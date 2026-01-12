@@ -239,6 +239,12 @@ TypeScript programs, based on the compatibility of their `compilerOptions`. This
 flag disables this behavior and creates one program per workspace, which is
 slower but memory usage is spread more evenly over time.
 
+### `--use-tsconfig-files`
+
+Shortcut: `-t`
+
+Use `tsconfig.json` to define project files (override `project` patterns).
+
 ## Modes
 
 ### `--production`
@@ -263,6 +269,20 @@ Read more at [Production Mode][13].
 ### `--fix`
 
 Read more at [auto-fix][15].
+
+### `--fix-type`
+
+Fix only issues of type, can be comma-separated or repeated.
+
+More info about fixable types at [issue types][16]
+
+### `--format`
+
+Format modified files after `--fix` using the local formatter.
+
+### `--allow-remove-files`
+
+Allow Knip to remove files (with `--fix`).
 
 ### `--cache`
 
@@ -293,7 +313,6 @@ Available [issue types][16] when filtering output using `--include` or
 
 - `files`
 - `dependencies`
-- `optionalPeerDependencies`
 - `unlisted`
 - `unresolved`
 - `exports`
@@ -303,6 +322,7 @@ Available [issue types][16] when filtering output using `--include` or
 - `nsTypes`
 - `enumMembers`
 - `duplicates`
+- `catalog`
 
 ### `--exclude`
 
@@ -331,7 +351,7 @@ knip --include files --include dependencies
 Shortcut to include all types of dependency issues:
 
 ```sh
---include dependencies,optionalPeerDependencies,unlisted,binaries,unresolved
+--include dependencies,unlisted,binaries,unresolved,catalog
 ```
 
 ### `--exports`
@@ -340,6 +360,14 @@ Shortcut to include all types of export issues:
 
 ```sh
 --include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
+```
+
+### `--files`
+
+Shortcut to include file issues:
+
+```sh
+--include files
 ```
 
 ### `--experimental-tags`
@@ -390,7 +418,10 @@ Available reporters:
 - `compact`
 - `codeowners`
 - `json`
+- `codeclimate`
 - `markdown`
+- `disclosure`
+- `github-actions`
 
 Can be repeated. Example:
 

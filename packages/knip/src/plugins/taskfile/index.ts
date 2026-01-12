@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { findFile } from '../../util/fs.js';
+import { isFile } from '../../util/fs.js';
 import type { Input } from '../../util/input.js';
 import { toConfig } from '../../util/input.js';
 import { join, relative } from '../../util/path.js';
@@ -27,7 +27,7 @@ const taskFiles = [
 
 const isEnabled: IsPluginEnabled = async ({ cwd, config }) => {
   if (config.taskfile) return true;
-  return taskFiles.some(file => findFile(cwd, file));
+  return taskFiles.some(file => isFile(cwd, file));
 };
 
 const extractScriptsFromCommand = (command: TaskfileCommand): string[] => {
