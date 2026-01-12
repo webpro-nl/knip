@@ -27,6 +27,7 @@ import { toRegexOrString } from './util/regex.js';
 import { ELLIPSIS } from './util/string.js';
 import { byPathDepth } from './util/workspace.js';
 import { selectWorkspaces } from './util/workspace-selectors.js';
+import { createWorkspaceFilePathFilter, type WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
 
 const defaultBaseFilenamePattern = '{index,cli,main}';
 
@@ -91,6 +92,7 @@ export class ConfigurationChief {
   config: Configuration;
   workspace: string | string[] | undefined;
   selectedWorkspaces: string[] | undefined;
+  workspaceFilePathFilter: WorkspaceFilePathFilter | undefined;
 
   workspaces: string[];
   ignoredWorkspacePatterns: string[] = [];
@@ -193,6 +195,12 @@ export class ConfigurationChief {
     this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
     this.selectedWorkspaces = this.getSelectedWorkspaces();
+
+    this.workspaceFilePathFilter = createWorkspaceFilePathFilter(
+      this.cwd,
+      this.selectedWorkspaces,
+      this.availableWorkspaceNames
+    );
 
     this.includedWorkspaces = this.getIncludedWorkspaces();
 

@@ -304,9 +304,8 @@ export const analyze = async ({
   await analyzeGraph();
 
   if (options.isTrace) {
-    const selectedWorkspaces = options.workspace ? chief.selectedWorkspaces : undefined;
-    const availableWorkspaceNames = options.workspace ? chief.availableWorkspaceNames : undefined;
-    traceReporter({ graph, explorer, options, selectedWorkspaces, availableWorkspaceNames });
+    const workspaceFilePathFilter = options.workspace ? chief.workspaceFilePathFilter : undefined;
+    traceReporter({ graph, explorer, options, workspaceFilePathFilter });
   }
 
   return analyzeGraph;

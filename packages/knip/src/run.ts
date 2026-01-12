@@ -32,7 +32,7 @@ export const run = async (options: MainOptions) => {
   const isGitIgnored = await getGitIgnoredHandler(options);
 
   if (chief.selectedWorkspaces) {
-    collector.setWorkspaceFilter(chief.selectedWorkspaces, chief.availableWorkspaceNames);
+    collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   }
 
   collector.setIgnoreIssues(chief.config.ignoreIssues);

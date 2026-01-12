@@ -1,10 +1,12 @@
 import { join } from './path.js';
 
+export type WorkspaceFilePathFilter = (filePath: string) => boolean;
+
 export const createWorkspaceFilePathFilter = (
   cwd: string,
   selectedWorkspaces: string[] | undefined,
   availableWorkspaceNames: string[] | undefined
-) => {
+): WorkspaceFilePathFilter | undefined => {
   if (!selectedWorkspaces || !availableWorkspaceNames) return;
 
   const selected = new Set(selectedWorkspaces);

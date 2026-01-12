@@ -5,7 +5,7 @@ import { partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
 import { relative } from './util/path.js';
-import { createWorkspaceFilePathFilter } from './util/workspace-file-filter.js';
+import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
 
 const createMatcher = (patterns: Set<string>) => {
   const [negated, positive] = partition(patterns, p => p[0] === '!');
@@ -44,10 +44,9 @@ export class IssueCollector {
     this.isFileMatch = () => false;
   }
 
-  setWorkspaceFilter(selectedWorkspaces: string[], availableWorkspaceNames: string[]) {
-    const isSelectedFilePath = createWorkspaceFilePathFilter(this.cwd, selectedWorkspaces, availableWorkspaceNames);
-    if (!isSelectedFilePath) return;
-    this.workspaceFilter = (filePath: string) => !isSelectedFilePath(filePath);
+  setWorkspaceFilter(workspaceFilePathFilter: WorkspaceFilePathFilter | undefined) {
+    if (!workspaceFilePathFilter) return;
+    this.workspaceFilter = (filePath: string) => !workspaceFilePathFilter(filePath);
   }
 
   addIgnorePatterns(patterns: string[]) {
