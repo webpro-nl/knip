@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/workspaces__frontend",
+  "main": "./index.js"
+}

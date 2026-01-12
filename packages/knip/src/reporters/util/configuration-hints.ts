@@ -157,10 +157,11 @@ export const printConfigurationHints = ({
   enabledPlugins,
   isTreatConfigHintsAsErrors,
   includedWorkspaceDirs,
+  selectedWorkspaces,
   configFilePath,
 }: ReporterOptions) => {
   const rows = finalizeConfigurationHints(
-    { issues, counters, configurationHints, tagHints, includedWorkspaceDirs, enabledPlugins },
+    { issues, counters, configurationHints, tagHints, includedWorkspaceDirs, selectedWorkspaces, enabledPlugins },
     { cwd, configFilePath }
   );
 

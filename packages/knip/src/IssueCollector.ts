@@ -4,7 +4,8 @@ import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, Ta
 import { partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { initCounters, initIssues } from './util/issue-initializers.js';
-import { join, relative } from './util/path.js';
+import { relative } from './util/path.js';
+import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
 
 const createMatcher = (patterns: Set<string>) => {
   const [negated, positive] = partition(patterns, p => p[0] === '!');
@@ -24,7 +25,7 @@ export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
 export class IssueCollector {
   private cwd: string;
   private rules: Rules;
-  private filter: string | undefined;
+  private workspaceFilter: (filePath: string) => boolean;
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
@@ -39,9 +40,13 @@ export class IssueCollector {
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
     this.rules = options.rules;
-    this.filter = options.workspace ? join(options.cwd, options.workspace) : undefined;
+    this.workspaceFilter = () => true;
     this.isMatch = () => false;
     this.isFileMatch = () => false;
+  }
+
+  setWorkspaceFilter(workspaceFilePathFilter: WorkspaceFilePathFilter | undefined) {
+    if (workspaceFilePathFilter) this.workspaceFilter = workspaceFilePathFilter;
   }
 
   addIgnorePatterns(patterns: string[]) {
@@ -89,7 +94,7 @@ export class IssueCollector {
 
   addFilesIssues(filePaths: string[]) {
     for (const filePath of filePaths) {
-      if (this.filter && !filePath.startsWith(`${this.filter}/`)) continue;
+      if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
       if (this.isFileMatch(filePath)) continue;
@@ -106,7 +111,7 @@ export class IssueCollector {
   }
 
   addIssue(issue: Issue) {
-    if (this.filter && !issue.filePath.startsWith(`${this.filter}/`)) return;
+    if (!this.workspaceFilter(issue.filePath)) return;
     if (this.isMatch(issue.filePath)) return;
     if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
     const key = relative(this.cwd, issue.filePath);
