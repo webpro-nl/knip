@@ -1,11 +1,10 @@
-import { execSync } from 'node:child_process';
 import picomatch from 'picomatch';
 import type { WorkspacePackage } from '../types/package-json.js';
 import { ConfigurationError } from './errors.js';
 import { isDirectory, isFile } from './fs.js';
 import { join } from './path.js';
 
-export type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob' | 'git-range';
+export type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob';
 
 export interface ParsedSelector {
   type: WorkspaceSelectorType;
@@ -24,16 +23,6 @@ export function parseWorkspaceSelector(token: string, cwd: string): ParsedSelect
   if (trimmed.startsWith('!')) {
     isNegated = true;
     pattern = trimmed.slice(1);
-  }
-
-  // Git range selector [ref] or [ref...ref] or [ref..ref]
-  if (pattern.startsWith('[') && pattern.endsWith(']')) {
-    const range = pattern.slice(1, -1);
-    return {
-      type: 'git-range',
-      pattern: range,
-      isNegated,
-    };
   }
 
   if (pattern.startsWith('./')) {
@@ -95,48 +84,6 @@ export function matchWorkspacesByDirGlob(pattern: string, availableWorkspaceName
 }
 
 /**
- * Get changed files from Git and map to workspaces.
- */
-export function selectWorkspacesByGit(range: string, cwd: string, availableWorkspaceNames: string[]): string[] {
-  try {
-    const gitRange = range.includes('...') || range.includes('..') ? range : `${range}...HEAD`;
-
-    const command = `git diff --name-only ${gitRange}`;
-    const output = execSync(command, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-
-    const changedFiles = output
-      .split('\n')
-      .map(f => f.trim())
-      .filter(Boolean);
-
-    const workspaceSet = new Set<string>();
-
-    // Sort by depth (deepest first) to correctly map files to nested workspaces
-    const sortedNames = [...availableWorkspaceNames].sort((a, b) => {
-      const depthA = a.split('/').length;
-      const depthB = b.split('/').length;
-      return depthB - depthA;
-    });
-
-    for (const file of changedFiles) {
-      for (const name of sortedNames) {
-        if (name === '.' || name === '' || file.startsWith(`${name}/`) || file === name) {
-          workspaceSet.add(name);
-          break;
-        }
-      }
-    }
-
-    return Array.from(workspaceSet);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new ConfigurationError(
-      `Failed to get Git changes for range "${range}": ${message}. Ensure you're in a Git repository and the ref exists.`
-    );
-  }
-}
-
-/**
  * Select workspaces based on multiple selectors.
  */
 export function selectWorkspaces(
@@ -188,10 +135,6 @@ export function selectWorkspaces(
             `Workspace directory pattern "${selector.pattern}" did not match any workspaces.`
           );
         }
-        break;
-
-      case 'git-range':
-        matches = selectWorkspacesByGit(selector.pattern, cwd, availableWorkspaceNames);
         break;
     }
     return matches;

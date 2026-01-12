@@ -28,27 +28,6 @@ test('parseWorkspaceSelector: negated directory path', () => {
   assert.equal(selector.isNegated, true);
 });
 
-test('parseWorkspaceSelector: negated git range', () => {
-  const selector = parseWorkspaceSelector('![main]', '/test/cwd');
-  assert.equal(selector.type, 'git-range');
-  assert.equal(selector.pattern, 'main');
-  assert.equal(selector.isNegated, true);
-});
-
-test('parseWorkspaceSelector: git range', () => {
-  const selector = parseWorkspaceSelector('[main]', '/test/cwd');
-  assert.equal(selector.type, 'git-range');
-  assert.equal(selector.pattern, 'main');
-  assert.equal(selector.isNegated, false);
-});
-
-test('parseWorkspaceSelector: git range with ...', () => {
-  const selector = parseWorkspaceSelector('[HEAD~1...HEAD]', '/test/cwd');
-  assert.equal(selector.type, 'git-range');
-  assert.equal(selector.pattern, 'HEAD~1...HEAD');
-  assert.equal(selector.isNegated, false);
-});
-
 test('parseWorkspaceSelector: directory glob', () => {
   const selector = parseWorkspaceSelector('./apps/*', '/test/cwd');
   assert.equal(selector.type, 'dir-glob');
