@@ -54,7 +54,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 };
 
 const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>
-  globSync(patterns, { cwd, followSymbolicLinks: false });
+  globSync(patterns, { cwd, followSymbolicLinks: false, expandDirectories: false });
 
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
   glob(patterns, {
