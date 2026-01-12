@@ -303,7 +303,10 @@ export const analyze = async ({
 
   await analyzeGraph();
 
-  if (options.isTrace) traceReporter({ graph, explorer, options });
+  if (options.isTrace) {
+    const workspaceFilePathFilter = options.workspace ? chief.workspaceFilePathFilter : undefined;
+    traceReporter({ graph, explorer, options, workspaceFilePathFilter });
+  }
 
   return analyzeGraph;
 };

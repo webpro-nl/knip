@@ -3,26 +3,27 @@ import type { GraphExplorer } from '../graph-explorer/explorer.js';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.js';
 import type { ModuleGraph } from '../types/module-graph.js';
 import type { MainOptions } from '../util/create-options.js';
-import { join, toRelative } from '../util/path.js';
+import { toRelative } from '../util/path.js';
 import { toRegexOrString } from '../util/regex.js';
 import { Table } from '../util/table.js';
 import { formatTrace } from '../util/trace.js';
+import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.js';
 
 interface TraceReporterOptions {
   graph: ModuleGraph;
   explorer: GraphExplorer;
   options: MainOptions;
+  workspaceFilePathFilter?: WorkspaceFilePathFilter;
 }
 
-export default ({ graph, explorer, options }: TraceReporterOptions) => {
+export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceReporterOptions) => {
   if (options.traceDependency) {
     const pattern = toRegexOrString(options.traceDependency);
-    const workspaceDir = options.workspace ? join(options.cwd, options.workspace) : undefined;
     const toRel = (path: string) => toRelative(path, options.cwd);
     const table = new Table({ truncateStart: ['filePath'] });
     const seen = new Set<string>();
     for (const [packageName, { imports }] of explorer.getDependencyUsage(pattern)) {
-      const filtered = workspaceDir ? imports.filter(i => i.filePath.startsWith(workspaceDir)) : imports;
+      const filtered = workspaceFilePathFilter ? imports.filter(i => workspaceFilePathFilter(i.filePath)) : imports;
       filtered.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       for (const _import of filtered) {
         const pos = _import.line ? `:${_import.line}:${_import.col}` : '';

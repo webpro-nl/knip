@@ -17,7 +17,6 @@ import type { WorkspacePackage } from './types/package-json.js';
 import { arrayify, compact, partition } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.js';
-import { ConfigurationError } from './util/errors.js';
 import { isDirectory, isFile } from './util/fs.js';
 import { _dirGlob, removeProductionSuffix } from './util/glob.js';
 import { graphSequencer } from './util/graph-sequencer.js';
@@ -27,6 +26,8 @@ import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { ELLIPSIS } from './util/string.js';
 import { byPathDepth } from './util/workspace.js';
+import { selectWorkspaces } from './util/workspace-selectors.js';
+import { createWorkspaceFilePathFilter, type WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
 
 const defaultBaseFilenamePattern = '{index,cli,main}';
 
@@ -89,7 +90,9 @@ export class ConfigurationChief {
   isStrict: boolean;
   isIncludeEntryExports: boolean;
   config: Configuration;
-  workspace: string | undefined;
+  workspace: string | string[] | undefined;
+  selectedWorkspaces: string[] | undefined;
+  workspaceFilePathFilter: WorkspaceFilePathFilter | undefined;
 
   workspaces: string[];
   ignoredWorkspacePatterns: string[] = [];
@@ -177,6 +180,7 @@ export class ConfigurationChief {
 
     this.additionalWorkspaceNames = await this.getAdditionalWorkspaceNames();
     const workspaceNames = compact([...this.getListedWorkspaces(), ...this.additionalWorkspaceNames]);
+
     const [packages, wsPkgNames] = await mapWorkspaces(this.cwd, [...workspaceNames, '.']);
 
     this.workspacePackages = packages;
@@ -190,6 +194,14 @@ export class ConfigurationChief {
 
     this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
+    this.selectedWorkspaces = this.getSelectedWorkspaces();
+
+    this.workspaceFilePathFilter = createWorkspaceFilePathFilter(
+      this.cwd,
+      this.selectedWorkspaces,
+      this.availableWorkspaceNames
+    );
+
     this.includedWorkspaces = this.getIncludedWorkspaces();
 
     for (const workspace of this.includedWorkspaces) {
@@ -199,7 +211,7 @@ export class ConfigurationChief {
 
     const sorted = graphSequencer(
       this.workspaceGraph,
-      this.includedWorkspaces.map(workspace => workspace.dir)
+      this.includedWorkspaces.map(workspace => workspace.dir).filter(dir => this.workspaceGraph.has(dir))
     );
     const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
     // biome-ignore lint: style/noNonNullAssertion
@@ -258,11 +270,7 @@ export class ConfigurationChief {
   }
 
   private getIncludedWorkspaces() {
-    if (this.workspace) {
-      const dir = path.resolve(this.cwd, this.workspace);
-      if (!isDirectory(dir)) throw new ConfigurationError('Workspace is not a directory');
-      if (!isFile(dir, 'package.json')) throw new ConfigurationError('Unable to find package.json in workspace');
-    }
+    const selectedWorkspaces = this.selectedWorkspaces;
 
     const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
       if (name === ancestorName) return ancestors;
@@ -270,15 +278,17 @@ export class ConfigurationChief {
       return ancestors;
     };
 
-    const workspaceNames = this.workspace
-      ? [...this.availableWorkspaceNames.reduce(getAncestors(this.workspace), []), this.workspace]
+    const initialSelectedNames = selectedWorkspaces ?? this.availableWorkspaceNames;
+
+    const workspaceNames = selectedWorkspaces
+      ? initialSelectedNames.flatMap(name => [...this.availableWorkspaceNames.reduce(getAncestors(name), []), name])
       : this.availableWorkspaceNames;
 
     const ws = new Set<string>();
 
-    if (this.workspace && this.isStrict) {
-      ws.add(this.workspace);
-    } else if (this.workspace) {
+    if (selectedWorkspaces && this.isStrict) {
+      for (const name of initialSelectedNames) ws.add(name);
+    } else if (selectedWorkspaces) {
       const graph = this.workspaceGraph;
       if (graph) {
         const seen = new Set<string>();
@@ -361,6 +371,20 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .reverse()
       .find(pattern => picomatch.isMatch(workspaceName, pattern));
+  }
+
+  private getSelectedWorkspaces() {
+    const workspaceSelectors = this.workspace
+      ? Array.isArray(this.workspace)
+        ? this.workspace
+        : [this.workspace]
+      : undefined;
+
+    const selectedWorkspaces = workspaceSelectors
+      ? selectWorkspaces(workspaceSelectors, this.cwd, this.workspacePackages, this.availableWorkspaceNames)
+      : undefined;
+
+    return selectedWorkspaces;
   }
 
   public getWorkspaceConfig(workspaceName: string) {
