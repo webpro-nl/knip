@@ -10,7 +10,7 @@ export const getInputsFromSourceFile = (sourceFile: ts.SourceFile): Input[] => {
   const starlightImportName = getDefaultImportName(importMap, '@astrojs/starlight');
 
   // Starlight enables Expressive Code by default
-  // https://starlight.astro.build/guides/authoring-content/#expressive-code-features
+  // // https://starlight.astro.build/reference/configuration/#expressivecode
   let isExpressiveCodeEnabled = true;
 
   function visit(node: ts.Node) {

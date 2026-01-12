@@ -13,9 +13,7 @@ const enablers = ['@astrojs/starlight'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  const inputs = getInputsFromSourceFile(sourceFile);
-
-  return inputs;
+  return getInputsFromSourceFile(sourceFile);
 };
 
 export default {
