@@ -12,6 +12,7 @@ import {
 } from './code-actions.js';
 import {
   DEFAULT_JSDOC_TAGS,
+  NOTIFICATION_INDEXING_COMPLETE,
   REQUEST_FILE_NODE,
   REQUEST_PACKAGE_JSON,
   REQUEST_RESTART,
@@ -195,6 +196,7 @@ export class LanguageServer {
 
       this.session = session;
       this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
+      this.connection.sendNotification(NOTIFICATION_INDEXING_COMPLETE, { duration: Date.now() - start });
     } catch (_error) {
       this.connection.console.error(`Error: ${_error}`);
     }
