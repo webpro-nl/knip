@@ -7,7 +7,7 @@ import type { NitroConfig } from './types.js';
 
 const title = 'Nitro';
 
-const enablers = ['nitropack'];
+const enablers = ['nitropack', 'nitro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
