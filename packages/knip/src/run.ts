@@ -31,10 +31,7 @@ export const run = async (options: MainOptions) => {
   const workspaces = await chief.getWorkspaces();
   const isGitIgnored = await getGitIgnoredHandler(options);
 
-  if (chief.selectedWorkspaces) {
-    collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
-  }
-
+  collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);
 
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
@@ -107,7 +104,7 @@ export const run = async (options: MainOptions) => {
       counters,
       tagHints,
       configurationHints,
-      selectedWorkspaces: chief.selectedWorkspaces,
+      selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: chief.includedWorkspaces.map(w => w.dir),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },

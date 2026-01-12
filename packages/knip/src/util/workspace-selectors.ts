@@ -1,10 +1,11 @@
 import picomatch from 'picomatch';
 import type { WorkspacePackage } from '../types/package-json.js';
+import { partition } from './array.js';
 import { ConfigurationError } from './errors.js';
 import { isDirectory, isFile } from './fs.js';
 import { join } from './path.js';
 
-export type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob';
+type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob';
 
 export interface ParsedSelector {
   type: WorkspaceSelectorType;
@@ -14,6 +15,7 @@ export interface ParsedSelector {
 
 /**
  * Parse a workspace selector token and determine its type.
+ * @internal
  */
 export function parseWorkspaceSelector(token: string, cwd: string): ParsedSelector {
   const trimmed = token.trim();
@@ -44,7 +46,7 @@ export function parseWorkspaceSelector(token: string, cwd: string): ParsedSelect
 
   // Existing directory with package.json (backward compatibility)
   const dirPath = join(cwd, pattern);
-  if (isDirectory(dirPath) && isFile(join(dirPath, 'package.json'))) {
+  if (isDirectory(dirPath) && isFile(dirPath, 'package.json')) {
     return {
       type: 'dir-path',
       pattern: pattern,
@@ -61,6 +63,7 @@ export function parseWorkspaceSelector(token: string, cwd: string): ParsedSelect
 
 /**
  * Match workspaces by package name pattern.
+ * @internal
  */
 export function matchWorkspacesByPkgName(
   pattern: string,
@@ -77,6 +80,7 @@ export function matchWorkspacesByPkgName(
 
 /**
  * Match workspaces by directory glob pattern.
+ * @internal
  */
 export function matchWorkspacesByDirGlob(pattern: string, availableWorkspaceNames: string[]): string[] {
   const matcher = picomatch(pattern);
@@ -91,7 +95,7 @@ export function selectWorkspaces(
   cwd: string,
   workspacePackages: Map<string, WorkspacePackage>,
   availableWorkspaceNames: string[]
-): string[] | undefined {
+): Set<string> | undefined {
   if (!selectors || selectors.length === 0) {
     return undefined;
   }
@@ -104,8 +108,7 @@ export function selectWorkspaces(
   }
   const pkgNames = Array.from(pkgNameToWorkspaceName.keys());
 
-  const positiveSelectors = parsedSelectors.filter(s => !s.isNegated);
-  const negativeSelectors = parsedSelectors.filter(s => s.isNegated);
+  const [positiveSelectors, negativeSelectors] = partition(parsedSelectors, s => !s.isNegated);
 
   const selectedWorkspaces = new Set<string>(positiveSelectors.length === 0 ? availableWorkspaceNames : []);
 
@@ -152,5 +155,5 @@ export function selectWorkspaces(
     }
   }
 
-  return Array.from(selectedWorkspaces);
+  return selectedWorkspaces;
 }

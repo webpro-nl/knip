@@ -1,25 +1,25 @@
+import { ROOT_WORKSPACE_NAME } from '../constants.js';
 import { join } from './path.js';
 
 export type WorkspaceFilePathFilter = (filePath: string) => boolean;
 
 export const createWorkspaceFilePathFilter = (
   cwd: string,
-  selectedWorkspaces: string[] | undefined,
+  selectedWorkspaces: Set<string> | undefined,
   availableWorkspaceNames: string[] | undefined
-): WorkspaceFilePathFilter | undefined => {
-  if (!selectedWorkspaces || !availableWorkspaceNames) return;
+): WorkspaceFilePathFilter => {
+  if (!selectedWorkspaces || !availableWorkspaceNames) return () => true;
 
-  const selected = new Set(selectedWorkspaces);
-  const includeRoot = selected.has('.');
+  const includeRoot = selectedWorkspaces.has(ROOT_WORKSPACE_NAME);
 
   const workspaceDirs = availableWorkspaceNames
-    .filter(name => name !== '.')
+    .filter(name => name !== ROOT_WORKSPACE_NAME)
     .map(name => ({ name, dir: join(cwd, name) }))
     .sort((a, b) => b.name.split('/').length - a.name.split('/').length);
 
   return (filePath: string) => {
     const match = workspaceDirs.find(ws => filePath.startsWith(`${ws.dir}/`));
-    if (match) return selected.has(match.name);
+    if (match) return selectedWorkspaces.has(match.name);
     return includeRoot;
   };
 };

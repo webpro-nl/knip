@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.js';
+import baseCounters from './helpers/baseCounters.js';
 import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
@@ -13,7 +14,12 @@ test('Exclude root workspace with !. selector', async () => {
   assert(!selectedWorkspaces?.includes('.'));
   assert(selectedWorkspaces?.includes('app'));
   assert(issues.unlisted['app/index.ts']['vanilla-js']);
-  assert(counters.unlisted === 1);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 1,
+    processed: 2,
+    total: 2,
+  });
 });
 
 test('Select only root workspace with . selector', async () => {
@@ -23,5 +29,12 @@ test('Select only root workspace with . selector', async () => {
   assert(selectedWorkspaces?.includes('.'));
   assert(!selectedWorkspaces?.includes('app'));
   assert(issues.unlisted['scripts/index.ts']['js-yaml']);
-  assert(counters.unlisted === 1);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    unlisted: 1,
+    binaries: 1,
+    processed: 1,
+    total: 1,
+  });
 });

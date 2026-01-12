@@ -26,8 +26,8 @@ import { normalizePluginConfig } from './util/plugin.js';
 import { toRegexOrString } from './util/regex.js';
 import { ELLIPSIS } from './util/string.js';
 import { byPathDepth } from './util/workspace.js';
-import { selectWorkspaces } from './util/workspace-selectors.js';
 import { createWorkspaceFilePathFilter, type WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
+import { selectWorkspaces } from './util/workspace-selectors.js';
 
 const defaultBaseFilenamePattern = '{index,cli,main}';
 
@@ -78,9 +78,8 @@ export type Workspace = {
 };
 
 /**
- * - Normalizes raw local config
+ * - Normalizes raw workspaces config
  * - Determines workspaces to analyze
- * - Determines issue types to report (--include/--exclude)
  * - Hands out workspace and plugin configs
  */
 export class ConfigurationChief {
@@ -91,8 +90,8 @@ export class ConfigurationChief {
   isIncludeEntryExports: boolean;
   config: Configuration;
   workspace: string | string[] | undefined;
-  selectedWorkspaces: string[] | undefined;
-  workspaceFilePathFilter: WorkspaceFilePathFilter | undefined;
+  selectedWorkspaces: Set<string> | undefined;
+  workspaceFilePathFilter: WorkspaceFilePathFilter = () => true;
 
   workspaces: string[];
   ignoredWorkspacePatterns: string[] = [];
@@ -272,22 +271,19 @@ export class ConfigurationChief {
   private getIncludedWorkspaces() {
     const selectedWorkspaces = this.selectedWorkspaces;
 
-    const getAncestors = (name: string) => (ancestors: string[], ancestorName: string) => {
-      if (name === ancestorName) return ancestors;
-      if (ancestorName === ROOT_WORKSPACE_NAME || name.startsWith(`${ancestorName}/`)) ancestors.push(ancestorName);
-      return ancestors;
-    };
+    const isAncestor = (name: string, ancestor: string) =>
+      ancestor !== name && (ancestor === ROOT_WORKSPACE_NAME || name.startsWith(`${ancestor}/`));
 
-    const initialSelectedNames = selectedWorkspaces ?? this.availableWorkspaceNames;
+    const getAncestors = (name: string) => this.availableWorkspaceNames.filter(a => isAncestor(name, a));
 
     const workspaceNames = selectedWorkspaces
-      ? initialSelectedNames.flatMap(name => [...this.availableWorkspaceNames.reduce(getAncestors(name), []), name])
+      ? Array.from(selectedWorkspaces).flatMap(name => [...getAncestors(name), name])
       : this.availableWorkspaceNames;
 
     const ws = new Set<string>();
 
     if (selectedWorkspaces && this.isStrict) {
-      for (const name of initialSelectedNames) ws.add(name);
+      for (const name of selectedWorkspaces) ws.add(name);
     } else if (selectedWorkspaces) {
       const graph = this.workspaceGraph;
       if (graph) {
@@ -323,7 +319,7 @@ export class ConfigurationChief {
           pkgName,
           dir,
           config: this.getConfigForWorkspace(name),
-          ancestors: this.availableWorkspaceNames.reduce(getAncestors(name), []),
+          ancestors: getAncestors(name),
           manifestPath,
           manifestStr,
           ignoreMembers,
@@ -374,17 +370,9 @@ export class ConfigurationChief {
   }
 
   private getSelectedWorkspaces() {
-    const workspaceSelectors = this.workspace
-      ? Array.isArray(this.workspace)
-        ? this.workspace
-        : [this.workspace]
-      : undefined;
-
-    const selectedWorkspaces = workspaceSelectors
-      ? selectWorkspaces(workspaceSelectors, this.cwd, this.workspacePackages, this.availableWorkspaceNames)
-      : undefined;
-
-    return selectedWorkspaces;
+    if (!this.workspace) return;
+    const workspaceSelectors = Array.isArray(this.workspace) ? this.workspace : [this.workspace];
+    return selectWorkspaces(workspaceSelectors, this.cwd, this.workspacePackages, this.availableWorkspaceNames);
   }
 
   public getWorkspaceConfig(workspaceName: string) {

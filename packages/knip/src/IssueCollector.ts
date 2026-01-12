@@ -25,7 +25,7 @@ export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
 export class IssueCollector {
   private cwd: string;
   private rules: Rules;
-  private workspaceFilter: ((filePath: string) => boolean) | undefined;
+  private workspaceFilter: (filePath: string) => boolean;
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
@@ -40,13 +40,13 @@ export class IssueCollector {
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
     this.rules = options.rules;
+    this.workspaceFilter = () => true;
     this.isMatch = () => false;
     this.isFileMatch = () => false;
   }
 
   setWorkspaceFilter(workspaceFilePathFilter: WorkspaceFilePathFilter | undefined) {
-    if (!workspaceFilePathFilter) return;
-    this.workspaceFilter = (filePath: string) => !workspaceFilePathFilter(filePath);
+    if (workspaceFilePathFilter) this.workspaceFilter = workspaceFilePathFilter;
   }
 
   addIgnorePatterns(patterns: string[]) {
@@ -94,7 +94,7 @@ export class IssueCollector {
 
   addFilesIssues(filePaths: string[]) {
     for (const filePath of filePaths) {
-      if (this.workspaceFilter?.(filePath)) continue;
+      if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
       if (this.isMatch(filePath)) continue;
       if (this.isFileMatch(filePath)) continue;
@@ -111,8 +111,7 @@ export class IssueCollector {
   }
 
   addIssue(issue: Issue) {
-    const filterIt = this.workspaceFilter?.(issue.filePath);
-    if (filterIt) return;
+    if (!this.workspaceFilter(issue.filePath)) return;
     if (this.isMatch(issue.filePath)) return;
     if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
     const key = relative(this.cwd, issue.filePath);

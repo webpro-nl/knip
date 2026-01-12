@@ -1,4 +1,4 @@
 import {} from 'js-yaml';
 
-export type ScriptUnUsedExport = {};
+export type ScriptUnUsedExport = unknown;
 export const a = 1;
