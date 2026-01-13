@@ -12,6 +12,6 @@ export const REQUEST_PACKAGE_JSON = 'knip.getPackageJson';
 
 export const REQUEST_RESULTS = 'knip.getResults';
 
-export const NOTIFICATION_INDEXING_COMPLETE = 'knip.indexingComplete';
+export const NOTIFICATION_MODULE_GRAPH_BUILT = 'knip.moduleGraphBuilt';
 
 export const SESSION_LOADING = 'session-loading';
