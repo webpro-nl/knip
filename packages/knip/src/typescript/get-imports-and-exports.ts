@@ -22,6 +22,7 @@ import {
   isDestructuring,
   isImportSpecifier,
   isInForIteration,
+  isKeyofTypeof,
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
 } from './ast-helpers.js';
@@ -506,6 +507,9 @@ const getImportsAndExports = (
                 } else if (isInForIteration(node)) {
                   // Pattern: for (const x in NS) { }
                   // Pattern: for (const x of NS) { }
+                  imports.refs.add(id);
+                } else if (isKeyofTypeof(node)) {
+                  // Pattern: keyof typeof MyEnum
                   imports.refs.add(id);
                 }
               }
