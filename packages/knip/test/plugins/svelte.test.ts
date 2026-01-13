@@ -17,7 +17,7 @@ test('Use compilers (svelte)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    processed: 16,
-    total: 16,
+    processed: 18,
+    total: 18,
   });
 });
