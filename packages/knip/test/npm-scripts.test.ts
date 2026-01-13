@@ -78,14 +78,11 @@ test('Unused dependencies in npm scripts', async () => {
     total: 3,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+  ]);
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
@@ -93,11 +90,12 @@ test('Unused dependencies in npm scripts (strict)', async () => {
   const { issues, counters } = await main(options);
   assert(issues.dependencies['package.json']['express']);
   assert(issues.dependencies['package.json']['unused-peer-dep']);
+  assert(issues.dependencies['package.json']['@sap/approuter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    dependencies: 2,
+    dependencies: 3,
     processed: 2,
     total: 3,
   });

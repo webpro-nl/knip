@@ -1,4 +1,3 @@
-import type ts from 'typescript';
 import type { Fix, Fixes } from './exports.js';
 import type { IssueSymbol, SymbolType } from './issues.js';
 
@@ -20,18 +19,21 @@ export interface Position {
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
-/** Aggregated imports from other files (who imports this file's exports) */
 export type ImportMaps = {
-  /** Usage references to imported identifiers ("default", "named", "NS.export", "enum.member", etc.) */
+  /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
-  /** Directly imported identifiers */
-  imported: IdToFileMap;
-  importedAs: IdToNsToFileMap;
-  importedNs: IdToFileMap;
+  /** Identifiers imported from this file */
+  import: IdToFileMap;
+  /** Identifiers imported with alias (id → alias → files) */
+  importAs: IdToNsToFileMap;
+  /** Namespace imports of this file */
+  importNs: IdToFileMap;
   /** Identifiers re-exported (not directly imported) */
-  reExported: IdToFileMap;
-  reExportedAs: IdToNsToFileMap;
-  reExportedNs: IdToFileMap;
+  reExport: IdToFileMap;
+  /** Namespace re-exports */
+  reExportNs: IdToFileMap;
+  /** Irregular re-exports: id → namespace/alias → source files */
+  reExportAs: IdToNsToFileMap;
 };
 
 export type ImportMap = Map<FilePath, ImportMaps>;
@@ -53,24 +55,20 @@ export interface Export extends Position {
   readonly type: SymbolType;
   readonly members: ExportMember[];
   readonly jsDocTags: Tags;
-  self: [number, boolean];
+  hasRefsInFile: boolean;
+  referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
-  symbol: undefined | ts.Symbol;
   readonly isReExport: boolean;
 }
 
-export type ExportMember = {
+export interface ExportMember extends Position {
   readonly identifier: Identifier;
-  readonly pos: number;
-  readonly line: number;
-  readonly col: number;
   readonly type: SymbolType;
   readonly fix: Fix;
   readonly jsDocTags: Tags;
   readonly flags: number;
-  self: [number, boolean];
-  symbol: undefined | ts.Symbol;
-};
+  hasRefsInFile: boolean;
+}
 
 export type ExportMap = Map<Identifier, Export>;
 
@@ -89,7 +87,8 @@ export type FileNode = {
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
-  imported: undefined | ImportMaps;
+  /** Aggregation of other files importing this file's exports */
+  importedBy: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
 

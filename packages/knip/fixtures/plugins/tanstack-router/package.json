@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/tanstack-router",
+  "dependencies": {
+    "@tanstack/react-router": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "@tanstack/router-cli": "*",
+    "typescript": "*",
+    "vite": "*"
+  }
+}

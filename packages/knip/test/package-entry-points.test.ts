@@ -17,13 +17,10 @@ test('Resolve package entry points to source files', async () => {
   assert(issues.files.has(join(cwd, 'src/public/lib/rary/lost.js')));
 
   const filePath = join(cwd, 'package.json');
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'package-entry', identifier: './feature/index.js', workspaceName: '.', filePath },
-      { type: 'package-entry', identifier: './not-found.tsx', workspaceName: '.', filePath },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'package-entry', identifier: './feature/index.js', workspaceName: '.', filePath },
+    { type: 'package-entry', identifier: './not-found.tsx', workspaceName: '.', filePath },
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,

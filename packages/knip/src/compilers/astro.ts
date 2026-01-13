@@ -1,14 +1,18 @@
-import { fencedCodeBlockMatcher, importMatcher } from './compilers.js';
+import { frontmatterMatcher, scriptBodies } from './compilers.js';
 import type { HasDependency } from './types.js';
 
 const condition = (hasDependency: HasDependency) => hasDependency('astro');
 
-const taggedTemplateMatcher = /\w+(?:\.\w+)*`[\s\S]*?`/g;
+const compiler = (text: string, path: string) => {
+  const scripts = [];
 
-const compiler = (text: string) => {
-  const cleanedText = text.replace(fencedCodeBlockMatcher, '').replace(taggedTemplateMatcher, '""');
+  const frontmatter = text.match(frontmatterMatcher);
+  if (frontmatter?.[1]) scripts.push(frontmatter[1]);
 
-  return [...cleanedText.matchAll(importMatcher)].join('\n');
+  const scriptContent = scriptBodies(text, path);
+  if (scriptContent) scripts.push(scriptContent);
+
+  return scripts.join('\n');
 };
 
 export default { condition, compiler };

@@ -10,7 +10,7 @@ export default visit(isModule, (node, { isFixExports, isReportClassMembers, isFi
     // Patterns:
     // export default 1;
     // export = identifier;
-    const pos = node.getChildAt(1).getStart();
+    const pos = node.expression.getStart();
     const fix: Fix = isFixExports ? [node.getStart(), node.getEnd() + 1, FIX_FLAGS.NONE] : undefined;
     // @ts-expect-error We need the symbol in `addExport`
     const symbol = node.getSourceFile().locals?.get(node.expression.escapedText);

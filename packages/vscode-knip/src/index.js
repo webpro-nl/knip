@@ -9,6 +9,7 @@ import {
   REQUEST_STOP,
   SESSION_LOADING,
 } from '@knip/language-server/constants';
+import { getErrorMessage } from '@knip/mcp/tools';
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
@@ -16,7 +17,7 @@ import { collectDependencySnippets } from './collect-dependency-hover-snippets.j
 import { collectExportHoverSnippets } from './collect-export-hover-snippets.js';
 import { renderDependencyHover } from './render-dependency-hover.js';
 import { renderExportHover, renderExportHoverEntryPaths } from './render-export-hover.js';
-import { registerKnipTools, setLanguageClient } from './tools.js';
+import { registerKnipTools, setLanguageClient, setOutputChannel } from './tools.js';
 import { ExportsTreeViewProvider } from './tree-view-exports.js';
 import { ImportsTreeViewProvider } from './tree-view-imports.js';
 
@@ -79,6 +80,7 @@ export class Extension {
     this.#setupEventHandlers();
 
     // Register LM tools (available even when extension is disabled)
+    setOutputChannel(this.#outputChannel);
     registerKnipTools(this.#context);
 
     const config = vscode.workspace.getConfiguration('knip');
@@ -276,7 +278,7 @@ export class Extension {
       if (!file) return { message: '(file not in project)' };
       return { kind: 'file', uri, file };
     } catch (error) {
-      this.#outputChannel.error(`Error requesting file: ${(error?.message || error).toString()}`);
+      this.#outputChannel.error(`Error requesting file: ${getErrorMessage(error)}`);
       return { message: '(error requesting file)' };
     }
   }
@@ -364,7 +366,7 @@ export class Extension {
       const snippets = await collectDependencySnippets(imports);
       return renderDependencyHover({ packageName, imports }, root, snippets);
     } catch (error) {
-      this.#outputChannel.error(`Error getting dependency usage: ${(error?.message || error).toString()}`);
+      this.#outputChannel.error(`Error getting dependency usage: ${getErrorMessage(error)}`);
       return null;
     }
   }

@@ -8,6 +8,7 @@ module.exports = env =>
     entry: {
       main: './src/app',
       vendor: './src/vendor',
+      subpath: '#subpath/subpath-entry',
     },
     module: {
       rules: [

@@ -12,6 +12,7 @@ import {
 } from './code-actions.js';
 import {
   DEFAULT_JSDOC_TAGS,
+  NOTIFICATION_MODULE_GRAPH_BUILT,
   REQUEST_FILE_NODE,
   REQUEST_PACKAGE_JSON,
   REQUEST_RESTART,
@@ -181,10 +182,8 @@ export class LanguageServer {
           : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
         : undefined;
 
-      if (configFilePath) {
-        this.cwd = path.dirname(configFilePath);
-        process.chdir(this.cwd);
-      }
+      if (configFilePath) this.cwd = path.dirname(configFilePath);
+      if (this.cwd) process.chdir(this.cwd);
 
       this.connection.console.log('Creating options');
       const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
@@ -197,6 +196,7 @@ export class LanguageServer {
 
       this.session = session;
       this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
+      this.connection.sendNotification(NOTIFICATION_MODULE_GRAPH_BUILT, { duration: Date.now() - start });
     } catch (_error) {
       this.connection.console.error(`Error: ${_error}`);
     }

@@ -111,9 +111,9 @@ export default ({
     }
   }
 
-  if (!isDisableConfigHints && configurationHints.size > 0) {
+  if (!isDisableConfigHints && configurationHints.length > 0) {
     const CONFIG_HINTS_TITLE = 'Configuration hints';
-    core.info(`${CONFIG_HINTS_TITLE} (${configurationHints.size})`);
+    core.info(`${CONFIG_HINTS_TITLE} (${configurationHints.length})`);
 
     const sortedHints = [...configurationHints].sort((a, b) => (a.filePath ?? '').localeCompare(b.filePath ?? ''));
     for (const hint of sortedHints) {

@@ -31,15 +31,30 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 // ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
 
+// Check if directory is a git root (has .git directory or .git file for worktrees)
+const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
+
+// Get the git directory path, handling worktrees where .git is a file containing "gitdir: /path/to/git/dir"
+const getGitDir = (cwd: string): string | undefined => {
+  const dotGit = join(cwd, '.git');
+  if (isDirectory(dotGit)) return dotGit;
+  if (isFile(dotGit)) {
+    const content = readFileSync(dotGit, 'utf8').trim();
+    const match = content.match(/^gitdir:\s*(.+)$/);
+    if (match) return join(cwd, match[1]);
+  }
+  return undefined;
+};
+
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
-  if (isDirectory(join(cwd, '.git'))) return gitignorePaths;
+  if (isGitRoot(cwd)) return gitignorePaths;
   let dir = dirname(cwd);
   let prev: string;
   while (dir) {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
-    if (isDirectory(join(dir, '.git'))) break;
+    if (isGitRoot(dir)) break;
     // biome-ignore lint: suspicious/noAssignInExpressions
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
@@ -128,7 +143,11 @@ export const findAndParseGitignores = async (cwd: string) => {
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
 
-  if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
+  const gitDir = getGitDir(cwd);
+  if (gitDir) {
+    const excludePath = join(gitDir, 'info/exclude');
+    if (isFile(excludePath)) addFile(excludePath, cwd);
+  }
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {

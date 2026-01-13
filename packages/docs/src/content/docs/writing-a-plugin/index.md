@@ -248,7 +248,7 @@ const resolveConfig: ResolveConfig<AstroConfig> = async config => {
 
 This is why plugins can implement the `resolveFromAST` function.
 
-### 7. resolveFromAST
+### 8. resolveFromAST
 
 Let's take a look at the Astro plugin implementation. This example assumes some
 familiarity with Abstract Syntax Trees (AST) and the TypeScript compiler API.
@@ -317,6 +317,19 @@ const plugin: Plugin {
 export default plugin;
 ```
 
+## None Of The Above
+
+### 9. `resolve`
+
+If there is no configuration file to parse or there is a need for customization,
+use `resolve`:
+
+```ts
+const resolve: Resolve = async options => {
+  return toDependency('troublesome', { optional: true });
+};
+```
+
 ## Inputs
 
 You may have noticed functions like `toDeferResolve` and `toEntry`. They're a
@@ -374,6 +387,6 @@ plugin, this might be the right time to open a pull request!
 [3]: ../explanations/plugins.md#entry-files-from-config-files
 [4]:
   https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
-[5]: ./writing-a-plugin/inputs.md
+[5]: ./inputs.md
 [6]: ../features/script-parser.md
-[7]: ./writing-a-plugin/argument-parsing.md
+[7]: ./argument-parsing.md

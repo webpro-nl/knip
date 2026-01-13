@@ -26,15 +26,15 @@ export const walkDown = (
   visited.add(key);
 
   const file = graph.get(filePath);
-  if (!file?.imported) return false;
+  if (!file?.importedBy) return false;
 
   const restIds = identifier.split('.');
   const id = restIds.shift();
   if (!id) return false;
 
-  const imported = file.imported;
+  const imported = file.importedBy;
 
-  const importedByFiles = imported.imported.get(id);
+  const importedByFiles = imported.import.get(id);
   if (importedByFiles) {
     for (const importingFile of importedByFiles) {
       const isEntry = entryPaths.has(importingFile);
@@ -42,9 +42,9 @@ export const walkDown = (
     }
   }
 
-  const importedAsAliases = imported.importedAs.get(id);
-  if (importedAsAliases) {
-    for (const [alias, byFilePaths] of importedAsAliases) {
+  const importAsAliases = imported.importAs.get(id);
+  if (importAsAliases) {
+    for (const [alias, byFilePaths] of importAsAliases) {
       for (const importingFile of byFilePaths) {
         const isEntry = entryPaths.has(importingFile);
         if (visitor(filePath, id, importingFile, alias, isEntry, 'importAs') === STOP) return true;
@@ -52,7 +52,7 @@ export const walkDown = (
     }
   }
 
-  for (const [namespace, byFilePaths] of imported.importedNs) {
+  for (const [namespace, byFilePaths] of imported.importNs) {
     for (const importingFile of byFilePaths) {
       const isEntry = entryPaths.has(importingFile);
       if (visitor(filePath, identifier, importingFile, `${namespace}.${identifier}`, isEntry, 'importNS') === STOP) {
@@ -101,7 +101,7 @@ export const walkDown = (
   }
 
   if (!done) {
-    for (const [namespace, sources] of imported.reExportedNs) {
+    for (const [namespace, sources] of imported.reExportNs) {
       for (const reExportingFile of sources) {
         const isEntry = entryPaths.has(reExportingFile);
         if (

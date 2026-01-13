@@ -1,5 +1,4 @@
 import type { CollectorIssues } from '../IssueCollector.js';
-import { finalizeConfigurationHints, type ProcessedHint } from '../reporters/util/configuration-hints.js';
 import { type Results, run } from '../run.js';
 import type { MainOptions } from '../util/create-options.js';
 import type { SessionHandler, WatchChange } from '../util/watch.js';
@@ -13,7 +12,6 @@ export interface Session {
   handleFileChanges(changes: WatchChange[]): Promise<WatchUpdate>;
   getIssues(): CollectorIssues;
   getResults(): Results;
-  getConfigurationHints(): ProcessedHint[];
   describeFile(filePath: string, options?: FileDescriptorOptions): File | undefined;
   describePackageJson(): PackageJsonFile;
 }
@@ -31,7 +29,6 @@ const createSessionAdapter = (session: SessionHandler, results: Results, options
     handleFileChanges: session.handleFileChanges,
     getIssues: session.getIssues,
     getResults: () => results,
-    getConfigurationHints: () => finalizeConfigurationHints(results, options),
     describeFile: (filePath, opts) =>
       buildFileDescriptor(filePath, options.cwd, session.getGraph(), session.getEntryPaths(), opts),
     describePackageJson: () => buildPackageJsonDescriptor(session.getGraph(), session.getEntryPaths()),

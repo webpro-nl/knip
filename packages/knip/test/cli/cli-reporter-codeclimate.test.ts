@@ -30,7 +30,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Unused exports',
       description: 'Unused export: default',
       categories: ['Bug Risk'],
-      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 8 }, end: { line: 30, column: 8 } } },
+      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 16 }, end: { line: 30, column: 16 } } },
       severity: 'major',
     },
     {

@@ -75,7 +75,10 @@ const getWorkspaceFlag = (manifest, pm) => {
 const getPackageManagerFromPackageJson = manifest => {
   if (!manifest.packageManager) return undefined;
 
-  const pmName = manifest.packageManager.split('@')[0];
+  let [pmName, pmVersion] = manifest.packageManager.split('@');
+  if (pmName === 'yarn' && pmVersion?.[0] > 1) {
+    pmName = 'yarn-berry';
+  }
 
   const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];
   if (!validPackageManagers.includes(pmName)) return undefined;
@@ -107,10 +110,6 @@ const main = () => {
 
   const knipConfig = {
     $schema: 'https://unpkg.com/knip@5/schema.json',
-    ignoreExportsUsedInFile: {
-      interface: true,
-      type: true,
-    },
     tags: ['-lintignore'],
   };
 
@@ -128,7 +127,7 @@ const main = () => {
   }
 
   try {
-    execSync('npm pkg set scripts.knip=knip 2>/dev/null');
+    execSync('npm pkg set scripts.knip=knip', { stdio: ['inherit', 'inherit', 'ignore'] });
     console.info('✓ Add knip to package.json#scripts');
     console.info('');
     console.info(`→ Run \`${bin} run knip --max-show-issues 5\` to run Knip for the first time`);

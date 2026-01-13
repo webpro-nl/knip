@@ -1,0 +1,5 @@
+{
+  "entry": ["index.js"],
+  "project": ["**/*.js"],
+  "ignore": ["!src/modules/B/**/*.js"]
+}

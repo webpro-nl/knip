@@ -3,6 +3,7 @@ export type PluginName =
   | 'angular'
   | 'astro'
   | 'astro-db'
+  | 'astro-og-canvas'
   | 'ava'
   | 'babel'
   | 'biome'
@@ -38,6 +39,7 @@ export type PluginName =
   | 'i18next-parser'
   | 'jest'
   | 'karma'
+  | 'knex'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -67,6 +69,7 @@ export type PluginName =
   | 'nyc'
   | 'oclif'
   | 'oxlint'
+  | 'parcel'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -102,6 +105,7 @@ export type PluginName =
   | 'swc'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
   | 'taskfile'
   | 'travis'
   | 'ts-node'
@@ -130,6 +134,7 @@ export const pluginNames = [
   'angular',
   'astro',
   'astro-db',
+  'astro-og-canvas',
   'ava',
   'babel',
   'biome',
@@ -165,6 +170,7 @@ export const pluginNames = [
   'i18next-parser',
   'jest',
   'karma',
+  'knex',
   'ladle',
   'lefthook',
   'lint-staged',
@@ -194,6 +200,7 @@ export const pluginNames = [
   'nyc',
   'oclif',
   'oxlint',
+  'parcel',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -229,6 +236,7 @@ export const pluginNames = [
   'swc',
   'syncpack',
   'tailwind',
+  'tanstack-router',
   'taskfile',
   'travis',
   'ts-node',

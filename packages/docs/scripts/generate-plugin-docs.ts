@@ -56,7 +56,8 @@ for await (const dir of directories) {
     const frontmatter = u('yaml', `title: ${title}\nsidebar:\n  hidden: true`);
 
     const defaults: Record<string, string[]> = {};
-    if (config && config.length > 0) defaults.config = config;
+    const configFiles = typeof config === 'function' ? config({ cwd: pluginDir }) : config;
+    if (configFiles && configFiles.length > 0) defaults.config = configFiles;
     if (entry && entry.length > 0) defaults.entry = entry;
     if (docs?.entry && docs.entry.length > 0) defaults.entry = [...(defaults.entry ?? []), ...docs.entry];
     if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
@@ -98,7 +99,7 @@ for await (const dir of directories) {
           ...parseFragment('Depending on local configuration, plugins may modify the defaults as shown.'),
           ...parseFragment('Custom `config` or `entry` options override default values, they are not merged.'),
           ...parseFragment(
-            'See [Plugins](../../explanations/plugins) for more details about plugins and their `entry` and `config` options.'
+            'See [Plugins](../../explanations/plugins.md) for more details about plugins and their `entry` and `config` options.'
           ),
         ]
       : [];
@@ -125,7 +126,7 @@ for await (const dir of directories) {
               .join('\n')}\n\`\`\``
           ),
           ...parseFragment(
-            'The configuration was generated from source code. Also see [Script Parser](../../features/script-parser).'
+            'The configuration was generated from source code. Also see [Script Parser](../../features/script-parser.md).'
           ),
         ]
       : [];

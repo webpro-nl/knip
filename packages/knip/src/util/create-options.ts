@@ -21,8 +21,6 @@ interface CreateOptions extends Partial<Options> {
   args?: ParsedCLIArgs;
 }
 
-const pcwd = process.cwd();
-
 /**
  * - Loads package.json/pnpm-workspace.yaml
  * - Loads & validates knip.json
@@ -30,6 +28,7 @@ const pcwd = process.cwd();
  */
 export const createOptions = async (options: CreateOptions) => {
   const { args = {} } = options;
+  const pcwd = process.cwd();
   const cwd = normalize(toPosix(toAbsolute(options.cwd ?? args.directory ?? pcwd, pcwd)));
 
   const manifestPath = findFile(cwd, 'package.json');
@@ -105,6 +104,8 @@ export const createOptions = async (options: CreateOptions) => {
   const isReportClassMembers = includedIssueTypes.classMembers;
   const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? args['experimental-tags'] ?? []);
 
+  const workspace = options.workspace ?? args.workspace;
+
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
     catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
@@ -120,7 +121,7 @@ export const createOptions = async (options: CreateOptions) => {
     includedIssueTypes,
     isCache: args.cache ?? false,
     isDebug,
-    isDisableConfigHints: args['no-config-hints'] || isProduction || Boolean(args.workspace),
+    isDisableConfigHints: args['no-config-hints'] || isProduction || Boolean(workspace),
     isFix: args.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
@@ -170,7 +171,7 @@ export const createOptions = async (options: CreateOptions) => {
     traceExport: args['trace-export'],
     traceFile: args['trace-file'] ? toAbsolute(args['trace-file'], cwd) : undefined,
     tsConfigFile: args.tsConfig,
-    workspace: options.workspace ?? args.workspace,
+    workspace,
     workspaces,
   };
 };

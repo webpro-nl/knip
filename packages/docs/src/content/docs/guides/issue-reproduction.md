@@ -42,6 +42,10 @@ Before opening an issue, please make sure you:
 Please file only a single issue at a time, so each of them can be labeled and
 tracked separately.
 
+There is no need to open an issue if you're going to submit a pull request to
+close it right away anyway. In that case it's preferred to keep things central
+in either an issue or pull request.
+
 ## Templates
 
 A convenient way to create a minimal reproduction is by starting with one of

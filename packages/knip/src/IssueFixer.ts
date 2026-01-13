@@ -1,13 +1,28 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
+import { formatly } from 'formatly';
 import type { Fixes } from './types/exports.js';
 import type { Issue, Issues } from './types/issues.js';
 import { DEFAULT_CATALOG } from './util/catalog.js';
 import type { MainOptions } from './util/create-options.js';
+import { debugLogArray, debugLogObject } from './util/debug.js';
 import { load, save } from './util/package-json.js';
 import { extname, join } from './util/path.js';
 import { removeExport } from './util/remove-export.js';
 
-export class IssueFixer {
+export const fix = async (issues: Issues, options: MainOptions) => {
+  const fixer = new IssueFixer(options);
+  const touchedFiles = await fixer.fixIssues(issues);
+  if (options.isFormat) {
+    const report = await formatly(Array.from(touchedFiles));
+    if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
+      debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
+    } else {
+      debugLogObject('*', 'Formatting files failed', report);
+    }
+  }
+};
+
+class IssueFixer {
   options: MainOptions;
 
   constructor(options: MainOptions) {

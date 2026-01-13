@@ -7,14 +7,14 @@ import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/workspaces-nested');
 
-const expectedConfigurationHints = new Set([
-  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
-  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
-  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
+const expectedConfigurationHints = [
   { type: 'ignoreDependencies', identifier: 'ignored-dep-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-global', workspaceName: '.' },
+  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-global', workspaceName: '.' },
   { type: 'ignoreDependencies', identifier: 'unused-ignored-dep-L-3', workspaceName: 'L-1-1/L-1-2/L-1-3' },
-]);
+  { type: 'ignoreBinaries', identifier: 'unused-ignored-bin-L-2', workspaceName: 'L-1-1/L-1-2' },
+  { type: 'ignoreWorkspaces', identifier: 'unused-ignored-workspace' },
+];
 
 test('Find unused dependencies in nested workspaces with default config in production mode (default)', async () => {
   const options = await createOptions({ cwd });

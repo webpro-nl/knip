@@ -1,6 +1,6 @@
 {
   "name": "@knip/mcp",
-  "version": "0.0.9",
+  "version": "0.0.15",
   "description": "Knip MCP Server",
   "type": "module",
   "bin": {
@@ -30,7 +30,7 @@
   "author": "Lars Kappert <lars@webpro.nl>",
   "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@modelcontextprotocol/sdk": "^1.25.1",
     "knip": "workspace:^",
     "zod": "^4.1.11"
   },

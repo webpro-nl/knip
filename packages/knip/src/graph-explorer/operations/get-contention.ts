@@ -139,7 +139,7 @@ const walkDown = (
   visited.add(filePath);
 
   const node = graph.get(filePath);
-  if (!node?.imported) return;
+  if (!node?.importedBy) return;
 
   const processConsumer = (consumerPath: string) => {
     network.files.add(consumerPath);
@@ -151,12 +151,12 @@ const walkDown = (
     walkDown(graph, network, consumerPath, identifier, visited);
   };
 
-  const directConsumers = node.imported.reExported.get(identifier);
+  const directConsumers = node.importedBy.reExport.get(identifier);
   if (directConsumers) {
     for (const consumerPath of directConsumers) processConsumer(consumerPath);
   }
 
-  for (const [sourceId, aliasMap] of node.imported.reExportedAs) {
+  for (const [sourceId, aliasMap] of node.importedBy.reExportAs) {
     if (sourceId === identifier) {
       for (const [_alias, consumers] of aliasMap) {
         for (const consumerPath of consumers) processConsumer(consumerPath);
@@ -164,7 +164,7 @@ const walkDown = (
     }
   }
 
-  const starConsumers = node.imported.reExported.get(IMPORT_STAR);
+  const starConsumers = node.importedBy.reExport.get(IMPORT_STAR);
   if (starConsumers) {
     for (const consumerPath of starConsumers) {
       const consumerExports = getExportedIdentifiers(graph, consumerPath);

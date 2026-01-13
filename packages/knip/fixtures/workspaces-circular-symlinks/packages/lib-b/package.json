@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/lib-b",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  }
+}

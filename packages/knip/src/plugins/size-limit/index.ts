@@ -13,10 +13,7 @@ const enablers = ['size-limit'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = [
-  'package.json',
-  ...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['mts', 'cts'], rcSuffix: '' }),
-];
+const entry = [...toLilconfig('size-limit', { configDir: false, additionalExtensions: ['mts', 'cts'], rcSuffix: '' })];
 
 const resolve: Resolve = options => {
   const allDeps = [
@@ -33,7 +30,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
   resolve,
 };
 

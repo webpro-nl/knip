@@ -169,21 +169,21 @@ export const buildInternalImports = (fileNode: FileNode, explorer: GraphExplorer
   };
 
   for (const [importedFilePath, importMaps] of fileNode.imports.internal) {
-    for (const identifier of importMaps.imported.keys()) {
+    for (const identifier of importMaps.import.keys()) {
       const _import = getImport(importedFilePath, identifier);
       addInternalImport(importedFilePath, identifier, _import.identifier, _import.line, _import.col);
     }
 
-    for (const [identifier, aliasMap] of importMaps.importedAs) {
+    for (const [identifier, aliasMap] of importMaps.importAs) {
       for (const [alias] of aliasMap) {
         const _import = getImport(importedFilePath, identifier);
         addInternalImport(importedFilePath, identifier, alias, _import.line, _import.col);
       }
     }
 
-    if (importMaps.importedNs.size > 0) {
+    if (importMaps.importNs.size > 0) {
       const _import = getImport(importedFilePath, IMPORT_STAR);
-      for (const namespace of importMaps.importedNs.keys()) {
+      for (const namespace of importMaps.importNs.keys()) {
         addInternalImport(importedFilePath, namespace, namespace, _import.line, _import.col);
       }
     }

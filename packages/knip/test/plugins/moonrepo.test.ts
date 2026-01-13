@@ -17,6 +17,7 @@ test('Find dependencies with the moonrepo plugin', async () => {
   assert(issues.binaries['.moon/tasks/typescript.yml']['eslint']);
   assert(issues.binaries['moon.yml']['vite-node']);
   assert(issues.binaries['moon.yml']['vitest']);
+  assert(issues.binaries['moon.yml']['tsx']);
 
   assert(issues.devDependencies['package.json']['@moonrepo/cli']);
   assert(issues.devDependencies['package.json']['vite-node']);
@@ -29,8 +30,8 @@ test('Find dependencies with the moonrepo plugin', async () => {
     ...baseCounters,
     files: 1,
     devDependencies: 4,
-    binaries: 5,
-    processed: 2,
-    total: 2,
+    binaries: 6,
+    processed: 3,
+    total: 3,
   });
 });

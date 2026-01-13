@@ -16,7 +16,7 @@ import {
   toDebugString,
 } from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
-import { dirname, isAbsolute, isInternal, join } from './path.js';
+import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
 
 export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
@@ -76,7 +76,13 @@ export const createInputHandler =
 
     const packageName = getPackageNameFromSpecifier(specifier);
 
-    if (packageName && (isDependency(input) || isDeferResolve(input) || isConfig(input))) {
+    if (
+      packageName &&
+      (isDependency(input) ||
+        isDeferResolve(input) ||
+        (isDeferResolveEntry(input) && isInNodeModules(specifier)) ||
+        isConfig(input))
+    ) {
       // Attempt fast path first for external dependencies (including internal workspaces)
       const isWorkspace = chief.workspacesByPkgName.has(packageName);
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
@@ -117,7 +123,7 @@ export const createInputHandler =
     }
 
     const baseDir = input.dir ?? dirname(containingFilePath);
-    const filePath = isAbsolute(specifier) ? specifier : join(baseDir, specifier);
+    const filePath = isAbsolute(specifier) || specifier.startsWith('#') ? specifier : join(baseDir, specifier);
     const resolvedFilePath = _resolveSync(filePath, baseDir);
 
     if (resolvedFilePath && isInternal(resolvedFilePath)) {

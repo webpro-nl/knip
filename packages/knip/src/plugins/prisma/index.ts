@@ -26,7 +26,7 @@ const config: string[] = [
 ];
 
 const resolveSchema = (path: string, cwd: string) => {
-  if (!isDirectory(join(cwd, path))) {
+  if (!isDirectory(cwd, path)) {
     return toEntry(path);
   }
   // Multi-file schema directory
@@ -58,7 +58,7 @@ const args: Args = {
   config: true,
   resolveInputs: (parsed: ParsedArgs, { cwd }) => {
     const inputs: Input[] = [];
-    if (parsed['schema']) {
+    if (typeof parsed['schema'] === 'string') {
       inputs.push(resolveSchema(parsed['schema'], cwd));
     }
     return inputs;

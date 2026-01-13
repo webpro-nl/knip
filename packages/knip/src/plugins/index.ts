@@ -2,6 +2,7 @@
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
 import { default as astroDb } from './astro-db/index.js';
+import { default as astroOgCanvas } from './astro-og-canvas/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
 import { default as biome } from './biome/index.js';
@@ -37,6 +38,7 @@ import { default as husky } from './husky/index.js';
 import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
 import { default as karma } from './karma/index.js';
+import { default as knex } from './knex/index.js';
 import { default as ladle } from './ladle/index.js';
 import { default as lefthook } from './lefthook/index.js';
 import { default as lintStaged } from './lint-staged/index.js';
@@ -66,6 +68,7 @@ import { default as nx } from './nx/index.js';
 import { default as nyc } from './nyc/index.js';
 import { default as oclif } from './oclif/index.js';
 import { default as oxlint } from './oxlint/index.js';
+import { default as parcel } from './parcel/index.js';
 import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
@@ -101,6 +104,7 @@ import { default as svgr } from './svgr/index.js';
 import { default as swc } from './swc/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
+import { default as tanstackRouter } from './tanstack-router/index.js';
 import { default as taskfile } from './taskfile/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
@@ -129,6 +133,7 @@ export const Plugins = {
   angular,
   astro,
   'astro-db': astroDb,
+  'astro-og-canvas': astroOgCanvas,
   ava,
   babel,
   biome,
@@ -164,6 +169,7 @@ export const Plugins = {
   'i18next-parser': i18nextParser,
   jest,
   karma,
+  knex,
   ladle,
   lefthook,
   'lint-staged': lintStaged,
@@ -193,6 +199,7 @@ export const Plugins = {
   nyc,
   oclif,
   oxlint,
+  parcel,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
@@ -228,6 +235,7 @@ export const Plugins = {
   swc,
   syncpack,
   tailwind,
+  'tanstack-router': tanstackRouter,
   taskfile,
   travis,
   'ts-node': tsNode,

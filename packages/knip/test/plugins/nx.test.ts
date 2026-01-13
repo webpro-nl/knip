@@ -30,8 +30,9 @@ test('Find dependencies with the Nx plugin', async () => {
     ...baseCounters,
     binaries: 5,
     devDependencies: 6,
-    unlisted: 3,
-    processed: 0,
-    total: 0,
+    unlisted: 5,
+    files: 3,
+    processed: 3,
+    total: 3,
   });
 });

@@ -9,7 +9,7 @@ type AliasReExportCallback = (identifier: string, alias: string, sources: Set<st
 type NamespaceReExportCallback = (namespace: string, sources: Set<string>) => boolean | void;
 
 export const forEachPassThroughReExport = (importMaps: ImportMaps, callback: PassThroughReExportCallback): boolean => {
-  for (const [identifier, sources] of importMaps.reExported) {
+  for (const [identifier, sources] of importMaps.reExport) {
     if (identifier === IMPORT_STAR) continue;
     if (callback(identifier, sources) === false) return false;
   }
@@ -17,7 +17,7 @@ export const forEachPassThroughReExport = (importMaps: ImportMaps, callback: Pas
 };
 
 export const forEachAliasReExport = (importMaps: ImportMaps, callback: AliasReExportCallback): boolean => {
-  for (const [identifier, aliasMap] of importMaps.reExportedAs) {
+  for (const [identifier, aliasMap] of importMaps.reExportAs) {
     for (const [alias, sources] of aliasMap) {
       if (callback(identifier, alias, sources) === false) return false;
     }
@@ -26,19 +26,19 @@ export const forEachAliasReExport = (importMaps: ImportMaps, callback: AliasReEx
 };
 
 export const forEachNamespaceReExport = (importMaps: ImportMaps, callback: NamespaceReExportCallback): boolean => {
-  for (const [namespace, sources] of importMaps.reExportedNs) {
+  for (const [namespace, sources] of importMaps.reExportNs) {
     if (callback(namespace, sources) === false) return false;
   }
   return true;
 };
 
-export const getStarReExportSources = (importMaps: ImportMaps) => importMaps.reExported.get(IMPORT_STAR);
+export const getStarReExportSources = (importMaps: ImportMaps) => importMaps.reExport.get(IMPORT_STAR);
 
 export const getPassThroughReExportSources = (importMaps: ImportMaps, identifier: string) =>
-  importMaps.reExported.get(identifier);
+  importMaps.reExport.get(identifier);
 
 export const getAliasReExportMap = (importMaps: ImportMaps, identifier: string) =>
-  importMaps.reExportedAs.get(identifier);
+  importMaps.reExportAs.get(identifier);
 
 export const getNamespaceReExportSources = (importMaps: ImportMaps, namespace: string) =>
-  importMaps.reExportedNs.get(namespace);
+  importMaps.reExportNs.get(namespace);

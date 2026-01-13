@@ -180,6 +180,13 @@ notation below is valid and will report only exports tagged `@lintignore` or
 }
 ```
 
+:::caution
+
+Tags must not contain hyphens or plus symbols, so it is recommended to stick to
+letters and avoid snake-case.
+
+:::
+
 Also see [JSDoc & TSDoc Tags][8].
 
 ### `treatConfigHintsAsErrors`
@@ -198,17 +205,23 @@ Exit with non-zero code (1) if there are any configuration hints.
 
 :::tip
 
-Please read [configuring project files][9] before using the `ignore` option,
-because in most cases you'll want to fine‑tune `entry` and `project` (or use
-production mode) instead.
+Please read [configuring project files][9] before using the `ignore` option.
 
 :::
 
-Array of glob patterns to ignore issues from matching files. Example:
+Avoid `ignore` patterns. There is almost always a better solution:
+
+- Follow up on configuration hints (if there are any).
+- Fine-tune `entry` and `project` patterns.
+- Use [production mode][10].
+- Other `ignore*` options.
+
+**NOTE**: An exception to the rule: to _temporarily_ report only issues in files
+that match the negated `ignore` pattern:
 
 ```json title="knip.json"
 {
-  "ignore": ["src/generated.ts", "fixtures/**"]
+  "ignore": ["!src/dir/**"]
 }
 ```
 
@@ -270,6 +283,8 @@ export default {
 ```
 
 Suffix an item with `!` to enable it only in production mode.
+
+Also see [Unused dependencies][11].
 
 ### `ignoreMembers`
 
@@ -399,7 +414,7 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 Override built-in compilers or add custom compilers for additional file types.
 
-Also see [Compilers][10].
+Also see [Compilers][12].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -410,4 +425,6 @@ Also see [Compilers][10].
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
 [9]: ../guides/configuring-project-files.md
-[10]: ../features/compilers.md
+[10]: ../features/production-mode.md
+[11]: ../guides/handling-issues.mdx#unused-dependencies
+[12]: ../features/compilers.md

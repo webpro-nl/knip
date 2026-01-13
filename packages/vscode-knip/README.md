@@ -1,7 +1,7 @@
-# Knip VS Code Extension
+# Knip Editor Extension for VS Code/Open VSX
 
-This extension is powered by Knip: Find unused files, dependencies, and exports
-in your JavaScript/TypeScript projects.
+The Knip Editor Extension for VS Code/Open VSX is powered by Knip: Find unused
+files, dependencies, and exports in your JavaScript/TypeScript projects.
 
 - Website: [knip.dev][1]
 - GitHub repo: [webpro-nl/knip][2]

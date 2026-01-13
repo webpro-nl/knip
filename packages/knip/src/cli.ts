@@ -1,9 +1,16 @@
 // biome-ignore-all lint/suspicious/noConsole: ignore
-import { main } from './index.js';
+import { fix } from './IssueFixer.js';
+import { run } from './run.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
 import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
-import { getKnownErrors, hasErrorCause, isConfigurationError, isKnownError } from './util/errors.js';
+import {
+  getKnownErrors,
+  hasErrorCause,
+  isConfigurationError,
+  isKnownError,
+  isModuleNotFoundError,
+} from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
 import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
@@ -22,7 +29,7 @@ try {
   throw error;
 }
 
-const run = async () => {
+const main = async () => {
   try {
     if (args.help) {
       console.log(helpText);
@@ -36,8 +43,17 @@ const run = async () => {
 
     const options = await createOptions({ args });
 
-    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs, enabledPlugins } =
-      await main(options);
+    const { results } = await run(options);
+
+    const {
+      issues,
+      counters,
+      tagHints,
+      configurationHints,
+      includedWorkspaceDirs,
+      enabledPlugins,
+      selectedWorkspaces,
+    } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
@@ -59,9 +75,12 @@ const run = async () => {
       maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
+      selectedWorkspaces,
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
+
+    if (options.isFix) await fix(finalData.issues, options);
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
 
@@ -90,7 +109,7 @@ const run = async () => {
 
     if (
       (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
-      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
     ) {
       process.exit(1);
     }
@@ -99,7 +118,11 @@ const run = async () => {
     if (!args.debug && error instanceof Error && isKnownError(error)) {
       const knownErrors = getKnownErrors(error);
       for (const knownError of knownErrors) logError('ERROR', knownError.message);
-      if (hasErrorCause(knownErrors[0])) console.error('Reason:', knownErrors[0].cause.message);
+      if (hasErrorCause(knownErrors[0])) {
+        console.error('Reason:', knownErrors[0].cause.message);
+        if (isModuleNotFoundError(knownErrors[0].cause))
+          console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+      }
       if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
@@ -110,4 +133,4 @@ const run = async () => {
   process.exit(0);
 };
 
-await run();
+await main();

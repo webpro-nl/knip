@@ -1,5 +1,4 @@
 import { watch } from 'node:fs';
-import { formatly } from 'formatly';
 import { CatalogCounselor } from './CatalogCounselor.js';
 import { ConfigurationChief } from './ConfigurationChief.js';
 import { ConsoleStreamer } from './ConsoleStreamer.js';
@@ -7,11 +6,10 @@ import { DependencyDeputy } from './DependencyDeputy.js';
 import { analyze } from './graph/analyze.js';
 import { build } from './graph/build.js';
 import { IssueCollector } from './IssueCollector.js';
-import { IssueFixer } from './IssueFixer.js';
 import { PrincipalFactory } from './PrincipalFactory.js';
 import watchReporter from './reporters/watch.js';
 import type { MainOptions } from './util/create-options.js';
-import { debugLogArray, debugLogObject } from './util/debug.js';
+import { debugLogObject } from './util/debug.js';
 import { getGitIgnoredHandler } from './util/glob-core.js';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.js';
 
@@ -25,7 +23,6 @@ export const run = async (options: MainOptions) => {
   const deputy = new DependencyDeputy(options);
   const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer(options);
-  const fixer = new IssueFixer(options);
   const collector = new IssueCollector(options);
   const counselor = new CatalogCounselor(options);
 
@@ -34,6 +31,7 @@ export const run = async (options: MainOptions) => {
   const workspaces = await chief.getWorkspaces();
   const isGitIgnored = await getGitIgnoredHandler(options);
 
+  collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);
 
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
@@ -61,7 +59,6 @@ export const run = async (options: MainOptions) => {
     deputy,
     entryPaths,
     factory,
-    fixer,
     graph,
     streamer,
     unreferencedFiles,
@@ -99,18 +96,6 @@ export const run = async (options: MainOptions) => {
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
-  if (options.isFix && !options.isSession) {
-    const touchedFiles = await fixer.fixIssues(issues);
-    if (options.isFormat) {
-      const report = await formatly(Array.from(touchedFiles));
-      if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
-        debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
-      } else {
-        debugLogObject('*', 'Formatting files failed', report);
-      }
-    }
-  }
-
   if (!options.isWatch) streamer.clear();
 
   return {
@@ -119,6 +104,7 @@ export const run = async (options: MainOptions) => {
       counters,
       tagHints,
       configurationHints,
+      selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: chief.includedWorkspaces.map(w => w.dir),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },

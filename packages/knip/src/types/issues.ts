@@ -65,7 +65,7 @@ export type ReporterOptions = {
   issues: Issues;
   counters: Counters;
   tagHints: TagHints;
-  configurationHints: Set<ConfigurationHint>;
+  configurationHints: ConfigurationHint[];
   enabledPlugins: Record<string, string[]>;
   isDisableConfigHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
@@ -75,6 +75,7 @@ export type ReporterOptions = {
   options: string;
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
+  selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
 };

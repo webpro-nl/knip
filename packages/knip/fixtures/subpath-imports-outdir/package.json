@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/subpath-imports-outdir",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "imports": {
+    "#src/*": "./dist/src/*"
+  }
+}

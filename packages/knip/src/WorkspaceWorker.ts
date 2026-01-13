@@ -10,6 +10,7 @@ import type {
   GetInputsFromScriptsPartial,
   GetSourceFile,
   HandleInput,
+  Plugin,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHint } from './types/issues.js';
@@ -186,13 +187,16 @@ export class WorkspaceWorker {
     return [patterns, this.negatedWorkspacePatterns].flat();
   }
 
+  private getPluginConfig(plugin: Plugin) {
+    return typeof plugin.config === 'function' ? plugin.config({ cwd: this.dir }) : plugin.config;
+  }
+
   getPluginConfigPatterns() {
     const patterns: string[] = [];
     for (const [pluginName, plugin] of PluginEntries) {
       const pluginConfig = this.getConfigForPlugin(pluginName);
       if (this.enabledPluginsMap[pluginName] && pluginConfig) {
-        const { config } = pluginConfig;
-        patterns.push(...(config ?? plugin.config ?? []));
+        patterns.push(...(pluginConfig.config ?? this.getPluginConfig(plugin) ?? []));
       }
     }
     return patterns;
@@ -234,7 +238,7 @@ export class WorkspaceWorker {
   private getConfigurationFilePatterns(pluginName: PluginName) {
     const plugin = Plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
-    return pluginConfig.config ?? plugin.config ?? [];
+    return pluginConfig.config ?? this.getPluginConfig(plugin) ?? [];
   }
 
   public async runPlugins() {
@@ -442,7 +446,7 @@ export class WorkspaceWorker {
     filePaths: string[],
     includedPaths: Set<string>
   ) {
-    const hints = new Set<ConfigurationHint>();
+    const hints: ConfigurationHint[] = [];
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
     const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));
@@ -451,7 +455,7 @@ export class WorkspaceWorker {
 
     if (filePaths.length === 0) {
       const identifier = `[${entries[0]}${entries.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
-      hints.add({ type: `${type}-empty`, identifier, workspaceName });
+      hints.push({ type: `${type}-empty`, identifier, workspaceName });
       return hints;
     }
 
@@ -459,11 +463,11 @@ export class WorkspaceWorker {
       if (pattern.startsWith('!')) continue;
       const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
       if (includedPaths.has(filePathOrPattern)) {
-        hints.add({ type: `${type}-redundant`, identifier: pattern, workspaceName });
+        hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
       } else {
         const matcher = picomatch(filePathOrPattern);
         if (!filePaths.some(filePath => matcher(filePath))) {
-          hints.add({ type: `${type}-empty`, identifier: pattern, workspaceName });
+          hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
         }
       }
     }

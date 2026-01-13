@@ -10,7 +10,7 @@ import type { MainOptions } from './create-options.js';
 import { debugLog } from './debug.js';
 import { isFile } from './fs.js';
 import { updateImportMap } from './module-graph.js';
-import { join, toAbsolute, toRelative } from './path.js';
+import { toAbsolute, toRelative } from './path.js';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
@@ -125,7 +125,7 @@ export const getSessionHandler = async (
     } else {
       for (const [filePath, file] of graph) {
         if (filePaths.includes(filePath)) {
-          file.imported = undefined;
+          file.importedBy = undefined;
         } else {
           graph.delete(filePath);
           analyzedFiles.delete(filePath);
@@ -181,7 +181,7 @@ export const getSessionHandler = async (
   const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
     debugLog('*', `(raw) ${eventType} ${filePath}`);
     if (typeof filePath === 'string') {
-      const type = eventType === 'rename' ? (isFile(join(options.cwd, filePath)) ? 'added' : 'deleted') : 'modified';
+      const type = eventType === 'rename' ? (isFile(options.cwd, filePath) ? 'added' : 'deleted') : 'modified';
       handleFileChanges([{ type, filePath }]);
     }
   };

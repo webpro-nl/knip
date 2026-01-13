@@ -13,4 +13,7 @@ export default [
   {
     file: 'routes/$.tsx',
   },
+  {
+    file: 'routes/main+/nested+/_index.tsx',
+  },
 ];
