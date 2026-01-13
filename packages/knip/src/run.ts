@@ -105,7 +105,7 @@ export const run = async (options: MainOptions) => {
       tagHints,
       configurationHints,
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
-      includedWorkspaceDirs: chief.includedWorkspaces.map(w => w.dir),
+      includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },
     session,

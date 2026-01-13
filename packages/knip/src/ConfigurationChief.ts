@@ -97,13 +97,12 @@ export class ConfigurationChief {
   ignoredWorkspacePatterns: string[] = [];
   workspacePackages = new Map<string, WorkspacePackage>();
   workspacesByPkgName = new Map<string, Workspace>();
-  workspacesByName = new Map<string, Workspace>();
+  workspacesByDir = new Map<string, Workspace>();
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
   workspaceGraph: WorkspaceGraph = new Map();
-  includedWorkspaces: Workspace[] = [];
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
@@ -201,20 +200,20 @@ export class ConfigurationChief {
       this.availableWorkspaceNames
     );
 
-    this.includedWorkspaces = this.getIncludedWorkspaces();
+    const includedWorkspaces = this.getIncludedWorkspaces();
 
-    for (const workspace of this.includedWorkspaces) {
+    for (const workspace of includedWorkspaces) {
       this.workspacesByPkgName.set(workspace.pkgName, workspace);
-      this.workspacesByName.set(workspace.name, workspace);
+      this.workspacesByDir.set(workspace.dir, workspace);
     }
 
     const sorted = graphSequencer(
       this.workspaceGraph,
-      this.includedWorkspaces.map(workspace => workspace.dir).filter(dir => this.workspaceGraph.has(dir))
+      Array.from(this.workspacesByDir.keys()).filter(dir => this.workspaceGraph.has(dir))
     );
     const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
     // biome-ignore lint: style/noNonNullAssertion
-    return [...root, ...rest.reverse()].map(dir => this.includedWorkspaces.find(w => w.dir === dir)!);
+    return [...root, ...rest.reverse()].map(dir => this.workspacesByDir.get(dir)!);
   }
 
   private getListedWorkspaces() {
@@ -260,8 +259,9 @@ export class ConfigurationChief {
   private getAvailableWorkspaceNames(names: Iterable<string>) {
     const availableWorkspaceNames = [];
     const [ignore, patterns] = partition(this.ignoredWorkspacePatterns, pattern => pattern.startsWith('!'));
+    const ignoreSliced = ignore.map(pattern => pattern.slice(1));
     for (const name of names) {
-      if (!picomatch.isMatch(name, patterns, { ignore: ignore.map(pattern => pattern.slice(1)) })) {
+      if (!picomatch.isMatch(name, patterns, { ignore: ignoreSliced })) {
         availableWorkspaceNames.push(name);
       }
     }
@@ -288,16 +288,20 @@ export class ConfigurationChief {
       const graph = this.workspaceGraph;
       if (graph) {
         const seen = new Set<string>();
-        const initialWorkspaces = workspaceNames.map(name => join(this.cwd, name));
+        const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
         const workspaceDirsWithDependents = new Set(initialWorkspaces);
         const addDependents = (dir: string) => {
           seen.add(dir);
           const dirs = graph.get(dir);
           if (!dirs || dirs.size === 0) return;
-          if (initialWorkspaces.some(dir => dirs.has(dir))) workspaceDirsWithDependents.add(dir);
+          for (const d of dirs)
+            if (initialWorkspaces.has(d)) {
+              workspaceDirsWithDependents.add(dir);
+              break;
+            }
           for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
         };
-        this.availableWorkspaceDirs.forEach(addDependents);
+        for (const dir of this.availableWorkspaceDirs) addDependents(dir);
         for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME);
       }
     } else {
@@ -332,9 +336,10 @@ export class ConfigurationChief {
   }
 
   private getDescendentWorkspaces(name: string) {
-    return this.availableWorkspaceNames
-      .filter(workspaceName => workspaceName !== name)
-      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(`${name}/`));
+    const prefix = `${name}/`;
+    return this.availableWorkspaceNames.filter(
+      workspaceName => workspaceName !== name && (name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(prefix))
+    );
   }
 
   public getIgnoredWorkspacesFor(name: string) {
@@ -435,14 +440,19 @@ export class ConfigurationChief {
 
   public findWorkspaceByFilePath(filePath: string) {
     const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(`${workspaceDir}/`));
-    return this.includedWorkspaces.find(workspace => workspace.dir === workspaceDir);
+    if (!workspaceDir) return undefined;
+    return this.workspacesByDir.get(workspaceDir);
   }
 
   public getUnusedIgnoredWorkspaces() {
     const ignoredWorkspaceNames = this.config.ignoreWorkspaces.map(removeProductionSuffix);
-    const workspaceNames = [...this.workspacePackages.keys(), ...this.additionalWorkspaceNames];
+    const matchesWorkspace = (pattern: string) => {
+      for (const name of this.workspacePackages.keys()) if (picomatch.isMatch(name, pattern)) return true;
+      for (const name of this.additionalWorkspaceNames) if (picomatch.isMatch(name, pattern)) return true;
+      return false;
+    };
     return ignoredWorkspaceNames
-      .filter(ignoredWorkspaceName => !workspaceNames.some(name => picomatch.isMatch(name, ignoredWorkspaceName)))
+      .filter(ignoredWorkspaceName => !matchesWorkspace(ignoredWorkspaceName))
       .filter(ignoredWorkspaceName => {
         const dir = join(this.cwd, ignoredWorkspaceName);
         return !isDirectory(dir) || isFile(dir, 'package.json');
