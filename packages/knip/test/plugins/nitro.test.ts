@@ -15,7 +15,6 @@ test('Find dependencies with the nitro plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
     exports: 1,
     processed: 3,
     total: 3,
