@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/peer-dependencies-optional-strict",
+  "peerDependencies": {
+    "@types/pg": "*",
+    "pg": "*",
+    "required-peer": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/pg": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    }
+  }
+}
