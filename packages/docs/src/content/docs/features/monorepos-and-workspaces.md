@@ -100,16 +100,31 @@ The following options are available inside workspace configurations:
 Use `--debug` for verbose output and see the workspaces Knip includes, their
 configurations, enabled plugins, glob options and resolved files.
 
-## Lint a single workspace
+## Filter workspaces
 
-Use the `--workspace` (or `-W`) argument to focus on a single workspace (and let
-Knip run faster). Example:
+Use the `--workspace` (or `-W`) argument to select one or more workspaces:
 
 ```sh
 knip --workspace packages/my-lib
 ```
 
-This will include the target workspace, but also ancestor and dependent
+The filter supports multiple formats:
+
+```sh
+knip --workspace @myorg/my-lib     # Package name
+knip --workspace '@myorg/*'        # Package name glob
+knip --workspace packages/my-lib   # Directory path
+knip --workspace './apps/*'        # Directory glob
+```
+
+Combine selectors to include or exclude workspaces:
+
+```sh
+knip --workspace @myorg/* --workspace '!@myorg/legacy'
+knip --workspace './apps/*' --workspace '@shared/utils'
+```
+
+This will include the target workspace(s), but also ancestor and dependent
 workspaces. For two reasons:
 
 - Ancestor workspaces may list dependencies in `package.json` the linted

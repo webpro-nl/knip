@@ -150,12 +150,14 @@ changes in `package.json` or `node_modules` may not cause an updated report.
 
 ## Scope
 
-### `--workspace [dir]`
+### `--workspace [filter]`
 
-[Lint a single workspace][10] including its ancestor and dependent workspaces.
-The default behavior is to lint all configured workspaces.
+Select one or multiple workspaces (including its ancestor and dependent
+workspaces). The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
+
+See [filter workspaces][10] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -497,7 +499,7 @@ Trace file to see where its exports are imported. Implies [--trace][19].
 [7]: ../guides/performance.md#workspace-sharing
 [8]: ../features/production-mode.md
 [9]: #--production
-[10]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
 [11]: ./issue-types.md
 [12]: ../features/auto-fix.mdx
 [13]: #--reporter-reporter

@@ -36,7 +36,7 @@ Also see [related tooling][2].
 | [Strict mode][23]            | Use `--strict` to isolate workspaces and consider only `dependencies` |
 | [Trace][24]                  | Trace exports to find where they are used                             |
 | [Watch mode][25]             | Use `--watch` for live updates of unused files and exports            |
-| [Workspace][26]              | Use `--workspace` to lint a single workspace in a monorepo            |
+| [Workspace][26]              | Use `--workspace` to filter workspaces in a monorepo                  |
 
 [1]: ../reference/issue-types.md
 [2]: ../reference/related-tooling.md
