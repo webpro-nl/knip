@@ -42,7 +42,6 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'base64',
   'basename',
   'bash',
-  'biome',
   'bun',
   'bundle',
   'bunx',
