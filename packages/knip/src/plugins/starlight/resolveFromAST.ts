@@ -9,14 +9,19 @@ export const getInputsFromSourceFile = (sourceFile: ts.SourceFile): Input[] => {
   const importMap = getImportMap(sourceFile);
   const starlightImportName = getDefaultImportName(importMap, '@astrojs/starlight');
 
+  let starlightConfigFound = false;
   // Starlight enables Expressive Code by default
   // // https://starlight.astro.build/reference/configuration/#expressivecode
   let isExpressiveCodeEnabled = true;
 
   function visit(node: ts.Node) {
+    if (starlightConfigFound) return;
+
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === starlightImportName) {
       const starlightConfig = node.arguments[0];
       if (ts.isObjectLiteralExpression(starlightConfig)) {
+        starlightConfigFound = true;
+
         const componentsValues = getPropertyValues(starlightConfig, 'components');
         for (const value of componentsValues) componentPaths.add(value);
 
