@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+npm login
+
 # Running the release cycle twice to ensure a single clean commit with multiple tags will be pushed,
 # with manual bump/skip for each package separately. One-off package publish can still be done from package dir.
 
