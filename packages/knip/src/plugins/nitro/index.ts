@@ -13,7 +13,14 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['nitro.config.{js,mjs,ts}'];
 
-const production = ['server.{js,mjs,ts}', 'api/**/*.ts', 'routes/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', '.nitro/types/*.d.ts'];
+const production = [
+  'server.{js,mjs,ts}',
+  'api/**/*.ts',
+  'routes/**/*.ts',
+  'middleware/**/*.ts',
+  'plugins/**/*.ts',
+  '.nitro/types/*.d.ts',
+];
 
 const setup = async () => {
   if (globalThis && !('defineNitroConfig' in globalThis)) {
@@ -36,7 +43,7 @@ const resolveConfig: ResolveConfig<NitroConfig> = async localConfig => {
       join(typeof localConfig.routesDir === 'string' ? localConfig.routesDir : 'routes', '**/*.ts'),
       'middleware/**/*.ts',
       'plugins/**/*.ts',
-    ].map(pattern => toProductionEntry(join(srcDir, pattern)))
+    ].map(pattern => toProductionEntry(join(srcDir, pattern))),
   ];
 
   const deps =
