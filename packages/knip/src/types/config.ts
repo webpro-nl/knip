@@ -63,11 +63,11 @@ export type GetImportsAndExportsOptions = {
 
 export interface Configuration {
   ignore: NormalizedGlob;
-  ignoreFiles: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
-  ignoreIssues?: IgnoreIssues;
+  ignoreFiles: NormalizedGlob;
+  ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];

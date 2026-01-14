@@ -51,9 +51,10 @@ const isPluginName = (name: string): name is PluginName => pluginNames.includes(
 
 const defaultConfig: Configuration = {
   ignore: [],
-  ignoreFiles: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
+  ignoreFiles: [],
+  ignoreIssues: {},
   ignoreMembers: [],
   ignoreUnresolved: [],
   ignoreWorkspaces: [],
@@ -142,7 +143,7 @@ export class ConfigurationChief {
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
-    const ignoreIssues = rawConfig.ignoreIssues;
+    const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
