@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
+import pkg from '../package.json' with { type: 'json' };
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -97,7 +98,13 @@ export class LanguageServer {
         },
       };
 
-      return { capabilities };
+      return {
+        capabilities,
+        serverInfo: {
+          name: pkg.name,
+          version: pkg.version,
+        },
+      };
     });
 
     this.connection.onInitialized(() => {});
