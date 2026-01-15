@@ -1,6 +1,7 @@
 import type { SyncCompilerFn } from './types.js';
 
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
+export const inlineCodeMatcher = /`[^`]+`/g;
 
 // Extract imports from body of <script> nodes
 const scriptExtractor = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;

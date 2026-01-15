@@ -1,4 +1,4 @@
-import { fencedCodeBlockMatcher, importMatcher } from './compilers.js';
+import { fencedCodeBlockMatcher, importMatcher, inlineCodeMatcher } from './compilers.js';
 import type { HasDependency } from './types.js';
 
 // https://mdxjs.com/packages/
@@ -16,6 +16,7 @@ const mdxDependencies = [
 
 const condition = (hasDependency: HasDependency) => mdxDependencies.some(hasDependency);
 
-const compiler = (text: string) => [...text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher)].join('\n');
+const compiler = (text: string) =>
+  [...text.replace(fencedCodeBlockMatcher, '').replace(inlineCodeMatcher, '').matchAll(importMatcher)].join('\n');
 
 export default { condition, compiler };
