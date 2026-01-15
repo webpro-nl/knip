@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/tsconfig-nested-paths",
+  "dependencies": {
+    "typescript": "*"
+  }
+}
