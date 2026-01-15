@@ -3,7 +3,9 @@
   "scripts": {
     "test": "jest"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "eslint-config-airbnb": "*",
     "jest": "^29.7.0",

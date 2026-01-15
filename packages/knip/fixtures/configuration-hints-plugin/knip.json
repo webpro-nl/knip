@@ -1,0 +1,4 @@
+{
+  "entry": ["create-typescript-app.config.js", "svgo.config.mjs"],
+  "project": ["create-typescript-app.config.js"]
+}

@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { exec } from '../helpers/exec.js';
 import { resolve } from '../helpers/resolve.js';
 
@@ -26,6 +26,7 @@ test('knip --reporter json (enum members)', () => {
           ],
         },
         duplicates: [],
+        catalog: [],
       },
     ],
   };

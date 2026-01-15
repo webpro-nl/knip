@@ -18,18 +18,26 @@ const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
   'src/hooks.{server,client}.{js,ts}',
   'src/params/*.{js,ts}',
+  'src/service-worker.{js,ts}',
+  'src/service-worker/index.{js,ts}',
+  'src/instrumentation.server.{js,ts}',
 ];
 
 const resolve: Resolve = options => {
   const alias = toAlias('$app/*', [join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/app/*')]);
-  return [alias];
+  const serviceWorkerAlias = toAlias('$service-worker', [
+    join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/service-worker.js'),
+  ]);
+  return [alias, serviceWorkerAlias];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   production,
   resolve,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -1,11 +1,13 @@
+import type { ParsedArgs } from 'minimist';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
+import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { _glob } from '../../util/glob.js';
 import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join, toPosix } from '../../util/path.js';
+import { isAbsolute, isInternal, join, toPosix } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
-import { getEnvPackageName, getExternalReporters } from './helpers.js';
+import { getEnvSpecifier, getExternalReporters } from './helpers.js';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
 
 // https://vitest.dev/config/
@@ -28,13 +30,18 @@ const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
   scripts ? Object.values(scripts).some(script => isVitestCoverageCommand.test(script)) : false;
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
-  const { manifest, cwd: dir } = options;
+  const { manifest, configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
 
+  const env = testConfig.environment;
   const environments =
-    testConfig.environment && testConfig.environment !== 'node' ? [getEnvPackageName(testConfig.environment)] : [];
+    env && env !== 'node'
+      ? isInternal(env) || isAbsolute(env)
+        ? [toDeferResolve(env)]
+        : [toDependency(getEnvSpecifier(env))]
+      : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
   const hasCoverageEnabled =
@@ -61,7 +68,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   }
 
   return [
-    ...[...environments, ...reporters, ...coverage].map(id => toDependency(id)),
+    ...environments,
+    ...reporters.map(id => toDependency(id)),
+    ...coverage.map(id => toDependency(id)),
     ...setupFiles,
     ...globalSetup,
     ...workspaceDependencies,
@@ -178,11 +187,16 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   return Array.from(inputs);
 };
 
-const args = {
+const args: Args = {
   config: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [];
+    if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
+    return inputs;
+  },
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -190,4 +204,6 @@ export default {
   entry,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

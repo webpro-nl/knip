@@ -1,0 +1,13 @@
+version: '3'
+
+includes:
+  # Deep nesting - shared includes another nested file
+  deep:
+    taskfile: deep/Taskfile.yml
+
+tasks:
+  shared-task:
+    cmd: node ../scripts/shared.js
+  shared-binary:
+    cmd: npx another-nonexistent-binary
+

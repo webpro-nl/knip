@@ -1,4 +1,4 @@
-// biome-ignore lint/style/useNodejsImportProtocol:  fixture festa
+// biome-ignore lint: style/useNodejsImportProtocol
 import { PassThrough } from 'stream';
 import { Response } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';

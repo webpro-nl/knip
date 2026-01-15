@@ -1,6 +1,6 @@
 import type { GetInputsFromScripts } from '../types/config.js';
+import { fromBinary, type Input, isBinary, isDependency } from '../util/input.js';
 import { timerify } from '../util/Performance.js';
-import { type Input, fromBinary, isBinary, isDependency } from '../util/input.js';
 import { getDependenciesFromScript } from './bash-parser.js';
 
 const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {

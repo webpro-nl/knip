@@ -34,11 +34,13 @@ const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {
     .concat((localConfig?.plugins ?? []).map(id => toDeferResolve(id)));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

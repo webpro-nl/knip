@@ -1,10 +1,13 @@
 import ts from 'typescript';
-import { ANONYMOUS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.js';
 import {
   findAncestor,
   findDescendants,
+  getAccessedIdentifiers,
+  getThenBindings,
   isAccessExpression,
   isImportCall,
+  isInOpaqueExpression,
   isTopLevel,
   stripQuotes,
 } from '../../ast-helpers.js';
@@ -19,6 +22,7 @@ export default visit(
     if (isImportCall(node)) {
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
+        const modifiers = IMPORT_FLAGS.NONE;
 
         if (specifier) {
           const accessExpression = findAncestor<ts.AccessExpression>(node, _node => {
@@ -32,36 +36,44 @@ export default visit(
               const pos = accessExpression.name.pos;
               if (identifier === 'then') {
                 const callExpression = node.parent.parent;
-                if (ts.isCallExpression(callExpression) && ts.isFunctionLike(callExpression.arguments[0])) {
-                  const arg = callExpression.arguments[0].parameters[0];
-                  if (arg && ts.isIdentifier(arg.name)) {
-                    const argName = arg.name.escapedText;
-                    const accessExpressions = findDescendants<ts.PropertyAccessExpression>(
-                      callExpression.arguments[0].body,
-                      ts.isPropertyAccessExpression
-                    ).filter(binding => binding.expression.getText() === argName);
-                    if (accessExpressions.length > 0) {
-                      // Pattern: import('specifier').then(module => module.identifier);
-                      return accessExpressions.map(binding => {
-                        const identifier = String(binding.name.escapedText);
-                        return { identifier, specifier, pos };
-                      });
-                    }
-                  } else if (arg && ts.isObjectBindingPattern(arg.name)) {
+                if (ts.isCallExpression(callExpression)) {
+                  const accessed = getThenBindings(callExpression);
+                  if (accessed && accessed.length > 0) {
+                    // Pattern: import('specifier').then(module => module.identifier);
                     // Pattern: import('specifier').then({ identifier } => identifier);
-                    return arg.name.elements.map(element => {
-                      const identifier = (element.propertyName ?? element.name).getText();
-                      const alias = element.propertyName ? element.name.getText() : undefined;
-                      return { identifier, alias, specifier, pos: element.pos };
-                    });
+                    return accessed.map(acc => ({
+                      ...acc,
+                      specifier,
+                      modifiers,
+                      alias: undefined,
+                      namespace: undefined,
+                      symbol: undefined,
+                    }));
                   }
                 }
                 // Pattern: import('specifier').then(id => id)
-                return { identifier: 'default', specifier, pos };
+                return {
+                  identifier: 'default',
+                  specifier,
+                  pos,
+                  modifiers,
+                  alias: undefined,
+                  namespace: undefined,
+                  symbol: undefined,
+                };
               }
 
               // Pattern: (await import('./prop-access')).propAccess;
-              if (identifier !== 'catch') return { identifier, specifier, pos };
+              if (identifier !== 'catch')
+                return {
+                  identifier,
+                  specifier,
+                  pos,
+                  modifiers,
+                  alias: undefined,
+                  namespace: undefined,
+                  symbol: undefined,
+                };
             }
 
             if (
@@ -72,7 +84,15 @@ export default visit(
               const pos = accessExpression.argumentExpression.pos;
               const identifier = name;
               // Pattern: (await import('specifier'))['identifier']
-              return { identifier, specifier, pos };
+              return {
+                identifier,
+                specifier,
+                pos,
+                modifiers,
+                alias: undefined,
+                namespace: undefined,
+                symbol: undefined,
+              };
             }
           }
 
@@ -82,7 +102,9 @@ export default visit(
             accessExpression.name &&
             accessExpression.name.escapedText === 'catch'
               ? node.parent.parent.parent.parent
-              : node.parent.parent;
+              : ts.isVariableDeclaration(node.parent)
+                ? node.parent
+                : node.parent.parent;
           if (
             ts.isVariableDeclaration(variableDeclaration) &&
             ts.isVariableDeclarationList(variableDeclaration.parent)
@@ -90,9 +112,32 @@ export default visit(
             const isTLA = isTopLevel(variableDeclaration.parent);
             if (ts.isIdentifier(variableDeclaration.name)) {
               // Pattern: const identifier = await import('specifier');
+              // Pattern: const promise = import('specifier'); const { identifier: alias } = await promise;
               const alias = String(variableDeclaration.name.escapedText);
               const symbol = getSymbol(variableDeclaration, isTLA);
-              return { identifier: 'default', alias, symbol, specifier, pos: node.arguments[0].pos };
+              // @ts-expect-error ts.isFunctionBody
+              const scope: ts.Node = findAncestor(variableDeclaration, ts.isFunctionBody) || node.getSourceFile();
+              const accessed = getAccessedIdentifiers(alias, scope);
+              if (accessed.length > 0) {
+                return accessed.map(acc => ({
+                  identifier: acc.identifier,
+                  alias,
+                  symbol,
+                  specifier,
+                  pos: acc.pos,
+                  modifiers,
+                  namespace: undefined,
+                }));
+              }
+              return {
+                identifier: 'default',
+                alias,
+                symbol,
+                specifier,
+                pos: node.arguments[0].pos,
+                modifiers,
+                namespace: undefined,
+              };
             }
             const bindings = findDescendants<ts.BindingElement>(variableDeclaration, ts.isBindingElement);
             if (bindings.length > 0) {
@@ -101,11 +146,27 @@ export default visit(
                 const identifier = (element.propertyName ?? element.name).getText();
                 const alias = element.propertyName ? element.name.getText() : undefined;
                 const symbol = getSymbol(element, isTLA);
-                return { identifier, alias, symbol, specifier, pos: element.pos };
+                return {
+                  identifier,
+                  alias,
+                  symbol,
+                  specifier,
+                  pos: element.name.getStart(),
+                  modifiers,
+                  namespace: undefined,
+                };
               });
             }
             // Pattern: import('specifier')
-            return { identifier: ANONYMOUS, specifier, pos: node.arguments[0].pos };
+            return {
+              identifier: undefined,
+              specifier,
+              pos: node.arguments[0].pos,
+              modifiers: IMPORT_FLAGS.SIDE_EFFECTS,
+              alias: undefined,
+              namespace: undefined,
+              symbol: undefined,
+            };
           }
           const arrayLiteralExpression = node.parent;
           const variableDeclarationParent = node.parent.parent?.parent?.parent;
@@ -126,7 +187,15 @@ export default visit(
                   const identifier = (element.propertyName ?? element.name).getText();
                   const alias = element.propertyName ? element.name.getText() : undefined;
                   const symbol = getSymbol(element, isTL);
-                  return { identifier, alias, symbol, specifier, pos: element.pos };
+                  return {
+                    identifier,
+                    alias,
+                    symbol,
+                    specifier,
+                    pos: element.getStart(),
+                    modifiers,
+                    namespace: undefined,
+                  };
                 });
               }
 
@@ -134,19 +203,51 @@ export default visit(
                 // Pattern: const [a, b] = await Promise.all([import('A'), import('B')]);
                 const alias = String(element.name.escapedText);
                 const symbol = getSymbol(element, isTL);
-                return { identifier: 'default', symbol, alias, specifier, pos: element.pos };
+                return {
+                  identifier: 'default',
+                  symbol,
+                  alias,
+                  specifier,
+                  pos: element.getStart(),
+                  modifiers,
+                  namespace: undefined,
+                };
               }
 
-              return { identifier: 'default', specifier, pos: element.pos };
+              return {
+                identifier: 'default',
+                specifier,
+                pos: element.getStart(),
+                modifiers,
+                alias: undefined,
+                namespace: undefined,
+                symbol: undefined,
+              };
             }
           }
 
-          // Pattern: return import('side-effects')
-          return { identifier: 'default', specifier, pos: node.arguments[0].pos };
+          // Pattern: import('side-effects')
+          return {
+            identifier: undefined,
+            specifier,
+            pos: node.arguments[0].pos,
+            modifiers: isInOpaqueExpression(node) ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS,
+            alias: undefined,
+            namespace: undefined,
+            symbol: undefined,
+          };
         }
 
         // Fallback, seems to never happen though
-        return { specifier, identifier: 'default', pos: node.arguments[0].pos };
+        return {
+          specifier,
+          identifier: 'default',
+          pos: node.arguments[0].pos,
+          modifiers,
+          alias: undefined,
+          namespace: undefined,
+          symbol: undefined,
+        };
       }
     }
   }

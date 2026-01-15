@@ -14,6 +14,9 @@ const dynamicB = () => import('./dir/import-b.js').then(m => m.dynamic);
 
 const dynamicF = () => import('./dir/import-f.js').then(({ dynamic, named: renamed }) => [dynamic, renamed]);
 
+const dynamicG = import('./import-g.js');
+dynamicG.then(module => module.func());
+
 import('./top-level-side-effects-call.js');
 
 async function main() {
@@ -96,6 +99,10 @@ const child1 = fn(() => import('./import-c.js'));
 const { identifier15 } = await import('./catch.js').catch(() => {
   throw new Error('caught');
 });
+
+const importPromise = import('./await-import.js');
+const { default: awaitedImport } = await importPromise;
+awaitedImport();
 
 export default fn({
   components: {

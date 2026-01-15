@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/plugin-disable",
-  "workspaces": ["ws"],
+  "workspaces": [
+    "ws"
+  ],
   "scripts": {
     "test": "vitest -c vite.config.ts"
   }

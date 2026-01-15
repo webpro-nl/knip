@@ -1,7 +1,11 @@
 {
   "name": "@plugins/eslint4",
+  "scripts": {
+    "lint": "eslint --fix --format codeframe ."
+  },
   "devDependencies": {
     "eslint": "*",
+    "eslint-formatter-codeframe": "*",
     "@eslint/js": "*"
   }
 }

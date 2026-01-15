@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/graphql-codegen');
@@ -20,6 +20,7 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/typescript-msw']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/graphql-modules-preset']);
   assert(issues.unlisted['codegen.ts']['graphql-codegen-typescript-validation-schema']);
+  assert(issues.unlisted['codegen.ts']['graphql-codegen-apollo-next-ssr']);
 
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/add']);
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/typescript']);
@@ -31,7 +32,7 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 15,
+    unlisted: 16,
     processed: 1,
     total: 1,
   });

@@ -1,0 +1,373 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { IMPORT_STAR } from '../../src/constants.js';
+import { walkDown } from '../../src/graph-explorer/walk-down.js';
+import type { ModuleGraph } from '../../src/types/module-graph.js';
+import { baseExport, baseFileNode, baseImportMaps, getBaseImport } from '../helpers/baseNodeObjects.js';
+import { resolve } from '../helpers/resolve.js';
+
+const createGraph = (): ModuleGraph => new Map();
+
+const filePath1 = resolve('module-1.ts');
+const filePath2 = resolve('module-2.ts');
+const filePath3 = resolve('module-3.ts');
+
+const baseImport = getBaseImport(filePath1);
+
+test('should find direct importers', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
+      ]),
+      imports: new Set([baseImport]),
+    },
+  });
+
+  const importers: string[] = [];
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
+      importers.push(importingFile);
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.equal(importers.length, 1);
+  assert.equal(importers[0], filePath2);
+});
+
+test('should find aliased importers', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      importAs: new Map([['identifier', new Map([['alias', new Set([filePath2])]])]]),
+    },
+  });
+
+  graph.set(filePath2, { ...baseFileNode });
+
+  const importers: Array<{ file: string; identifier: string }> = [];
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, identifier, _isEntry) => {
+      importers.push({ file: importingFile, identifier });
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.equal(importers.length, 1);
+  assert.equal(importers[0].file, filePath2);
+  assert.equal(importers[0].identifier, 'alias');
+});
+
+test('should follow re-export chain', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      reExport: new Map([['identifier', new Set([filePath2])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath3])]]),
+    },
+  });
+
+  graph.set(filePath3, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath2, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath3])]]) }],
+      ]),
+      imports: new Set([{ ...baseImport, specifier: './module-2', filePath: filePath2 }]),
+    },
+  });
+
+  const importers: string[] = [];
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
+      importers.push(importingFile);
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.ok(importers.includes(filePath3));
+});
+
+test('should mark entry files correctly', () => {
+  const graph = createGraph();
+  const entryPaths = new Set([filePath2]);
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
+      ]),
+      imports: new Set([baseImport]),
+    },
+  });
+
+  let isEntryFound = false;
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, _importingFile, _identifier, isEntry) => {
+      if (isEntry) isEntryFound = true;
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.equal(isEntryFound, true);
+});
+
+test('should bail out early when visitor returns stop', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2, filePath3])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [
+          filePath1,
+          {
+            ...baseImportMaps,
+            imported: new Map([['identifier', new Set([filePath2])]]),
+          },
+        ],
+      ]),
+      imports: new Set([baseImport]),
+    },
+  });
+
+  graph.set(filePath3, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath3])]]) }],
+      ]),
+      imports: new Set([baseImport]),
+    },
+  });
+
+  const importers: string[] = [];
+  const stopped = walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
+      importers.push(importingFile);
+      return 'stop';
+    },
+    entryPaths
+  );
+
+  assert.equal(stopped, true);
+  assert.equal(importers.length, 1);
+});
+
+test('should handle circular imports without infinite loop', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2])]]),
+      reExport: new Map([['alias', new Set([filePath2])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    exports: new Map([['alias', { ...baseExport, identifier: 'alias' }]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['alias', new Set([filePath1])]]),
+      reExport: new Map([['identifier', new Set([filePath1])]]),
+    },
+  });
+
+  const importers: string[] = [];
+  const stopped = walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, _identifier, _isEntry) => {
+      importers.push(importingFile);
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.equal(stopped, false);
+
+  assert.ok(importers.length <= 4);
+});
+
+test('should handle namespace imports with member refs', () => {
+  const graph = createGraph();
+  const entryPaths = new Set<string>();
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      importNs: new Map([['NS', new Set([filePath2])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [
+          filePath1,
+          { ...baseImportMaps, refs: new Set(['NS.identifier']), importNs: new Map([['NS', new Set([filePath2])]]) },
+        ],
+      ]),
+      imports: new Set([{ ...baseImport, identifier: IMPORT_STAR }]),
+    },
+  });
+
+  const importers: Array<{ file: string; identifier: string }> = [];
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, identifier, _isEntry) => {
+      importers.push({ file: importingFile, identifier });
+      return undefined;
+    },
+    entryPaths
+  );
+
+  assert.equal(importers.length, 1);
+  assert.equal(importers[0].file, filePath2);
+  assert.equal(importers[0].identifier, 'NS.identifier');
+});
+
+test('should visitor receives correct isEntry and via flags', () => {
+  const graph = createGraph();
+  const entryPaths = new Set([filePath2]);
+
+  graph.set(filePath1, {
+    ...baseFileNode,
+    exports: new Map([['identifier', baseExport]]),
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2])]]),
+      reExport: new Map([['identifier', new Set([filePath3])]]),
+    },
+  });
+
+  graph.set(filePath2, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath1, { ...baseImportMaps, imported: new Map([['identifier', new Set([filePath2])]]) }],
+      ]),
+      imports: new Set([baseImport]),
+    },
+  });
+
+  graph.set(filePath3, {
+    ...baseFileNode,
+    imports: {
+      ...baseFileNode.imports,
+      internal: new Map([
+        [filePath1, { ...baseImportMaps, reExport: new Map([['identifier', new Set([filePath3])]]) }],
+      ]),
+      imports: new Set([baseImport]),
+    },
+    importedBy: {
+      ...baseImportMaps,
+      import: new Map([['identifier', new Set([filePath2])]]),
+    },
+  });
+
+  const results: Array<{ file: string; isEntry: boolean; via: string }> = [];
+  walkDown(
+    graph,
+    filePath1,
+    'identifier',
+    (_sourceFile, _sourceId, importingFile, _identifier, isEntry, via) => {
+      results.push({ file: importingFile, isEntry, via });
+      return undefined;
+    },
+    entryPaths
+  );
+
+  const file2Result = results.find(r => r.file === filePath2);
+  assert.ok(file2Result !== undefined);
+  assert.equal(file2Result?.isEntry, true);
+  assert.equal(file2Result?.via, 'import');
+});

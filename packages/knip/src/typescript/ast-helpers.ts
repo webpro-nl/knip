@@ -1,7 +1,8 @@
 import ts from 'typescript';
-import { FIX_FLAGS } from '../constants.js';
+import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
-import { SymbolType } from '../types/issues.js';
+import type { SymbolType } from '../types/issues.js';
+import type { BoundSourceFile } from './SourceFile.js';
 
 function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
@@ -15,7 +16,7 @@ function isPrivateMember(
 
 export function isDefaultImport(
   node: ts.ImportDeclaration | ts.ImportEqualsDeclaration | ts.ExportDeclaration
-): boolean {
+): node is ts.ImportDeclaration {
   return node.kind === ts.SyntaxKind.ImportDeclaration && !!node.importClause && !!node.importClause.name;
 }
 
@@ -52,39 +53,44 @@ export function isPropertyAccessCall(node: ts.Node, identifier: string): node is
 }
 
 export const getNodeType = (node: ts.Node): SymbolType => {
-  if (!node) return SymbolType.UNKNOWN;
-  if (ts.isFunctionDeclaration(node)) return SymbolType.FUNCTION;
-  if (ts.isClassDeclaration(node)) return SymbolType.CLASS;
-  if (ts.isInterfaceDeclaration(node)) return SymbolType.INTERFACE;
-  if (ts.isTypeAliasDeclaration(node)) return SymbolType.TYPE;
-  if (ts.isEnumDeclaration(node)) return SymbolType.ENUM;
-  if (ts.isVariableDeclaration(node)) return SymbolType.VARIABLE;
-  return SymbolType.UNKNOWN;
+  if (!node) return SYMBOL_TYPE.UNKNOWN;
+  if (ts.isFunctionDeclaration(node)) return SYMBOL_TYPE.FUNCTION;
+  if (ts.isClassDeclaration(node)) return SYMBOL_TYPE.CLASS;
+  if (ts.isInterfaceDeclaration(node)) return SYMBOL_TYPE.INTERFACE;
+  if (ts.isTypeAliasDeclaration(node)) return SYMBOL_TYPE.TYPE;
+  if (ts.isEnumDeclaration(node)) return SYMBOL_TYPE.ENUM;
+  if (ts.isVariableDeclaration(node)) return SYMBOL_TYPE.VARIABLE;
+  return SYMBOL_TYPE.UNKNOWN;
 };
 
-export const isNonPrivatePropertyOrMethodDeclaration = (
+export const isNonPrivateDeclaration = (
   member: ts.ClassElement
-): member is ts.MethodDeclaration | ts.PropertyDeclaration =>
+): member is ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration =>
   (ts.isPropertyDeclaration(member) || ts.isMethodDeclaration(member) || isGetOrSetAccessorDeclaration(member)) &&
   !isPrivateMember(member);
 
-export const getClassMember = (member: ts.MethodDeclaration | ts.PropertyDeclaration, isFixTypes: boolean) => ({
+export const getClassMember = (
+  member: ts.MethodDeclaration | ts.PropertyDeclaration | ts.AccessorDeclaration,
+  isFixTypes: boolean
+) => ({
   node: member,
   identifier: member.name.getText(),
   // Naive, but [does.the.job()]
   pos: member.name.getStart() + (ts.isComputedPropertyName(member.name) ? 1 : 0),
-  type: SymbolType.MEMBER,
+  type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes ? ([member.getStart(), member.getEnd(), FIX_FLAGS.NONE] as Fix) : undefined,
+  flags: member.kind === ts.SyntaxKind.SetAccessor ? MEMBER_FLAGS.SETTER : MEMBER_FLAGS.NONE,
 });
 
 export const getEnumMember = (member: ts.EnumMember, isFixTypes: boolean) => ({
   node: member,
   identifier: stripQuotes(member.name.getText()),
   pos: member.name.getStart(),
-  type: SymbolType.MEMBER,
+  type: SYMBOL_TYPE.MEMBER,
   fix: isFixTypes
     ? ([member.getStart(), member.getEnd(), FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE] as Fix)
     : undefined,
+  flags: MEMBER_FLAGS.NONE,
 });
 
 export function stripQuotes(name: string) {
@@ -148,6 +154,25 @@ export function findDescendants<T>(node: ts.Node | undefined, callback: (element
   return results;
 }
 
+export const getLeadingComments = (sourceFile: BoundSourceFile) => {
+  const text = sourceFile.text;
+  if (!text) return [];
+
+  const firstStatement = sourceFile.statements[0];
+  const limit = firstStatement ? firstStatement.getStart() : text.length;
+
+  const ranges = ts.getLeadingCommentRanges(text, 0);
+  if (!ranges?.length) return [];
+
+  const comments = [];
+  for (const range of ranges) {
+    if (range.end > limit) break;
+    comments.push({ ...range, text: text.slice(range.pos, range.end) });
+  }
+
+  return comments;
+};
+
 export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
 
@@ -185,7 +210,7 @@ const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => 
   }
 };
 
-export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
+export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Node) => {
   let members: string[] = [];
   let current: ts.Node = node.parent;
   while (current) {
@@ -204,18 +229,36 @@ export const isDestructuring = (node: ts.Node) =>
   ts.isVariableDeclarationList(node.parent.parent) &&
   ts.isObjectBindingPattern(node.parent.name);
 
-export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
-  name.elements.map(element => element.name.getText());
+export const getDestructuredNames = (name: ts.ObjectBindingPattern): [string[], boolean] => {
+  const members: string[] = [];
+  let hasSpread = false;
+  for (const element of name.elements) {
+    if (element.dotDotDotToken) {
+      hasSpread = true;
+      break;
+    }
+    members.push(element.name.getText());
+  }
+  return [members, hasSpread];
+};
 
 export const isConsiderReferencedNS = (node: ts.Identifier) =>
   ts.isPropertyAssignment(node.parent) ||
-  ts.isShorthandPropertyAssignment(node.parent) ||
   (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
   ts.isSpreadAssignment(node.parent) ||
   ts.isArrayLiteralExpression(node.parent) ||
   ts.isExportAssignment(node.parent) ||
-  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
+  (ts.isBindingElement(node.parent) && node.parent.initializer === node) ||
   ts.isTypeQueryNode(node.parent.parent);
+
+export const isInOpaqueExpression = (node: ts.Node): boolean =>
+  ts.isAwaitExpression(node.parent)
+    ? isInOpaqueExpression(node.parent)
+    : ts.isCallExpression(node.parent) ||
+      ts.isReturnStatement(node.parent) ||
+      ts.isArrowFunction(node.parent) ||
+      ts.isPropertyAssignment(node.parent) ||
+      ts.isSpreadAssignment(node.parent.parent);
 
 const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
 export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
@@ -237,21 +280,31 @@ export const getTypeRef = (node: ts.Identifier) => {
   return findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
 };
 
+export const isKeyofTypeof = (node: ts.Identifier) =>
+  ts.isTypeQueryNode(node.parent) &&
+  ts.isTypeOperatorNode(node.parent.parent) &&
+  node.parent.parent.operator === ts.SyntaxKind.KeyOfKeyword;
+
 export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportSpecifier(node.parent) ||
   ts.isImportEqualsDeclaration(node.parent) ||
   ts.isImportClause(node.parent) ||
   ts.isNamespaceImport(node.parent);
 
-const isInExportedNode = (node: ts.Node): boolean => {
-  if (getExportKeywordNode(node)) return true;
-  return node.parent ? isInExportedNode(node.parent) : false;
+const getContainingExportDeclaration = (node: ts.Node): ts.Node | undefined => {
+  if (getExportKeywordNode(node)) return node;
+  return node.parent ? getContainingExportDeclaration(node.parent) : undefined;
 };
 
-export const isReferencedInExport = (node: ts.Node) => {
-  if (ts.isTypeQueryNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
-  if (ts.isTypeReferenceNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
-  return false;
+/** Returns the identifier of the containing export, or undefined if not in an export */
+export const isReferencedInExport = (node: ts.Node): string | undefined => {
+  const parent = node.parent;
+  if ((ts.isTypeQueryNode(parent) || ts.isTypeReferenceNode(parent)) && parent.parent) {
+    const exportDecl = getContainingExportDeclaration(parent.parent);
+    // @ts-expect-error name may not exist on all node types
+    if (exportDecl) return exportDecl.name?.getText();
+  }
+  return undefined;
 };
 
 export const getExportKeywordNode = (node: ts.Node) =>
@@ -273,6 +326,7 @@ export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
 export const getImportMap = (sourceFile: ts.SourceFile) => {
   const importMap = new Map<string, string>();
   for (const statement of sourceFile.statements) {
+    // ESM
     if (ts.isImportDeclaration(statement)) {
       const importClause = statement.importClause;
       const importPath = stripQuotes(statement.moduleSpecifier.getText());
@@ -281,7 +335,24 @@ export const getImportMap = (sourceFile: ts.SourceFile) => {
         for (const element of importClause.namedBindings.elements) importMap.set(element.name.text, importPath);
       }
     }
+
+    // CommonJS
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (
+          declaration.initializer &&
+          isRequireCall(declaration.initializer) &&
+          ts.isIdentifier(declaration.name) &&
+          ts.isStringLiteral(declaration.initializer.arguments[0])
+        ) {
+          const importName = declaration.name.text;
+          const importPath = stripQuotes(declaration.initializer.arguments[0].text);
+          importMap.set(importName, importPath);
+        }
+      }
+    }
   }
+
   return importMap;
 };
 
@@ -313,4 +384,78 @@ export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName
     }
   }
   return values;
+};
+
+const isMatchAlias = (expression: ts.Expression | undefined, identifier: string) => {
+  while (expression && ts.isAwaitExpression(expression)) expression = expression.expression;
+  return expression && ts.isIdentifier(expression) && expression.escapedText === identifier;
+};
+
+export function getThenBindings(callExpression: ts.CallExpression) {
+  if (!ts.isFunctionLike(callExpression.arguments[0])) return;
+  const fn = callExpression.arguments[0];
+  const param = fn.parameters[0];
+  if (!param) return;
+
+  if (ts.isIdentifier(param.name)) {
+    const paramName = param.name.escapedText;
+    const identifiers: Array<{ identifier: string; pos: number }> = [];
+    for (const node of findDescendants<ts.PropertyAccessExpression>(fn.body, ts.isPropertyAccessExpression)) {
+      if (ts.isIdentifier(node.expression) && node.expression.escapedText === paramName) {
+        identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+      }
+    }
+    if (identifiers.length > 0) return identifiers;
+  } else if (ts.isObjectBindingPattern(param.name)) {
+    return param.name.elements.map(element => {
+      const identifier = (element.propertyName ?? element.name).getText();
+      const alias = element.propertyName ? element.name.getText() : undefined;
+      return { identifier, alias, pos: element.pos };
+    });
+  }
+}
+
+export const getAccessedIdentifiers = (identifier: string, scope: ts.Node) => {
+  const identifiers: Array<{ identifier: string; pos: number }> = [];
+
+  function visit(node: ts.Node) {
+    if (ts.isPropertyAccessExpression(node) && isMatchAlias(node.expression, identifier)) {
+      identifiers.push({ identifier: String(node.name.escapedText), pos: node.name.pos });
+    } else if (
+      ts.isElementAccessExpression(node) &&
+      isMatchAlias(node.expression, identifier) &&
+      ts.isStringLiteral(node.argumentExpression)
+    ) {
+      identifiers.push({
+        identifier: stripQuotes(node.argumentExpression.text),
+        pos: node.argumentExpression.pos,
+      });
+    } else if (
+      ts.isVariableDeclaration(node) &&
+      isMatchAlias(node.initializer, identifier) &&
+      ts.isObjectBindingPattern(node.name)
+    ) {
+      for (const element of node.name.elements) {
+        if (ts.isBindingElement(element)) {
+          const identifier = (element.propertyName ?? element.name).getText();
+          identifiers.push({ identifier, pos: element.getStart() });
+        }
+      }
+    } else if (
+      // Pattern: identifier.then(module => module.property)
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      isMatchAlias(node.expression.expression, identifier) &&
+      node.expression.name.escapedText === 'then'
+    ) {
+      const accessed = getThenBindings(node);
+      if (accessed) for (const acc of accessed) identifiers.push(acc);
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(scope);
+
+  return identifiers;
 };

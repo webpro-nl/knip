@@ -1,29 +1,29 @@
-import { statSync } from 'node:fs';
+import { readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.js';
-import { join } from './path.js';
+import { extname, join } from './path.js';
 
-export const isDirectory = (filePath: string) => {
+export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(filePath).isDirectory();
-  } catch (_error) {
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isDirectory();
+  } catch {
     return false;
   }
 };
 
-export const isFile = (filePath: string) => {
+export const isFile = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(filePath).isFile();
-  } catch (_error) {
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isFile();
+  } catch {
     return false;
   }
 };
 
-export const findFile = (workingDir: string, fileName: string) => {
-  const filePath = join(workingDir, fileName);
+export const findFile = (cwd: string, fileName: string) => {
+  const filePath = join(cwd, fileName);
   return isFile(filePath) ? filePath : undefined;
 };
 
@@ -36,9 +36,32 @@ export const loadFile = async (filePath: string) => {
   }
 };
 
+export const hasFilesWithExtensions = (cwd: string, dirName: string, extensions: string[]): boolean => {
+  if (!isDirectory(cwd, dirName)) return false;
+
+  try {
+    const files = readdirSync(join(cwd, dirName));
+    return files.some(file => {
+      const ext = extname(file).slice(1);
+      return extensions.includes(ext);
+    });
+  } catch {
+    return false;
+  }
+};
+
 export const loadJSON = async (filePath: string) => {
   const contents = await loadFile(filePath);
-  return parseJSON(filePath, contents);
+  try {
+    return JSON.parse(contents);
+  } catch {
+    return parseJSONC(filePath, contents);
+  }
+};
+
+export const loadJSONC = async (filePath: string) => {
+  const contents = await loadFile(filePath);
+  return parseJSONC(filePath, contents);
 };
 
 export const loadYAML = async (filePath: string) => {
@@ -51,11 +74,12 @@ export const loadTOML = async (filePath: string) => {
   return parseTOML(contents);
 };
 
-export const parseJSON = async (filePath: string, contents: string) => {
+export const parseJSONC = async (filePath: string, contents: string) => {
   try {
-    return JSON.parse(stripJsonComments(contents, { trailingCommas: true }));
+    return JSON.parse(stripJsonComments(contents, { trailingCommas: true, whitespace: false }));
   } catch (error) {
-    throw new LoaderError(`Error parsing ${filePath}`, { cause: error });
+    const message = `Error parsing ${filePath} ${extname(filePath) === '.json5' ? 'JSON5 features beyond comments and trailing commas are not fully supported. Consider converting to .jsonc format.' : ''}`;
+    throw new LoaderError(message, { cause: error });
   }
 };
 

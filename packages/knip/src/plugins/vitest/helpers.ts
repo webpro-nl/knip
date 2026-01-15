@@ -6,7 +6,7 @@ import type { ViteConfig } from './types.js';
  * - https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/reporters/index.ts
  */
 
-type BuiltinEnvironment = 'node' | 'jsdom' | 'happy-dom' | 'edge-runtime';
+type KnownEnvironment = 'node' | 'jsdom' | 'happy-dom' | 'edge-runtime';
 
 const environments = {
   node: null,
@@ -21,14 +21,17 @@ const envPackageNames: Record<Exclude<keyof typeof environments, 'node'>, string
   'edge-runtime': '@edge-runtime/vm',
 };
 
-export const getEnvPackageName = (env: string) => {
-  if (env in envPackageNames) return envPackageNames[env as Exclude<BuiltinEnvironment, 'node'>];
+export const getEnvSpecifier = (env: string) => {
+  if (env in envPackageNames) return envPackageNames[env as Exclude<KnownEnvironment, 'node'>];
   return `vitest-environment-${env}`;
 };
 
-// See full list here : https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/reporters/index.ts#L30
+// See full list here:
+// https://github.com/vitest-dev/vitest/blob/v3.2.4/packages/vitest/src/node/reporters/index.ts#L46-L58
+// https://github.com/vitest-dev/vitest/blob/v4.0.3/packages/vitest/src/node/reporters/index.ts#L47-L59
 const builtInReporters = [
   'basic',
+  'blob',
   'default',
   'dot',
   'github-actions',
@@ -38,6 +41,7 @@ const builtInReporters = [
   'junit',
   'tap',
   'tap-flat',
+  'tree',
   'verbose',
 ];
 

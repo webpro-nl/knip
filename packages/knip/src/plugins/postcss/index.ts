@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toDependency } from '../../util/input.js';
-import { toLilconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toLilconfig } from '../../util/plugin-config.js';
 import type { PostCSSConfig } from './types.js';
 
 // https://github.com/postcss/postcss-load-config/blob/main/src/index.js#L110
@@ -36,10 +36,12 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
     : inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

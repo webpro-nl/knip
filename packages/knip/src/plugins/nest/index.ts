@@ -18,10 +18,12 @@ const resolveConfig: ResolveConfig<NestConfig> = async config => {
   return [...inputs].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

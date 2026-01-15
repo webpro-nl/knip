@@ -22,16 +22,24 @@ const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node
 
 const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
 
+export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
+
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
 
   // Helper for recursive calls
   const fromArgs: FromArgs = (args, opts): Input[] => {
+    if (args.length === 0 || !isValidBinary(args[0].split(' ')[0])) return [];
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
       ...opts,
       knownBinsOnly: false,
     });
+  };
+
+  const definedFunctions = new Set<string>();
+  const collectFunctionNames = (nodes: Node[]): void => {
+    for (const node of nodes) if (node.type === 'Function') definedFunctions.add(node.name.text);
   };
 
   const getDependenciesFromNodes = (nodes: Node[]): Input[] =>
@@ -56,6 +64,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
           // Bunch of early bail outs for things we can't or don't want to resolve
           if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
           if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
+          if (definedFunctions.has(binary)) return [];
 
           const args = node.suffix?.map(arg => arg.text) ?? [];
 
@@ -109,6 +118,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
           return getDependenciesFromNodes(node.commands);
         case 'Function':
           return getDependenciesFromNodes(node.body.commands);
+        case 'Subshell':
+          return getDependenciesFromNodes(node.list.commands);
         default:
           return [];
       }
@@ -116,7 +127,9 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
   try {
     const parsed = parse(script);
-    return parsed?.commands ? getDependenciesFromNodes(parsed.commands) : [];
+    if (!parsed?.commands) return [];
+    collectFunctionNames(parsed.commands);
+    return getDependenciesFromNodes(parsed.commands);
   } catch (error) {
     const msg = `Warning: failed to parse and ignoring script in ${relative(options.cwd, options.containingFilePath)} (${truncate(script, 30)})`;
     debugLogObject('*', msg, error);

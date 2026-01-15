@@ -1,0 +1,5 @@
+{
+  "taskfile": {
+    "config": ["custom-taskfile.yml", "tasks/*.yml"]
+  }
+}

@@ -2,6 +2,8 @@
   "name": "@fixtures/treat-config-hints-as-errors2",
   "knip": {
     "treatConfigHintsAsErrors": true,
-    "ignoreDependencies": ["bananas"]
+    "ignoreDependencies": [
+      "bananas"
+    ]
   }
 }

@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { deserialize, serialize } from 'node:v8';
 
 test('Should serialize and deserialize file back to original', () => {
@@ -13,11 +13,11 @@ test('Should serialize and deserialize file back to original', () => {
           {
             refs: new Set(['ref1', 'ref2']),
             imported: new Map([['name', new Set(['file', 'file2'])]]),
-            importedAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
-            importedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
-            reExported: new Map([['*', new Set(['file', 'file2'])]]),
-            reExportedAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
-            reExportedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
+            importAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
+            importNs: new Map([['namespace', new Set(['file', 'file2'])]]),
+            reExport: new Map([['*', new Set(['file', 'file2'])]]),
+            reExportAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
+            reExportNs: new Map([['namespace', new Set(['file', 'file2'])]]),
           },
         ],
         [
@@ -25,7 +25,7 @@ test('Should serialize and deserialize file back to original', () => {
           {
             refs: new Set(['ref1', 'ref2']),
             imported: new Map([['name', new Set(['file', 'file2'])]]),
-            importedAs: new Map([
+            importAs: new Map([
               [
                 'name',
                 new Map([
@@ -34,13 +34,13 @@ test('Should serialize and deserialize file back to original', () => {
                 ]),
               ],
             ]),
-            importedNs: new Map([['namespace', new Set(['file', 'file2'])]]),
-            reExported: new Map([
+            importNs: new Map([['namespace', new Set(['file', 'file2'])]]),
+            reExport: new Map([
               ['*', new Set(['file', 'file2'])],
               ['id', new Set(['file', 'file2'])],
             ]),
-            reExportedAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
-            reExportedNs: new Map([
+            reExportAs: new Map([['name', new Map([['alias', new Set(['file', 'file2'])]])]]),
+            reExportNs: new Map([
               ['namespace', new Set(['file', 'file2'])],
               ['namespace2', new Set(['file', 'file2'])],
             ]),
@@ -60,7 +60,6 @@ test('Should serialize and deserialize file back to original', () => {
       ]),
     },
     scripts: new Set(['script', 'script2']),
-    traceRefs: new Set(['ref']),
   };
 
   assert.deepEqual(deserialize(serialize(file)), file);

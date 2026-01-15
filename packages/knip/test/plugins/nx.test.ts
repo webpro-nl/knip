@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/nx');
@@ -30,8 +30,9 @@ test('Find dependencies with the Nx plugin', async () => {
     ...baseCounters,
     binaries: 5,
     devDependencies: 6,
-    unlisted: 3,
-    processed: 0,
-    total: 0,
+    unlisted: 5,
+    files: 3,
+    processed: 3,
+    total: 3,
   });
 });

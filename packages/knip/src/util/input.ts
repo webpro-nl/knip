@@ -1,5 +1,5 @@
-import type { PluginName } from '../types/PluginNames.js';
 import type { IssueType } from '../types/issues.js';
+import type { PluginName } from '../types/PluginNames.js';
 import { isAbsolute, toRelative } from './path.js';
 
 type InputType =
@@ -22,6 +22,7 @@ export interface Input {
   containingFilePath?: string;
   allowIncludeExports?: boolean;
   skipExportsAnalysis?: boolean;
+  group?: string;
 }
 
 export interface ConfigInput extends Input {

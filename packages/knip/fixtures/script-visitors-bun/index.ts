@@ -1,3 +1,3 @@
 import { $ } from 'bun';
 
-await $`FOO=${process.argv.at(2)} bun script.ts`;
+await $`MY_VAR=${process.argv.at(2)} bun script.ts`;

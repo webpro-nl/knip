@@ -17,12 +17,14 @@ export interface Options {
   isIsolateWorkspaces: boolean;
   isProduction: boolean;
   isRemoveFiles: boolean;
+  isSession: boolean;
   isShowProgress: boolean;
   isStrict: boolean;
+  isUseTscFiles: boolean;
   isWatch: boolean;
   tags: string[];
   tsConfigFile: string | undefined;
-  workspace: string | undefined;
+  workspace: string | string[] | undefined;
 }
 
 export type Tags = [string[], string[]];

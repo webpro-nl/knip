@@ -1,6 +1,10 @@
 {
   "name": "@fixtures/workspaces-nested",
-  "workspaces": ["L-1-1", "L-1-1/L-1-2", "L-1-1/L-1-2/L-1-3"],
+  "workspaces": [
+    "L-1-1",
+    "L-1-1/L-1-2",
+    "L-1-1/L-1-2/L-1-3"
+  ],
   "dependencies": {
     "ignored-dep-global": "*"
   },
@@ -10,21 +14,32 @@
     "eslint-plugin-prefer-let": "*"
   },
   "knip": {
-    "ignoreBinaries": ["ignored-bin-global", "unused-ignored-bin-global"],
+    "ignoreBinaries": [
+      "ignored-bin-global",
+      "unused-ignored-bin-global"
+    ],
     "ignoreDependencies": [
       "ignored-dep-global",
       "unused-ignored-listed-dep",
       "unused-ignored-dep-global"
     ],
-    "ignoreWorkspaces": ["unused-ignored-workspace"],
+    "ignoreWorkspaces": [
+      "unused-ignored-workspace"
+    ],
     "workspaces": {
       ".": {},
       "L-1-1": {},
       "L-1-1/L-1-2": {
-        "ignoreBinaries": ["ignored-bin-L-2", "unused-ignored-bin-L-2"]
+        "ignoreBinaries": [
+          "ignored-bin-L-2",
+          "unused-ignored-bin-L-2"
+        ]
       },
       "L-1-1/L-1-2/L-1-3": {
-        "ignoreDependencies": ["ignored-dep-L-3", "unused-ignored-dep-L-3"]
+        "ignoreDependencies": [
+          "ignored-dep-L-3",
+          "unused-ignored-dep-L-3"
+        ]
       }
     }
   }

@@ -20,10 +20,12 @@ const args: Args = {
   resolve: ['plugin', 'configPlugin'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

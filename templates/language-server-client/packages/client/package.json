@@ -1,0 +1,15 @@
+{
+  "name": "@knip-ls/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "blend": "node ./src/blend.js",
+    "pick": "node ./src/pick.js",
+    "reap": "node ./src/reap.js"
+  },
+  "dependencies": {
+    "@knip-ls/shared": "workspace:*"
+  }
+}

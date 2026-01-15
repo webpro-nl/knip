@@ -1,5 +1,7 @@
 {
   "name": "@fixtures/workspaces-plugin-overlap",
   "private": true,
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }

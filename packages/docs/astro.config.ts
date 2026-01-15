@@ -18,6 +18,7 @@ export default defineConfig({
   trailingSlash: 'never',
   redirects: {
     '/guides/commonjs': '/guides/working-with-commonjs',
+    '/guides/writing-a-plugin': '/writing-a-plugin',
   },
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
@@ -59,6 +60,10 @@ export default defineConfig({
         {
           label: 'Guides',
           autogenerate: { directory: 'guides' },
+        },
+        {
+          label: 'Writing a Plugin',
+          autogenerate: { directory: 'writing-a-plugin' },
         },
         {
           label: 'Reference',

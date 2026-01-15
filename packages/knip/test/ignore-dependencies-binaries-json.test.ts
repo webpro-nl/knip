@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/ignore-dependencies-binaries-json');
@@ -20,14 +20,11 @@ test('Respect ignored binaries and dependencies, including string-to-regex, conf
     total: 1,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+  ]);
 });
 
 test('Respect ignored binaries and dependencies, including string-to-regex', async () => {

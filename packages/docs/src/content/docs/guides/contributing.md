@@ -20,5 +20,5 @@ contributes to that goal is welcome!
 [1]: https://github.com/webpro-nl/knip
 [2]: ./issue-reproduction.md
 [3]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
-[4]: ./writing-a-plugin.md
+[4]: ../writing-a-plugin/index.md
 [5]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md

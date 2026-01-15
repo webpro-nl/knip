@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
 
 // https://github.com/lirantal/lockfile-lint/blob/main/packages/lockfile-lint/README.md
 
@@ -12,9 +12,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('lockfile-lint', { additionalExtensions: ['toml'] })];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
-} satisfies Plugin;
+};
+
+export default plugin;

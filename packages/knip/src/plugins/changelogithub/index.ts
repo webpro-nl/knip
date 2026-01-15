@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toC12config } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toC12config } from '../../util/plugin-config.js';
 
 // https://github.com/antfu/changelogithub
 
@@ -14,10 +14,12 @@ const entry = ['package.json', ...toC12config('changelogithub')];
 
 const isRootOnly = true;
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   entry,
-} satisfies Plugin;
+};
+
+export default plugin;

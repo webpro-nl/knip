@@ -11,6 +11,9 @@
     }
   },
   "lint-staged": {
-    "*.*": ["prettier --write", "git add"]
+    "*.*": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

@@ -33,11 +33,13 @@ const resolveConfig: ResolveConfig = (script, options) => {
   return options.getInputsFromScripts(String(script), { knownBinsOnly: true });
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

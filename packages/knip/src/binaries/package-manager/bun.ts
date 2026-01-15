@@ -1,25 +1,57 @@
 import parseArgs from 'minimist';
 import type { BinaryResolver } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
 import { toEntry } from '../../util/input.js';
 import { isAbsolute, join } from '../../util/path.js';
+import { _resolveSync } from '../../util/resolve.js';
 import { resolveX } from './bunx.js';
 
-const commands = [
+const commands = new Set([
   'add',
   'audit',
+  'auth',
+  'build',
+  'c',
+  'ci',
+  'cloud',
+  'completions',
+  'config',
   'create',
+  'deploy',
+  'discord',
+  'exec',
+  'feedback',
+  'fuzzilli',
+  'getcompletes',
+  'help',
+  'i',
+  'info',
   'init',
   'install',
   'link',
+  'list',
+  'login',
+  'logout',
+  'outdated',
+  'patch',
+  'patch-commit',
   'pm',
+  'prune',
+  'publish',
+  'r',
   'remove',
+  'repl',
+  'rm',
   'run',
   'test',
+  'unlink',
+  'uninstall',
   'update',
   'upgrade',
+  'use',
+  'whoami',
+  'why',
   'x',
-];
+]);
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, { string: ['cwd'] });
@@ -35,11 +67,13 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   if (command === 'run' && manifestScriptNames.has(script)) return [];
   if (manifestScriptNames.has(command)) return [];
   if (command === 'test') return parsed._.filter(id => id !== command).map(toEntry);
-  if (command !== 'run' && commands.includes(command)) return [];
+  if (command !== 'run' && commands.has(command)) return [];
 
   const filePath = command === 'run' ? script : command;
-  const absFilePath = isAbsolute(filePath) ? filePath : join(cwd, filePath);
-  if (isFile(absFilePath)) return [toEntry(absFilePath)];
+  if (!filePath) return [];
+  const _cwd = parsed.cwd ? join(cwd, parsed.cwd) : cwd;
+  const resolved = _resolveSync(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
+  if (resolved) return [toEntry(resolved)];
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};

@@ -36,7 +36,7 @@ const resolveConfig: ResolveConfig<LadleConfig> = async (localConfig, options) =
   return entries;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -44,4 +44,6 @@ export default {
   entry,
   project,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

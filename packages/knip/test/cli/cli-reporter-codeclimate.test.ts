@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import type { Issue } from 'codeclimate-types';
 import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.js';
 import { exec } from '../helpers/exec.js';
@@ -30,7 +30,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Unused exports',
       description: 'Unused export: default',
       categories: ['Bug Risk'],
-      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 8 }, end: { line: 30, column: 8 } } },
+      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 16 }, end: { line: 30, column: 16 } } },
       severity: 'major',
     },
     {
@@ -114,7 +114,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Unused exported types',
       description: 'Unused exported type: MyType',
       categories: ['Bug Risk'],
-      location: { path: 'types.ts', positions: { begin: { line: 9, column: 14 }, end: { line: 9, column: 14 } } },
+      location: { path: 'types.ts', positions: { begin: { line: 9, column: 15 }, end: { line: 9, column: 15 } } },
       severity: 'major',
     },
     {

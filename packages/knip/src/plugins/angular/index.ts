@@ -22,8 +22,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['angular.json'];
 
 const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (config, options) => {
-  const { cwd, configFilePath } = options;
-
   if (!config?.projects) return [];
 
   const inputs = new Set<Input>();
@@ -36,7 +34,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       if (packageName) inputs.add(toDependency(packageName));
       if (opts) {
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
-          inputs.add(toConfig('typescript', opts.tsConfig, { containingFilePath: configFilePath }));
+          inputs.add(toConfig('typescript', opts.tsConfig));
         }
       }
       const defaultEntriesByOption: EntriesByOption = opts ? entriesByOption(opts) : new Map();
@@ -48,7 +46,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       const isBuildTarget = targetName === BUILD_TARGET_NAME;
       const maybeExternal = (option: string) => option === 'polyfills';
       const toInput = (specifier: string, opts: { isProduction: boolean; maybeExternal: boolean }): Input => {
-        const normalizedPath = join(cwd, specifier);
+        const normalizedPath = join(options.cwd, specifier);
         // 👇 `isInternal` will report `false` for specifiers not starting with `.`
         //    However, relative imports are usually specified in `angular.json` without `.` prefix
         //    Hence checking also that file doesn't exist before considering it external
@@ -57,8 +55,8 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         }
         return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
       };
-      for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
-        for (const [option, entries] of entriesByOption.entries()) {
+      for (const [configName, entriesByOption] of entriesByOptionByConfig) {
+        for (const [option, entries] of entriesByOption) {
           for (const entry of entries) {
             inputs.add(
               toInput(entry, {
@@ -69,7 +67,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           }
         }
       }
-      for (const [option, entries] of defaultEntriesByOption.entries()) {
+      for (const [option, entries] of defaultEntriesByOption) {
         for (const entry of entries) {
           inputs.add(
             toInput(entry, {
@@ -166,10 +164,12 @@ type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'],
 const PRODUCTION_CONFIG_NAME = 'production';
 const BUILD_TARGET_NAME = 'build';
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

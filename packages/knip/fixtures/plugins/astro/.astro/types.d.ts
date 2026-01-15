@@ -175,3 +175,7 @@ declare module 'astro:content' {
 
   type ContentConfig = typeof import('../src/content/config');
 }
+
+declare module 'astro:env/client' {
+  export const AWESOME_URL: string;
+}

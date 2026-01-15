@@ -1,16 +1,18 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import { join } from '../../src/util/path.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
+
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
 
 const cwd = resolve('fixtures/fix');
 
 const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
 
-test.skip('Fix and format exports and dependencies', async () => {
+skipIfBun('Fix and format exports and dependencies', async () => {
   const tests = [
     [
       'mod.ts',
@@ -18,9 +20,9 @@ test.skip('Fix and format exports and dependencies', async () => {
       `const x = 1;
 const y = 2;
 
-// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
+// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint/complexity/noBannedTypes:  fixture festa
+// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -148,7 +150,7 @@ export const { set: setter } = fn();
   }
 });
 
-test.skip('Fix and format only exported types', async () => {
+skipIfBun('Fix and format only exported types', async () => {
   const tests = [
     [
       'mod.ts',
@@ -156,9 +158,9 @@ test.skip('Fix and format only exported types', async () => {
       `export const x = 1;
 export const y = 2;
 
-// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
+// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint/complexity/noBannedTypes:  fixture festa
+// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 

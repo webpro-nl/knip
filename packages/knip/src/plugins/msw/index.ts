@@ -22,11 +22,13 @@ const resolveConfig: ResolveConfig<MSWConfig> = async localConfig => {
   return entry.map(pattern => toEntry(join(dir, pattern)));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

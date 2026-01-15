@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/rstest2",
+  "devDependencies": {
+    "@rstest/core": "*"
+  }
+}

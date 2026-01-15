@@ -7,6 +7,8 @@
     "postcss": "*"
   },
   "postcss": {
-    "plugins": ["autoprefixer"]
+    "plugins": [
+      "autoprefixer"
+    ]
   }
 }

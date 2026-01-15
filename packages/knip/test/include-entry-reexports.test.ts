@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/include-entry-reexports');
@@ -22,7 +22,7 @@ test('Report unused nsExports in entry source files', async () => {
   const options = await createOptions({ cwd, isIncludeEntryExports: true });
   const { issues, counters } = await main(options);
 
-  assert(issues.exports['packages/shared/bar.mjs']['bar']);
+  assert(issues.exports['packages/shared/module-b.mjs']['identifierB']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

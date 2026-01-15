@@ -1,13 +1,25 @@
 {
   "name": "@plugins/prisma",
+  "dependencies": {
+    "@prisma/client": "*",
+    "@prisma/client2": "*",
+    "@prisma/client3": "*"
+  },
   "devDependencies": {
+    "lint-staged": "*",
     "prisma": "*",
     "tsx": "*"
   },
   "scripts": {
-    "generate": "prisma generate --config config/prisma.custom-config.ts"
+    "lint-staged": "lint-staged",
+    "generate": "prisma generate --schema prisma/schema-script.prisma --config config/prisma.custom-config.ts",
+    "generate-multi-schema": "prisma generate --schema prisma-multi-schema"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "schema": "prisma/schema-package-json.prisma",
+    "seed": "tsx prisma/seed-package-json.ts"
+  },
+  "lint-staged": {
+    "*.prisma": "prisma format --schema"
   }
 }

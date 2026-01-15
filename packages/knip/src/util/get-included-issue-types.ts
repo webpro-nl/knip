@@ -16,8 +16,8 @@ const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
-export const shorthandDeps = ['dependencies', 'optionalPeerDependencies', 'unlisted', 'binaries', 'unresolved'];
-export const shorthandTypes = ['types', 'nsTypes', 'enumMembers', 'duplicates'];
+export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved', 'catalog'];
+export const shorthandExports = ['exports', 'types', 'enumMembers', 'duplicates'];
 export const shorthandFiles = ['files'];
 
 export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => {
@@ -41,6 +41,7 @@ export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => 
   if (options.isProduction) {
     // Ignore devDependencies when analyzing production code
     _exclude.push('devDependencies');
+    _exclude.push('catalog');
   } else {
     // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
     if (_include.includes('dependencies')) _include.push('devDependencies', 'optionalPeerDependencies');
@@ -55,8 +56,5 @@ export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => 
       : defaultIssueTypes
   ).filter(group => !_exclude.includes(group));
 
-  return ISSUE_TYPES.filter(i => i !== '_files').reduce((types, group) => {
-    types[group] = included.includes(group);
-    return types;
-  }, {} as Report);
+  return Object.fromEntries(ISSUE_TYPES.map(group => [group, included.includes(group)])) as Report;
 };

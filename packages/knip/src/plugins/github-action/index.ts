@@ -27,10 +27,12 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   return inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

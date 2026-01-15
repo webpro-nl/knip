@@ -1,4 +1,5 @@
 import type ts from 'typescript';
+import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
 import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -20,11 +21,18 @@ const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   return babelPlugins.map(plugin => toDependency(plugin));
 };
 
-export default {
+const args: Args = {
+  config: true,
+};
+
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   resolveFromAST,
-} satisfies Plugin;
+  args,
+};
+
+export default plugin;

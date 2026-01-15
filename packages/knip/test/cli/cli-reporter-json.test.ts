@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { exec } from '../helpers/exec.js';
 import { resolve } from '../helpers/resolve.js';
 
@@ -21,6 +21,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'dynamic-import.ts',
@@ -34,6 +35,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'my-mix.ts',
@@ -47,6 +49,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'my-module.ts',
@@ -59,7 +62,7 @@ test('knip --reporter json (exports & types)', () => {
         exports: [
           { name: 'unusedNumber', line: 23, col: 14, pos: 682 },
           { name: 'unusedFunction', line: 24, col: 14, pos: 713 },
-          { name: 'default', line: 30, col: 8, pos: 847 },
+          { name: 'default', line: 30, col: 16, pos: 855 },
         ],
         types: [{ name: 'MyAnyType', line: 28, col: 13, pos: 822 }],
         enumMembers: {},
@@ -69,6 +72,7 @@ test('knip --reporter json (exports & types)', () => {
             { name: 'default', line: 30, col: 15, pos: 854 },
           ],
         ],
+        catalog: [],
       },
       {
         file: 'my-namespace.ts',
@@ -79,9 +83,10 @@ test('knip --reporter json (exports & types)', () => {
         binaries: [],
         unresolved: [],
         exports: [{ name: 'nsUnusedKey', line: 3, col: 14, pos: 84 }],
-        types: [{ name: 'MyNamespace', line: 6, col: 18, pos: 184 }],
+        types: [{ name: 'MyNamespace', line: 6, col: 18, pos: 169 }],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'named-exports.ts',
@@ -98,6 +103,7 @@ test('knip --reporter json (exports & types)', () => {
         types: [],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
       {
         file: 'types.ts',
@@ -110,10 +116,11 @@ test('knip --reporter json (exports & types)', () => {
         exports: [],
         types: [
           { name: 'MyEnum', line: 3, col: 13, pos: 71 },
-          { name: 'MyType', line: 9, col: 14, pos: 210 },
+          { name: 'MyType', line: 9, col: 15, pos: 196 },
         ],
         enumMembers: {},
         duplicates: [],
+        catalog: [],
       },
     ],
   };

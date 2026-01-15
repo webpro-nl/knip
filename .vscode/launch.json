@@ -2,9 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug test with tsx/Node.js",
+      "runtimeExecutable": "${workspaceFolder}/packages/knip/node_modules/.bin/tsx",
+      "runtimeArgs": ["--test"],
+      "args": ["${file}"],
+      "cwd": "${workspaceFolder}/packages/knip",
+      "console": "integratedTerminal"
+    },
+    {
       "type": "bun",
       "request": "launch",
-      "name": "Debug Bun test",
+      "name": "Debug test with Bun",
       "program": "${file}",
       "cwd": "${workspaceFolder}/packages/knip",
       "runtime": "bun",
@@ -12,20 +22,64 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "type": "node",
+      "type": "bun",
       "request": "launch",
-      "name": "Debug Node test",
-      "program": "${workspaceFolder}/node_modules/.bin/tsx",
-      "args": ["--test", "--import", "./transform-test.js", "${file}"],
+      "name": "Debug all tests with Bun",
+      "program": ".",
       "cwd": "${workspaceFolder}/packages/knip",
-      "console": "integratedTerminal",
+      "runtime": "bun",
+      "runtimeArgs": ["test", "--timeout", "999999999"],
       "internalConsoleOptions": "openOnSessionStart"
     },
     {
-      "type": "bun",
+      "name": "Run Extension on Playground Monorepo (w/ MCP Server)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode-knip",
+        "${workspaceFolder}/templates/language-server-client" // Point at any repo
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode-knip/**/*.js",
+        "${workspaceFolder}/packages/language-server/**/*.js",
+        "${workspaceFolder}/packages/mcp-server/**/*.js"
+      ]
+    },
+    {
+      "name": "Attach to Knip Server",
+      "type": "node",
       "request": "attach",
-      "name": "Attach to Bun",
-      "url": "ws://localhost:6499/knip"
+      "port": 6009,
+      "restart": true,
+      "outFiles": [
+        "${workspaceFolder}/packages/language-server/**/*.js",
+        "${workspaceFolder}/packages/knip/dist/**/*.js",
+        "${workspaceFolder}/packages/knip/src/**/*.ts"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+
+        "!**/node_modules/**"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run + Attach Knip LSP",
+      "configurations": [
+        "Run Extension on Playground Monorepo (w/ MCP Server)",
+        "Attach to Knip Server"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "projectPath",
+      "type": "promptString",
+      "description": "Enter absolute path to y${lineNumber}our project dir",
+      "default": "${workspaceFolder}/templates/language-server-client"
     }
   ]
 }

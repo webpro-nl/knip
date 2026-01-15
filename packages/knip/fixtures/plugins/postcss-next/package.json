@@ -10,6 +10,8 @@
     "postcss-rtlcss": "*"
   },
   "postcss": {
-    "plugins": ["autoprefixer"]
+    "plugins": [
+      "autoprefixer"
+    ]
   }
 }

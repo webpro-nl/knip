@@ -8,6 +8,8 @@
   },
   "xo": {
     "space": true,
-    "plugins": ["eslint-comments"]
+    "plugins": [
+      "eslint-comments"
+    ]
   }
 }

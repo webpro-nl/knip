@@ -37,11 +37,13 @@ const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => 
   return files.concat(options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true }));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

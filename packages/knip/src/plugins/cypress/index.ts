@@ -36,11 +36,13 @@ const resolveConfig: ResolveConfig<CypressConfig> = async (localConfig, options)
   ];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

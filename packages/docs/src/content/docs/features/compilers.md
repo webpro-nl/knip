@@ -13,7 +13,10 @@ project. That's why Knip supports compilers.
 Knip has built-in "compilers" for the following file extensions:
 
 - `.astro`
+- `.css` (only enabled by `tailwindcss`)
 - `.mdx`
+- `.prisma`
+- `.sass` + `.scss`
 - `.svelte`
 - `.vue`
 
@@ -27,7 +30,10 @@ might represent component properties. This results in those exports being
 reported as unused by Knip.
 
 The built-in functions seem to do a decent job, but override them however you
-like. They can enabled manually if none if the enabling dependencies were found:
+like.
+
+Compilers are enabled only if certain dependencies are found. If that's not
+working for your project, set `true` and enable any compiler manually:
 
 ```ts title="knip.ts"
 export default {
@@ -65,7 +71,8 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 - [CSS][1]
 - [MDX][2]
-- [Vue][3]
+- [Svelte][3]
+- [Vue][4]
 
 #### CSS
 
@@ -81,7 +88,8 @@ export default {
 
 You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
-determine it should be enabled, and what syntax(es) it should support.
+determine it should be enabled, and what syntax(es) it should support. Note that
+Tailwind CSS and SASS/SCSS compilers are included.
 
 #### MDX
 
@@ -97,10 +105,26 @@ export default {
 };
 ```
 
+#### Svelte
+
+In a Svelte project, the compiler is automatically enabled. Override and use
+Svelte's compiler for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import { compile } from 'svelte/compiler';
+
+export default {
+  compilers: {
+    svelte: (source: string) => compile(source, {}).js.code,
+  },
+} satisfies KnipConfig;
+```
+
 #### Vue
 
-In a project with Vue, the compiler is automatically enabled. Override and use
-Vue's parser for better results if the built-in "compiler" is not enough:
+In a Vue project, the compiler is automatically enabled. Override and use Vue's
+parser for better results if the built-in "compiler" is not enough:
 
 ```ts
 import type { KnipConfig } from 'knip';
@@ -144,4 +168,5 @@ export default config;
 
 [1]: #css
 [2]: #mdx
-[3]: #vue
+[3]: #svelte
+[4]: #vue

@@ -1,14 +1,13 @@
 import ts from 'typescript';
-import { FIX_FLAGS } from '../../../constants.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
 import type { Fix } from '../../../types/exports.js';
-import { SymbolType } from '../../../types/issues.js';
 import { compact } from '../../../util/array.js';
 import {
   getClassMember,
   getDefaultKeywordNode,
   getEnumMember,
   getExportKeywordNode,
-  isNonPrivatePropertyOrMethodDeclaration,
+  isNonPrivateDeclaration,
 } from '../../ast-helpers.js';
 import { isModule } from '../helpers.js';
 import { exportVisitor as visit } from '../index.js';
@@ -37,9 +36,11 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
                   // @ts-expect-error We'll use the symbol in `findInternalReferences`
                   symbol: element.symbol,
                   identifier: element.name.escapedText.toString(),
-                  type: SymbolType.UNKNOWN,
+                  type: SYMBOL_TYPE.UNKNOWN,
                   pos: element.name.getStart(),
                   fix,
+                  members: EMPTY_ARRAY,
+                  jsDocTags: undefined,
                 };
               }
             })
@@ -55,10 +56,12 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
                   node: element,
                   // @ts-expect-error We'll use the symbol in `findInternalReferences`
                   symbol: element.symbol,
-                  identifier: element.getText(),
-                  type: SymbolType.UNKNOWN,
+                  identifier: element.name.getText(),
+                  type: SYMBOL_TYPE.UNKNOWN,
                   pos: element.getStart(),
                   fix,
+                  members: EMPTY_ARRAY,
+                  jsDocTags: undefined,
                 };
               }
             })
@@ -69,7 +72,15 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
         const identifier = declaration.name.getText();
         const pos = declaration.name.getStart();
         const fix = getFix(exportKeyword);
-        return { node: declaration, identifier, type: SymbolType.UNKNOWN, pos, fix };
+        return {
+          node: declaration,
+          identifier,
+          type: SYMBOL_TYPE.UNKNOWN,
+          pos,
+          fix,
+          members: EMPTY_ARRAY,
+          jsDocTags: undefined,
+        };
       });
     }
 
@@ -79,7 +90,16 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const identifier = defaultKeyword ? 'default' : node.name.getText();
       const pos = (node.name ?? node.body ?? node).getStart();
       const fix = getFix(exportKeyword, defaultKeyword);
-      return { node, identifier, pos, type: SymbolType.FUNCTION, fix };
+      return {
+        node,
+        symbol: undefined,
+        identifier,
+        pos,
+        type: SYMBOL_TYPE.FUNCTION,
+        fix,
+        members: EMPTY_ARRAY,
+        jsDocTags: undefined,
+      };
     }
 
     if (ts.isClassDeclaration(node) && node.name) {
@@ -87,24 +107,42 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const pos = (node.name ?? node).getStart();
       const fix = getFix(exportKeyword, defaultKeyword);
       const members = isReportClassMembers
-        ? node.members.filter(isNonPrivatePropertyOrMethodDeclaration).map(member => getClassMember(member, isFixTypes))
-        : [];
+        ? node.members.filter(isNonPrivateDeclaration).map(member => getClassMember(member, isFixTypes))
+        : EMPTY_ARRAY;
 
-      return { node, identifier, type: SymbolType.CLASS, pos, members, fix };
+      return { node, symbol: undefined, identifier, type: SYMBOL_TYPE.CLASS, pos, fix, members, jsDocTags: undefined };
     }
 
     if (ts.isTypeAliasDeclaration(node)) {
       const identifier = node.name.getText();
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
-      return { node, identifier, type: SymbolType.TYPE, pos, fix };
+      return {
+        node,
+        symbol: undefined,
+        identifier,
+        type: SYMBOL_TYPE.TYPE,
+        pos,
+        fix,
+        members: EMPTY_ARRAY,
+        jsDocTags: undefined,
+      };
     }
 
     if (ts.isInterfaceDeclaration(node)) {
       const identifier = defaultKeyword ? 'default' : node.name.getText();
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
-      return { node, identifier, type: SymbolType.INTERFACE, pos, fix };
+      return {
+        node,
+        symbol: undefined,
+        identifier,
+        type: SYMBOL_TYPE.INTERFACE,
+        pos,
+        fix,
+        members: EMPTY_ARRAY,
+        jsDocTags: undefined,
+      };
     }
 
     if (ts.isEnumDeclaration(node)) {
@@ -112,7 +150,7 @@ export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassM
       const pos = node.name.getStart();
       const fix = getTypeFix(exportKeyword);
       const members = node.members.map(member => getEnumMember(member, isFixExports));
-      return { node, identifier, type: SymbolType.ENUM, pos, members, fix };
+      return { node, symbol: undefined, identifier, type: SYMBOL_TYPE.ENUM, pos, members, fix, jsDocTags: undefined };
     }
   }
 });

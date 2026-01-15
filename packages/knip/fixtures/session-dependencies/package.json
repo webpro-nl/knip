@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/session-dependencies",
+  "dependencies": {
+    "lodash": "*",
+    "zod": "*",
+    "unused-dep": "*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "vitest": "*",
+    "unused-dev-dep": "*"
+  }
+}

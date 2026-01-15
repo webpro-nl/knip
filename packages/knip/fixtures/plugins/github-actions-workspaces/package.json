@@ -1,6 +1,8 @@
 {
   "name": "@plugins/github-actions-workspaces",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "hello-app": "yarn run --cwd packages/app goodbye"
   },

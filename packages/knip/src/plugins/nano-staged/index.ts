@@ -36,10 +36,12 @@ const resolveConfig: ResolveConfig<NanoStagedConfig> = async (config, options) =
   return Array.from(inputs);
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

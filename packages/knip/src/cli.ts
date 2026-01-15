@@ -1,18 +1,25 @@
-import { main } from './index.js';
+// biome-ignore-all lint/suspicious/noConsole: ignore
+import { fix } from './IssueFixer.js';
+import { run } from './run.js';
 import type { IssueType, ReporterOptions } from './types/issues.js';
-import { perfObserver } from './util/Performance.js';
-import { helpText } from './util/cli-arguments.js';
-import parseArgs from './util/cli-arguments.js';
+import parseArgs, { helpText } from './util/cli-arguments.js';
 import { createOptions } from './util/create-options.js';
-import { getKnownError, isConfigurationError, isDisplayReason, isKnownError } from './util/errors.js';
+import {
+  getKnownErrors,
+  hasErrorCause,
+  isConfigurationError,
+  isKnownError,
+  isModuleNotFoundError,
+} from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
+import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { prettyMilliseconds } from './util/string.js';
 import { version } from './version.js';
 
-let parsedCLIArgs: ReturnType<typeof parseArgs> = {};
+let args: ReturnType<typeof parseArgs> = {};
 try {
-  parsedCLIArgs = parseArgs();
+  args = parseArgs();
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(error.message);
@@ -22,21 +29,31 @@ try {
   throw error;
 }
 
-const run = async () => {
+const main = async () => {
   try {
-    const options = await createOptions({ parsedCLIArgs });
-
-    if (parsedCLIArgs.help) {
+    if (args.help) {
       console.log(helpText);
       process.exit(0);
     }
 
-    if (parsedCLIArgs.version) {
+    if (args.version) {
       console.log(version);
       process.exit(0);
     }
 
-    const { issues, counters, tagHints, configurationHints, includedWorkspaceDirs } = await main(options);
+    const options = await createOptions({ args });
+
+    const { results } = await run(options);
+
+    const {
+      issues,
+      counters,
+      tagHints,
+      configurationHints,
+      includedWorkspaceDirs,
+      enabledPlugins,
+      selectedWorkspaces,
+    } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
@@ -47,6 +64,7 @@ const run = async () => {
       counters,
       tagHints,
       configurationHints,
+      enabledPlugins,
       includedWorkspaceDirs,
       cwd: options.cwd,
       configFilePath: options.configFilePath,
@@ -54,13 +72,17 @@ const run = async () => {
       isProduction: options.isProduction,
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
-      options: parsedCLIArgs['reporter-options'] ?? '',
-      preprocessorOptions: parsedCLIArgs['preprocessor-options'] ?? '',
+      maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
+      options: args['reporter-options'] ?? '',
+      preprocessorOptions: args['preprocessor-options'] ?? '',
+      selectedWorkspaces,
     };
 
-    const finalData = await runPreprocessors(parsedCLIArgs.preprocessor ?? [], initialData);
+    const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
 
-    await runReporters(parsedCLIArgs.reporter ?? ['symbols'], finalData);
+    if (options.isFix) await fix(finalData.issues, options);
+
+    await runReporters(args.reporter ?? ['symbols'], finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
@@ -68,7 +90,7 @@ const run = async () => {
 
     if (perfObserver.isEnabled) await perfObserver.finalize();
     if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
-    if (perfObserver.isMemoryUsageEnabled && !parsedCLIArgs['memory-realtime'])
+    if (perfObserver.isMemoryUsageEnabled && !args['memory-realtime'])
       console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled) {
@@ -77,7 +99,7 @@ const run = async () => {
       perfObserver.reset();
     }
 
-    if (parsedCLIArgs['experimental-tags'] && parsedCLIArgs['experimental-tags'].length > 0) {
+    if (args['experimental-tags'] && args['experimental-tags'].length > 0) {
       logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
     }
 
@@ -86,18 +108,22 @@ const run = async () => {
     }
 
     if (
-      (!parsedCLIArgs['no-exit-code'] && totalErrorCount > Number(parsedCLIArgs['max-issues'] ?? 0)) ||
-      (options.isTreatConfigHintsAsErrors && configurationHints.size > 0)
+      (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
+      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
     ) {
       process.exit(1);
     }
   } catch (error: unknown) {
     process.exitCode = 2;
-    if (!parsedCLIArgs.debug && error instanceof Error && isKnownError(error)) {
-      const knownError = getKnownError(error);
-      logError('ERROR', knownError.message);
-      if (isDisplayReason(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
+    if (!args.debug && error instanceof Error && isKnownError(error)) {
+      const knownErrors = getKnownErrors(error);
+      for (const knownError of knownErrors) logError('ERROR', knownError.message);
+      if (hasErrorCause(knownErrors[0])) {
+        console.error('Reason:', knownErrors[0].cause.message);
+        if (isModuleNotFoundError(knownErrors[0].cause))
+          console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+      }
+      if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
@@ -107,4 +133,4 @@ const run = async () => {
   process.exit(0);
 };
 
-await run();
+await main();

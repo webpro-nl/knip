@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/exports-special-characters');
@@ -71,11 +71,12 @@ test('Handle special characters in named exports and members (nsTypes)', async (
   assert(issues.enumMembers['exports.ts']['Characters.$']);
   assert(issues.enumMembers['exports.ts']['Characters.Slash']);
   assert(issues.enumMembers['exports.ts']['Characters.Space']);
+  assert(issues.enumMembers['exports.ts']['Characters. ']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     classMembers: 4,
-    enumMembers: 20,
+    enumMembers: 21,
     exports: 5,
     types: 1,
     processed: 2,

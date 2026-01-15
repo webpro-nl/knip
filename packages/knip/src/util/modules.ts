@@ -19,7 +19,12 @@ export const getPackageNameFromFilePath = (value: string) => {
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
-export const isStartsLikePackageName = (specifier: string) => /^(@[a-z0-9._]|[a-z0-9])/i.test(specifier);
+const matchPackageNameStart = /^(@[a-z0-9._]|[a-z0-9])/i;
+export const isStartsLikePackageName = (specifier: string) => {
+  const ch = specifier.charCodeAt(0);
+  if (ch === 46 || ch === 47 || ch === 35 || ch === 126 || ch === 36) return false; // . / # ~ $
+  return matchPackageNameStart.test(specifier);
+};
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 
@@ -48,11 +53,44 @@ export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
   return typedDependency;
 };
 
+const CHAR_EXCLAMATION = 33; // '!'
+const CHAR_DASH = 45; // '-'
+const CHAR_SLASH = 47; // '/'
+const CHAR_COLON = 58; // ':'
+const CHAR_HASH = 35; // '#'
+const CHAR_QUESTION = 63; // '?'
+
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
-const matchDirectives = /^([?!|-]+)?([^!?:]+).*/;
 export const sanitizeSpecifier = (specifier: string) => {
-  if (isBuiltin(specifier)) return specifier;
-  if (isAbsolute(specifier)) return specifier;
-  if (specifier.startsWith(PROTOCOL_VIRTUAL)) return specifier;
-  return specifier.replace(matchDirectives, '$2');
+  if (
+    isBuiltin(specifier) ||
+    isAbsolute(specifier) ||
+    specifier.charCodeAt(0) === CHAR_COLON ||
+    specifier.startsWith(PROTOCOL_VIRTUAL)
+  ) {
+    return specifier;
+  }
+  const len = specifier.length;
+  let start = 0;
+  let end = len;
+  let colon = -1;
+  let hasSlash = false;
+  for (let i = 0; i < len; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (i === start && (ch === CHAR_EXCLAMATION || ch === CHAR_DASH)) {
+      start++;
+      continue;
+    }
+    if (ch === CHAR_SLASH && colon === -1) {
+      hasSlash = true;
+    }
+    if (colon === -1 && ch === CHAR_COLON && !hasSlash) {
+      colon = i;
+    }
+    if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {
+      end = i;
+      break;
+    }
+  }
+  return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
 };

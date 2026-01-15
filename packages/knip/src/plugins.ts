@@ -1,8 +1,8 @@
 import { parseArgs } from 'node:util';
 import { Plugins } from './plugins/index.js';
-import type { PluginName } from './types/PluginNames.js';
 import type { Args } from './types/args.js';
 import type { Entries, PluginMap } from './types/config.js';
+import type { PluginName } from './types/PluginNames.js';
 import { timerify } from './util/Performance.js';
 
 const PMap: PluginMap = Plugins;

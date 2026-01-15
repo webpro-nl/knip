@@ -1,5 +1,5 @@
 ---
-import { type PostWithUser, formatTimestamp, replaceShortenedUrls } from '../util/post.js';
+import { formatTimestamp, type PostWithUser, replaceShortenedUrls } from '../util/post.js';
 
 const post: PostWithUser = replaceShortenedUrls(Astro.props.data);
 ---

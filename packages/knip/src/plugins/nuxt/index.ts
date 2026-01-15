@@ -1,9 +1,9 @@
-import type { NuxtOptions } from 'nuxt/schema';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toAlias, toDependency, toProductionEntry } from '../../util/input.js';
-import { isAbsolute, join, resolve } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { NuxtConfig } from './types.js';
+import type { NuxtOptions } from 'nuxt/schema'
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js'
+import { type Input, toAlias, toDependency, toProductionEntry } from '../../util/input.js'
+import { isAbsolute, join, resolve } from '../../util/path.js'
+import { hasDependency } from '../../util/plugin.js'
+import type { NuxtConfig } from './types.js'
 
 const title = 'Nuxt';
 
@@ -160,7 +160,7 @@ function toArray<T>(value: T | T[]): T[] {
 /** @public */
 export const docs = {};
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -168,4 +168,6 @@ export default {
   production,
   setup,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

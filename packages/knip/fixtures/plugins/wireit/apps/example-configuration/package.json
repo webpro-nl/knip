@@ -7,14 +7,25 @@
   "wireit": {
     "build": {
       "command": "tsc",
-      "files": ["src/**/*.ts", "tsconfig.json"],
-      "output": ["lib/**"]
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ],
+      "output": [
+        "lib/**"
+      ]
     },
     "bundle": {
       "command": "rollup -c",
-      "dependencies": ["build"],
-      "files": ["rollup.config.json"],
-      "output": ["dist/bundle.js"]
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "rollup.config.json"
+      ],
+      "output": [
+        "dist/bundle.js"
+      ]
     }
   }
 }

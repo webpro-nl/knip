@@ -8,7 +8,9 @@
     "type-check": "tsc --build --noEmit",
     "knip": "knip"
   },
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "@types/node": "*",
     "knip": "*",

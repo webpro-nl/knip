@@ -52,18 +52,18 @@ footer .pagination-links a:hover {
   }
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .sl-markdown-content a:hover {
     border-color: var(--sl-color-orange);
   }
 
-  .tab a[role='tab'] {
+  .tab a[role="tab"] {
     border-color: var(--sl-color-gray-5);
   }
-  .tab a[role='tab']:hover {
+  .tab a[role="tab"]:hover {
     border-color: var(--sl-color-white);
   }
-  .tab a[role='tab'][aria-selected] {
+  .tab a[role="tab"][aria-selected] {
     border-color: var(--sl-color-white);
   }
 }

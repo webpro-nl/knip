@@ -1,4 +1,6 @@
 {
   "name": "@plugins/typescript2",
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }

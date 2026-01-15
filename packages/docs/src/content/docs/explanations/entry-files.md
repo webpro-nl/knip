@@ -59,8 +59,8 @@ flag on the CLI.
 
 ## Configuring project files
 
-See [configuring project files][6] for guidance with the `entry`, `project` and
-`ignore` options.
+See [configuring project files][6] for guidance on tuning `entry` and `project`
+and when to use `ignore`.
 
 [1]: ../overview/configuration.md#defaults
 [2]: ../reference/faq.md#where-does-knip-look-for-entry-files

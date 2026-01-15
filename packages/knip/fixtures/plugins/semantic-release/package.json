@@ -4,7 +4,9 @@
     "semantic-release": "*"
   },
   "release": {
-    "branches": ["main"],
+    "branches": [
+      "main"
+    ],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
@@ -14,7 +16,9 @@
       [
         "@semantic-release/github",
         {
-          "releasedLabels": ["Status: Released"]
+          "releasedLabels": [
+            "Status: Released"
+          ]
         }
       ]
     ]

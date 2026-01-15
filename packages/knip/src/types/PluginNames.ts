@@ -2,9 +2,12 @@
 export type PluginName =
   | 'angular'
   | 'astro'
+  | 'astro-db'
+  | 'astro-og-canvas'
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'bumpp'
   | 'bun'
   | 'c8'
   | 'capacitor'
@@ -18,6 +21,7 @@ export type PluginName =
   | 'cspell'
   | 'cucumber'
   | 'cypress'
+  | 'danger'
   | 'dependency-cruiser'
   | 'docusaurus'
   | 'dotenv'
@@ -35,6 +39,7 @@ export type PluginName =
   | 'i18next-parser'
   | 'jest'
   | 'karma'
+  | 'knex'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -42,6 +47,8 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'markdownlint'
+  | 'mdx'
+  | 'mdxlint'
   | 'metro'
   | 'mocha'
   | 'moonrepo'
@@ -50,6 +57,9 @@ export type PluginName =
   | 'nest'
   | 'netlify'
   | 'next'
+  | 'next-intl'
+  | 'next-mdx'
+  | 'nitro'
   | 'node'
   | 'node-modules-inspector'
   | 'nodemon'
@@ -59,6 +69,7 @@ export type PluginName =
   | 'nyc'
   | 'oclif'
   | 'oxlint'
+  | 'parcel'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -78,6 +89,7 @@ export type PluginName =
   | 'rsbuild'
   | 'rslib'
   | 'rspack'
+  | 'rstest'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
@@ -89,8 +101,12 @@ export type PluginName =
   | 'stylelint'
   | 'svelte'
   | 'svgo'
+  | 'svgr'
+  | 'swc'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
+  | 'taskfile'
   | 'travis'
   | 'ts-node'
   | 'tsdown'
@@ -103,6 +119,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vitepress'
   | 'vitest'
   | 'vue'
   | 'webdriver-io'
@@ -116,9 +133,12 @@ export type PluginName =
 export const pluginNames = [
   'angular',
   'astro',
+  'astro-db',
+  'astro-og-canvas',
   'ava',
   'babel',
   'biome',
+  'bumpp',
   'bun',
   'c8',
   'capacitor',
@@ -132,6 +152,7 @@ export const pluginNames = [
   'cspell',
   'cucumber',
   'cypress',
+  'danger',
   'dependency-cruiser',
   'docusaurus',
   'dotenv',
@@ -149,6 +170,7 @@ export const pluginNames = [
   'i18next-parser',
   'jest',
   'karma',
+  'knex',
   'ladle',
   'lefthook',
   'lint-staged',
@@ -156,6 +178,8 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'markdownlint',
+  'mdx',
+  'mdxlint',
   'metro',
   'mocha',
   'moonrepo',
@@ -164,6 +188,9 @@ export const pluginNames = [
   'nest',
   'netlify',
   'next',
+  'next-intl',
+  'next-mdx',
+  'nitro',
   'node',
   'node-modules-inspector',
   'nodemon',
@@ -173,6 +200,7 @@ export const pluginNames = [
   'nyc',
   'oclif',
   'oxlint',
+  'parcel',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -192,6 +220,7 @@ export const pluginNames = [
   'rsbuild',
   'rslib',
   'rspack',
+  'rstest',
   'semantic-release',
   'sentry',
   'simple-git-hooks',
@@ -203,8 +232,12 @@ export const pluginNames = [
   'stylelint',
   'svelte',
   'svgo',
+  'svgr',
+  'swc',
   'syncpack',
   'tailwind',
+  'tanstack-router',
+  'taskfile',
   'travis',
   'ts-node',
   'tsdown',
@@ -217,6 +250,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vitepress',
   'vitest',
   'vue',
   'webdriver-io',

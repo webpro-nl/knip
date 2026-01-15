@@ -10,7 +10,7 @@
     },
     "ws": {
       "paths": {
-        "#util-foo/*": ["./util/*"],
+        "#utilities/*": ["./util/*"],
         "~images/*": ["./assets/img/*"],
         "lib/*": ["./lib/*"]
       }

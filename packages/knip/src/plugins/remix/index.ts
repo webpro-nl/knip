@@ -18,10 +18,12 @@ const production = [
   'server.{js,ts}',
 ];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

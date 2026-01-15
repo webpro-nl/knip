@@ -17,10 +17,12 @@ const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
   return (config.main ? [config.main] : []).map(id => toProductionEntry(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

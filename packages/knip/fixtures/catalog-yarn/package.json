@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/catalog-yarn",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

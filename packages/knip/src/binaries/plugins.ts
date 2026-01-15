@@ -2,7 +2,7 @@ import parseArgs from 'minimist';
 import { pluginArgsMap } from '../plugins.js';
 import type { BinaryResolver } from '../types/config.js';
 import { compact } from '../util/array.js';
-import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.js';
+import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.js';
 import { extractBinary } from '../util/modules.js';
 import { dirname } from '../util/path.js';
 import { resolve as fallbackResolve } from './fallback.js';
@@ -13,13 +13,13 @@ const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
 export const resolve: BinaryResolver = (binary, _args, options) => {
-  const { fromArgs, containingFilePath } = options;
+  const { cwd, fromArgs, containingFilePath } = options;
   const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
 
   if (!pluginArgs) return fallbackResolve(binary, _args, options);
 
   const inputOpts = {};
-  if (options.cwd && dirname(containingFilePath) !== options.cwd) Object.assign(inputOpts, { dir: options.cwd });
+  if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });
 
   const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(_args) : _args;
 
@@ -56,7 +56,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     typeof pluginArgs.fromArgs === 'function'
       ? fromArgs(pluginArgs.fromArgs(parsed, args))
       : Array.isArray(pluginArgs.fromArgs)
-        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey))
+        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
@@ -68,6 +68,8 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
+  const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd }) ?? [];
+
   return [
     toBinary(binary, inputOpts),
     ...positionals,
@@ -75,5 +77,6 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     ...resolvedImports.map(id => toDeferResolve(id)),
     ...resolvedFromArgs,
     ...configFilePaths,
+    ...inputs,
   ];
 };

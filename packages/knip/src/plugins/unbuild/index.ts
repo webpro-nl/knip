@@ -21,10 +21,12 @@ const resolveConfig: ResolveConfig<UnbuildConfig> = config => {
     .map(id => toEntry(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

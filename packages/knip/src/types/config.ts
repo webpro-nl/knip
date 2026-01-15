@@ -1,13 +1,14 @@
 import type ts from 'typescript';
-import type { z } from 'zod';
+import type { z } from 'zod/mini';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { knipConfigurationSchema } from '../schema/configuration.js';
+import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
+import type { ParsedCLIArgs } from '../util/cli-arguments.js';
 import type { Input } from '../util/input.js';
-import type { PluginName } from './PluginNames.js';
 import type { Args } from './args.js';
-import type { SymbolType } from './issues.js';
+import type { IssueType, SymbolType } from './issues.js';
 import type { Tags } from './options.js';
+import type { PluginName } from './PluginNames.js';
 import type { PackageJson } from './package-json.js';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
@@ -35,19 +36,28 @@ export type BinaryResolver = (binary: string, args: string[], options: BinaryRes
 
 export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
 
+export type RawConfigurationOrFn =
+  | RawConfiguration
+  | ((options: ParsedCLIArgs) => RawConfiguration | Promise<RawConfiguration>);
+
 export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
+
+export type WorkspaceProjectConfig = z.infer<typeof workspaceConfigurationSchema>;
 
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = Exclude<SymbolType, SymbolType.UNKNOWN>;
+type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
 export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+
+export type IgnoreIssues = Record<string, IssueType[]>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
   isReportClassMembers: boolean;
+  isReportExports: boolean;
   tags: Tags;
 };
 
@@ -56,6 +66,8 @@ export interface Configuration {
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  ignoreFiles: NormalizedGlob;
+  ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
@@ -78,6 +90,7 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   isIncludeEntryExports: boolean;
 }
 
@@ -91,6 +104,7 @@ interface BaseOptions {
   rootCwd: string;
   cwd: string;
   manifestScriptNames: Set<string>;
+  rootManifest: PackageJson | undefined;
 }
 
 type IsPluginEnabledOptions = {
@@ -125,13 +139,12 @@ export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
 
-export type GetReferencedInternalFilePath = (input: Input) => string | undefined;
+export type HandleInput = (input: Input) => string | undefined;
 
 export type ResolveFromAST = (
   sourceFile: ts.SourceFile,
   options: PluginOptions & {
     getSourceFile: GetSourceFile;
-    getReferencedInternalFilePath: GetReferencedInternalFilePath;
   }
 ) => Input[];
 
@@ -142,7 +155,7 @@ export interface Plugin {
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
   isRootOnly?: boolean;
-  config?: string[];
+  config?: string[] | ((options: { cwd: string }) => string[]);
   entry?: string[];
   production?: string[];
   project?: string[];

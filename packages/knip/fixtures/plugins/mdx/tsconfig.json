@@ -1,0 +1,6 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "mdx": {
+    "plugins": [["remark-frontmatter", ["toml", "yaml"]], "remark-directive"]
+  }
+}

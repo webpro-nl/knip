@@ -1,4 +1,7 @@
 {
   "name": "@fixtures/module-resolution-non-std-absolute",
-  "workspaces": ["x-other", "x-self"]
+  "workspaces": [
+    "x-other",
+    "x-self"
+  ]
 }

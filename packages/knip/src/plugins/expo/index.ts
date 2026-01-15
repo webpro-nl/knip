@@ -43,11 +43,13 @@ const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) =>
   return production.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

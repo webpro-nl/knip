@@ -8,7 +8,8 @@ type WorkspaceManifest = {
   dependencies: DependencyArray;
   devDependencies: DependencyArray;
   peerDependencies: DependencySet;
-  optionalPeerDependencies: DependencyArray;
+  optionalPeerDependencies: DependencySet;
+  requiredPeerDependencies: DependencyArray;
   allDependencies: DependencySet;
   ignoreDependencies: (string | RegExp)[];
   ignoreBinaries: (string | RegExp)[];

@@ -9,6 +9,8 @@
     "build-4": "tsup -c tsup.config-4.ts"
   },
   "tsup": {
-    "entry": ["entry-5.ts"]
+    "entry": [
+      "entry-5.ts"
+    ]
   }
 }

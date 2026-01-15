@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/svelte');
@@ -17,7 +17,7 @@ test('Use compilers (svelte)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    processed: 16,
-    total: 16,
+    processed: 18,
+    total: 18,
   });
 });

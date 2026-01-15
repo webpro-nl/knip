@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toCosmiconfig } from '../../util/plugin-config.js';
 
 // https://jamiemason.github.io/syncpack/config/syncpackrc/
 
@@ -12,9 +12,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['package.json', ...toCosmiconfig('syncpack')];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
-} satisfies Plugin;
+};
+
+export default plugin;

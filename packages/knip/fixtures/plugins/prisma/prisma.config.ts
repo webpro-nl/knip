@@ -1,5 +1,8 @@
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
-  earlyAccess: true,
+  schema: 'prisma/schema-root-config.prisma',
+  migrations: {
+    seed: 'tsx prisma/seed-root-config.ts',
+  },
 });

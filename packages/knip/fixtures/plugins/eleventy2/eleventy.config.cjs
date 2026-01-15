@@ -33,7 +33,6 @@ module.exports = eleventyConfig => {
   eleventyConfig.addFilter('getAllTags', collection => {
     const tagSet = new Set();
     for (const item of collection) {
-      // biome-ignore lint/complexity/noForEach:  fixture festa
       (item.data.tags || []).forEach(tag => tagSet.add(tag));
     }
     return Array.from(tagSet);

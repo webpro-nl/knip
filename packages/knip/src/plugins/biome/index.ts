@@ -29,10 +29,12 @@ const resolveConfig: ResolveConfig<BiomeConfig> = (config, options) => {
   return [...resolveExtends(arrayify(config.extends), options)];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -1,4 +1,4 @@
-// biome-ignore lint/nursery/noRestrictedImports: <explanation>
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { join, toPosix } from '../../src/util/path.js';

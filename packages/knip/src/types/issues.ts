@@ -1,17 +1,16 @@
-export enum SymbolType {
-  VARIABLE = 'variable',
-  TYPE = 'type',
-  INTERFACE = 'interface',
-  ENUM = 'enum',
-  FUNCTION = 'function',
-  CLASS = 'class',
-  MEMBER = 'member',
-  UNKNOWN = 'unknown',
+import type { SYMBOL_TYPE } from '../constants.js';
+import type { Fixes } from './exports.js';
+
+export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
+
+export interface IssueSymbol {
+  symbol: string;
+  pos?: number;
+  line?: number;
+  col?: number;
 }
 
-export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
-
-export type Issue = {
+export interface Issue {
   type: SymbolIssueType;
   filePath: string;
   workspace: string;
@@ -24,8 +23,9 @@ export type Issue = {
   pos?: number;
   line?: number;
   col?: number;
+  fixes: Fixes;
   isFixed?: boolean;
-};
+}
 
 export type IssueSet = Set<string>;
 
@@ -47,6 +47,7 @@ export type Issues = {
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
   classMembers: IssueRecords;
+  catalog: IssueRecords;
 };
 
 export type IssueType = keyof Issues;
@@ -64,7 +65,8 @@ export type ReporterOptions = {
   issues: Issues;
   counters: Counters;
   tagHints: TagHints;
-  configurationHints: ConfigurationHints;
+  configurationHints: ConfigurationHint[];
+  enabledPlugins: Record<string, string[]>;
   isDisableConfigHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
   cwd: string;
@@ -73,7 +75,9 @@ export type ReporterOptions = {
   options: string;
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
-  configFilePath?: string;
+  selectedWorkspaces: string[] | undefined;
+  configFilePath: string | undefined;
+  maxShowIssues?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -84,7 +88,7 @@ export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;
 
-export type ConfigurationHints = Set<ConfigurationHint>;
+export type ConfigurationHints = Map<string, ConfigurationHint>;
 
 export type ConfigurationHintType =
   | 'ignoreBinaries'
@@ -98,6 +102,7 @@ export type ConfigurationHintType =
   | 'entry-empty'
   | 'project-empty'
   | 'package-entry'
+  | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
 export type ConfigurationHint = {

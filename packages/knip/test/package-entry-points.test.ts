@@ -1,9 +1,9 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import { join } from '../src/util/path.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/package-entry-points');
@@ -17,13 +17,10 @@ test('Resolve package entry points to source files', async () => {
   assert(issues.files.has(join(cwd, 'src/public/lib/rary/lost.js')));
 
   const filePath = join(cwd, 'package.json');
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'package-entry', identifier: './feature/index.js', workspaceName: '.', filePath },
-      { type: 'package-entry', identifier: './not-found.tsx', workspaceName: '.', filePath },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'package-entry', identifier: './feature/index.js', workspaceName: '.', filePath },
+    { type: 'package-entry', identifier: './not-found.tsx', workspaceName: '.', filePath },
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,

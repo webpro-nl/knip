@@ -20,7 +20,11 @@ This works in any terminal. See [--watch][1] and [auto-fix][2] for more details.
 Here's an example screenshot that traces the `mapIterator` export in the
 TypeScript codebase:
 
-<img src="/screenshots/trace.png" alt="trace" class="mw500" />
+<img src="/screenshots/trace-export.png" alt="trace export" class="mw500" />
+
+Inspect complicated import and re-export chains at a glance:
+
+<img src="/screenshots/trace-file.png" alt="trace file" class="mw500" />
 
 See [Trace][3] for more details.
 

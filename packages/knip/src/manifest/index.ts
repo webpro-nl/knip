@@ -1,6 +1,6 @@
 import type { HostDependencies, InstalledBinaries } from '../types/workspace.js';
-import { timerify } from '../util/Performance.js';
 import { isDefinitelyTyped } from '../util/modules.js';
+import { timerify } from '../util/Performance.js';
 import { loadPackageManifest } from './helpers.js';
 
 type Options = {

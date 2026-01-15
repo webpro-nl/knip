@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { toUnconfig } from '../../util/plugin-config.js';
 import { hasDependency } from '../../util/plugin.js';
+import { toUnconfig } from '../../util/plugin-config.js';
 
 // https://unocss.dev/guide/config-file
 // https://github.com/unocss/unocss/blob/main/packages/config/src/index.ts
@@ -13,9 +13,11 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [...toUnconfig('uno.config'), ...toUnconfig('unocss.config')];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
-} satisfies Plugin;
+};
+
+export default plugin;

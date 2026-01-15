@@ -19,10 +19,12 @@ const resolveConfig: ResolveConfig<OclifConfig> = async config => {
   return [...plugins, ...devPlugins].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

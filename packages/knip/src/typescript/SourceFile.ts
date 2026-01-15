@@ -17,7 +17,7 @@ type PragmaMap = {
   arguments: {
     factory?: string;
     path?: { value?: string; pos?: number };
-    types?: { value?: string; pos?: number };
+    types?: { value: string; pos: number };
   };
   range?: {
     kind?: number;

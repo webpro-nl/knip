@@ -1,4 +1,5 @@
 export { _load as load } from './loader.js';
+
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
 import { arrayify } from './array.js';
 import { _load as load } from './loader.js';
@@ -19,10 +20,10 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
   });
 
 export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
-  if (typeof pluginConfig === 'boolean') {
-    return pluginConfig;
-  }
+  if (typeof pluginConfig === 'boolean') return pluginConfig;
+
   const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
+
   const config = isObject
     ? 'config' in pluginConfig
       ? arrayify(pluginConfig.config)
@@ -30,8 +31,14 @@ export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
     : pluginConfig
       ? arrayify(pluginConfig)
       : null;
+
   const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
-  const project = isObject && 'project' in pluginConfig ? arrayify(pluginConfig.project) : entry;
+
+  const project =
+    isObject && 'project' in pluginConfig
+      ? arrayify(pluginConfig.project)
+      : (entry ?? []).filter(pattern => !pattern.startsWith('!'));
+
   return { config, entry, project };
 };
 

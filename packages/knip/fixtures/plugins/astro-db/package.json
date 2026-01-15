@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/astro-db",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/db": "^0.18.2",
+    "astro": "^5.15.3"
+  }
+}

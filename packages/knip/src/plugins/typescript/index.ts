@@ -56,16 +56,18 @@ const args = {
 };
 
 const note =
-  '[What’s up with that configurable tsconfig.json location?](/reference/faq#whats-up-with-that-configurable-tsconfigjson-location)';
+  "[What's up with that configurable tsconfig.json location?](/reference/faq#whats-up-with-that-configurable-tsconfigjson-location)";
 
 /** @public */
 export const docs = { note };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

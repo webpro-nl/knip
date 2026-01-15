@@ -1,4 +1,4 @@
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 
 export const isAbsolute = path.isAbsolute;

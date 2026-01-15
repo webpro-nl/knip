@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/ignore-unresolved2');
@@ -17,13 +17,10 @@ test('Respect ignored unresolved imports, including regex, show config hints', a
     total: 1,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-top-level' },
-      { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-root' },
-      { type: 'ignoreUnresolved', workspaceName: 'packages/client', identifier: 'unused-workspace' },
-      { type: 'ignoreUnresolved', workspaceName: '.', identifier: './unresolved-workspace' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-root' },
+    { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-top-level' },
+    { type: 'ignoreUnresolved', workspaceName: '.', identifier: './unresolved-workspace' },
+    { type: 'ignoreUnresolved', workspaceName: 'packages/client', identifier: 'unused-workspace' },
+  ]);
 });

@@ -5,7 +5,7 @@ export default {
     vue: text => {
       const scripts = [];
       let match: any[] | null;
-      // biome-ignore lint/suspicious/noAssignInExpressions:  fixture festa
+      // biome-ignore lint: suspicious/noAssignInExpressions
       while ((match = compiler.exec(text))) scripts.push(match[1]);
       return scripts.join(';');
     },

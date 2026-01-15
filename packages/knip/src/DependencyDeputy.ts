@@ -1,16 +1,16 @@
 import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.js';
-import { PackagePeeker } from './PackagePeeker.js';
 import {
   DT_SCOPE,
+  IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
-  IGNORE_DEFINITELY_TYPED,
   ROOT_WORKSPACE_NAME,
 } from './constants.js';
 import { getDependencyMetaData } from './manifest/index.js';
-import type { ConfigurationHints, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
+import { PackagePeeker } from './PackagePeeker.js';
+import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
 import type { PackageJson } from './types/package-json.js';
 import type {
   DependencyArray,
@@ -28,6 +28,9 @@ import {
 } from './util/modules.js';
 import { findMatch, toRegexOrString } from './util/regex.js';
 
+const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
+  typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
+
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
@@ -38,6 +41,7 @@ import { findMatch, toRegexOrString } from './util/regex.js';
 export class DependencyDeputy {
   isProduction;
   isStrict;
+  isReportDependencies;
   _manifests: WorkspaceManifests = new Map();
   referencedDependencies: Map<string, Set<string>>;
   referencedBinaries: Map<string, Set<string>>;
@@ -45,9 +49,10 @@ export class DependencyDeputy {
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
 
-  constructor({ isProduction, isStrict }: MainOptions) {
+  constructor({ isProduction, isStrict, isReportDependencies }: MainOptions) {
     this.isProduction = isProduction;
     this.isStrict = isStrict;
+    this.isReportDependencies = isReportDependencies;
     this.referencedDependencies = new Map();
     this.referencedBinaries = new Map();
     this.hostDependencies = new Map();
@@ -79,14 +84,13 @@ export class DependencyDeputy {
     const dependencies = Object.keys(manifest.dependencies ?? {});
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
     const optionalDependencies = Object.keys(manifest.optionalDependencies ?? {});
-    const optionalPeerDependencies = manifest.peerDependenciesMeta
-      ? peerDependencies.filter(
-          peerDependency =>
-            manifest.peerDependenciesMeta &&
-            peerDependency in manifest.peerDependenciesMeta &&
-            manifest.peerDependenciesMeta[peerDependency].optional
-        )
-      : [];
+    const optionalPeerDependencies: Set<string> = new Set();
+    if (manifest.peerDependenciesMeta) {
+      for (const dep of peerDependencies) {
+        if (manifest.peerDependenciesMeta[dep]?.optional) optionalPeerDependencies.add(dep);
+      }
+    }
+    const requiredPeerDependencies = peerDependencies.filter(dep => !optionalPeerDependencies.has(dep));
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
@@ -96,18 +100,20 @@ export class DependencyDeputy {
       ...(this.isProduction ? [] : devDependencies),
     ];
 
-    const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
-      packageNames,
-      dir,
-      cwd,
-    });
+    if (this.isReportDependencies) {
+      const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
+        packageNames,
+        dir,
+        cwd,
+      });
 
-    this.setHostDependencies(name, hostDependencies);
-    this.setInstalledBinaries(name, installedBinaries);
-    this.setHasTypesIncluded(name, hasTypesIncluded);
+      this.setHostDependencies(name, hostDependencies);
+      this.setInstalledBinaries(name, installedBinaries);
+      this.setHasTypesIncluded(name, hasTypesIncluded);
+    }
 
-    const ignoreDependencies = id.map(toRegexOrString);
-    const ignoreBinaries = ib.map(toRegexOrString);
+    const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
+    const ignoreBinaries = ib.flatMap(ib => filterIsProduction(ib, this.isProduction)).map(toRegexOrString);
     const ignoreUnresolved = iu.map(toRegexOrString);
 
     this._manifests.set(name, {
@@ -124,6 +130,7 @@ export class DependencyDeputy {
       devDependencies,
       peerDependencies: new Set(peerDependencies),
       optionalPeerDependencies,
+      requiredPeerDependencies,
       allDependencies: new Set(allDependencies),
     });
   }
@@ -135,7 +142,7 @@ export class DependencyDeputy {
   getProductionDependencies(workspaceName: string): DependencyArray {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return [];
-    if (this.isStrict) return [...manifest.dependencies, ...manifest.peerDependencies];
+    if (this.isStrict) return [...manifest.dependencies, ...manifest.requiredPeerDependencies];
     return manifest.dependencies;
   }
 
@@ -187,10 +194,8 @@ export class DependencyDeputy {
     return this.hostDependencies.get(workspaceName)?.get(dependency) ?? [];
   }
 
-  getOptionalPeerDependencies(workspaceName: string): DependencyArray {
-    const manifest = this._manifests.get(workspaceName);
-    if (!manifest) return [];
-    return manifest.optionalPeerDependencies;
+  getOptionalPeerDependencies(workspaceName: string): DependencySet {
+    return this._manifests.get(workspaceName)?.optionalPeerDependencies ?? new Set();
   }
 
   /**
@@ -198,6 +203,7 @@ export class DependencyDeputy {
    * wants to mark the dependency as "unlisted".
    */
   public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
+    if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
@@ -223,8 +229,9 @@ export class DependencyDeputy {
     return false;
   }
 
-  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): boolean {
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return true;
+  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
+    if (!this.isReportDependencies) return new Set();
+    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     this.addReferencedBinary(workspace.name, binaryName);
 
@@ -236,12 +243,12 @@ export class DependencyDeputy {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
           for (const dependency of dependencies) this.addReferencedDependency(name, dependency);
-          return true;
+          return dependencies;
         }
       }
     }
 
-    return false;
+    return;
   }
 
   private isInDependencies(workspaceName: string, packageName: string) {
@@ -256,7 +263,7 @@ export class DependencyDeputy {
     const devDependencyIssues: Issue[] = [];
     const optionalPeerDependencyIssues: Issue[] = [];
 
-    for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests.entries()) {
+    for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
       const peeker = new PackagePeeker(manifestStr);
@@ -313,17 +320,25 @@ export class DependencyDeputy {
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('dependencies', symbol);
-        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, ...position });
+        dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
       for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('devDependencies', symbol);
-        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, ...position });
+        devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
 
-      for (const symbol of this.getOptionalPeerDependencies(workspace).filter(d => isReferencedDependency(d))) {
+      for (const symbol of this.getOptionalPeerDependencies(workspace)) {
+        if (!isReferencedDependency(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
-        optionalPeerDependencyIssues.push({ type: 'optionalPeerDependencies', filePath, workspace, symbol, ...pos });
+        optionalPeerDependencyIssues.push({
+          type: 'optionalPeerDependencies',
+          filePath,
+          workspace,
+          symbol,
+          fixes: [],
+          ...pos,
+        });
       }
     }
 
@@ -437,19 +452,19 @@ export class DependencyDeputy {
   }
 
   public getConfigurationHints() {
-    const configurationHints: ConfigurationHints = new Set();
+    const configurationHints: ConfigurationHint[] = [];
 
-    for (const [workspaceName, manifest] of this._manifests.entries()) {
+    for (const [workspaceName, manifest] of this._manifests) {
       for (const identifier of manifest.unusedIgnoreDependencies) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreDependencies' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreDependencies' });
       }
 
       for (const identifier of manifest.unusedIgnoreBinaries) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreBinaries' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreBinaries' });
       }
 
       for (const identifier of manifest.unusedIgnoreUnresolved) {
-        configurationHints.add({ workspaceName, identifier, type: 'ignoreUnresolved' });
+        configurationHints.push({ workspaceName, identifier, type: 'ignoreUnresolved' });
       }
     }
 

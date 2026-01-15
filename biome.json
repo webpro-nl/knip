@@ -1,12 +1,16 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "extends": ["packages/knip/biome.json"],
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "files": {
-    "ignore": ["**/dist", "**/tmp", "packages/docs/.astro", ".vscode"]
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/tmp",
+      "!packages/docs/.astro",
+      "!.vscode",
+      "!templates/language-server-client"
+    ]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -23,7 +27,7 @@
         "useNodeAssertStrict": "error"
       },
       "suspicious": {
-        "noConsoleLog": "error",
+        "noConsole": "error",
         "noExplicitAny": "off"
       }
     }
@@ -48,12 +52,12 @@
   },
   "css": {
     "formatter": {
-      "quoteStyle": "single"
+      "quoteStyle": "double"
     }
   },
   "overrides": [
     {
-      "include": ["*.astro"],
+      "includes": ["**/*.astro"],
       "linter": {
         "rules": {
           "correctness": {
@@ -64,11 +68,14 @@
       }
     },
     {
-      "include": ["packages/docs"],
+      "includes": ["packages/docs/**", "packages/create-config/**"],
       "linter": {
         "rules": {
+          "style": {
+            "noRestrictedImports": "off"
+          },
           "suspicious": {
-            "noConsoleLog": "off"
+            "noConsole": "off"
           }
         }
       }

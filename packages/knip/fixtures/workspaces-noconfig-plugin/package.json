@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/workspaces-noconfig-plugin",
-  "workspaces": ["lib"],
+  "workspaces": [
+    "lib"
+  ],
   "dependencies": {
     "@fixtures/workspaces__lib": "workspace:*"
   },

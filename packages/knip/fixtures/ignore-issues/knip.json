@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schema.json",
+  "includeEntryExports": true,
+  "ignoreIssues": {
+    "src/generated/**": ["exports", "types"],
+    "**/*.generated.ts": ["exports", "classMembers"]
+  }
+}

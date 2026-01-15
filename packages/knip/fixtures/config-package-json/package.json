@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/config-package-json",
   "knip": {
-    "ignore": ["dangling.js"]
+    "ignore": [
+      "dangling.js"
+    ]
   }
 }

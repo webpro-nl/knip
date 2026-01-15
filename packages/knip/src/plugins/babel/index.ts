@@ -40,10 +40,12 @@ const resolveConfig: ResolveConfig<BabelConfig> = async config => {
   return getDependenciesFromConfig(config);
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

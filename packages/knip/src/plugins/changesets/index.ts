@@ -25,11 +25,13 @@ const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
   ).map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

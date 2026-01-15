@@ -1,7 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { isFile } from '../../util/fs.js';
 import { toDependency } from '../../util/input.js';
-import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { CapacitorConfig } from './types.js';
 
@@ -16,19 +15,19 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['capacitor.config.{json,ts}'];
 
 const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFileDir }) => {
-  const exists = (filePath: string) => isFile(join(configFileDir, filePath));
-
   const plugins = config.includePlugins ?? [];
-  const android = (await exists('android/capacitor.settings.gradle')) ? ['@capacitor/android'] : [];
-  const ios = (await exists('ios/App/Podfile')) ? ['@capacitor/ios'] : [];
+  const android = isFile(configFileDir, 'android/capacitor.settings.gradle') ? ['@capacitor/android'] : [];
+  const ios = isFile(configFileDir, 'ios/App/Podfile') ? ['@capacitor/ios'] : [];
 
   return [...plugins, ...android, ...ios].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

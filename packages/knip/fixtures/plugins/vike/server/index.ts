@@ -65,7 +65,6 @@ async function startServer() {
     }
     const { body, statusCode, headers, earlyHints } = httpResponse;
     if (res.writeEarlyHints) res.writeEarlyHints({ link: earlyHints.map(e => e.earlyHintLink) });
-    // biome-ignore lint/complexity/noForEach:  fixture festa
     headers.forEach(([name, value]) => res.setHeader(name, value));
     res.status(statusCode);
     // For HTTP streams use httpResponse.pipe() instead, see https://vike.dev/streaming

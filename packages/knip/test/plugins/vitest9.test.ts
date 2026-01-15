@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/vitest9');
@@ -20,7 +20,7 @@ test('Find dependencies in vitest configuration (projects with inline and extern
     devDependencies: 0,
     unlisted: 2,
     unresolved: 0,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

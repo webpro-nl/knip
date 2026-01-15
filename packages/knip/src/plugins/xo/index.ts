@@ -21,11 +21,13 @@ const resolveConfig: ResolveConfig<XOConfig> = async (config, options) => {
   return [...inputs];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

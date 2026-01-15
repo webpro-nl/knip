@@ -1,6 +1,8 @@
 {
   "name": "@plugins/wireit",
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "build": "wireit",
     "dev": "wireit"

@@ -13,9 +13,11 @@ const patterns = ['{pages,renderer}/**/+*.{js,jsx,ts,tsx,vue,react,solid}'];
 
 const production = [...patterns, ...patterns.map(pattern => `*/${pattern}`)];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

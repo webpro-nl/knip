@@ -19,17 +19,20 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   const inputs = tasks
     .map(task => task.command)
     .filter(command => command)
+    .map(command => (Array.isArray(command) ? command.join(' ') : command))
     .map(command => command.replace('$workspaceRoot', options.rootCwd))
     .map(command => command.replace('$projectRoot', options.cwd))
     .flatMap(command => options.getInputsFromScripts(command));
   return [...inputs];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

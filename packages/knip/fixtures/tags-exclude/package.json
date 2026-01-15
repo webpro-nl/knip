@@ -1,6 +1,8 @@
 {
   "name": "@fixtures/tags-exclude",
   "knip": {
-    "include": ["classMembers"]
+    "include": [
+      "classMembers"
+    ]
   }
 }

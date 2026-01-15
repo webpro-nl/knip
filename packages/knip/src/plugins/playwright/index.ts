@@ -54,13 +54,12 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
 };
 
 const args = {
-  binaries: ['playwright'],
   positional: true,
   args: (args: string[]) => args.filter(arg => arg !== 'install' && arg !== 'test'),
   config: true,
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -68,4 +67,6 @@ export default {
   entry,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

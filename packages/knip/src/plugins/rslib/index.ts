@@ -6,7 +6,7 @@ import type { RslibConfig } from './types.js';
 
 const title = 'Rslib';
 
-const enablers = ['rslib'];
+const enablers = ['@rslib/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -16,10 +16,12 @@ const resolveConfig: ResolveConfig<RslibConfig> = () => {
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

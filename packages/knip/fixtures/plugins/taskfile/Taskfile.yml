@@ -1,0 +1,56 @@
+version: '3'
+
+includes:
+  # String shorthand format
+  nested: nested/Taskfile.yml
+  # Object format with taskfile property
+  shared:
+    taskfile: shared/Taskfile.yml
+
+tasks:
+  build:
+    cmds:
+      - npm run build
+      - node scripts/build.js
+
+  test:
+    cmd: pnpm test
+
+  lint:
+    cmds:
+      - eslint src/
+      - npx prettier --check .
+
+  dev:
+    cmd: node scripts/dev.js
+
+  deploy:
+    cmds:
+      - node scripts/deploy.js
+      - yarn publish
+
+  check:
+    cmds:
+      - node -r esbuild-register ./check.ts
+      - npx knip
+
+  # Test command object format
+  test-command-object:
+    cmds:
+      - cmd: npx test-command-object-binary
+        silent: true
+
+  # Test deferred command format
+  test-defer:
+    cmds:
+      - echo "Starting"
+      - defer: echo "Cleanup"
+      - defer:
+          cmd: npx deferred-binary
+
+  # Test for loop format
+  test-for:
+    cmds:
+      - for: [item1, item2]
+        cmd: npx for-loop-binary {{.ITEM}}
+

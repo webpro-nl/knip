@@ -1,9 +1,17 @@
 {
   "name": "@fixtures/class-members",
-  "dependencies": {},
+  "dependencies": {
+    "@types/react": "*"
+  },
   "knip": {
-    "entry": ["index.ts"],
-    "project": ["*.ts"],
-    "include": ["classMembers"]
+    "entry": [
+      "index.ts"
+    ],
+    "project": [
+      "*.ts"
+    ],
+    "include": [
+      "classMembers"
+    ]
   }
 }

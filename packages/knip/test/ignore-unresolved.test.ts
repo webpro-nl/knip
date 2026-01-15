@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/ignore-unresolved');
@@ -20,8 +20,5 @@ test('Respect ignored unresolved imports, including regex, show config hints', a
     total: 2,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([{ type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-ignore' }])
-  );
+  assert.deepEqual(configurationHints, [{ type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-ignore' }]);
 });

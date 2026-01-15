@@ -5,4 +5,5 @@ module.exports = {
   '*.!(js|ts|tsx)': files => {
     return files.map(filename => `prettier --write --ignore-unknown '${filename}'`);
   },
+  '**/*': ['prettier --write --ignore-unknown', () => 'npm run knip', () => 'npx tsc --noEmit'],
 };

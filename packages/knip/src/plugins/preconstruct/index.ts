@@ -18,10 +18,12 @@ const resolveConfig: ResolveConfig<PreconstructConfig> = async config => {
   return (config.entrypoints ?? []).map(id => toProductionEntry(join('src', id), { allowIncludeExports: true }));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

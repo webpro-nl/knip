@@ -1,8 +1,7 @@
-import type ts from 'typescript';
 import type { Fix, Fixes } from './exports.js';
 import type { IssueSymbol, SymbolType } from './issues.js';
 
-type Identifier = string;
+export type Identifier = string;
 type FilePath = string;
 type NamespaceOrAlias = string;
 
@@ -11,65 +10,86 @@ type References = Set<Reference>;
 
 type Tags = Set<string>;
 
+export interface Position {
+  pos: number;
+  line: number;
+  col: number;
+}
+
 export type IdToFileMap = Map<Identifier, Set<FilePath>>;
 export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath>>>;
 
-export type ImportDetails = {
+export type ImportMaps = {
+  /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
-  imported: IdToFileMap;
-  importedAs: IdToNsToFileMap;
-  importedNs: IdToFileMap;
-  reExported: IdToFileMap;
-  reExportedAs: IdToNsToFileMap;
-  reExportedNs: IdToFileMap;
+  /** Identifiers imported from this file */
+  import: IdToFileMap;
+  /** Identifiers imported with alias (id → alias → files) */
+  importAs: IdToNsToFileMap;
+  /** Namespace imports of this file */
+  importNs: IdToFileMap;
+  /** Identifiers re-exported (not directly imported) */
+  reExport: IdToFileMap;
+  /** Namespace re-exports */
+  reExportNs: IdToFileMap;
+  /** Irregular re-exports: id → namespace/alias → source files */
+  reExportAs: IdToNsToFileMap;
 };
 
-export type ImportMap = Map<FilePath, ImportDetails>;
+export type ImportMap = Map<FilePath, ImportMaps>;
 
-export type UnresolvedImport = { specifier: string; pos?: number; line?: number; col?: number };
-
-export interface Export {
-  identifier: Identifier;
-  pos: number;
-  line: number;
-  col: number;
-  type: SymbolType;
-  members: ExportMember[];
-  jsDocTags: Tags;
-  refs: [number, boolean];
-  fixes: Fixes;
-  symbol?: ts.Symbol;
-  isReExport: boolean;
+export interface Import extends Position {
+  readonly specifier: string;
+  readonly filePath: string | undefined;
+  readonly identifier: string | undefined;
+  readonly isTypeOnly: boolean;
 }
 
-export type ExportMember = {
-  identifier: Identifier;
-  pos: number;
-  line: number;
-  col: number;
-  type: SymbolType;
-  refs: [number, boolean];
-  fix: Fix;
-  symbol?: ts.Symbol;
-  jsDocTags: Tags;
-};
+export interface ExternalRef {
+  readonly specifier: string;
+  readonly identifier: string | undefined;
+}
+
+export interface Export extends Position {
+  readonly identifier: Identifier;
+  readonly type: SymbolType;
+  readonly members: ExportMember[];
+  readonly jsDocTags: Tags;
+  hasRefsInFile: boolean;
+  referencedIn: Set<string> | undefined;
+  readonly fixes: Fixes;
+  readonly isReExport: boolean;
+}
+
+export interface ExportMember extends Position {
+  readonly identifier: Identifier;
+  readonly type: SymbolType;
+  readonly fix: Fix;
+  readonly jsDocTags: Tags;
+  readonly flags: number;
+  hasRefsInFile: boolean;
+}
 
 export type ExportMap = Map<Identifier, Export>;
 
+export type Imports = Set<Import>;
+
 export type FileNode = {
   imports: {
-    internal: ImportMap;
-    external: Set<string>;
-    unresolved: Set<UnresolvedImport>;
-    resolved: Set<FilePath>;
-    specifiers: Set<[string, FilePath]>;
+    readonly internal: ImportMap;
+    readonly external: Set<Import>;
+    readonly externalRefs: Set<ExternalRef>;
+    unresolved: Set<Import>;
+    readonly programFiles: Set<FilePath>;
+    readonly entryFiles: Set<FilePath>;
+    readonly imports: Imports;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
-  imported?: ImportDetails;
-  internalImportCache?: ImportMap;
-  traceRefs: References;
+  /** Aggregation of other files importing this file's exports */
+  importedBy: undefined | ImportMaps;
+  internalImportCache: undefined | ImportMap;
 };
 
 export type ModuleGraph = Map<FilePath, FileNode>;

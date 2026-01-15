@@ -1,0 +1,5 @@
+{
+  "*.+(css|json|md|html|yaml|yml)": ["prettier --write"],
+  "*.+(js|jsx|ts|tsx)": ["eslint --fix", "prettier --write"],
+  "_comment": "This file is generated. Note that while it is possible to alter this file, changes should be made carefully."
+}

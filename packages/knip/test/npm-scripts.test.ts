@@ -1,11 +1,11 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../src/index.js';
 import { getDependencyMetaData } from '../src/manifest/index.js';
-import { createOptions } from '../src/util/create-options.js';
 import { join } from '../src/util/path.js';
 import { load } from '../src/util/plugin.js';
 import baseCounters from './helpers/baseCounters.js';
+import { createOptions } from './helpers/create-options.js';
 import { resolve } from './helpers/resolve.js';
 
 const cwd = resolve('fixtures/npm-scripts');
@@ -74,18 +74,15 @@ test('Unused dependencies in npm scripts', async () => {
     devDependencies: 1,
     binaries: 3,
     files: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+  ]);
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
@@ -93,12 +90,13 @@ test('Unused dependencies in npm scripts (strict)', async () => {
   const { issues, counters } = await main(options);
   assert(issues.dependencies['package.json']['express']);
   assert(issues.dependencies['package.json']['unused-peer-dep']);
+  assert(issues.dependencies['package.json']['@sap/approuter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    dependencies: 2,
-    processed: 1,
-    total: 2,
+    files: 2,
+    dependencies: 3,
+    processed: 2,
+    total: 3,
   });
 });

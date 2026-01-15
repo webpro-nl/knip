@@ -26,10 +26,12 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   return [...extend, ...uses].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

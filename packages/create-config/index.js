@@ -1,19 +1,28 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { closeSync, openSync, readFileSync, readSync, statSync } from 'node:fs';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+import fs from 'node:fs';
+import { EOL } from 'node:os';
 import path from 'node:path';
 
 const fileExists = filePath => {
-  const stat = statSync(filePath, { throwIfNoEntry: false });
+  const stat = fs.statSync(filePath, { throwIfNoEntry: false });
   return stat?.isFile();
 };
 
+const hasAccess = filePath => {
+  try {
+    fs.accessSync(filePath, fs.constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const readFirstBytes = (filePath, length = 128) => {
-  const fd = openSync(filePath, 'r');
+  const fd = fs.openSync(filePath, 'r');
   const buffer = Buffer.alloc(length);
-  const bytesRead = readSync(fd, buffer, 0, length, 0);
-  closeSync(fd);
+  const bytesRead = fs.readSync(fd, buffer, 0, length, 0);
+  fs.closeSync(fd);
   return buffer.subarray(0, bytesRead).toString('utf-8');
 };
 
@@ -28,7 +37,7 @@ const getPackageManager = () => {
 
   if (fileExists(path.join(repositoryRoot, 'bun.lock'))) return 'bun';
   if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
-  if (fileExists(path.join(repositoryRoot, 'yarn.lock'))) {
+  if (hasAccess(path.join(repositoryRoot, 'yarn.lock'))) {
     const yarnLock = readFirstBytes(path.join(repositoryRoot, 'yarn.lock'), 128);
     return yarnLock.includes('yarn lockfile v1') ? 'yarn' : 'yarn-berry';
   }
@@ -41,17 +50,56 @@ const getBinX = pm => {
   return pm;
 };
 
-const getWorkspaceFlag = pm => {
-  if (pm === 'pnpm') {
-    return fileExists('pnpm-workspace.yaml') ? '-w' : undefined;
+const hasWorkspaces = manifest => {
+  if (manifest.workspaces) {
+    if (Array.isArray(manifest.workspaces) && manifest.workspaces.length > 0) return true;
+    if (typeof manifest.workspaces === 'object' && manifest.workspaces.packages?.length > 0) return true;
   }
 
-  // Yarn v1 only, Yarn v2+ does not need a workspace flag
-  if (pm === 'yarn') {
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-    return packageJson.workspaces && packageJson.workspaces.length > 0 ? '-W' : undefined;
+  if (hasAccess('pnpm-workspace.yaml')) {
+    try {
+      const content = fs.readFileSync('pnpm-workspace.yaml', 'utf-8');
+      return /(^|\n)packages:\n/.test(content);
+    } catch {
+      return false;
+    }
   }
+
+  return false;
+};
+
+const findPackageJsonFiles = (dir, depth = 0) => {
+  if (depth > 3) return [];
+  const dirs = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      dirs.push(...findPackageJsonFiles(fullPath, depth + 1));
+    } else if (entry.name === 'package.json' && dir !== process.cwd()) {
+      dirs.push(path.relative(process.cwd(), dir));
+    }
+  }
+  return dirs;
+};
+
+const getWorkspaceFlag = (manifest, pm) => {
+  if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces(manifest) ? '-w' : undefined;
+};
+
+const getPackageManagerFromPackageJson = manifest => {
+  if (!manifest.packageManager) return undefined;
+
+  let [pmName, pmVersion] = manifest.packageManager.split('@');
+  if (pmName === 'yarn' && pmVersion?.[0] > 1) {
+    pmName = 'yarn-berry';
+  }
+
+  const validPackageManagers = ['bun', 'yarn', 'yarn-berry', 'pnpm', 'npm'];
+  if (!validPackageManagers.includes(pmName)) return undefined;
+
+  return pmName;
 };
 
 const main = () => {
@@ -60,23 +108,65 @@ const main = () => {
     return;
   }
 
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  const manifest = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
   // Differentiate yarn v1 and v2+ but call them both with `yarn`
-  const pm = getPackageManager();
+  const pm = getPackageManagerFromPackageJson(manifest) ?? getPackageManager();
   const bin = pm === 'yarn-berry' ? 'yarn' : pm;
 
-  const cmd = [bin, 'add', getWorkspaceFlag(pm), '-D', 'knip', 'typescript', '@types/node'].filter(Boolean).join(' ');
+  const cmd = [bin, 'add', getWorkspaceFlag(manifest, pm), '-D', 'knip', 'typescript', '@types/node']
+    .filter(Boolean)
+    .join(' ');
 
   execSync(cmd, { stdio: 'inherit' });
+
+  console.info('');
   console.info('✓ Install Knip');
 
+  const knipConfig = {
+    $schema: 'https://unpkg.com/knip@5/schema.json',
+    tags: ['-lintignore'],
+  };
+
+  const hasExplicitWorkspaces = hasWorkspaces(manifest);
+
+  if (hasExplicitWorkspaces) knipConfig.workspaces = { '.': {} };
+
   try {
-    execSync('npm pkg set scripts.knip=knip', { stdio: 'inherit' });
+    if (!fileExists('knip.json')) {
+      fs.writeFileSync('knip.json', `${JSON.stringify(knipConfig, null, 2)}${EOL}`);
+      console.info('✓ Create knip.json');
+    } else {
+      console.info('✓ Detected knip.json');
+    }
+  } catch (error) {
+    console.warn('× Failed to create knip.json:', error.message);
+  }
+
+  try {
+    execSync('npm pkg set scripts.knip=knip', { stdio: ['inherit', 'inherit', 'ignore'] });
     console.info('✓ Add knip to package.json#scripts');
-    console.info(`→ Run "${bin} run knip" to run knip`);
   } catch {
     console.warn('× Failed to add knip to package.json#scripts');
-    console.info(`→ Run "${getBinX(bin)} knip" to run knip`);
   }
+
+  if (!hasExplicitWorkspaces) {
+    const packages = findPackageJsonFiles(process.cwd());
+    if (packages.length > 0) {
+      console.info('');
+      console.info('⚠ Found package.json files in subdirectories:');
+      for (const pkg of packages.slice(0, 5)) console.info(`- ${pkg}`);
+      if (packages.length > 5) console.info(`- ...and ${packages.length - 5} more`);
+      console.info('Consider adding workspaces to knip.json:');
+      console.info('More details: https://knip.dev/features/monorepos-and-workspaces#additional-workspaces');
+    }
+  }
+
+  console.info('');
+  console.info(`→ Run \`${getBinX(bin)} knip --max-show-issues 5\` to run Knip for the first time`);
+
+  console.info(`→ Continue with https://knip.dev/overview/configuration`);
 };
 
 main();

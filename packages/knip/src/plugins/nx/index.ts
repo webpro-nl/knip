@@ -1,7 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { toDependency } from '../../util/input.js';
+import { toConfig, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
 
@@ -68,18 +68,56 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
 
   const inputs = options.getInputsFromScripts(scripts);
 
-  return compact([...executors, ...inputs]).map(id => (typeof id === 'string' ? toDependency(id) : id));
+  const configInputs = targets.flatMap(target => {
+    const opts = target.options;
+    if (!opts) return [];
+
+    const configs = [];
+
+    if ('eslintConfig' in opts && typeof opts.eslintConfig === 'string') {
+      configs.push(toConfig('eslint', opts.eslintConfig));
+    }
+
+    if ('jestConfig' in opts && typeof opts.jestConfig === 'string') {
+      configs.push(toConfig('jest', opts.jestConfig));
+    }
+
+    if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
+      configs.push(toConfig('typescript', opts.tsConfig));
+    }
+
+    if ('vitestConfig' in opts && typeof opts.vitestConfig === 'string') {
+      configs.push(toConfig('vitest', opts.vitestConfig));
+    }
+
+    if ('webpackConfig' in opts && typeof opts.webpackConfig === 'string') {
+      configs.push(toConfig('webpack', opts.webpackConfig));
+    }
+
+    return configs;
+  });
+
+  return compact([...executors, ...inputs, ...configInputs]).map(id =>
+    typeof id === 'string' ? toDependency(id) : id
+  );
 };
 
 const args = {
   fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
 };
 
-export default {
+/** @public */
+export const docs = {
+  note: `Also see [integrated monorepos](/features/integrated-monorepos) and the note regarding internal workspace dependencies.`,
+};
+
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

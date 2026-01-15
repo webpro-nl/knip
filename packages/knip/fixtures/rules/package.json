@@ -20,7 +20,11 @@
     "unlisted-binary": "unlisted"
   },
   "knip": {
-    "include": ["classMembers", "nsExports", "nsTypes"],
+    "include": [
+      "classMembers",
+      "nsExports",
+      "nsTypes"
+    ],
     "rules": {
       "files": "warn",
       "dependencies": "warn",

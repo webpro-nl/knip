@@ -13,10 +13,6 @@ const enablers = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const gitHookPaths = getGitHookPaths();
-
-const config = ['lefthook.yml', ...gitHookPaths];
-
 type Command = {
   run: string;
   root: string;
@@ -52,10 +48,12 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
   return matches ? [matches] : [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  config: options => ['lefthook.yml', ...getGitHookPaths('.git/hooks', true, options.cwd)],
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

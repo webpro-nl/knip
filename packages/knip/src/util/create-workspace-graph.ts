@@ -13,7 +13,8 @@ export function createWorkspaceGraph(
 ) {
   const graph: WorkspaceGraph = new Map();
 
-  const packages = Array.from(wsPackages.values());
+  const packagesByPkgName = new Map<string, WorkspacePackage>();
+  for (const pkg of wsPackages.values()) if (pkg.pkgName) packagesByPkgName.set(pkg.pkgName, pkg);
 
   const getWorkspaceDirs = (pkg: WorkspacePackage) => {
     const dirs = new Set<string>();
@@ -21,7 +22,7 @@ export function createWorkspaceGraph(
       if (pkg.manifest[type]) {
         for (const pkgName in pkg.manifest[type]) {
           if (wsPkgNames.has(pkgName)) {
-            const wsPackage = packages.find(pkg => pkg.pkgName === pkgName);
+            const wsPackage = packagesByPkgName.get(pkgName);
             if (wsPackage) dirs.add(wsPackage.dir);
           }
         }

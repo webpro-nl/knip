@@ -4,12 +4,12 @@
  * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
  */
 import fs from 'node:fs';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { deserialize, serialize } from 'node:v8';
-import { timerify } from './Performance.js';
 import { debugLog } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
+import { timerify } from './Performance.js';
 import { dirname, isAbsolute, resolve } from './path.js';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
@@ -114,7 +114,7 @@ export class FileEntryCache<T> {
   reconcile() {
     this.removeNotFoundFiles();
 
-    for (const [entryName, cacheEntry] of this.normalizedEntries.entries()) {
+    for (const [entryName, cacheEntry] of this.normalizedEntries) {
       try {
         const meta = this._getMetaForFileUsingMtimeAndSize(cacheEntry);
         this.cache.set(entryName, meta);

@@ -9,7 +9,7 @@ const { values } = parseArgs({
   strict: false,
   options: {
     performance: { type: 'boolean' },
-    'performance-fn': { type: 'string' },
+    'performance-fn': { type: 'string', multiple: true },
     memory: { type: 'boolean' },
     'memory-realtime': { type: 'boolean' },
   },
@@ -22,7 +22,7 @@ const isMemoryUsageEnabled = !!values.memory || isMemoryRealtime;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
-  if (timerifyOnlyFnName && name !== timerifyOnlyFnName) return fn;
+  if (timerifyOnlyFnName && !timerifyOnlyFnName.includes(name)) return fn;
   return performance.timerify(Object.defineProperty(fn, 'name', { get: () => name }));
 };
 
@@ -43,7 +43,9 @@ const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) :
 const inMB = (bytes: number) => bytes / 1024 / 1024;
 
 const keys = ['heapUsed', 'heapTotal', 'freemem'] as const;
+// biome-ignore lint: suspicious
 const logHead = () => console.log(keys.map(key => key.padStart(10)).join('  '));
+// biome-ignore lint: suspicious
 const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memInfo[key])).padStart(10)).join('  '));
 
 class Performance {
@@ -152,9 +154,11 @@ class Performance {
 
   getMemoryUsageTable() {
     const table = new Table({ header: true });
+    let i = 0;
     for (const entry of this.memEntries) {
       if (!entry.detail) continue;
       table.row();
+      table.cell('#', String(i++));
       table.cell('heapUsed', inMB(entry.detail.heapUsed), twoFixed);
       table.cell('heapTotal', inMB(entry.detail.heapTotal), twoFixed);
       table.cell('freemem', inMB(entry.detail.freemem), twoFixed);
@@ -162,8 +166,8 @@ class Performance {
     return table.toString();
   }
 
-  getCurrentDurationInMs(startTime?: number) {
-    return performance.now() - (startTime ?? this.startTime);
+  getCurrentDurationInMs() {
+    return performance.now() - this.startTime;
   }
 
   getMemHeapUsage() {

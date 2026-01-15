@@ -39,6 +39,12 @@ const config = [
   'graphql.config.{json,yml,yaml,toml,js,cjs,ts}',
 ];
 
+// https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/plugins.ts#L8-L18
+const getPluginPackageName = (name: string) => {
+  if (name.startsWith('@') || name.includes('codegen-')) return name;
+  return `@graphql-codegen/${name}`;
+};
+
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = config => {
   const codegenConfigs = isGraphqlProjectsConfigTypes(config)
     ? Object.values(config.projects).flatMap(project => project.extensions?.codegen ?? [])
@@ -64,10 +70,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
   const flatPlugins = generateSet
     .filter((config): config is ConfiguredPlugin => !isConfigurationOutput(config))
     .flatMap(item => Object.keys(item))
-    .map(plugin =>
-      // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/plugins.ts#L8-L18
-      plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`
-    );
+    .map(plugin => getPluginPackageName(plugin));
 
   const nestedPlugins = configurationOutput
     .flatMap(configOutput => (configOutput.plugins ? configOutput.plugins : []))
@@ -78,17 +81,19 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
       if (isInternal(plugin)) return [toEntry(plugin)];
-      return [plugin.includes('codegen-') ? plugin : `@graphql-codegen/${plugin}`].map(id => toDependency(id));
+      return [toDependency(getPluginPackageName(plugin))];
     });
 
   return [...presets, ...flatPlugins, ...nestedPlugins].map(id => (typeof id === 'string' ? toDependency(id) : id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

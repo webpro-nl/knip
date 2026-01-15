@@ -16,10 +16,12 @@ const resolve: Resolve = async () => {
   return [toDependency('hardhat')];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   resolve,
-} satisfies Plugin;
+};
+
+export default plugin;

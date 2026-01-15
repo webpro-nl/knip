@@ -180,6 +180,13 @@ notation below is valid and will report only exports tagged `@lintignore` or
 }
 ```
 
+:::caution
+
+Tags must not contain hyphens or plus symbols, so it is recommended to stick to
+letters and avoid snake-case.
+
+:::
+
 Also see [JSDoc & TSDoc Tags][8].
 
 ### `treatConfigHintsAsErrors`
@@ -198,18 +205,42 @@ Exit with non-zero code (1) if there are any configuration hints.
 
 :::tip
 
-Please read [project files configuration][9] before using the `ignore` option,
-because in many cases you'll want to **fine-tune project files** instead.
+Please read [configuring project files][9] before using the `ignore` option.
 
 :::
 
-Array of glob patterns to ignore issues from matching files. Example:
+Avoid `ignore` patterns. There is almost always a better solution:
+
+- Follow up on configuration hints (if there are any).
+- Fine-tune `entry` and `project` patterns.
+- Use [production mode][10].
+- Other `ignore*` options.
+
+**NOTE**: An exception to the rule: to _temporarily_ report only issues in files
+that match the negated `ignore` pattern:
 
 ```json title="knip.json"
 {
-  "ignore": ["src/generated.ts", "fixtures/**"]
+  "ignore": ["!src/dir/**"]
 }
 ```
+
+### `ignoreFiles`
+
+Array of glob patterns of files to exclude from the "Unused files" section only.
+
+Unlike `ignore`, which suppresses all issue types for matching files,
+`ignoreFiles` only affects the `files` issue type. Use this when a file should
+remain analyzed for other issues (exports, dependencies, unresolved) but should
+not be considered for unused file detection.
+
+```json title="knip.json"
+{
+  "ignoreFiles": ["src/generated/**", "fixtures/**"]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreBinaries`
 
@@ -230,6 +261,8 @@ export default {
 };
 ```
 
+Suffix an item with `!` to enable it only in production mode.
+
 ### `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -248,6 +281,10 @@ export default {
   ignoreDependencies: [/@org\/.*/, /^lib-.+/],
 };
 ```
+
+Suffix an item with `!` to enable it only in production mode.
+
+Also see [Unused dependencies][11].
 
 ### `ignoreMembers`
 
@@ -292,6 +329,26 @@ Array of workspaces to ignore, globs allowed. Example:
     "packages/flat/*",
     "packages/deep/**"
   ]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
+
+Prefix an item with `!` to override an earlier wildcard.
+
+### `ignoreIssues`
+
+Ignore specific issue types for specific file patterns. Keys are glob patterns
+and values are arrays of issue types to ignore for matching files. This allows
+ignoring specific issues (like unused exports) in generated files while still
+reporting other issues in those same files.
+
+```json title="knip.json"
+{
+  "ignoreIssues": {
+    "src/generated/**": ["exports", "types"],
+    "**/*.generated.ts": ["exports", "classMembers"]
+  }
 }
 ```
 
@@ -357,7 +414,7 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 Override built-in compilers or add custom compilers for additional file types.
 
-Also see [Compilers][10].
+Also see [Compilers][12].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -368,4 +425,6 @@ Also see [Compilers][10].
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
 [9]: ../guides/configuring-project-files.md
-[10]: ../features/compilers.md
+[10]: ../features/production-mode.md
+[11]: ../guides/handling-issues.mdx#unused-dependencies
+[12]: ../features/compilers.md

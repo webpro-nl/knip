@@ -1,0 +1,23 @@
+{
+  "name": "@knip/language-server",
+  "version": "1.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/types.d.ts",
+      "default": "./src/index.js"
+    },
+    "./constants": "./src/constants.js"
+  },
+  "scripts": {
+    "release": "release-it -c ../../.release-it.json"
+  },
+  "dependencies": {
+    "knip": "workspace:^",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

@@ -1,9 +1,12 @@
 // This file is generated (no need to edit)
 import { default as angular } from './angular/index.js';
 import { default as astro } from './astro/index.js';
+import { default as astroDb } from './astro-db/index.js';
+import { default as astroOgCanvas } from './astro-og-canvas/index.js';
 import { default as ava } from './ava/index.js';
 import { default as babel } from './babel/index.js';
 import { default as biome } from './biome/index.js';
+import { default as bumpp } from './bumpp/index.js';
 import { default as bun } from './bun/index.js';
 import { default as c8 } from './c8/index.js';
 import { default as capacitor } from './capacitor/index.js';
@@ -17,6 +20,7 @@ import { default as createTypescriptApp } from './create-typescript-app/index.js
 import { default as cspell } from './cspell/index.js';
 import { default as cucumber } from './cucumber/index.js';
 import { default as cypress } from './cypress/index.js';
+import { default as danger } from './danger/index.js';
 import { default as dependencyCruiser } from './dependency-cruiser/index.js';
 import { default as docusaurus } from './docusaurus/index.js';
 import { default as dotenv } from './dotenv/index.js';
@@ -34,6 +38,7 @@ import { default as husky } from './husky/index.js';
 import { default as i18nextParser } from './i18next-parser/index.js';
 import { default as jest } from './jest/index.js';
 import { default as karma } from './karma/index.js';
+import { default as knex } from './knex/index.js';
 import { default as ladle } from './ladle/index.js';
 import { default as lefthook } from './lefthook/index.js';
 import { default as lintStaged } from './lint-staged/index.js';
@@ -41,6 +46,8 @@ import { default as linthtml } from './linthtml/index.js';
 import { default as lockfileLint } from './lockfile-lint/index.js';
 import { default as lostPixel } from './lost-pixel/index.js';
 import { default as markdownlint } from './markdownlint/index.js';
+import { default as mdx } from './mdx/index.js';
+import { default as mdxlint } from './mdxlint/index.js';
 import { default as metro } from './metro/index.js';
 import { default as mocha } from './mocha/index.js';
 import { default as moonrepo } from './moonrepo/index.js';
@@ -49,8 +56,11 @@ import { default as nanoStaged } from './nano-staged/index.js';
 import { default as nest } from './nest/index.js';
 import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
-import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
+import { default as nextIntl } from './next-intl/index.js';
+import { default as nextMdx } from './next-mdx/index.js';
+import { default as nitro } from './nitro/index.js';
 import { default as node } from './node/index.js';
+import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as nodemon } from './nodemon/index.js';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.js';
 import { default as nuxt } from './nuxt/index.js';
@@ -58,9 +68,10 @@ import { default as nx } from './nx/index.js';
 import { default as nyc } from './nyc/index.js';
 import { default as oclif } from './oclif/index.js';
 import { default as oxlint } from './oxlint/index.js';
+import { default as parcel } from './parcel/index.js';
+import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
-import { default as playwright } from './playwright/index.js';
 import { default as plop } from './plop/index.js';
 import { default as pnpm } from './pnpm/index.js';
 import { default as postcss } from './postcss/index.js';
@@ -77,6 +88,7 @@ import { default as rollup } from './rollup/index.js';
 import { default as rsbuild } from './rsbuild/index.js';
 import { default as rslib } from './rslib/index.js';
 import { default as rspack } from './rspack/index.js';
+import { default as rstest } from './rstest/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
@@ -88,8 +100,12 @@ import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
 import { default as svgo } from './svgo/index.js';
+import { default as svgr } from './svgr/index.js';
+import { default as swc } from './swc/index.js';
 import { default as syncpack } from './syncpack/index.js';
 import { default as tailwind } from './tailwind/index.js';
+import { default as tanstackRouter } from './tanstack-router/index.js';
+import { default as taskfile } from './taskfile/index.js';
 import { default as travis } from './travis/index.js';
 import { default as tsNode } from './ts-node/index.js';
 import { default as tsdown } from './tsdown/index.js';
@@ -102,6 +118,7 @@ import { default as unocss } from './unocss/index.js';
 import { default as vercelOg } from './vercel-og/index.js';
 import { default as vike } from './vike/index.js';
 import { default as vite } from './vite/index.js';
+import { default as vitepress } from './vitepress/index.js';
 import { default as vitest } from './vitest/index.js';
 import { default as vue } from './vue/index.js';
 import { default as webdriverIo } from './webdriver-io/index.js';
@@ -115,9 +132,12 @@ import { default as yorkie } from './yorkie/index.js';
 export const Plugins = {
   angular,
   astro,
+  'astro-db': astroDb,
+  'astro-og-canvas': astroOgCanvas,
   ava,
   babel,
   biome,
+  bumpp,
   bun,
   c8,
   capacitor,
@@ -131,6 +151,7 @@ export const Plugins = {
   cspell,
   cucumber,
   cypress,
+  danger,
   'dependency-cruiser': dependencyCruiser,
   docusaurus,
   dotenv,
@@ -148,6 +169,7 @@ export const Plugins = {
   'i18next-parser': i18nextParser,
   jest,
   karma,
+  knex,
   ladle,
   lefthook,
   'lint-staged': lintStaged,
@@ -155,6 +177,8 @@ export const Plugins = {
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   markdownlint,
+  mdx,
+  mdxlint,
   metro,
   mocha,
   moonrepo,
@@ -163,6 +187,9 @@ export const Plugins = {
   nest,
   netlify,
   next,
+  'next-intl': nextIntl,
+  'next-mdx': nextMdx,
+  nitro,
   node,
   'node-modules-inspector': nodeModulesInspector,
   nodemon,
@@ -172,6 +199,7 @@ export const Plugins = {
   nyc,
   oclif,
   oxlint,
+  parcel,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
@@ -191,6 +219,7 @@ export const Plugins = {
   rsbuild,
   rslib,
   rspack,
+  rstest,
   'semantic-release': semanticRelease,
   sentry,
   'simple-git-hooks': simpleGitHooks,
@@ -202,8 +231,12 @@ export const Plugins = {
   stylelint,
   svelte,
   svgo,
+  svgr,
+  swc,
   syncpack,
   tailwind,
+  'tanstack-router': tanstackRouter,
+  taskfile,
   travis,
   'ts-node': tsNode,
   tsdown,
@@ -216,6 +249,7 @@ export const Plugins = {
   'vercel-og': vercelOg,
   vike,
   vite,
+  vitepress,
   vitest,
   vue,
   'webdriver-io': webdriverIo,

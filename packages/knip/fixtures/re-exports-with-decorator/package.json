@@ -1,7 +1,11 @@
 {
   "name": "@fixtures/re-exports-with-decorator",
   "knip": {
-    "entry": ["entry.ts"],
-    "project": ["*.ts"]
+    "entry": [
+      "entry.ts"
+    ],
+    "project": [
+      "*.ts"
+    ]
   }
 }

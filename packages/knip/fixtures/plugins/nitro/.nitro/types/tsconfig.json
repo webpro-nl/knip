@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "#imports": ["./nitro-imports"]
+    }
+  },
+  "include": ["./nitro.d.ts", "../../**/*", "../../server/**/*"]
+}

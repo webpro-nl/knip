@@ -35,7 +35,7 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
   const copiedPackages = new Set<string>();
 
   for (const path of Object.keys(dummyUserConfig.passthroughCopies)) {
-    const isDir = !path.includes('*') && isDirectory(join(configFileDir, path));
+    const isDir = !path.includes('*') && isDirectory(configFileDir, path);
     if (isDir) {
       copiedEntries.add(join(path, `**/*.{${exts}}`));
     } else if (!isInNodeModules(path)) {
@@ -59,11 +59,13 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
     );
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

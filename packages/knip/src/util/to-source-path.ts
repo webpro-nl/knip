@@ -3,21 +3,21 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import { DEFAULT_EXTENSIONS } from '../constants.js';
 import { debugLog, debugLogArray } from './debug.js';
 import { isDirectory } from './fs.js';
-import { _glob, _syncGlob } from './glob.js';
+import { _glob, _syncGlob, prependDirToPattern } from './glob.js';
 import { isAbsolute, isInternal, join, toRelative } from './path.js';
 
 const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
-const hasDTSExt = /.d\.(m|c)?ts$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
 export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOptions: CompilerOptions) => {
   const srcDir = join(dir, 'src');
-  workspace.srcDir = compilerOptions.rootDir ?? (isDirectory(srcDir) ? srcDir : dir);
+  const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
+  workspace.srcDir = compilerOptions.rootDir ?? (outDirHasSrc ? dir : isDirectory(srcDir) ? srcDir : dir);
   workspace.outDir = compilerOptions.outDir || workspace.srcDir;
 };
 
-export const getToSourcePathHandler = (chief: ConfigurationChief) => {
+export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
   return (filePath: string) => {
@@ -25,10 +25,7 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace?.srcDir && workspace.outDir) {
-      if (
-        (!filePath.startsWith(workspace.srcDir) && filePath.startsWith(workspace.outDir)) ||
-        (workspace.srcDir === workspace.outDir && hasDTSExt.test(filePath))
-      ) {
+      if (filePath.startsWith(workspace.outDir) || workspace.srcDir === workspace.outDir) {
         const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
         const srcFilePath = _syncGlob({ patterns: pattern })[0];
         toSourceMapCache.set(filePath, srcFilePath);
@@ -42,11 +39,11 @@ export const getToSourcePathHandler = (chief: ConfigurationChief) => {
 };
 
 export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
-  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions) => {
+  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions, label: string) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : join(dir, specifier);
+      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       if (ws?.srcDir && ws.outDir && !absSpecifier.startsWith(ws.srcDir) && absSpecifier.startsWith(ws.outDir)) {
         const pattern = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
@@ -56,7 +53,7 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       }
     }
 
-    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir });
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir, label });
 
     debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
 
@@ -64,4 +61,4 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
   };
 };
 
-export type ToSourceFilePath = ReturnType<typeof getToSourcePathHandler>;
+export type ToSourceFilePath = ReturnType<typeof getModuleSourcePathHandler>;

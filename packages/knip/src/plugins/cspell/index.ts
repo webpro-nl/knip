@@ -12,7 +12,7 @@ const enablers = ['cspell'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = [
-  'cspell.config.{js,cjs,json,yaml,yml}',
+  'cspell.config.{js,cjs,mjs,ts,mts,json,yaml,yml}',
   'cspell.{json,yaml,yml}',
   '.c{s,S}pell.json',
   'c{s,S}pell.json',
@@ -22,10 +22,12 @@ const resolveConfig: ResolveConfig<CSpellConfig> = config => {
   return [config?.import ?? []].flat().map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

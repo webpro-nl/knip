@@ -2,11 +2,14 @@ import { partitionCompilers } from '../compilers/index.js';
 import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
 import { knipConfigurationSchema } from '../schema/configuration.js';
 import type { RawConfiguration } from '../types/config.js';
+import type { IssueType } from '../types/issues.js';
 import type { Options } from '../types/options.js';
-import type parseArgs from './cli-arguments.js';
+import type { PackageJson } from '../types/package-json.js';
+import { getCatalogContainer } from './catalog.js';
+import type { ParsedCLIArgs } from './cli-arguments.js';
 import { ConfigurationError } from './errors.js';
 import { findFile, loadJSON } from './fs.js';
-import { getIncludedIssueTypes, shorthandDeps, shorthandFiles, shorthandTypes } from './get-included-issue-types.js';
+import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
 import { defaultRules } from './issue-initializers.js';
 import { loadResolvedConfigFile } from './load-config.js';
 import { _load } from './loader.js';
@@ -14,13 +17,9 @@ import { getKeysByValue } from './object.js';
 import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.js';
 import { splitTags } from './tag.js';
 
-type ParsedArgs = ReturnType<typeof parseArgs>;
-
 interface CreateOptions extends Partial<Options> {
-  parsedCLIArgs?: ParsedArgs;
+  args?: ParsedCLIArgs;
 }
-
-const pcwd = process.cwd();
 
 /**
  * - Loads package.json/pnpm-workspace.yaml
@@ -28,18 +27,19 @@ const pcwd = process.cwd();
  * - Creates options
  */
 export const createOptions = async (options: CreateOptions) => {
-  const { parsedCLIArgs = {}, ...rest } = options;
-  const cwd = normalize(toPosix(toAbsolute(options.cwd ?? parsedCLIArgs.directory ?? pcwd, pcwd)));
+  const { args = {} } = options;
+  const pcwd = process.cwd();
+  const cwd = normalize(toPosix(toAbsolute(options.cwd ?? args.directory ?? pcwd, pcwd)));
 
   const manifestPath = findFile(cwd, 'package.json');
-  const manifest = manifestPath && (await loadJSON(manifestPath));
+  const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
 
   if (!(manifestPath && manifest)) {
     throw new ConfigurationError('Unable to find package.json');
   }
 
   let configFilePath: string | undefined;
-  for (const configPath of parsedCLIArgs.config ? [parsedCLIArgs.config] : KNIP_CONFIG_LOCATIONS) {
+  for (const configPath of args.config ? [args.config] : KNIP_CONFIG_LOCATIONS) {
     const resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(cwd, configPath);
     if (resolvedConfigFilePath) {
       configFilePath = resolvedConfigFilePath;
@@ -47,33 +47,35 @@ export const createOptions = async (options: CreateOptions) => {
     }
   }
 
-  if (parsedCLIArgs.config && !configFilePath && !manifest.knip) {
-    throw new ConfigurationError(`Unable to find ${parsedCLIArgs.config} or package.json#knip`);
+  if (args.config && !configFilePath && !manifest.knip) {
+    throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
 
   const loadedConfig = Object.assign(
     {},
     manifest.knip,
-    configFilePath ? await loadResolvedConfigFile(configFilePath) : {}
+    configFilePath ? await loadResolvedConfigFile(configFilePath, args) : {}
   );
 
   const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
-  const pnpmWorkspacesPath = findFile(cwd, 'pnpm-workspace.yaml');
-  const pnpmWorkspaces = pnpmWorkspacesPath && (await _load(pnpmWorkspacesPath));
+  const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
+  const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
 
   const workspaces =
-    pnpmWorkspaces?.packages ??
+    pnpmWorkspace?.packages ??
     (manifest.workspaces
       ? Array.isArray(manifest.workspaces)
         ? manifest.workspaces
         : (manifest.workspaces.packages ?? [])
       : []);
 
-  const isStrict = rest.isStrict ?? parsedCLIArgs.strict ?? false;
-  const isProduction = rest.isProduction ?? parsedCLIArgs.production ?? isStrict;
+  const isStrict = options.isStrict ?? args.strict ?? false;
+  const isProduction = options.isProduction ?? args.production ?? isStrict;
+  const isDebug = args.debug ?? false;
+  const isTrace = Boolean(args.trace ?? args['trace-file'] ?? args['trace-export'] ?? args['trace-dependency']);
 
   const rules = { ...defaultRules, ...parsedConfig.rules };
   const excludesFromRules = getKeysByValue(rules, 'off');
@@ -82,47 +84,53 @@ export const createOptions = async (options: CreateOptions) => {
     isProduction,
     exclude: [...excludesFromRules, ...(parsedConfig.exclude ?? [])],
     include: parsedConfig.include ?? [],
-    excludeOverrides: rest.excludedIssueTypes ?? parsedCLIArgs.exclude ?? [],
+    excludeOverrides: options.excludedIssueTypes ?? args.exclude ?? [],
     includeOverrides: [
-      ...(rest.includedIssueTypes ?? parsedCLIArgs.include ?? []),
-      ...(parsedCLIArgs.dependencies ? shorthandDeps : []),
-      ...(parsedCLIArgs.exports ? shorthandTypes : []),
-      ...(parsedCLIArgs.files ? shorthandFiles : []),
+      ...(options.includedIssueTypes ?? args.include ?? []),
+      ...(args.dependencies ? shorthandDeps : []),
+      ...(args.exports ? shorthandExports : []),
+      ...(args.files ? shorthandFiles : []),
     ],
   });
 
-  const fixTypes = rest.fixTypes ?? parsedCLIArgs['fix-type'] ?? [];
-  const isFixFiles = parsedCLIArgs['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
-  const isIncludeLibs = parsedCLIArgs['include-libs'] ?? rest.isIncludeLibs ?? false;
+  for (const [key, value] of Object.entries(includedIssueTypes) as [IssueType, boolean][]) {
+    if (!value) rules[key] = 'off';
+  }
+
+  const fixTypes = options.fixTypes ?? args['fix-type'] ?? [];
+  const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
+  const isIncludeLibs = args['include-libs'] ?? options.isIncludeLibs ?? false;
 
   const isReportClassMembers = includedIssueTypes.classMembers;
-  const tags = splitTags(
-    parsedCLIArgs.tags ?? rest.tags ?? parsedConfig.tags ?? parsedCLIArgs['experimental-tags'] ?? []
-  );
+  const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? args['experimental-tags'] ?? []);
+
+  const workspace = options.workspace ?? args.workspace;
 
   return {
-    cacheLocation: parsedCLIArgs['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
-    config: parsedCLIArgs.config,
+    cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
+    catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
+    config: args.config,
     configFilePath,
     cwd,
-    dependencies: parsedCLIArgs.dependencies ?? false,
+    dependencies: args.dependencies ?? false,
     experimentalTags: tags,
-    exports: parsedCLIArgs.exports ?? false,
-    files: parsedCLIArgs.files ?? false,
+    exports: args.exports ?? false,
+    files: args.files ?? false,
     fixTypes,
-    gitignore: parsedCLIArgs['no-gitignore'] ? false : (rest.gitignore ?? true),
+    gitignore: args['no-gitignore'] ? false : (options.gitignore ?? true),
     includedIssueTypes,
-    isCache: parsedCLIArgs.cache ?? false,
-    isDebug: parsedCLIArgs.debug ?? false,
-    isDisableConfigHints: parsedCLIArgs['no-config-hints'] || isProduction || Boolean(parsedCLIArgs.workspace),
-    isFix: parsedCLIArgs.fix ?? rest.isFix ?? false,
+    isCache: args.cache ?? false,
+    isDebug,
+    isDisableConfigHints: args['no-config-hints'] || isProduction || Boolean(workspace),
+    isFix: args.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
+    isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
     isFixFiles,
     isFixUnusedExports: fixTypes.length === 0 || fixTypes.includes('exports'),
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
-    isFormat: parsedCLIArgs.format ?? rest.isFormat ?? false,
-    isIncludeEntryExports: parsedCLIArgs['include-entry-exports'] ?? rest.isIncludeEntryExports ?? false,
-    isIsolateWorkspaces: rest.isIsolateWorkspaces ?? parsedCLIArgs['isolate-workspaces'] ?? false,
+    isFormat: args.format ?? options.isFormat ?? false,
+    isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
+    isIsolateWorkspaces: options.isIsolateWorkspaces ?? args['isolate-workspaces'] ?? false,
     isProduction,
     isReportClassMembers,
     isReportDependencies:
@@ -130,23 +138,40 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.unlisted ||
       includedIssueTypes.unresolved ||
       includedIssueTypes.binaries,
+    isReportExports:
+      includedIssueTypes.exports ||
+      includedIssueTypes.types ||
+      includedIssueTypes.nsExports ||
+      includedIssueTypes.nsTypes ||
+      includedIssueTypes.enumMembers ||
+      includedIssueTypes.duplicates ||
+      isReportClassMembers,
+    isReportFiles: includedIssueTypes.files,
     isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
+    isSession: options.isSession ?? false,
     isShowProgress:
-      parsedCLIArgs['no-progress'] === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function',
+      !isDebug &&
+      !isTrace &&
+      args['no-progress'] !== true &&
+      options.isShowProgress !== false &&
+      process.stdout.isTTY &&
+      typeof process.stdout.cursorTo === 'function',
     isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
     isStrict,
-    isTrace: parsedCLIArgs.trace ?? false,
-    isTreatConfigHintsAsErrors:
-      parsedCLIArgs['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
-    isWatch: parsedCLIArgs.watch ?? rest.isWatch ?? false,
+    isTrace,
+    isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
+    isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
+    isWatch: args.watch ?? options.isWatch ?? false,
+    maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
     rules,
     tags,
-    traceExport: parsedCLIArgs['trace-export'],
-    traceFile: parsedCLIArgs['trace-file'],
-    tsConfigFile: parsedCLIArgs.tsConfig,
-    workspace: rest.workspace ?? parsedCLIArgs.workspace,
+    traceDependency: args['trace-dependency'],
+    traceExport: args['trace-export'],
+    traceFile: args['trace-file'] ? toAbsolute(args['trace-file'], cwd) : undefined,
+    tsConfigFile: args.tsConfig,
+    workspace,
     workspaces,
   };
 };

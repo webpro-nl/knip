@@ -31,7 +31,7 @@ type PluginConfig =
         isServer?: boolean,
         utils?: {
           getStyleLoaders(isServer: boolean, cssOptions: { [key: string]: any }): Loader[];
-          // biome-ignore lint/complexity/noBannedTypes: deal with it
+          // biome-ignore lint: complexity/noBannedTypes
           getJSLoader(isServer: boolean, cacheOptions?: {}): Loader | null;
         },
         content?: unknown

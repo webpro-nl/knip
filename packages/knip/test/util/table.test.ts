@@ -1,5 +1,5 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { Table } from '../../src/util/table.js';
 
 test('Render table with column gaps and truncated values', () => {

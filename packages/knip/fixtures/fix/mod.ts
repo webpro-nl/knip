@@ -1,9 +1,9 @@
 export const x = 1;
 export const y = 2;
 
-// biome-ignore lint/suspicious/noEmptyInterface:  fixture festa
+// biome-ignore lint: suspicious/noEmptyInterface
 export interface McInterFace {}
-// biome-ignore lint/complexity/noBannedTypes:  fixture festa
+// biome-ignore lint: complexity/noBannedTypes
 export type McType = {};
 export enum McEnum {}
 

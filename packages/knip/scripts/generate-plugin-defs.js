@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { EOL } from 'node:os';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 
 const HEADER = '// This file is generated (no need to edit)';
@@ -31,16 +31,16 @@ const pluginsObj = `export const Plugins = {${pluginNames
 fs.writeFileSync(outputFilePlugins, HEADER + EOL + imports + EOL + EOL + pluginsObj);
 
 const pluginSchemas = pluginNames.map(name => `'${name}': pluginSchema`).join(`,${EOL}`);
-const pluginSchema = `import { z } from 'zod';
+const pluginSchema = `import { z } from 'zod/mini';
 export const globSchema = z.union([z.string(), z.array(z.string())]);
 
 export const pluginSchema = z.union([
   z.boolean(),
   globSchema,
   z.object({
-    config: globSchema.optional(),
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
+    config: z.optional(globSchema),
+    entry: z.optional(globSchema),
+    project: z.optional(globSchema),
   }),
 ]);
 

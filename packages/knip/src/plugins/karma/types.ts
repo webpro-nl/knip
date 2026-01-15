@@ -49,7 +49,7 @@ type InlinePluginType = FactoryFnType | ConstructorFnType | ValueType;
 type FactoryFnType = ['factory', FactoryFn];
 type FactoryFn = (...params: any[]) => any;
 type ConstructorFnType = ['type', ConstructorFn];
-// biome-ignore lint/complexity/noBannedTypes: copy/pasted
+// biome-ignore lint: complexity/noBannedTypes
 type ConstructorFn = Function | (new (...params: any[]) => any);
 type ValueType = ['value', any];
 

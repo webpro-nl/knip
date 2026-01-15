@@ -15,9 +15,11 @@ const production = [
   // 'api/og.{jsx,tsx}', // TODO maybe add for non-Next.js projects
 ];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

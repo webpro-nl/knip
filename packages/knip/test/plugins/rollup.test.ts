@@ -1,8 +1,8 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { main } from '../../src/index.js';
-import { createOptions } from '../../src/util/create-options.js';
 import baseCounters from '../helpers/baseCounters.js';
+import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/rollup');
@@ -19,7 +19,6 @@ test('Find dependencies with the Rollup plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 0,
-    files: 1,
     unlisted: 4,
     processed: 2,
     total: 2,

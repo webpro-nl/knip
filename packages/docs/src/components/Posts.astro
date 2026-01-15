@@ -1,7 +1,7 @@
 ---
 import { readFile } from 'node:fs/promises';
 import { Card, CardGrid } from '@astrojs/starlight/components';
-import { type PostResponse, formatTimestamp } from '../util/post.js';
+import { formatTimestamp, type PostResponse } from '../util/post.js';
 import Post from './Post.astro';
 
 const BEARER_TOKEN = import.meta.env.BEARER_TOKEN;

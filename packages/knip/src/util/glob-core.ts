@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
-import { type Entry, walk as _walk } from '@nodelib/fs.walk';
+import { walk as _walk, type Entry } from '@nodelib/fs.walk';
 import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
-import { timerify } from './Performance.js';
 import { compact, partition } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
+import { timerify } from './Performance.js';
 import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
 import { dirname, join, relative, toPosix } from './path.js';
 
@@ -31,16 +31,31 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 // ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
 
+// Check if directory is a git root (has .git directory or .git file for worktrees)
+const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
+
+// Get the git directory path, handling worktrees where .git is a file containing "gitdir: /path/to/git/dir"
+const getGitDir = (cwd: string): string | undefined => {
+  const dotGit = join(cwd, '.git');
+  if (isDirectory(dotGit)) return dotGit;
+  if (isFile(dotGit)) {
+    const content = readFileSync(dotGit, 'utf8').trim();
+    const match = content.match(/^gitdir:\s*(.+)$/);
+    if (match) return join(cwd, match[1]);
+  }
+  return undefined;
+};
+
 const findAncestorGitignoreFiles = (cwd: string): string[] => {
   const gitignorePaths: string[] = [];
-  if (isDirectory(join(cwd, '.git'))) return gitignorePaths;
+  if (isGitRoot(cwd)) return gitignorePaths;
   let dir = dirname(cwd);
   let prev: string;
   while (dir) {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
-    if (isDirectory(join(dir, '.git'))) break;
-    // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+    if (isGitRoot(dir)) break;
+    // biome-ignore lint: suspicious/noAssignInExpressions
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
   }
@@ -128,7 +143,11 @@ export const findAndParseGitignores = async (cwd: string) => {
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
 
-  if (isFile('.git/info/exclude')) addFile('.git/info/exclude', cwd);
+  const gitDir = getGitDir(cwd);
+  if (gitDir) {
+    const excludePath = join(gitDir, 'info/exclude');
+    if (isFile(excludePath)) addFile(excludePath, cwd);
+  }
 
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
@@ -159,7 +178,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
-  const _ignore = [];
+  const _ignore: string[] = [];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
   if (options.gitignore) {
@@ -172,7 +191,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
           // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
           _ignore.push(...cacheForDir.ignores);
         }
-        // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+        // biome-ignore lint: suspicious/noAssignInExpressions
         dir = dirname((prev = dir));
         if (prev === dir || dir === '.') break;
       }
@@ -183,20 +202,25 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
 
-  const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns);
+  const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
 
   const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
 
   const paths = await fg.glob(patterns, fgOptions);
 
-  const name = relative(options.cwd, dir) || ROOT_WORKSPACE_NAME;
-
-  debugLogObject(name, label ? `Finding ${label}` : 'Finding paths', () => ({
-    patterns,
-    ...fgOptions,
-    ignore: hasCache ? `// using cache from ${name}` : ignorePatterns,
-    paths,
-  }));
+  debugLogObject(
+    relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
+    label ? `Finding ${label}` : 'Finding paths',
+    () => ({
+      patterns,
+      ...fgOptions,
+      ignore:
+        hasCache && ignorePatterns.length === (cachedIgnores || _ignore).length
+          ? `// using cache from previous glob cwd: ${fgOptions.cwd}`
+          : ignorePatterns,
+      paths,
+    })
+  );
 
   return paths;
 }

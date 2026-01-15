@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+
+catalog:
+  react: ^18.0.0
+  typescript: ^5.0.0
+  lodash: ^4.17.21
