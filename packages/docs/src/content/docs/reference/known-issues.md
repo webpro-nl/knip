@@ -23,7 +23,10 @@ the cause of the issue with more details.
 Potential workarounds:
 
 - [Set path aliases][2] for "Cannot find module" errors
-- Set missing environment variable(s)
+- Set missing environment variable(s), potential solutions:
+  - Use a helper package like [dotenvx][3]
+  - `KEY=VAL knip`
+  - `node --env-file .env $(which knip)`
 - Disable loading the file by overriding the default `config` for that plugin.
   - Example: `vite: { config: [] }`
   - In a monorepo, be more specific like so:
@@ -58,8 +61,8 @@ Potential workarounds:
 - Rewrite the import in the configuration file to a relative import.
 - Inject support with a module like `tsx`: `NODE_OPTIONS="--import tsx" knip`
 - Or `tsconfig-paths`: `NODE_OPTIONS="--import tsconfig-paths/register.js" knip`
-- Use Bun with [knip-bun][3].
-- See [exceptions from config files][4] for more potential workarounds.
+- Use Bun with [knip-bun][4].
+- See [exceptions from config files][5] for more potential workarounds.
 
 ## Nx Daemon
 
@@ -69,7 +72,7 @@ In Nx projects you might encounter this error:
 NX   Daemon process terminated and closed the connection
 ```
 
-The solution is to [disable the Nx Daemon][5]:
+The solution is to [disable the Nx Daemon][6]:
 
 ```sh
 NX_DAEMON=false knip
@@ -77,6 +80,7 @@ NX_DAEMON=false knip
 
 [1]: ../guides/handling-issues.mdx
 [2]: #path-aliases-in-config-files
-[3]: ./cli.md#knip-bun
-[4]: #exceptions-from-config-files
-[5]: https://nx.dev/concepts/nx-daemon#turning-it-off
+[3]: https://dotenvx.com/
+[4]: ./cli.md#knip-bun
+[5]: #exceptions-from-config-files
+[6]: https://nx.dev/concepts/nx-daemon#turning-it-off

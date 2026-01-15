@@ -9,6 +9,7 @@ import {
   hasErrorCause,
   isConfigurationError,
   isKnownError,
+  isLoaderError,
   isModuleNotFoundError,
 } from './util/errors.js';
 import { logError, logWarning } from './util/log.js';
@@ -122,6 +123,8 @@ const main = async () => {
         console.error('Reason:', knownErrors[0].cause.message);
         if (isModuleNotFoundError(knownErrors[0].cause))
           console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+        if (isLoaderError(knownErrors[0]))
+          console.log('Configuration file load error? Visit https://knip.dev/reference/known-issues');
       }
       if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
