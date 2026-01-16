@@ -478,4 +478,8 @@ export class DependencyDeputy {
   public addIgnoredBinaries(workspaceName: string, identifier: string) {
     this._manifests.get(workspaceName)?.ignoreBinaries.push(toRegexOrString(identifier));
   }
+
+  public addIgnoredUnresolved(workspaceName: string, identifier: string) {
+    this._manifests.get(workspaceName)?.ignoreUnresolved.push(toRegexOrString(identifier));
+  }
 }

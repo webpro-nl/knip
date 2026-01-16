@@ -225,6 +225,8 @@ export async function build({
           deputy.addIgnoredDependencies(name, input.specifier);
         } else if (input.issueType === 'binaries') {
           deputy.addIgnoredBinaries(name, input.specifier);
+        } else if (input.issueType === 'unresolved') {
+          deputy.addIgnoredUnresolved(name, input.specifier);
         }
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
