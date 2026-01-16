@@ -729,6 +729,10 @@
           "title": "svelte plugin configuration (https://knip.dev/reference/plugins/svelte)",
           "$ref": "#/definitions/plugin"
         },
+        "sveltekit": {
+          "title": "sveltekit plugin configuration (https://knip.dev/reference/plugins/sveltekit)",
+          "$ref": "#/definitions/plugin"
+        },
         "svgo": {
           "title": "svgo plugin configuration (https://knip.dev/reference/plugins/svgo)",
           "$ref": "#/definitions/plugin"

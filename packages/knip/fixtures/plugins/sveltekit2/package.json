@@ -1,8 +1,7 @@
 {
-  "name": "@fixtures/svelte",
+  "name": "@fixtures/sveltekit2",
   "type": "module",
   "devDependencies": {
-    "@sveltejs/adapter-auto": "*",
     "@sveltejs/kit": "*",
     "svelte": "*",
     "typescript": "*",
