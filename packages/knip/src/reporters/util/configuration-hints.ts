@@ -25,8 +25,11 @@ const getWorkspaceName = (hint: ConfigurationHint) =>
     ? hint.workspaceName
     : '';
 
-const getIdentifier = (hint: ConfigurationHint) =>
-  hint.identifier === '.' ? `. ${dim('(root)')}` : hint.identifier.toString();
+const getIdentifier = (hint: ConfigurationHint) => {
+  if (hint.identifier === '.') return `. ${dim('(root)')}`;
+  if (hint.identifier instanceof RegExp) return hint.identifier.source.replaceAll('\\/', '/');
+  return hint.identifier.toString();
+};
 
 const getTableForHints = (hints: TableRow[]) => {
   const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
