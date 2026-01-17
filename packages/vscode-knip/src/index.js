@@ -150,43 +150,30 @@ export class Extension {
   }
 
   /**
-   * Detects package manager by searching for lock files and package.json packageManager field.
-   * Searches upward from workspace directory until finding a lock file or reaching project boundaries.
+   * Detects package manager by checking for lock files and package.json packageManager field.
    * @param {string} workspace - Workspace directory path
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
+   * @throws {Error} If no package manager can be detected
    */
   #detectPackageManager(workspace) {
-    let currentDir = workspace;
-    const vsWorkspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (existsSync(path.join(workspace, 'pnpm-lock.yaml'))) return 'pnpm';
+    if (existsSync(path.join(workspace, 'yarn.lock'))) return 'yarn';
+    if (existsSync(path.join(workspace, 'package-lock.json'))) return 'npm';
 
-    while (currentDir && currentDir !== path.dirname(currentDir)) {
-      if (existsSync(path.join(currentDir, 'pnpm-lock.yaml'))) return 'pnpm';
-      if (existsSync(path.join(currentDir, 'yarn.lock'))) return 'yarn';
-      if (existsSync(path.join(currentDir, 'package-lock.json'))) return 'npm';
-
-      const packageJsonPath = path.join(currentDir, 'package.json');
-      if (existsSync(packageJsonPath)) {
-        try {
-          const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-          if (packageJson.packageManager) {
-            const [pmName] = packageJson.packageManager.split('@');
-            if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
-              return pmName;
-            }
+    const packageJsonPath = path.join(workspace, 'package.json');
+    if (existsSync(packageJsonPath)) {
+      try {
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+        if (packageJson.packageManager) {
+          const [pmName] = packageJson.packageManager.split('@');
+          if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
+            return pmName;
           }
-          if (packageJson.workspaces) break;
-        } catch (_error) {
-          // Invalid JSON or read error, continue searching
         }
-      }
-
-      if (existsSync(path.join(currentDir, '.git'))) break;
-      if (vsWorkspaceRoot && currentDir === vsWorkspaceRoot) break;
-
-      currentDir = path.dirname(currentDir);
+      } catch (_error) {}
     }
 
-    return 'npm';
+    throw new Error('Could not detect package manager. Please ensure a lock file (pnpm-lock.yaml, yarn.lock, or package-lock.json) exists in your project.');
   }
 
   #registerCommands() {
@@ -235,7 +222,7 @@ export class Extension {
         terminal.show();
         terminal.sendText(command);
       } catch (error) {
-        vscode.window.showErrorMessage(`Failed to install dependency: ${error.message}`);
+        vscode.window.showErrorMessage(`Failed to install dependency: ${getErrorMessage(error)}`);
       }
     });
 
