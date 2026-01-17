@@ -359,21 +359,25 @@ export class LanguageServer {
 
       if (issueType === 'unlisted') {
         codeActions.push({
-          title: `Add '${issue.symbol}' to dependencies in package.json`,
+          title: `Install '${issue.symbol}' as dependency`,
           kind: CodeActionKind.QuickFix,
           diagnostics: [diagnostic],
+          command: {
+            title: `Install '${issue.symbol}' as dependency`,
+            command: 'knip.installDependency',
+            arguments: [issue.symbol, 'dependencies', issue.workspace],
+          },
         });
 
         codeActions.push({
-          title: `Add '${issue.symbol}' to devDependencies in package.json`,
+          title: `Install '${issue.symbol}' as devDependency`,
           kind: CodeActionKind.QuickFix,
           diagnostics: [diagnostic],
-        });
-
-        codeActions.push({
-          title: `Add '@types/${issue.symbol}' to devDependencies in package.json`,
-          kind: CodeActionKind.QuickFix,
-          diagnostics: [diagnostic],
+          command: {
+            title: `Install '${issue.symbol}' as devDependency`,
+            command: 'knip.installDependency',
+            arguments: [issue.symbol, 'devDependencies', issue.workspace],
+          },
         });
       }
 
