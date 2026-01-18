@@ -90,7 +90,7 @@ a regex that works too:
 
 <img src="/screenshots/trace-dependency.png" alt="trace dependency" class="mw500" />
 
-Use [--workspace \[dir\]][8] to filter accordingly.
+Use [--workspace \[filter\]][8] to filter accordingly.
 
 #### Legend
 
@@ -124,7 +124,7 @@ to [open an issue on GitHub][14].
 [5]: ../guides/handling-issues.mdx
 [6]: ./issue-reproduction.md
 [7]: ../reference/known-issues.md
-[8]: ../reference/cli.md#--workspace-dir
+[8]: ../reference/cli.md#--workspace-filter
 [9]: ../explanations/entry-files.md
 [10]: ../explanations/plugins.md
 [11]: ../features/production-mode.md

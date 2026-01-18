@@ -569,6 +569,10 @@
           "title": "next-mdx plugin configuration (https://knip.dev/reference/plugins/next-mdx)",
           "$ref": "#/definitions/plugin"
         },
+        "nitro": {
+          "title": "nitro plugin configuration (https://knip.dev/reference/plugins/nitro)",
+          "$ref": "#/definitions/plugin"
+        },
         "node": {
           "title": "node plugin configuration (https://knip.dev/reference/plugins/node)",
           "$ref": "#/definitions/plugin"
@@ -723,6 +727,10 @@
         },
         "svelte": {
           "title": "svelte plugin configuration (https://knip.dev/reference/plugins/svelte)",
+          "$ref": "#/definitions/plugin"
+        },
+        "sveltekit": {
+          "title": "sveltekit plugin configuration (https://knip.dev/reference/plugins/sveltekit)",
           "$ref": "#/definitions/plugin"
         },
         "svgo": {

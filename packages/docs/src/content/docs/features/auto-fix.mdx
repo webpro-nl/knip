@@ -91,9 +91,9 @@ configuration in your project.
 
 ### 2. Unused variables
 
-Use a tool like ESLint or Biome to find and remove unused variables inside
-files. Even better, try [remove-unused-vars][3] to remove unused variables
-within files.
+Use a tool like ESLint or Biome to find and remove unused imports and variables
+inside files. Even better, try [remove-unused-vars][3] to remove unused
+variables within files.
 
 This may result in more deleted code, and Knip may then find more unused code.
 Rinse and repeat!
@@ -316,6 +316,20 @@ component are unused and will remove those.
 
 Note that [`classMembers` aren't included by default][4].
 
+### Catalog entries
+
+Unused [catalog][5] entries are removed from `pnpm-workspace.yaml`:
+
+```diff title="pnpm-workspace.yaml"
+ packages:
+   - 'packages/*'
+ catalog:
+   react: ^18.0.0
+-  unused-package: ^1.0.0
+```
+
+Catalogs in `package.json` are supported as well.
+
 ## What's not included
 
 Operations that auto-fix does not (yet) perform and why:
@@ -331,3 +345,4 @@ Operations that auto-fix does not (yet) perform and why:
 [2]: https://github.com/JoshuaKGoldberg/formatly
 [3]: https://github.com/webpro-nl/remove-unused-vars
 [4]: ../guides/handling-issues.mdx#class-members
+[5]: https://pnpm.io/catalogs

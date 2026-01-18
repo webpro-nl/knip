@@ -68,6 +68,22 @@ const hasWorkspaces = manifest => {
   return false;
 };
 
+const findPackageJsonFiles = (dir, depth = 0) => {
+  if (depth > 3) return [];
+  const dirs = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      dirs.push(...findPackageJsonFiles(fullPath, depth + 1));
+    } else if (entry.name === 'package.json' && dir !== process.cwd()) {
+      dirs.push(path.relative(process.cwd(), dir));
+    }
+  }
+  return dirs;
+};
+
 const getWorkspaceFlag = (manifest, pm) => {
   if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces(manifest) ? '-w' : undefined;
 };
@@ -113,7 +129,9 @@ const main = () => {
     tags: ['-lintignore'],
   };
 
-  if (hasWorkspaces(manifest)) knipConfig.workspaces = { '.': {} };
+  const hasExplicitWorkspaces = hasWorkspaces(manifest);
+
+  if (hasExplicitWorkspaces) knipConfig.workspaces = { '.': {} };
 
   try {
     if (!fileExists('knip.json')) {
@@ -129,13 +147,24 @@ const main = () => {
   try {
     execSync('npm pkg set scripts.knip=knip', { stdio: ['inherit', 'inherit', 'ignore'] });
     console.info('✓ Add knip to package.json#scripts');
-    console.info('');
-    console.info(`→ Run \`${bin} run knip --max-show-issues 5\` to run Knip for the first time`);
   } catch {
     console.warn('× Failed to add knip to package.json#scripts');
-    console.info('');
-    console.info(`→ Run \`${getBinX(bin)} knip --max-show-issues 5\` to run Knip for the first time`);
   }
+
+  if (!hasExplicitWorkspaces) {
+    const packages = findPackageJsonFiles(process.cwd());
+    if (packages.length > 0) {
+      console.info('');
+      console.info('⚠ Found package.json files in subdirectories:');
+      for (const pkg of packages.slice(0, 5)) console.info(`- ${pkg}`);
+      if (packages.length > 5) console.info(`- ...and ${packages.length - 5} more`);
+      console.info('Consider adding workspaces to knip.json:');
+      console.info('More details: https://knip.dev/features/monorepos-and-workspaces#additional-workspaces');
+    }
+  }
+
+  console.info('');
+  console.info(`→ Run \`${getBinX(bin)} knip --max-show-issues 5\` to run Knip for the first time`);
 
   console.info(`→ Continue with https://knip.dev/overview/configuration`);
 };

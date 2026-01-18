@@ -84,14 +84,13 @@ export class DependencyDeputy {
     const dependencies = Object.keys(manifest.dependencies ?? {});
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
     const optionalDependencies = Object.keys(manifest.optionalDependencies ?? {});
-    const optionalPeerDependencies = manifest.peerDependenciesMeta
-      ? peerDependencies.filter(
-          peerDependency =>
-            manifest.peerDependenciesMeta &&
-            peerDependency in manifest.peerDependenciesMeta &&
-            manifest.peerDependenciesMeta[peerDependency].optional
-        )
-      : [];
+    const optionalPeerDependencies: Set<string> = new Set();
+    if (manifest.peerDependenciesMeta) {
+      for (const dep of peerDependencies) {
+        if (manifest.peerDependenciesMeta[dep]?.optional) optionalPeerDependencies.add(dep);
+      }
+    }
+    const requiredPeerDependencies = peerDependencies.filter(dep => !optionalPeerDependencies.has(dep));
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
@@ -131,6 +130,7 @@ export class DependencyDeputy {
       devDependencies,
       peerDependencies: new Set(peerDependencies),
       optionalPeerDependencies,
+      requiredPeerDependencies,
       allDependencies: new Set(allDependencies),
     });
   }
@@ -142,7 +142,7 @@ export class DependencyDeputy {
   getProductionDependencies(workspaceName: string): DependencyArray {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return [];
-    if (this.isStrict) return [...manifest.dependencies, ...manifest.peerDependencies];
+    if (this.isStrict) return [...manifest.dependencies, ...manifest.requiredPeerDependencies];
     return manifest.dependencies;
   }
 
@@ -194,10 +194,8 @@ export class DependencyDeputy {
     return this.hostDependencies.get(workspaceName)?.get(dependency) ?? [];
   }
 
-  getOptionalPeerDependencies(workspaceName: string): DependencyArray {
-    const manifest = this._manifests.get(workspaceName);
-    if (!manifest) return [];
-    return manifest.optionalPeerDependencies;
+  getOptionalPeerDependencies(workspaceName: string): DependencySet {
+    return this._manifests.get(workspaceName)?.optionalPeerDependencies ?? new Set();
   }
 
   /**
@@ -330,7 +328,8 @@ export class DependencyDeputy {
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
 
-      for (const symbol of this.getOptionalPeerDependencies(workspace).filter(d => isReferencedDependency(d))) {
+      for (const symbol of this.getOptionalPeerDependencies(workspace)) {
+        if (!isReferencedDependency(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({
           type: 'optionalPeerDependencies',
@@ -478,5 +477,9 @@ export class DependencyDeputy {
 
   public addIgnoredBinaries(workspaceName: string, identifier: string) {
     this._manifests.get(workspaceName)?.ignoreBinaries.push(toRegexOrString(identifier));
+  }
+
+  public addIgnoredUnresolved(workspaceName: string, identifier: string) {
+    this._manifests.get(workspaceName)?.ignoreUnresolved.push(toRegexOrString(identifier));
   }
 }

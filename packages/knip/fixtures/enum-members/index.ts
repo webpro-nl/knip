@@ -10,3 +10,5 @@ export enum EntryEnum {
 }
 
 function setCategory(cat: Category) {}
+
+type CategoryKey = keyof typeof Category;

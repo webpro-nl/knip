@@ -75,6 +75,7 @@ export type ReporterOptions = {
   options: string;
   preprocessorOptions: string;
   includedWorkspaceDirs: string[];
+  selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
 };

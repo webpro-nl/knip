@@ -280,6 +280,11 @@ export const getTypeRef = (node: ts.Identifier) => {
   return findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
 };
 
+export const isKeyofTypeof = (node: ts.Identifier) =>
+  ts.isTypeQueryNode(node.parent) &&
+  ts.isTypeOperatorNode(node.parent.parent) &&
+  node.parent.parent.operator === ts.SyntaxKind.KeyOfKeyword;
+
 export const isImportSpecifier = (node: ts.Node) =>
   ts.isImportSpecifier(node.parent) ||
   ts.isImportEqualsDeclaration(node.parent) ||

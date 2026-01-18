@@ -58,6 +58,7 @@ import { default as netlify } from './netlify/index.js';
 import { default as next } from './next/index.js';
 import { default as nextIntl } from './next-intl/index.js';
 import { default as nextMdx } from './next-mdx/index.js';
+import { default as nitro } from './nitro/index.js';
 import { default as node } from './node/index.js';
 import { default as nodeModulesInspector } from './node-modules-inspector/index.js';
 import { default as nodemon } from './nodemon/index.js';
@@ -98,6 +99,7 @@ import { default as storybook } from './storybook/index.js';
 import { default as stryker } from './stryker/index.js';
 import { default as stylelint } from './stylelint/index.js';
 import { default as svelte } from './svelte/index.js';
+import { default as sveltekit } from './sveltekit/index.js';
 import { default as svgo } from './svgo/index.js';
 import { default as svgr } from './svgr/index.js';
 import { default as swc } from './swc/index.js';
@@ -188,6 +190,7 @@ export const Plugins = {
   next,
   'next-intl': nextIntl,
   'next-mdx': nextMdx,
+  nitro,
   node,
   'node-modules-inspector': nodeModulesInspector,
   nodemon,
@@ -228,6 +231,7 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  sveltekit,
   svgo,
   svgr,
   swc,

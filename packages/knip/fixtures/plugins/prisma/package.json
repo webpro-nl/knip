@@ -6,15 +6,20 @@
     "@prisma/client3": "*"
   },
   "devDependencies": {
+    "lint-staged": "*",
     "prisma": "*",
     "tsx": "*"
   },
   "scripts": {
+    "lint-staged": "lint-staged",
     "generate": "prisma generate --schema prisma/schema-script.prisma --config config/prisma.custom-config.ts",
     "generate-multi-schema": "prisma generate --schema prisma-multi-schema"
   },
   "prisma": {
     "schema": "prisma/schema-package-json.prisma",
     "seed": "tsx prisma/seed-package-json.ts"
+  },
+  "lint-staged": {
+    "*.prisma": "prisma format --schema"
   }
 }

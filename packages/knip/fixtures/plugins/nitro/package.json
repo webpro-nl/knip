@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/nitro",
+  "scripts": {
+    "build": "nitro build",
+    "dev": "nitro dev",
+    "preview": "node .output/server/index.mjs",
+    "postinstall": "nitro prepare"
+  },
+  "devDependencies": {
+    "h3": "*",
+    "nitropack": "*"
+  }
+}

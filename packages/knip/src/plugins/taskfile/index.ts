@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { _firstGlob } from '../../util/glob.js';
+import { isFile } from '../../util/fs.js';
 import type { Input } from '../../util/input.js';
 import { toConfig } from '../../util/input.js';
 import { join, relative } from '../../util/path.js';
@@ -14,11 +14,20 @@ const enablers =
 
 const isRootOnly = true;
 
-const defaultConfigPatterns = ['{T,t}askfile.{yml,yaml}', '{T,t}askfile.dist.{yml,yaml}'];
+const taskFiles = [
+  'Taskfile.yml',
+  'taskfile.yml',
+  'Taskfile.yaml',
+  'taskfile.yaml',
+  'Taskfile.dist.yml',
+  'taskfile.dist.yml',
+  'Taskfile.dist.yaml',
+  'taskfile.dist.yaml',
+];
 
 const isEnabled: IsPluginEnabled = async ({ cwd, config }) => {
   if (config.taskfile) return true;
-  return Boolean(await _firstGlob({ cwd, patterns: defaultConfigPatterns }));
+  return taskFiles.some(file => isFile(cwd, file));
 };
 
 const extractScriptsFromCommand = (command: TaskfileCommand): string[] => {
@@ -120,7 +129,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config: defaultConfigPatterns,
+  config: taskFiles,
   resolveConfig,
   isRootOnly,
 };

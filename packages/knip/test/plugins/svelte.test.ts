@@ -11,13 +11,12 @@ test('Use compilers (svelte)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.devDependencies['package.json']['@types/cookie']);
-  assert(issues.devDependencies['package.json']['tslib']);
+  assert(issues.devDependencies['package.json']['svelte']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 2,
-    processed: 16,
-    total: 16,
+    devDependencies: 1,
+    processed: 18,
+    total: 18,
   });
 });

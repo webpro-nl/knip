@@ -20,6 +20,13 @@ JavaScript and TypeScript projects.
 - For features and issues concerning the module graph, make sure to consult
   [ModuleGraph type definitions][2].
 
+## Implementation
+
+- Avoid redundant code and abstractions.
+- Avoid unnecessary complexity and nesting.
+- Prefer plain `for..in/of` loops over iterator methods like `map` and `reduce`.
+- Concise one-liners are fine, but prioritize clarity over cleverness.
+
 ## Implementation walk-through
 
 The sequence from [CLI][3]:
