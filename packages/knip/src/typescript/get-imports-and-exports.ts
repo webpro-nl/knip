@@ -516,17 +516,18 @@ const getImportsAndExports = (
             }
           }
         }
+      }
 
-        // Store exports referenced in exported types, including `typeof` values
-        // Simplifies and speeds up (*) below while we still have the typeChecker
-        if (!isTopLevel && symbol.exportSymbol) {
-          const containingExport = isReferencedInExport(node);
-          if (containingExport) {
-            const referencedId = String(symbol.exportSymbol.escapedName);
-            const refs = referencedInExport.get(referencedId);
-            if (refs) refs.add(containingExport);
-            else referencedInExport.set(referencedId, new Set([containingExport]));
-          }
+      // Store exports referenced in exported types (both imported and local)
+      // Simplifies and speeds up (*) below while we still have the typeChecker
+      // TODO: Does not handle transitive A used in B used in C where only C is imported (use ignoreExportsUsedInFile)
+      if (ts.isTypeReferenceNode(node.parent) || ts.isTypeQueryNode(node.parent)) {
+        const containingExport = isReferencedInExport(node);
+        if (containingExport && containingExport !== id) {
+          const refId = symbol?.exportSymbol ? String(symbol.exportSymbol.escapedName) : id;
+          const refs = referencedInExport.get(refId);
+          if (refs) refs.add(containingExport);
+          else referencedInExport.set(refId, new Set([containingExport]));
         }
       }
     }

@@ -2,6 +2,8 @@
 set -e
 
 npm login
+vsce verify-pat webpro
+ovsx verify-pat webpro
 
 # Running the release cycle twice to ensure a single clean commit with multiple tags will be pushed,
 # with manual bump/skip for each package separately. One-off package publish can still be done from package dir.
@@ -16,10 +18,10 @@ pnpm run --dir packages/mcp-server release "${BUMP_AND_PUBLISH[@]}"
 pnpm run --dir packages/vscode-knip release "${BUMP_AND_PUBLISH[@]}"
 
 # Tag other packages (this is why we run the show twice: git-amend + git-tag is moving target but we want to keep it clean)
-TAG="--no-git.changelog --no-increment --no-git.commit --no-git.push"
-pnpm run --dir packages/language-server release "$TAG" --no-npm.publish
-pnpm run --dir packages/mcp-server release "$TAG" --no-npm.publish
-pnpm run --dir packages/vscode-knip release "$TAG" --no-hooks
+TAG=(--no-git.changelog --no-increment --no-git.commit --no-git.push)
+pnpm run --dir packages/language-server release "${TAG[@]}" --no-npm.publish
+pnpm run --dir packages/mcp-server release "${TAG[@]}" --no-npm.publish
+pnpm run --dir packages/vscode-knip release "${TAG[@]}" --no-hooks
 
 # End with core knip package to push & release,
 pnpm run --dir packages/knip release --no-increment --no-npm.publish --no-git.commit --no-hooks
