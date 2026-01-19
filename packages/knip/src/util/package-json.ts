@@ -71,7 +71,7 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
-      if (item === './*') continue;
+      if (item === './*' || item.trim() === '') continue;
       const expanded = item
         .replace(/\/\*$/, '/**') // /* → /**
         .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
