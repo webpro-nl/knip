@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -148,6 +149,35 @@ export class Extension {
     if (this.#client.needsStop()) await this.#client.stop();
   }
 
+  /**
+   * Detects package manager by checking for lock files and package.json packageManager field.
+   * @param {string} workspace - Workspace directory path
+   * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
+   * @throws {Error} If no package manager can be detected
+   */
+  #detectPackageManager(workspace) {
+    if (existsSync(path.join(workspace, 'pnpm-lock.yaml'))) return 'pnpm';
+    if (existsSync(path.join(workspace, 'yarn.lock'))) return 'yarn';
+    if (existsSync(path.join(workspace, 'package-lock.json'))) return 'npm';
+
+    const packageJsonPath = path.join(workspace, 'package.json');
+    if (existsSync(packageJsonPath)) {
+      try {
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+        if (packageJson.packageManager) {
+          const [pmName] = packageJson.packageManager.split('@');
+          if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
+            return pmName;
+          }
+        }
+      } catch (_error) {}
+    }
+
+    throw new Error(
+      'Could not detect package manager. Please ensure a lock file (pnpm-lock.yaml, yarn.lock, or package-lock.json) exists in your project.'
+    );
+  }
+
   #registerCommands() {
     const restart = vscode.commands.registerCommand(REQUEST_RESTART, async () => {
       if (!this.#client) return;
@@ -165,7 +195,43 @@ export class Extension {
       await vscode.commands.executeCommand('editor.action.showHover');
     });
 
-    this.#context.subscriptions.push(restart, showHover);
+    const installDependency = vscode.commands.registerCommand(
+      'knip.installDependency',
+      async (packageName, dependencyType, workspace) => {
+        try {
+          const vsWorkspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+          const workspacePath = path.isAbsolute(workspace)
+            ? workspace
+            : path.resolve(vsWorkspaceRoot || process.cwd(), workspace);
+
+          if (!existsSync(workspacePath)) {
+            vscode.window.showErrorMessage(`Workspace directory not found: ${workspacePath}`);
+            return;
+          }
+
+          const packageManager = this.#detectPackageManager(workspacePath);
+          const isDev = dependencyType === 'devDependencies';
+
+          const commands = {
+            npm: `npm install ${packageName}${isDev ? ' --save-dev' : ' --save'}`,
+            pnpm: `pnpm add ${packageName}${isDev ? ' -D' : ''}`,
+            yarn: `yarn add ${packageName}${isDev ? ' -D' : ''}`,
+          };
+
+          const command = commands[packageManager];
+          const terminal = vscode.window.createTerminal({
+            name: `Install ${packageName}`,
+            cwd: workspacePath,
+          });
+          terminal.show();
+          terminal.sendText(command);
+        } catch (error) {
+          vscode.window.showErrorMessage(`Failed to install dependency: ${getErrorMessage(error)}`);
+        }
+      }
+    );
+
+    this.#context.subscriptions.push(restart, showHover, installDependency);
   }
 
   /**
