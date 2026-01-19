@@ -5,10 +5,10 @@ export type PluginConfig = {
   entryPathsOrPatterns?: string[];
 };
 
-export type FunctionsCollection = {
+type FunctionsCollection = {
   [key: string | number]: Function;
 };
 
-export type Function = {
+type Function = {
   handler: string;
 };
