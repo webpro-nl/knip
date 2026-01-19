@@ -1,0 +1,18 @@
+---
+service: TestService
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  logRetentionInDays: 1
+  stage: '${opt:stage, "dev"}'
+
+functions:
+  Function:
+    handler: src/function/handler.handler
+
+  Function2:
+    handler: src/function-2/function2.handler

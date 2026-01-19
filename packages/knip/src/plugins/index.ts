@@ -91,6 +91,7 @@ import { default as rspack } from './rspack/index.js';
 import { default as rstest } from './rstest/index.js';
 import { default as semanticRelease } from './semantic-release/index.js';
 import { default as sentry } from './sentry/index.js';
+import { default as serverlessFramework } from './serverless-framework/index.js';
 import { default as simpleGitHooks } from './simple-git-hooks/index.js';
 import { default as sizeLimit } from './size-limit/index.js';
 import { default as sst } from './sst/index.js';
@@ -223,6 +224,7 @@ export const Plugins = {
   rstest,
   'semantic-release': semanticRelease,
   sentry,
+  'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
   sst,
