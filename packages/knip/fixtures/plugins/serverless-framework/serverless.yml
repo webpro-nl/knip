@@ -9,10 +9,13 @@ provider:
   region: eu-west-1
   logRetentionInDays: 1
   stage: '${opt:stage, "dev"}'
+  environment:
+    STAGE: ${opt:stage, "dev"}
+    CLOUDFORMATION_VARIABLE: "!Sub 'arn:aws:iam::${AWS::AccountId}:role/role-name'"
 
 functions:
   Function:
-    handler: src/function/handler.handler
+    handler: function/handler.handler
 
   Function2:
-    handler: src/function-2/function2.handler
+    handler: function-2/function2.handler
