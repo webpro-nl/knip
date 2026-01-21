@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolveProductionEntry } from '../../util/input.js';
+import { toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PluginConfig } from './types.js';
 
@@ -7,7 +7,7 @@ import type { PluginConfig } from './types.js';
 
 const title = 'serverless-framework';
 
-const enablers = ['serverless'];
+const enablers = ['serverless', 'sls'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async config => {
 const convertHandlerToFileToProductionEntry = (handler: string) => {
   const lastIndexOfDot = handler.lastIndexOf('.');
   const file = `${handler.substring(0, lastIndexOfDot)}.{js,ts}`;
-  return toDeferResolveProductionEntry(file)
+  return toProductionEntry(file)
 };
 
 const plugin: Plugin = {

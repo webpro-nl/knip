@@ -2,5 +2,9 @@
   "name": "@plugins/serverless-framework",
   "dependencies": {
     "serverless": "*"
+  },
+  "scripts": {
+    "serverless-command": "serverless deploy",
+    "serverless-alias-command": "sls deploy"
   }
 }

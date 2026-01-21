@@ -14,6 +14,7 @@ test('Find dependencies with the serverless-framework plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
+    binaries: 2,
     files: 2,
     processed: 2,
     total: 2,
