@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import fg from 'fast-glob';
+import { glob } from 'tinyglobby';
 import type { PackageJson, WorkspacePackage } from '../types/package-json.js';
 import { partition } from './array.js';
 import { ConfigurationError } from './errors.js';
@@ -18,7 +18,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
 
   const manifestPatterns = patterns.map(p => join(p, 'package.json'));
 
-  const matches = await fg.glob(manifestPatterns, {
+  const matches = await glob(manifestPatterns, {
     cwd,
     ignore: ['**/node_modules/**', ...negatedPatterns.map(p => p.slice(1))],
   });

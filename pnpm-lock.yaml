@@ -104,9 +104,6 @@ importers:
       '@types/node':
         specifier: '>=18'
         version: 24.3.0
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       formatly:
         specifier: ^0.3.0
         version: 0.3.0
