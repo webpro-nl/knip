@@ -4,6 +4,14 @@ import { jiti } from './jiti.js';
 import { timerify } from './Performance.js';
 import { extname, isInternal } from './path.js';
 
+const PLAYWRIGHT_CONFIG_RE = /(^|[\\/])playwright\.config\.[cm]?[jt]s$/;
+const resetPlaywrightInitiator = (filePath: string) => {
+  if (PLAYWRIGHT_CONFIG_RE.test(filePath)) {
+    // biome-ignore lint/performance/noDelete: need to delete property
+    delete (process as NodeJS.Process & { __pw_initiator__?: unknown }).__pw_initiator__;
+  }
+};
+
 const load = async (filePath: string) => {
   try {
     const ext = extname(filePath);
@@ -41,6 +49,7 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
+    resetPlaywrightInitiator(filePath);
     return await jiti.import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
