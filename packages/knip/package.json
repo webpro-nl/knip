@@ -67,7 +67,6 @@
   ],
   "dependencies": {
     "@nodelib/fs.walk": "^1.2.3",
-    "fast-glob": "^3.3.3",
     "formatly": "^0.3.0",
     "jiti": "^2.6.0",
     "js-yaml": "^4.1.1",

@@ -53,13 +53,15 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   });
 };
 
-const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>
-  globSync(patterns, {
+const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) => {
+  const hasAbsolutePattern = [patterns].flat().some(p => isAbsolute(p.replace(/^!/, '')));
+  return globSync(patterns, {
     cwd,
+    absolute: hasAbsolutePattern,
     followSymbolicLinks: false,
     expandDirectories: false,
-    debug: true,
   });
+};
 
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
   glob(patterns, {
