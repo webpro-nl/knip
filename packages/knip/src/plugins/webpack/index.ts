@@ -84,7 +84,19 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
     const mode = isProduction ? 'production' : 'development';
     const env: Env = { production: isProduction, mode };
     const argv: Argv = { mode };
-    const resolvedConfig = typeof config === 'function' ? await config(env, argv) : config;
+    let resolvedConfig: WebpackConfig;
+    if (typeof config === 'function') {
+      try {
+        resolvedConfig = await config(env, argv);
+      } catch (_error) {
+        continue;
+      }
+    } else {
+      resolvedConfig = config;
+    }
+    if (!resolvedConfig) {
+      continue;
+    }
 
     for (const opts of [resolvedConfig].flat()) {
       const entries = [];
