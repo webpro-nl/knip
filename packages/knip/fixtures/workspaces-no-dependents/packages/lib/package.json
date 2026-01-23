@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/no-dependents__lib",
+  "main": "./index.js",
+  "devDependencies": {
+    "unused-dev-dep": "*"
+  }
+}

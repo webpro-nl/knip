@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/no-dependents__app",
+  "main": "./index.js",
+  "dependencies": {
+    "@fixtures/no-dependents__lib": "1.0.0"
+  }
+}
