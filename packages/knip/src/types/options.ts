@@ -15,6 +15,7 @@ export interface Options {
   isIncludeEntryExports: boolean;
   isIncludeLibs: boolean;
   isIsolateWorkspaces: boolean;
+  isNoDependents: boolean;
   isProduction: boolean;
   isRemoveFiles: boolean;
   isSession: boolean;

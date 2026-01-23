@@ -131,6 +131,7 @@ export const createOptions = async (options: CreateOptions) => {
     isFormat: args.format ?? options.isFormat ?? false,
     isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
     isIsolateWorkspaces: options.isIsolateWorkspaces ?? args['isolate-workspaces'] ?? false,
+    isNoDependents: options.isNoDependents ?? args['no-dependents'] ?? false,
     isProduction,
     isReportClassMembers,
     isReportDependencies:

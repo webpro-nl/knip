@@ -18,6 +18,7 @@ Mode
   --include-entry-exports  Include entry files when reporting unused exports
   --include-libs           Include type definitions from external dependencies (default: false)
   --isolate-workspaces     Isolate workspaces into separate programs
+  --no-dependents          Don't include dependent workspaces when using --workspace
   --no-gitignore           Don't respect .gitignore
   --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
@@ -107,6 +108,7 @@ export default function parseCLIArgs() {
       memory: { type: 'boolean' },
       'memory-realtime': { type: 'boolean' },
       'no-config-hints': { type: 'boolean' },
+      'no-dependents': { type: 'boolean' },
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
