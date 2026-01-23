@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/no-dependents",
+  "workspaces": ["packages/*"],
+  "knip": {
+    "workspaces": {
+      "packages/*": {
+        "entry": "index.ts!",
+        "project": "**/*.ts!"
+      }
+    }
+  }
+}

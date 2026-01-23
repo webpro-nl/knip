@@ -229,6 +229,24 @@ test('Strict mode: only analyze explicitly selected workspaces', async () => {
   });
 });
 
+test('No dependents: exclude dependent workspaces', async () => {
+  const noDependentsCwd = resolve('fixtures/workspaces-no-dependents');
+  const options = await createOptions({ cwd: noDependentsCwd, workspace: '@fixtures/no-dependents__lib', isNoDependents: true });
+  const { includedWorkspaceDirs } = await main(options);
+
+  assert(includedWorkspaceDirs.includes(join(noDependentsCwd, '.')));
+  assert(includedWorkspaceDirs.includes(join(noDependentsCwd, 'packages/lib')));
+  assert(!includedWorkspaceDirs.includes(join(noDependentsCwd, 'packages/app')));
+});
+
+test('No dependents: devDependencies still analyzed', async () => {
+  const noDependentsCwd = resolve('fixtures/workspaces-no-dependents');
+  const options = await createOptions({ cwd: noDependentsCwd, workspace: '@fixtures/no-dependents__lib', isNoDependents: true });
+  const { issues } = await main(options);
+
+  assert(issues.devDependencies['packages/lib/package.json']['unused-dev-dep']);
+});
+
 test('Empty selection after exclusion', async () => {
   const options = await createOptions({
     cwd,
