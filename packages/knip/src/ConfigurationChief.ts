@@ -88,6 +88,7 @@ export class ConfigurationChief {
   rawConfig?: RawConfiguration;
   isProduction: boolean;
   isStrict: boolean;
+  isNoDependents: boolean;
   isIncludeEntryExports: boolean;
   config: Configuration;
   workspace: string | string[] | undefined;
@@ -109,6 +110,7 @@ export class ConfigurationChief {
     this.cwd = options.cwd;
     this.isProduction = options.isProduction;
     this.isStrict = options.isStrict;
+    this.isNoDependents = options.isNoDependents;
     this.isIncludeEntryExports = options.isIncludeEntryExports;
     this.workspace = options.workspace;
     this.workspaces = options.workspaces;
@@ -285,6 +287,8 @@ export class ConfigurationChief {
 
     if (selectedWorkspaces && this.isStrict) {
       for (const name of selectedWorkspaces) ws.add(name);
+    } else if (selectedWorkspaces && this.isNoDependents) {
+      for (const name of workspaceNames) ws.add(name);
     } else if (selectedWorkspaces) {
       const graph = this.workspaceGraph;
       if (graph) {
