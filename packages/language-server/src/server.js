@@ -1,7 +1,11 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
@@ -98,7 +102,13 @@ export class LanguageServer {
         },
       };
 
-      return { capabilities };
+      return {
+        capabilities,
+        serverInfo: {
+          name: pkg.name,
+          version: pkg.version,
+        },
+      };
     });
 
     this.connection.onInitialized(() => {});
