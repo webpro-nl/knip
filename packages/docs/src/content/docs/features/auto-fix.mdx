@@ -9,13 +9,13 @@ Run Knip as you normally would, and if the report looks good then run it again
 with the `--fix` flag to let Knip automatically apply fixes. It fixes the
 following [issue types][1]:
 
-- Remove `export` keyword for unused exports and exported types
+- Remove `export` keyword for unused exports, re-exports, and exported types
 - Remove `export default` keywords for unused default exports
-- Remove exports, re-exports and exported types
 - Remove unused enum members
 - Remove unused class members (disabled by default)
 - Remove unused `dependencies` and `devDependencies` from `package.json`
 - Remove unused files
+- Remove unused catalog entries
 
 :::caution
 
