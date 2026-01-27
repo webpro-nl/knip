@@ -1,5 +1,5 @@
 ---
-title: Plugins (127)
+title: Plugins (130)
 tableOfContents: false
 ---
 
@@ -7,6 +7,7 @@ tableOfContents: false
 - [Angular](/reference/plugins/angular "Angular")
 - [Astro](/reference/plugins/astro "Astro")
 - [Astro DB](/reference/plugins/astro-db "Astro DB")
+- [astro-og-canvas](/reference/plugins/astro-og-canvas "astro-og-canvas")
 - [Ava](/reference/plugins/ava "Ava")
 - [Babel](/reference/plugins/babel "Babel")
 - [Biome](/reference/plugins/biome "Biome")
@@ -62,6 +63,7 @@ tableOfContents: false
 - [Next.js](/reference/plugins/next "Next.js")
 - [next-intl](/reference/plugins/next-intl "next-intl")
 - [Next.js MDX](/reference/plugins/next-mdx "Next.js MDX")
+- [Nitro](/reference/plugins/nitro "Nitro")
 - [Node.js](/reference/plugins/node "Node.js")
 - [node-modules-inspector](/reference/plugins/node-modules-inspector "node-modules-inspector")
 - [nodemon](/reference/plugins/nodemon "nodemon")
@@ -102,6 +104,7 @@ tableOfContents: false
 - [Stryker](/reference/plugins/stryker "Stryker")
 - [Stylelint](/reference/plugins/stylelint "Stylelint")
 - [Svelte](/reference/plugins/svelte "Svelte")
+- [SvelteKit](/reference/plugins/sveltekit "SvelteKit")
 - [SVGO](/reference/plugins/svgo "SVGO")
 - [SVGR](/reference/plugins/svgr "SVGR")
 - [SWC](/reference/plugins/swc "SWC")
