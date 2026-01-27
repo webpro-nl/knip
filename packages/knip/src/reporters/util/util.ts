@@ -49,26 +49,13 @@ const sortByPos = (a: Issue, b: Issue) => {
     : filePathA.localeCompare(filePathB);
 };
 
-const isPathSpecifier = (specifier?: string) => {
-  if (!specifier) return false;
-  if (specifier.startsWith('file:')) return true;
-  const first = specifier[0];
-  if (first === '.' || first === '/' || first === '\\') return true;
-  if (/^[a-zA-Z]:[\\/]/.test(specifier)) return true;
-  return specifier.includes('node_modules/') || specifier.includes('node_modules\\');
-};
-
 const highlightSymbol =
   (issue: Issue) =>
   (_: unknown): string => {
-    if (isPathSpecifier(issue.specifier)) {
-      return issue.symbol;
-    }
     if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
-      const lastIndex = issue.specifier.lastIndexOf(issue.symbol);
-      const before = issue.specifier.slice(0, lastIndex);
-      const after = issue.specifier.slice(lastIndex + issue.symbol.length);
-      return [dim(before), bright(issue.symbol), dim(after)].join('');
+      const parts = issue.specifier.split(issue.symbol);
+      const rest = parts.slice(1).join('');
+      return [dim(parts[0]), bright(issue.symbol), dim(rest)].join('');
     }
     return issue.symbol;
   };

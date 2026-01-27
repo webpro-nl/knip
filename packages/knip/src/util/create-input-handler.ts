@@ -15,7 +15,7 @@ import {
   isDependency,
   toDebugString,
 } from './input.js';
-import { getPackageNameFromSpecifier, normalizeSpecifier } from './modules.js';
+import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.js';
 import { _resolveSync } from './resolve.js';
 
@@ -101,8 +101,8 @@ export const createInputHandler =
                 type: 'unlisted',
                 filePath: containingFilePath,
                 workspace: inputWorkspace.name,
-                symbol: packageName ?? specifier,
-                specifier: normalizeSpecifier(specifier),
+                symbol: packageName,
+                specifier: packageName,
                 fixes: [],
               });
             }
@@ -138,7 +138,7 @@ export const createInputHandler =
         filePath: containingFilePath,
         workspace: workspace.name,
         symbol: packageName ?? specifier,
-        specifier: normalizeSpecifier(specifier),
+        specifier: packageName ?? specifier,
         fixes: [],
       });
     } else if (!isGitIgnored(filePath)) {

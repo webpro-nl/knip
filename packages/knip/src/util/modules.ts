@@ -1,18 +1,6 @@
 import { isBuiltin } from 'node:module';
-import { fileURLToPath } from 'node:url';
 import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.js';
 import { isAbsolute, isInNodeModules, toPosix } from './path.js';
-
-const toFilePath = (value: string) => {
-  if (value.startsWith('file:')) {
-    try {
-      return fileURLToPath(value);
-    } catch {
-      // If conversion fails, continue with original value
-    }
-  }
-  return value;
-};
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;
@@ -22,17 +10,15 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
 export const getPackageNameFromFilePath = (value: string) => {
-  const filePath = toFilePath(value);
-  if (filePath.includes('node_modules/.bin/')) return extractBinary(filePath);
-  const match = toPosix(filePath).match(lastPackageNameMatch);
+  const name = value.startsWith('file://') ? value.slice(7) : value;
+  if (name.includes('node_modules/.bin/')) return extractBinary(name);
+  const match = toPosix(name).match(lastPackageNameMatch);
   if (match) return match[match.length - 1];
-  return filePath;
+  return name;
 };
 
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
-
-export const normalizeSpecifier = (specifier: string) => toFilePath(specifier);
 
 const matchPackageNameStart = /^(@[a-z0-9._]|[a-z0-9])/i;
 export const isStartsLikePackageName = (specifier: string) => {
