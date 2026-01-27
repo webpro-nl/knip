@@ -53,6 +53,8 @@ test('Respect ignored binaries when excluding dependencies+unlisted+unresolved',
 
   assert.deepEqual(configurationHints, [
     { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /^@org\/.*/ },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /^rc-.*/ },
     { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
     { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
   ]);

@@ -114,6 +114,7 @@ export class IssueCollector {
     if (!this.workspaceFilter(issue.filePath)) return;
     if (this.isMatch(issue.filePath)) return;
     if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
+    if (this.rules[issue.type] === 'off') return;
     const key = relative(this.cwd, issue.filePath);
     const { type } = issue;
     issue.severity = this.rules[type];
