@@ -1,23 +1,38 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { main } from '../../src/index.js';
 import { join } from '../../src/util/path.js';
+import { copyFixture } from '../helpers/copy-fixture.js';
 import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
 
 const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
 
-const cwd = resolve('fixtures/fix');
-
-const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
-
 skipIfBun('Fix and format exports and dependencies', async () => {
-  const tests = [
-    [
-      'mod.ts',
-      await readContents('mod.ts'),
-      `const x = 1;
+  const cwd = await copyFixture('fixtures/fix');
+  const options = await createOptions({ cwd, isFix: true, isFormat: true, tags: ['-lintignore'] });
+  const { issues } = await main(options);
+
+  assert(issues.exports['access.js']['UNUSED']);
+  assert(issues.exports['access.js']['ACCESS']);
+  assert(issues.exports['exports.js']['identifier2']);
+  assert(issues.exports['mod.ts']['a']);
+  assert(issues.exports['mod.ts']['b']);
+  assert(issues.exports['mod.ts']['c']);
+  assert(issues.exports['mod.ts']['d']);
+  assert(issues.exports['mod.ts']['default']);
+  assert(issues.exports['mod.ts']['x']);
+  assert(issues.exports['mod.ts']['y']);
+  assert(issues.exports['reexported.ts']['Three']);
+  assert(issues.exports['reexported.ts']['Two']);
+
+  assert(issues.exports['ignored.ts'] === undefined);
+  assert(issues.dependencies['package.json']['ignored'] === undefined);
+  assert(issues.types['mod.ts']['U'] === undefined);
+
+  assert.equal(
+    await readFile(join(cwd, 'mod.ts'), 'utf8'),
+    `const x = 1;
 const y = 2;
 
 // biome-ignore lint: suspicious/noEmptyInterface
@@ -40,47 +55,38 @@ class MyClass {}
 
 /** @lintignore */
 export type U = number;
-`,
-    ],
-    [
-      'access.js',
-      await readContents('access.js'),
-      `module.exports.USED = 1;
-`,
-    ],
-    [
-      'default-x.mjs',
-      await readContents('default-x.mjs'),
-      `const x = 1;
+`
+  );
+
+  assert.equal(await readFile(join(cwd, 'access.js'), 'utf8'), `module.exports.USED = 1;\n`);
+
+  assert.equal(
+    await readFile(join(cwd, 'default-x.mjs'), 'utf8'),
+    `const x = 1;
 
 export const dx = 1;
-`,
-    ],
-    [
-      'default.mjs',
-      await readContents('default.mjs'),
-      `export const d = 1;
-`,
-    ],
-    [
-      'exports.js',
-      await readContents('exports.js'),
-      `const identifier = 1;
+`
+  );
+
+  assert.equal(await readFile(join(cwd, 'default.mjs'), 'utf8'), `export const d = 1;\n`);
+
+  assert.equal(
+    await readFile(join(cwd, 'exports.js'), 'utf8'),
+    `const identifier = 1;
 const identifier2 = 2;
 
 module.exports = { identifier };
-`,
-    ],
-    [
-      'reexports.mjs',
-      await readContents('reexports.mjs'),
-      `export { One, Rectangle, Nine, setter } from './reexported';
-`,
-    ],
-    [
-      'reexported.ts',
-      await readContents('reexported.ts'),
-      `const Two = 2;
+`
+  );
+
+  assert.equal(
+    await readFile(join(cwd, 'reexports.mjs'), 'utf8'),
+    `export { One, Rectangle, Nine, setter } from './reexported';\n`
+  );
+
+  assert.equal(
+    await readFile(join(cwd, 'reexported.ts'), 'utf8'),
+    `const Two = 2;
 const Three = 3;
 const Four = 4;
 const Five = 5;
@@ -100,12 +106,12 @@ export const One = 1;
 const fn = () => ({ get: () => 1, set: () => 1 });
 
 export const { set: setter } = fn();
-`,
-    ],
-    [
-      'package.json',
-      await readContents('package.json'),
-      `{
+`
+  );
+
+  assert.equal(
+    await readFile(join(cwd, 'package.json'), 'utf8'),
+    `{
   "name": "@fixtures/fix",
   "dependencies": {
     "lodash": "*",
@@ -113,49 +119,37 @@ export const { set: setter } = fn();
   },
   "devDependencies": {}
 }
-`,
-    ],
-  ];
-
-  const options = await createOptions({ cwd, isFix: true, isFormat: true, tags: ['-lintignore'] });
-  const { issues } = await main(options);
-
-  assert(issues.exports['access.js']['UNUSED']);
-  assert(issues.exports['access.js']['ACCESS']);
-  assert(issues.exports['exports.js']['identifier2']);
-  assert(issues.exports['mod.ts']['a']);
-  assert(issues.exports['mod.ts']['b']);
-  assert(issues.exports['mod.ts']['c']);
-  assert(issues.exports['mod.ts']['d']);
-  assert(issues.exports['mod.ts']['default']);
-  assert(issues.exports['mod.ts']['x']);
-  assert(issues.exports['mod.ts']['y']);
-  assert(issues.exports['reexported.ts']['Three']);
-  assert(issues.exports['reexported.ts']['Two']);
-
-  // check ignore
-  assert(issues.exports['ignored.ts'] === undefined);
-
-  // check ignoreDependencies
-  assert(issues.dependencies['package.json']['ignored'] === undefined);
-
-  // check ignored by tags
-  assert(issues.types['mod.ts']['U'] === undefined);
-
-  for (const [fileName, before, after] of tests) {
-    const filePath = join(cwd, fileName);
-    const originalFile = await readFile(filePath);
-    assert.equal(String(originalFile), after);
-    await writeFile(filePath, before);
-  }
+`
+  );
 });
 
 skipIfBun('Fix and format only exported types', async () => {
-  const tests = [
-    [
-      'mod.ts',
-      await readContents('mod.ts'),
-      `export const x = 1;
+  const cwd = await copyFixture('fixtures/fix');
+  const options = await createOptions({
+    cwd,
+    isFix: true,
+    isFormat: true,
+    fixTypes: ['types'],
+    tags: ['-lintignore'],
+  });
+  const { issues } = await main(options);
+
+  assert(issues.exports['access.js']['ACCESS']);
+  assert(issues.exports['access.js']['UNUSED']);
+  assert(issues.exports['exports.js']['identifier2']);
+  assert(issues.exports['mod.ts']['a']);
+  assert(issues.exports['mod.ts']['b']);
+  assert(issues.exports['mod.ts']['default']);
+  assert(issues.exports['mod.ts']['x']);
+  assert(issues.exports['mod.ts']['y']);
+
+  assert(issues.exports['ignored.ts'] === undefined);
+  assert(issues.dependencies['package.json']['ignored'] === undefined);
+  assert(issues.types['mod.ts']['U'] === undefined);
+
+  assert.equal(
+    await readFile(join(cwd, 'mod.ts'), 'utf8'),
+    `export const x = 1;
 export const y = 2;
 
 // biome-ignore lint: suspicious/noEmptyInterface
@@ -178,12 +172,12 @@ export default class MyClass {}
 
 /** @lintignore */
 export type U = number;
-`,
-    ],
-    [
-      'reexported.ts',
-      await readContents('reexported.ts'),
-      `const Two = 2;
+`
+  );
+
+  assert.equal(
+    await readFile(join(cwd, 'reexported.ts'), 'utf8'),
+    `const Two = 2;
 const Three = 3;
 const Four = 4;
 const Five = 5;
@@ -207,41 +201,6 @@ export const One = 1;
 const fn = () => ({ get: () => 1, set: () => 1 });
 
 export const { get: getter, set: setter } = fn();
-`,
-    ],
-  ];
-
-  const options = await createOptions({
-    cwd,
-    isFix: true,
-    isFormat: true,
-    fixTypes: ['types'],
-    tags: ['-lintignore'],
-  });
-  const { issues } = await main(options);
-
-  assert(issues.exports['access.js']['ACCESS']);
-  assert(issues.exports['access.js']['UNUSED']);
-  assert(issues.exports['exports.js']['identifier2']);
-  assert(issues.exports['mod.ts']['a']);
-  assert(issues.exports['mod.ts']['b']);
-  assert(issues.exports['mod.ts']['default']);
-  assert(issues.exports['mod.ts']['x']);
-  assert(issues.exports['mod.ts']['y']);
-
-  // check ignore
-  assert(issues.exports['ignored.ts'] === undefined);
-
-  // check ignoreDependencies
-  assert(issues.dependencies['package.json']['ignored'] === undefined);
-
-  // check ignored by tags
-  assert(issues.types['mod.ts']['U'] === undefined);
-
-  for (const [fileName, before, after] of tests) {
-    const filePath = join(cwd, fileName);
-    const actual = await readFile(filePath, 'utf8');
-    assert.equal(actual, after);
-    await writeFile(filePath, before);
-  }
+`
+  );
 });

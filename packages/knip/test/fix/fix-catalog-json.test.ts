@@ -1,17 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { main } from '../../src/index.js';
 import { join } from '../../src/util/path.js';
+import { copyFixture } from '../helpers/copy-fixture.js';
 import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
-
-const cwd = resolve('fixtures/catalog-named-package-json');
-const manifestPath = join(cwd, 'package.json');
-
-const originalFile = await readFile(manifestPath);
 
 test('Fix catalog entries (package.json)', async () => {
+  const cwd = await copyFixture('fixtures/catalog-named-package-json');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
@@ -19,10 +15,8 @@ test('Fix catalog entries (package.json)', async () => {
   assert(issues.catalog['package.json']['frontend.nuxt']);
   assert(issues.catalog['package.json']['backend.fastify']);
 
-  const fixedFile = await readFile(manifestPath, 'utf-8');
-
   assert.equal(
-    fixedFile,
+    await readFile(join(cwd, 'package.json'), 'utf8'),
     `{
   "name": "@fixtures/catalog-named-package-json",
   "private": true,
@@ -50,6 +44,4 @@ test('Fix catalog entries (package.json)', async () => {
 }
 `
   );
-
-  await writeFile(manifestPath, originalFile);
 });
