@@ -92,6 +92,7 @@ export type PluginName =
   | 'rstest'
   | 'semantic-release'
   | 'sentry'
+  | 'serverless-framework'
   | 'simple-git-hooks'
   | 'size-limit'
   | 'sst'
@@ -224,6 +225,7 @@ export const pluginNames = [
   'rstest',
   'semantic-release',
   'sentry',
+  'serverless-framework',
   'simple-git-hooks',
   'size-limit',
   'sst',

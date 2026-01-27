@@ -1,0 +1,21 @@
+---
+service: TestService
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  logRetentionInDays: 1
+  stage: '${opt:stage, "dev"}'
+  environment:
+    STAGE: ${opt:stage, "dev"}
+    CLOUDFORMATION_VARIABLE: "!Sub 'arn:aws:iam::${AWS::AccountId}:role/role-name'"
+
+functions:
+  Function:
+    handler: function/handler.handler
+
+  Function2:
+    handler: function-2/function2.handler
