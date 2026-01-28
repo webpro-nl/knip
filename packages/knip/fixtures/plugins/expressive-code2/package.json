@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/expressive-code-astro",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "*",
+    "@astrojs/sitemap": "*",
+    "astro-expressive-code": "*",
+    "@expressive-code/plugin-collapsible-sections": "*",
+    "astro": "*"
+  }
+}
