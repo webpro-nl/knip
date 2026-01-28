@@ -1,4 +1,4 @@
-import fg from 'fast-glob';
+import { globSync } from 'tinyglobby';
 import { compact } from './array.js';
 import { glob } from './glob-core.js';
 import { timerify } from './Performance.js';
@@ -53,8 +53,15 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   });
 };
 
-const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>
-  fg.sync(patterns, { cwd, followSymbolicLinks: false });
+const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) => {
+  const hasAbsolutePattern = [patterns].flat().some(p => isAbsolute(p.replace(/^!/, '')));
+  return globSync(patterns, {
+    cwd,
+    absolute: hasAbsolutePattern,
+    followSymbolicLinks: false,
+    expandDirectories: false,
+  });
+};
 
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
   glob(patterns, {

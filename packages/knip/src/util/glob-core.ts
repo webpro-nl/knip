@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
 import { walk as _walk, type Entry } from '@nodelib/fs.walk';
-import fg, { type Options as FastGlobOptions } from 'fast-glob';
+import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
 import { compact, partition } from './array.js';
@@ -17,7 +17,7 @@ const _picomatch = timerify(picomatch);
 
 type Options = { gitignore: boolean; cwd: string };
 
-interface GlobOptions extends FastGlobOptions {
+interface GlobOptions extends TinyGlobOptions {
   gitignore: boolean;
   cwd: string;
   dir: string;
@@ -204,9 +204,9 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
 
-  const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
+  const { dir, label, gitignore, ...fgOptions } = { ...options, ignore: ignorePatterns };
 
-  const paths = await fg.glob(patterns, fgOptions);
+  const paths = await tinyGlob(patterns, fgOptions);
 
   debugLogObject(
     relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
