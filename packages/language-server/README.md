@@ -11,6 +11,13 @@ and exports in your JavaScript/TypeScript projects.
 - Blogpost: [Knip for Editors & Agents][4]
 - [Sponsor Knip][5]
 
+## IDE Extensions
+
+The following IDE extensions are powered by this Language Server:
+
+- [VS Code Extension][28] ([Open VSX][29])
+- [JetBrains IDE Plugin][30] (WebStorm, IntelliJ IDEA, etc.)
+
 ## Contents
 
 - [Configuration][6]
@@ -162,3 +169,6 @@ Example:
 [25]: ../vscode-knip/src/tree-view-exports.js
 [26]: ../vscode-knip/src/collect-dependency-hover-snippets.js
 [27]: ../vscode-knip/src/render-dependency-hover.js
+[28]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
+[29]: https://open-vsx.org/extension/webpro/vscode-knip
+[30]: https://plugins.jetbrains.com/plugin/29765-knip

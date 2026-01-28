@@ -36,6 +36,11 @@ configure Knip for you, _completely automated_.
 Find [Knip on the VS Code Marketplace][7] and find [Knip in the Open VSX
 Registry][8].
 
+### JetBrains IDEs
+
+The Knip plugin is also available for JetBrains IDEs like WebStorm, IntelliJ
+IDEA and others. Find [Knip on the JetBrains Marketplace][22].
+
 ## MCP Server
 
 Configuring Knip has always been a major headache to many. No more. Tell your
@@ -48,11 +53,12 @@ Extension.
 
 ## Language Server
 
-The VS Code Extension and the MCP Server are powered by the new Language Server.
-It's a custom server that builds the full module graph of your project, and
-provides a session with a graph explorer to request all sorts of interesting
-information. Queries like "where is an export imported" or "is this import part
-of a circular dependency" are just scratching the surface here.
+The VS Code Extension, the JetBrains IDE Plugin and the MCP Server are powered
+by the Language Server. It's a custom server that builds the full module graph
+of your project, and provides a session with a graph explorer to request all
+sorts of interesting information. Queries like "where is an export imported" or
+"is this import part of a circular dependency" are just scratching the surface
+here.
 
 Extensions for other IDEs can be built on top. See
 [language-server/README.md][10]
@@ -129,3 +135,4 @@ barrel files. Knip warns:
 [19]: /screenshots/editors-and-agents/conflict.webp
 [20]: /screenshots/editors-and-agents/branch.webp
 [21]: /screenshots/editors-and-agents/vscode-extension-settings.webp
+[22]: https://plugins.jetbrains.com/plugin/29765-knip
