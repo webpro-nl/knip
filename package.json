@@ -16,7 +16,8 @@
     "email": "lars@webpro.nl"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/knip/fixtures/plugins/nuxt"
   ],
   "scripts": {
     "watch": "pnpm run --dir packages/knip watch",
