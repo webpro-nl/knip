@@ -59,6 +59,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'cp',
   'curl',
   'cut',
+  'date',
   'deno',
   'df',
   'dir',
