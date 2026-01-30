@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/compact-reporter",
+  "type": "module",
+  "scripts": {
+    "test": "unknown-binary"
+  },
+  "dependencies": {
+    "unused-dep": "*"
+  }
+}
