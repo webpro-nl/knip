@@ -28,6 +28,7 @@ import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
 import { default as expo } from './expo/index.js';
+import { default as expressiveCode } from './expressive-code/index.js';
 import { default as gatsby } from './gatsby/index.js';
 import { default as githubAction } from './github-action/index.js';
 import { default as githubActions } from './github-actions/index.js';
@@ -161,6 +162,7 @@ export const Plugins = {
   eleventy,
   eslint,
   expo,
+  'expressive-code': expressiveCode,
   gatsby,
   'github-action': githubAction,
   'github-actions': githubActions,

@@ -1,16 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { main } from '../../src/index.js';
 import { join } from '../../src/util/path.js';
+import { copyFixture } from '../helpers/copy-fixture.js';
 import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
 
 test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
-  const cwd = resolve('fixtures/catalog-named');
-  const manifestPath = join(cwd, 'pnpm-workspace.yaml');
-  const originalFile = await readFile(manifestPath);
-
+  const cwd = await copyFixture('fixtures/catalog-named');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
@@ -18,10 +15,8 @@ test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
   assert(issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
   assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
 
-  const fixedFile = await readFile(manifestPath, 'utf-8');
-
   assert.equal(
-    fixedFile,
+    await readFile(join(cwd, 'pnpm-workspace.yaml'), 'utf8'),
     `packages:
   - 'packages/*'
 
@@ -35,24 +30,17 @@ catalogs:
     '@ex/press': ^4.18.0
 `
   );
-
-  await writeFile(manifestPath, originalFile);
 });
 
 test('Fix catalog entries (.yarnrc.yml)', async () => {
-  const cwd = resolve('fixtures/catalog-yarn');
-  const manifestPath = join(cwd, '.yarnrc.yml');
-  const originalFile = await readFile(manifestPath);
-
+  const cwd = await copyFixture('fixtures/catalog-yarn');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
   assert(issues.catalog['.yarnrc.yml']['default.@lo/dash']);
 
-  const fixedFile = await readFile(manifestPath, 'utf-8');
-
   assert.equal(
-    fixedFile,
+    await readFile(join(cwd, '.yarnrc.yml'), 'utf8'),
     `packages:
   - "packages/*"
 
@@ -61,6 +49,4 @@ catalog:
   typescript: ^5.0.0
 `
   );
-
-  await writeFile(manifestPath, originalFile);
 });

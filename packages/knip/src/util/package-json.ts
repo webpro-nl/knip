@@ -61,13 +61,13 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
 
   const entryPaths = new Set<string>();
 
-  if (typeof main === 'string') entryPaths.add(main);
-  if (typeof module === 'string') entryPaths.add(module);
-  if (typeof browser === 'string') entryPaths.add(browser);
-  if (typeof bin === 'string') entryPaths.add(bin);
-  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
+  if (typeof main === 'string' && main) entryPaths.add(main);
+  if (typeof module === 'string' && module) entryPaths.add(module);
+  if (typeof browser === 'string' && browser) entryPaths.add(browser);
+  if (typeof bin === 'string' && bin) entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) if (id) entryPaths.add(id);
+  if (typeof types === 'string' && types) entryPaths.add(types);
+  if (typeof typings === 'string' && typings) entryPaths.add(typings);
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {

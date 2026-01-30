@@ -24,10 +24,12 @@ export default ({ report, issues, isShowProgress, cwd }: ReporterOptions) => {
         ? Array.from(issues[reportType] as IssueSet)
         : reportType === 'duplicates'
           ? Object.values(issues[reportType]).flatMap(Object.values)
-          : Object.values(issues[reportType] as IssueRecords).map(issues => {
-              const items = Object.values(issues);
-              return { ...items[0], symbols: items };
-            });
+          : Object.values(issues[reportType] as IssueRecords)
+              .filter(issues => Object.keys(issues).length > 0)
+              .map(issues => {
+                const items = Object.values(issues);
+                return { ...items[0], symbols: items };
+              });
 
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));

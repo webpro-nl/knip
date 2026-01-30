@@ -86,7 +86,7 @@ export class PrincipalFactory {
     if (p) {
       debugLog(
         '*',
-        `Deleting principal at ${[...p.wsDirs].map(dir => toRelative(dir, cwd) || '.')} (${[...p.pkgNames]})`
+        `Deleting principal at ${[...p.wsDirs].map(dir => toRelative(dir, cwd))} (${[...p.pkgNames]})`
       );
       this.principals.delete(p);
     }

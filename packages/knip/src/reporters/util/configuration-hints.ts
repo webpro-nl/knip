@@ -114,7 +114,7 @@ export const finalizeConfigurationHints = (
     } else {
       const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
       for (const { dir, size } of topWorkspaces) {
-        const identifier = toRelative(dir, options.cwd) || '.';
+        const identifier = toRelative(dir, options.cwd);
         results.configurationHints.push({
           type: 'workspace-unconfigured',
           workspaceName: identifier,

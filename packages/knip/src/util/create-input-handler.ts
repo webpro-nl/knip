@@ -101,8 +101,8 @@ export const createInputHandler =
                 type: 'unlisted',
                 filePath: containingFilePath,
                 workspace: inputWorkspace.name,
-                symbol: packageName ?? specifier,
-                specifier,
+                symbol: packageName,
+                specifier: packageName,
                 fixes: [],
               });
             }
@@ -138,7 +138,7 @@ export const createInputHandler =
         filePath: containingFilePath,
         workspace: workspace.name,
         symbol: packageName ?? specifier,
-        specifier,
+        specifier: packageName ?? specifier,
         fixes: [],
       });
     } else if (!isGitIgnored(filePath)) {

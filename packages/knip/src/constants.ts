@@ -15,7 +15,6 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.config.js',
 ];
 
-// TS extensions: https://github.com/microsoft/TypeScript/blob/da8dfbf0ff6a94df65568fd048aec0d763c65811/src/compiler/types.ts#L7637-L7651
 export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
@@ -34,7 +33,7 @@ export const PROTOCOL_VIRTUAL = 'virtual:';
 /**
  * Binaries that are expected to be globally available. The package at
  * https://www.npmjs.com/package/[name] might exist, but is not expected to be
- * listed in package.json and last npm publish was at least 6 years ago.
+ * listed in package.json because last npm publish was >6 years ago OR weekly downloads <5_000
  */
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'amplify',

@@ -72,15 +72,17 @@ export const getTableForType = (
 
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
+    // @ts-expect-error TODO Fix up in next major
+    const isFileIssue = issue.type === 'files';
     const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
-    table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
+    const displaySymbol = isFileIssue ? '' : symbol;
+    table.cell('symbol', print(displaySymbol), options.isUseColors ? highlightSymbol(issue) : () => displaySymbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
     table.cell('symbolType', issue.symbolType && issue.symbolType !== SYMBOL_TYPE.UNKNOWN && print(issue.symbolType));
 
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
-    // @ts-expect-error TODO Fix up in next major
-    const cell = issue.type === 'files' ? '' : `${relative(cwd, issue.filePath)}${pos}`;
+    const cell = isFileIssue ? relative(cwd, symbol) : `${relative(cwd, issue.filePath)}${pos}`;
     table.cell('filePath', print(cell));
 
     table.cell('fixed', issue.isFixed && print('(removed)'));

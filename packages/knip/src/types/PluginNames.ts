@@ -29,6 +29,7 @@ export type PluginName =
   | 'eleventy'
   | 'eslint'
   | 'expo'
+  | 'expressive-code'
   | 'gatsby'
   | 'github-action'
   | 'github-actions'
@@ -162,6 +163,7 @@ export const pluginNames = [
   'eleventy',
   'eslint',
   'expo',
+  'expressive-code',
   'gatsby',
   'github-action',
   'github-actions',

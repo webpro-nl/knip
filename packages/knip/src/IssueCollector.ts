@@ -81,10 +81,7 @@ export class IssueCollector {
   private shouldIgnoreIssue(filePath: string, issueType: IssueType): boolean {
     const matcher = this.issueMatchers.get(issueType);
     if (!matcher) return false;
-
-    // Match against relative path
-    const relativePath = relative(this.cwd, filePath);
-    return matcher(relativePath);
+    return matcher(relative(this.cwd, filePath));
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -114,10 +111,10 @@ export class IssueCollector {
     if (!this.workspaceFilter(issue.filePath)) return;
     if (this.isMatch(issue.filePath)) return;
     if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
+    if (this.rules[issue.type] === 'off') return;
     const key = relative(this.cwd, issue.filePath);
-    const { type } = issue;
-    issue.severity = this.rules[type];
-    const issues = this.issues[type];
+    issue.severity = this.rules[issue.type];
+    const issues = this.issues[issue.type];
     issues[key] = issues[key] ?? {};
     const symbol = issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
     if (!issues[key][symbol]) {

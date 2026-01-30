@@ -303,7 +303,7 @@ export class ConfigurationChief {
           for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
         };
         for (const dir of this.availableWorkspaceDirs) addDependents(dir);
-        for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir) || ROOT_WORKSPACE_NAME);
+        for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir));
       }
     } else {
       for (const name of workspaceNames) ws.add(name);
