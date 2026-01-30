@@ -1,6 +1,8 @@
 // biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 
+const isWin = process.platform === 'win32';
+
 export const isAbsolute = path.isAbsolute;
 
 export const dirname = path.posix.dirname;
@@ -15,7 +17,15 @@ export const toPosix = (value: string) => value.split(path.sep).join(path.posix.
 
 export const resolve = path.posix.resolve;
 
-export const relative = (from: string, to: string) => toPosix(path.relative(from, to));
+export const relative = (from: string, to: string) => {
+  if (to.startsWith(from)) {
+    const next = to[from.length];
+    if (next === '/') return to.substring(from.length + 1);
+    if (next === undefined) return '.';
+  }
+  const result = path.relative(from, to);
+  return isWin ? toPosix(result) : result || '.';
+};
 
 export const isInNodeModules = (filePath: string) => filePath.includes('node_modules');
 

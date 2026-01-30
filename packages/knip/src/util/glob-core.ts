@@ -209,7 +209,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   const paths = await fg.glob(patterns, fgOptions);
 
   debugLogObject(
-    relative(options.cwd, dir) || ROOT_WORKSPACE_NAME,
+    relative(options.cwd, dir),
     label ? `Finding ${label}` : 'Finding paths',
     () => ({
       patterns,
