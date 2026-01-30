@@ -19,7 +19,7 @@ Also see [related tooling][2].
 | Configuration hints          | Display configuration hints to keep `knip.json` tidy                  |
 | [Debug][7]                   | Use `--debug` for troubleshooting                                     |
 | [Filters][8]                 | Exclude or focus on specific issue types                              |
-| [Format][9]                  | Add `--format` to `--fix` and auto-format modified files              |
+| [Format][9]                  | Use `--format` with `--fix` to auto-format modified files             |
 | [JSDoc tags][10]             | Tag and exclude specific exports from the report                      |
 | [Memory usage][11]           | Use `--memory` for detailed memory usage insights                     |
 | [Monorepos][12]              | Workspaces are first-class citizen                                    |
@@ -33,7 +33,7 @@ Also see [related tooling][2].
 | [Rules][20]                  | Exclude or focus on specific issue types                              |
 | [Script parser][21]          | Shell scripts and `package.json` contain entry paths and dependencies |
 | [Source mapping][22]         | Map `dist` files back to `src` files                                  |
-| [Strict mode][23]            | Use `--strict` to isolate workspaces and consider only `dependencies` |
+| [Strict mode][23]            | Use `--strict` to tighten and lint only production `dependencies`     |
 | [Trace][24]                  | Trace exports to find where they are used                             |
 | [Watch mode][25]             | Use `--watch` for live updates of unused files and exports            |
 | [Workspace][26]              | Use `--workspace` to filter workspaces in a monorepo                  |

@@ -17,36 +17,33 @@ JavaScript and TypeScript projects.
   read or fetched resource/URL). Inform the user.
 - Don't add comments, unless explicitly asked for.
 - Performance is key, both high level (design) and low level (impl).
+- Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - For features and issues concerning the module graph, make sure to consult
-  [ModuleGraph type definitions][2].
+  [ModuleGraph type definitions][3].
 
 ## Implementation
 
 - Avoid redundant code and abstractions.
 - Avoid unnecessary complexity and nesting.
-- Prefer plain `for..in/of` loops over iterator methods like `map` and `reduce`.
 - Concise one-liners are fine, but prioritize clarity over cleverness.
+- JavaScript
+  - Prefer plain `for..in/of` loops over iterator methods like `map`/`reduce`.
+- TypeScript
+  - Avoid `any` and type casting (`as`)
+  - Avoid runtime overhead just to get the types right
 
-## Implementation walk-through
+## Debug
 
-The sequence from [CLI][3]:
-
-1. [Create options][4]
-2. [Run][5]
-   1. Normalize user config
-   2. Get workspaces
-   3. [Build module graph][6]
-      1. [Run enabled plugins][7] in each workspace
-      2. Store entry points and referenced dependencies
-      3. [Create TS programs][8]
-      4. [Get imports and exports][9] using TS AST traversal/visitors
-      5. [Get dependencies/binaries from scripts][10]
-   4. [Analyze module graph][11]
-      1. Find [unused exports][12] (respecting [namespaces & members][13])
-      2. Settle unused files
-      3. [Settle unused/unlisted dependencies][14]
-      4. Settle unused catalog entries
-3. [Run default reporter][15]
+- Important: debug, don't guess.
+- Find repositories/CodeSandbox/StackBlitz source files and local fixtures to
+  actually reproduce the issue at hand.
+- [Run Knip without compilation][4]
+- Run `knip` directly in a fixture or temp directory (over creating test scripts
+  that import the `main` function). Knip requires `package.json` in root dir.
+- Enable [debug & helpers][5] with `--debug` (not `DEBUG=`). Warning: noisy.
+- Use [trace][6] to debug
+  - Exported identifiers (`knip --trace-export [name] --trace-file [file]`)
+  - External dependencies (`knip --trace-dependency [name] --workspace [dir]`)
 
 ## Run without compilation
 
@@ -118,27 +115,26 @@ cd packages/knip/fixtures/commonjs
 knip
 ```
 
-## Debug
+## Implementation walk-through
 
-- Run `knip` directly in a fixture or temp directory (over creating test scripts
-  that import the `main` function). Knip requires `package.json` in root dir.
-- Enable [debug & helpers][16] with `--debug` (not `DEBUG=`). Warning: noisy.
+The sequence from [CLI][7]:
 
-### Trace exported identifier
-
-With optional `--trace-file` filter:
-
-```sh
-knip --trace-export [name] --trace-file [file]
-```
-
-### Trace external dependency
-
-With optional `--workspace` filter:
-
-```sh
-knip --trace-dependency [name] --workspace [dir]
-```
+1. [Create options][8]
+2. [Run][9]
+   1. Normalize user config
+   2. Get workspaces
+   3. [Build module graph][10]
+      1. [Run enabled plugins][11] in each workspace
+      2. Store entry points and referenced dependencies
+      3. [Create TS programs][12]
+      4. [Get imports and exports][13] using TS AST traversal/visitors
+      5. [Get dependencies/binaries from scripts][14]
+   4. [Analyze module graph][15]
+      1. Find [unused exports][16] (respecting [namespaces & members][17])
+      2. Settle unused files
+      3. [Settle unused/unlisted dependencies][18]
+      4. Settle unused catalog entries
+3. [Run default reporter][19]
 
 ## Plugins
 
@@ -146,32 +142,36 @@ If requested to create a new plugin for a certain package/tool/framework:
 
 - Come up with a kebab-cased `name`.
 - Run `pnpm create-plugin --name [name]` from the `packages/knip` directory.
-- Must read [Writing A Plugin][17] first to understand plugin responsibilities
-  and `Input[]` plugin functions like `resolveConfig` return.
+- Must read [Writing A Plugin][20] first to understand:
+  - Plugin responsibilities
+  - Functions like `resolveConfig` and `Input` type definition
+  - Consider `resolveFromAST` only for custom plugin-specific needs (core takes
+    care of module resolution, imports, exports, external dependencies)
 - Update the plugin's `types.ts`: add only relevant types, remove if unused.
-- Consult similar plugins and the tool's website to implement the plugin.
-- Update and fill out the blanks in the new files.
-- Don't forget: [run tests][18] individually first.
-- Remove unused variables and empty arrays from the template.
-- Consider `resolveFromAST` only for plugin-specific custom needs (core takes
-  care of module resolution, imports, exports, external dependencies).
+- Consult similar plugins and the tool's website before implementation
+- Update and fill out the blanks in the generated files.
+- Remove unused variables and empty arrays from the template
+- Don't forget: [run tests][21] individually first.
 
 [1]: https://knip.dev
-[2]: ./packages/knip/src/types/module-graph.ts
-[3]: ./packages/knip/src/cli.ts
-[4]: ./packages/knip/src/util/create-options.ts
-[5]: ./packages/knip/src/run.ts
-[6]: ./packages/knip/src/graph/build.ts
-[7]: ./packages/knip/src/WorkspaceWorker.ts
-[8]: ./packages/knip/src/ProjectPrincipal.ts
-[9]: ./packages/knip/src/typescript/get-imports-and-exports.ts
-[10]: ./packages/knip/src/binaries/bash-parser.ts
-[11]: ./packages/knip/src/graph/analyze.ts
-[12]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[13]:
+[2]: ./packages/knip/src/util/Performance.ts
+[3]: ./packages/knip/src/types/module-graph.ts
+[4]: #run-without-compilation
+[5]: ./packages/knip/src/util/debug.ts
+[6]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[7]: ./packages/knip/src/cli.ts
+[8]: ./packages/knip/src/util/create-options.ts
+[9]: ./packages/knip/src/run.ts
+[10]: ./packages/knip/src/graph/build.ts
+[11]: ./packages/knip/src/WorkspaceWorker.ts
+[12]: ./packages/knip/src/ProjectPrincipal.ts
+[13]: ./packages/knip/src/typescript/get-imports-and-exports.ts
+[14]: ./packages/knip/src/binaries/bash-parser.ts
+[15]: ./packages/knip/src/graph/analyze.ts
+[16]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
+[17]:
   ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
-[14]: ./packages/knip/src/DependencyDeputy.ts
-[15]: ./packages/knip/src/reporters/symbols.ts
-[16]: packages/knip/src/util/debug.ts
-[17]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
-[18]: #test
+[18]: ./packages/knip/src/DependencyDeputy.ts
+[19]: ./packages/knip/src/reporters/symbols.ts
+[20]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
+[21]: #test
