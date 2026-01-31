@@ -99,7 +99,6 @@ export class Extension {
     this.#outputChannel.info('Initializing extension');
 
     await this.#startClient();
-    await this.#client?.sendRequest(REQUEST_START);
     await this.#refresh();
   }
 
