@@ -39,7 +39,7 @@ const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
 /**
  * @import { Issues, Rules } from 'knip/session';
- * @import { Connection, Diagnostic, CodeAction, ClientCapabilities } from 'vscode-languageserver';
+ * @import { Connection, Diagnostic, CodeAction } from 'vscode-languageserver';
  * @import { CodeActionParams, DidChangeWatchedFilesParams } from 'vscode-languageserver';
  * @import { Config, IssuesByUri } from './types.js';
  *
@@ -85,9 +85,6 @@ export class LanguageServer {
 
   /** @type TextDocuments<TextDocument> */
   documents;
-
-  /** @type {ClientCapabilities | undefined} */
-  clientCapabilities;
 
   /** @type {{ filePath: string; file: File } | undefined} */
   fileCache;
