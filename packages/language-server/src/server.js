@@ -225,6 +225,7 @@ export class LanguageServer {
   stop() {
     this.session = undefined;
     this.fileCache = undefined;
+    this.packageJsonCache = undefined;
     for (const uri of this.published) this.connection.sendDiagnostics({ uri, diagnostics: [] });
     this.published.clear();
   }
