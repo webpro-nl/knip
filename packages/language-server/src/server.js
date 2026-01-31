@@ -2,7 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
-import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
+import {
+  DidChangeWatchedFilesNotification,
+  FileChangeType,
+  ProposedFeatures,
+  TextDocuments,
+} from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
@@ -34,7 +39,7 @@ const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
 /**
  * @import { Issues, Rules } from 'knip/session';
- * @import { Connection, Diagnostic, CodeAction } from 'vscode-languageserver';
+ * @import { Connection, Diagnostic, CodeAction, ClientCapabilities } from 'vscode-languageserver';
  * @import { CodeActionParams, DidChangeWatchedFilesParams } from 'vscode-languageserver';
  * @import { Config, IssuesByUri } from './types.js';
  *
@@ -121,7 +126,13 @@ export class LanguageServer {
       };
     });
 
-    this.connection.onInitialized(() => {});
+    this.connection.onInitialized(async () => {
+      await this.connection.client.register(DidChangeWatchedFilesNotification.type, {
+        watchers: [{ globPattern: '**/*' }],
+      });
+
+      await this.start();
+    });
 
     this.connection.onRequest(REQUEST_START, () => this.start());
 
