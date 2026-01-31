@@ -125,7 +125,6 @@ export class Extension {
       /** @type {LanguageClientOptions} */
       const clientOptions = {
         documentSelector: [{ scheme: 'file' }],
-        synchronize: { fileEvents: [vscode.workspace.createFileSystemWatcher('**/*')] },
         initializationOptions: { config },
         outputChannel: this.#outputChannel,
         outputChannelName: 'Knip',
