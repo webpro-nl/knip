@@ -40,6 +40,7 @@ const toPosix = value => value.split(path.sep).join(path.posix.sep);
  *
  * @typedef {import('knip/session').Session} Session
  * @typedef {import('knip/session').File} File
+ * @typedef {import('knip/session').DependencyNodes} DependencyNodes
  */
 
 const FILE_CHANGE_TYPES = new Map([
@@ -79,6 +80,15 @@ export class LanguageServer {
 
   /** @type TextDocuments<TextDocument> */
   documents;
+
+  /** @type {ClientCapabilities | undefined} */
+  clientCapabilities;
+
+  /** @type {{ filePath: string; file: File } | undefined} */
+  fileCache;
+
+  /** @type {{ dependenciesUsage: Record<string, DependencyNodes> } | undefined} */
+  packageJsonCache;
 
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
