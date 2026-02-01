@@ -151,26 +151,37 @@ export class Extension {
 
   /**
    * Detects package manager by checking for lock files and package.json packageManager field.
+   * Walks up the directory tree to the workspace root for monorepo support.
    * @param {string} workspace - Workspace directory path
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
    * @throws {Error} If no package manager can be detected
    */
   #detectPackageManager(workspace) {
-    if (existsSync(path.join(workspace, 'pnpm-lock.yaml'))) return 'pnpm';
-    if (existsSync(path.join(workspace, 'yarn.lock'))) return 'yarn';
-    if (existsSync(path.join(workspace, 'package-lock.json'))) return 'npm';
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    let dir = workspace;
 
-    const packageJsonPath = path.join(workspace, 'package.json');
-    if (existsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson.packageManager) {
-          const [pmName] = packageJson.packageManager.split('@');
-          if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
-            return pmName;
+    while (dir) {
+      if (existsSync(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
+      if (existsSync(path.join(dir, 'yarn.lock'))) return 'yarn';
+      if (existsSync(path.join(dir, 'package-lock.json'))) return 'npm';
+
+      const packageJsonPath = path.join(dir, 'package.json');
+      if (existsSync(packageJsonPath)) {
+        try {
+          const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+          if (packageJson.packageManager) {
+            const [pmName] = packageJson.packageManager.split('@');
+            if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
+              return pmName;
+            }
           }
-        }
-      } catch (_error) {}
+        } catch (_error) {}
+      }
+
+      if (dir === workspaceRoot) break;
+      const parentDir = path.dirname(dir);
+      if (parentDir === dir) break;
+      dir = parentDir;
     }
 
     throw new Error(
