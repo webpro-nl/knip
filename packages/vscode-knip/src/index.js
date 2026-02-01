@@ -151,16 +151,16 @@ export class Extension {
 
   /**
    * Detects package manager by checking for lock files and package.json packageManager field.
-   * Walks up the directory tree to the workspace root for monorepo support.
+   * Falls back to workspace root for monorepo support.
    * @param {string} workspace - Workspace directory path
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
    * @throws {Error} If no package manager can be detected
    */
   #detectPackageManager(workspace) {
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    let dir = workspace;
+    const dirsToCheck = workspaceRoot && workspaceRoot !== workspace ? [workspace, workspaceRoot] : [workspace];
 
-    while (dir) {
+    for (const dir of dirsToCheck) {
       if (existsSync(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
       if (existsSync(path.join(dir, 'yarn.lock'))) return 'yarn';
       if (existsSync(path.join(dir, 'package-lock.json'))) return 'npm';
@@ -177,11 +177,6 @@ export class Extension {
           }
         } catch (_error) {}
       }
-
-      if (dir === workspaceRoot) break;
-      const parentDir = path.dirname(dir);
-      if (parentDir === dir) break;
-      dir = parentDir;
     }
 
     throw new Error(
