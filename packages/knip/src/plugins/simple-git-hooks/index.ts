@@ -15,6 +15,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['.simple-git-hooks.{js,cjs,json}', 'simple-git-hooks.{js,cjs,json}', 'package.json'];
 
 const resolveConfig: ResolveConfig<SimpleGitHooksConfig> = async (config, options) => {
+  if (options.isProduction) return [];
+
   if (typeof config === 'function') config = config();
 
   if (!config) return [];
