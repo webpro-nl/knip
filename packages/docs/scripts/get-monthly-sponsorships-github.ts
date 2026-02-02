@@ -1,6 +1,6 @@
 import { graphql } from '@octokit/graphql';
 
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.GITHUB_TOKEN_SPONSORSHIPS;
 
 type Options = {
   token?: string;
@@ -94,7 +94,7 @@ const getMonthlyTotals = async (options: Options) => {
 };
 
 export const getGitHubTotals = async (options: Options) => {
-  if (!token) throw new Error('GITHUB_TOKEN is not set');
+  if (!token) throw new Error('GITHUB_TOKEN_SPONSORSHIPS is not set');
   const monthlyData = await getMonthlyTotals({ ...options, token });
   const startMonth = options.startDate.toISOString().substring(0, 7);
   const endMonth = options.endDate?.toISOString().substring(0, 7);
