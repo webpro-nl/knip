@@ -81,7 +81,13 @@
   },
   "peerDependencies": {
     "@types/node": ">=18",
+    "nuxt": ">=3.0.0",
     "typescript": ">=5.0.4 <7"
+  },
+  "peerDependenciesMeta": {
+    "nuxt": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@jest/types": "^29.6.3",
@@ -93,6 +99,7 @@
     "@wdio/types": "^9.20.0",
     "codeclimate-types": "^0.3.1",
     "glob-bin": "^1.0.0",
+    "nuxt": "^4.1.2",
     "tsx": "^4.20.3",
     "typescript": "^5.5.2"
   },
