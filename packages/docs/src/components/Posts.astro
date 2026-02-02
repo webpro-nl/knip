@@ -1,10 +1,10 @@
 ---
 import { readFile } from 'node:fs/promises';
 import { Card, CardGrid } from '@astrojs/starlight/components';
-import { type PostResponse } from '../util/post.js';
+import type { PostResponse } from '../util/post.js';
 import Post from './Post.astro';
 
-const testimonials: PostResponse = (JSON.parse(await readFile('src/assets/testimonials.json', 'utf-8')));
+const testimonials: PostResponse = JSON.parse(await readFile('src/assets/testimonials.json', 'utf-8'));
 ---
 
 <div class="no-title-cards">

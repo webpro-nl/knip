@@ -84,10 +84,7 @@ export class PrincipalFactory {
   public deletePrincipal(principal: ProjectPrincipal, cwd: string) {
     const p = Array.from(this.principals).find(p => p.principal === principal);
     if (p) {
-      debugLog(
-        '*',
-        `Deleting principal at ${[...p.wsDirs].map(dir => toRelative(dir, cwd))} (${[...p.pkgNames]})`
-      );
+      debugLog('*', `Deleting principal at ${[...p.wsDirs].map(dir => toRelative(dir, cwd))} (${[...p.pkgNames]})`);
       this.principals.delete(p);
     }
   }
