@@ -2,7 +2,7 @@ import codeclimate from './codeclimate.js';
 import codeowners from './codeowners.js';
 import compact from './compact.js';
 import disclosure from './disclosure.js';
-import githubActions from './githubActions.js';
+import githubActions from './github-actions.js';
 import json from './json.js';
 import markdown from './markdown.js';
 import symbols from './symbols.js';
