@@ -37,7 +37,7 @@ Here's what's included in production mode:
 - Only `entry` and `project` patterns suffixed with `!`
 - Only production `entry` file patterns exported by plugins (such as Next.js and
   Remix)
-- Only the `start` and `postinstall` scripts
+- Only the `start` script (of `package.json#scripts`)
 - Ignore exports with the [`@internal` tag][1]
 
 :::note

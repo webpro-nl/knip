@@ -59,9 +59,9 @@ on large monorepos.
 
 Knip does not install the TypeScript Language Service (LS) by default. This is
 expensive, as TypeScript needs to set up symbols and caching for the rather slow
-`findReferences` function.
+`findReferences` function. Even more so for multiple projects/workspaces.
 
-There are two cases that enforce Knip to install the LS.
+There are two cases that enforce Knip to install the LS:
 
 ### 1. Class members
 
@@ -70,10 +70,11 @@ The `findReferences` function is used to find unused members of imported classes
 
 ### 2. Include external type definitions
 
-When [`--include-libs`][3] is enabled, Knip enables loading type definitions of
-external dependencies. This will also install the LS to access its
-`findReferences` function. It acts as an extra line of defense: only exports
-that weren't referenced to during default procedure go through this.
+When [`--include-libs`][3] is enabled, Knip loads type definitions of external
+dependencies. This will also install the LS to access its `findReferences`
+function. It acts as an extra line of defense: only exports that Knip thinks
+aren't referenced (during the default/fast procedure), will now receive a second
+opinion from `findReferences`.
 
 ## Metrics
 
@@ -85,13 +86,23 @@ those functions. Example usage:
 knip --include classMembers --performance
 ```
 
+## ignoreExportsUsedInFile
+
+The [ignoreExportsUsedInFile][5] option slows down the process slightly.
+Typically, anywhere between 0.25% and 10% of total running time. To find out:
+
+```sh
+knip --performance-fn hasRefsInFile
+```
+
 ## A last resort
 
 In case Knip is unbearably slow (or even crashes), you could resort to [lint
-individual workspaces][5].
+individual workspaces][6].
 
 [1]: ./configuring-project-files.md
 [2]: ../reference/cli.md#--isolate-workspaces
 [3]: ../guides/handling-issues.mdx#external-libraries
 [4]: ../reference/cli.md#--performance
-[5]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[5]: ../reference/configuration.md#ignoreexportsusedinfile
+[6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace

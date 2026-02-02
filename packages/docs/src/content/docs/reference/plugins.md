@@ -1,5 +1,5 @@
 ---
-title: Plugins (130)
+title: Plugins (131)
 tableOfContents: false
 ---
 
@@ -33,6 +33,7 @@ tableOfContents: false
 - [Eleventy](/reference/plugins/eleventy "Eleventy")
 - [ESLint](/reference/plugins/eslint "ESLint")
 - [Expo](/reference/plugins/expo "Expo")
+- [Expressive Code](/reference/plugins/expressive-code "Expressive Code")
 - [Gatsby](/reference/plugins/gatsby "Gatsby")
 - [GitHub Action](/reference/plugins/github-action "GitHub Action")
 - [GitHub Actions](/reference/plugins/github-actions "GitHub Actions")
