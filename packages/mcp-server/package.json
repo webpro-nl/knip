@@ -30,7 +30,7 @@
   "author": "Lars Kappert <lars@webpro.nl>",
   "license": "ISC",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.3",
     "knip": "workspace:^",
     "zod": "^4.1.11"
   },
