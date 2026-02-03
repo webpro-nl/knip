@@ -108,7 +108,10 @@ export class LanguageServer {
       };
     });
 
-    this.connection.onInitialized(() => {});
+    this.connection.onInitialized(async () => {
+      const config = await this.getConfig();
+      if (config?.deferSession !== true) this.start();
+    });
 
     this.connection.onRequest(REQUEST_START, () => this.start());
 
@@ -181,9 +184,8 @@ export class LanguageServer {
 
     try {
       const config = await this.getConfig();
-      if (!config?.enabled) return;
 
-      const configFilePath = config.configFilePath
+      const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
           ? config.configFilePath
           : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
@@ -235,23 +237,28 @@ export class LanguageServer {
     this.packageJsonCache = undefined;
     if (!this.session) return;
 
+    const cwd = this.cwd ?? process.cwd();
+
     /** @type {{ type: "added" | "deleted" | "modified"; filePath: string }[]} */
     const changes = [];
     for (const change of params.changes) {
       const filePath = fileURLToPath(change.uri);
+      if (!filePath.startsWith(cwd)) continue;
       if (RESTART_FOR.has(path.basename(change.uri))) return this.restart();
       const type = FILE_CHANGE_TYPES.get(change.type);
       if (!type) continue;
       changes.push({ type, filePath });
     }
 
+    if (changes.length === 0) return;
+
     const result = await this.session.handleFileChanges(changes);
 
-    if (result) {
-      this.connection.console.log(
-        `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
-      );
-    }
+    if (!result) return;
+
+    this.connection.console.log(
+      `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
+    );
 
     const config = await this.getConfig();
     this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
