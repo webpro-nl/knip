@@ -13,6 +13,7 @@
   "scripts": {
     "release": "release-it -c ../../.release-it.json"
   },
+  "repository": "webpro-nl/knip",
   "dependencies": {
     "knip": "workspace:^",
     "vscode-languageserver": "^9.0.1",

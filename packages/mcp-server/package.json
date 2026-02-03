@@ -22,11 +22,7 @@
     "mcp",
     "model-context-protocol"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webpro-nl/knip",
-    "directory": "packages/mcp-server"
-  },
+  "repository": "webpro-nl/knip",
   "author": "Lars Kappert <lars@webpro.nl>",
   "license": "ISC",
   "dependencies": {

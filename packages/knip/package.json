@@ -4,8 +4,8 @@
   "description": "Find and fix unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "homepage": "https://knip.dev",
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/webpro-nl/knip.git",
+    "type": "github",
+    "url": "webpro-nl/knip",
     "directory": "packages/knip"
   },
   "bugs": "https://github.com/webpro-nl/knip/issues",
