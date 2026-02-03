@@ -53,6 +53,7 @@
   "scripts": {
     "package": "node scripts/publish.js",
     "release": "release-it",
+    "test": "pnpm package && node test/run.mjs",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {
@@ -65,6 +66,7 @@
   "devDependencies": {
     "@types/mdast": "4.0.4",
     "@types/vscode": "^1.95.0",
+    "@vscode/test-electron": "^2.5.2",
     "knip": "workspace:*",
     "rolldown": "^1.0.0-rc.2"
   },
