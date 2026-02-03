@@ -1,10 +1,10 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import pkg from '../package.json' with { type: 'json' };
 import {
   createAddJSDocTagEdit,
   createDeleteFileEdit,
@@ -23,9 +23,6 @@ import {
   SESSION_LOADING,
 } from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
 
