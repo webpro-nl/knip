@@ -367,6 +367,7 @@ export class LanguageServer {
       }
 
       if (issueType === 'unlisted') {
+        const workspacePath = path.resolve(this.cwd ?? process.cwd(), issue.workspace);
         codeActions.push({
           title: `Install '${issue.symbol}' as dependency`,
           kind: CodeActionKind.QuickFix,
@@ -374,7 +375,7 @@ export class LanguageServer {
           command: {
             title: `Install '${issue.symbol}' as dependency`,
             command: 'knip.installDependency',
-            arguments: [issue.symbol, 'dependencies', issue.workspace],
+            arguments: [issue.symbol, 'dependencies', workspacePath],
           },
         });
 
@@ -385,7 +386,7 @@ export class LanguageServer {
           command: {
             title: `Install '${issue.symbol}' as devDependency`,
             command: 'knip.installDependency',
-            arguments: [issue.symbol, 'devDependencies', issue.workspace],
+            arguments: [issue.symbol, 'devDependencies', workspacePath],
           },
         });
       }
