@@ -75,8 +75,7 @@ export const getTableForType = (
     // @ts-expect-error TODO Fix up in next major
     const isFileIssue = issue.type === 'files';
     const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
-    const displaySymbol = isFileIssue ? '' : symbol;
-    table.cell('symbol', print(displaySymbol), options.isUseColors ? highlightSymbol(issue) : () => displaySymbol);
+    if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
     table.cell('symbolType', issue.symbolType && issue.symbolType !== SYMBOL_TYPE.UNKNOWN && print(issue.symbolType));

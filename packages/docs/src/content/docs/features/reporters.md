@@ -79,15 +79,17 @@ The keys match the [reported issue types][6]. Example usage:
 knip --reporter json
 ```
 
-### Github Actions
+### GitHub Actions
 
-TODO
-
+Use the GitHub Actions reporter in a workflow for annotations in pull requests.
 Example usage:
 
 ```sh
 knip --reporter github-actions
 ```
+
+Changed files in pull requests will now contain inline annotations for lint
+findings.
 
 ### Markdown
 
@@ -138,8 +140,8 @@ dangling.js
 <summary>Unused dependencies (2)</summary>
 
 ```
-unused-dep     package.json
-my-package     package.json
+my-package     package.json:17:5
+unused-dep     package.json:20:5
 ```
 
 </details>
@@ -162,8 +164,8 @@ dangling.js
   <summary>Unused dependencies (2)</summary>
 
 ```
-unused-dep     package.json
-my-package     package.json
+my-package     package.json:17:5
+unused-dep     package.json:20:5
 ```
 
 </details>

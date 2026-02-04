@@ -24,13 +24,12 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
 export const getFilteredScripts = (scripts: Scripts) => {
   if (!scripts) return [{}, {}];
 
-  const scriptFilter = new Set(['start', 'postinstall']);
   const productionScripts: Scripts = {};
   const developmentScripts: Scripts = {};
 
   for (const scriptName in scripts) {
     if (!/^\w/.test(scriptName)) continue;
-    if (scriptFilter.has(scriptName)) productionScripts[scriptName] = scripts[scriptName];
+    if (scriptName === 'start') productionScripts[scriptName] = scripts[scriptName];
     else developmentScripts[scriptName] = scripts[scriptName];
   }
 

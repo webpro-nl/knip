@@ -36,18 +36,15 @@ export const loadFile = async (filePath: string) => {
   }
 };
 
-export const hasFilesWithExtensions = (cwd: string, dirName: string, extensions: string[]): boolean => {
+export const hasFileWithExtension = (cwd: string, dirName: string, extensions: string[]): boolean => {
   if (!isDirectory(cwd, dirName)) return false;
 
   try {
-    const files = readdirSync(join(cwd, dirName));
-    return files.some(file => {
-      const ext = extname(file).slice(1);
-      return extensions.includes(ext);
-    });
-  } catch {
-    return false;
-  }
+    for (const file of readdirSync(join(cwd, dirName))) {
+      if (extensions.includes(extname(file))) return true;
+    }
+  } catch {}
+  return false;
 };
 
 export const loadJSON = async (filePath: string) => {

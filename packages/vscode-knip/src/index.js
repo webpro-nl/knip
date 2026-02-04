@@ -150,31 +150,38 @@ export class Extension {
   }
 
   /**
-   * Detects package manager by checking for lock files and package.json packageManager field.
-   * @param {string} workspace - Workspace directory path
+   * Walk up directory tree to find lockfile and package.json#packageManager
+   * @param {string} startDir - Starting directory path
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
    * @throws {Error} If no package manager can be detected
    */
-  #detectPackageManager(workspace) {
-    if (existsSync(path.join(workspace, 'pnpm-lock.yaml'))) return 'pnpm';
-    if (existsSync(path.join(workspace, 'yarn.lock'))) return 'yarn';
-    if (existsSync(path.join(workspace, 'package-lock.json'))) return 'npm';
+  #detectPackageManager(startDir) {
+    let dir = startDir;
+    const root = path.parse(dir).root;
 
-    const packageJsonPath = path.join(workspace, 'package.json');
-    if (existsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-        if (packageJson.packageManager) {
-          const [pmName] = packageJson.packageManager.split('@');
-          if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
-            return pmName;
+    while (dir !== root) {
+      if (existsSync(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
+      if (existsSync(path.join(dir, 'yarn.lock'))) return 'yarn';
+      if (existsSync(path.join(dir, 'package-lock.json'))) return 'npm';
+
+      const packageJsonPath = path.join(dir, 'package.json');
+      if (existsSync(packageJsonPath)) {
+        try {
+          const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+          if (packageJson.packageManager) {
+            const [pmName] = packageJson.packageManager.split('@');
+            if (pmName === 'pnpm' || pmName === 'yarn' || pmName === 'npm') {
+              return pmName;
+            }
           }
-        }
-      } catch (_error) {}
+        } catch (_error) {}
+      }
+
+      dir = path.dirname(dir);
     }
 
     throw new Error(
-      'Could not detect package manager. Please ensure a lock file (pnpm-lock.yaml, yarn.lock, or package-lock.json) exists in your project.'
+      `Could not detect package manager. Please ensure a lock file (pnpm-lock.yaml, yarn.lock, or package-lock.json) exists in your project. Current working dir: ${startDir}`
     );
   }
 
@@ -197,13 +204,8 @@ export class Extension {
 
     const installDependency = vscode.commands.registerCommand(
       'knip.installDependency',
-      async (packageName, dependencyType, workspace) => {
+      async (packageName, dependencyType, workspacePath) => {
         try {
-          const vsWorkspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-          const workspacePath = path.isAbsolute(workspace)
-            ? workspace
-            : path.resolve(vsWorkspaceRoot || process.cwd(), workspace);
-
           if (!existsSync(workspacePath)) {
             vscode.window.showErrorMessage(`Workspace directory not found: ${workspacePath}`);
             return;

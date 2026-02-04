@@ -19,6 +19,8 @@ influence the issue at hand, such as:
 - Dependent or depending workspaces in a monorepo
 - Knip configuration in `knip.json`
 
+## Keep it minimal
+
 Create the minimum of source code and configuration with a few files to
 reproduce and demonstrate the issue. Having this as a basis has many benefits:
 
@@ -29,6 +31,12 @@ reproduce and demonstrate the issue. Having this as a basis has many benefits:
 
 Providing this with an issue description will help us help you and improve the
 chances the issue can be looked into efficiently and in a timely manner.
+
+Useful **complements** to a minimal reproduction might include:
+
+- Screenshots, videos, code snippets or log output
+- Links to an existing project repository
+- Applications scaffolded by tools like Angular or Svelte CLI
 
 ## Before opening an issue
 
@@ -67,13 +75,9 @@ including:
 - A public repository on e.g. GitHub or GitLab.
 - A new [fixtures folder in the Knip repository][9].
 
-The goal is to have an easy and common understanding and reproduction. A link to
-your existing project repository will likely not be considered "minimal". Issues
-containing just a screenshot, or snippets of output or source code don't provide
-the full picture and aren't complete nor actionable.
-
-If you're unable to create a reproduction using one of the methods described
-then please clearly explain this in the issue or [contact me][10].
+The goal is to have an easy and common understanding and reproduction. If you're
+unable to create a reproduction using one of the methods described then please
+clearly explain this in the issue or [contact me][10].
 
 ## Pull Request
 

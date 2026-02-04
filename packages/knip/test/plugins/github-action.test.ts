@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/github-action');
 
-test('Find dependencies with the Github Action plugin', async () => {
+test('Find dependencies with the GitHub Action plugin', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 

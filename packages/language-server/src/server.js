@@ -1,10 +1,10 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
+import { KNIP_CONFIG_LOCATIONS, createOptions, createSession } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
-import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
+import pkg from '../package.json' with { type: 'json' };
 import {
   createAddJSDocTagEdit,
   createDeleteFileEdit,
@@ -23,9 +23,6 @@ import {
   SESSION_LOADING,
 } from './constants.js';
 import { issueToDiagnostic } from './diagnostics.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
 
@@ -370,6 +367,7 @@ export class LanguageServer {
       }
 
       if (issueType === 'unlisted') {
+        const workspacePath = path.resolve(this.cwd ?? process.cwd(), issue.workspace);
         codeActions.push({
           title: `Install '${issue.symbol}' as dependency`,
           kind: CodeActionKind.QuickFix,
@@ -377,7 +375,7 @@ export class LanguageServer {
           command: {
             title: `Install '${issue.symbol}' as dependency`,
             command: 'knip.installDependency',
-            arguments: [issue.symbol, 'dependencies', issue.workspace],
+            arguments: [issue.symbol, 'dependencies', workspacePath],
           },
         });
 
@@ -388,7 +386,7 @@ export class LanguageServer {
           command: {
             title: `Install '${issue.symbol}' as devDependency`,
             command: 'knip.installDependency',
-            arguments: [issue.symbol, 'devDependencies', issue.workspace],
+            arguments: [issue.symbol, 'devDependencies', workspacePath],
           },
         });
       }

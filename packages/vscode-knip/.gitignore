@@ -1,1 +1,2 @@
 *.vsix
+.vscode-test

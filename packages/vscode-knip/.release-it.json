@@ -5,6 +5,7 @@
     "publish": false
   },
   "hooks": {
+    "before:init": "pnpm test",
     "after:bump": "node scripts/publish.js --publish"
   }
 }

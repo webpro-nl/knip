@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import { walk as _walk, type Entry } from '@nodelib/fs.walk';
 import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
-import { GLOBAL_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from '../constants.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
 import { compact, partition } from './array.js';
 import { debugLogObject } from './debug.js';
 import { isDirectory, isFile } from './fs.js';
@@ -208,19 +208,15 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   const paths = await fg.glob(patterns, fgOptions);
 
-  debugLogObject(
-    relative(options.cwd, dir),
-    label ? `Finding ${label}` : 'Finding paths',
-    () => ({
-      patterns,
-      ...fgOptions,
-      ignore:
-        hasCache && ignorePatterns.length === (cachedIgnores || _ignore).length
-          ? `// using cache from previous glob cwd: ${fgOptions.cwd}`
-          : ignorePatterns,
-      paths,
-    })
-  );
+  debugLogObject(relative(options.cwd, dir), label ? `Finding ${label}` : 'Finding paths', () => ({
+    patterns,
+    ...fgOptions,
+    ignore:
+      hasCache && ignorePatterns.length === (cachedIgnores || _ignore).length
+        ? `// using cache from previous glob cwd: ${fgOptions.cwd}`
+        : ignorePatterns,
+    paths,
+  }));
 
   return paths;
 }

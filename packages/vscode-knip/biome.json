@@ -3,7 +3,7 @@
   "extends": "//",
   "overrides": [
     {
-      "includes": ["scripts/**"],
+      "includes": ["scripts/**", "test/**"],
       "linter": {
         "rules": {
           "suspicious": {
