@@ -41,3 +41,19 @@ test('Find dependencies with the Prettier plugin (.json5 config)', async () => {
     total: 0,
   });
 });
+
+test('Handle re-exported config', async () => {
+  const cwd = resolve('fixtures/plugins/prettier-reexport');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.equal(issues.unlisted['prettier.config.js']?.['prettier-plugin-test'], undefined);
+  assert.equal(issues.devDependencies['package.json']?.['@org/prettier-config'], undefined);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    processed: 1,
+    total: 1,
+  });
+});
