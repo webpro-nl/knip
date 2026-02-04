@@ -33,7 +33,7 @@ test('Find unused exports respecting ignoreExportsUsedInFile: true', async () =>
 
 test('Find unused exports respecting ignoreExportsUsedInFile: false', async () => {
   const cwd = resolve('fixtures/ignore-exports-used-in-file-false');
-  const options = await createOptions({ cwd: cwd });
+  const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert.equal(Object.values(issues.exports).length, 1);

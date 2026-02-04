@@ -296,13 +296,14 @@ const getContainingExportDeclaration = (node: ts.Node): ts.Node | undefined => {
   return node.parent ? getContainingExportDeclaration(node.parent) : undefined;
 };
 
-/** Returns the identifier of the containing export, or undefined if not in an export */
+const isTypeExport = (node: ts.Node) => ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node);
+
+/** Returns the identifier of the containing type export, or undefined if not in a type export */
 export const isReferencedInExport = (node: ts.Node): string | undefined => {
   const parent = node.parent;
   if ((ts.isTypeQueryNode(parent) || ts.isTypeReferenceNode(parent)) && parent.parent) {
     const exportDecl = getContainingExportDeclaration(parent.parent);
-    // @ts-expect-error name may not exist on all node types
-    if (exportDecl) return exportDecl.name?.getText();
+    if (exportDecl && isTypeExport(exportDecl)) return exportDecl.name.getText();
   }
   return undefined;
 };
