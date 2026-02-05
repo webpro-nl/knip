@@ -2,7 +2,9 @@
   "name": "@knip/language-server",
   "version": "1.2.0",
   "type": "module",
-  "bin": "./src/cli.js",
+  "bin": {
+    "knip-language-server": "./src/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./src/types.d.ts",
