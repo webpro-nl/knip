@@ -47,8 +47,13 @@ export const analyze = async ({
 
   const isReferencedInUsedExport = (exportedItem: Export, filePath: string, includeEntryExports: boolean) => {
     if (!exportedItem.referencedIn) return false;
+    const file = graph.get(filePath);
+    if (!file) return false;
     for (const containingExport of exportedItem.referencedIn) {
       if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
+      const inExport = file.exports.get(containingExport);
+      if (!inExport) return false;
+      if (inExport.hasRefsInFile && (inExport.type === 'type' || inExport.type === 'interface')) return true;
     }
     return false;
   };
