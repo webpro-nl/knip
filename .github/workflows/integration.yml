@@ -122,6 +122,14 @@ jobs:
               bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
               bunx --bun knip --tags=-knipignore --production
 
+          - name: npmx.dev
+            repo: npmx-dev/npmx.dev
+            commands: |
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm knip
+              pnpm knip --production
+
           - name: prettier
             repo: prettier/prettier
             commands: |
