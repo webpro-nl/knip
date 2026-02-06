@@ -2,7 +2,13 @@
   "name": "@plugins/vitest",
   "scripts": {
     "test": "vitest --config vitest-default-coverage.config.ts",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage.provider istanbul",
+    "test:reporter": "vitest --reporter vitest-sonar-reporter",
+    "test:reporter:builtin": "vitest --reporter verbose",
+    "test:env": "vitest --environment jsdom",
+    "test:typecheck": "vitest --typecheck.checker vue-tsc",
+    "test:typecheck:tsc": "vitest --typecheck.checker tsc"
   },
   "devDependencies": {
     "vitest": "*",
