@@ -32,7 +32,7 @@ const load = async (filePath: string) => {
       return await loadJSONC(filePath);
     }
 
-    if (typeof Bun !== 'undefined') {
+    if ('Bun' in globalThis) {
       const imported = await import(filePath);
       return imported.default ?? imported;
     }
