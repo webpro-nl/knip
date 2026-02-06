@@ -10,7 +10,7 @@ import { hasDependency } from '../../util/plugin.js';
 
 const title = 'TypeScript';
 
-const enablers = ['typescript'];
+const enablers = ['typescript', '@typescript/native-preview'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -49,7 +49,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
 };
 
 const args = {
-  binaries: ['tsc'],
+  binaries: ['tsc', 'tsgo'],
   string: ['project'],
   alias: { project: ['p'] },
   config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,

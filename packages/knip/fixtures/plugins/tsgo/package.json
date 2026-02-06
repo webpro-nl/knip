@@ -1,0 +1,10 @@
+{
+  "name": "tsgo",
+  "scripts": {
+    "build": "tsgo"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "*",
+    "@types/node": "*"
+  }
+}
