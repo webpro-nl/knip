@@ -1,14 +1,7 @@
 import type ts from 'typescript';
 import type { Args } from '../../types/args.js';
-import type {
-  IsPluginEnabled,
-  Plugin,
-  Resolve,
-  ResolveFromAST,
-} from '../../types/config.js';
-import {
-  toDependency,
-} from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
+import { toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import { resolveConfig } from '../vitest/index.js';
 import { getIndexHtmlEntries, getReactBabelPlugins } from './helpers.js';
@@ -19,11 +12,9 @@ const title = 'Vite';
 
 const enablers = ['vite', 'vitest'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
-
 
 const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   const babelPlugins = getReactBabelPlugins(sourceFile);
