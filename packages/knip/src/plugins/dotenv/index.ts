@@ -7,7 +7,7 @@ import type { Plugin } from '../../types/config.js';
 const title = 'dotenv';
 
 const args = {
-  fromArgs: (parsed: ParsedArgs, args: string[]) => argsFrom(args, parsed._[0]),
+  fromArgs: (parsed: ParsedArgs, args: string[]) => (parsed._[0] ? argsFrom(args, parsed._[0]) : []),
 };
 
 const plugin: Plugin = {
