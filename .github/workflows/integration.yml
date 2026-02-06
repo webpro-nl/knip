@@ -161,6 +161,7 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
+              pnpm run knip --fix --no-exit-code
               pnpm run knip
 
           - name: slonik
