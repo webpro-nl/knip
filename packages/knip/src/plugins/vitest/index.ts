@@ -41,7 +41,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const hasCoverageEnabled = testConfig.coverage && testConfig.coverage.enabled !== false;
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
+  const setupFiles = [testConfig.setupFiles ?? []]
+    .flat()
+    .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
   const workspaceDependencies: Input[] = [];
