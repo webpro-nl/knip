@@ -71,8 +71,6 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
 
   const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd }) ?? [];
 
-  const extraInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
-
   return [
     toBinary(binary, inputOpts),
     ...positionals,
@@ -81,6 +79,5 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     ...resolvedFromArgs,
     ...configFilePaths,
     ...inputs,
-    ...extraInputs,
   ];
 };

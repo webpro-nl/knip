@@ -64,8 +64,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
-  t('node -r program -- node script.js', [toBinary('node'), toDeferResolve('program'), toBinary('node'), toDeferResolveEntry('script.js', opt)]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toDeferResolve('dotenv/config'), toBinary('node'), js]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toDeferResolve('dotenv/config')]);
   t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toDeferResolveEntry('script', opt), toDeferResolve('pkg1'), toDeferResolve('pkg2')]);
@@ -103,7 +102,7 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv program', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -- program', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -e .env3 -v VARIABLE=somevalue -- program', [toBinary('dotenv'), toBinary('program')]);
-  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', [toBinary('dotenv'), toBinary('program'), toBinary('exit')]);
+  t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
 });
 
@@ -266,6 +265,7 @@ test('getInputsFromScripts ("positionals")', () => {
 
 test('getInputsFromScripts (c8)', () => {
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha')]);
@@ -321,27 +321,14 @@ test('getInputsFromScripts (ignore parse error)', () => {
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, []); // Unexpected 'OPEN_PAREN'
 });
 
+test('getInputsFromScripts (plugins → double-dash)', () => {
+  t('eslint --fix -- src/', [toBinary('eslint')]);
+  t('vitest -c vitest.unit.config.ts -- --bail 1', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.ts')]);
+  t('tsc -p tsconfig.lib.json -- --verbose', [toBinary('tsc'), toConfig('typescript', 'tsconfig.lib.json')]);
+  t('nx exec -- vitest --config vitest.int.config.ts', [toBinary('nx'), toBinary('vitest'), toConfig('vitest', 'vitest.int.config.ts')]);
+});
+
 test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
-});
-
-test('getInputsFromScripts (plugins → extra args)', () => {
-  t('vitest -- node ./script.js', [toBinary('vitest'), toBinary('node'), js]);
-  t('vitest run --reporter=verbose -- tsx ./main.ts', [toBinary('vitest'), toBinary('tsx'), ts]);
-  t('vitest --coverage -- node -r dotenv/config ./script.js', [toBinary('vitest'), toDependency('@vitest/coverage-v8'), toBinary('node'), js, toDeferResolve('dotenv/config')]);
-  t('vitest --environment jsdom -- echo done', [toBinary('vitest'), toDependency('jsdom'), toBinary('echo')]);
-  t('vitest --ui -- node -r ts-node/register ./script.js', [toBinary('vitest'), toDependency('@vitest/ui', opt), toBinary('node'), js, toDeferResolve('ts-node/register')]);
-  t('vitest -c vitest.unit.config.ts -- --bail 1', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.ts')]);
-  t('jest --config jest.e2e.json -- --runInBand', [toBinary('jest'), toConfig('jest', 'jest.e2e.json')]);
-  t('eslint --fix -- src/', [toBinary('eslint'), toBinary('src/')]);
-  t('tsc -p tsconfig.lib.json -- --verbose', [toBinary('tsc'), toConfig('typescript', 'tsconfig.lib.json')]);
-  t('mocha --require ts-node/register -- --grep unit', [toBinary('mocha'), toDeferResolve('ts-node/register')]);
-  t('webpack --config webpack.prod.js -- --env production', [toBinary('webpack'), toConfig('webpack', 'webpack.prod.js')]);
-  t('playwright test --config playwright.ci.ts -- --shard=1/3', [toBinary('playwright'), toConfig('playwright', 'playwright.ci.ts')]);
-  t('tsx ./main.ts -- --flag value', [toBinary('tsx'), ts]);
-  t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
-  t('c8 node ./script.js -- --extra-flag', [toBinary('c8'), toBinary('node'), js]);
-  t('nx exec -- vitest --config vitest.int.config.ts', [toBinary('nx'), toBinary('vitest'), toConfig('vitest', 'vitest.int.config.ts')]);
-  t('rollup -c -- --environment production', [toBinary('rollup')]);
 });
