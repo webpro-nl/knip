@@ -178,7 +178,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
-  const _ignore: string[] = [];
+  const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
   if (options.gitignore) {
@@ -196,8 +196,6 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
         if (prev === dir || dir === '.') break;
       }
     }
-  } else {
-    _ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
   if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
