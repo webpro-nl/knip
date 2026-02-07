@@ -110,6 +110,32 @@ Works identical to [`@public`][9]. Knip ignores other tags like `@alpha` and
 
 [TSDoc: @beta][10]
 
+## `@knip-ignore-until`
+
+Temporarily ignore an unused export until a specified date. After the date
+passes, Knip will report the export as unused again.
+
+Example:
+
+```ts
+/**
+ * @knip-ignore-until 2025-04-01
+ */
+export const temporarilyIgnored = () => {};
+```
+
+Use ISO 8601 date format (`YYYY-MM-DD`). This is useful for:
+
+- Exports that will be used in upcoming features
+- Temporary workarounds with a planned removal date
+- Staged rollouts where code will be enabled later
+
+| Date value | Behavior |
+| ---------- | -------- |
+| Future date | Ignored (not reported) |
+| Past date | Reported as unused |
+| Invalid date | Reported as unused |
+
 [1]: ../reference/cli.md#--tags
 [2]: ./configuration.md#tags
 [3]: ./cli.md#--include-entry-exports
