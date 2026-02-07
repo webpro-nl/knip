@@ -1,7 +1,3 @@
-import type { HasDependency } from './types.js';
-
-const condition = (hasDependency: HasDependency) => hasDependency('prisma');
-
 const directiveMatcher = /generator\s+(?!client)\w+\s*\{\s*provider\s*=\s*"([^"]+)"[^}]*\}/g;
 
 const compiler = (text: string) => {
@@ -18,4 +14,4 @@ const compiler = (text: string) => {
   return imports.join('\n');
 };
 
-export default { condition, compiler };
+export default compiler;

@@ -11,6 +11,7 @@ import type {
   GetSourceFile,
   HandleInput,
   Plugin,
+  RegisterCompiler,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHint } from './types/issues.js';
@@ -239,6 +240,18 @@ export class WorkspaceWorker {
     const plugin = Plugins[pluginName];
     const pluginConfig = this.getConfigForPlugin(pluginName);
     return pluginConfig.config ?? this.getPluginConfig(plugin) ?? [];
+  }
+
+  public async registerCompilers(registerCompiler: RegisterCompiler) {
+    const cwd = this.dir;
+    const isProduction = this.options.isProduction;
+    const hasDependency = (packageName: string) => this.dependencies.has(packageName);
+    for (const [pluginName, plugin] of PluginEntries) {
+      if (!plugin.registerCompilers) continue;
+      if (this.config[pluginName] === false) continue;
+      if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
+      await plugin.registerCompilers({ cwd, hasDependency, registerCompiler });
+    }
   }
 
   public async runPlugins() {

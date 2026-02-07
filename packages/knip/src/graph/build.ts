@@ -2,13 +2,13 @@ import { _getInputsFromScripts } from '../binaries/index.js';
 import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.js';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { GetImportsAndExportsOptions } from '../types/config.js';
+import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.js';
 import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
@@ -106,11 +106,7 @@ export async function build({
     if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
-
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
-    const extensions = getCompilerExtensions(compilers);
-    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
-    const config = chief.getConfigForWorkspace(name, extensions);
+    const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
@@ -121,7 +117,7 @@ export async function build({
     const worker = new WorkspaceWorker({
       name,
       dir,
-      config,
+      config: baseConfig,
       manifest,
       dependencies,
       rootManifest,
@@ -136,6 +132,20 @@ export async function build({
     });
 
     await worker.init();
+
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
+      const ext = normalizeCompilerExtension(extension);
+      if (compilers[0].has(ext)) return;
+      compilers[0].set(ext, compiler);
+    };
+
+    await worker.registerCompilers(registerCompiler);
+
+    const extensions = getCompilerExtensions(compilers);
+    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
+    const config = chief.getConfigForWorkspace(name, extensions);
+    worker.config = config;
 
     const inputs = new Set<Input>();
 

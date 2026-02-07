@@ -1,7 +1,3 @@
-import type { HasDependency } from './types.js';
-
-const condition = (hasDependency: HasDependency) => hasDependency('tailwindcss');
-
 const directiveMatcher = /@(?:import|config|source|plugin)\s+['"]([^'"]+)['"][^;]*;/g;
 
 const compiler = (text: string) => {
@@ -15,4 +11,4 @@ const compiler = (text: string) => {
   return imports.join('\n');
 };
 
-export default { condition, compiler };
+export default compiler;

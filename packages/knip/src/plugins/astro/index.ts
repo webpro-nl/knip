@@ -1,6 +1,8 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.js';
 import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
+import compiler from './compiler.js';
+import mdxCompiler from './compiler-mdx.js';
 import { getSrcDir } from './resolveFromAST.js';
 
 // https://docs.astro.build/en/reference/configuration-reference/
@@ -34,6 +36,14 @@ const resolveFromAST: ResolveFromAST = sourceFile => {
   ];
 };
 
+// https://docs.astro.build/en/guides/integrations-guide/mdx/
+const registerCompilers: RegisterCompilers = async ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('astro')) await registerCompiler({ extension: '.astro', compiler });
+  if (hasDependency('@astrojs/mdx') || hasDependency('@astrojs/starlight')) {
+    await registerCompiler({ extension: '.mdx', compiler: mdxCompiler });
+  }
+};
+
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
   const inputs = [];
@@ -56,6 +66,7 @@ const plugin: Plugin = {
   config,
   entry,
   production,
+  registerCompilers,
   resolveFromAST,
   resolve,
 };

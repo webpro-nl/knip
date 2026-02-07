@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { AsyncCompilers, CompilerSync, Compilers, HasDependency, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { ParsedCLIArgs } from '../util/cli-arguments.js';
@@ -141,12 +141,27 @@ export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
 
 export type HandleInput = (input: Input) => string | undefined;
 
+export type RegisterCompilerInput = {
+  extension: string;
+  compiler: CompilerSync;
+};
+
+export type RegisterCompiler = (input: RegisterCompilerInput) => void;
+
 export type ResolveFromAST = (
   sourceFile: ts.SourceFile,
   options: PluginOptions & {
     getSourceFile: GetSourceFile;
   }
 ) => Input[];
+
+export type RegisterCompilersOptions = {
+  cwd: string;
+  hasDependency: HasDependency;
+  registerCompiler: RegisterCompiler;
+};
+
+export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
 export interface Plugin {
   title: string;
@@ -165,6 +180,7 @@ export interface Plugin {
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;
+  registerCompilers?: RegisterCompilers;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

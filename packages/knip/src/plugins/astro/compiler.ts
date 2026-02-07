@@ -1,7 +1,4 @@
-import { frontmatterMatcher, scriptBodies } from './compilers.js';
-import type { HasDependency } from './types.js';
-
-const condition = (hasDependency: HasDependency) => hasDependency('astro');
+import { frontmatterMatcher, scriptBodies } from '../../compilers/compilers.js';
 
 const compiler = (text: string, path: string) => {
   const scripts = [];
@@ -15,4 +12,4 @@ const compiler = (text: string, path: string) => {
   return scripts.join('\n');
 };
 
-export default { condition, compiler };
+export default compiler;
