@@ -5,7 +5,7 @@
     "publish": false
   },
   "hooks": {
-    "before:init": "pnpm test",
+    "before:init": ["pnpm -C ../mcp-server/ prepack", "pnpm test"],
     "after:bump": "node scripts/publish.js --publish"
   }
 }
