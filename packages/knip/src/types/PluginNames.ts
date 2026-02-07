@@ -5,6 +5,7 @@ export type PluginName =
   | 'astro-db'
   | 'astro-og-canvas'
   | 'ava'
+  | 'aws-cdk'
   | 'babel'
   | 'biome'
   | 'bumpp'
@@ -138,6 +139,7 @@ export const pluginNames = [
   'astro-db',
   'astro-og-canvas',
   'ava',
+  'aws-cdk',
   'babel',
   'biome',
   'bumpp',
