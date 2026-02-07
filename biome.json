@@ -7,6 +7,8 @@
       "!**/tmp",
       "!packages/docs/.astro",
       "!.vscode",
+      "!**/.pnp.{cjs,mjs,js}",
+      "!**/.pnp.loader.{cjs,mjs,js}",
       "!templates/language-server-client"
     ]
   },
