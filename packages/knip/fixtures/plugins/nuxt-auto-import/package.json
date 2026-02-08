@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/nuxt-auto-import",
+  "dependencies": {
+    "nuxt": "*",
+    "vue": "*",
+    "@pinia/nuxt": "*",
+    "@vueuse/nuxt": "*"
+  }
+}
