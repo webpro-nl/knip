@@ -16,8 +16,7 @@ test('Find dependencies with the Cspell plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    // case-sensitivity: fast-glob returns two files (.cspell.json and .cSpell.json) while there's only one
-    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    unresolved: 1,
     processed: 0,
     total: 0,
   });

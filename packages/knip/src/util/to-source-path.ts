@@ -27,7 +27,7 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
     if (workspace?.srcDir && workspace.outDir) {
       if (filePath.startsWith(workspace.outDir) || workspace.srcDir === workspace.outDir) {
         const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
-        const srcFilePath = _syncGlob({ patterns: pattern })[0];
+        const srcFilePath = _syncGlob({ cwd: workspace.srcDir, patterns: pattern })[0];
         toSourceMapCache.set(filePath, srcFilePath);
         if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
