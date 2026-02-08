@@ -1,6 +1,6 @@
 import type ts from 'typescript';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, Compilers, HasDependency, SyncCompilers } from '../compilers/types.js';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
 import type { ParsedCLIArgs } from '../util/cli-arguments.js';

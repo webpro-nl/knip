@@ -12,8 +12,7 @@ import type {
 } from './types.js';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
-export const isAsyncCompiler = (fn?: CompilerSync | CompilerAsync) =>
-  fn ? fn.constructor.name === 'AsyncFunction' : false;
+const isAsyncCompiler = (fn?: CompilerSync | CompilerAsync) => (fn ? fn.constructor.name === 'AsyncFunction' : false);
 
 export const normalizeCompilerExtension = (ext: string) => ext.replace(/^\.*/, '.');
 

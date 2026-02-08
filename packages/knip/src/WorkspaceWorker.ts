@@ -244,7 +244,6 @@ export class WorkspaceWorker {
 
   public async registerCompilers(registerCompiler: RegisterCompiler) {
     const cwd = this.dir;
-    const isProduction = this.options.isProduction;
     const hasDependency = (packageName: string) => this.dependencies.has(packageName);
     for (const [pluginName, plugin] of PluginEntries) {
       if (!plugin.registerCompilers) continue;
