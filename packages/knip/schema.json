@@ -138,6 +138,9 @@
         "binaries": {
           "$ref": "#/definitions/ruleValue"
         },
+        "catalog": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "classMembers": {
           "$ref": "#/definitions/ruleValue"
         },
