@@ -16,7 +16,7 @@ import { partition } from '../util/array.js';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
-import { _glob, _syncGlob, negate, prependDirToPattern } from '../util/glob.js';
+import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.js';
 import {
   type Input,
   isAlias,
@@ -94,8 +94,8 @@ export async function build({
     counselor.addWorkspace(manifest);
   }
 
-  collector.addIgnorePatterns(chief.config.ignore.map(p => prependDirToPattern(options.cwd, p)));
-  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => prependDirToPattern(options.cwd, p)));
+  collector.addIgnorePatterns(chief.config.ignore.map(p => prependDir(options.cwd, p)));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => prependDir(options.cwd, p)));
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
@@ -156,10 +156,8 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(config.ignore.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p))));
-    collector.addIgnoreFilesPatterns(
-      config.ignoreFiles.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p)))
-    );
+    collector.addIgnorePatterns(config.ignore.map(p => prependDir(options.cwd, prependDir(name, p))));
+    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(p => prependDir(options.cwd, prependDir(name, p))));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
