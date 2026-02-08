@@ -57,6 +57,9 @@ export class LanguageServer {
   connection;
 
   /** @type {undefined | string} */
+  workspaceRoot;
+
+  /** @type {undefined | string} */
   cwd;
 
   /** @type Set<string> */
@@ -91,7 +94,8 @@ export class LanguageServer {
 
       if (!uri) return { capabilities: {} };
 
-      this.cwd = fileURLToPath(uri);
+      this.workspaceRoot = fileURLToPath(uri);
+      this.cwd = this.workspaceRoot;
 
       const capabilities = {
         codeActionProvider: {
@@ -186,10 +190,10 @@ export class LanguageServer {
       const configFilePath = config.configFilePath
         ? path.isAbsolute(config.configFilePath)
           ? config.configFilePath
-          : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
+          : path.resolve(this.workspaceRoot ?? process.cwd(), config.configFilePath)
         : undefined;
 
-      if (configFilePath) this.cwd = path.dirname(configFilePath);
+      this.cwd = configFilePath ? path.dirname(configFilePath) : this.workspaceRoot;
       if (this.cwd) process.chdir(this.cwd);
 
       this.connection.console.log('Creating options');
