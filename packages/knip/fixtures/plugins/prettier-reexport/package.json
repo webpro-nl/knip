@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/prettier-reexport",
+  "type": "module",
+  "devDependencies": {
+    "prettier": "*",
+    "@org/prettier-config": "*"
+  }
+}
