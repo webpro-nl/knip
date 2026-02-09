@@ -14,9 +14,10 @@ test('Exclude root workspace with !. selector', async () => {
   assert(!selectedWorkspaces?.includes('.'));
   assert(selectedWorkspaces?.includes('app'));
   assert(issues.unlisted['app/index.ts']['vanilla-js']);
+  assert(issues.unlisted['app/tsconfig.json']['@fixtures/workspaces__tsconfig']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
+    unlisted: 2,
     processed: 2,
     total: 2,
   });

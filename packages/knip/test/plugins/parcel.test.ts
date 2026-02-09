@@ -12,20 +12,20 @@ test('Find dependencies with the Parcel plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.devDependencies['package.json']['parcel']);
-  assert(issues.unresolved['.parcelrc']['@parcel/config-default']);
-  assert(issues.unresolved['.parcelrc']['@parcel/transformer-js']);
-  assert(issues.unresolved['.parcelrc']['@parcel/transformer-react-refresh-wrap']);
-  assert(issues.unresolved['.parcelrc']['@parcel/transformer-svg-react']);
-  assert(issues.unresolved['.parcelrc']['@parcel/optimizer-terser']);
-  assert(issues.unresolved['.parcelrc']['@parcel/optimizer-cssnano']);
-  assert(issues.unresolved['.parcelrc']['@parcel/reporter-cli']);
-  assert(issues.unresolved['.parcelrc']['@parcel/reporter-bundle-analyzer']);
+  assert(issues.unlisted['.parcelrc']['@parcel/config-default']);
+  assert(issues.unlisted['.parcelrc']['@parcel/transformer-js']);
+  assert(issues.unlisted['.parcelrc']['@parcel/transformer-react-refresh-wrap']);
+  assert(issues.unlisted['.parcelrc']['@parcel/transformer-svg-react']);
+  assert(issues.unlisted['.parcelrc']['@parcel/optimizer-terser']);
+  assert(issues.unlisted['.parcelrc']['@parcel/optimizer-cssnano']);
+  assert(issues.unlisted['.parcelrc']['@parcel/reporter-cli']);
+  assert(issues.unlisted['.parcelrc']['@parcel/reporter-bundle-analyzer']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     binaries: 1,
-    unresolved: 8,
+    unlisted: 8,
     processed: 0,
     total: 0,
   });

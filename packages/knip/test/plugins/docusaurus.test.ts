@@ -11,14 +11,14 @@ test('Find dependencies with the docusaurus plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
-  assert(issues.unresolved['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
+  assert(issues.unlisted['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
+  assert(issues.unlisted['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
 
   assert(issues.dependencies['package.json']['@mdx-js/react']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unresolved: 2,
+    unlisted: 2,
     dependencies: 1,
     processed: 8,
     total: 8,

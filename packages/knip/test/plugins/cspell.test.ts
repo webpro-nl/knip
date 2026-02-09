@@ -11,13 +11,13 @@ test('Find dependencies with the Cspell plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['.cspell.json']['@cspell/dict-cryptocurrencies/cspell-ext.json']);
+  assert(issues.unlisted['.cspell.json']['@cspell/dict-cryptocurrencies']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     // case-sensitivity: fast-glob returns two files (.cspell.json and .cSpell.json) while there's only one
-    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    unlisted: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
     processed: 0,
     total: 0,
   });
