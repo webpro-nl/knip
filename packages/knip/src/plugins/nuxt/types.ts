@@ -16,6 +16,7 @@ export interface NuxtConfig {
   components?: {
     dirs?: Array<string | { path: string }>;
   };
+  css?: string[];
 }
 
 export interface TemplateExpressionNode {

@@ -2,7 +2,7 @@ import type { IsLoadConfig, IsPluginEnabled, Plugin, RegisterCompilers, ResolveC
 import { isDirectory } from '../../util/fs.js';
 import { _syncGlob } from '../../util/glob.js';
 import type { Input } from '../../util/input.js';
-import { toAlias, toDependency, toIgnore, toProductionEntry } from '../../util/input.js';
+import { toAlias, toDeferResolveProductionEntry, toDependency, toIgnore, toProductionEntry } from '../../util/input.js';
 import { loadTSConfig } from '../../util/load-tsconfig.js';
 import { dirname, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
@@ -67,6 +67,7 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, local
   inputs.push(toProductionEntry(join(serverDir, 'routes/**/*.ts')));
   inputs.push(toProductionEntry(join(serverDir, 'tasks/**/*.ts')));
   inputs.push(toProductionEntry('modules/**/*.ts'));
+  if(localConfig.css) for(const id of localConfig.css) inputs.push(toDeferResolveProductionEntry(id));
 };
 
 const findLayerDirs = (cwd: string): string[] =>
