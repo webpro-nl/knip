@@ -19,10 +19,9 @@ const resolve: Resolve = options => {
   const scripts = { ...options.rootManifest?.scripts, ...options.manifest.scripts };
   for (const script of Object.values(scripts)) {
     if (/(?<=^|\s)bun test/.test(script)) {
-      const parsed = parseArgs(script.split(' '));
-      if (parsed._.filter(id => id !== 'bun' && id !== 'test').length === 0) {
-        return patterns.map(toEntry);
-      }
+      const parsed = parseArgs(script.split(' '), { string: ['timeout', 'rerun-each', 'preload'] });
+      const args = parsed._.filter(id => id !== 'bun' && id !== 'test');
+      return (args.length === 0 ? patterns : args).map(toEntry);
     }
   }
   return [];
