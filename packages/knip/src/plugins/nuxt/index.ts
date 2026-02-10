@@ -54,7 +54,14 @@ const setup = async () => {
 
 const isLoadConfig: IsLoadConfig = options => !options.configFilePath.endsWith('.d.ts');
 
-const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, localConfig: NuxtConfig) => {
+// Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
+const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
+  if (specifier.startsWith('~~/') || specifier.startsWith('@@/')) return join(rootDir, specifier.slice(3));
+  if (specifier.startsWith('~/') || specifier.startsWith('@/')) return join(srcDir, specifier.slice(2));
+  return specifier;
+};
+
+const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, localConfig: NuxtConfig, rootDir: string) => {
   inputs.push(toProductionEntry(join(srcDir, 'app.{vue,jsx,tsx}')));
   inputs.push(toProductionEntry(join(srcDir, 'error.{vue,jsx,tsx}')));
   inputs.push(toProductionEntry(join(srcDir, 'router.options.ts')));
@@ -69,7 +76,7 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, local
   inputs.push(toProductionEntry(join(serverDir, 'routes/**/*.ts')));
   inputs.push(toProductionEntry(join(serverDir, 'tasks/**/*.ts')));
   inputs.push(toProductionEntry('modules/**/*.ts'));
-  if(localConfig.css) for(const id of localConfig.css) inputs.push(toDeferResolveProductionEntry(id));
+  if(localConfig.css) for(const id of localConfig.css) inputs.push(toDeferResolveProductionEntry(resolveAlias(id, srcDir, rootDir)));
 };
 
 const findLayerDirs = (cwd: string): string[] =>
@@ -165,13 +172,13 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     if (typeof id === 'string') inputs.push(toDependency(id));
   }
 
-  addAppEntries(inputs, srcDir, serverDir, localConfig);
+  addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
 
   for (const dir of findLayerDirs(cwd)) {
     const layerAppDir = isDirectory(dir, 'app') ? join(dir, 'app') : dir;
     const layerServerDir = join(dir, 'server');
     inputs.push(toProductionEntry(join(dir, 'nuxt.config.ts')));
-    addAppEntries(inputs, layerAppDir, layerServerDir, localConfig);
+    addAppEntries(inputs, layerAppDir, layerServerDir, localConfig, cwd);
   }
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
