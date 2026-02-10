@@ -28,6 +28,7 @@ const config = ['nuxt.config.{js,mjs,ts}'];
 const production = [
   'app.{vue,jsx,tsx}',
   'error.{vue,jsx,tsx}',
+  'router.options.ts',
   '**/*.d.vue.ts',
   'layouts/**/*.{vue,jsx,tsx}',
   'middleware/**/*.ts',
@@ -56,6 +57,7 @@ const isLoadConfig: IsLoadConfig = options => !options.configFilePath.endsWith('
 const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, localConfig: NuxtConfig) => {
   inputs.push(toProductionEntry(join(srcDir, 'app.{vue,jsx,tsx}')));
   inputs.push(toProductionEntry(join(srcDir, 'error.{vue,jsx,tsx}')));
+  inputs.push(toProductionEntry(join(srcDir, 'router.options.ts')));
   inputs.push(toProductionEntry(join(srcDir, '**/*.d.vue.ts')));
   inputs.push(toProductionEntry(join(srcDir, localConfig.dir?.layouts ?? 'layouts', '**/*.{vue,jsx,tsx}')));
   inputs.push(toProductionEntry(join(srcDir, localConfig.dir?.middleware ?? 'middleware', '**/*.ts')));
