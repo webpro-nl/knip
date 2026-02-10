@@ -95,6 +95,8 @@ Use `knip --exports` to also include class and enum members.
 on a single `tsconfig.json` file (`includes` and `excludes`) and requires no
 configuration. It removes the `export` keyword or the whole export declaration.
 
+**Project status**: The project is archived and recommends Knip.
+
 ## Related projects
 
 Additional alternative and related projects include:
