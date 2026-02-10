@@ -1,0 +1,67 @@
+diff --git a/knip.ts b/knip.ts
+index e0a3199..3596350 100644
+--- a/knip.ts
++++ b/knip.ts
+@@ -1,21 +1,9 @@
+-import type { KnipConfig } from 'knip'
++import type { KnipConfig } from 'knip';
+ 
+ const config: KnipConfig = {
+   workspaces: {
+     '.': {
+       entry: [
+-        'app/router.options.ts!',
+-        'app/app.vue!',
+-        'app/error.vue!',
+-        'app/pages/**/*.vue!',
+-        'app/components/**/*.vue!',
+-        'app/components/**/*.d.vue.ts!',
+-        'app/composables/**/*.ts!',
+-        'app/middleware/**/*.ts!',
+-        'app/plugins/**/*.ts!',
+-        'app/utils/**/*.ts!',
+-        'server/**/*.ts!',
+-        'modules/**/*.ts!',
+         'config/**/*.ts!',
+         'lunaria/**/*.ts!',
+         'shared/**/*.ts!',
+@@ -24,8 +12,8 @@ const config: KnipConfig = {
+         'pwa-assets.config.ts',
+         '.lighthouserc.cjs',
+         'lighthouse-setup.cjs',
+-        'uno-preset-rtl.ts!',
+-        'scripts/**/*.ts',
++        'uno-preset-*.ts!',
++        'scripts/**/*.ts'
+       ],
+       project: ['**/*.{ts,vue,cjs,mjs}', '!test/fixtures/**'],
+       ignoreDependencies: [
+@@ -43,18 +31,18 @@ const config: KnipConfig = {
+ 
+         /** Oxlint plugins don't get picked up yet */
+         '@e18e/eslint-plugin',
+-        'eslint-plugin-regexp',
++        'eslint-plugin-regexp'
+       ],
+-      ignoreUnresolved: ['#components', '#oauth/config'],
++      ignoreUnresolved: ['#components', '#oauth/config']
+     },
+-    'cli': {
+-      project: ['src/**/*.ts!'],
++    cli: {
++      project: ['src/**/*.ts!']
+     },
+-    'docs': {
++    docs: {
+       entry: ['app/**/*.{ts,vue}'],
+-      ignoreDependencies: ['docus', 'better-sqlite3', '@nuxtjs/mdc', 'nuxt!'],
+-    },
+-  },
+-}
++      ignoreDependencies: ['docus', 'better-sqlite3', '@nuxtjs/mdc', 'nuxt!']
++    }
++  }
++};
+ 
+-export default config
++export default config;
