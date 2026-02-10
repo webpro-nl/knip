@@ -1,4 +1,4 @@
-import type { IsLoadConfig, IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
@@ -25,21 +25,24 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['nuxt.config.{js,mjs,ts}'];
 
-const production = [
-  'app.{vue,jsx,tsx}',
-  'error.{vue,jsx,tsx}',
-  'router.options.ts',
-  '**/*.d.vue.ts',
-  'layouts/**/*.{vue,jsx,tsx}',
-  'middleware/**/*.ts',
-  'pages/**/*.{vue,jsx,tsx}',
-  'plugins/**/*.ts',
-  'server/api/**/*.ts',
-  'server/middleware/**/*.ts',
-  'server/plugins/**/*.ts',
-  'server/routes/**/*.ts',
-  'server/tasks/**/*.ts',
-  'modules/**/*.ts',
+const entry = ['app.config.ts', '**/*.d.vue.ts'];
+
+const app = ['app.{vue,jsx,tsx}', 'error.{vue,jsx,tsx}', 'router.options.ts'];
+const layout = (dir = 'layouts') => join(dir, '**/*.{vue,jsx,tsx}');
+const middleware = (dir = 'middleware') => join(dir, '**/*.ts');
+const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
+const plugins = (dir = 'plugins') => join(dir, '**/*.ts');
+const modules = 'modules/**/*.ts';
+const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
+
+const production: string[] = [
+  ...app,
+  layout(),
+  middleware(),
+  pages(),
+  plugins(),
+  modules,
+  ...server.map(id => join('server', id)),
 ];
 
 const setup = async () => {
@@ -51,8 +54,6 @@ const setup = async () => {
     });
   }
 };
-
-const isLoadConfig: IsLoadConfig = options => !options.configFilePath.endsWith('.d.ts');
 
 // Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
 const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
@@ -214,9 +215,9 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
+  entry,
   production,
   setup,
-  isLoadConfig,
   resolveConfig,
   registerCompilers,
 };

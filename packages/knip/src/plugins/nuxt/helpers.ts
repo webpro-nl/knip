@@ -1,8 +1,8 @@
-import ts from 'typescript';
-import { basename, dirname, isInNodeModules, join } from '../../util/path.js';
 import { createRequire } from 'node:module';
-import type { TemplateAstNode, VueSfc } from './types.js';
+import ts from 'typescript';
 import { scriptBodies } from '../../compilers/compilers.js';
+import { basename, dirname, isInNodeModules, join } from '../../util/path.js';
+import type { TemplateAstNode, VueSfc } from './types.js';
 
 export const getVueSfc = (cwd: string): VueSfc => {
   try {
