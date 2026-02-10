@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/suppressions-workspaces",
+  "workspaces": [
+    "workspace-a",
+    "workspace-b"
+  ]
+}
