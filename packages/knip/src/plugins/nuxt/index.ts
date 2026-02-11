@@ -4,6 +4,7 @@ import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
 import {
   toAlias,
+  toConfig,
   toDeferResolveProductionEntry,
   toDependency,
   toEntry,
@@ -11,7 +12,7 @@ import {
   toProductionEntry,
 } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
-import { dirname, join } from '../../util/path.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
@@ -82,8 +83,7 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
     for (const id of config.css) inputs.push(toDeferResolveProductionEntry(resolveAlias(id, srcDir, dir)));
 };
 
-const findLayerDirs = (cwd: string): string[] =>
-  _syncGlob({ cwd, patterns: ['layers/*/nuxt.config.ts'] }).map(f => join(cwd, dirname(f)));
+const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
 
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
   if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
@@ -164,7 +164,7 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 };
 
 const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) => {
-  const { cwd } = options;
+  const { configFileDir: cwd } = options;
   const hasAppDir = isDirectory(cwd, 'app');
   const srcDir = localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd);
   const serverDir = localConfig.serverDir ?? 'server';
@@ -177,12 +177,11 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
 
-  for (const dir of findLayerDirs(cwd)) {
-    const layerAppDir = isDirectory(dir, 'app') ? join(dir, 'app') : dir;
-    const layerServerDir = join(dir, 'server');
-    inputs.push(toProductionEntry(join(dir, 'nuxt.config.ts')));
-    addAppEntries(inputs, layerAppDir, layerServerDir, localConfig, cwd);
+  for (const layerConfig of findLayerConfigs(cwd)) {
+    inputs.push(toConfig('nuxt', layerConfig));
   }
+
+  if (cwd !== options.cwd) return inputs;
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
     const sourceFile = createSourceFile(join(cwd, file));
