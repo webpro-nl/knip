@@ -89,12 +89,13 @@ export function buildAutoImportMap(sourceFile: ts.SourceFile) {
       if (!decl.type) return;
       const tNode = ts.isImportTypeNode(decl.type)
         ? decl.type
-        : ts.isTypeQueryNode(decl.type) &&
-          (ts.isImportTypeNode(decl.type.exprName)
+        : ts.isTypeQueryNode(decl.type)
+          ? ts.isImportTypeNode(decl.type.exprName)
             ? decl.type.exprName
             : ts.isQualifiedName(decl.type.exprName) &&
               ts.isImportTypeNode(decl.type.exprName.left) &&
-              decl.type.exprName.left);
+              decl.type.exprName.left
+          : ts.isIndexedAccessTypeNode(decl.type) && ts.isImportTypeNode(decl.type.objectType) && decl.type.objectType;
       if (!tNode || !ts.isLiteralTypeNode(tNode.argument) || !ts.isStringLiteral(tNode.argument.literal)) return;
       const specifier = tNode.argument.literal.text;
       if (!isLocalSpecifier(specifier)) return;
