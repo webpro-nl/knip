@@ -11,7 +11,7 @@ import {
   toProductionEntry,
 } from '../../util/input.js';
 import { loadTSConfig } from '../../util/load-tsconfig.js';
-import { dirname, join } from '../../util/path.js';
+import { dirname, isAbsolute, join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import {
   buildAutoImportMap,
@@ -39,7 +39,7 @@ const layout = (dir = 'layouts') => join(dir, '**/*.{vue,jsx,tsx}');
 const middleware = (dir = 'middleware') => join(dir, '**/*.ts');
 const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
 const plugins = (dir = 'plugins') => join(dir, '**/*.ts');
-const modules = 'modules/**/*.ts';
+const modules = 'modules/**/*.{ts,vue}';
 const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
 
 const production: string[] = [
@@ -78,8 +78,12 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
   inputs.push(toProductionEntry(join(srcDir, plugins(config.dir?.plugins))));
   for (const id of server) inputs.push(toProductionEntry(join(serverDir, id)));
   inputs.push(toProductionEntry(join(dir, modules)));
-  if (config.css)
-    for (const id of config.css) inputs.push(toDeferResolveProductionEntry(resolveAlias(id, srcDir, dir)));
+  if (config.css) {
+    for (const id of config.css) {
+      if (isAbsolute(id)) inputs.push(toProductionEntry(id));
+      else inputs.push(toDeferResolveProductionEntry(resolveAlias(id, srcDir, dir)));
+    }
+  }
 };
 
 const findLayerDirs = (cwd: string): string[] =>
