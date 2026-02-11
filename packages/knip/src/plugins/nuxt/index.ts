@@ -77,7 +77,7 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
   inputs.push(toProductionEntry(join(srcDir, middleware(config.dir?.middleware))));
   inputs.push(toProductionEntry(join(srcDir, pages(config.dir?.pages))));
   inputs.push(toProductionEntry(join(srcDir, plugins(config.dir?.plugins))));
-  for (const id of server) inputs.push(toProductionEntry(join(serverDir, id)));
+  for (const id of server) inputs.push(toProductionEntry(join(dir, serverDir, id)));
   inputs.push(toProductionEntry(join(dir, modules)));
   if (config.css) {
     for (const id of config.css) {
