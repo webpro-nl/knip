@@ -1,5 +1,5 @@
 diff --git a/knip.ts b/knip.ts
-index e0a3199..4ba5a2f 100644
+index e0a3199..5c5a779 100644
 --- a/knip.ts
 +++ b/knip.ts
 @@ -1,21 +1,9 @@
@@ -58,7 +58,7 @@ index e0a3199..4ba5a2f 100644
 +        'vue-data-ui!'
        ],
 -      ignoreUnresolved: ['#components', '#oauth/config'],
-+      ignoreUnresolved: ['#components', '#oauth/config']
++      ignoreUnresolved: ['#oauth/config']
      },
 -    'cli': {
 -      project: ['src/**/*.ts!'],
