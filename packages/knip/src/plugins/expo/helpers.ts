@@ -29,7 +29,8 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
   const pluginPackages =
     (config.plugins
       ?.map(plugin => {
-        const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+        const pluginNameOrFn = Array.isArray(plugin) ? plugin[0] : plugin;
+        const pluginName = typeof pluginNameOrFn === "function" ? (pluginNameOrFn.name || String(pluginNameOrFn)) : pluginNameOrFn;
         return getPackageNameFromModuleSpecifier(pluginName);
       })
       .filter(Boolean) as string[]) ?? [];
