@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/ignore-patterns-monorepo",
+  "workspaces": [
+    "packages/*"
+  ]
+}

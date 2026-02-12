@@ -94,8 +94,8 @@ export async function build({
     counselor.addWorkspace(manifest);
   }
 
-  collector.addIgnorePatterns(chief.config.ignore.map(p => prependDir(options.cwd, p)));
-  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => prependDir(options.cwd, p)));
+  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
@@ -156,8 +156,20 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(config.ignore.map(p => prependDir(options.cwd, prependDir(name, p))));
-    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(p => prependDir(options.cwd, prependDir(name, p))));
+    collector.addIgnorePatterns(
+      config.ignore.map(pattern => ({
+        pattern: prependDir(options.cwd, prependDir(name, pattern)),
+        id: pattern,
+        workspaceName: name,
+      }))
+    );
+    collector.addIgnoreFilesPatterns(
+      config.ignoreFiles.map(pattern => ({
+        pattern: prependDir(options.cwd, prependDir(name, pattern)),
+        id: pattern,
+        workspaceName: name,
+      }))
+    );
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);

@@ -36,6 +36,8 @@ export class IssueCollector {
   private isMatch: (filePath: string) => boolean;
   private isFileMatch: (filePath: string) => boolean;
   private issueMatchers: Map<IssueType, (filePath: string) => boolean> = new Map();
+  private unusedIgnorePatterns: Map<string, ConfigurationHint> = new Map();
+  private unusedIgnoreFilesPatterns: Map<string, ConfigurationHint> = new Map();
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
@@ -49,14 +51,38 @@ export class IssueCollector {
     if (workspaceFilePathFilter) this.workspaceFilter = workspaceFilePathFilter;
   }
 
-  addIgnorePatterns(patterns: string[]) {
-    for (const pattern of patterns) this.ignorePatterns.add(pattern);
+  addIgnorePatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+    for (const entry of entries) {
+      this.ignorePatterns.add(entry.pattern);
+      if (!entry.pattern.startsWith('!') && !this.unusedIgnorePatterns.has(entry.pattern)) {
+        this.unusedIgnorePatterns.set(entry.pattern, {
+          type: 'ignore',
+          identifier: entry.id,
+          workspaceName: entry.workspaceName,
+        });
+      }
+    }
     this.isMatch = createMatcher(this.ignorePatterns);
   }
 
-  addIgnoreFilesPatterns(patterns: string[]) {
-    for (const pattern of patterns) this.ignoreFilesPatterns.add(pattern);
+  addIgnoreFilesPatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+    for (const entry of entries) {
+      this.ignoreFilesPatterns.add(entry.pattern);
+      if (!entry.pattern.startsWith('!') && !this.unusedIgnoreFilesPatterns.has(entry.pattern)) {
+        this.unusedIgnoreFilesPatterns.set(entry.pattern, {
+          type: 'ignoreFiles',
+          identifier: entry.id,
+          workspaceName: entry.workspaceName,
+        });
+      }
+    }
     this.isFileMatch = createMatcher(this.ignoreFilesPatterns);
+  }
+
+  private markUsedPatterns(filePath: string, unused: Map<string, ConfigurationHint>) {
+    for (const pattern of unused.keys()) {
+      if (picomatch.isMatch(filePath, pattern, { dot: true })) unused.delete(pattern);
+    }
   }
 
   setIgnoreIssues(ignoreIssues?: IgnoreIssues) {
@@ -93,8 +119,14 @@ export class IssueCollector {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
-      if (this.isMatch(filePath)) continue;
-      if (this.isFileMatch(filePath)) continue;
+      if (this.isMatch(filePath)) {
+        this.markUsedPatterns(filePath, this.unusedIgnorePatterns);
+        continue;
+      }
+      if (this.isFileMatch(filePath)) {
+        this.markUsedPatterns(filePath, this.unusedIgnoreFilesPatterns);
+        continue;
+      }
       if (this.shouldIgnoreIssue(filePath, 'files')) continue;
 
       this.issues.files.add(filePath);
@@ -109,7 +141,10 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     if (!this.workspaceFilter(issue.filePath)) return;
-    if (this.isMatch(issue.filePath)) return;
+    if (this.isMatch(issue.filePath)) {
+      this.markUsedPatterns(issue.filePath, this.unusedIgnorePatterns);
+      return;
+    }
     if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
     if (this.rules[issue.type] === 'off') return;
     const key = relative(this.cwd, issue.filePath);
@@ -147,6 +182,10 @@ export class IssueCollector {
       tagHints: this.tagHints,
       configurationHints: Array.from(this.configurationHints.values()),
     };
+  }
+
+  getUnusedIgnorePatternHints() {
+    return [...this.unusedIgnorePatterns.values(), ...this.unusedIgnoreFilesPatterns.values()];
   }
 
   // Retain issues from `handleInput` that would otherwise get lost between analysis runs (e.g. in watch mode)
