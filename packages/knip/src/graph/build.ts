@@ -382,11 +382,9 @@ export async function build({
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
-          const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
-          if (!isIgnored) {
+          if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
             const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) unresolvedImports.add(unresolvedImport);
+            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
           }
         }
       }
