@@ -181,6 +181,17 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
 
+  const aliases = localConfig.alias;
+  if (aliases) {
+    for (const key in aliases) {
+      const prefix = resolveAlias(aliases[key], srcDir, cwd);
+      inputs.push(toAlias(key, prefix));
+      if (prefix.endsWith('/') || isDirectory(prefix)) {
+        inputs.push(toAlias(join(key, '*'), join(prefix, '*'), { dir: cwd }));
+      }
+    }
+  }
+
   for (const layerConfig of findLayerConfigs(cwd)) {
     inputs.push(toConfig('nuxt', layerConfig));
   }
