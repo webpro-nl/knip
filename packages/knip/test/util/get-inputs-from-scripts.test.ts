@@ -135,6 +135,7 @@ test('getInputsFromScripts (npm)', () => {
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
   t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('npm run program -- run --coverage.enabled', [], pkgScripts);
 });
 
 test('getInputsFromScripts (npx)', () => {

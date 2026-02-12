@@ -82,7 +82,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (parsed.filter && !parsed.recursive) return [];
 
-  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--'], { knownBinsOnly: true }) : [];
 
   if (command === 'exec') {
     return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));

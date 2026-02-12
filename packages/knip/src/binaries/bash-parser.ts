@@ -32,8 +32,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (args.length === 0 || !isValidBinary(args[0].split(' ')[0])) return [];
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
-      ...opts,
       knownBinsOnly: false,
+      ...opts,
     });
   };
 
