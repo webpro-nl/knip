@@ -30,7 +30,7 @@ const resolve: Resolve = options => {
       const parsed = parseArgs(script.split(' '), { string: ['timeout', 'rerun-each', 'preload'] });
       const args = parsed._.filter(id => id !== 'bun' && id !== 'test');
       const inputs = (args.length === 0 ? patterns : args).map(toEntry);
-      if (parsed.preload) inputs.push(toDeferResolve(parsed.preload));
+      for (const specifier of [parsed.preload ?? []].flat()) inputs.push(toDeferResolve(specifier));
       return inputs;
     }
   }
