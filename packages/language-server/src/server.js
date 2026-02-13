@@ -267,8 +267,9 @@ export class LanguageServer {
     /** @type {{ type: "added" | "deleted" | "modified"; filePath: string }[]} */
     const changes = [];
     for (const change of params.changes) {
+      if (!change.uri.startsWith('file:')) continue;
       const filePath = fileURLToPath(change.uri);
-      if (!filePath.startsWith(cwd)) continue;
+      if (!filePath.startsWith(cwd) || filePath.includes('/.git/')) continue;
       if (RESTART_FOR.has(path.basename(change.uri))) return this.restart();
       const type = FILE_CHANGE_TYPES.get(change.type);
       if (!type) continue;
