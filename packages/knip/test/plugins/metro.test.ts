@@ -11,6 +11,12 @@ test('Find dependencies with the Metro plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
+  assert(!issues.dependencies['package.json']['@react-native-community/cli']);
+  assert(!issues.dependencies['package.json']['@react-native-community/cli-platform-android']);
+  assert(!issues.dependencies['package.json']['@react-native-community/cli-platform-ios']);
+  assert(!issues.dependencies['package.json']['@react-native-community/cli-server-api']);
+  assert(!issues.dependencies['package.json']['@react-native-community/cli-tools']);
+
   assert(issues.dependencies['package.json']['react']);
   assert(issues.dependencies['package.json']['react-native']);
 

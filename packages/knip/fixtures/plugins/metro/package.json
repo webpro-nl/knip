@@ -1,6 +1,11 @@
 {
   "name": "@plugins/metro",
   "dependencies": {
+    "@react-native-community/cli": "*",
+    "@react-native-community/cli-platform-android": "*",
+    "@react-native-community/cli-platform-ios": "*",
+    "@react-native-community/cli-server-api": "*",
+    "@react-native-community/cli-tools": "*",
     "expo-asset": "*",
     "react": "*",
     "react-native": "*",

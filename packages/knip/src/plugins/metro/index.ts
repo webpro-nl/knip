@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { compact } from '../../util/array.js';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.js';
+import { type Input, toDeferResolve, toDependency, toProductionEntry } from '../../util/input.js';
 import { join } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { MetroConfig } from './types.js';
@@ -18,10 +18,23 @@ const config = ['metro.config.{js,cjs,json}', 'package.json'];
 const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
 const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
 const DEFAULT_EXTENSIONS = ['js', 'jsx', 'json', 'ts', 'tsx'];
+const DEFAULT_TRANSFORMER_PATH = 'metro-transform-worker';
+const DEFAULT_MINIFIER_PATH = 'metro-minify-terser';
+const RN_CLI_PACKAGES = [
+  '@react-native-community/cli',
+  '@react-native-community/cli-platform-android',
+  '@react-native-community/cli-platform-ios',
+  '@react-native-community/cli-server-api',
+  '@react-native-community/cli-tools',
+];
 
 const production = [`src/**/*.{${PLATFORMS.join(',')}}.{${DEFAULT_EXTENSIONS.join(',')}}`];
 
-const resolveConfig: ResolveConfig<MetroConfig> = async config => {
+const resolveConfig: ResolveConfig<MetroConfig> = async (config, options) => {
+  const manifestDependencies = new Set([
+    ...Object.keys(options.manifest.dependencies ?? {}),
+    ...Object.keys(options.manifest.devDependencies ?? {}),
+  ]);
   const { transformerPath, transformer } = config;
   const i = new Set<Input>();
   const inputs: string[] = [];
@@ -45,7 +58,17 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   if (transformer?.minifierPath) inputs.push(transformer.minifierPath);
   if (transformer?.babelTransformerPath) inputs.push(transformer.babelTransformerPath);
 
-  return Array.from(i).concat([...inputs].map(id => toDeferResolve(id)));
+  for (const pkg of RN_CLI_PACKAGES) {
+    if (manifestDependencies.has(pkg)) i.add(toDependency(pkg));
+  }
+
+  return Array.from(i).concat(
+    [...inputs].map(id =>
+      toDeferResolve(id, {
+        optional: id === DEFAULT_TRANSFORMER_PATH || id === DEFAULT_MINIFIER_PATH,
+      })
+    )
+  );
 };
 
 const note = `False positives for platform-specific unused files?
