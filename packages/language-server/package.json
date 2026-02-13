@@ -7,6 +7,9 @@
     "directory": "packages/language-server"
   },
   "type": "module",
+  "bin": {
+    "knip-language-server": "./src/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./src/types.d.ts",
