@@ -184,8 +184,11 @@ export class IssueCollector {
     };
   }
 
-  getUnusedIgnorePatternHints() {
-    return [...this.unusedIgnorePatterns.values(), ...this.unusedIgnoreFilesPatterns.values()];
+  getUnusedIgnorePatternHints(options: MainOptions) {
+    return [
+      ...(options.isReportFiles ? this.unusedIgnorePatterns.values() : []),
+      ...(options.isReportFiles ? this.unusedIgnoreFilesPatterns.values() : []),
+    ];
   }
 
   // Retain issues from `handleInput` that would otherwise get lost between analysis runs (e.g. in watch mode)
