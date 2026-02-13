@@ -98,6 +98,10 @@ export class LanguageServer {
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
     this.documents = new TextDocuments(TextDocument);
+    console.log = this.connection.console.log.bind(this.connection.console);
+    console.warn = this.connection.console.warn.bind(this.connection.console);
+    console.error = this.connection.console.error.bind(this.connection.console);
+    console.info = this.connection.console.info.bind(this.connection.console);
     this.setupHandlers();
     this.documents.listen(this.connection);
     this.connection.listen();
