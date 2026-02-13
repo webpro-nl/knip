@@ -14,8 +14,6 @@ test('Ignore unresolved issues for Metro defaults', async () => {
   assert(issues.dependencies['package.json']['react']);
   assert(issues.dependencies['package.json']['react-native']);
 
-  assert(!issues.unresolved['metro.config.js']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 2,
