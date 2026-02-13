@@ -26,6 +26,21 @@ import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
 
+/** @type {Config} */
+const DEFAULT_CONFIG = {
+  deferSession: false,
+  editor: {
+    exports: {
+      codelens: { enabled: true },
+      hover: { enabled: true, includeImportLocationSnippet: false, maxSnippets: 10, timeout: 300 },
+      quickfix: { enabled: true },
+      highlight: { dimExports: false, dimTypes: false },
+    },
+  },
+  imports: { enabled: true },
+  exports: { enabled: true, contention: { enabled: true } },
+};
+
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
@@ -77,6 +92,9 @@ export class LanguageServer {
   /** @type TextDocuments<TextDocument> */
   documents;
 
+  /** @type {Config | undefined} */
+  initConfig;
+
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
     this.documents = new TextDocuments(TextDocument);
@@ -92,6 +110,8 @@ export class LanguageServer {
       if (!uri) return { capabilities: {} };
 
       this.cwd = fileURLToPath(uri);
+
+      this.initConfig = params.initializationOptions?.config;
 
       const capabilities = {
         codeActionProvider: {
@@ -138,7 +158,11 @@ export class LanguageServer {
 
   /** @returns {Promise<Config>} */
   async getConfig() {
-    return await this.connection.workspace.getConfiguration('knip');
+    try {
+      const config = await this.connection.workspace.getConfiguration('knip');
+      if (config?.editor) return config;
+    } catch {}
+    return this.initConfig ?? DEFAULT_CONFIG;
   }
 
   /**
