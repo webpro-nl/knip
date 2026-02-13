@@ -1,0 +1,4 @@
+{
+  "name": "@plugins/yarn-berry",
+  "packageManager": "yarn@4.12.0"
+}
