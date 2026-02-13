@@ -3,7 +3,7 @@ import { Plugins, pluginArgsMap } from '../plugins.js';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.js';
 import { debugLogObject } from '../util/debug.js';
 import { type Input, toBinary, toDeferResolve } from '../util/input.js';
-import { extractBinary } from '../util/modules.js';
+import { extractBinary, isValidBinary } from '../util/modules.js';
 import { relative } from '../util/path.js';
 import { truncate } from '../util/string.js';
 import { resolve as fallbackResolve } from './fallback.js';
@@ -21,8 +21,6 @@ const spawningBinaries = ['cross-env', 'retry-cli'];
 const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node;
 
 const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
-
-export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];

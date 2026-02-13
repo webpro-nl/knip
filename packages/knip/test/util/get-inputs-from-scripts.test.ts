@@ -76,6 +76,7 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index', opt), toDeferResolve('@scope/package/register')]);
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
+  t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toDeferResolve('dotenv-flow/config')]);
 });
 
 test('getInputsFromScripts (tsx)', () => {
@@ -216,6 +217,8 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pnpm write:report', []);
+  t('pnpm perf:test:ci', []);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {

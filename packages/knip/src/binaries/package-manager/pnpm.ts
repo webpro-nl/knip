@@ -1,6 +1,7 @@
 import parseArgs from 'minimist';
 import type { BinaryResolver } from '../../types/config.js';
 import { toBinary } from '../../util/input.js';
+import { isValidBinary } from '../../util/modules.js';
 import { resolveDlx } from './pnpx.js';
 
 // https://pnpm.io/cli/add
@@ -91,5 +92,5 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const isScript = manifestScriptNames.has(command);
   if (isScript || commands.includes(command)) return childInputs;
 
-  return command ? [toBinary(command)] : [];
+  return command && isValidBinary(command) ? [toBinary(command)] : [];
 };
