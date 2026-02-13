@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { IsPluginEnabled, Plugin, ResolveConfig, Resolve } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
 import { toDeferResolve, toEntry } from '../../util/input.js';
 import type { BunfigConfig } from './types.js';
 
