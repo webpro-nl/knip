@@ -27,7 +27,7 @@ jobs:
         working-directory: packages/knip
       - id: publish
         run: |
-          pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp'
+          pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'
       - name: Comment on referenced issues
         if: github.event_name == 'push'
         uses: actions/github-script@v7
