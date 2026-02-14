@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/metro-defaults",
+  "dependencies": {
+    "react": "*",
+    "react-native": "*"
+  }
+}
