@@ -170,6 +170,8 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return compact([...inputs, ...[...webpackCLI, ...webpackDevServer].map(id => toDependency(id))]);
 };
 
+const isFilterTransitiveDependencies = true;
+
 const args = {
   binaries: ['webpack', 'webpack-dev-server'],
   config: true,
@@ -181,6 +183,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  isFilterTransitiveDependencies,
   args,
 };
 

@@ -18,6 +18,7 @@ import type { ConfigurationHint } from './types/issues.js';
 import type { PluginName } from './types/PluginNames.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
+import { collectStringLiterals } from './typescript/ast-helpers.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
@@ -26,14 +27,17 @@ import {
   type ConfigInput,
   type Input,
   isConfig,
+  isDeferResolve,
+  isDependency,
   toConfig,
   toDebugString,
   toEntry,
   toProductionEntry,
 } from './util/input.js';
+import { getPackageNameFromSpecifier } from './util/modules.js';
 import { getKeysByValue } from './util/object.js';
 import { timerify } from './util/Performance.js';
-import { basename, dirname, join } from './util/path.js';
+import { basename, dirname, isInternal, join } from './util/path.js';
 import { loadConfigForPlugin } from './util/plugin.js';
 import { ELLIPSIS } from './util/string.js';
 
@@ -380,6 +384,9 @@ export class WorkspaceWorker {
           const localConfig = isLoad && (await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName));
           if (localConfig) {
             const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
+            if (plugin.isFilterTransitiveDependencies && !isManifest) {
+              this.filterDelegatedDependencies(inputs, configFilePath);
+            }
             for (const input of inputs) addInput(input, configFilePath);
             cache.resolveConfig = inputs;
           }
@@ -450,6 +457,28 @@ export class WorkspaceWorker {
     debugLogArray(wsName, 'Plugin dependencies', () => compact(inputs.map(input => toDebugString(input, rootCwd))));
 
     return inputs;
+  }
+
+  private filterDelegatedDependencies(inputs: Input[], configFilePath: string) {
+    const literals = new Set<string>();
+    const visited = new Set<string>();
+    const collect = (filePath: string) => {
+      if (visited.has(filePath)) return;
+      visited.add(filePath);
+      const sourceFile = this.getSourceFile(filePath);
+      if (!sourceFile) return;
+      for (const literal of collectStringLiterals(sourceFile)) {
+        literals.add(literal);
+        if (isInternal(literal)) collect(join(dirname(filePath), literal));
+      }
+    };
+    collect(configFilePath);
+    for (const input of inputs) {
+      if (!input.optional && (isDeferResolve(input) || isDependency(input))) {
+        const name = getPackageNameFromSpecifier(input.specifier);
+        if (name && !literals.has(name)) input.optional = true;
+      }
+    }
   }
 
   public getConfigurationHints(

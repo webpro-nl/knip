@@ -173,6 +173,16 @@ export const getLeadingComments = (sourceFile: BoundSourceFile) => {
   return comments;
 };
 
+export const collectStringLiterals = (sourceFile: ts.SourceFile): Set<string> => {
+  const literals = new Set<string>();
+  const visit = (node: ts.Node) => {
+    if (ts.isStringLiteral(node)) literals.add(node.text);
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(sourceFile, visit);
+  return literals;
+};
+
 export const isDeclarationFileExtension = (extension: string) =>
   extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
 

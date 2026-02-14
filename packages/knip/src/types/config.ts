@@ -180,6 +180,7 @@ export interface Plugin {
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;
+  isFilterTransitiveDependencies?: boolean;
   registerCompilers?: RegisterCompilers;
 }
 

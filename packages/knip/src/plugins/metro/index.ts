@@ -69,6 +69,8 @@ const resolveConfig: ResolveConfig<MetroConfig> = async (config, options) => {
   );
 };
 
+const isFilterTransitiveDependencies = true;
+
 const note = `False positives for platform-specific unused files?
 Override the default \`entry\` patterns to match platforms and extensions.`;
 
@@ -82,6 +84,7 @@ const plugin: Plugin = {
   config,
   production,
   resolveConfig,
+  isFilterTransitiveDependencies,
 };
 
 export default plugin;
