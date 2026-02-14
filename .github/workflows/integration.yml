@@ -128,7 +128,7 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm knip
+              pnpm knip --fix --allow-remove-files --no-exit-code
               pnpm knip --production
 
           - name: prettier
