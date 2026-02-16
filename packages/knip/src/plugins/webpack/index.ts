@@ -1,6 +1,7 @@
+import type { ParsedArgs } from 'minimist';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
 import {
   type Input,
   toAlias,
@@ -159,22 +160,21 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
 };
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { manifest } = options;
-
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
-
-  const scripts = Object.values(manifest.scripts ?? {});
-  const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
-  const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
-
-  return compact([...inputs, ...[...webpackCLI, ...webpackDevServer].map(id => toDependency(id))]);
+  inputs.push(toDependency('webpack-cli', { optional: true }));
+  return inputs;
 };
 
 const isFilterTransitiveDependencies = true;
 
-const args = {
+const args: Args = {
   binaries: ['webpack', 'webpack-dev-server'],
   config: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [toDependency('webpack-cli')];
+    if (parsed._[0] === 'serve') inputs.push(toDependency('webpack-dev-server'));
+    return inputs;
+  },
 };
 
 const plugin: Plugin = {
