@@ -21,7 +21,7 @@ test('Find dependencies with the Metro plugin', async () => {
     ...baseCounters,
     dependencies: 2,
     unresolved: 2,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
