@@ -18,7 +18,7 @@ import type { ConfigurationHint } from './types/issues.js';
 import type { PluginName } from './types/PluginNames.js';
 import type { PackageJson } from './types/package-json.js';
 import type { DependencySet } from './types/workspace.js';
-import { collectStringLiterals } from './typescript/ast-helpers.js';
+import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.js';
 import { compact } from './util/array.js';
 import type { MainOptions } from './util/create-options.js';
 import { debugLogArray, debugLogObject } from './util/debug.js';
@@ -37,7 +37,7 @@ import {
 import { getPackageNameFromSpecifier } from './util/modules.js';
 import { getKeysByValue } from './util/object.js';
 import { timerify } from './util/Performance.js';
-import { basename, dirname, isInternal, join } from './util/path.js';
+import { basename, dirname, extname, isInternal, join } from './util/path.js';
 import { loadConfigForPlugin } from './util/plugin.js';
 import { ELLIPSIS } from './util/string.js';
 
@@ -379,19 +379,26 @@ export class WorkspaceWorker {
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
-          const isLoad =
-            typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
-
-          const localConfig = isLoad && (await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName));
-          if (localConfig) {
-            const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
-            if (plugin.isFilterTransitiveDependencies && !isManifest) {
-              this.filterDelegatedDependencies(inputs, configFilePath);
+          if (extname(configFilePath) !== '.json') {
+            const sourceFile = this.getSourceFile(configFilePath);
+            if (sourceFile && isExternalReExportsOnly(sourceFile)) {
+              cache.resolveConfig = [];
             }
-            for (const input of inputs) addInput(input, configFilePath);
-            cache.resolveConfig = inputs;
           }
 
+          if (!cache.resolveConfig) {
+            const isLoad =
+              typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
+            const localConfig = isLoad && (await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName));
+            if (localConfig) {
+              const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
+              if (plugin.isFilterTransitiveDependencies && !isManifest) {
+                this.filterTransitiveDependencies(inputs, configFilePath);
+              }
+              for (const input of inputs) addInput(input, configFilePath);
+              cache.resolveConfig = inputs;
+            }
+          }
         }
 
         if (plugin.resolveFromAST) {
@@ -459,7 +466,7 @@ export class WorkspaceWorker {
     return inputs;
   }
 
-  private filterDelegatedDependencies(inputs: Input[], configFilePath: string) {
+  private filterTransitiveDependencies(inputs: Input[], configFilePath: string) {
     const literals = new Set<string>();
     const visited = new Set<string>();
     const collect = (filePath: string) => {
