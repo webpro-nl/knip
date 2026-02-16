@@ -55,8 +55,8 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
   return inputs;
 };
 
-const registerCompilers: RegisterCompilers = async ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('prisma')) await registerCompiler({ extension: '.prisma', compiler });
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('prisma')) registerCompiler({ extension: '.prisma', compiler });
 };
 
 const args: Args = {

@@ -45,8 +45,8 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
   return inputs;
 };
 
-const registerCompilers: RegisterCompilers = async ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('vue') || hasDependency('nuxt')) await registerCompiler({ extension: '.vue', compiler: compiler });
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('vue') || hasDependency('nuxt')) registerCompiler({ extension: '.vue', compiler });
 };
 
 const plugin: Plugin = {

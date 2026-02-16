@@ -13,8 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['svelte.config.js', ...viteConfig];
 
-const registerCompilers: RegisterCompilers = async ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('svelte')) await registerCompiler({ extension: '.svelte', compiler });
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('svelte')) registerCompiler({ extension: '.svelte', compiler });
 };
 
 const plugin: Plugin = {

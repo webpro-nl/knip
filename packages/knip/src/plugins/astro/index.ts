@@ -37,10 +37,10 @@ const resolveFromAST: ResolveFromAST = sourceFile => {
 };
 
 // https://docs.astro.build/en/guides/integrations-guide/mdx/
-const registerCompilers: RegisterCompilers = async ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('astro')) await registerCompiler({ extension: '.astro', compiler });
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('astro')) registerCompiler({ extension: '.astro', compiler });
   if (hasDependency('@astrojs/mdx') || hasDependency('@astrojs/starlight')) {
-    await registerCompiler({ extension: '.mdx', compiler: mdxCompiler });
+    registerCompiler({ extension: '.mdx', compiler: mdxCompiler });
   }
 };
 
