@@ -11,6 +11,7 @@ test('Configuration hints for unused ignore patterns', async () => {
   const { counters, configurationHints } = await main(options);
 
   assert.deepEqual(configurationHints, [
+    { type: 'ignore', identifier: 'dist/**', workspaceName: undefined },
     { type: 'ignore', identifier: 'generated/**', workspaceName: undefined },
     { type: 'ignoreFiles', identifier: 'temp/**', workspaceName: undefined },
   ]);
@@ -18,7 +19,7 @@ test('Configuration hints for unused ignore patterns', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 1,
-    total: 3,
+    total: 2,
   });
 });
 

@@ -1,4 +1,4 @@
 {
-  "ignore": ["dist/**", "generated/**"],
-  "ignoreFiles": ["scripts/**", "temp/**"]
+  "ignore": ["dist/**", "generated/**", "scripts/**"],
+  "ignoreFiles": ["temp/**"]
 }
