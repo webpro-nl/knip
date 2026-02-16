@@ -1,7 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.js';
 import {
   type Input,
   toAlias,
@@ -15,6 +15,7 @@ import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.js';
+import { requireContextCall } from './visitors/requireContext.js';
 
 // https://webpack.js.org/configuration/
 
@@ -165,6 +166,10 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return inputs;
 };
 
+const registerVisitors: RegisterVisitors = ({ registerVisitors }) => {
+  registerVisitors({ dynamicImport: [requireContextCall] });
+};
+
 const isFilterTransitiveDependencies = true;
 
 const args: Args = {
@@ -183,6 +188,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
   isFilterTransitiveDependencies,
   args,
 };
