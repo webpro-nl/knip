@@ -38,7 +38,7 @@ const getVisitors = (sourceFile: ts.SourceFile, visitors: Visitors) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
   dynamicImport: getDynamicImportVisitors(sourceFile, visitors.dynamicImport),
-  script: getScriptVisitors(sourceFile),
+  script: getScriptVisitors(sourceFile, visitors.script),
 });
 
 const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile, type: SymbolType) =>

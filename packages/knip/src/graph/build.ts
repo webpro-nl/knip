@@ -209,7 +209,8 @@ export async function build({
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
     worker.registerVisitors(visitors => {
-      principal.visitors.dynamicImport.push(...visitors.dynamicImport);
+      if (visitors.dynamicImport) principal.visitors.dynamicImport.push(...visitors.dynamicImport);
+      if (visitors.script) principal.visitors.script.push(...visitors.script);
     });
 
     const DEFAULT_GROUP = 'default';

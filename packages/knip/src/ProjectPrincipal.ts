@@ -57,7 +57,7 @@ export class ProjectPrincipal {
   // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
-  visitors: Visitors = { dynamicImport: [] };
+  visitors: Visitors = { dynamicImport: [], script: [] };
 
   cwd: string;
   compilerOptions: ts.CompilerOptions;

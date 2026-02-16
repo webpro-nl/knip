@@ -3,7 +3,7 @@ import type { z } from 'zod/mini';
 import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
-import type { ImportVisitor } from '../typescript/visitors/index.js';
+import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.js';
 import type { ParsedCLIArgs } from '../util/cli-arguments.js';
 import type { Input } from '../util/input.js';
 import type { Args } from './args.js';
@@ -162,9 +162,9 @@ export type RegisterCompilersOptions = {
 
 export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
-export type Visitors = { dynamicImport: ImportVisitor[] };
+export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
 
-export type RegisterVisitor = (visitors: Visitors) => void;
+export type RegisterVisitor = (visitors: Partial<Visitors>) => void;
 
 export type RegisterVisitorsOptions = {
   registerVisitors: RegisterVisitor;
