@@ -9,6 +9,8 @@ type VisitorCondition<T> = (sourceFile: ts.SourceFile) => Visitor<T>;
 
 type Visitor<T> = (node: ts.Node, options: GetImportsAndExportsOptions) => undefined | T | T[];
 
+export type ImportVisitor = ReturnType<VisitorFactory<ImportNode>>;
+
 const noop = () => undefined;
 
 export const importVisitor: VisitorFactory<ImportNode> = (fileCondition, visitorFn) => sourceFile => {

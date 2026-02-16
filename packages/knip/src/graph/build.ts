@@ -208,6 +208,10 @@ export async function build({
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
+    worker.registerVisitors(visitors => {
+      principal.visitors.dynamicImport.push(...visitors.dynamicImport);
+    });
+
     const DEFAULT_GROUP = 'default';
     type PatternMap = Map<string, Set<string>>;
     const createPatternMap = (): PatternMap => new Map([[DEFAULT_GROUP, new Set()]]);

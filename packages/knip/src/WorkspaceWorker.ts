@@ -12,6 +12,7 @@ import type {
   HandleInput,
   Plugin,
   RegisterCompiler,
+  RegisterVisitor,
   WorkspaceConfiguration,
 } from './types/config.js';
 import type { ConfigurationHint } from './types/issues.js';
@@ -254,6 +255,13 @@ export class WorkspaceWorker {
       if (this.config[pluginName] === false) continue;
       if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
       await plugin.registerCompilers({ cwd, hasDependency, registerCompiler });
+    }
+  }
+
+  public registerVisitors(registerVisitors: RegisterVisitor) {
+    for (const pluginName of this.enabledPlugins) {
+      const plugin = Plugins[pluginName];
+      if (plugin.registerVisitors) plugin.registerVisitors({ registerVisitors });
     }
   }
 

@@ -1,7 +1,7 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
 import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from '../types/config.js';
 import type { ExportNode, ExportNodeMember } from '../types/exports.js';
 import type { ImportNode } from '../types/imports.js';
 import type { IssueSymbol, SymbolType } from '../types/issues.js';
@@ -34,10 +34,10 @@ import getExportVisitors from './visitors/exports/index.js';
 import getImportVisitors from './visitors/imports/index.js';
 import getScriptVisitors from './visitors/scripts/index.js';
 
-const getVisitors = (sourceFile: ts.SourceFile) => ({
+const getVisitors = (sourceFile: ts.SourceFile, visitors: Visitors) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
-  dynamicImport: getDynamicImportVisitors(sourceFile),
+  dynamicImport: getDynamicImportVisitors(sourceFile, visitors.dynamicImport),
   script: getScriptVisitors(sourceFile),
 });
 
@@ -66,6 +66,7 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Mem
 };
 
 interface AddInternalImportOptions extends ImportNode {
+  specifier: string;
   filePath: string;
   line: number;
   col: number;
@@ -77,7 +78,8 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions,
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
-  skipExportsForFile: boolean
+  skipExportsForFile: boolean,
+  pluginVisitors: Visitors
 ): FileNode => {
   const skipExports = skipExportsForFile || !options.isReportExports;
   const internal: ImportMap = new Map();
@@ -101,7 +103,7 @@ const getImportsAndExports = (
 
   const referencedInExport = new Map<string, Set<string>>();
 
-  const visitors = getVisitors(sourceFile);
+  const visitors = getVisitors(sourceFile, pluginVisitors);
 
   const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {

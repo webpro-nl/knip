@@ -3,7 +3,7 @@ import { CacheConsultant } from './CacheConsultant.js';
 import { getCompilerExtensions } from './compilers/index.js';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
 import { ANONYMOUS, DEFAULT_EXTENSIONS, MEMBER_FLAGS, PUBLIC_TAG } from './constants.js';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from './types/config.js';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from './types/config.js';
 import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
 import type { Paths, PrincipalOptions } from './types/project.js';
 import { createHosts } from './typescript/create-hosts.js';
@@ -56,6 +56,8 @@ export class ProjectPrincipal {
 
   // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
+
+  visitors: Visitors = { dynamicImport: [] };
 
   cwd: string;
   compilerOptions: ts.CompilerOptions;
@@ -242,7 +244,15 @@ export class ProjectPrincipal {
 
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
-    return _getImportsAndExports(sourceFile, resolve, typeChecker, options, ignoreExportsUsedInFile, skipExports);
+    return _getImportsAndExports(
+      sourceFile,
+      resolve,
+      typeChecker,
+      options,
+      ignoreExportsUsedInFile,
+      skipExports,
+      this.visitors
+    );
   }
 
   invalidateFile(filePath: string) {
