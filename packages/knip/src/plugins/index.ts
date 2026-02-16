@@ -27,6 +27,7 @@ import { default as dotenv } from './dotenv/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
+import { default as execa } from './execa/index.js';
 import { default as expo } from './expo/index.js';
 import { default as expressiveCode } from './expressive-code/index.js';
 import { default as gatsby } from './gatsby/index.js';
@@ -130,6 +131,7 @@ import { default as wrangler } from './wrangler/index.js';
 import { default as xo } from './xo/index.js';
 import { default as yarn } from './yarn/index.js';
 import { default as yorkie } from './yorkie/index.js';
+import { default as zx } from './zx/index.js';
 
 export const Plugins = {
   angular,
@@ -160,6 +162,7 @@ export const Plugins = {
   drizzle,
   eleventy,
   eslint,
+  execa,
   expo,
   'expressive-code': expressiveCode,
   gatsby,
@@ -263,4 +266,5 @@ export const Plugins = {
   xo,
   yarn,
   yorkie,
+  zx,
 };

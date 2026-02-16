@@ -28,6 +28,7 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'execa'
   | 'expo'
   | 'expressive-code'
   | 'gatsby'
@@ -130,7 +131,8 @@ export type PluginName =
   | 'wrangler'
   | 'xo'
   | 'yarn'
-  | 'yorkie';
+  | 'yorkie'
+  | 'zx';
 
 export const pluginNames = [
   'angular',
@@ -161,6 +163,7 @@ export const pluginNames = [
   'drizzle',
   'eleventy',
   'eslint',
+  'execa',
   'expo',
   'expressive-code',
   'gatsby',
@@ -264,4 +267,5 @@ export const pluginNames = [
   'xo',
   'yarn',
   'yorkie',
+  'zx',
 ] as const;
