@@ -353,6 +353,8 @@ export class WorkspaceWorker {
         if (plugin.production) for (const id of plugin.production) inputs.push(toProductionEntry(id));
       }
 
+      if (typeof plugin.setup === 'function') await plugin.setup();
+
       for (const configFilePath of configFilePaths) {
         const isManifest = basename(configFilePath) === 'package.json';
         const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
@@ -377,7 +379,6 @@ export class WorkspaceWorker {
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
-          if (typeof plugin.setup === 'function') await plugin.setup(resolveOpts);
           const isLoad =
             typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
 
@@ -391,7 +392,6 @@ export class WorkspaceWorker {
             cache.resolveConfig = inputs;
           }
 
-          if (typeof plugin.teardown === 'function') await plugin.teardown(resolveOpts);
         }
 
         if (plugin.resolveFromAST) {

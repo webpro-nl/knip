@@ -127,9 +127,7 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
-type PluginSetup = (options: PluginOptions) => Promise<void> | void;
-
-type PluginTeardown = (options: PluginOptions) => Promise<void> | void;
+type PluginSetup = () => Promise<void> | void;
 
 export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
 
@@ -175,7 +173,6 @@ export interface Plugin {
   production?: string[];
   project?: string[];
   setup?: PluginSetup;
-  teardown?: PluginTeardown;
   isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
