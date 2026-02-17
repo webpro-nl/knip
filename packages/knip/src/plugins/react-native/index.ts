@@ -7,7 +7,7 @@ import type { ReactNativeConfig } from './types.js';
 
 const title = 'React Native';
 
-const enablers = ['react-native', '@react-native-community/cli'];
+const enablers = ['react-native'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
