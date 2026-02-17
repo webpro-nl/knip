@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/pm2-ecosystem",
+  "scripts": {
+    "start": "pm2 start ecosystem.config.json"
+  },
+  "devDependencies": {
+    "pm2": "*"
+  }
+}
