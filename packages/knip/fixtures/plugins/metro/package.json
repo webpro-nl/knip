@@ -1,12 +1,8 @@
 {
   "name": "@plugins/metro",
   "dependencies": {
-    "@react-native-community/cli": "*",
-    "@react-native-community/cli-platform-android": "*",
-    "@react-native-community/cli-platform-ios": "*",
-    "expo-asset": "*",
-    "react": "*",
-    "react-native": "*",
+    "@react-native/metro-config": "*",
+    "metro-minify-esbuild": "*",
     "react-native-svg-transformer": "*"
   },
   "metro": {

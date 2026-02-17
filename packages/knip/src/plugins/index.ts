@@ -81,6 +81,7 @@ import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as prisma } from './prisma/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
+import { default as reactNative } from './react-native/index.js';
 import { default as reactRouter } from './react-router/index.js';
 import { default as relay } from './relay/index.js';
 import { default as releaseIt } from './release-it/index.js';
@@ -216,6 +217,7 @@ export const Plugins = {
   prettier,
   prisma,
   'react-cosmos': reactCosmos,
+  'react-native': reactNative,
   'react-router': reactRouter,
   relay,
   'release-it': releaseIt,

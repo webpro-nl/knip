@@ -660,6 +660,10 @@
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"
         },
+        "react-native": {
+          "title": "react-native plugin configuration (https://knip.dev/reference/plugins/react-native)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-router": {
           "title": "react-router plugin configuration (https://knip.dev/reference/plugins/react-router)",
           "$ref": "#/definitions/plugin"
