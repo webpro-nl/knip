@@ -1,4 +1,4 @@
-const directiveMatcher = /@(?:import|config|source|plugin)\s+['"]([^'"]+)['"][^;]*;/g;
+const directiveMatcher = /@(?:import|config|plugin)\s+['"]([^'"]+)['"][^;]*;/g;
 
 const compiler = (text: string) => {
   const imports = [];
