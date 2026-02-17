@@ -36,6 +36,8 @@ depcheck
 knip --dependencies
 ```
 
+**Project status**: The project is archived and recommends Knip.
+
 ### unimported
 
 > Find and fix dangling files and unused dependencies in your JavaScript
