@@ -9,20 +9,12 @@ const cwd = resolve('fixtures/plugins/metro');
 
 test('Find dependencies with the Metro plugin', async () => {
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert(issues.dependencies['package.json']['metro']);
-  assert(issues.dependencies['package.json']['react']);
-  assert(issues.dependencies['package.json']['react-native']);
-
-  assert(issues.unresolved['metro.config.js']['metro-minify-esbuild']);
-  assert(issues.unresolved['package.json']['./custom-metro-transformer.js']);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 3,
-    unresolved: 2,
-    processed: 2,
-    total: 2,
+    dependencies: 1,
+    processed: 3,
+    total: 3,
   });
 });

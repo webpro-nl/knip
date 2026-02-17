@@ -1,11 +1,13 @@
 {
-  "name": "@plugins/react-native",
+  "name": "@plugins/metro-react-native",
   "dependencies": {
     "@react-native-community/cli": "*",
     "@react-native-community/cli-platform-android": "*",
     "@react-native-community/cli-platform-ios": "*",
+    "@react-native/metro-config": "*",
+    "expo-asset": "*",
+    "react": "*",
     "react-native": "*",
-    "react-native-macos": "*",
-    "react-native-vector-icons": "*"
+    "react-native-svg-transformer": "*"
   }
 }

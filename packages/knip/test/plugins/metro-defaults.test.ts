@@ -12,12 +12,10 @@ test('Ignore unresolved issues for Metro defaults', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.dependencies['package.json']['metro']);
-  assert(issues.dependencies['package.json']['react']);
-  assert(issues.dependencies['package.json']['react-native']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 3,
+    dependencies: 1,
     unresolved: 0,
     processed: 2,
     total: 2,

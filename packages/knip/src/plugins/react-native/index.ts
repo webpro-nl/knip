@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
 import { type Input, toDependency } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { ReactNativeConfig } from './types.js';
@@ -34,11 +34,11 @@ const resolveConfig: ResolveConfig<ReactNativeConfig> = async config => {
     }
   }
 
-  for (const pkg of RN_CLI_PACKAGES) {
-    inputs.push(toDependency(pkg, { optional: true }));
-  }
-
   return inputs;
+};
+
+const resolve: Resolve = () => {
+  return RN_CLI_PACKAGES.map(pkg => toDependency(pkg, { optional: true }));
 };
 
 const plugin: Plugin = {
@@ -47,6 +47,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  resolve,
 };
 
 export default plugin;
