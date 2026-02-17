@@ -1,10 +1,8 @@
 {
   "name": "@plugins/metro",
   "dependencies": {
-    "@react-native-community/cli": "*",
-    "@react-native-community/cli-platform-android": "*",
-    "@react-native-community/cli-platform-ios": "*",
     "expo-asset": "*",
+    "metro": "*",
     "react": "*",
     "react-native": "*",
     "react-native-svg-transformer": "*"

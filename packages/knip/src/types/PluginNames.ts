@@ -82,6 +82,7 @@ export type PluginName =
   | 'prettier'
   | 'prisma'
   | 'react-cosmos'
+  | 'react-native'
   | 'react-router'
   | 'relay'
   | 'release-it'
@@ -217,6 +218,7 @@ export const pluginNames = [
   'prettier',
   'prisma',
   'react-cosmos',
+  'react-native',
   'react-router',
   'relay',
   'release-it',

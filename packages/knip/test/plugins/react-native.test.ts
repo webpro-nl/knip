@@ -5,21 +5,19 @@ import baseCounters from '../helpers/baseCounters.js';
 import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
-const cwd = resolve('fixtures/plugins/metro-defaults');
+const cwd = resolve('fixtures/plugins/react-native');
 
-test('Ignore unresolved issues for Metro defaults', async () => {
+test('Find dependencies with the React Native plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.dependencies['package.json']['metro']);
   assert(issues.dependencies['package.json']['react']);
   assert(issues.dependencies['package.json']['react-native']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 3,
-    unresolved: 0,
-    processed: 2,
-    total: 2,
+    dependencies: 2,
+    processed: 1,
+    total: 1,
   });
 });

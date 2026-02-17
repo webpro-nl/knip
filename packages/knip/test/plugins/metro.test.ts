@@ -11,6 +11,7 @@ test('Find dependencies with the Metro plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
+  assert(issues.dependencies['package.json']['metro']);
   assert(issues.dependencies['package.json']['react']);
   assert(issues.dependencies['package.json']['react-native']);
 
@@ -19,7 +20,7 @@ test('Find dependencies with the Metro plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 2,
+    dependencies: 3,
     unresolved: 2,
     processed: 2,
     total: 2,
