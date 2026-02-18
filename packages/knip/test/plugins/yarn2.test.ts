@@ -13,11 +13,12 @@ test('Find dependencies with the yarn plugin (Berry)', async () => {
   const { issues, counters } = await main(options);
 
   assert(!issues.files.has(join(cwd, '.yarn/plugins/@yarnpkg/plugin-foo.cjs')));
+  assert(!issues.files.has(join(cwd, '.yarn/releases/yarn-4.12.0.cjs')));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

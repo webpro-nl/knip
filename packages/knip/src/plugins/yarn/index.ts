@@ -21,17 +21,22 @@ type YarnConfig = {
   plugins?: Array<{
     path?: string;
   }>;
+  yarnPath?: string;
 };
 
 const resolveConfig: ResolveConfig<YarnConfig> = config => {
   const inputs: Input[] = [];
 
-  if (!Array.isArray(config.plugins)) return inputs;
-
-  for (const plugin of config.plugins) {
-    if (plugin.path) {
-      inputs.push(toEntry(plugin.path));
+  if (Array.isArray(config.plugins)) {
+    for (const plugin of config.plugins) {
+      if (plugin.path) {
+        inputs.push(toEntry(plugin.path));
+      }
     }
+  }
+
+  if (config.yarnPath) {
+    inputs.push(toEntry(config.yarnPath));
   }
 
   return inputs;
