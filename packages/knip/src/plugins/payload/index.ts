@@ -15,8 +15,8 @@ const entry = [
   'src/app/**/importMap.js',
   'payload-types.ts',
   'src/payload-types.ts',
-  "payload.config.ts",
-  "src/payload.config.ts"
+  'payload.config.ts',
+  'src/payload.config.ts',
 ];
 
 const project = ['!migrations/**', '!src/migrations/**'];
