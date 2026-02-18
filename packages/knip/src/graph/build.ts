@@ -156,20 +156,9 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(
-      config.ignore.map(pattern => ({
-        pattern: prependDir(options.cwd, prependDir(name, pattern)),
-        id: pattern,
-        workspaceName: name,
-      }))
-    );
-    collector.addIgnoreFilesPatterns(
-      config.ignoreFiles.map(pattern => ({
-        pattern: prependDir(options.cwd, prependDir(name, pattern)),
-        id: pattern,
-        workspaceName: name,
-      }))
-    );
+    const fn = (id: string) => ({ pattern: prependDir(options.cwd, prependDir(name, id)), id, workspaceName: name });
+    collector.addIgnorePatterns(config.ignore.map(fn));
+    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
