@@ -68,7 +68,7 @@ const commands = [
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, {
-    boolean: ['recursive', 'silent', 'shell-mode'],
+    boolean: ['aggregate-output', 'if-present', 'parallel', 'recursive', 'reverse', 'shell-mode', 'silent', 'stream'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
     '--': true,
   });
