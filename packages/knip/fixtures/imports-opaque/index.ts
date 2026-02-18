@@ -19,3 +19,12 @@ const obj = {
   key2: await import('./awaited-assignment.js'),
   ...(await import('./obj-spread.js')),
 };
+
+const loader = () => import('./variable.js');
+function fnRun(load: () => Promise<unknown>) {
+  return load();
+}
+fnRun(loader);
+
+const direct = import('./direct.js');
+fn(direct, 0);
