@@ -75,6 +75,7 @@ import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as plop } from './plop/index.js';
+import { default as pm2 } from './pm2/index.js';
 import { default as pnpm } from './pnpm/index.js';
 import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
@@ -211,6 +212,7 @@ export const Plugins = {
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
   plop,
+  pm2,
   pnpm,
   postcss,
   preconstruct,

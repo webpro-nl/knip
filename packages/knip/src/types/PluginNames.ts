@@ -76,6 +76,7 @@ export type PluginName =
   | 'playwright-ct'
   | 'playwright-test'
   | 'plop'
+  | 'pm2'
   | 'pnpm'
   | 'postcss'
   | 'preconstruct'
@@ -212,6 +213,7 @@ export const pluginNames = [
   'playwright-ct',
   'playwright-test',
   'plop',
+  'pm2',
   'pnpm',
   'postcss',
   'preconstruct',
