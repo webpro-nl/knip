@@ -11,12 +11,15 @@ const enablers = ['payload'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const entry = [
-  'app/**/importMap.{js,ts}',
-  'src/app/**/importMap.{js,ts}',
+  'app/**/importMap.js',
+  'src/app/**/importMap.js',
+  'payload-types.ts',
   'src/payload-types.ts',
+  "payload.config.ts",
+  "src/payload.config.ts"
 ];
 
-const project = ['!src/migrations/**/*.ts'];
+const project = ['!migrations/**', '!src/migrations/**'];
 
 const plugin: Plugin = {
   title,
