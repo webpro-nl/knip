@@ -49,7 +49,7 @@
     "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
     "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
     "test:smoke": "glob-bin -c \"tsx --test\" \"test/*.test.ts\" && glob-bin -c \"tsx --test\" \"test/{plugins,util}/*.test.ts\"",
-    "test:smoke-fast": "glob-bin -c \"node --import=./register.ts --test\" \"test/*.test.ts\" && glob-bin -c \"node --import=./register.ts --test\" \"test/{plugins,util}/*.test.ts\"",
+    "test:smoke-fast": "glob-bin -c \"node --import=register.ts --test\" \"test/*.test.ts\" && glob-bin -c \"node --import=register.ts --test\" \"test/{plugins,util}/*.test.ts\"",
     "test:bun:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
     "watch": "npm link && tsc --watch",
     "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
