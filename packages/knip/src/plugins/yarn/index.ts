@@ -25,7 +25,7 @@ type YarnConfig = {
 };
 
 const resolveConfig: ResolveConfig<YarnConfig> = config => {
-  const inputs: Input[] = [];
+  const inputs: Input[] = entry.map(id => toEntry(id));
 
   if (Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
