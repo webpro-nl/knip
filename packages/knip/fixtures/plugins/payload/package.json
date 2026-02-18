@@ -1,3 +1,6 @@
 {
-  "name": "@plugins/payload"
+  "name": "@plugins/payload",
+  "dependencies": {
+    "payload": "*"
+  }
 }
