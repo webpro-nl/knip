@@ -13,7 +13,7 @@ test('Ignore exports of opaque import calls', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 10,
-    total: 10,
+    processed: 12,
+    total: 12,
   });
 });
