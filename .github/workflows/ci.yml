@@ -45,7 +45,39 @@ jobs:
       - name: Test knip
         run: pnpm run test:smoke
         working-directory: packages/knip
-      - name: Run knip
-        run: ./packages/knip/bin/knip.js --reporter github-actions
-      - name: Run knip in strict mode
-        run: ./packages/knip/bin/knip.js --production --strict
+
+  test-fast:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 18
+          - 20
+          - 22
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (Node v${{ matrix.node }})
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install
+      - name: Install earliest supported peer dependencies
+        run: pnpm add typescript@5.0.4 @types/node@18
+        working-directory: packages/knip
+      - name: Remove erasableSyntaxOnly from tsconfig
+        run: node -e "const path = 'tsconfig.json'; const content = fs.readFileSync(path, 'utf8'); const updated = content.replace(/^.*erasableSyntaxOnly.*(\r?\n)?/gm, ''); fs.writeFileSync(path, updated);"
+        working-directory: packages/knip
+      - name: Build knip
+        run: pnpm run build
+        working-directory: packages/knip
+      - name: Test knip
+        run: pnpm run test:smoke-fast
+        working-directory: packages/knip

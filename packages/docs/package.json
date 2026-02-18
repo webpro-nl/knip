@@ -11,10 +11,10 @@
     "directory": "packages/docs"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
-    "prebuild": "tsx ./scripts/generate-plugin-docs.ts",
+    "prebuild": "node --import=./register.ts ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
     "postbuild": "[ \"$CF_PAGES\" = \"1\" ] && find dist -mindepth 2 -type f -name 'index.html' -exec bash -c 'f=\"$1\"; d=$(dirname \"$f\"); bn=$(basename \"$d\"); mv -v \"$f\" \"$d/../$bn.html\"' _ {} \\; && find dist -mindepth 1 -type d -empty -print -delete || true",
     "dev": "astro dev",
@@ -29,6 +29,7 @@
     "@astrojs/check": "0.9.6",
     "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
+    "@types/node": "^22.18.0",
     "@types/unist": "3.0.3",
     "astro": "5.17.1",
     "hastscript": "9.0.1",
@@ -38,7 +39,6 @@
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
     "remark-stringify": "11.0.0",
-    "tsx": "^4.21.0",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.1.0"
