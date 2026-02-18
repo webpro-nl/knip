@@ -13,6 +13,7 @@ test('Find dependencies with the Webpack plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.files.has(join(cwd, 'src/unused.ts')));
+  assert(!issues.files.has(join(cwd, 'src/routes.ts')));
   assert(issues.devDependencies['package.json']['@babel/plugin-proposal-object-rest-spread']);
   assert(issues.devDependencies['package.json']['buffer']);
   assert(issues.unresolved['webpack.config.js']['svgo-loader']);
@@ -25,7 +26,7 @@ test('Find dependencies with the Webpack plugin', async () => {
     devDependencies: 2,
     unlisted: 2,
     unresolved: 1,
-    processed: 16,
-    total: 16,
+    processed: 17,
+    total: 17,
   });
 });
