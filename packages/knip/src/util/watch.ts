@@ -1,4 +1,5 @@
 import type { WatchListener } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.js';
 import { invalidateCache } from '../graph-explorer/cache.js';
 import type { IssueCollector } from '../IssueCollector.js';
@@ -92,16 +93,22 @@ export const getSessionHandler = async (
           principal.removeProjectPath(filePath);
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
-        default:
+        default: {
+          const cached = principal.backend.fileManager.sourceFileCache.get(filePath);
+          if (cached && cached.text === readFileSync(filePath, 'utf8')) {
+            debugLog(workspace.name, `Watcher: = ${relativePath}`);
+            continue;
+          }
           modified.add(filePath);
           debugLog(workspace.name, `Watcher: ± ${relativePath}`);
           break;
+        }
       }
 
       principal.invalidateFile(filePath);
     }
 
-    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return createUpdate({ startTime });
+    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
 
     invalidateCache(graph);
 

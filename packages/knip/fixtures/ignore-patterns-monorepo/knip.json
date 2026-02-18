@@ -1,0 +1,8 @@
+{
+  "ignore": ["build/**"],
+  "workspaces": {
+    "packages/lib": {
+      "ignore": ["output/**", "cache/**"]
+    }
+  }
+}

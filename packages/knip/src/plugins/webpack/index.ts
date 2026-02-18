@@ -1,6 +1,7 @@
+import type { ParsedArgs } from 'minimist';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
+import type { Args } from '../../types/args.js';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.js';
 import {
   type Input,
   toAlias,
@@ -14,6 +15,7 @@ import { hasDependency } from '../../util/plugin.js';
 import { getDependenciesFromConfig } from '../babel/index.js';
 import type { BabelConfigObj } from '../babel/types.js';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.js';
+import { requireContextCall } from './visitors/requireContext.js';
 
 // https://webpack.js.org/configuration/
 
@@ -159,20 +161,25 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
 };
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { manifest } = options;
-
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
-
-  const scripts = Object.values(manifest.scripts ?? {});
-  const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
-  const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
-
-  return compact([...inputs, ...[...webpackCLI, ...webpackDevServer].map(id => toDependency(id))]);
+  inputs.push(toDependency('webpack-cli', { optional: true }));
+  return inputs;
 };
 
-const args = {
+const registerVisitors: RegisterVisitors = ({ registerVisitors }) => {
+  registerVisitors({ dynamicImport: [requireContextCall] });
+};
+
+const isFilterTransitiveDependencies = true;
+
+const args: Args = {
   binaries: ['webpack', 'webpack-dev-server'],
   config: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [toDependency('webpack-cli')];
+    if (parsed._[0] === 'serve') inputs.push(toDependency('webpack-dev-server'));
+    return inputs;
+  },
 };
 
 const plugin: Plugin = {
@@ -181,6 +188,8 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
+  isFilterTransitiveDependencies,
   args,
 };
 

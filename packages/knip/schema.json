@@ -138,6 +138,9 @@
         "binaries": {
           "$ref": "#/definitions/ruleValue"
         },
+        "catalog": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "classMembers": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -449,6 +452,10 @@
           "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
           "$ref": "#/definitions/plugin"
         },
+        "execa": {
+          "title": "execa plugin configuration (https://knip.dev/reference/plugins/execa)",
+          "$ref": "#/definitions/plugin"
+        },
         "expo": {
           "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
           "$ref": "#/definitions/plugin"
@@ -629,6 +636,10 @@
           "title": "playwright-test plugin configuration (https://knip.dev/reference/plugins/playwright-test)",
           "$ref": "#/definitions/plugin"
         },
+        "pm2": {
+          "title": "pm2 plugin configuration (https://knip.dev/reference/plugins/pm2)",
+          "$ref": "#/definitions/plugin"
+        },
         "pnpm": {
           "title": "pnpm plugin configuration (https://knip.dev/reference/plugins/pnpm)",
           "$ref": "#/definitions/plugin"
@@ -651,6 +662,10 @@
         },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-native": {
+          "title": "react-native plugin configuration (https://knip.dev/reference/plugins/react-native)",
           "$ref": "#/definitions/plugin"
         },
         "react-router": {
@@ -855,6 +870,10 @@
         },
         "yorkie": {
           "title": "yorkie plugin configuration (https://knip.dev/reference/plugins/yorkie)",
+          "$ref": "#/definitions/plugin"
+        },
+        "zx": {
+          "title": "zx plugin configuration (https://knip.dev/reference/plugins/zx)",
           "$ref": "#/definitions/plugin"
         }
       }

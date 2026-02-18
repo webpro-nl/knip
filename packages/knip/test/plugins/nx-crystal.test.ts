@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/nx-crystal');
 
-test('Find dependencies with the Nx plugin', async () => {
+test('Find dependencies with the Nx plugin (crystal)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 

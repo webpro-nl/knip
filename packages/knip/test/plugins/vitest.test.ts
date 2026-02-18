@@ -19,11 +19,15 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unlisted['vitest-default-coverage.config.ts']['@vitest/coverage-v8']);
   assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-istanbul']);
+  assert(issues.unlisted['package.json']['@vitest/coverage-istanbul']);
+  assert(issues.unlisted['package.json']['vitest-sonar-reporter']);
+  assert(issues.unlisted['package.json']['jsdom']);
+  assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 7,
+    unlisted: 11,
     unresolved: 1,
     processed: 9,
     total: 9,

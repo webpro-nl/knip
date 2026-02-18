@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
 import { isFile } from '../../util/fs.js';
+import type { Input } from '../../util/input.js';
+import { toEntry } from '../../util/input.js';
 
 // https://yarnpkg.com/features/constraints
 
@@ -11,14 +13,43 @@ const isEnabled: IsPluginEnabled = async ({ cwd }) => isFile(cwd, 'yarn.lock');
 
 const isRootOnly = true;
 
+const config = ['.yarnrc.yml'];
+
 const entry = ['yarn.config.cjs'];
+
+type YarnConfig = {
+  plugins?: Array<{
+    path?: string;
+  }>;
+  yarnPath?: string;
+};
+
+const resolveConfig: ResolveConfig<YarnConfig> = config => {
+  const inputs: Input[] = entry.map(id => toEntry(id));
+
+  if (Array.isArray(config.plugins)) {
+    for (const plugin of config.plugins) {
+      if (plugin.path) {
+        inputs.push(toEntry(plugin.path));
+      }
+    }
+  }
+
+  if (config.yarnPath) {
+    inputs.push(toEntry(config.yarnPath));
+  }
+
+  return inputs;
+};
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
+  config,
   entry,
+  resolveConfig,
 };
 
 export default plugin;

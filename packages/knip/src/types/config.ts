@@ -1,8 +1,9 @@
 import type ts from 'typescript';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.js';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
 import type { pluginSchema } from '../schema/plugins.js';
+import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.js';
 import type { ParsedCLIArgs } from '../util/cli-arguments.js';
 import type { Input } from '../util/input.js';
 import type { Args } from './args.js';
@@ -127,9 +128,7 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
-type PluginSetup = (options: PluginOptions) => Promise<void> | void;
-
-type PluginTeardown = (options: PluginOptions) => Promise<void> | void;
+type PluginSetup = () => Promise<void> | void;
 
 export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
 
@@ -141,12 +140,37 @@ export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
 
 export type HandleInput = (input: Input) => string | undefined;
 
+export type RegisterCompilerInput = {
+  extension: string;
+  compiler: CompilerSync;
+};
+
+export type RegisterCompiler = (input: RegisterCompilerInput) => void;
+
 export type ResolveFromAST = (
   sourceFile: ts.SourceFile,
   options: PluginOptions & {
     getSourceFile: GetSourceFile;
   }
 ) => Input[];
+
+export type RegisterCompilersOptions = {
+  cwd: string;
+  hasDependency: HasDependency;
+  registerCompiler: RegisterCompiler;
+};
+
+export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
+
+export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
+
+export type RegisterVisitor = (visitors: Partial<Visitors>) => void;
+
+export type RegisterVisitorsOptions = {
+  registerVisitors: RegisterVisitor;
+};
+
+export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
 
 export interface Plugin {
   title: string;
@@ -160,11 +184,13 @@ export interface Plugin {
   production?: string[];
   project?: string[];
   setup?: PluginSetup;
-  teardown?: PluginTeardown;
   isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;
+  isFilterTransitiveDependencies?: boolean;
+  registerCompilers?: RegisterCompilers;
+  registerVisitors?: RegisterVisitors;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

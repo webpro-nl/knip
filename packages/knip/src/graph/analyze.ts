@@ -303,6 +303,10 @@ export const analyze = async ({
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
 
+    for (const hint of collector.getUnusedIgnorePatternHints(options)) {
+      collector.addConfigurationHint(hint);
+    }
+
     for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
   };
 

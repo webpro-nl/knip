@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from '../util/path.js';
-import type { HasDependency, SyncCompilerFn } from './types.js';
+import type { CompilerSync, HasDependency } from './types.js';
 
 const condition = (hasDependency: HasDependency) =>
   hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
@@ -18,7 +18,7 @@ const resolvePartial = (specifier: string, containingFile: string) => {
   return rel;
 };
 
-const compiler: SyncCompilerFn = (text, filePath) =>
+const compiler: CompilerSync = (text, filePath) =>
   [...text.matchAll(importMatcher)]
     .filter(match => match[2] && !match[2].startsWith('sass:'))
     .map((match, i) => `import _$${i} from '${match[1] ? match[2] : resolvePartial(match[2], filePath)}';`)

@@ -1,6 +1,6 @@
 {
   "name": "vscode-knip",
-  "version": "1.0.12",
+  "version": "1.0.14",
   "private": true,
   "license": "ISC",
   "repository": {
@@ -119,8 +119,12 @@
     ],
     "commands": [
       {
+        "command": "knip.start",
+        "title": "Knip: Start"
+      },
+      {
         "command": "knip.restart",
-        "title": "Knip: Restart Knip Server"
+        "title": "Knip: Restart"
       },
       {
         "command": "knip.expandAll",
@@ -176,10 +180,10 @@
         "title": "Knip",
         "order": 1,
         "properties": {
-          "knip.enabled": {
+          "knip.deferSession": {
             "type": "boolean",
-            "default": true,
-            "description": "Enable Knip"
+            "default": false,
+            "description": "Don't build module graph until explicit start"
           },
           "knip.requireConfig": {
             "type": "boolean",

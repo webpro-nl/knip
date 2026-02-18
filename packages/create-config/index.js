@@ -85,7 +85,8 @@ const findPackageJsonFiles = (dir, depth = 0) => {
 };
 
 const getWorkspaceFlag = (manifest, pm) => {
-  if (pm === 'pnpm' || pm === 'yarn') return hasWorkspaces(manifest) ? '-w' : undefined;
+  if (pm === 'pnpm') return hasWorkspaces(manifest) ? '-w' : undefined;
+  if (pm === 'yarn') return hasWorkspaces(manifest) ? '-W' : undefined;
 };
 
 const getPackageManagerFromPackageJson = manifest => {

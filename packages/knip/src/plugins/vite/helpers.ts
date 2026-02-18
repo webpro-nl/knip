@@ -1,5 +1,8 @@
 import ts from 'typescript';
 import { findDescendants, getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.js';
+import { isFile, loadFile } from '../../util/fs.js';
+import { type Input, toProductionEntry } from '../../util/input.js';
+import { join } from '../../util/path.js';
 
 /**
  * Traverses through Vite's configuration file to find Babel plugins passed to
@@ -118,4 +121,30 @@ export const getReactBabelPlugins = (sourceFile: ts.SourceFile): string[] => {
   }
 
   return babelPlugins;
+};
+
+const moduleScriptPattern =
+  /<script\b(?=[^>]*\btype\s*=\s*["']?module["']?)(?=[^>]*\bsrc\s*=\s*["']?([^"' >]+)["']?)[^>]*>/gi;
+
+const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, '');
+
+const getModuleScriptSources = (html: string): string[] => {
+  const matches = html.matchAll(moduleScriptPattern);
+  const sources = [];
+
+  for (const match of matches) {
+    const src = normalizeModuleScriptSrc(match[1]);
+    if (src) sources.push(src);
+  }
+
+  return sources;
+};
+
+export const getIndexHtmlEntries = async (rootDir: string): Promise<Input[]> => {
+  const indexPath = join(rootDir, 'index.html');
+  if (!isFile(indexPath)) return [];
+
+  const html = await loadFile(indexPath);
+  const entries = getModuleScriptSources(html).map(src => join(rootDir, src));
+  return entries.map(entry => toProductionEntry(entry));
 };

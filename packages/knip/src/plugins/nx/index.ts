@@ -103,7 +103,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
 };
 
 const args = {
-  fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? parsed._.slice(1) : []),
+  fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? [...parsed._.slice(1), ...(parsed['--'] ?? [])] : []),
 };
 
 /** @public */

@@ -3,4 +3,5 @@
 /tmp
 /node_modules
 !/fixtures/**
+/fixtures/**/.DS_Store
 .cache

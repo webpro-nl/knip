@@ -9,7 +9,7 @@ import type { File } from './types.js';
 type WatchUpdate = { duration: number; mem: number };
 
 export interface Session {
-  handleFileChanges(changes: WatchChange[]): Promise<WatchUpdate>;
+  handleFileChanges(changes: WatchChange[]): Promise<WatchUpdate | undefined>;
   getIssues(): CollectorIssues;
   getResults(): Results;
   describeFile(filePath: string, options?: FileDescriptorOptions): File | undefined;
