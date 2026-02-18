@@ -18,7 +18,16 @@ export default visit(
       // Pattern: register('@nodejs-loaders/tsx', import.meta.url)
       if (node.arguments[0] && ts.isStringLiteralLike(node.arguments[0])) {
         const specifier = node.arguments[0].text;
-        if (specifier)
+        const arg1 = node.arguments[1];
+        if (
+          specifier &&
+          (!specifier.startsWith('.') ||
+            (arg1 &&
+              ts.isPropertyAccessExpression(arg1) &&
+              ts.isMetaProperty(arg1.expression) &&
+              arg1.expression.keywordToken === ts.SyntaxKind.ImportKeyword &&
+              arg1.name.text === 'url'))
+        )
           return {
             specifier,
             identifier: undefined,

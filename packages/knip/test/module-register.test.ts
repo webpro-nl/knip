@@ -13,7 +13,8 @@ test('Resolve module.register() specifier as dependency', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
