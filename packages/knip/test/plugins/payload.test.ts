@@ -7,11 +7,10 @@ import { createOptions } from '../helpers/create-options.js';
 import { resolve } from '../helpers/resolve.js';
 
 const cwd = resolve('fixtures/plugins/payload');
+const options = await createOptions({ cwd });
+const { counters, issues } = await main(options);
 
 test('Find dependencies with the Payload CMS plugin', async () => {
-  const options = await createOptions({ cwd });
-  const { counters } = await main(options);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 3,
@@ -20,17 +19,11 @@ test('Find dependencies with the Payload CMS plugin', async () => {
 });
 
 test('Ignore migration issues with the Payload CMS plugin', async () => {
-  const options = await createOptions({ cwd });
-  const { issues } = await main(options);
-
   assert(!issues.unlisted['migrations/20260218.ts']);
   assert(!issues.files.has(join(cwd, 'migrations/20260218.ts')));
 });
 
 test('Mark importMap components as used with the Payload CMS plugin', async () => {
-  const options = await createOptions({ cwd });
-  const { issues } = await main(options);
-
   assert(!issues.files.has(join(cwd, 'src/components/ImportMapComponent.tsx')));
   assert(!issues.exports['src/components/ImportMapComponent.tsx']?.ImportMapComponent);
 });
