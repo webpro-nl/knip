@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolveEntry } from '../../util/input.js';
+import { toDeferResolve } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { PayloadConfig } from './types.js';
 
@@ -18,7 +18,7 @@ const resolveConfig: ResolveConfig<PayloadConfig> = async config => {
 
   const importMapFile = awaitedConfig?.admin?.importMap?.importMapFile;
   if (importMapFile) {
-    return [toDeferResolveEntry(importMapFile)];
+    return [toDeferResolve(importMapFile, { optional: true })];
   }
 
   const adminRoute = awaitedConfig?.routes?.admin ?? '/admin';
@@ -29,7 +29,7 @@ const resolveConfig: ResolveConfig<PayloadConfig> = async config => {
     `src/app/(payload)${adminRoute}/importMap.js`,
   ];
 
-  return possibleImportMapPaths.map(id => toDeferResolveEntry(id));
+  return possibleImportMapPaths.map(id => toDeferResolve(id, { optional: true }));
 };
 
 const project = ['!migrations/**', '!src/migrations/**', '!payload-types.ts', '!src/payload-types.ts'];
