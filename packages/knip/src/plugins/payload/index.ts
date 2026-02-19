@@ -32,8 +32,6 @@ const resolveConfig: ResolveConfig<PayloadConfig> = async config => {
   return possibleImportMapPaths.map(id => toDeferResolveEntry(id));
 };
 
-const entry = ['payload.config.ts', 'src/payload.config.ts'];
-
 const project = ['!migrations/**', '!src/migrations/**', '!payload-types.ts', '!src/payload-types.ts'];
 
 const plugin: Plugin = {
@@ -42,7 +40,6 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
-  entry,
   project,
 };
 
