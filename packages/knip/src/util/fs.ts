@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import yaml from 'js-yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
-import { LoaderError } from './errors.js';
-import { extname, join } from './path.js';
+import { LoaderError } from './errors.ts';
+import { extname, join } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {

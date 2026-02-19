@@ -1,4 +1,4 @@
-import { importsWithinScripts } from '../../compilers/compilers.js';
+import { importsWithinScripts } from '../../compilers/compilers.ts';
 
 const compiler = importsWithinScripts;
 

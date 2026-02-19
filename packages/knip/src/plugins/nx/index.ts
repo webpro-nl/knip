@@ -1,9 +1,9 @@
 import type { ParsedArgs } from 'minimist';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { toConfig, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { NxConfigRoot, NxProjectConfiguration } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { toConfig, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
 const title = 'Nx';
 

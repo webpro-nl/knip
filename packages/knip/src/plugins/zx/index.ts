@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import zxVisitor from './visitors/zx.js';
+import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import zxVisitor from './visitors/zx.ts';
 
 // https://google.github.io/zx/
 

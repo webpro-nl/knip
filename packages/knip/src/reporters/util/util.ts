@@ -1,8 +1,8 @@
 import picocolors from 'picocolors';
-import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.js';
-import type { Issue, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.js';
-import { relative } from '../../util/path.js';
-import { Table } from '../../util/table.js';
+import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
+import type { Issue, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
+import { relative } from '../../util/path.ts';
+import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
 export const dim = picocolors.gray;

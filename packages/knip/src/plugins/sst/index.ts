@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getInputsFromHandlers } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getInputsFromHandlers } from './resolveFromAST.ts';
 
 // https://v2.sst.dev
 // https://sst.dev/docs/

@@ -1,10 +1,10 @@
-import type { ConfigArg } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { TsConfigJson } from '../../types/tsconfig-json.js';
-import { compact } from '../../util/array.js';
-import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { ConfigArg } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { TsConfigJson } from '../../types/tsconfig-json.ts';
+import { compact } from '../../util/array.ts';
+import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://www.typescriptlang.org/tsconfig
 

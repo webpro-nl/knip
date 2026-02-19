@@ -1,21 +1,21 @@
 import ts from 'typescript';
-import { CacheConsultant } from './CacheConsultant.js';
-import { getCompilerExtensions } from './compilers/index.js';
-import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, MEMBER_FLAGS, PUBLIC_TAG } from './constants.js';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from './types/config.js';
-import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.js';
-import type { Paths, PrincipalOptions } from './types/project.js';
-import { createHosts } from './typescript/create-hosts.js';
-import { _getImportsAndExports } from './typescript/get-imports-and-exports.js';
-import type { ResolveModuleNames } from './typescript/resolve-module-names.js';
-import type { BoundSourceFile } from './typescript/SourceFile.js';
-import { SourceFileManager } from './typescript/SourceFileManager.js';
-import { compact } from './util/array.js';
-import type { MainOptions } from './util/create-options.js';
-import { timerify } from './util/Performance.js';
-import { extname, isInNodeModules, toAbsolute } from './util/path.js';
-import type { ToSourceFilePath } from './util/to-source-path.js';
+import { CacheConsultant } from './CacheConsultant.ts';
+import { getCompilerExtensions } from './compilers/index.ts';
+import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
+import { ANONYMOUS, DEFAULT_EXTENSIONS, MEMBER_FLAGS, PUBLIC_TAG } from './constants.ts';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from './types/config.ts';
+import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.ts';
+import type { Paths, PrincipalOptions } from './types/project.ts';
+import { createHosts } from './typescript/create-hosts.ts';
+import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
+import type { ResolveModuleNames } from './typescript/resolve-module-names.ts';
+import type { BoundSourceFile } from './typescript/SourceFile.ts';
+import { SourceFileManager } from './typescript/SourceFileManager.ts';
+import { compact } from './util/array.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { timerify } from './util/Performance.ts';
+import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
+import type { ToSourceFilePath } from './util/to-source-path.ts';
 
 // These compiler options override local options
 const baseCompilerOptions: ts.CompilerOptions = {

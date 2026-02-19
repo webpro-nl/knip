@@ -1,10 +1,10 @@
-import * as bun from './bun.js';
-import * as bunx from './bunx.js';
-import * as npm from './npm.js';
-import * as npx from './npx.js';
-import * as pnpm from './pnpm.js';
-import * as pnpx from './pnpx.js';
-import * as yarn from './yarn.js';
+import * as bun from './bun.ts';
+import * as bunx from './bunx.ts';
+import * as npm from './npm.ts';
+import * as npx from './npx.ts';
+import * as pnpm from './pnpm.ts';
+import * as pnpx from './pnpx.ts';
+import * as yarn from './yarn.ts';
 
 export default {
   bun: bun.resolve,

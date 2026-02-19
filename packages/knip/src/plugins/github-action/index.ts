@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry, toProject } from '../../util/input.js';
-import { relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getActionDependencies } from '../github-actions/index.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toEntry, toProject } from '../../util/input.ts';
+import { relative } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getActionDependencies } from '../github-actions/index.ts';
 
 // https://docs.github.com/en/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions
 

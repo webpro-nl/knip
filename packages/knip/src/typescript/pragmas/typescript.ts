@@ -1,6 +1,6 @@
-import { IMPORT_FLAGS } from '../../constants.js';
-import type { ImportNode } from '../../types/imports.js';
-import type { BoundSourceFile } from '../SourceFile.js';
+import { IMPORT_FLAGS } from '../../constants.ts';
+import type { ImportNode } from '../../types/imports.ts';
+import type { BoundSourceFile } from '../SourceFile.ts';
 
 export const collectTypeScriptPragmaImports = (sourceFile: BoundSourceFile): ImportNode[] => {
   if (!sourceFile.pragmas || sourceFile.pragmas.size === 0) return [];

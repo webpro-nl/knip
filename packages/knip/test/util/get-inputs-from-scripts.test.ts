@@ -2,10 +2,10 @@
 // biome-ignore-all lint/suspicious/noTemplateCurlyInString: ignore
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { _getInputsFromScripts } from '../../src/binaries/index.js';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { join } from '../../src/util/path.js';
-import { resolve } from '../helpers/resolve.js';
+import { _getInputsFromScripts } from '../../src/binaries/index.ts';
+import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { join } from '../../src/util/path.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');

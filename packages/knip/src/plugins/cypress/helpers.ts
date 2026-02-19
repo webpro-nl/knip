@@ -1,7 +1,7 @@
-import type { PluginOptions } from '../../types/config.js';
-import { isInternal, toAbsolute } from '../../util/path.js';
-import { load } from '../../util/plugin.js';
-import type { CypressConfig } from './types.js';
+import type { PluginOptions } from '../../types/config.ts';
+import { isInternal, toAbsolute } from '../../util/path.ts';
+import { load } from '../../util/plugin.ts';
+import type { CypressConfig } from './types.ts';
 
 interface ReporterConfig {
   reporterEnabled: string;

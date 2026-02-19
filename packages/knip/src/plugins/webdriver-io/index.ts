@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { WebdriverIOConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { WebdriverIOConfig } from './types.ts';
 
 // https://webdriver.io/docs/configuration
 

@@ -2,8 +2,8 @@ import os from 'node:os';
 import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import { parseArgs } from 'node:util';
-import { getStats } from './math.js';
-import { Table } from './table.js';
+import { getStats } from './math.ts';
+import { Table } from './table.ts';
 
 const { values } = parseArgs({
   strict: false,

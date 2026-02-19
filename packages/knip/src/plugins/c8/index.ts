@@ -1,6 +1,6 @@
 import type { ParsedArgs } from 'minimist';
-import { argsFrom } from '../../binaries/util.js';
-import type { Plugin } from '../../types/config.js';
+import { argsFrom } from '../../binaries/util.ts';
+import type { Plugin } from '../../types/config.ts';
 
 // https://www.npmjs.com/package/c8
 

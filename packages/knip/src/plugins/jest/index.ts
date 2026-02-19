@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { isInternal, join, normalize, toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getReportersDependencies, resolveExtensibleConfig } from './helpers.js';
-import type { JestConfig, JestInitialOptions } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
+import type { JestConfig, JestInitialOptions } from './types.ts';
 
 // https://jestjs.io/docs/configuration
 

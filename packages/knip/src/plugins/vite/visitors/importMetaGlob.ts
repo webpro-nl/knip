@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS } from '../../../constants.js';
-import { isPropertyAccessCall } from '../../../typescript/ast-helpers.js';
-import type { ImportVisitor } from '../../../typescript/visitors/index.js';
-import { _syncGlob } from '../../../util/glob.js';
-import { dirname, isAbsolute, join } from '../../../util/path.js';
+import { IMPORT_FLAGS } from '../../../constants.ts';
+import { isPropertyAccessCall } from '../../../typescript/ast-helpers.ts';
+import type { ImportVisitor } from '../../../typescript/visitors/index.ts';
+import { _syncGlob } from '../../../util/glob.ts';
+import { dirname, isAbsolute, join } from '../../../util/path.ts';
 
 export const importMetaGlobCall: ImportVisitor = sourceFile => {
   return node => {

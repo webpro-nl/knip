@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs';
 import os from 'node:os';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
-import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
-import { join, toAbsolute } from '../../util/path.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import vite from '../vite/index.js';
-import type { PluginConfig, RouteConfigEntry } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
+import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
+import { hasDependency, load } from '../../util/plugin.ts';
+import vite from '../vite/index.ts';
+import type { PluginConfig, RouteConfigEntry } from './types.ts';
 
 const isWindows = os.platform() === 'win32';
 // https://reactrouter.com/start/framework/routing

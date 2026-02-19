@@ -1,9 +1,9 @@
-import { ISSUE_TYPE_TITLE } from '../constants.js';
-import type { Entries } from '../types/entries.js';
-import type { Issue, ReporterOptions } from '../types/issues.js';
-import { relative } from '../util/path.js';
-import { hintPrinters } from './util/configuration-hints.js';
-import { getIssueTypeTitle } from './util/util.js';
+import { ISSUE_TYPE_TITLE } from '../constants.ts';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, ReporterOptions } from '../types/issues.ts';
+import { relative } from '../util/path.ts';
+import { hintPrinters } from './util/configuration-hints.ts';
+import { getIssueTypeTitle } from './util/util.ts';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (

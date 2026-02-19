@@ -1,7 +1,7 @@
-import internalReporters from '../reporters/index.js';
-import type { ReporterOptions } from '../types/issues.js';
-import { _load } from './loader.js';
-import { isAbsolute, isInternal, resolve } from './path.js';
+import internalReporters from '../reporters/index.ts';
+import type { ReporterOptions } from '../types/issues.ts';
+import { _load } from './loader.ts';
+import { isAbsolute, isInternal, resolve } from './path.ts';
 
 export const runPreprocessors = async (processors: string[], data: ReporterOptions): Promise<ReporterOptions> => {
   const preprocessors = await Promise.all(

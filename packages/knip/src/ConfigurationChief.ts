@@ -1,8 +1,8 @@
 // biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import picomatch from 'picomatch';
-import type { SyncCompilers } from './compilers/types.js';
-import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.js';
+import type { SyncCompilers } from './compilers/types.ts';
+import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
   IgnorePatterns,
@@ -10,24 +10,24 @@ import type {
   RawConfiguration,
   RawPluginConfiguration,
   WorkspaceConfiguration,
-} from './types/config.js';
-import type { ConfigurationHint } from './types/issues.js';
-import { type PluginName, pluginNames } from './types/PluginNames.js';
-import type { WorkspacePackage } from './types/package-json.js';
-import { arrayify, compact, partition } from './util/array.js';
-import type { MainOptions } from './util/create-options.js';
-import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.js';
-import { isDirectory, isFile } from './util/fs.js';
-import { _dirGlob, removeProductionSuffix } from './util/glob.js';
-import { graphSequencer } from './util/graph-sequencer.js';
-import mapWorkspaces from './util/map-workspaces.js';
-import { join, relative } from './util/path.js';
-import { normalizePluginConfig } from './util/plugin.js';
-import { toRegexOrString } from './util/regex.js';
-import { ELLIPSIS } from './util/string.js';
-import { byPathDepth } from './util/workspace.js';
-import { createWorkspaceFilePathFilter, type WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
-import { selectWorkspaces } from './util/workspace-selectors.js';
+} from './types/config.ts';
+import type { ConfigurationHint } from './types/issues.ts';
+import { type PluginName, pluginNames } from './types/PluginNames.ts';
+import type { WorkspacePackage } from './types/package-json.ts';
+import { arrayify, compact, partition } from './util/array.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.ts';
+import { isDirectory, isFile } from './util/fs.ts';
+import { _dirGlob, removeProductionSuffix } from './util/glob.ts';
+import { graphSequencer } from './util/graph-sequencer.ts';
+import mapWorkspaces from './util/map-workspaces.ts';
+import { join, relative } from './util/path.ts';
+import { normalizePluginConfig } from './util/plugin.ts';
+import { toRegexOrString } from './util/regex.ts';
+import { ELLIPSIS } from './util/string.ts';
+import { byPathDepth } from './util/workspace.ts';
+import { createWorkspaceFilePathFilter, type WorkspaceFilePathFilter } from './util/workspace-file-filter.ts';
+import { selectWorkspaces } from './util/workspace-selectors.ts';
 
 const defaultBaseFilenamePattern = '{index,cli,main}';
 

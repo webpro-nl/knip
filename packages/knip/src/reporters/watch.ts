@@ -1,11 +1,11 @@
 import picocolors from 'picocolors';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import type { Entries } from '../types/entries.js';
-import type { Issues } from '../types/issues.js';
-import type { MainOptions } from '../util/create-options.js';
-import { perfObserver } from '../util/Performance.js';
-import { prettyMilliseconds } from '../util/string.js';
-import { getIssueTypeTitle, getTableForType } from './util/util.js';
+import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
+import type { Entries } from '../types/entries.ts';
+import type { Issues } from '../types/issues.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { perfObserver } from '../util/Performance.ts';
+import { prettyMilliseconds } from '../util/string.ts';
+import { getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 interface WatchReporter {
   issues: Issues;

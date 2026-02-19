@@ -1,5 +1,5 @@
-import type { SYMBOL_TYPE } from '../constants.js';
-import type { Fixes } from './exports.js';
+import type { SYMBOL_TYPE } from '../constants.ts';
+import type { Fixes } from './exports.ts';
 
 export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 

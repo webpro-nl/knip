@@ -1,7 +1,7 @@
-import type { PluginOptions } from '../../types/config.js';
-import { dirname, isInternal, join, toAbsolute } from '../../util/path.js';
-import { load } from '../../util/plugin.js';
-import type { JestInitialOptions } from './types.js';
+import type { PluginOptions } from '../../types/config.ts';
+import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
+import { load } from '../../util/plugin.ts';
+import type { JestInitialOptions } from './types.ts';
 
 export const resolveExtensibleConfig = async (configFilePath: string) => {
   let config = await load(configFilePath);

@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getPageExtensions } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getPageExtensions } from './resolveFromAST.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 

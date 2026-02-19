@@ -1,11 +1,11 @@
-import type { Import, ImportMaps, ModuleGraph } from '../types/module-graph.js';
-import { getCachedExportedIdentifiers, setCachedExportedIdentifiers } from './cache.js';
+import type { Import, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
+import { getCachedExportedIdentifiers, setCachedExportedIdentifiers } from './cache.ts';
 import {
   forEachAliasReExport,
   forEachNamespaceReExport,
   forEachPassThroughReExport,
   getStarReExportSources,
-} from './visitors.js';
+} from './visitors.ts';
 
 export const getExportedIdentifiers = (
   graph: ModuleGraph,

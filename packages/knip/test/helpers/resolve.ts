@@ -1,7 +1,7 @@
 // biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { join, toPosix } from '../../src/util/path.js';
+import { join, toPosix } from '../../src/util/path.ts';
 
 const base = toPosix(path.join(path.dirname(fileURLToPath(import.meta.url)), '../..'));
 

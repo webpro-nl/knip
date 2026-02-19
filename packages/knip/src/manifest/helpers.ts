@@ -1,6 +1,6 @@
-import type { Scripts } from '../types/package-json.js';
-import { join } from '../util/path.js';
-import { _require } from '../util/require.js';
+import type { Scripts } from '../types/package-json.ts';
+import { join } from '../util/path.ts';
+import { _require } from '../util/require.ts';
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 

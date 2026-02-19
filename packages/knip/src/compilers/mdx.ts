@@ -1,5 +1,5 @@
-import { fencedCodeBlockMatcher, importMatcher, inlineCodeMatcher } from './compilers.js';
-import type { HasDependency } from './types.js';
+import { fencedCodeBlockMatcher, importMatcher, inlineCodeMatcher } from './compilers.ts';
+import type { HasDependency } from './types.ts';
 
 // https://mdxjs.com/packages/
 const mdxDependencies = [

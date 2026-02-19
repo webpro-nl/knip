@@ -1,4 +1,4 @@
-import { FIX_FLAGS } from '../constants.js';
+import { FIX_FLAGS } from '../constants.ts';
 
 interface FixerOptions {
   text: string;

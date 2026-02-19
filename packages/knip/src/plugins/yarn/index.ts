@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
-import type { Input } from '../../util/input.js';
-import { toEntry } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
+import type { Input } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 
 // https://yarnpkg.com/features/constraints
 

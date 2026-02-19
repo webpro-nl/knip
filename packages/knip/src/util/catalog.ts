@@ -1,8 +1,8 @@
-import type { CatalogContainer } from '../CatalogCounselor.js';
-import type { PackageJson } from '../types/package-json.js';
-import { isFile } from './fs.js';
-import { _load } from './loader.js';
-import { basename, join } from './path.js';
+import type { CatalogContainer } from '../CatalogCounselor.ts';
+import type { PackageJson } from '../types/package-json.ts';
+import { isFile } from './fs.ts';
+import { _load } from './loader.ts';
+import { basename, join } from './path.ts';
 
 export const DEFAULT_CATALOG = 'default';
 

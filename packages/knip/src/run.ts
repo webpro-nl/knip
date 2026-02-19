@@ -1,17 +1,17 @@
 import { watch } from 'node:fs';
-import { CatalogCounselor } from './CatalogCounselor.js';
-import { ConfigurationChief } from './ConfigurationChief.js';
-import { ConsoleStreamer } from './ConsoleStreamer.js';
-import { DependencyDeputy } from './DependencyDeputy.js';
-import { analyze } from './graph/analyze.js';
-import { build } from './graph/build.js';
-import { IssueCollector } from './IssueCollector.js';
-import { PrincipalFactory } from './PrincipalFactory.js';
-import watchReporter from './reporters/watch.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogObject } from './util/debug.js';
-import { getGitIgnoredHandler } from './util/glob-core.js';
-import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.js';
+import { CatalogCounselor } from './CatalogCounselor.ts';
+import { ConfigurationChief } from './ConfigurationChief.ts';
+import { ConsoleStreamer } from './ConsoleStreamer.ts';
+import { DependencyDeputy } from './DependencyDeputy.ts';
+import { analyze } from './graph/analyze.ts';
+import { build } from './graph/build.ts';
+import { IssueCollector } from './IssueCollector.ts';
+import { PrincipalFactory } from './PrincipalFactory.ts';
+import watchReporter from './reporters/watch.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogObject } from './util/debug.ts';
+import { getGitIgnoredHandler } from './util/glob-core.ts';
+import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
 

@@ -1,6 +1,6 @@
 import type ts from 'typescript';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { ToSourceFilePath } from '../util/to-source-path.js';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
+import type { ToSourceFilePath } from '../util/to-source-path.ts';
 
 export type Paths = ts.CompilerOptions['paths'];
 

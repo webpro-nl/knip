@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toCosmiconfig } from '../../util/plugin-config.ts';
 
 // https://jamiemason.github.io/syncpack/config/syncpackrc/
 

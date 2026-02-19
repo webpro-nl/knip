@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS } from '../../../constants.js';
-import { isPropertyAccessCall } from '../../ast-helpers.js';
-import { importVisitor as visit } from '../index.js';
+import { IMPORT_FLAGS } from '../../../constants.ts';
+import { isPropertyAccessCall } from '../../ast-helpers.ts';
+import { importVisitor as visit } from '../index.ts';
 
 export default visit(
   () => true,

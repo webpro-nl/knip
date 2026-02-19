@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { getPropertyValues } from '../../typescript/ast-helpers.js';
+import { getPropertyValues } from '../../typescript/ast-helpers.ts';
 
 export const getSrcDir = (sourceFile: ts.SourceFile): string => {
   const srcDir = 'src';

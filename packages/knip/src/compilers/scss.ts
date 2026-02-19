@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
-import { basename, dirname, join } from '../util/path.js';
-import type { CompilerSync, HasDependency } from './types.js';
+import { basename, dirname, join } from '../util/path.ts';
+import type { CompilerSync, HasDependency } from './types.ts';
 
 const condition = (hasDependency: HasDependency) =>
   hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');

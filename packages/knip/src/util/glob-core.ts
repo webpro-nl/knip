@@ -3,13 +3,13 @@ import { promisify } from 'node:util';
 import { walk as _walk, type Entry } from '@nodelib/fs.walk';
 import fg, { type Options as FastGlobOptions } from 'fast-glob';
 import picomatch from 'picomatch';
-import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
-import { compact, partition } from './array.js';
-import { debugLogObject } from './debug.js';
-import { isDirectory, isFile } from './fs.js';
-import { timerify } from './Performance.js';
-import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
-import { dirname, join, relative, toPosix } from './path.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
+import { compact, partition } from './array.ts';
+import { debugLogObject } from './debug.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { timerify } from './Performance.ts';
+import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
+import { dirname, join, relative, toPosix } from './path.ts';
 
 const walk = promisify(_walk);
 

@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { TsdownConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { TsdownConfig } from './types.ts';
 
 // https://github.com/rolldown/tsdown/blob/main/src/options/index.ts
 

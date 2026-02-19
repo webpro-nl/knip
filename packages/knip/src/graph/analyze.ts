@@ -1,17 +1,17 @@
-import type { CatalogCounselor } from '../CatalogCounselor.js';
-import type { ConfigurationChief } from '../ConfigurationChief.js';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import type { DependencyDeputy } from '../DependencyDeputy.js';
-import { createGraphExplorer } from '../graph-explorer/explorer.js';
-import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.js';
-import type { IssueCollector } from '../IssueCollector.js';
-import type { PrincipalFactory } from '../PrincipalFactory.js';
-import traceReporter from '../reporters/trace.js';
-import type { Export, ModuleGraph } from '../types/module-graph.js';
-import type { MainOptions } from '../util/create-options.js';
-import { getPackageNameFromModuleSpecifier } from '../util/modules.js';
-import { findMatch } from '../util/regex.js';
-import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.js';
+import type { CatalogCounselor } from '../CatalogCounselor.ts';
+import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
+import type { DependencyDeputy } from '../DependencyDeputy.ts';
+import { createGraphExplorer } from '../graph-explorer/explorer.ts';
+import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
+import type { IssueCollector } from '../IssueCollector.ts';
+import type { PrincipalFactory } from '../PrincipalFactory.ts';
+import traceReporter from '../reporters/trace.ts';
+import type { Export, ModuleGraph } from '../types/module-graph.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
+import { findMatch } from '../util/regex.ts';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;

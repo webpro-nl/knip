@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import compiler from './compiler.js';
-import mdxCompiler from './compiler-mdx.js';
-import { getSrcDir } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
+import mdxCompiler from './compiler-mdx.ts';
+import { getSrcDir } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 

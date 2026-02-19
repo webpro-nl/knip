@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import type { Workspace } from './ConfigurationChief.js';
+import type { Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
@@ -7,26 +7,26 @@ import {
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
-} from './constants.js';
-import { getDependencyMetaData } from './manifest/index.js';
-import { PackagePeeker } from './PackagePeeker.js';
-import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
-import type { PackageJson } from './types/package-json.js';
+} from './constants.ts';
+import { getDependencyMetaData } from './manifest/index.ts';
+import { PackagePeeker } from './PackagePeeker.ts';
+import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.ts';
+import type { PackageJson } from './types/package-json.ts';
 import type {
   DependencyArray,
   DependencySet,
   HostDependencies,
   InstalledBinaries,
   WorkspaceManifests,
-} from './types/workspace.js';
-import type { MainOptions } from './util/create-options.js';
+} from './types/workspace.ts';
+import type { MainOptions } from './util/create-options.ts';
 import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
   getPackageNameFromModuleSpecifier,
   isDefinitelyTyped,
-} from './util/modules.js';
-import { findMatch, toRegexOrString } from './util/regex.js';
+} from './util/modules.ts';
+import { findMatch, toRegexOrString } from './util/regex.ts';
 
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;

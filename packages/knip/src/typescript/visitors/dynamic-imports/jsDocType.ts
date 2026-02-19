@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
-import type { ImportNode } from '../../../types/imports.js';
-import { importVisitor as visit } from '../index.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.ts';
+import type { ImportNode } from '../../../types/imports.ts';
+import { importVisitor as visit } from '../index.ts';
 
 const supportsJSDocImportTag = 'isJSDocImportTag' in ts;
 

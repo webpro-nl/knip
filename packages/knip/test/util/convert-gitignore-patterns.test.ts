@@ -4,7 +4,7 @@ import test from 'node:test';
 import {
   convertGitignoreToPicomatchIgnorePatterns as convert,
   parseAndConvertGitignorePatterns as parse,
-} from '../../src/util/parse-and-convert-gitignores.js';
+} from '../../src/util/parse-and-convert-gitignores.ts';
 
 test('convertGitignoreToPicomatch', () => {
   assert.deepEqual(convert('*.ext'), { negated: false, patterns: ['**/*.ext', '**/*.ext/**'] });

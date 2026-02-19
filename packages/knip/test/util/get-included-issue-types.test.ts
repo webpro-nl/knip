@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { ISSUE_TYPES } from '../../src/constants.js';
+import { ISSUE_TYPES } from '../../src/constants.ts';
 import {
   defaultExcludedIssueTypes,
   getIncludedIssueTypes,
   shorthandDeps,
   shorthandExports,
   shorthandFiles,
-} from '../../src/util/get-included-issue-types.js';
+} from '../../src/util/get-included-issue-types.ts';
 
 const included = (type: string) => [type, true];
 const excluded = (type: string) => [type, false];
