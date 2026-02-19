@@ -1,5 +1,7 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
+import { toDeferResolveEntry } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
+import type { PayloadConfig } from './types.js';
 
 // https://payloadcms.com/docs/configuration/overview
 
@@ -9,21 +11,37 @@ const enablers = ['payload'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = [
-  'app/**/importMap.js',
-  'src/app/**/importMap.js',
-  'payload-types.ts',
-  'src/payload-types.ts',
-  'payload.config.ts',
-  'src/payload.config.ts',
-];
+const config = ['payload.config.ts', 'src/payload.config.ts'];
 
-const project = ['!migrations/**', '!src/migrations/**'];
+const resolveConfig: ResolveConfig<PayloadConfig> = async config => {
+  const awaitedConfig = await config;
+
+  const importMapFile = awaitedConfig?.admin?.importMap?.importMapFile;
+  if (importMapFile) {
+    return [toDeferResolveEntry(importMapFile)];
+  }
+
+  const adminRoute = awaitedConfig?.routes?.admin ?? '/admin';
+  // Payload searches for these paths by default if the `importMapFile` is not explicitly specified
+  // Ref: https://github.com/payloadcms/payload/blob/677596c503e8c0977b89b4579ac6b6d8a294b329/packages/payload/src/bin/generateImportMap/utilities/resolveImportMapFilePath.ts#L39-L40
+  const possibleImportMapPaths = [
+    `app/(payload)${adminRoute}/importMap.js`,
+    `src/app/(payload)${adminRoute}/importMap.js`,
+  ];
+
+  return possibleImportMapPaths.map(id => toDeferResolveEntry(id));
+};
+
+const entry = ['payload.config.ts', 'src/payload.config.ts'];
+
+const project = ['!migrations/**', '!src/migrations/**', '!payload-types.ts', '!src/payload-types.ts'];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
+  config,
+  resolveConfig,
   entry,
   project,
 };
