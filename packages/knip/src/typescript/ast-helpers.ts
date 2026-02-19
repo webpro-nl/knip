@@ -102,11 +102,11 @@ export function stripQuotes(name: string) {
   return name;
 }
 
-enum CharacterCodes {
-  backtick = 0x60,
-  doubleQuote = 0x22,
-  singleQuote = 0x27,
-}
+const CharacterCodes = {
+  backtick: 0x60,
+  doubleQuote: 0x22,
+  singleQuote: 0x27,
+};
 
 function isQuoteOrBacktick(charCode: number) {
   return (
