@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.js';
 import { hasDependency } from '../../util/plugin.js';
 
-// https://payloadcms.com/docs/getting-started/what-is-payload
+// https://payloadcms.com/docs/configuration/overview
 
 const title = 'Payload CMS';
 
