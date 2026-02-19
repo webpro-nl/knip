@@ -129,6 +129,21 @@ export default visit(
                   namespace: undefined,
                 }));
               }
+              const hasFunctionBoundary = findAncestor(node, _node => {
+                if (_node === variableDeclaration) return 'STOP';
+                return ts.isArrowFunction(_node);
+              });
+              if (hasFunctionBoundary) {
+                return {
+                  identifier: undefined,
+                  specifier,
+                  pos: node.arguments[0].pos,
+                  modifiers: IMPORT_FLAGS.OPAQUE,
+                  alias: undefined,
+                  namespace: undefined,
+                  symbol: undefined,
+                };
+              }
               return {
                 identifier: 'default',
                 alias,

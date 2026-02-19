@@ -1,9 +1,8 @@
 {
   "name": "@plugins/metro",
   "dependencies": {
-    "expo-asset": "*",
-    "react": "*",
-    "react-native": "*",
+    "@react-native/metro-config": "*",
+    "metro-minify-esbuild": "*",
     "react-native-svg-transformer": "*"
   },
   "metro": {

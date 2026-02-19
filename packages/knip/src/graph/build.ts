@@ -2,13 +2,13 @@ import { _getInputsFromScripts } from '../binaries/index.js';
 import type { CatalogCounselor } from '../CatalogCounselor.js';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
 import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
+import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.js';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
 import type { DependencyDeputy } from '../DependencyDeputy.js';
 import type { IssueCollector } from '../IssueCollector.js';
 import type { PrincipalFactory } from '../PrincipalFactory.js';
 import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { GetImportsAndExportsOptions } from '../types/config.js';
+import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.js';
 import type { Issue } from '../types/issues.js';
 import type { Import, ModuleGraph } from '../types/module-graph.js';
 import type { PluginName } from '../types/PluginNames.js';
@@ -16,7 +16,7 @@ import { partition } from '../util/array.js';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.js';
 import type { MainOptions } from '../util/create-options.js';
 import { debugLog, debugLogArray } from '../util/debug.js';
-import { _glob, _syncGlob, negate, prependDirToPattern } from '../util/glob.js';
+import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.js';
 import {
   type Input,
   isAlias,
@@ -94,8 +94,8 @@ export async function build({
     counselor.addWorkspace(manifest);
   }
 
-  collector.addIgnorePatterns(chief.config.ignore.map(p => prependDirToPattern(options.cwd, p)));
-  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => prependDirToPattern(options.cwd, p)));
+  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
@@ -106,11 +106,7 @@ export async function build({
     if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
-
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
-    const extensions = getCompilerExtensions(compilers);
-    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
-    const config = chief.getConfigForWorkspace(name, extensions);
+    const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
@@ -121,7 +117,7 @@ export async function build({
     const worker = new WorkspaceWorker({
       name,
       dir,
-      config,
+      config: baseConfig,
       manifest,
       dependencies,
       rootManifest,
@@ -137,6 +133,20 @@ export async function build({
 
     await worker.init();
 
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
+      const ext = normalizeCompilerExtension(extension);
+      if (compilers[0].has(ext)) return;
+      compilers[0].set(ext, compiler);
+    };
+
+    await worker.registerCompilers(registerCompiler);
+
+    const extensions = getCompilerExtensions(compilers);
+    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
+    const config = chief.getConfigForWorkspace(name, extensions);
+    worker.config = config;
+
     const inputs = new Set<Input>();
 
     if (definitionPaths.length > 0) {
@@ -146,10 +156,9 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(config.ignore.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p))));
-    collector.addIgnoreFilesPatterns(
-      config.ignoreFiles.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p)))
-    );
+    const fn = (id: string) => ({ pattern: prependDir(options.cwd, prependDir(name, id)), id, workspaceName: name });
+    collector.addIgnorePatterns(config.ignore.map(fn));
+    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
@@ -187,6 +196,11 @@ export async function build({
     const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
+
+    worker.registerVisitors(visitors => {
+      if (visitors.dynamicImport) principal.visitors.dynamicImport.push(...visitors.dynamicImport);
+      if (visitors.script) principal.visitors.script.push(...visitors.script);
+    });
 
     const DEFAULT_GROUP = 'default';
     type PatternMap = Map<string, Set<string>>;
@@ -374,11 +388,9 @@ export async function build({
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
-          const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
-          if (!isIgnored) {
+          if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
             const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) unresolvedImports.add(unresolvedImport);
+            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
           }
         }
       }

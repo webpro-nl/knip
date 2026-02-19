@@ -2,7 +2,6 @@ import type { ParsedArgs } from 'minimist';
 import { DEFAULT_EXTENSIONS } from '../../constants.js';
 import type { Args } from '../../types/args.js';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import type { PackageJson } from '../../types/package-json.js';
 import { _glob } from '../../util/glob.js';
 import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
 import { isAbsolute, isInternal, join, toPosix } from '../../util/path.js';
@@ -24,13 +23,8 @@ const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
 const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
 
-const isVitestCoverageCommand = /vitest(.+)--coverage(?:\.enabled(?:=true)?)?/;
-
-const hasScriptWithCoverage = (scripts: PackageJson['scripts']) =>
-  scripts ? Object.values(scripts).some(script => isVitestCoverageCommand.test(script)) : false;
-
-const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions) => {
-  const { manifest, configFileDir: dir } = options;
+const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
+  const { configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
@@ -44,17 +38,18 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
       : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
-  const hasCoverageEnabled =
-    (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
+  const hasCoverageEnabled = testConfig.coverage && testConfig.coverage.enabled !== false;
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
+  const setupFiles = [testConfig.setupFiles ?? []]
+    .flat()
+    .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {
     for (const workspaceConfig of testConfig.workspace) {
-      workspaceDependencies.push(...findConfigDependencies(workspaceConfig, options));
+      workspaceDependencies.push(...findConfigDependencies(workspaceConfig, options, vitestRoot));
     }
   }
 
@@ -62,7 +57,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
   if (testConfig.projects !== undefined) {
     for (const projectConfig of testConfig.projects) {
       if (typeof projectConfig !== 'string') {
-        projectsDependencies.push(...findConfigDependencies(projectConfig, options));
+        projectsDependencies.push(...findConfigDependencies(projectConfig, options, vitestRoot));
       }
     }
   }
@@ -176,7 +171,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
         inputs.add(toEntry(`src/**/*${ext}`));
       }
     }
-    for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
+    for (const dependency of findConfigDependencies(cfg, options, dir)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
       .map(specifier => join(dir, specifier))
@@ -192,6 +187,21 @@ const args: Args = {
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
+    if (parsed['coverage']) {
+      const provider = typeof parsed['coverage'] === 'object' ? parsed['coverage'].provider : undefined;
+      inputs.push(toDependency(`@vitest/coverage-${provider ?? 'v8'}`));
+    }
+    if (parsed['reporter']) {
+      for (const reporter of getExternalReporters([parsed['reporter']].flat())) {
+        inputs.push(toDependency(reporter));
+      }
+    }
+    if (parsed['environment'] && parsed['environment'] !== 'node') {
+      inputs.push(toDependency(getEnvSpecifier(parsed['environment'])));
+    }
+    if (typeof parsed['typecheck'] === 'object' && parsed['typecheck'].checker) {
+      inputs.push(toDependency(parsed['typecheck'].checker === 'tsc' ? 'typescript' : parsed['typecheck'].checker));
+    }
     return inputs;
   },
 };

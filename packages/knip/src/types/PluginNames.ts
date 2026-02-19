@@ -28,6 +28,7 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'execa'
   | 'expo'
   | 'expressive-code'
   | 'gatsby'
@@ -75,12 +76,14 @@ export type PluginName =
   | 'playwright-ct'
   | 'playwright-test'
   | 'plop'
+  | 'pm2'
   | 'pnpm'
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
   | 'react-cosmos'
+  | 'react-native'
   | 'react-router'
   | 'relay'
   | 'release-it'
@@ -131,7 +134,8 @@ export type PluginName =
   | 'wrangler'
   | 'xo'
   | 'yarn'
-  | 'yorkie';
+  | 'yorkie'
+  | 'zx';
 
 export const pluginNames = [
   'angular',
@@ -162,6 +166,7 @@ export const pluginNames = [
   'drizzle',
   'eleventy',
   'eslint',
+  'execa',
   'expo',
   'expressive-code',
   'gatsby',
@@ -209,12 +214,14 @@ export const pluginNames = [
   'playwright-ct',
   'playwright-test',
   'plop',
+  'pm2',
   'pnpm',
   'postcss',
   'preconstruct',
   'prettier',
   'prisma',
   'react-cosmos',
+  'react-native',
   'react-router',
   'relay',
   'release-it',
@@ -266,4 +273,5 @@ export const pluginNames = [
   'xo',
   'yarn',
   'yorkie',
+  'zx',
 ] as const;

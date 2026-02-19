@@ -27,12 +27,15 @@ const resolveConfig: ResolveConfig<PrettierConfig> = config => {
     : [];
 };
 
+const isFilterTransitiveDependencies = true;
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  isFilterTransitiveDependencies,
 };
 
 export default plugin;

@@ -12,8 +12,11 @@ export class YamlCatalogPeeker {
   private lines: string[] = [];
   private sections: Record<string, number> = {};
   private ready = false;
+  private fileContent: string;
 
-  constructor(private fileContent: string) {}
+  constructor(fileContent: string) {
+    this.fileContent = fileContent;
+  }
 
   private init() {
     this.lines = this.fileContent.split('\n');

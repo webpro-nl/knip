@@ -38,6 +38,8 @@ export const extractBinary = (command: string) =>
       .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
   );
 
+export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
+
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
 export const getDefinitelyTypedFor = (packageName: string) => {

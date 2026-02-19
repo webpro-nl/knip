@@ -86,8 +86,8 @@ plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
-Plugins parse `config` files to find external dependencies. Knip uses this to
-determine unused and unlisted dependencies.
+Plugins load configuration files to find referenced dependencies, and determine
+unused and unlisted dependencies.
 
 :::
 
@@ -304,6 +304,23 @@ playwright test -c playwright.web.config.ts
 
 Please see [script parser][10] for more details.
 
+## Config File Location
+
+If configuration files aren't in their default location and they are not
+referenced through some script like `vite -c ./dir/vite.config.ts`, then make
+sure to tell Knip about it. Two examples:
+
+```json title="knip.jsonc"
+{
+  "playwright": { "config": ["e2e/playwright.config.ts"] },
+  "vite": "packages/*/vite.config.ts" // shorthand without `config` and array notation
+}
+```
+
+This is common in projects where a directory like `packages/lib` is not an
+actual workspace with a `package.json` file. Also see [integrated monorepos][11]
+for similar cases.
+
 ## Summary
 
 :::tip[Summary]
@@ -327,3 +344,4 @@ Plugins are configured with two distinct types of files:
 [8]: ../reference/plugins/vitest.md
 [9]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies
 [10]: ../features/script-parser.md
+[11]: ../features/integrated-monorepos.md

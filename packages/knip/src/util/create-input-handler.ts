@@ -17,9 +17,14 @@ import {
 } from './input.js';
 import { getPackageNameFromSpecifier } from './modules.js';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.js';
-import { _resolveSync } from './resolve.js';
+import { _resolveModuleSync, _resolveSync } from './resolve.js';
 
 export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
+
+const isJoinable = (specifier: string) => {
+  const char = specifier.charCodeAt(0);
+  return char !== 35 && char !== 126 && char !== 64 && !isAbsolute(specifier); // not # ~ @, not absolute
+};
 
 const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Workspace) =>
   (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
@@ -122,9 +127,10 @@ export const createInputHandler =
       return;
     }
 
-    const baseDir = input.dir ?? dirname(containingFilePath);
-    const filePath = isAbsolute(specifier) || specifier.startsWith('#') ? specifier : join(baseDir, specifier);
-    const resolvedFilePath = _resolveSync(filePath, baseDir);
+    // oxc-resolver does not resolve "file" or "file.ts" without "./" so we best-guess-absolutify
+    const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
+    const basePath = input.dir ? join(input.dir, 'file.ts') : containingFilePath;
+    const resolvedFilePath = _resolveModuleSync(filePath, basePath);
 
     if (resolvedFilePath && isInternal(resolvedFilePath)) {
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;

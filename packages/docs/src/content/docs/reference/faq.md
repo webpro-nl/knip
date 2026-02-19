@@ -405,10 +405,8 @@ Examples of features that have been requested include:
 - Analyze workspaces in parallel
 - Support Deno
 - Improve internal code structures and accessibility to support contributions
-- One-shot dead code removal (more comprehensive removal of unused variables,
-  duplicate exports, dead code, etc).
 - Replace dependencies for better performance and correctness, such as for shell
-  script parsing, module resolution and globbing with "unignores".
+  script parsing and globbing with "unignores".
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and

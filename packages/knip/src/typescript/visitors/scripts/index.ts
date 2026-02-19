@@ -1,8 +1,8 @@
 import type ts from 'typescript';
+import type { ScriptVisitor } from '../index.js';
 import bun from './bun.js';
-import execa from './execa.js';
-import zx from './zx.js';
 
-const visitors = [bun, execa, zx];
+const visitors = [bun];
 
-export default (sourceFile: ts.SourceFile) => visitors.map(v => v(sourceFile));
+export default (sourceFile: ts.SourceFile, extraVisitors: ScriptVisitor[]) =>
+  [...visitors, ...extraVisitors].map(v => v(sourceFile));

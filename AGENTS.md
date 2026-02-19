@@ -35,8 +35,6 @@ JavaScript and TypeScript projects.
 ## Debug
 
 - Important: debug, don't guess.
-- Find repositories/CodeSandbox/StackBlitz source files and local fixtures to
-  actually reproduce the issue at hand.
 - [Run Knip without compilation][4]
 - Run `knip` directly in a fixture or temp directory (over creating test scripts
   that import the `main` function). Knip requires `package.json` in root dir.
@@ -102,18 +100,26 @@ pnpm test
 There are plenty of directories with fixtures in `packages/knip/fixtures`.
 
 - In general, a test has its own fixture directory.
+- Plugin fixture directories at `packages/knip/fixtures/plugins/[plugin-name]*`.
 - For trivial changes or fixes, extend an existing fixture.
 - Don't use "foo" or vague names. One fixture should consist of descriptive file
   and variable names like `module.ts` and `barrel.ts`, or build upon a "theme"
   such as fruits or animals to indicate relation/hierarchy.
-- Use empty files when possible.
+- Use empty files if sufficient (e.g. to verify import specifier or entry file).
 - For debugging, it might be useful to run Knip from the fixture directory and
-  see output in terminal:
+  see output in terminal. Example:
 
 ```sh
 cd packages/knip/fixtures/commonjs
-knip
+knip # or k
 ```
+
+## Issues and Pull Requests
+
+- Find repositories/CodeSandbox/StackBlitz source files and local fixtures to
+  actually reproduce the issue at hand.
+- To fetch stackblitz.com reproduction url:
+  `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
 
 ## Implementation walk-through
 

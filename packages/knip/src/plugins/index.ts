@@ -27,6 +27,7 @@ import { default as dotenv } from './dotenv/index.js';
 import { default as drizzle } from './drizzle/index.js';
 import { default as eleventy } from './eleventy/index.js';
 import { default as eslint } from './eslint/index.js';
+import { default as execa } from './execa/index.js';
 import { default as expo } from './expo/index.js';
 import { default as expressiveCode } from './expressive-code/index.js';
 import { default as gatsby } from './gatsby/index.js';
@@ -74,12 +75,14 @@ import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
 import { default as plop } from './plop/index.js';
+import { default as pm2 } from './pm2/index.js';
 import { default as pnpm } from './pnpm/index.js';
 import { default as postcss } from './postcss/index.js';
 import { default as preconstruct } from './preconstruct/index.js';
 import { default as prettier } from './prettier/index.js';
 import { default as prisma } from './prisma/index.js';
 import { default as reactCosmos } from './react-cosmos/index.js';
+import { default as reactNative } from './react-native/index.js';
 import { default as reactRouter } from './react-router/index.js';
 import { default as relay } from './relay/index.js';
 import { default as releaseIt } from './release-it/index.js';
@@ -131,6 +134,7 @@ import { default as wrangler } from './wrangler/index.js';
 import { default as xo } from './xo/index.js';
 import { default as yarn } from './yarn/index.js';
 import { default as yorkie } from './yorkie/index.js';
+import { default as zx } from './zx/index.js';
 
 export const Plugins = {
   angular,
@@ -161,6 +165,7 @@ export const Plugins = {
   drizzle,
   eleventy,
   eslint,
+  execa,
   expo,
   'expressive-code': expressiveCode,
   gatsby,
@@ -208,12 +213,14 @@ export const Plugins = {
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
   plop,
+  pm2,
   pnpm,
   postcss,
   preconstruct,
   prettier,
   prisma,
   'react-cosmos': reactCosmos,
+  'react-native': reactNative,
   'react-router': reactRouter,
   relay,
   'release-it': releaseIt,
@@ -265,4 +272,5 @@ export const Plugins = {
   xo,
   yarn,
   yorkie,
+  zx,
 };

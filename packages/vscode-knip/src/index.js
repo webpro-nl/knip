@@ -25,7 +25,7 @@ import { ImportsTreeViewProvider } from './tree-view-imports.js';
 const require = createRequire(import.meta.url);
 
 /**
- * @import { ExtensionContext, LogOutputChannel } from 'vscode';
+ * @import { ExtensionContext, LogOutputChannel, WorkspaceFolder } from 'vscode';
  * @import { ServerOptions, LanguageClientOptions } from 'vscode-languageclient/node.js';
  * @import { PackageJson } from 'knip/session';
  * @import { TreeData } from './tree-view-base.js';
@@ -38,11 +38,14 @@ export class Extension {
   /** @type {Extension | undefined} */
   static #instance;
 
+  /** @type {string} */
+  static #serverModule = require.resolve('@knip/language-server');
+
   /** @type {ExtensionContext} */
   #context;
 
-  /** @type {LanguageClient | undefined} */
-  #client;
+  /** @type {Map<string, LanguageClient>} */
+  #clients = new Map();
 
   /** @type {LogOutputChannel} */
   #outputChannel;
@@ -80,73 +83,139 @@ export class Extension {
     this.#setupTreeViews();
     this.#setupEventHandlers();
 
-    // Register LM tools (available even when extension is disabled)
+    // Register LM tools
     setOutputChannel(this.#outputChannel);
     registerKnipTools(this.#context);
 
-    const config = vscode.workspace.getConfiguration('knip');
-
-    const isEnabled = config.get('enabled', true);
-    this.#outputChannel.info(`Extension enabled: ${isEnabled}`);
-    if (!isEnabled) return;
-
-    if (config.get('requireConfig', false)) {
-      const hasConfig = await this.#hasKnipConfig();
-      this.#outputChannel.info(`Config file found: ${hasConfig}`);
-      if (!hasConfig) return;
-    }
-
     this.#outputChannel.info('Initializing extension');
 
-    await this.#startClient();
-    await this.#client?.sendRequest(REQUEST_START);
+    await this.#startClients();
     await this.#refresh();
   }
 
   async stop() {
-    await this.#stopClient();
+    await this.#stopClients();
   }
 
-  async #startClient() {
-    if (this.#client && !this.#client.needsStart()) return;
+  /**
+   * @param {vscode.Uri} uri
+   * @returns {LanguageClient | undefined}
+   */
+  #getClientForUri(uri) {
+    const folder = vscode.workspace.getWorkspaceFolder(uri);
+    if (!folder) return;
+    return this.#clients.get(folder.uri.toString());
+  }
 
-    if (!this.#client) {
-      const config = vscode.workspace.getConfiguration('knip');
-      const module = require.resolve('@knip/language-server');
+  /**
+   * @returns {LanguageClient | undefined}
+   */
+  #getActiveClient() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) return this.#clients.values().next().value;
+    return this.#getClientForUri(editor.document.uri);
+  }
 
-      this.#outputChannel.info('Starting Knip Language Server');
+  async #startClients() {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) return;
 
-      /** @type {ServerOptions} */
-      const serverOptions = {
-        run: { module, transport: TransportKind.ipc },
-        debug: { module, transport: TransportKind.ipc, options: { execArgv: ['--inspect=6009'] } },
-      };
-
-      /** @type {LanguageClientOptions} */
-      const clientOptions = {
-        documentSelector: [{ scheme: 'file' }],
-        synchronize: { fileEvents: [vscode.workspace.createFileSystemWatcher('**/*')] },
-        initializationOptions: { config },
-        outputChannel: this.#outputChannel,
-        outputChannelName: 'Knip',
-      };
-
-      this.#client = new LanguageClient('knip', 'Knip', serverOptions, clientOptions);
+    for (const folder of folders) {
+      await this.#startClientForFolder(folder);
     }
 
-    await this.#client.start();
-    setLanguageClient(this.#client);
+    this.#updateToolsClient();
+    this.#logManagedWorkspaces();
   }
 
-  async #stopClient() {
-    if (!this.#client) return;
-    setLanguageClient(undefined);
-    if (!this.#client.needsStart()) {
+  /**
+   * @param {WorkspaceFolder} folder
+   */
+  async #startClientForFolder(folder) {
+    const key = folder.uri.toString();
+    if (this.#clients.has(key)) return;
+
+    const config = vscode.workspace.getConfiguration('knip', folder.uri);
+
+    if (config.get('requireConfig', false)) {
+      const hasConfig = await this.#hasKnipConfig(folder);
+      if (!hasConfig) {
+        this.#outputChannel.info(`No config found in ${folder.name}, skipping`);
+        return;
+      }
+    }
+
+    this.#outputChannel.info(`Starting Knip Language Server for ${folder.name}`);
+
+    /** @type {ServerOptions} */
+    const serverOptions = {
+      run: { module: Extension.#serverModule, transport: TransportKind.ipc },
+      debug: {
+        module: Extension.#serverModule,
+        transport: TransportKind.ipc,
+        options: { execArgv: ['--inspect=6009'] },
+      },
+    };
+
+    /** @type {LanguageClientOptions} */
+    const clientOptions = {
+      documentSelector: [{ scheme: 'file', pattern: `${folder.uri.fsPath}/**/*` }],
+      synchronize: {
+        fileEvents: [vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'))],
+      },
+      workspaceFolder: folder,
+      initializationOptions: { config },
+      outputChannel: this.#outputChannel,
+      outputChannelName: 'Knip',
+    };
+
+    const client = new LanguageClient(`knip-${folder.name}`, `Knip (${folder.name})`, serverOptions, clientOptions);
+    this.#clients.set(key, client);
+
+    await client.start();
+  }
+
+  /**
+   * @param {WorkspaceFolder} folder
+   */
+  async #stopClientForFolder(folder) {
+    const key = folder.uri.toString();
+    const client = this.#clients.get(key);
+    if (!client) return;
+
+    this.#outputChannel.info(`Stopping client for ${folder.name}`);
+    this.#clients.delete(key);
+
+    if (!client.needsStart()) {
       try {
-        await this.#client.sendRequest(REQUEST_STOP);
+        await client.sendRequest(REQUEST_STOP);
       } catch (_error) {}
     }
-    if (this.#client.needsStop()) await this.#client.stop();
+    if (client.needsStop()) await client.stop();
+  }
+
+  async #stopClients() {
+    this.#outputChannel.info(`Stopping ${this.#clients.size} client(s)...`);
+    for (const client of this.#clients.values()) {
+      if (!client.needsStart()) {
+        try {
+          await client.sendRequest(REQUEST_STOP);
+        } catch (_error) {}
+      }
+      if (client.needsStop()) await client.stop();
+    }
+    this.#clients.clear();
+    setLanguageClient(undefined);
+  }
+
+  #updateToolsClient() {
+    const firstClient = this.#clients.values().next().value;
+    setLanguageClient(firstClient);
+  }
+
+  #logManagedWorkspaces() {
+    const names = [...this.#clients.keys()].map(uri => fileURLToPath(uri));
+    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${names.join(', ')}`);
   }
 
   /**
@@ -186,11 +255,22 @@ export class Extension {
   }
 
   #registerCommands() {
+    const start = vscode.commands.registerCommand('knip.start', async () => {
+      for (const client of this.#clients.values()) {
+        try {
+          await client.sendRequest(REQUEST_START);
+        } catch (error) {
+          vscode.window.showErrorMessage((error?.message || error).toString());
+        }
+      }
+    });
+
     const restart = vscode.commands.registerCommand(REQUEST_RESTART, async () => {
-      if (!this.#client) return;
+      const client = this.#getActiveClient();
+      if (!client) return;
       try {
         this.#packageJsonCache = undefined;
-        await this.#client.sendRequest(REQUEST_RESTART);
+        await client.sendRequest(REQUEST_RESTART);
       } catch (error) {
         vscode.window.showErrorMessage((error?.message || error).toString());
       }
@@ -233,7 +313,7 @@ export class Extension {
       }
     );
 
-    this.#context.subscriptions.push(restart, showHover, installDependency);
+    this.#context.subscriptions.push(start, restart, showHover, installDependency);
   }
 
   /**
@@ -243,8 +323,9 @@ export class Extension {
    */
   async #requestFileDescriptor(document) {
     const uri = document.uri.toString();
-    if (!this.#client) return;
-    return await this.#client.sendRequest(REQUEST_FILE_NODE, { uri });
+    const client = this.#getClientForUri(document.uri);
+    if (!client) return;
+    return await client.sendRequest(REQUEST_FILE_NODE, { uri });
   }
 
   #registerHoverProvider() {
@@ -338,7 +419,8 @@ export class Extension {
       return { kind: 'manifest', uri, manifest: contents };
     }
 
-    if (!this.#client) return { message: 'Language server not connected' };
+    const client = this.#getClientForUri(uri);
+    if (!client) return { message: 'Language server not connected' };
 
     try {
       const file = await this.#requestFileDescriptor(document);
@@ -357,18 +439,19 @@ export class Extension {
    * @returns {Promise<{ kind: 'markdown'; value: string } | null>}
    */
   async #getHoverContent(document, position) {
-    if (!this.#client) return null;
+    const client = this.#getClientForUri(document.uri);
+    if (!client) return null;
 
     const config = vscode.workspace.getConfiguration('knip');
     if (!config.get('editor.exports.hover.enabled', true)) return null;
 
-    const fsPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    if (!fsPath) return null;
-    const root = toPosix(fsPath);
+    const folder = vscode.workspace.getWorkspaceFolder(document.uri);
+    if (!folder) return null;
+    const root = toPosix(folder.uri.fsPath);
 
     if (path.basename(document.uri.fsPath) === 'package.json') {
       if (!config.get('editor.dependencies.hover.enabled', true)) return null;
-      return this.#getDependencyHoverContent(document, position, root);
+      return this.#getDependencyHoverContent(document, position, root, client);
     }
 
     const file = await this.#requestFileDescriptor(document);
@@ -410,16 +493,17 @@ export class Extension {
    * @param {vscode.TextDocument} document
    * @param {vscode.Position} position
    * @param {string} root
+   * @param {LanguageClient} client
    * @returns {Promise<{ kind: 'markdown'; value: string } | null>}
    */
-  async #getDependencyHoverContent(document, position, root) {
+  async #getDependencyHoverContent(document, position, root, client) {
     const packageName = this.#findDependencyAtPosition(document, position);
     if (!packageName) return null;
 
     try {
       if (!this.#packageJsonCache) {
         /** @type {{ dependenciesUsage: Record<string, import('knip/session').DependencyNodes> } | typeof SESSION_LOADING | undefined} */
-        const result = await this.#client?.sendRequest(REQUEST_PACKAGE_JSON);
+        const result = await client.sendRequest(REQUEST_PACKAGE_JSON);
         if (!result || result === SESSION_LOADING) return null;
         this.#packageJsonCache = result;
       }
@@ -511,10 +595,11 @@ export class Extension {
     }
   }
 
-  async #hasKnipConfig() {
-    const folder = vscode.workspace.workspaceFolders?.[0];
-    if (!folder) return false;
-
+  /**
+   * @param {vscode.WorkspaceFolder} folder
+   * @returns {Promise<boolean>}
+   */
+  async #hasKnipConfig(folder) {
     const config = vscode.workspace.getConfiguration('knip');
     const configFile = config.get('configFilePath', '');
     const locations = configFile ? [configFile] : KNIP_CONFIG_LOCATIONS;
@@ -626,7 +711,24 @@ export class Extension {
       this.#refresh(activeEditor);
     });
 
-    this.#context.subscriptions.push(selectionHandler, editorHandler, diagnosticsHandler, documentHandler);
+    const workspaceFoldersHandler = vscode.workspace.onDidChangeWorkspaceFolders(async event => {
+      for (const folder of event.added) {
+        await this.#startClientForFolder(folder);
+      }
+      for (const folder of event.removed) {
+        await this.#stopClientForFolder(folder);
+      }
+      this.#updateToolsClient();
+      this.#logManagedWorkspaces();
+    });
+
+    this.#context.subscriptions.push(
+      selectionHandler,
+      editorHandler,
+      diagnosticsHandler,
+      documentHandler,
+      workspaceFoldersHandler
+    );
   }
 }
 

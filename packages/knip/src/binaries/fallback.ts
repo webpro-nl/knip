@@ -2,7 +2,7 @@ import parseArgs from 'minimist';
 import type { BinaryResolver } from '../types/config.js';
 import { compact } from '../util/array.js';
 import { toBinary, toDeferResolve, toEntry } from '../util/input.js';
-import { isValidBinary } from './bash-parser.js';
+import { isValidBinary } from '../util/modules.js';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 

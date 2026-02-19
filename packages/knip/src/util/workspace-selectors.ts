@@ -7,7 +7,7 @@ import { join } from './path.js';
 
 type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob';
 
-export interface ParsedSelector {
+interface ParsedSelector {
   type: WorkspaceSelectorType;
   pattern: string;
   isNegated: boolean;

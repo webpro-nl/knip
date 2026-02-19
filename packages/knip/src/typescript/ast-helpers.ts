@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.js';
 import type { Fix } from '../types/exports.js';
 import type { SymbolType } from '../types/issues.js';
+import { isInternal } from '../util/path.js';
 import type { BoundSourceFile } from './SourceFile.js';
 
 function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
@@ -101,11 +102,11 @@ export function stripQuotes(name: string) {
   return name;
 }
 
-enum CharacterCodes {
-  backtick = 0x60,
-  doubleQuote = 0x22,
-  singleQuote = 0x27,
-}
+const CharacterCodes = {
+  backtick: 0x60,
+  doubleQuote: 0x22,
+  singleQuote: 0x27,
+};
 
 function isQuoteOrBacktick(charCode: number) {
   return (
@@ -171,6 +172,47 @@ export const getLeadingComments = (sourceFile: BoundSourceFile) => {
   }
 
   return comments;
+};
+
+export const isExternalReExportsOnly = (sourceFile: ts.SourceFile): boolean => {
+  let hasExternalReExport = false;
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      if (statement.moduleSpecifier && ts.isStringLiteral(statement.moduleSpecifier)) {
+        if (isInternal(statement.moduleSpecifier.text)) return false;
+        hasExternalReExport = true;
+        continue;
+      }
+      return false;
+    }
+    if (ts.isExpressionStatement(statement)) {
+      if (ts.isStringLiteral(statement.expression)) continue;
+      if (ts.isBinaryExpression(statement.expression)) {
+        const { left, right } = statement.expression;
+        if (ts.isPropertyAccessExpression(left) && isModuleExportsAccess(left) && isRequireCall(right)) {
+          const arg = right.arguments[0];
+          if (ts.isStringLiteral(arg)) {
+            if (isInternal(arg.text)) return false;
+            hasExternalReExport = true;
+            continue;
+          }
+        }
+      }
+      return false;
+    }
+    return false;
+  }
+  return hasExternalReExport;
+};
+
+export const collectStringLiterals = (sourceFile: ts.SourceFile): Set<string> => {
+  const literals = new Set<string>();
+  const visit = (node: ts.Node) => {
+    if (ts.isStringLiteral(node)) literals.add(node.text);
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(sourceFile, visit);
+  return literals;
 };
 
 export const isDeclarationFileExtension = (extension: string) =>
@@ -296,15 +338,17 @@ const getContainingExportDeclaration = (node: ts.Node): ts.Node | undefined => {
   return node.parent ? getContainingExportDeclaration(node.parent) : undefined;
 };
 
-/** Returns the identifier of the containing export, or undefined if not in an export */
+const isTypeExport = (node: ts.Node) => ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node);
+
 export const isReferencedInExport = (node: ts.Node): string | undefined => {
   const parent = node.parent;
-  if ((ts.isTypeQueryNode(parent) || ts.isTypeReferenceNode(parent)) && parent.parent) {
-    const exportDecl = getContainingExportDeclaration(parent.parent);
-    // @ts-expect-error name may not exist on all node types
-    if (exportDecl) return exportDecl.name?.getText();
-  }
-  return undefined;
+  if (!parent?.parent) return;
+  const isTypeQuery = ts.isTypeQueryNode(parent);
+  if (!isTypeQuery && !ts.isTypeReferenceNode(parent)) return;
+  const exportDecl = getContainingExportDeclaration(parent.parent);
+  if (!exportDecl) return;
+  // @ts-expect-error name exists on declarations
+  if (isTypeQuery || isTypeExport(exportDecl)) return exportDecl.name?.getText();
 };
 
 export const getExportKeywordNode = (node: ts.Node) =>

@@ -82,6 +82,7 @@ test('Unused dependencies in npm scripts', async () => {
     { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
     { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
     { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+    { workspaceName: undefined, identifier: 'ignore.js', type: 'ignore' },
   ]);
 });
 

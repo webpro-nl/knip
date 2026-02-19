@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/import-meta-glob",
+  "devDependencies": {
+    "astro": "*",
+    "vite": "*",
+    "vue": "*"
+  }
+}

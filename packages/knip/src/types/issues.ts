@@ -91,6 +91,8 @@ export type Rules = Record<IssueType, IssueSeverity>;
 export type ConfigurationHints = Map<string, ConfigurationHint>;
 
 export type ConfigurationHintType =
+  | 'ignore'
+  | 'ignoreFiles'
   | 'ignoreBinaries'
   | 'ignoreDependencies'
   | 'ignoreUnresolved'

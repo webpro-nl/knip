@@ -35,6 +35,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
       ...(pluginArgs.config === true ? { config: ['c'] } : {}),
       ...pluginArgs.alias,
     },
+    '--': true,
   });
 
   const positionals = [];

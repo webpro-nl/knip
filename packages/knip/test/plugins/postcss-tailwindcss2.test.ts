@@ -11,11 +11,11 @@ test('Find dependencies with the PostCSS plugin (with @tailwindcss/postcss)', as
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['postcss.config.mjs']['@tailwindcss/postcss']);
+  assert(issues.unlisted['postcss.config.mjs']['@tailwindcss/postcss']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unresolved: 1,
+    unlisted: 1,
     processed: 1,
     total: 1,
   });

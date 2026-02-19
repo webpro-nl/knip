@@ -62,6 +62,8 @@ const addWorkspace = (options: PrintHintOptions) =>
 const packageEntry = () => 'Package entry file not found';
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
+  ['ignore', { print: unused }],
+  ['ignoreFiles', { print: unused }],
   ['ignoreBinaries', { print: unused }],
   ['ignoreDependencies', { print: unused }],
   ['ignoreUnresolved', { print: unused }],
@@ -82,6 +84,7 @@ export { hintPrinters };
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['top-level-unconfigured', 'workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
+  ['ignore', 'ignoreFiles'],
   ['ignoreWorkspaces'],
   ['ignoreDependencies'],
   ['ignoreBinaries'],

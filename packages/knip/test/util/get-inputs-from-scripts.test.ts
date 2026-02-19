@@ -17,7 +17,7 @@ const js = toDeferResolveEntry('./script.js', opt);
 const ts = toDeferResolveEntry('./main.ts', opt);
 const req = toDeferResolve('./require.js');
 
-type T = (script: string | string[], dependencies: Input[], options?: { cwd: string }) => void;
+type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifestScriptNames?: Set<string> }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getInputsFromScripts(script, {
@@ -64,6 +64,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toDeferResolve('script.js')]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toDeferResolve('dotenv/config')]);
   t('node -r package/script', [toBinary('node'), toDeferResolve('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toDeferResolveEntry('script', opt), toDeferResolve('pkg1'), toDeferResolve('pkg2')]);
@@ -75,6 +76,7 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index', opt), toDeferResolve('@scope/package/register')]);
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
+  t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toDeferResolve('dotenv-flow/config')]);
 });
 
 test('getInputsFromScripts (tsx)', () => {
@@ -103,6 +105,8 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv -e .env3 -v VARIABLE=somevalue -- program', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -e .env3 -v VARIABLE=somevalue program -- exit', [toBinary('dotenv'), toBinary('program')]);
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
+  t('dotenv -- concurrently "npm ci"', [toBinary('dotenv'), toBinary('concurrently')]);
+  t('dotenv -- concurrently "next dev" "prisma generate"', [toBinary('dotenv'), toBinary('concurrently'), toBinary('next'), toBinary('prisma')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
@@ -132,6 +136,7 @@ test('getInputsFromScripts (npm)', () => {
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
   t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('npm run program -- run --coverage.enabled', [], pkgScripts);
 });
 
 test('getInputsFromScripts (npx)', () => {
@@ -212,6 +217,8 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pnpm write:report', []);
+  t('pnpm perf:test:ci', []);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -219,6 +226,8 @@ test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
+  t('pnpm --recursive --parallel exec program', [toBinary('program')]);
+  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifestScriptNames: new Set(['program']) });
 });
 
 test('getInputsFromScripts (yarn)', () => {
@@ -264,6 +273,7 @@ test('getInputsFromScripts ("positionals")', () => {
 
 test('getInputsFromScripts (c8)', () => {
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha')]);
@@ -319,7 +329,14 @@ test('getInputsFromScripts (ignore parse error)', () => {
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, []); // Unexpected 'OPEN_PAREN'
 });
 
-test('getInputsFromScripts (config)', () => {
+test('getInputsFromScripts (plugins → double-dash)', () => {
+  t('eslint --fix -- src/', [toBinary('eslint')]);
+  t('vitest -c vitest.unit.config.ts -- --bail 1', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.ts')]);
+  t('tsc -p tsconfig.lib.json -- --verbose', [toBinary('tsc'), toConfig('typescript', 'tsconfig.lib.json')]);
+  t('nx exec -- vitest --config vitest.int.config.ts', [toBinary('nx'), toBinary('vitest'), toConfig('vitest', 'vitest.int.config.ts')]);
+});
+
+test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
 });
