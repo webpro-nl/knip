@@ -19,7 +19,8 @@ export const requireContextCall: ImportVisitor = sourceFile => {
 
     const filter =
       regExpArg && ts.isRegularExpressionLiteral(regExpArg) ? regExpArg.text.match(/^\/(.+)\/([gimsuy]*)$/) : null;
-    const matched = filter ? files.filter(file => new RegExp(filter[1], filter[2]).test(file)) : files;
+    const re = filter ? new RegExp(filter[1], filter[2]) : null;
+    const matched = re ? files.filter(file => re.test(`./${file}`)) : files;
 
     return matched.map(filePath => ({
       specifier: isAbsolute(filePath) ? filePath : join(cwd, filePath),
