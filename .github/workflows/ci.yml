@@ -36,11 +36,16 @@ jobs:
       - name: Install earliest supported peer dependencies
         run: pnpm add typescript@5.0.4 @types/node@18
         working-directory: packages/knip
-      - name: Remove erasableSyntaxOnly from tsconfig
-        run: node -e "const path = 'tsconfig.json'; const content = fs.readFileSync(path, 'utf8'); const updated = content.replace(/^.*erasableSyntaxOnly.*(\r?\n)?/gm, ''); fs.writeFileSync(path, updated);"
+      - name: Run prebuild
+        run: pnpm run prebuild
+        working-directory: packages/knip
+      - name: Downgrade tsconfig/sources for TS 5.0.4
+        run: |
+          sed -i '/erasableSyntaxOnly\|rewriteRelativeImportExtensions\|allowImportingTsExtensions/d' tsconfig.json
+          find src -name '*.ts' -exec sed -i -E "s/(from '[^']+)\.ts'/\1.js'/g; s/(from \"[^\"]+)\.ts\"/\1.js\"/g" {} +
         working-directory: packages/knip
       - name: Build knip
-        run: pnpm run build
+        run: pnpm tsc
         working-directory: packages/knip
       - name: Test knip
         run: pnpm run test:smoke
