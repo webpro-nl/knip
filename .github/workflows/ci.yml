@@ -41,8 +41,8 @@ jobs:
         working-directory: packages/knip
       - name: Downgrade tsconfig/sources for TS 5.0.4
         run: |
-          sed -i '/erasableSyntaxOnly\|rewriteRelativeImportExtensions\|allowImportingTsExtensions/d' tsconfig.json
-          find src -name '*.ts' -exec sed -i -E "s/(from '[^']+)\.ts'/\1.js'/g; s/(from \"[^\"]+)\.ts\"/\1.js\"/g" {} +
+          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:erasableSyntaxOnly|rewriteRelativeImportExtensions|allowImportingTsExtensions).*\n/g,''))"
+          node -e "const f=require('fs'),p=require('path');(function w(d){for(const e of f.readdirSync(d,{withFileTypes:true})){const n=p.join(d,e.name);if(e.isDirectory())w(n);else if(e.name.endsWith('.ts')){const c=f.readFileSync(n,'utf8'),u=c.replace(/(from ['\"][^'\"]+)\.ts(['\"])/g,'\$1.js\$2');if(c!==u)f.writeFileSync(n,u)}}})('src')"
         working-directory: packages/knip
       - name: Build knip
         run: pnpm tsc
