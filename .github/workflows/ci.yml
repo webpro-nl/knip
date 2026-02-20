@@ -37,7 +37,7 @@ jobs:
         run: pnpm add typescript@5.0.4 @types/node@18
         working-directory: packages/knip
       - name: Remove erasableSyntaxOnly from tsconfig
-        run: node -e "const path = 'tsconfig.json'; const content = fs.readFileSync(path, 'utf8'); const updated = content.replace(/^.*erasableSyntaxOnly.*(\r?\n)?/gm, ''); fs.writeFileSync(path, updated);"
+        run: sed -i '/erasableSyntaxOnly/d' tsconfig.json
         working-directory: packages/knip
       - name: Build knip
         run: pnpm run build
