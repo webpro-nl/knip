@@ -624,6 +624,10 @@
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
+        "payload": {
+          "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
+          "$ref": "#/definitions/plugin"
+        },
         "playwright": {
           "title": "Playwright plugin configuration (https://knip.dev/reference/plugins/playwright)",
           "$ref": "#/definitions/plugin"
