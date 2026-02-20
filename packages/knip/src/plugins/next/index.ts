@@ -17,7 +17,7 @@ const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
 const productionEntryFilePatterns = [
   '{instrumentation,instrumentation-client,middleware,proxy}.{js,ts}',
-  'app/{manifest,robots}.{js,ts}',
+  'app/**/{manifest,robots}.{js,ts}',
   'app/**/sitemap.{js,ts}',
   'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
   'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
