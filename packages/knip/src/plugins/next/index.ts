@@ -17,23 +17,20 @@ const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
 const productionEntryFilePatterns = [
   '{instrumentation,instrumentation-client,middleware,proxy}.{js,ts}',
-  'app/**/{manifest,robots}.{js,ts}',
+  'app/{,[(]*[)]/}{manifest,robots}.{js,ts}',
   'app/**/sitemap.{js,ts}',
-  'app/**/{icon,apple-icon}.{js,jsx,ts,tsx}',
-  'app/**/{opengraph,twitter}-image.{js,jsx,ts,tsx}',
+  'app/**/{icon,apple-icon,opengraph-image,twitter-image}.{js,jsx,ts,tsx}',
 ];
 
 const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
-  const patterns = [...productionEntryFilePatterns];
-  for (const ext of pageExtensions) {
-    patterns.push(
-      `app/global-{error,not-found}.${ext}`,
-      `app/**/{error,layout,loading,not-found,page,template,default,forbidden,unauthorized}.${ext}`,
-      `app/**/route.${ext}`,
-      `pages/**/*.${ext}`
-    );
-  }
-  return [...patterns, ...patterns.map(pattern => `src/${pattern}`)];
+  const ext = pageExtensions.length === 1 ? pageExtensions[0] : `{${pageExtensions.join(',')}}`;
+  return [
+    ...productionEntryFilePatterns,
+    `app/global-{error,not-found}.${ext}`,
+    `app/**/{default,error,forbidden,loading,not-found,unauthorized}.${ext}`,
+    `app/**/{layout,page,route,template}.${ext}`,
+    `pages/**/*.${ext}`,
+  ].flatMap(pattern => [pattern, `src/${pattern}`]);
 };
 
 const production = getEntryFilePatterns();
