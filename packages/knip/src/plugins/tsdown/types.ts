@@ -1,4 +1,4 @@
-type Entry = string[] | Record<string, string>;
+export type Entry = (string | Record<string, string[] | string>)[] | string | Record<string, string[] | string>;
 
 type Options = {
   entry?: Entry;
