@@ -15,7 +15,7 @@ Options:
 
 Mode
   --cache                  Enable caching
-  --cache-location         Change cache location (default: node_modules/.cache/knip)
+  --cache-location [dir]   Change cache location (default: node_modules/.cache/knip)
   --include-entry-exports  Include entry files when reporting unused exports
   --include-libs           Include type definitions from external dependencies (default: false)
   --isolate-workspaces     Isolate workspaces into separate programs
@@ -39,6 +39,15 @@ Fix
   --fix-type               Fix only issues of type, can be comma-separated or repeated (2)
   --allow-remove-files     Allow Knip to remove files (with --fix)
   --format                 Format modified files after --fix using the local formatter
+
+Suppressions
+  --suppress-all           Generate suppressions file for all current issues
+  --suppress-type [type]   Suppress only a specific issue type
+  --suppress-until [date]  Set an expiry date (YYYY-MM-DD) on generated suppressions
+  --prune-suppressions     Remove stale entries from suppressions file
+  --check-suppressions     Fail if suppressions file needs updating
+  --suppressions-location  Cache suppressions file location (default: .knip-suppressions.json)
+  --no-suppressions        Ignore suppressions
 
 Output
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
@@ -86,6 +95,7 @@ export default function parseCLIArgs() {
     options: {
       cache: { type: 'boolean' },
       'cache-location': { type: 'string' },
+      'check-suppressions': { type: 'boolean' },
       config: { type: 'string', short: 'c' },
       debug: { type: 'boolean', short: 'd' },
       dependencies: { type: 'boolean' },
@@ -112,14 +122,20 @@ export default function parseCLIArgs() {
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
+      'no-suppressions': { type: 'boolean' },
       performance: { type: 'boolean' },
       'performance-fn': { type: 'string' },
       production: { type: 'boolean' },
       preprocessor: { type: 'string', multiple: true },
       'preprocessor-options': { type: 'string' },
       reporter: { type: 'string', multiple: true },
+      'prune-suppressions': { type: 'boolean' },
       'reporter-options': { type: 'string' },
       strict: { type: 'boolean' },
+      'suppress-all': { type: 'boolean' },
+      'suppress-type': { type: 'string' },
+      'suppress-until': { type: 'string' },
+      'suppressions-location': { type: 'string' },
       trace: { type: 'boolean' },
       'trace-dependency': { type: 'string' },
       'trace-export': { type: 'string' },

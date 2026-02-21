@@ -40,4 +40,10 @@ export default (options: ReporterOptions) => {
   ) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
+
+  if (isShowProgress && options.suppressedCount && options.suppressedCount > 0) {
+    const parts = [`${options.suppressedCount} suppressed`];
+    if (options.expiredCount && options.expiredCount > 0) parts.push(`${options.expiredCount} expired`);
+    console.log(dim(`(${parts.join(', ')})`));
+  }
 };

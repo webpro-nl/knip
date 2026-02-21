@@ -366,6 +366,41 @@ The default exit codes:
 | `1`  | Knip ran successfully, but there is at least one lint issue      |
 | `2`  | Knip did not run successfully due to bad input or internal error |
 
+## Suppressions
+
+### `--suppress-all`
+
+Generate a `.knip-suppressions.json` file to suppress all currently reported
+issues.
+
+### `--suppress-type [type]`
+
+Suppress only a specific issue type (e.g. `exports` or `dependencies`). Can be
+combined with `--suppress-all` to refresh only one type.
+
+### `--suppress-until [date]`
+
+Snapshot this date into the suppressions file. Format: `YYYY-MM-DD`. Knip
+ignores the suppression after this date.
+
+### `--suppressions-location`
+
+Path to the suppressions file. Default: `.knip-suppressions.json`.
+
+### `--check-suppressions`
+
+Exit with an error code if the suppressions file is modified (e.g. by
+auto-pruning). Useful in CI to ensure the file is up-to-date.
+
+### `--prune-suppressions`
+
+Explicitly remove unused entries from the suppressions file. (Note: Knip
+automatically prunes unused suppressions when running with `--fix`).
+
+### `--no-suppressions`
+
+Run Knip ignoring any existing suppressions file.
+
 ## Troubleshooting
 
 ### `--debug`

@@ -16,6 +16,7 @@ import { logError, logWarning } from './util/log.js';
 import { perfObserver } from './util/Performance.js';
 import { runPreprocessors, runReporters } from './util/reporter.js';
 import { prettyMilliseconds } from './util/string.js';
+import { _handleSuppressions } from './util/suppressions.js';
 import { version } from './version.js';
 
 let args: ReturnType<typeof parseArgs> = {};
@@ -59,6 +60,27 @@ const main = async () => {
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
 
+    let suppressedCount = 0;
+    let expiredCount = 0;
+
+    if (!options.isProduction) {
+      const suppressionResult = await _handleSuppressions(issues, counters, options);
+
+      if (suppressionResult.action === 'generated') {
+        console.log(suppressionResult.message);
+        process.exit(0);
+      }
+
+      if (suppressionResult.action === 'applied') {
+        suppressedCount = suppressionResult.suppressedCount;
+        expiredCount = suppressionResult.expiredCount;
+        if (suppressionResult.isChanged && options.checkSuppressions) {
+          console.log('Suppressions file has been updated. Please commit the changes.');
+          process.exit(1);
+        }
+      }
+    }
+
     const initialData: ReporterOptions = {
       report: options.includedIssueTypes,
       issues,
@@ -77,6 +99,8 @@ const main = async () => {
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
       selectedWorkspaces,
+      suppressedCount,
+      expiredCount,
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
