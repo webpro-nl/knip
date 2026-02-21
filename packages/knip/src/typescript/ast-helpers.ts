@@ -406,6 +406,32 @@ export const getDefaultImportName = (importMap: ReturnType<typeof getImportMap>,
   }
 };
 
+export const findImportSpecifier = (sourceFile: ts.SourceFile, specifier: string) => {
+  for (const statement of sourceFile.statements) {
+    if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
+      if (statement.moduleSpecifier.text !== specifier) continue;
+      const { importClause } = statement;
+      if (importClause?.name) return importClause.name.text;
+      if (importClause?.namedBindings && ts.isNamedImports(importClause.namedBindings)) {
+        return importClause.namedBindings.elements[0]?.name.text;
+      }
+    }
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (
+          ts.isIdentifier(declaration.name) &&
+          declaration.initializer &&
+          isRequireCall(declaration.initializer) &&
+          ts.isStringLiteral(declaration.initializer.arguments[0]) &&
+          declaration.initializer.arguments[0].text === specifier
+        ) {
+          return declaration.name.text;
+        }
+      }
+    }
+  }
+};
+
 export const getPropertyValues = (node: ts.ObjectLiteralExpression, propertyName: string) => {
   const values = new Set<string>();
   if (ts.isObjectLiteralExpression(node)) {

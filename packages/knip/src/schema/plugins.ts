@@ -86,6 +86,7 @@ export const pluginsSchema = z.object({
   oxlint: pluginSchema,
   parcel: pluginSchema,
   payload: pluginSchema,
+  pino: pluginSchema,
   playwright: pluginSchema,
   'playwright-ct': pluginSchema,
   'playwright-test': pluginSchema,

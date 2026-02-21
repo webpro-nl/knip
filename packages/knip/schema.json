@@ -628,6 +628,10 @@
           "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
           "$ref": "#/definitions/plugin"
         },
+        "pino": {
+          "title": "pino plugin configuration (https://knip.dev/reference/plugins/pino)",
+          "$ref": "#/definitions/plugin"
+        },
         "playwright": {
           "title": "Playwright plugin configuration (https://knip.dev/reference/plugins/playwright)",
           "$ref": "#/definitions/plugin"

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/pino",
+  "main": "src/logger.ts",
+  "dependencies": {
+    "@openobserve/pino-openobserve": "*",
+    "pino": "*",
+    "pino-datadog-transport": "*",
+    "pino-pretty": "*"
+  }
+}

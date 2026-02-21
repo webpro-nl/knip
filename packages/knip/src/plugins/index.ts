@@ -72,6 +72,7 @@ import { default as oclif } from './oclif/index.js';
 import { default as oxlint } from './oxlint/index.js';
 import { default as parcel } from './parcel/index.js';
 import { default as payload } from './payload/index.js';
+import { default as pino } from './pino/index.js';
 import { default as playwright } from './playwright/index.js';
 import { default as playwrightCt } from './playwright-ct/index.js';
 import { default as playwrightTest } from './playwright-test/index.js';
@@ -210,6 +211,7 @@ export const Plugins = {
   oxlint,
   parcel,
   payload,
+  pino,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,

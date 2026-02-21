@@ -73,6 +73,7 @@ export type PluginName =
   | 'oxlint'
   | 'parcel'
   | 'payload'
+  | 'pino'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -211,6 +212,7 @@ export const pluginNames = [
   'oxlint',
   'parcel',
   'payload',
+  'pino',
   'playwright',
   'playwright-ct',
   'playwright-test',
