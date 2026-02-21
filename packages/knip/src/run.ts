@@ -29,7 +29,7 @@ export const run = async (options: MainOptions) => {
   streamer.cast('Reading workspace configuration');
 
   const workspaces = await chief.getWorkspaces();
-  const isGitIgnored = await getGitIgnoredHandler(options);
+  const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);

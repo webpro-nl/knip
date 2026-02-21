@@ -12,7 +12,7 @@ test('Find dependencies with the Vitest plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.devDependencies['package.json']['vitest']);
-  assert(issues.unlisted['package.json']['@vitest/coverage-v8']);
+  assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-v8']);
   assert(issues.binaries['package.json']['vitest']);
 
   assert.deepEqual(counters, {
