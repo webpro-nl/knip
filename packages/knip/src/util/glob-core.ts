@@ -63,22 +63,18 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
 };
 
 /** @internal */
-export const findAndParseGitignores = async (cwd: string) => {
+export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<string>) => {
   const init = ['.git', ...GLOBAL_IGNORE_PATTERNS];
   const ignores: Set<string> = new Set(init);
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
   const pmOptions = { ignore: unignores };
 
-  // Warning: earlier matchers don't include later unignores (perf win, but can't unignore from ancestor gitignores)
-  const matchers = new Set(init.map(pattern => _picomatch(pattern, pmOptions)));
+  let deepFilterMatcher: ((str: string) => boolean) | undefined;
 
-  const matcher = (str: string) => {
-    for (const isMatch of matchers) {
-      const state = isMatch(str);
-      if (state) return state;
-    }
-    return false;
+  const getMatcher = () => {
+    if (!deepFilterMatcher) deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
+    return deepFilterMatcher;
   };
 
   const addFile = (filePath: string, baseDir?: string) => {
@@ -138,7 +134,7 @@ export const findAndParseGitignores = async (cwd: string) => {
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    for (const pattern of ignoresForDir) matchers.add(_picomatch(pattern, pmOptions));
+    deepFilterMatcher = undefined;
   };
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
@@ -149,6 +145,30 @@ export const findAndParseGitignores = async (cwd: string) => {
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
 
+  // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
+  let isRelevantDir: ((absPath: string) => boolean) | undefined;
+  if (workspaceDirs && workspaceDirs.size > 0) {
+    const relevantAncestors = new Set<string>();
+    const nonRootDirs = new Set<string>();
+    for (const wsDir of workspaceDirs) {
+      if (wsDir !== cwd) nonRootDirs.add(wsDir);
+      let dir = wsDir;
+      while (dir.length >= cwd.length) {
+        relevantAncestors.add(dir);
+        const parent = dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+      }
+    }
+    if (nonRootDirs.size > 0) {
+      isRelevantDir = (absPath: string) => {
+        if (relevantAncestors.has(absPath)) return true;
+        for (const wsDir of nonRootDirs) if (absPath.startsWith(wsDir + '/')) return true;
+        return false;
+      };
+    }
+  }
+
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
       addFile(entry.path);
@@ -157,9 +177,11 @@ export const findAndParseGitignores = async (cwd: string) => {
     return false;
   };
 
-  const deepFilter = (entry: Entry) => !matcher(relative(cwd, entry.path));
+  const deepFilter = (entry: Entry) =>
+    (!isRelevantDir || isRelevantDir(toPosix(entry.path))) && !getMatcher()(relative(cwd, entry.path));
 
   await walk(cwd, {
+    concurrency: 16,
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
@@ -221,12 +243,15 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   return paths;
 }
 
-export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {
+export async function getGitIgnoredHandler(
+  options: Options,
+  workspaceDirs?: Set<string>
+): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
 
   if (options.gitignore === false) return () => false;
 
-  const { ignores, unignores } = await _parseFindGitignores(options.cwd);
+  const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
   const matcher = _picomatch(Array.from(ignores), { ignore: unignores });
 
   const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
