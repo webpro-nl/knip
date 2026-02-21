@@ -720,6 +720,10 @@
           "title": "Sentry plugin configuration (https://knip.dev/reference/plugins/sentry)",
           "$ref": "#/definitions/plugin"
         },
+        "serverless-framework": {
+          "title": "serverless-framework plugin configuration (https://knip.dev/reference/plugins/serverless-framework)",
+          "$ref": "#/definitions/plugin"
+        },
         "simple-git-hooks": {
           "title": "simple-git-hooks plugin configuration (https://knip.dev/reference/plugins/simple-git-hooks)",
           "$ref": "#/definitions/plugin"
