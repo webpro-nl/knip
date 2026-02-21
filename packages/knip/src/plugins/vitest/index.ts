@@ -38,8 +38,8 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
       : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
-  const hasCoverageEnabled = testConfig.coverage && testConfig.coverage.enabled !== false;
-  const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
+  const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
+  const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
@@ -187,9 +187,8 @@ const args: Args = {
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
-    if (parsed['coverage']) {
-      const provider = typeof parsed['coverage'] === 'object' ? parsed['coverage'].provider : undefined;
-      inputs.push(toDependency(`@vitest/coverage-${provider ?? 'v8'}`));
+    if (typeof parsed['coverage'] === 'object' && parsed['coverage'].provider) {
+      inputs.push(toDependency(`@vitest/coverage-${parsed['coverage'].provider}`));
     }
     if (parsed['reporter']) {
       for (const reporter of getExternalReporters([parsed['reporter']].flat())) {
