@@ -1,0 +1,25 @@
+{
+  "name": "@fixtures/yarn-pnp-dependencies",
+  "scripts": {
+    "start": "start-server",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@sindresorhus/is": "*",
+    "@tootallnate/once": "*",
+    "JSONStream": "*",
+    "fs-extra": "*",
+    "has": "*",
+    "stream": "*"
+  },
+  "peerDependencies": {
+    "ansi-regex": "*",
+    "jquery": "*"
+  },
+  "optionalDependencies": {
+    "js-yaml": "*"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}

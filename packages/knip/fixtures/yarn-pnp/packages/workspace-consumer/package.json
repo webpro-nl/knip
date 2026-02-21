@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/yarn-pnp-workspace-consumer",
+  "dependencies": {
+    "@fixtures/yarn-pnp-workspace-no-main-export": "workspace:*"
+  }
+}
