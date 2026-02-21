@@ -46,9 +46,9 @@
     "lint": "biome lint",
     "format": "biome format --write",
     "test": "node scripts/run-test.ts",
-    "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
+    "test:node": "node --test test/*.test.ts test/**/*.test.ts",
     "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
-    "test:smoke": "glob-bin -c \"tsx --test\" \"test/*.test.ts\" && glob-bin -c \"tsx --test\" \"test/{plugins,util}/*.test.ts\"",
+    "test:smoke": "glob-bin -c \"node --test\" \"test/*.test.ts\" && glob-bin -c \"node --test\" \"test/{plugins,util}/*.test.ts\"",
     "test:bun:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
     "watch": "npm link && tsc --watch",
     "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
@@ -93,7 +93,6 @@
     "@wdio/types": "^9.20.0",
     "codeclimate-types": "^0.3.1",
     "glob-bin": "^1.0.0",
-    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "engines": {
