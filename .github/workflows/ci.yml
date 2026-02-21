@@ -1,4 +1,4 @@
-name: Tests (against typescript@5.0.4)
+name: Tests (against typescript@5.0.4 in Node.js v18)
 
 on:
   workflow_dispatch:
@@ -33,23 +33,19 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install
+      - name: Build knip
+        run: pnpm run build
+        working-directory: packages/knip
       - name: Install earliest supported peer dependencies
         run: pnpm add typescript@5.0.4 @types/node@18
         working-directory: packages/knip
-      - name: Run prebuild
-        run: pnpm run prebuild
-        working-directory: packages/knip
-      - name: Downgrade tsconfig/sources for TS 5.0.4
-        shell: bash
+      - name: Type-check against TS 5.0.4
         run: |
-          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:erasableSyntaxOnly|rewriteRelativeImportExtensions|allowImportingTsExtensions).*\n/g,''))"
-          node -e "const f=require('fs'),p=require('path');(function w(d){for(const e of f.readdirSync(d,{withFileTypes:true})){const n=p.join(d,e.name);if(e.isDirectory())w(n);else if(e.name.endsWith('.ts')){const c=f.readFileSync(n,'utf8'),u=c.replace(/(from ['\"][^'\"]+)\.ts(['\"])/g,'\$1.js\$2');if(c!==u)f.writeFileSync(n,u)}}})('src')"
-        working-directory: packages/knip
-      - name: Build knip
-        run: pnpm tsc
+          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:rewriteRelativeImportExtensions|erasableSyntaxOnly).*\n/g,''))"
+          pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip
-        run: pnpm run test:smoke
+        run: pnpm run test:smoke # glob-bin is OK with Node.js v18.20 (import-with), but Knip works with v18.18.0+
         working-directory: packages/knip
       - name: Run knip
         run: ./packages/knip/bin/knip.js --reporter github-actions
