@@ -21,7 +21,7 @@ const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,proj
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
+const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const { configFileDir: dir } = options;
