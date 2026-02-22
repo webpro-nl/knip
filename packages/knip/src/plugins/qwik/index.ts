@@ -2,15 +2,16 @@ import MDX from '../../compilers/mdx.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { config } from '../vite/index.ts';
 import { getRoutesDirs, getSrcDir } from './resolveFromAST.ts';
+
+// https://qwik.dev/docs/project-structure/
 
 const title = 'Qwik';
 
 const enablers = ['@builder.io/qwik'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
-
-const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const entry = ['src/entry.dev.tsx'];
 
