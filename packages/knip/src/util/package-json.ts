@@ -1,6 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
-import type { PackageJson } from '../types/package-json.js';
+import type { PackageJson } from '../types/package-json.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');

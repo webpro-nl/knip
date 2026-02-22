@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import type { BoundSourceFile } from '../SourceFile.js';
+import type { BoundSourceFile } from '../SourceFile.ts';
 
 export const isNotJS = (sourceFile: BoundSourceFile) => !isJS(sourceFile);
 

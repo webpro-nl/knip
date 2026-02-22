@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { EMPTY_ARRAY, FIX_FLAGS } from '../../../constants.js';
-import type { Fix } from '../../../types/exports.js';
-import { getClassMember, getEnumMember, getNodeType, isNonPrivateDeclaration } from '../../ast-helpers.js';
-import { isModule } from '../helpers.js';
-import { exportVisitor as visit } from '../index.js';
+import { EMPTY_ARRAY, FIX_FLAGS } from '../../../constants.ts';
+import type { Fix } from '../../../types/exports.ts';
+import { getClassMember, getEnumMember, getNodeType, isNonPrivateDeclaration } from '../../ast-helpers.ts';
+import { isModule } from '../helpers.ts';
+import { exportVisitor as visit } from '../index.ts';
 
 export default visit(isModule, (node, { isFixExports, isReportClassMembers, isFixTypes }) => {
   if (ts.isExportAssignment(node)) {

@@ -1,7 +1,7 @@
 import { ResolverFactory } from 'oxc-resolver';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { timerify } from './Performance.js';
-import { toPosix } from './path.js';
+import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { timerify } from './Performance.ts';
+import { toPosix } from './path.ts';
 
 const createSyncModuleResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({

@@ -1,7 +1,7 @@
 import parseArgs from 'minimist';
-import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/input.js';
-import type { BunfigConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toEntry } from '../../util/input.ts';
+import type { BunfigConfig } from './types.ts';
 
 // https://bun.sh/docs/cli/test
 

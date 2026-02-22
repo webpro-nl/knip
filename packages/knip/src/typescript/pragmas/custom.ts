@@ -1,9 +1,9 @@
-import { IMPORT_FLAGS } from '../../constants.js';
-import { getEnvSpecifier } from '../../plugins/vitest/helpers.js';
-import type { ImportNode } from '../../types/imports.js';
-import { isAbsolute, isInternal } from '../../util/path.js';
-import { getLeadingComments, stripQuotes } from '../ast-helpers.js';
-import type { BoundSourceFile } from '../SourceFile.js';
+import { IMPORT_FLAGS } from '../../constants.ts';
+import { getEnvSpecifier } from '../../plugins/vitest/helpers.ts';
+import type { ImportNode } from '../../types/imports.ts';
+import { isAbsolute, isInternal } from '../../util/path.ts';
+import { getLeadingComments, stripQuotes } from '../ast-helpers.ts';
+import type { BoundSourceFile } from '../SourceFile.ts';
 
 const VITEST_ENV = /@(vitest|jest)-environment\s+(\S+)/g;
 

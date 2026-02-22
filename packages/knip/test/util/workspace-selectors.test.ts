@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { PackageJson, WorkspacePackage } from '../../src/types/package-json.js';
+import type { PackageJson, WorkspacePackage } from '../../src/types/package-json.ts';
 import {
   matchWorkspacesByDirGlob,
   matchWorkspacesByPkgName,
   parseWorkspaceSelector,
-} from '../../src/util/workspace-selectors.js';
+} from '../../src/util/workspace-selectors.ts';
 
 test('parseWorkspaceSelector: negated package name', () => {
   const selector = parseWorkspaceSelector('!@myorg/pkg', '/test/cwd');

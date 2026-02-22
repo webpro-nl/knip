@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toEntry } from '../../util/input.js';
-import { isAbsolute, join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toEntry } from '../../util/input.ts';
+import { isAbsolute, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.ts';
 
 // https://karma-runner.github.io/latest/config/configuration-file.html
 

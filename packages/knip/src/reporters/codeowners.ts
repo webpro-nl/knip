@@ -1,8 +1,8 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, ReporterOptions } from '../types/issues.js';
-import { createOwnershipEngine } from '../util/codeowners.js';
-import { relative, resolve } from '../util/path.js';
-import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, ReporterOptions } from '../types/issues.ts';
+import { createOwnershipEngine } from '../util/codeowners.ts';
+import { relative, resolve } from '../util/path.ts';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 type OwnedIssue = Issue & { owner: string };
 

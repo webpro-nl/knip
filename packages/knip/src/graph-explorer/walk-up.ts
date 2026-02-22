@@ -1,11 +1,11 @@
-import type { ModuleGraph } from '../types/module-graph.js';
-import { RE_EXPORT_KIND, STOP } from './constants.js';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import { RE_EXPORT_KIND, STOP } from './constants.ts';
 import {
   forEachAliasReExport,
   getNamespaceReExportSources,
   getPassThroughReExportSources,
   getStarReExportSources,
-} from './visitors.js';
+} from './visitors.ts';
 
 type ReExportKind = (typeof RE_EXPORT_KIND)[keyof typeof RE_EXPORT_KIND];
 

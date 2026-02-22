@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS } from '../../../constants.js';
+import { IMPORT_FLAGS } from '../../../constants.ts';
 import {
   findAncestor,
   findDescendants,
@@ -10,8 +10,8 @@ import {
   isInOpaqueExpression,
   isTopLevel,
   stripQuotes,
-} from '../../ast-helpers.js';
-import { importVisitor as visit } from '../index.js';
+} from '../../ast-helpers.ts';
+import { importVisitor as visit } from '../index.ts';
 
 // @ts-expect-error Property 'symbol' does not exist on type 'BindingElement', etc.
 const getSymbol = (node: ts.Node, isTopLevel: boolean) => (isTopLevel ? node.symbol : undefined);

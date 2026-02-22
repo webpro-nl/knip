@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { type Input, toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { api, resolveName } from './helpers.js';
-import type { BabelConfig, BabelConfigObj } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { type Input, toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { api, resolveName } from './helpers.ts';
+import type { BabelConfig, BabelConfigObj } from './types.ts';
 
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization

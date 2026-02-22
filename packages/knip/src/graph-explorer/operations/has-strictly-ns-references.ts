@@ -1,5 +1,5 @@
-import type { ImportMaps, ModuleGraph } from '../../types/module-graph.js';
-import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from '../visitors.js';
+import type { ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
+import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from '../visitors.ts';
 
 export const hasStrictlyNsReferences = (
   graph: ModuleGraph,

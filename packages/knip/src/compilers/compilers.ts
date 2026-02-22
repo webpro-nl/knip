@@ -1,4 +1,4 @@
-import type { CompilerSync } from './types.js';
+import type { CompilerSync } from './types.ts';
 
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
 export const inlineCodeMatcher = /`[^`]+`/g;

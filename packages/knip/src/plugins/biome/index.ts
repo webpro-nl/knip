@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { arrayify } from '../../util/array.js';
-import { type Input, toConfig } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { BiomeConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { arrayify } from '../../util/array.ts';
+import { type Input, toConfig } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { BiomeConfig } from './types.ts';
 
 const title = 'Biome';
 

@@ -1,10 +1,10 @@
 import picomatch from 'picomatch';
-import { _getInputsFromScripts } from './binaries/index.js';
-import { CacheConsultant } from './CacheConsultant.js';
-import { isDefaultPattern, type Workspace } from './ConfigurationChief.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
-import { getFilteredScripts } from './manifest/helpers.js';
-import { PluginEntries, Plugins } from './plugins.js';
+import { _getInputsFromScripts } from './binaries/index.ts';
+import { CacheConsultant } from './CacheConsultant.ts';
+import { isDefaultPattern, type Workspace } from './ConfigurationChief.ts';
+import { ROOT_WORKSPACE_NAME } from './constants.ts';
+import { getFilteredScripts } from './manifest/helpers.ts';
+import { PluginEntries, Plugins } from './plugins.ts';
 import type {
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
@@ -14,16 +14,16 @@ import type {
   RegisterCompiler,
   RegisterVisitor,
   WorkspaceConfiguration,
-} from './types/config.js';
-import type { ConfigurationHint } from './types/issues.js';
-import type { PluginName } from './types/PluginNames.js';
-import type { PackageJson } from './types/package-json.js';
-import type { DependencySet } from './types/workspace.js';
-import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.js';
-import { compact } from './util/array.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.js';
+} from './types/config.ts';
+import type { ConfigurationHint } from './types/issues.ts';
+import type { PluginName } from './types/PluginNames.ts';
+import type { PackageJson } from './types/package-json.ts';
+import type { DependencySet } from './types/workspace.ts';
+import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
+import { compact } from './util/array.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
 import {
   type ConfigInput,
   type Input,
@@ -34,13 +34,13 @@ import {
   toDebugString,
   toEntry,
   toProductionEntry,
-} from './util/input.js';
-import { getPackageNameFromSpecifier } from './util/modules.js';
-import { getKeysByValue } from './util/object.js';
-import { timerify } from './util/Performance.js';
-import { basename, dirname, extname, isInternal, join } from './util/path.js';
-import { loadConfigForPlugin } from './util/plugin.js';
-import { ELLIPSIS } from './util/string.js';
+} from './util/input.ts';
+import { getPackageNameFromSpecifier } from './util/modules.ts';
+import { getKeysByValue } from './util/object.ts';
+import { timerify } from './util/Performance.ts';
+import { basename, dirname, extname, isInternal, join } from './util/path.ts';
+import { loadConfigForPlugin } from './util/plugin.ts';
+import { ELLIPSIS } from './util/string.ts';
 
 type WorkspaceManagerOptions = {
   name: string;

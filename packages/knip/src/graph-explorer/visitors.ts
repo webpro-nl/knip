@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConfusingVoidType: avoid */
-import { IMPORT_STAR } from '../constants.js';
-import type { ImportMaps } from '../types/module-graph.js';
+import { IMPORT_STAR } from '../constants.ts';
+import type { ImportMaps } from '../types/module-graph.ts';
 
 type PassThroughReExportCallback = (identifier: string, sources: Set<string>) => boolean | void;
 

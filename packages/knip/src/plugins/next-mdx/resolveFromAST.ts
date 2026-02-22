@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.js';
+import { getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.ts';
 
 const isNamedProp = (prop: ts.ObjectLiteralElementLike, name: string) =>
   ts.isPropertyAssignment(prop) && prop.name.getText() === name;

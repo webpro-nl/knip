@@ -23,7 +23,7 @@ const values = `export const pluginNames = [${pluginNames.map(name => `'${name}'
 
 fs.writeFileSync(outputFileTypes, HEADER + EOL + typeDefinition + EOL + EOL + values);
 
-const imports = pluginNames.map(name => `import { default as ${cc(name)} } from './${name}/index.js';`).join(EOL);
+const imports = pluginNames.map(name => `import { default as ${cc(name)} } from './${name}/index.ts';`).join(EOL);
 const pluginsObj = `export const Plugins = {${pluginNames
   .map(name => (name === cc(name) ? `${name},` : `'${name}': ${cc(name)},`))
   .join(EOL)} };`;

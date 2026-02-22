@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
-import type { Fix } from '../../../types/exports.js';
-import type { BoundSourceFile } from '../../SourceFile.js';
-import { isModule } from '../helpers.js';
-import { exportVisitor as visit } from '../index.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.ts';
+import type { Fix } from '../../../types/exports.ts';
+import type { BoundSourceFile } from '../../SourceFile.ts';
+import { isModule } from '../helpers.ts';
+import { exportVisitor as visit } from '../index.ts';
 
 export default visit(isModule, (node, { isFixExports, isFixTypes }) => {
   if (ts.isExportDeclaration(node)) {

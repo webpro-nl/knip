@@ -1,4 +1,4 @@
-import type { WebpackConfig } from '../webpack/types.js';
+import type { WebpackConfig } from '../webpack/types.ts';
 
 export type ModuleType = 'plugin' | 'theme' | 'preset';
 

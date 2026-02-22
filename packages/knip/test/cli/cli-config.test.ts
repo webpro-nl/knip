@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { exec } from '../helpers/exec.js';
-import { resolve } from '../helpers/resolve.js';
+import { exec } from '../helpers/exec.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 test('Support loading js async function for configuration', async () => {
   const cwd = resolve('fixtures/config-js-async');

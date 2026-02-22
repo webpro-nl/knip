@@ -2,11 +2,11 @@ import { EOL } from 'node:os';
 // biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import ts from 'typescript';
-import { getCompilerExtensions } from '../compilers/index.js';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { ToSourceFilePath } from '../util/to-source-path.js';
-import { createCustomModuleResolver } from './resolve-module-names.js';
-import type { SourceFileManager } from './SourceFileManager.js';
+import { getCompilerExtensions } from '../compilers/index.ts';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
+import type { ToSourceFilePath } from '../util/to-source-path.ts';
+import { createCustomModuleResolver } from './resolve-module-names.ts';
+import type { SourceFileManager } from './SourceFileManager.ts';
 
 const libLocation = path.dirname(ts.getDefaultLibFilePath({}));
 

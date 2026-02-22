@@ -1,8 +1,8 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver } from '../types/config.js';
-import { compact } from '../util/array.js';
-import { toBinary, toDeferResolve, toEntry } from '../util/input.js';
-import { isValidBinary } from '../util/modules.js';
+import type { BinaryResolver } from '../types/config.ts';
+import { compact } from '../util/array.ts';
+import { toBinary, toDeferResolve, toEntry } from '../util/input.ts';
+import { isValidBinary } from '../util/modules.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 

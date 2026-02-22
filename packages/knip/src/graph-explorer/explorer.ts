@@ -1,13 +1,13 @@
-import type { ModuleGraph } from '../types/module-graph.js';
-import { invalidateCache as invalidateCacheInternal } from './cache.js';
-import { buildExportsTree } from './operations/build-exports-tree.js';
-import { findCycles } from './operations/find-cycles.js';
-import { getContention } from './operations/get-contention.js';
-import { getDependencyUsage } from './operations/get-dependency-usage.js';
-import { getUsage } from './operations/get-usage.js';
-import { hasStrictlyNsReferences } from './operations/has-strictly-ns-references.js';
-import { isReferenced } from './operations/is-referenced.js';
-import { resolveDefinition } from './operations/resolve-definition.js';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import { invalidateCache as invalidateCacheInternal } from './cache.ts';
+import { buildExportsTree } from './operations/build-exports-tree.ts';
+import { findCycles } from './operations/find-cycles.ts';
+import { getContention } from './operations/get-contention.ts';
+import { getDependencyUsage } from './operations/get-dependency-usage.ts';
+import { getUsage } from './operations/get-usage.ts';
+import { hasStrictlyNsReferences } from './operations/has-strictly-ns-references.ts';
+import { isReferenced } from './operations/is-referenced.ts';
+import { resolveDefinition } from './operations/resolve-definition.ts';
 
 export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>) => {
   return {

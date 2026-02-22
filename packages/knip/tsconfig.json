@@ -1,6 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "declaration": true,
     "erasableSyntaxOnly": true,
     "esModuleInterop": true,
@@ -13,6 +14,7 @@
     "outDir": "./dist",
     "removeComments": true,
     "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true,
     "rootDir": "./src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,

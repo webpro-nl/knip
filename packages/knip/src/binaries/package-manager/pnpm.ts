@@ -1,8 +1,8 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver } from '../../types/config.js';
-import { toBinary } from '../../util/input.js';
-import { isValidBinary } from '../../util/modules.js';
-import { resolveDlx } from './pnpx.js';
+import type { BinaryResolver } from '../../types/config.ts';
+import { toBinary } from '../../util/input.ts';
+import { isValidBinary } from '../../util/modules.ts';
+import { resolveDlx } from './pnpx.ts';
 
 // https://pnpm.io/cli/add
 

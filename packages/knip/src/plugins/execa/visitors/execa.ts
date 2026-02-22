@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { stripQuotes } from '../../../typescript/ast-helpers.js';
-import { hasImportSpecifier } from '../../../typescript/visitors/helpers.js';
-import { scriptVisitor as visit } from '../../../typescript/visitors/index.js';
+import { stripQuotes } from '../../../typescript/ast-helpers.ts';
+import { hasImportSpecifier } from '../../../typescript/visitors/helpers.ts';
+import { scriptVisitor as visit } from '../../../typescript/visitors/index.ts';
 
 const tags = new Set(['$', '$sync']);
 const methods = new Set(['execa', 'execaSync', 'execaCommand', 'execaCommandSync', '$sync']);

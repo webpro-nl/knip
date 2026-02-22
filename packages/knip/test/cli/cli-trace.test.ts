@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { showDiff } from '../helpers/diff.js';
-import { exec } from '../helpers/exec.js';
-import { resolve } from '../helpers/resolve.js';
+import { showDiff } from '../helpers/diff.ts';
+import { exec } from '../helpers/exec.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/trace');
 

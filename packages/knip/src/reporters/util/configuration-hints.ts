@@ -1,9 +1,9 @@
-import type { Results } from '../../run.js';
-import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
-import { relative, toRelative } from '../../util/path.js';
-import { Table } from '../../util/table.js';
-import { byPathDepth } from '../../util/workspace.js';
-import { bright, dim, getColoredTitle, getDimmedTitle } from './util.js';
+import type { Results } from '../../run.ts';
+import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.ts';
+import { relative, toRelative } from '../../util/path.ts';
+import { Table } from '../../util/table.ts';
+import { byPathDepth } from '../../util/workspace.ts';
+import { bright, dim, getColoredTitle, getDimmedTitle } from './util.ts';
 
 interface PrintHintOptions {
   type: ConfigurationHintType;

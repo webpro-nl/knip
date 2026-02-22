@@ -1,4 +1,4 @@
-import { scriptBodies } from '../../compilers/compilers.js';
+import { scriptBodies } from '../../compilers/compilers.ts';
 
 const compiler = scriptBodies;
 

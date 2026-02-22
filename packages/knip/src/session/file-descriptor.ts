@@ -1,8 +1,8 @@
-import { createGraphExplorer } from '../graph-explorer/explorer.js';
-import type { ModuleGraph } from '../types/module-graph.js';
-import { toAbsolute } from '../util/path.js';
-import { buildExportsMap, buildImportLookup, buildInternalImports } from './build-maps.js';
-import type { ContentionDetails, File, FileMetrics } from './types.js';
+import { createGraphExplorer } from '../graph-explorer/explorer.ts';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import { toAbsolute } from '../util/path.ts';
+import { buildExportsMap, buildImportLookup, buildInternalImports } from './build-maps.ts';
+import type { ContentionDetails, File, FileMetrics } from './types.ts';
 
 export interface FileDescriptorOptions {
   isShowContention?: boolean;

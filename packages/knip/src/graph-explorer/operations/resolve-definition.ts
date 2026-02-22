@@ -1,8 +1,8 @@
-import type { ReExportKind } from '../../session/types.js';
-import type { Export, Identifier, ModuleGraph } from '../../types/module-graph.js';
-import { getCachedDefinition, setCachedDefinition } from '../cache.js';
-import { CONTINUE, STOP } from '../constants.js';
-import { walkUp } from '../walk-up.js';
+import type { ReExportKind } from '../../session/types.ts';
+import type { Export, Identifier, ModuleGraph } from '../../types/module-graph.ts';
+import { getCachedDefinition, setCachedDefinition } from '../cache.ts';
+import { CONTINUE, STOP } from '../constants.ts';
+import { walkUp } from '../walk-up.ts';
 
 interface TraversalStep {
   filePath: string;

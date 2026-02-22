@@ -1,6 +1,6 @@
 import { z } from 'zod/mini';
-import { SYMBOL_TYPE } from '../constants.js';
-import { globSchema, pluginsSchema } from './plugins.js';
+import { SYMBOL_TYPE } from '../constants.ts';
+import { globSchema, pluginsSchema } from './plugins.ts';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 

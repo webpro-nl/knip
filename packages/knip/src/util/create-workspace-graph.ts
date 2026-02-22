@@ -1,5 +1,5 @@
-import type { WorkspacePackage } from '../types/package-json.js';
-import { join } from './path.js';
+import type { WorkspacePackage } from '../types/package-json.ts';
+import { join } from './path.ts';
 
 export type WorkspaceGraph = Map<string, Set<string>>;
 

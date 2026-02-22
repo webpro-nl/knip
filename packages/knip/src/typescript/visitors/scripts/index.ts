@@ -1,6 +1,6 @@
 import type ts from 'typescript';
-import type { ScriptVisitor } from '../index.js';
-import bun from './bun.js';
+import type { ScriptVisitor } from '../index.ts';
+import bun from './bun.ts';
 
 const visitors = [bun];
 

@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { findDescendants, getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.js';
-import { isFile, loadFile } from '../../util/fs.js';
-import { type Input, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { findDescendants, getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.ts';
+import { isFile, loadFile } from '../../util/fs.ts';
+import { type Input, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 
 /**
  * Traverses through Vite's configuration file to find Babel plugins passed to

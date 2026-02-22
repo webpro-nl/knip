@@ -1,15 +1,15 @@
 import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
-import { Plugins, pluginArgsMap } from '../plugins.js';
-import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.js';
-import { debugLogObject } from '../util/debug.js';
-import { type Input, toBinary, toDeferResolve } from '../util/input.js';
-import { extractBinary, isValidBinary } from '../util/modules.js';
-import { relative } from '../util/path.js';
-import { truncate } from '../util/string.js';
-import { resolve as fallbackResolve } from './fallback.js';
-import PackageManagerResolvers from './package-manager/index.js';
-import { resolve as resolverFromPlugins } from './plugins.js';
-import { parseNodeArgs } from './util.js';
+import { Plugins, pluginArgsMap } from '../plugins.ts';
+import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
+import { debugLogObject } from '../util/debug.ts';
+import { type Input, toBinary, toDeferResolve } from '../util/input.ts';
+import { extractBinary, isValidBinary } from '../util/modules.ts';
+import { relative } from '../util/path.ts';
+import { truncate } from '../util/string.ts';
+import { resolve as fallbackResolve } from './fallback.ts';
+import PackageManagerResolvers from './package-manager/index.ts';
+import { resolve as resolverFromPlugins } from './plugins.ts';
+import { parseNodeArgs } from './util.ts';
 
 // https://vorpaljs.github.io/bash-parser-playground/
 

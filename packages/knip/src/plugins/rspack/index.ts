@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
-import type { WebpackConfig } from '../webpack/types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
+import type { WebpackConfig } from '../webpack/types.ts';
 
 // https://rspack.rs/config/
 

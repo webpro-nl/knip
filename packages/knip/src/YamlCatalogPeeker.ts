@@ -1,4 +1,4 @@
-import { DEFAULT_CATALOG } from './util/catalog.js';
+import { DEFAULT_CATALOG } from './util/catalog.ts';
 
 function matchesKey(line: string, indent: string, key: string) {
   return (

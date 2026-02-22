@@ -7,10 +7,10 @@ import fs from 'node:fs';
 // biome-ignore lint: style/noRestrictedImports
 import path from 'node:path';
 import { deserialize, serialize } from 'node:v8';
-import { debugLog } from './debug.js';
-import { isDirectory, isFile } from './fs.js';
-import { timerify } from './Performance.js';
-import { dirname, isAbsolute, resolve } from './path.js';
+import { debugLog } from './debug.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { timerify } from './Performance.ts';
+import { dirname, isAbsolute, resolve } from './path.ts';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 

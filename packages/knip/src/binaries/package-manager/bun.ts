@@ -1,9 +1,9 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
-import { isAbsolute, join } from '../../util/path.js';
-import { _resolveSync } from '../../util/resolve.js';
-import { resolveX } from './bunx.js';
+import type { BinaryResolver } from '../../types/config.ts';
+import { toEntry } from '../../util/input.ts';
+import { isAbsolute, join } from '../../util/path.ts';
+import { _resolveSync } from '../../util/resolve.ts';
+import { resolveX } from './bunx.ts';
 
 const commands = new Set([
   'add',

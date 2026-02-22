@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
-import type { LintHTMLConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toCosmiconfig } from '../../util/plugin-config.ts';
+import type { LintHTMLConfig } from './types.ts';
 
 // https://linthtml.vercel.app/
 

@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
-import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.js';
-import { isAbsolute, isInNodeModules, toPosix } from './path.js';
+import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
+import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;

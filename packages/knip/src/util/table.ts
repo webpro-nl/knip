@@ -1,5 +1,5 @@
 import { stripVTControlCharacters } from 'node:util';
-import { pad, truncate, truncateStart } from './string.js';
+import { pad, truncate, truncateStart } from './string.ts';
 
 type Value = string | number | undefined | false | null;
 type Align = 'left' | 'center' | 'right';

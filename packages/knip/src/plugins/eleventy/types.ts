@@ -1,4 +1,4 @@
-import type { DummyEleventyConfig } from './helpers.js';
+import type { DummyEleventyConfig } from './helpers.ts';
 
 export type EleventyConfig = {
   dir?: {

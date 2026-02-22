@@ -1,6 +1,6 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
-import { importVisitor as visit } from '../index.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.ts';
+import { importVisitor as visit } from '../index.ts';
 
 export default visit(
   () => true,

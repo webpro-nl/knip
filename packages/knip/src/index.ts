@@ -1,6 +1,6 @@
-import { fix } from './IssueFixer.js';
-import { run } from './run.js';
-import type { MainOptions } from './util/create-options.js';
+import { fix } from './IssueFixer.ts';
+import { run } from './run.ts';
+import type { MainOptions } from './util/create-options.ts';
 
 export const main = async (options: MainOptions) => {
   const { results } = await run(options);

@@ -1,9 +1,9 @@
 // biome-ignore-all lint/suspicious/noConsole: ignore
-import { fix } from './IssueFixer.js';
-import { run } from './run.js';
-import type { IssueType, ReporterOptions } from './types/issues.js';
-import parseArgs, { helpText } from './util/cli-arguments.js';
-import { createOptions } from './util/create-options.js';
+import { fix } from './IssueFixer.ts';
+import { run } from './run.ts';
+import type { IssueType, ReporterOptions } from './types/issues.ts';
+import parseArgs, { helpText } from './util/cli-arguments.ts';
+import { createOptions } from './util/create-options.ts';
 import {
   getKnownErrors,
   hasErrorCause,
@@ -11,12 +11,12 @@ import {
   isKnownError,
   isLoaderError,
   isModuleNotFoundError,
-} from './util/errors.js';
-import { logError, logWarning } from './util/log.js';
-import { perfObserver } from './util/Performance.js';
-import { runPreprocessors, runReporters } from './util/reporter.js';
-import { prettyMilliseconds } from './util/string.js';
-import { version } from './version.js';
+} from './util/errors.ts';
+import { logError, logWarning } from './util/log.ts';
+import { perfObserver } from './util/Performance.ts';
+import { runPreprocessors, runReporters } from './util/reporter.ts';
+import { prettyMilliseconds } from './util/string.ts';
+import { version } from './version.ts';
 
 let args: ReturnType<typeof parseArgs> = {};
 try {

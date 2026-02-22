@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PayloadConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PayloadConfig } from './types.ts';
 
 // https://payloadcms.com/docs/configuration/overview
 

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildFileDescriptor } from '../../src/session/file-descriptor.js';
-import { createSession } from '../../src/session/session.js';
-import { join } from '../../src/util/path.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
-import { describeFile } from './util.js';
+import { buildFileDescriptor } from '../../src/session/file-descriptor.ts';
+import { createSession } from '../../src/session/session.ts';
+import { join } from '../../src/util/path.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+import { describeFile } from './util.ts';
 
 const cwd = resolve('fixtures/session');
 
@@ -76,7 +76,7 @@ test('false disables contention reporting', async () => {
   assert.ok(withContention);
   assert.ok(withContention.contention.DIAMOND);
 
-  const { session: sessionHandler } = await (await import('../../src/run.js')).run(options);
+  const { session: sessionHandler } = await (await import('../../src/run.ts')).run(options);
   assert.ok(sessionHandler);
 
   const graph = sessionHandler.getGraph();

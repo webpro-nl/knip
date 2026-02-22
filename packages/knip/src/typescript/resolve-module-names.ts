@@ -1,13 +1,13 @@
 import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { sanitizeSpecifier } from '../util/modules.js';
-import { timerify } from '../util/Performance.js';
-import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.js';
-import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.js';
-import type { ToSourceFilePath } from '../util/to-source-path.js';
-import { isDeclarationFileExtension } from './ast-helpers.js';
+import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { sanitizeSpecifier } from '../util/modules.ts';
+import { timerify } from '../util/Performance.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.ts';
+import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
+import type { ToSourceFilePath } from '../util/to-source-path.ts';
+import { isDeclarationFileExtension } from './ast-helpers.ts';
 
 const resolutionCache = new Map<string, ts.ResolvedModuleFull | undefined>();
 

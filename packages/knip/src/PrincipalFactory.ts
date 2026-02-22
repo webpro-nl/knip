@@ -1,10 +1,10 @@
 import ts from 'typescript';
-import type { AsyncCompilers, SyncCompilers } from './compilers/types.js';
-import { ProjectPrincipal } from './ProjectPrincipal.js';
-import type { PrincipalOptions } from './types/project.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLog } from './util/debug.js';
-import { toRelative } from './util/path.js';
+import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
+import { ProjectPrincipal } from './ProjectPrincipal.ts';
+import type { PrincipalOptions } from './types/project.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLog } from './util/debug.ts';
+import { toRelative } from './util/path.ts';
 
 type Principal = { principal: ProjectPrincipal; wsDirs: Set<string>; pathKeys: Set<string>; pkgNames: Set<string> };
 type Principals = Set<Principal>;

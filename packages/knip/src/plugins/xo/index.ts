@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getInputs } from '../eslint/helpers.js';
-import type { XOConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getInputs } from '../eslint/helpers.ts';
+import type { XOConfig } from './types.ts';
 
 // https://github.com/xojs/xo#config
 // https://github.com/xojs/xo/blob/ee9f0a3d72d55df098fc321c4d54a1ea3804e226/lib/constants.js

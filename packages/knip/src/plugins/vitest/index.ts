@@ -1,13 +1,13 @@
 import type { ParsedArgs } from 'minimist';
-import { DEFAULT_EXTENSIONS } from '../../constants.js';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
-import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { isAbsolute, isInternal, join, toPosix } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getEnvSpecifier, getExternalReporters } from './helpers.js';
-import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
+import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { isAbsolute, isInternal, join, toPosix } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
 

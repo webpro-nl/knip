@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import { join } from '../../src/util/path.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import { join } from '../../src/util/path.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
 
