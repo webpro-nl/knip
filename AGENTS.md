@@ -46,10 +46,11 @@ JavaScript and TypeScript projects.
 ## Run without compilation
 
 On the system, `k` should be a global alias for
-`tsx --inspect ~/p/knip/knip/packages/knip/src/cli.ts` to run Knip without
-having to compile it first. If that's not available, run the CLI using `bun` or
-`tsx`. The rest of this document shows `knip` in commands for consistency,
-replace it with `k` or `bun ../../src/cli.ts` or `tsx ../../src/cli.ts`.
+`node --inspect ~/p/knip/knip/packages/knip/src/cli.ts` to run Knip without
+having to compile it first. If that's not available, run the CLI directly using
+`node` or `bun`. The rest of this document shows `knip` in commands for
+consistency, replace it with `k` or `node ../../src/cli.ts` or
+`bun ../../src/cli.ts`.
 
 ## Build
 
@@ -67,7 +68,7 @@ test(s) first, e.g.:
 
 ```sh
 cd packages/knip
-bun test test/commonjs.test.ts
+node --test test/commonjs.test.ts
 bun test test/util/get-inputs-from-scripts.test.ts
 ```
 
@@ -78,11 +79,11 @@ cd packages/knip
 pnpm run test:bun:smoke
 ```
 
-If Bun is not available, use `tsx` instead:
+If Bun is not available, use `node` instead:
 
 ```sh
 cd packages/knip
-tsx --test test/commonjs.test.ts
+node --test test/commonjs.test.ts
 pnpm test:smoke
 ```
 
