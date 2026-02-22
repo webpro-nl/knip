@@ -163,7 +163,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     if (nonRootDirs.size > 0) {
       isRelevantDir = (absPath: string) => {
         if (relevantAncestors.has(absPath)) return true;
-        for (const wsDir of nonRootDirs) if (absPath.startsWith(wsDir + '/')) return true;
+        for (const wsDir of nonRootDirs) if (absPath.startsWith(`${wsDir}/`)) return true;
         return false;
       };
     }

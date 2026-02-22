@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/qwik",
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "dev": "vite --mode ssr",
+    "preview": "qwik build preview && vite preview --open"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "*",
+    "@builder.io/qwik-city": "*",
+    "vite": "*"
+  }
+}

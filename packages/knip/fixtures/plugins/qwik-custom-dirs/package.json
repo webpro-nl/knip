@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/qwik-custom-dirs",
+  "type": "module",
+  "scripts": {
+    "build": "qwik build",
+    "dev": "vite --mode ssr"
+  },
+  "devDependencies": {
+    "@builder.io/qwik": "*",
+    "@builder.io/qwik-city": "*",
+    "vite": "*"
+  }
+}

@@ -13,10 +13,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['tsdown.config.{ts,mts,cts,js,mjs,cjs,json}', 'package.json'];
 
-const normalizeEntry = (entry: Entry | undefined) : string[] => {
+const normalizeEntry = (entry: Entry | undefined): string[] => {
   if (!entry) return [];
 
-  if (typeof entry === "string") {
+  if (typeof entry === 'string') {
     return [entry];
   }
 
@@ -24,10 +24,8 @@ const normalizeEntry = (entry: Entry | undefined) : string[] => {
     return entry.flatMap(normalizeEntry);
   }
 
-  return Object.values(entry).flatMap(value =>
-    Array.isArray(value) ? value : [value]
-  );
-}
+  return Object.values(entry).flatMap(value => (Array.isArray(value) ? value : [value]));
+};
 
 const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
   if (typeof config === 'function') config = await config({});
