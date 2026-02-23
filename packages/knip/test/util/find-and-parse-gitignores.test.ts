@@ -25,6 +25,10 @@ test('findAndParseGitignores', async () => {
       '**/a/b/c/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });
@@ -50,6 +54,10 @@ test('findAndParseGitignores (/a)', async () => {
       '**/.cache/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });
@@ -81,6 +89,10 @@ test('findAndParseGitignores (/a/b', async () => {
       '**/.cache/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });
