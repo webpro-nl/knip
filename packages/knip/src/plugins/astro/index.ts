@@ -3,7 +3,7 @@ import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 import mdxCompiler from './compiler-mdx.ts';
-import { getSrcDir } from './resolveFromAST.ts';
+import { getSrcDir, usesSharpImageService } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -29,11 +29,14 @@ const production = [
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
-
-  return [
+  const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
     ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
+
+  if (usesSharpImageService(sourceFile)) inputs.push(toDependency('sharp'));
+
+  return inputs;
 };
 
 // https://docs.astro.build/en/guides/integrations-guide/mdx/
