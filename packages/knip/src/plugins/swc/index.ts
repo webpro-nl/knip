@@ -1,6 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { compact } from '../../util/array.ts';
 import type { SWCConfig } from './types.ts';
 
 // https://swc.rs/
@@ -16,7 +17,8 @@ const config: string[] = ['.swcrc'];
 
 const resolveConfig: ResolveConfig<SWCConfig> = async config => {
   const inputs = config?.jsc?.experimental?.plugins ?? [];
-  return inputs.map(([id]) => toDependency(id));
+  const externalHelpers = config.jsc?.externalHelpers ? ['@swc/helpers'] : [];
+  return compact([...inputs.map(([id]) => toDependency(id)), ...externalHelpers.map(id => toDependency(id))]);
 };
 
 const plugin: Plugin = {
