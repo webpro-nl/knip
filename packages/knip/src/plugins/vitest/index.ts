@@ -4,8 +4,9 @@ import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
 import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { isAbsolute, isInternal, join, toPosix } from '../../util/path.ts';
+import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getEnvSpecifier, getExternalReporters } from './helpers.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
@@ -146,7 +147,15 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
   };
 
+  const seenRoots = new Set<string>();
+
   for (const cfg of configs) {
+    const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
+    if (!seenRoots.has(viteRoot)) {
+      seenRoots.add(viteRoot);
+      for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
+    }
+
     const dir = join(options.cwd, cfg.test?.root ?? '.');
 
     if (cfg.test) {
