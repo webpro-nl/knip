@@ -18,7 +18,7 @@ const config: string[] = ['.swcrc'];
 const resolveConfig: ResolveConfig<SWCConfig> = async config => {
   const inputs = config?.jsc?.experimental?.plugins ?? [];
   const externalHelpers = config.jsc?.externalHelpers ? ['@swc/helpers'] : [];
-  return compact([...inputs.map(([id]) => toDependency(id)), ...externalHelpers.map(id => toDependency(id))]);
+  return compact([...inputs.map(([id]) => id), ...externalHelpers]).map(id => toDependency(id));
 };
 
 const plugin: Plugin = {
