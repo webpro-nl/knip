@@ -11,7 +11,7 @@ const enablers = ['wrangler'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['wrangler.{json,toml}'];
+const config = ['wrangler.{json,jsonc,toml}'];
 
 const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
   return (config.main ? [config.main] : []).map(id => toProductionEntry(id));
