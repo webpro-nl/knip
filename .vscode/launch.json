@@ -4,8 +4,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test with tsx/Node.js",
-      "runtimeExecutable": "${workspaceFolder}/packages/knip/node_modules/.bin/tsx",
+      "name": "Debug test with Node.js",
       "runtimeArgs": ["--test"],
       "args": ["${file}"],
       "cwd": "${workspaceFolder}/packages/knip",
@@ -58,20 +57,13 @@
         "${workspaceFolder}/packages/knip/src/**/*.ts"
       ],
       "sourceMaps": true,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-
-        "!**/node_modules/**"
-      ]
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
     }
   ],
   "compounds": [
     {
       "name": "Run + Attach Knip LSP",
-      "configurations": [
-        "Run Extension on Playground Monorepo (w/ MCP Server)",
-        "Attach to Knip Server"
-      ]
+      "configurations": ["Run Extension on Playground Monorepo (w/ MCP Server)", "Attach to Knip Server"]
     }
   ],
   "inputs": [

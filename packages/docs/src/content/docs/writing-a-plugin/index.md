@@ -365,7 +365,7 @@ The script adds the plugin to the JSON Schema and type definitions.
 Run the test for your new plugin using one of the following commands:
 
 ```sh
-pnpm tsx --test test/plugins/tool.test.ts
+node --test test/plugins/tool.test.ts
 bun test test/plugins/tool.test.ts
 ```
 
