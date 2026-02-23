@@ -105,4 +105,4 @@ individual workspaces][6].
 [3]: ../guides/handling-issues.mdx#external-libraries
 [4]: ../reference/cli.md#--performance
 [5]: ../reference/configuration.md#ignoreexportsusedinfile
-[6]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[6]: ../features/monorepos-and-workspaces.md#filter-workspaces

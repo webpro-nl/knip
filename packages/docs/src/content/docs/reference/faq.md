@@ -22,6 +22,65 @@ This FAQ is an attempt to provide some perspective on a few design decisions and
 why certain things work the way they do. Here and there it's intentionally a bit
 more in-depth than the rest of the docs.
 
+## Why should I even bother to do all this?
+
+Because the payoff is huge. While it might take a bit of effort to configure
+Knip correctly initially, a clean module graph gives you absolute confidence in
+your codebase. You can delete dead code, remove unused dependencies, and
+refactor with certainty. It prevents the slow accumulation of technical debt and
+keeps your project lean and fast. Once configured, Knip runs quickly in CI and
+keeps your codebase pristine automatically.
+
+:::tip
+
+Try the [Knip MCP Server][1] or the [Knip Editor Extension][2]. Let your coding
+agent use the built-in MCP Server and create a custom `knip.json` for you, so
+you don't have to.
+
+:::
+
+## Common Pitfalls
+
+### Why shouldn't I ignore or disable configuration hints?
+
+Configuration hints are critical for building a healthy and accurate module
+graph. They usually indicate that Knip cannot resolve a dependency, plugin, or
+entry file. If you ignore or disable these hints, Knip's understanding of your
+project will be incomplete, which inevitably leads to false positives (reporting
+used code as unused). Always address configuration hints first before looking at
+other reported issues.
+
+### Why is it a bad idea to use `ignore` patterns like I do in ESLint?
+
+Knip is not a regular file-based linter like ESLint. It works by analyzing the
+entire interconnected module graph of your project. Using `ignore` patterns does
+not exclude files from the analysis, it only suppresses the reporting of issues
+in those files. This hides real issues and creates blind spots. Instead of
+ignoring files, ensure your entry points and plugins are configured correctly,
+and use `project` patterns to define the boundaries of your codebase. Read more:
+[Configuring Project Files][3].
+
+If you have specific exports (such as types) that are only used within the file
+they are defined, use the [ignoreExportsUsedInFile][4] configuration option
+rather than ignoring the file entirely.
+
+### How should I exclude tests and development tools from the analysis?
+
+A common mistake is trying to exclude test files, storybooks, or development
+tools using `project` or `ignore` patterns. The correct approach is to use
+[production mode][5]. This mode is specifically designed to strictly analyze
+only your production source code and `dependencies`, automatically excluding
+tests and `devDependencies` without requiring complex ignore rules.
+
+### Why shouldn't I run `knip --fix` immediately?
+
+Running `knip --fix` before your configuration is fully settled is dangerous. If
+your configuration is missing entry points or has unresolved hints, Knip might
+think perfectly valid, actively used code is unused. Auto-fixing in this state
+can lead to deleting code that your application relies on. Always verify the
+reported issues manually and ensure your configuration is solid before using the
+`--fix` flag.
+
 ## Comparison
 
 ### Why isn't Knip an ESLint plugin?
@@ -53,10 +112,10 @@ Issues reported by the linter are for you to handle and review.
 
 Besides those differences, Knip has a broader scope:
 
-- Improve DX (see [less is more][1]).
-- Unless using [production mode][2], also lint all source code like tests,
+- Improve DX (see [less is more][6]).
+- Unless using [production mode][5], also lint all source code like tests,
   scripts and Storybook stories.
-- Handle more [types of issues][3] (such as unlisted dependencies).
+- Handle more [types of issues][7] (such as unlisted dependencies).
 
 ## Synergy
 
@@ -89,13 +148,13 @@ Building up the module and dependency graphs requires non-standard module
 resolution and not only static but also dynamic analysis (i.e. actually load and
 execute modules), such as for parsers of plugins to receive the exported value
 of dynamic tooling configuration files. Additionally, [exports consumed by
-external libraries][4] require type information, as supported by the TypeScript
+external libraries][8] require type information, as supported by the TypeScript
 backend. Last but not least, shell script parsing is required to find the right
 entry files, configuration files and dependencies accurately.
 
 The rippling effect of plugins and recursively adding entry files and
 dependencies to build up the graphs is also exactly what's meant by
-["comprehensive" here][5].
+["comprehensive" here][9].
 
 ## Building the graphs
 
@@ -143,7 +202,7 @@ files (`config/vitest.config.ts` and `playwright.e2e.config.ts` in the examples
 above). They're recognized as configuration files and passed to their respective
 plugins, and may contain additional entry files.
 
-Entry files are added to the module graph. [Module resolution][6] might result
+Entry files are added to the module graph. [Module resolution][10] might result
 in additional entry files recursively until no more entry files are found.
 
 ### What does Knip look for in source files?
@@ -156,7 +215,7 @@ all nodes of the generated AST to find:
 - Accessed properties on namespace imports and re-exports to track individual
   export usage
 - Calls to `require.resolve` and `import.meta.resolve`
-- Scripts in template strings (passed to [script parser][7])
+- Scripts in template strings (passed to [script parser][11])
 
 ### What's in the graphs?
 
@@ -194,7 +253,7 @@ there are a few issues with this approach:
 
 - It requires lockfile parsing for each lockfile format and version of each
   package manager.
-- The lockfile doesn't contain whether the package [has types included][8].
+- The lockfile doesn't contain whether the package [has types included][12].
 
 ## Module Resolution
 
@@ -215,12 +274,12 @@ seem to meet all requirements to be usable on its own by Knip:
   `module.js`
 
 A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [oxc-resolver][9], the TypeScript module resolver and a few
+combination of [oxc-resolver][13], the TypeScript module resolver and a few
 customizations. This single custom module resolver function is hooked into the
 TypeScript compiler and language service hosts.
 
-Everything else is handled by `oxc-resolver` for things like [script parsing][7]
-and resolving references to files in other workspaces.
+Everything else is handled by `oxc-resolver` for things like [script
+parsing][11] and resolving references to files in other workspaces.
 
 ### How does Knip handle non-standard import syntax?
 
@@ -250,7 +309,7 @@ file. They're not a concept in Knip.
 
 A TypeScript program has a 1-to-1 relationship with workspaces if they're
 analyzed in isolation. However, by default Knip optimizes for performance and
-utilizes [workspace sharing][10]. That's why debug output contains messages like
+utilizes [workspace sharing][14]. That's why debug output contains messages like
 "Installed 2 programs for 29 workspaces".
 
 ### Why doesn't Knip match my TypeScript project structure?
@@ -282,7 +341,7 @@ Knip shares the files of multiple workspaces in a single program if their
 configuration allows it. This optimization is enabled by default, while it also
 allows the module resolver (one per program) to do some more caching.
 
-Also see [workspace sharing][10].
+Also see [workspace sharing][14].
 
 ### Why doesn't Knip just use `ts.findReferences`?
 
@@ -298,7 +357,7 @@ comprehensive graph include:
 Without sacrificing these benefits, Knip does use `ts.findReferences` to find
 references to class members (i.e. when the issue type `classMembers` is
 included). In case analysis of exports requires type information of external
-dependencies, the [`--include-libs ` flag][4] will trigger the same.
+dependencies, the [`--include-libs ` flag][8] will trigger the same.
 
 ### Why can't I use path aliases to reference other workspaces?
 
@@ -310,19 +369,19 @@ The recommendation and best practice is to list such workspaces/dependencies in
 `package.json`, and import them as such. Other tooling should not have any
 issues with this standard approach either.
 
-Also see the example in [TypeScript path aliases in monorepos][11].
+Also see the example in [TypeScript path aliases in monorepos][15].
 
 ### What's up with that configurable `tsconfig.json` location?
 
 There's a difference between `--tsConfig [file]` as a CLI argument and the
 `typescript.config` option in Knip configuration.
 
-The [`--tsConfig [file]` option][12] is used to provide an alternative location
+The [`--tsConfig [file]` option][16] is used to provide an alternative location
 for the default root `tsconfig.json` file. Relevant `compilerOptions` include
 `paths` and `moduleResolution`. This setting is only available at the root
 level.
 
-On the other hand, the [`config` option of the plugin][13] can be set per
+On the other hand, the [`config` option of the plugin][17] can be set per
 workspace. The TypeScript plugin extracts referenced external dependencies such
 as those in `extends`, `compilerOptions.types` and JSX settings:
 
@@ -346,7 +405,7 @@ From this example, Knip can determine whether the `@tsconfig/node20` and
   for `tsconfig.json` can be set per workspace.
 - In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
   either use `--tsConfig [file]` to target a different `tsconfig.json`, or
-  manually add [paths][14] to the Knip configuration. The latter can be done per
+  manually add [paths][18] to the Knip configuration. The latter can be done per
   workspace.
 
 ## Compilers
@@ -369,7 +428,7 @@ other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][15].
+project. Also see the answer to the previous question and [Compilers][19].
 
 ## Miscellaneous
 
@@ -389,7 +448,7 @@ Which mode should've been the default? They both have their merits:
   tooling, including most issues found in production mode. This mode has the
   most impact on DX, for the same reason.
 
-Also see [production mode][2].
+Also see [production mode][5].
 
 ### Why doesn't Knip have...?
 
@@ -410,21 +469,25 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][16] currently don't cover - this can change though!
+[sponsorships][20] currently don't cover - this can change though!
 
-[1]: ../explanations/why-use-knip.md#less-is-more
-[2]: ../features/production-mode.md
-[3]: ./issue-types.md
-[4]: ../guides/handling-issues.mdx#external-libraries
-[5]: ../explanations/why-use-knip.md#comprehensive
-[6]: #module-resolution
-[7]: ../features/script-parser.md
-[8]: ../guides/handling-issues.mdx#type-definition-packages
-[9]: https://oxc.rs/docs/guide/usage/resolver.html
-[10]: ../guides/performance.md#workspace-sharing
-[11]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
-[12]: ../reference/cli.md#--tsconfig-file
-[13]: ../explanations/plugins.md#configuration-files
-[14]: ../reference/configuration.md#paths
-[15]: ../features/compilers.md
-[16]: /sponsors
+[1]: ../reference/integrations.md#mcp-server
+[2]: ../reference/integrations.md#vs-code-extension
+[3]: ../guides/configuring-project-files.md
+[4]: ../reference/configuration.md#ignoreexportsusedinfile
+[5]: ../features/production-mode.md
+[6]: ../explanations/why-use-knip.md#less-is-more
+[7]: ./issue-types.md
+[8]: ../guides/handling-issues.mdx#external-libraries
+[9]: ../explanations/why-use-knip.md#comprehensive
+[10]: #module-resolution
+[11]: ../features/script-parser.md
+[12]: ../guides/handling-issues.mdx#type-definition-packages
+[13]: https://oxc.rs/docs/guide/usage/resolver.html
+[14]: ../guides/performance.md#workspace-sharing
+[15]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
+[16]: ../reference/cli.md#--tsconfig-file
+[17]: ../explanations/plugins.md#configuration-files
+[18]: ../reference/configuration.md#paths
+[19]: ../features/compilers.md
+[20]: /sponsors

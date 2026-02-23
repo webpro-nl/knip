@@ -63,4 +63,4 @@ Also see [related tooling][2].
 [23]: ../features/production-mode.md#strict-mode
 [24]: ../guides/troubleshooting.md#trace
 [25]: ../reference/cli.md#--watch
-[26]: ../features/monorepos-and-workspaces.md#lint-a-single-workspace
+[26]: ../features/monorepos-and-workspaces.md#filter-workspaces
