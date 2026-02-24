@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { EOL } from 'node:os';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 
 const HEADER = '// This file is generated (no need to edit)';

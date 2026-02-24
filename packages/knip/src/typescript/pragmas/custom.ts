@@ -15,7 +15,7 @@ export const collectCustomImports = (sourceFile: BoundSourceFile): ImportNode[] 
 
   for (const comment of comments) {
     let match: RegExpExecArray | null;
-    // biome-ignore lint/suspicious/noAssignInExpressions: deal with it
+    // oxlint-disable-next-line no-cond-assign
     while ((match = VITEST_ENV.exec(comment.text)) !== null) {
       const id = stripQuotes(match[2].trim());
       if (!id) continue;

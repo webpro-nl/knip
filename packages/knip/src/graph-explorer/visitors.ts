@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/suspicious/noConfusingVoidType: avoid */
+/* oxlint-disable @typescript-eslint/no-invalid-void-type */
 import { IMPORT_STAR } from '../constants.ts';
 import type { ImportMaps } from '../types/module-graph.ts';
 

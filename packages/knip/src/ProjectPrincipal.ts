@@ -275,12 +275,12 @@ export class ProjectPrincipal {
       if (member.jsDocTags.has(PUBLIC_TAG)) return false;
 
       const implementations =
-        // biome-ignore lint/style/noNonNullAssertion: assigned in guard
+        // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.getImplementationAtPosition!(filePath, member.pos)?.filter(
           impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
         ) ?? [];
 
-      // biome-ignore lint/style/noNonNullAssertion: assigned in guard
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       const referencedSymbols = this.findReferences!(filePath, member.pos) ?? [];
 
       if (referencedSymbols.length > 1 && referencedSymbols.some(sym => isInNodeModules(sym.definition.fileName))) {

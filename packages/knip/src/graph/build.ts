@@ -215,7 +215,7 @@ export async function build({
 
     const addPattern = (map: PatternMap, input: Input, pattern: string) => {
       if (input.group && !map.has(input.group)) map.set(input.group, new Set());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       map.get(input.group ?? DEFAULT_GROUP)!.add(pattern);
     };
 
@@ -508,7 +508,7 @@ export async function build({
   if (externalRefsFromInputs) {
     for (const [filePath, refs] of externalRefsFromInputs) {
       if (!graph.has(filePath)) graph.set(filePath, createFileNode());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
     }
   }

@@ -9,7 +9,7 @@ export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint: suspicious/noAssignInExpressions
+  // oxlint-disable-next-line no-cond-assign
   while ((scriptMatch = scriptExtractor.exec(text))) {
     for (const importMatch of scriptMatch[1].matchAll(importMatcher)) {
       scripts.push(importMatch);
@@ -23,7 +23,7 @@ const scriptBodyExtractor = /<script\b[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
 export const scriptBodies: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint: suspicious/noAssignInExpressions
+  // oxlint-disable-next-line no-cond-assign
   while ((scriptMatch = scriptBodyExtractor.exec(text))) {
     if (scriptMatch.groups?.body) scripts.push(scriptMatch.groups.body);
   }

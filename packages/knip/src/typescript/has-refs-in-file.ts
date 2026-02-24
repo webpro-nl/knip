@@ -35,7 +35,7 @@ const hasRefsInFile = (
 
   let index = 0;
 
-  // biome-ignore lint: suspicious/noAssignInExpressions
+  // oxlint-disable-next-line no-cond-assign
   while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
     if (isIdChar(text.charAt(index - 1)) || isIdChar(text.charAt(index + id.length))) {
       index += id.length;

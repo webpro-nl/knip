@@ -1,5 +1,5 @@
 import { EOL } from 'node:os';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import ts from 'typescript';
 import { getCompilerExtensions } from '../compilers/index.ts';

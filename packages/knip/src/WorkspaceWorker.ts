@@ -65,7 +65,6 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 
 const initEnabledPluginsMap = () =>
   Object.keys(Plugins).reduce(
-    // biome-ignore lint: performance/noAccumulatingSpread
     (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
     {} as Record<PluginName, boolean>
   );

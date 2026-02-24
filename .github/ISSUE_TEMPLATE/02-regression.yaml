@@ -19,12 +19,10 @@ body:
       options:
         - label: I've read the relevant [documentation](https://knip.dev)
           required: true
-        - label:
-            I've searched for [existing
+        - label: I've searched for [existing
             issues](https://github.com/webpro-nl/knip/issues?q=is%3Aissue)
           required: true
-        - label:
-            I've read the [issue reproduction
+        - label: I've read the [issue reproduction
             guide](https://knip.dev/guides/issue-reproduction)
           required: true
   - type: input

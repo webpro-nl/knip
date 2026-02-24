@@ -1,0 +1,93 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_"
+      }
+    ],
+    "no-unused-expressions": [
+      "error",
+      { "allowShortCircuit": true, "allowTernary": true }
+    ],
+    "no-console": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-param-reassign": "off",
+    "dot-notation": "off",
+    "array-callback-return": "off"
+  },
+  "ignorePatterns": [
+    "**/dist",
+    "**/tmp",
+    "**/vendor",
+    "packages/docs/.astro",
+    ".vscode",
+    "templates"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.astro"],
+      "rules": { "no-unused-vars": "off" }
+    },
+    {
+      "files": ["packages/knip/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "node:path",
+                "message": "Please use src/util/path.js instead."
+              },
+              {
+                "name": "path",
+                "message": "Please use src/util/path.js instead."
+              },
+              {
+                "name": "node:assert",
+                "message": "Please use node:assert/strict instead."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/docs/**", "packages/create-config/**"],
+      "rules": { "no-restricted-imports": "off", "no-console": "off" }
+    },
+    {
+      "files": ["packages/language-server/**"],
+      "rules": { "no-console": "off" }
+    },
+    {
+      "files": [
+        "packages/knip/src/reporters/**",
+        "packages/knip/scripts/**",
+        "packages/vscode-knip/scripts/**",
+        "packages/vscode-knip/test/**"
+      ],
+      "rules": { "no-console": "off" }
+    },
+    {
+      "files": ["packages/knip/fixtures/**"],
+      "rules": {
+        "no-unused-expressions": "off",
+        "no-unused-vars": "off",
+        "no-console": "off",
+        "no-duplicate-enum-values": "off",
+        "no-restricted-imports": "off",
+        "triple-slash-reference": "off",
+        "import/namespace": "off"
+      }
+    }
+  ]
+}

@@ -57,13 +57,19 @@
         "${workspaceFolder}/packages/knip/src/**/*.ts"
       ],
       "sourceMaps": true,
-      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
     }
   ],
   "compounds": [
     {
       "name": "Run + Attach Knip LSP",
-      "configurations": ["Run Extension on Playground Monorepo (w/ MCP Server)", "Attach to Knip Server"]
+      "configurations": [
+        "Run Extension on Playground Monorepo (w/ MCP Server)",
+        "Attach to Knip Server"
+      ]
     }
   ],
   "inputs": [

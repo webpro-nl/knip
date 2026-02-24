@@ -43,8 +43,8 @@
   "scripts": {
     "knip": "node ./dist/cli.js --directory ../..",
     "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
-    "lint": "biome lint",
-    "format": "biome format --write",
+    "lint": "oxlint",
+    "format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.prettierignore",
     "test": "node scripts/run-test.ts",
     "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
     "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
@@ -56,8 +56,8 @@
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm run test",
     "release": "release-it",
     "create-plugin": "node ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "pnpm run build && biome format --write schema.json schema-jsonc.json src/schema/plugins.ts",
-    "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && biome check --write src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts"
+    "postcreate-plugin": "pnpm run build && (oxfmt schema.json schema-jsonc.json src/schema/plugins.ts || true)",
+    "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts || true)"
   },
   "files": [
     "dist",

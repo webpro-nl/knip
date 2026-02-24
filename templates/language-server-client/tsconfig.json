@@ -11,9 +11,5 @@
     "target": "ES2022"
   },
   "files": [],
-  "references": [
-    { "path": "packages/client" },
-    { "path": "packages/server" },
-    { "path": "packages/shared" }
-  ]
+  "references": [{ "path": "packages/client" }, { "path": "packages/server" }, { "path": "packages/shared" }]
 }

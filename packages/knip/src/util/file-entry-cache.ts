@@ -4,7 +4,7 @@
  * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
  */
 import fs from 'node:fs';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { deserialize, serialize } from 'node:v8';
 import { debugLog } from './debug.ts';

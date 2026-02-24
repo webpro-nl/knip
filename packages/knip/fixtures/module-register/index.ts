@@ -1,5 +1,4 @@
 import { register } from 'node:module';
-// biome-ignore lint: style/useNodejsImportProtocol
 import module from 'module';
 
 register('@nodejs-loaders/tsx', import.meta.url);

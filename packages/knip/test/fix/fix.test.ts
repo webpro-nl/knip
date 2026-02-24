@@ -33,9 +33,7 @@ test('Fix exports and dependencies', async () => {
     `const x = 1;
 const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -162,9 +160,7 @@ test('Fix only exported types', async () => {
     `export const x = 1;
 export const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 

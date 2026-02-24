@@ -395,7 +395,7 @@ const getImportsAndExports = (
         // Pattern: const spread = { ...NS }; spread.member
         // Pattern: const assign = NS; assign.member
         const members = getAccessMembers(typeChecker, node);
-        // biome-ignore lint/style/noNonNullAssertion: deal with it
+        // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const { id: aliasedId, filePath: aliasFilePath } of importAliases.get(id)!) {
           const aliasImports = internal.get(aliasFilePath);
           if (aliasImports) addNsMemberRefs(aliasImports, aliasedId, members);

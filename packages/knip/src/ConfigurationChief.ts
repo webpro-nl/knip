@@ -1,5 +1,3 @@
-// biome-ignore lint: style/noRestrictedImports
-import path from 'node:path';
 import picomatch from 'picomatch';
 import type { SyncCompilers } from './compilers/types.ts';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
@@ -213,7 +211,7 @@ export class ConfigurationChief {
       Array.from(this.workspacesByDir.keys()).filter(dir => this.workspaceGraph.has(dir))
     );
     const [root, rest] = partition(sorted.chunks.flat(), dir => dir === this.cwd);
-    // biome-ignore lint: style/noNonNullAssertion
+    // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [...root, ...rest.reverse()].map(dir => this.workspacesByDir.get(dir)!);
   }
 

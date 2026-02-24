@@ -43,9 +43,9 @@ const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) :
 const inMB = (bytes: number) => bytes / 1024 / 1024;
 
 const keys = ['heapUsed', 'heapTotal', 'freemem'] as const;
-// biome-ignore lint: suspicious
+// oxlint-disable-next-line no-console
 const logHead = () => console.log(keys.map(key => key.padStart(10)).join('  '));
-// biome-ignore lint: suspicious
+// oxlint-disable-next-line no-console
 const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memInfo[key])).padStart(10)).join('  '));
 
 class Performance {

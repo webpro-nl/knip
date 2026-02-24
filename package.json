@@ -22,13 +22,14 @@
     "watch": "pnpm run --dir packages/knip watch",
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
-    "format": "biome check --write",
-    "lint": "biome lint .",
-    "ci": "biome ci . && installed-check --ignore-dev",
+    "format": "oxfmt",
+    "lint": "oxlint",
+    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
     "release": "./release.sh"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.8",
+    "oxfmt": "^0.35.0",
+    "oxlint": "^1.50.0",
     "@release-it/bumper": "^7.0.5",
     "installed-check": "^9.3.0",
     "mdxlint": "^1.0.0",

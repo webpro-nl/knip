@@ -31,7 +31,7 @@ type PluginConfig =
         isServer?: boolean,
         utils?: {
           getStyleLoaders(isServer: boolean, cssOptions: { [key: string]: any }): Loader[];
-          // biome-ignore lint: complexity/noBannedTypes
+          // oxlint-disable-next-line @typescript-eslint/no-empty-object-type
           getJSLoader(isServer: boolean, cacheOptions?: {}): Loader | null;
         },
         content?: unknown

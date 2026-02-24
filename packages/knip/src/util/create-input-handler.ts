@@ -33,7 +33,7 @@ const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Wor
 
 const addExternalRef = (map: ExternalRefsFromInputs, containingFilePath: string, ref: ExternalRef) => {
   if (!map.has(containingFilePath)) map.set(containingFilePath, new Set());
-  // biome-ignore lint/style/noNonNullAssertion: srsly
+  // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
   map.get(containingFilePath)!.add(ref);
 };
 

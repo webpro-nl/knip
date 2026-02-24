@@ -564,7 +564,7 @@ export class Extension {
         packageRegex.lastIndex = sectionStart;
 
         let match;
-        // biome-ignore lint: suspicious/noAssignInExpressions
+        // oxlint-disable-next-line no-cond-assign
         while ((match = packageRegex.exec(text)) !== null) {
           if (match.index > sectionEnd) break;
 

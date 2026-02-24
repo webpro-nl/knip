@@ -1,4 +1,4 @@
-// biome-ignore-all lint/suspicious/noConsole: ignore
+/* oxlint-disable no-console */
 import { fix } from './IssueFixer.ts';
 import { run } from './run.ts';
 import type { IssueType, ReporterOptions } from './types/issues.ts';

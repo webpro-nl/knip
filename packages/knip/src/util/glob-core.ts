@@ -55,7 +55,7 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
     if (isGitRoot(dir)) break;
-    // biome-ignore lint: suspicious/noAssignInExpressions
+    // oxlint-disable-next-line no-cond-assign
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
   }
@@ -213,7 +213,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
           // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
           _ignore.push(...cacheForDir.ignores);
         }
-        // biome-ignore lint: suspicious/noAssignInExpressions
+        // oxlint-disable-next-line no-cond-assign
         dir = dirname((prev = dir));
         if (prev === dir || dir === '.') break;
       }
