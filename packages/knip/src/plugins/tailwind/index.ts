@@ -11,7 +11,7 @@ const enablers = ['tailwindcss'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
+const entry = ['tailwind.config.{js,cjs,mjs,ts}', '*.css'];
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
   if (hasDependency('tailwindcss')) registerCompiler({ extension: '.css', compiler });
