@@ -23,6 +23,7 @@
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
     "format": "biome check --write",
+    "k": "node packages/knip/src/cli.ts",
     "lint": "biome lint .",
     "ci": "biome ci . && installed-check --ignore-dev",
     "release": "./release.sh"
