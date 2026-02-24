@@ -160,6 +160,7 @@ export type RegisterCompilersOptions = {
   registerCompiler: RegisterCompiler;
 };
 
+/** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
 export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
 export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
@@ -170,6 +171,7 @@ export type RegisterVisitorsOptions = {
   registerVisitors: RegisterVisitor;
 };
 
+/** Plugin visitors are automatically registered if the plugin is enabled */
 export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
 
 export interface Plugin {
