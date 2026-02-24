@@ -92,6 +92,9 @@ Run Knip without compilation:
 
 ```shell
 node path/to/knip/packages/knip/src/cli.ts
+
+// or using the alias script
+pnpm k
 ```
 
 #### Alias
