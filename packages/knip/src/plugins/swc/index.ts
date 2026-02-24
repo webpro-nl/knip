@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
 import { toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { compact } from '../../util/array.ts';
 import type { SWCConfig } from './types.ts';
 
 // https://swc.rs/
