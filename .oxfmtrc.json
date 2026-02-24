@@ -3,7 +3,6 @@
   "singleQuote": true,
   "arrowParens": "avoid",
   "trailingComma": "es5",
-  "experimentalSortPackageJson": false,
   "overrides": [
     {
       "files": ["**/*.json", "**/*.jsonc"],

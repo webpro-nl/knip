@@ -1,18 +1,15 @@
 {
   "name": "@knip/docs",
   "version": "0.0.0",
-  "type": "module",
-  "description": "Documentation for Knip, hosted at knip.dev",
   "private": true,
+  "description": "Documentation for Knip, hosted at knip.dev",
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
     "url": "github:webpro-nl/knip",
     "directory": "packages/docs"
   },
-  "engines": {
-    "node": ">=22.0.0"
-  },
+  "type": "module",
   "scripts": {
     "prebuild": "node ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
@@ -41,5 +38,8 @@
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.1.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

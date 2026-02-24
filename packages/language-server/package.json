@@ -6,10 +6,10 @@
     "url": "git+https://github.com/webpro-nl/knip.git",
     "directory": "packages/language-server"
   },
-  "type": "module",
   "bin": {
     "knip-language-server": "./src/cli.js"
   },
+  "type": "module",
   "exports": {
     ".": {
       "types": "./src/types.d.ts",
