@@ -11,7 +11,8 @@
         "test/**/*.ts",
         "!src/util/empty.ts",
         "!**/_template/**"
-      ]
+      ],
+      "ignoreDependencies": ["prettier"]
     },
     "packages/docs": {
       "entry": ["{remark,scripts}/*.ts"]
