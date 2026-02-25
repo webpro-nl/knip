@@ -104,7 +104,21 @@ export class Extension {
   #getClientForUri(uri) {
     const folder = vscode.workspace.getWorkspaceFolder(uri);
     if (!folder) return;
-    return this.#clients.get(folder.uri.toString());
+    const client = this.#clients.get(folder.uri.toString());
+    if (client) return client;
+
+    // Folder may be nested inside another workspace folder that has a client
+    const filePath = toPosix(uri.fsPath);
+    let bestMatch;
+    let bestLength = 0;
+    for (const [key, candidate] of this.#clients) {
+      const clientPath = toPosix(fileURLToPath(key));
+      if (filePath.startsWith(`${clientPath}/`) && clientPath.length > bestLength) {
+        bestMatch = candidate;
+        bestLength = clientPath.length;
+      }
+    }
+    return bestMatch;
   }
 
   /**
@@ -134,6 +148,19 @@ export class Extension {
   async #startClientForFolder(folder) {
     const key = folder.uri.toString();
     if (this.#clients.has(key)) return;
+
+    // Skip folders nested inside another workspace folder (the parent's client covers it)
+    const folders = vscode.workspace.workspaceFolders;
+    if (folders) {
+      const folderPath = folder.uri.fsPath + path.sep;
+      for (const other of folders) {
+        if (other === folder) continue;
+        if (folderPath.startsWith(other.uri.fsPath + path.sep)) {
+          this.#outputChannel.info(`Skipping ${folder.name}: covered by workspace folder ${other.name}`);
+          return;
+        }
+      }
+    }
 
     const config = vscode.workspace.getConfiguration('knip', folder.uri);
 
