@@ -64,8 +64,7 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
 
 /** @internal */
 export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<string>) => {
-  const init = ['.git', ...GLOBAL_IGNORE_PATTERNS];
-  const ignores: Set<string> = new Set(init);
+  const ignores: Set<string> = new Set(GLOBAL_IGNORE_PATTERNS);
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
   const pmOptions = { ignore: unignores };
@@ -84,7 +83,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
-    const ignoresForDir = new Set(base === '' ? init : []);
+    const ignoresForDir = new Set(base === '' ? GLOBAL_IGNORE_PATTERNS : []);
     const unignoresForDir = new Set<string>();
 
     const patterns = readFileSync(filePath, 'utf8');
@@ -200,26 +199,22 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
-  const _ignore: string[] = [];
+  const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
-  if (options.gitignore) {
-    if (willCache) {
-      let dir = options.dir;
-      let prev: string;
-      while (dir) {
-        const cacheForDir = cachedGitIgnores.get(dir);
-        if (cacheForDir) {
-          // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
-          _ignore.push(...cacheForDir.ignores);
-        }
-        // oxlint-disable-next-line no-cond-assign
-        dir = dirname((prev = dir));
-        if (prev === dir || dir === '.') break;
+  if (options.gitignore && willCache) {
+    let dir = options.dir;
+    let prev: string;
+    while (dir) {
+      const cacheForDir = cachedGitIgnores.get(dir);
+      if (cacheForDir) {
+        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
+        _ignore.push(...cacheForDir.ignores);
       }
+      // oxlint-disable-next-line no-cond-assign
+      dir = dirname((prev = dir));
+      if (prev === dir || dir === '.') break;
     }
-  } else {
-    _ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
   if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
