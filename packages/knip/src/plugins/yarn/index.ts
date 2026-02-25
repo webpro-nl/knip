@@ -18,9 +18,7 @@ const config = ['.yarnrc.yml'];
 const entry = ['yarn.config.cjs'];
 
 type YarnConfig = {
-  plugins?: Array<{
-    path?: string;
-  }>;
+  plugins?: Array<string | { path?: string }>;
   yarnPath?: string;
 };
 
@@ -29,9 +27,8 @@ const resolveConfig: ResolveConfig<YarnConfig> = config => {
 
   if (Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
-      if (plugin.path) {
-        inputs.push(toEntry(plugin.path));
-      }
+      if (typeof plugin === 'string') inputs.push(toEntry(plugin));
+      else if (typeof plugin.path === 'string') inputs.push(toEntry(plugin.path));
     }
   }
 
