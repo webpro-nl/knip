@@ -16,6 +16,7 @@ import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { isFile as isFilePath } from '../util/fs.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -71,8 +72,28 @@ export async function build({
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
+  const packageDirCache = new Map<string, string | undefined>();
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const findClosestPackageDir = (filePath: string) => {
+    if (packageDirCache.has(filePath)) return packageDirCache.get(filePath);
+
+    let dir = dirname(filePath);
+    let packageDir;
+
+    while (true) {
+      if (isFilePath(dir, 'package.json')) {
+        packageDir = dir;
+        break;
+      }
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+
+    packageDirCache.set(filePath, packageDir);
+    return packageDir;
+  };
 
   const rootManifest = chief.getManifestForWorkspace('.');
 
@@ -408,11 +429,18 @@ export async function build({
       for (const _import of file.imports.imports) {
         if (_import.filePath) {
           const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
-          if (packageName && isInternalWorkspace(packageName)) {
-            file.imports.external.add({ ..._import, specifier: packageName });
-            const principal = getPrincipalByFilePath(_import.filePath);
-            if (principal && !isGitIgnored(_import.filePath)) {
-              principal.addProgramPath(_import.filePath);
+          if (packageName) {
+            if (isInternalWorkspace(packageName)) {
+              file.imports.external.add({ ..._import, specifier: packageName });
+              const principal = getPrincipalByFilePath(_import.filePath);
+              if (principal && !isGitIgnored(_import.filePath)) {
+                principal.addProgramPath(_import.filePath);
+              }
+            } else {
+              const importPackageDir = findClosestPackageDir(_import.filePath);
+              if (importPackageDir && importPackageDir !== workspace.dir) {
+                file.imports.external.add({ ..._import, specifier: packageName });
+              }
             }
           }
         }
