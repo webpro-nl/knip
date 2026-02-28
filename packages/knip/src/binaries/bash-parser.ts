@@ -1,4 +1,4 @@
-import parse, { type Assignment, type ExpansionNode, type Node, type Prefix } from '../../vendor/bash-parser/index.js';
+import { parse, type Node, type Script, type Statement } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
@@ -11,16 +11,26 @@ import PackageManagerResolvers from './package-manager/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
 import { parseNodeArgs } from './util.ts';
 
-// https://vorpaljs.github.io/bash-parser-playground/
-
 type KnownResolver = keyof typeof PackageManagerResolvers;
 
-// Binaries that spawn a child process for the binary at first positional arg (and don't have custom resolver already)
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
-const isExpansion = (node: Prefix): node is ExpansionNode => 'expansion' in node;
-
-const isAssignment = (node: Prefix): node is Assignment => 'type' in node && node.type === 'AssignmentWord';
+const collectExpansionScripts = (word: { parts?: ReadonlyArray<unknown> }, out: Script[]) => {
+  if (!word.parts) return;
+  for (const part of word.parts as Array<{
+    type: string;
+    script?: Script;
+    parts?: Array<{ type: string; script?: Script }>;
+  }>) {
+    if ((part.type === 'CommandExpansion' || part.type === 'ProcessSubstitution') && part.script) {
+      out.push(part.script);
+    } else if ((part.type === 'DoubleQuoted' || part.type === 'LocaleString') && part.parts) {
+      for (const child of part.parts) {
+        if (child.type === 'CommandExpansion' && child.script) out.push(child.script);
+      }
+    }
+  }
+};
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
@@ -36,98 +46,110 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   };
 
   const definedFunctions = new Set<string>();
-  const collectFunctionNames = (nodes: Node[]): void => {
-    for (const node of nodes) if (node.type === 'Function') definedFunctions.add(node.name.text);
+  const collectFunctionNames = (statements: Statement[]): void => {
+    for (const stmt of statements) if (stmt.command.type === 'Function') definedFunctions.add(stmt.command.name.text);
   };
 
-  const getDependenciesFromNodes = (nodes: Node[]): Input[] =>
-    nodes.flatMap(node => {
-      switch (node.type) {
-        case 'Command': {
-          const text = node.name?.text;
-          const binary = text ? extractBinary(text) : text;
+  const processScript = (s: Script): Input[] => {
+    collectFunctionNames(s.commands);
+    const pending: Script[] = [];
+    const mainDeps = getDependenciesFromStatements(s.commands, pending);
+    const expansionDeps = pending.flatMap(inner => processScript(inner));
+    return [...mainDeps, ...expansionDeps];
+  };
 
-          const commandExpansions =
-            node.prefix
-              ?.filter(isExpansion)
-              .map(prefix => prefix.expansion)
-              .flatMap(expansion => expansion.filter(expansion => expansion.type === 'CommandExpansion') ?? []) ?? [];
+  const getDependenciesFromStatements = (statements: Statement[], pending: Script[]): Input[] =>
+    statements.flatMap(stmt => getDependenciesFromNode(stmt.command, pending));
 
-          if (commandExpansions.length > 0) {
-            return (
-              commandExpansions.flatMap(expansion => getDependenciesFromNodes(expansion.commandAST.commands)) ?? []
-            );
-          }
+  const getDependenciesFromNode = (node: Node, pending: Script[]): Input[] => {
+    switch (node.type) {
+      case 'Command': {
+        const text = node.name?.text;
+        const binary = text ? extractBinary(text) : text;
 
-          // Bunch of early bail outs for things we can't or don't want to resolve
-          if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
-          if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
-          if (definedFunctions.has(binary)) return [];
+        if (node.name) collectExpansionScripts(node.name, pending);
+        for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
+        for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
 
-          const args = node.suffix?.map(arg => arg.text) ?? [];
+        // Bunch of early bail outs for things we can't or don't want to resolve
+        if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
+        if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
+        if (definedFunctions.has(binary)) return [];
 
-          // Commands that precede other commands, try again with the rest
-          if (['!', 'test'].includes(binary)) return fromArgs(args);
+        const args = node.suffix.map(arg => arg.text);
 
-          const fromNodeOptions =
-            node.prefix
-              ?.filter(isAssignment)
-              .filter(node => node.text.startsWith('NODE_OPTIONS='))
-              .flatMap(node => node.text.split('=')[1])
-              .map(arg => parseNodeArgs(arg.split(' ')))
-              .filter(args => args.require)
-              .flatMap(arg => arg.require)
-              .map(id => toDeferResolve(id)) ?? [];
+        // Commands that precede other commands, try again with the rest
+        if (['!', 'test'].includes(binary)) return fromArgs(args);
 
-          if (binary in PackageManagerResolvers) {
-            const resolver = PackageManagerResolvers[binary as KnownResolver];
-            return resolver(binary, args, { ...options, fromArgs });
-          }
+        const fromNodeOptions = node.prefix
+          .filter(a => a.text.startsWith('NODE_OPTIONS='))
+          .flatMap(a => a.text.split('=')[1])
+          .map(arg => parseNodeArgs(arg.split(' ')))
+          .filter(args => args.require)
+          .flatMap(arg => arg.require)
+          .map(id => toDeferResolve(id));
 
-          if (pluginArgsMap.has(binary)) {
-            return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
-          }
+        if (binary in PackageManagerResolvers) {
+          const resolver = PackageManagerResolvers[binary as KnownResolver];
+          return resolver(binary, args, { ...options, fromArgs });
+        }
 
-          if (spawningBinaries.includes(binary)) {
-            // Run again with everything behind `binary -- ` (bash-parser AST is lacking)
-            const command = script.replace(new RegExp(`.*${text ?? binary}(\\s--\\s)?`), '');
-            return [toBinary(binary), ...getDependenciesFromScript(command, options)];
-          }
+        if (pluginArgsMap.has(binary)) {
+          return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+        }
 
-          if (binary in Plugins) {
-            return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
-          }
+        if (spawningBinaries.includes(binary)) {
+          // Run again with everything behind `binary -- ` (bash-parser AST is lacking)
+          const command = script.replace(new RegExp(`.*${text ?? binary}(\\s--\\s)?`), '');
+          return [toBinary(binary), ...getDependenciesFromScript(command, options)];
+        }
 
-          // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
-          // Actions, which are provisioned with lots of unknown global binaries.
-          if (options.knownBinsOnly && !text?.startsWith('.')) return [];
-
+        if (binary in Plugins) {
           return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
         }
-        case 'LogicalExpression':
-          return getDependenciesFromNodes([node.left, node.right]);
-        case 'If':
-          return getDependenciesFromNodes([node.clause, node.then, ...(node.else ? [node.else] : [])]);
-        case 'For':
-          return getDependenciesFromNodes(node.do.commands);
-        case 'CompoundList':
-          return getDependenciesFromNodes(node.commands);
-        case 'Pipeline':
-          return getDependenciesFromNodes(node.commands);
-        case 'Function':
-          return getDependenciesFromNodes(node.body.commands);
-        case 'Subshell':
-          return getDependenciesFromNodes(node.list.commands);
-        default:
-          return [];
+
+        // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
+        // Actions, which are provisioned with lots of unknown global binaries.
+        if (options.knownBinsOnly && !text?.startsWith('.')) return [];
+
+        return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
       }
-    });
+      case 'AndOr':
+      case 'Pipeline':
+        return node.commands.flatMap(n => getDependenciesFromNode(n, pending));
+      case 'If':
+        return getDependenciesFromNode(node.clause, pending).concat(
+          getDependenciesFromNode(node.then, pending),
+          node.else ? getDependenciesFromNode(node.else, pending) : []
+        );
+      case 'For':
+      case 'Select':
+        return getDependenciesFromStatements(node.body.commands, pending);
+      case 'While':
+        return [
+          ...getDependenciesFromNode(node.clause, pending),
+          ...getDependenciesFromStatements(node.body.commands, pending),
+        ];
+      case 'CompoundList':
+        return getDependenciesFromStatements(node.commands, pending);
+      case 'Function':
+        return getDependenciesFromNode(node.body, pending);
+      case 'Subshell':
+      case 'BraceGroup':
+        return getDependenciesFromStatements(node.body.commands, pending);
+      case 'Coproc':
+        return getDependenciesFromNode(node.body, pending);
+      case 'Statement':
+        return getDependenciesFromNode(node.command, pending);
+      default:
+        return [];
+    }
+  };
 
   try {
     const parsed = parse(script);
     if (!parsed?.commands) return [];
-    collectFunctionNames(parsed.commands);
-    return getDependenciesFromNodes(parsed.commands);
+    return processScript(parsed);
   } catch (error) {
     const msg = `Warning: failed to parse and ignoring script in ${relative(options.cwd, options.containingFilePath)} (${truncate(script, 30)})`;
     debugLogObject('*', msg, error);

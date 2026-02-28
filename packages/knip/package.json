@@ -61,7 +61,6 @@
   },
   "files": [
     "dist",
-    "vendor",
     "schema.json",
     "schema-jsonc.json"
   ],
@@ -108,6 +107,7 @@
     "picomatch": "^4.0.1",
     "smol-toml": "^1.5.2",
     "strip-json-comments": "5.0.3",
+    "unbash": "^1.0.1",
     "zod": "^4.1.11"
   },
   "devDependencies": {

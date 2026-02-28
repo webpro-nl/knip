@@ -134,6 +134,9 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
+      unbash:
+        specifier: ^1.0.1
+        version: 1.0.1
       zod:
         specifier: ^4.1.11
         version: 4.1.11
@@ -4335,6 +4338,10 @@ packages:
 
   ultrahtml@1.6.0:
     resolution: {integrity: sha512-R9fBn90VTJrqqLDwyMph+HGne8eqY1iPfYhPzZrvKpIfwkWZbcYlfpsb8B9dTvBfpy1/hqAD7Wi8EKfP9e8zdw==}
+
+  unbash@1.0.1:
+    resolution: {integrity: sha512-oCK/pknTrncOJlrtV7m4YN254OC+Wo8b+TatgUYfpRnY+qCoEvKGLnN0aBn2D3dOe4fgomg88iC74LN68WDBNg==}
+    engines: {node: '>=14'}
 
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
@@ -9635,6 +9642,8 @@ snapshots:
   ufo@1.6.3: {}
 
   ultrahtml@1.6.0: {}
+
+  unbash@1.0.1: {}
 
   uncrypto@0.1.3: {}
 
