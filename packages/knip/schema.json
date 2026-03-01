@@ -616,6 +616,10 @@
           "title": "nyc plugin configuration (https://knip.dev/reference/plugins/nyc)",
           "$ref": "#/definitions/plugin"
         },
+        "openapi-ts": {
+          "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
+          "$ref": "#/definitions/plugin"
+        },
         "oclif": {
           "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
           "$ref": "#/definitions/plugin"

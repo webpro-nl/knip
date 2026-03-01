@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/openapi-ts",
+  "devDependencies": {
+    "@hey-api/openapi-ts": "*"
+  },
+  "dependencies": {
+    "@hey-api/typescript": "*",
+    "@hey-api/sdk": "*",
+    "@hey-api/client-fetch": "*",
+    "@tanstack/react-query": "*"
+  },
+  "scripts": {
+    "generate": "openapi-ts"
+  }
+}
