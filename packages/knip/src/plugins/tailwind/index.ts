@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import compiler from './compiler.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
 
 // https://tailwindcss.com/docs/configuration
 // Tailwinds lilconfig dependency is only used for postcss

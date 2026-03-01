@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS } from '../../../constants.js';
-import { isPropertyAccessCall } from '../../../typescript/ast-helpers.js';
-import type { ImportVisitor } from '../../../typescript/visitors/index.js';
-import { _syncGlob } from '../../../util/glob.js';
-import { dirname, isAbsolute, join } from '../../../util/path.js';
+import { IMPORT_FLAGS } from '../../../constants.ts';
+import { isPropertyAccessCall } from '../../../typescript/ast-helpers.ts';
+import type { ImportVisitor } from '../../../typescript/visitors/index.ts';
+import { _syncGlob } from '../../../util/glob.ts';
+import { dirname, isAbsolute, join } from '../../../util/path.ts';
 
 export const requireContextCall: ImportVisitor = sourceFile => {
   return node => {
@@ -19,7 +19,8 @@ export const requireContextCall: ImportVisitor = sourceFile => {
 
     const filter =
       regExpArg && ts.isRegularExpressionLiteral(regExpArg) ? regExpArg.text.match(/^\/(.+)\/([gimsuy]*)$/) : null;
-    const matched = filter ? files.filter(file => new RegExp(filter[1], filter[2]).test(file)) : files;
+    const re = filter ? new RegExp(filter[1], filter[2]) : null;
+    const matched = re ? files.filter(file => re.test(`./${file}`)) : files;
 
     return matched.map(filePath => ({
       specifier: isAbsolute(filePath) ? filePath : join(cwd, filePath),

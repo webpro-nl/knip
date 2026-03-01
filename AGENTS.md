@@ -3,7 +3,7 @@
 Knip is a tool to find and fix unused dependencies, exports and files in
 JavaScript and TypeScript projects.
 
-## Project Overview
+## Context: project overview
 
 - Monorepo
 - Main package is core in `packages/knip` (TypeScript)
@@ -11,18 +11,41 @@ JavaScript and TypeScript projects.
 - VS Code Extension in `packages/vscode-knip` (JS + JSDoc for types)
 - [Documentation][1] content in `packages/docs` (Astro + MD/MDX)
 
-## General guidelines
+## Core behavior and constraints
 
-- Verify your claims, do not make assumptions after failed actions (like a file
-  read or fetched resource/URL). Inform the user.
-- Don't add comments, unless explicitly asked for.
-- Performance is key, both high level (design) and low level (impl).
-- Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
-- For features and issues concerning the module graph, make sure to consult
-  [ModuleGraph type definitions][3].
+- If something goes sideways, stop and re-plan immediately - don't keep pushing
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?" — maintain high standards
+- Run tests, check logs, demonstrate correctness
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant
+  solution" — skip this for simple, obvious fixes; don't over-engineer
+- Challenge your own work before presenting it
+- Point at logs, errors, failing tests - then resolve them
+
+## Output formatting: communication with user
+
+- Don't add comments to code, unless explicitly asked for.
+- Zero context switching required from the user
+- When reporting information to the user, be extremely concise and sacrifice
+  grammar for the sake of concision
+
+## Planning: task management
+
+1. Plan: write plan to `.agents/tasks/todo-(name).md` with checkable items
+2. Verify: check in before starting implementation
+3. Track progress: mark items complete as you go
+4. Explain changes: high-level summary at each step
+5. Document results: add review section to `.agents/tasks/todo-(name).md`
+6. Capture lessons: Update `.agents/lessons.md` after corrections
 
 ## Implementation
 
+- Performance is key, both high level (design) and low level (impl).
+- Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - Avoid redundant code and abstractions.
 - Avoid unnecessary complexity and nesting.
 - Concise one-liners are fine, but prioritize clarity over cleverness.
@@ -31,44 +54,42 @@ JavaScript and TypeScript projects.
 - TypeScript
   - Avoid `any` and type casting (`as`)
   - Avoid runtime overhead just to get the types right
+- For features and issues concerning the module graph, make sure to consult
+  [ModuleGraph type definitions][3].
 
-## Debug
+## Issues and Pull Requests
 
-- Important: debug, don't guess.
-- [Run Knip without compilation][4]
+- When given a bug report: just fix it and don't ask for hand-holding
+- Find repositories/CodeSandbox/StackBlitz source files and [local fixtures][4]
+  to actually reproduce the issue at hand.
+- To fetch stackblitz.com reproduction url:
+  `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+
+## Run & Debug
+
+Important: debug, don't guess.
+
+Run the CLI directly using `node` or `bun`. The rest of this document shows
+`knip` in commands for consistency. Replace it with `node (path/to/)src/cli.ts`
+or `bun (path/to/)src/cli.ts` and keep using what works.
+
 - Run `knip` directly in a fixture or temp directory (over creating test scripts
-  that import the `main` function). Knip requires `package.json` in root dir.
+  that import the `main` function).
+- Knip requires `package.json` in root dir.
 - Enable [debug & helpers][5] with `--debug` (not `DEBUG=`). Warning: noisy.
 - Use [trace][6] to debug
-  - Exported identifiers (`knip --trace-export [name] --trace-file [file]`)
-  - External dependencies (`knip --trace-dependency [name] --workspace [dir]`)
-
-## Run without compilation
-
-On the system, `k` should be a global alias for
-`tsx --inspect ~/p/knip/knip/packages/knip/src/cli.ts` to run Knip without
-having to compile it first. If that's not available, run the CLI using `bun` or
-`tsx`. The rest of this document shows `knip` in commands for consistency,
-replace it with `k` or `bun ../../src/cli.ts` or `tsx ../../src/cli.ts`.
-
-## Build
-
-To type-check `knip` with `tsc`:
-
-```sh
-cd packages/knip
-pnpm build
-```
+  - exported identifiers (`knip --trace-export [name] --trace-file [file]`)
+  - external dependencies (`knip --trace-dependency [name] --workspace [dir]`)
 
 ## Test
 
-Don't run all tests at once (slow & noisy). Start out with running the relevant
-test(s) first, e.g.:
+Prefer `bun` over `node` for speed. Don't run all tests at once (slow & noisy).
+Start out with running the relevant test(s) first:
 
 ```sh
 cd packages/knip
-bun test test/commonjs.test.ts
 bun test test/util/get-inputs-from-scripts.test.ts
+node --test test/commonjs.test.ts
 ```
 
 To run all relevant tests without having to build `knip`:
@@ -78,11 +99,11 @@ cd packages/knip
 pnpm run test:bun:smoke
 ```
 
-If Bun is not available, use `tsx` instead:
+Use `node` if Bun is not available:
 
 ```sh
 cd packages/knip
-tsx --test test/commonjs.test.ts
+node --test test/commonjs.test.ts
 pnpm test:smoke
 ```
 
@@ -99,7 +120,7 @@ pnpm test
 
 There are plenty of directories with fixtures in `packages/knip/fixtures`.
 
-- In general, a test has its own fixture directory.
+- In general, tests have their own fixture directory.
 - Plugin fixture directories at `packages/knip/fixtures/plugins/[plugin-name]*`.
 - For trivial changes or fixes, extend an existing fixture.
 - Don't use "foo" or vague names. One fixture should consist of descriptive file
@@ -111,73 +132,29 @@ There are plenty of directories with fixtures in `packages/knip/fixtures`.
 
 ```sh
 cd packages/knip/fixtures/commonjs
-knip # or k
+knip
 ```
 
-## Issues and Pull Requests
+## Build
 
-- Find repositories/CodeSandbox/StackBlitz source files and local fixtures to
-  actually reproduce the issue at hand.
-- To fetch stackblitz.com reproduction url:
-  `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+To type-check `knip` with `tsc`:
 
-## Implementation walk-through
+```sh
+cd packages/knip
+pnpm build
+```
 
-The sequence from [CLI][7]:
+## Domain Knowledge
 
-1. [Create options][8]
-2. [Run][9]
-   1. Normalize user config
-   2. Get workspaces
-   3. [Build module graph][10]
-      1. [Run enabled plugins][11] in each workspace
-      2. Store entry points and referenced dependencies
-      3. [Create TS programs][12]
-      4. [Get imports and exports][13] using TS AST traversal/visitors
-      5. [Get dependencies/binaries from scripts][14]
-   4. [Analyze module graph][15]
-      1. Find [unused exports][16] (respecting [namespaces & members][17])
-      2. Settle unused files
-      3. [Settle unused/unlisted dependencies][18]
-      4. Settle unused catalog entries
-3. [Run default reporter][19]
-
-## Plugins
-
-If requested to create a new plugin for a certain package/tool/framework:
-
-- Come up with a kebab-cased `name`.
-- Run `pnpm create-plugin --name [name]` from the `packages/knip` directory.
-- Must read [Writing A Plugin][20] first to understand:
-  - Plugin responsibilities
-  - Functions like `resolveConfig` and `Input` type definition
-  - Consider `resolveFromAST` only for custom plugin-specific needs (core takes
-    care of module resolution, imports, exports, external dependencies)
-- Update the plugin's `types.ts`: add only relevant types, remove if unused.
-- Consult similar plugins and the tool's website before implementation
-- Update and fill out the blanks in the generated files.
-- Remove unused variables and empty arrays from the template
-- Don't forget: [run tests][21] individually first.
+- If creating or modifying a plugin, read [PLUGINS.md][7] first.
+- If modifying core module graph, AST traversal, or CLI sequence, read
+  [MODULE_GRAPH.md][8] first.
 
 [1]: https://knip.dev
 [2]: ./packages/knip/src/util/Performance.ts
 [3]: ./packages/knip/src/types/module-graph.ts
-[4]: #run-without-compilation
+[4]: ./packages/knip/fixtures
 [5]: ./packages/knip/src/util/debug.ts
 [6]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
-[7]: ./packages/knip/src/cli.ts
-[8]: ./packages/knip/src/util/create-options.ts
-[9]: ./packages/knip/src/run.ts
-[10]: ./packages/knip/src/graph/build.ts
-[11]: ./packages/knip/src/WorkspaceWorker.ts
-[12]: ./packages/knip/src/ProjectPrincipal.ts
-[13]: ./packages/knip/src/typescript/get-imports-and-exports.ts
-[14]: ./packages/knip/src/binaries/bash-parser.ts
-[15]: ./packages/knip/src/graph/analyze.ts
-[16]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[17]:
-  ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
-[18]: ./packages/knip/src/DependencyDeputy.ts
-[19]: ./packages/knip/src/reporters/symbols.ts
-[20]: ./packages/docs/src/content/docs/writing-a-plugin/index.md
-[21]: #test
+[7]: ./.agents/PLUGINS.md
+[8]: ./.agents/MODULE_GRAPH.md

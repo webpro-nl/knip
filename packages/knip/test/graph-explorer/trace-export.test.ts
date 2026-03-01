@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildExportsTree } from '../../src/graph-explorer/operations/build-exports-tree.js';
-import type { ModuleGraph } from '../../src/types/module-graph.js';
-import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
-import { resolve } from '../helpers/resolve.js';
+import { buildExportsTree } from '../../src/graph-explorer/operations/build-exports-tree.ts';
+import type { ModuleGraph } from '../../src/types/module-graph.ts';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const createGraph = (): ModuleGraph => new Map();
 

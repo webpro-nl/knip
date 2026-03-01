@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MoonConfiguration } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MoonConfiguration } from './types.ts';
 
 // https://moonrepo.dev/docs
 

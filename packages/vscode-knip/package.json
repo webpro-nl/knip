@@ -1,25 +1,13 @@
 {
   "name": "vscode-knip",
-  "version": "1.0.14",
-  "private": true,
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/webpro-nl/knip.git",
-    "directory": "packages/vscode-knip"
-  },
   "displayName": "Knip",
+  "version": "1.0.15",
+  "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
-  "icon": "icon-192x192.png",
   "categories": [
     "Linters",
     "Programming Languages"
   ],
-  "qna": false,
-  "galleryBanner": {
-    "color": "#F56E0F",
-    "theme": "light"
-  },
   "keywords": [
     "analysis",
     "dead code",
@@ -35,20 +23,24 @@
     "typescript",
     "unused"
   ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webpro-nl/knip.git",
+    "directory": "packages/vscode-knip"
+  },
   "sponsor": {
     "url": "https://knip.dev/sponsors"
   },
+  "qna": false,
   "publisher": "webpro",
-  "type": "module",
-  "engines": {
-    "vscode": "^1.95.0"
-  },
   "files": [
     "dist/",
     "icon-192x192.png",
     "license",
     "README.md"
   ],
+  "type": "module",
   "main": "./dist/extension.js",
   "scripts": {
     "package": "node scripts/publish.js",
@@ -70,11 +62,6 @@
     "knip": "workspace:*",
     "rolldown": "^1.0.0-rc.2"
   },
-  "activationEvents": [
-    "onStartupFinished",
-    "onCommand:knip.restart",
-    "onCommand:knip.showHover"
-  ],
   "contributes": {
     "languageModelTools": [
       {
@@ -298,5 +285,18 @@
         }
       }
     ]
+  },
+  "activationEvents": [
+    "onCommand:knip.restart",
+    "onCommand:knip.showHover",
+    "onStartupFinished"
+  ],
+  "icon": "icon-192x192.png",
+  "galleryBanner": {
+    "color": "#F56E0F",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
   }
 }

@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
-import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.js';
-import { isNotJS } from '../helpers.js';
-import { importVisitor as visit } from '../index.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.ts';
+import { findAncestor, findDescendants, isModuleExportsAccess, isRequireCall, isTopLevel } from '../../ast-helpers.ts';
+import { isNotJS } from '../helpers.ts';
+import { importVisitor as visit } from '../index.ts';
 
 export default visit(
   () => true,

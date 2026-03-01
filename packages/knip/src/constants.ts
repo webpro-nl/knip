@@ -19,7 +19,7 @@ export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx',
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
-export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
+export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules/**', '.yarn', '.git'];
 
 export const PUBLIC_TAG = '@public';
 export const INTERNAL_TAG = '@internal';

@@ -72,6 +72,7 @@ export type PluginName =
   | 'oclif'
   | 'oxlint'
   | 'parcel'
+  | 'payload'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -82,6 +83,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'qwik'
   | 'react-cosmos'
   | 'react-native'
   | 'react-router'
@@ -209,6 +211,7 @@ export const pluginNames = [
   'oclif',
   'oxlint',
   'parcel',
+  'payload',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -219,6 +222,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'prisma',
+  'qwik',
   'react-cosmos',
   'react-native',
   'react-router',

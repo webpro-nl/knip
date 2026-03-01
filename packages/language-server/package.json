@@ -1,15 +1,15 @@
 {
   "name": "@knip/language-server",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/webpro-nl/knip.git",
     "directory": "packages/language-server"
   },
-  "type": "module",
   "bin": {
     "knip-language-server": "./src/cli.js"
   },
+  "type": "module",
   "exports": {
     ".": {
       "types": "./src/types.d.ts",

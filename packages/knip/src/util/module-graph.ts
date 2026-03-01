@@ -5,7 +5,7 @@ import type {
   ImportMap,
   ImportMaps,
   ModuleGraph,
-} from '../types/module-graph.js';
+} from '../types/module-graph.ts';
 
 const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
   for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);

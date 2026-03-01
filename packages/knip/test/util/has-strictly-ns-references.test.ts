@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { hasStrictlyNsReferences } from '../../src/graph-explorer/operations/has-strictly-ns-references.js';
-import type { ImportMaps, ModuleGraph } from '../../src/types/module-graph.js';
+import { hasStrictlyNsReferences } from '../../src/graph-explorer/operations/has-strictly-ns-references.ts';
+import type { ImportMaps, ModuleGraph } from '../../src/types/module-graph.ts';
 
 const map: ModuleGraph = new Map();
 

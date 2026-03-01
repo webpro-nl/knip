@@ -1,28 +1,21 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
+import os from 'node:os';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import { join } from '../../src/util/path.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import { join } from '../../src/util/path.ts';
+import { copyFixture } from '../helpers/copy-fixture.ts';
+import { createOptions } from '../helpers/create-options.ts';
 
-const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+const skipIfBunWin = typeof Bun !== 'undefined' && os.platform() === 'win32' ? test.skip : test;
 
-const cwd = resolve('fixtures/fix');
-
-const readContents = async (fileName: string) => await readFile(join(cwd, fileName), 'utf8');
-
-skipIfBun('Fix and format exports and dependencies', async () => {
-  const tests = [
-    [
-      'mod.ts',
-      await readContents('mod.ts'),
-      `const x = 1;
+skipIfBunWin('Fix and format exports and dependencies', async () => {
+  const cwd = await copyFixture('fixtures/fix');
+  const expected: Record<string, string> = {
+    'mod.ts': `const x = 1;
 const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -41,46 +34,22 @@ class MyClass {}
 /** @lintignore */
 export type U = number;
 `,
-    ],
-    [
-      'access.js',
-      await readContents('access.js'),
-      `module.exports.USED = 1;
+    'access.js': `module.exports.USED = 1;
 `,
-    ],
-    [
-      'default-x.mjs',
-      await readContents('default-x.mjs'),
-      `const x = 1;
+    'default-x.mjs': `const x = 1;
 
 export const dx = 1;
 `,
-    ],
-    [
-      'default.mjs',
-      await readContents('default.mjs'),
-      `export const d = 1;
+    'default.mjs': `export const d = 1;
 `,
-    ],
-    [
-      'exports.js',
-      await readContents('exports.js'),
-      `const identifier = 1;
+    'exports.js': `const identifier = 1;
 const identifier2 = 2;
 
 module.exports = { identifier };
 `,
-    ],
-    [
-      'reexports.mjs',
-      await readContents('reexports.mjs'),
-      `export { One, Rectangle, Nine, setter } from './reexported';
+    'reexports.mjs': `export { One, Rectangle, Nine, setter } from './reexported';
 `,
-    ],
-    [
-      'reexported.ts',
-      await readContents('reexported.ts'),
-      `const Two = 2;
+    'reexported.ts': `const Two = 2;
 const Three = 3;
 const Four = 4;
 const Five = 5;
@@ -101,11 +70,7 @@ const fn = () => ({ get: () => 1, set: () => 1 });
 
 export const { set: setter } = fn();
 `,
-    ],
-    [
-      'package.json',
-      await readContents('package.json'),
-      `{
+    'package.json': `{
   "name": "@fixtures/fix",
   "dependencies": {
     "lodash": "*",
@@ -114,8 +79,7 @@ export const { set: setter } = fn();
   "devDependencies": {}
 }
 `,
-    ],
-  ];
+  };
 
   const options = await createOptions({ cwd, isFix: true, isFormat: true, tags: ['-lintignore'] });
   const { issues } = await main(options);
@@ -142,25 +106,20 @@ export const { set: setter } = fn();
   // check ignored by tags
   assert(issues.types['mod.ts']['U'] === undefined);
 
-  for (const [fileName, before, after] of tests) {
+  for (const [fileName, after] of Object.entries(expected)) {
     const filePath = join(cwd, fileName);
-    const originalFile = await readFile(filePath);
-    assert.equal(String(originalFile), after);
-    await writeFile(filePath, before);
+    const actual = await readFile(filePath, 'utf8');
+    assert.equal(actual, after);
   }
 });
 
-skipIfBun('Fix and format only exported types', async () => {
-  const tests = [
-    [
-      'mod.ts',
-      await readContents('mod.ts'),
-      `export const x = 1;
+skipIfBunWin('Fix and format only exported types', async () => {
+  const cwd = await copyFixture('fixtures/fix');
+  const expected: Record<string, string> = {
+    'mod.ts': `export const x = 1;
 export const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -179,11 +138,7 @@ export default class MyClass {}
 /** @lintignore */
 export type U = number;
 `,
-    ],
-    [
-      'reexported.ts',
-      await readContents('reexported.ts'),
-      `const Two = 2;
+    'reexported.ts': `const Two = 2;
 const Three = 3;
 const Four = 4;
 const Five = 5;
@@ -208,8 +163,7 @@ const fn = () => ({ get: () => 1, set: () => 1 });
 
 export const { get: getter, set: setter } = fn();
 `,
-    ],
-  ];
+  };
 
   const options = await createOptions({
     cwd,
@@ -238,10 +192,9 @@ export const { get: getter, set: setter } = fn();
   // check ignored by tags
   assert(issues.types['mod.ts']['U'] === undefined);
 
-  for (const [fileName, before, after] of tests) {
+  for (const [fileName, after] of Object.entries(expected)) {
     const filePath = join(cwd, fileName);
     const actual = await readFile(filePath, 'utf8');
     assert.equal(actual, after);
-    await writeFile(filePath, before);
   }
 });

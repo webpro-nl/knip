@@ -1,7 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.js';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import {
   type Input,
   toAlias,
@@ -9,13 +9,13 @@ import {
   toDeferResolveEntry,
   toDeferResolveProductionEntry,
   toDependency,
-} from '../../util/input.js';
-import { isInternal, join, toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getDependenciesFromConfig } from '../babel/index.js';
-import type { BabelConfigObj } from '../babel/types.js';
-import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.js';
-import { requireContextCall } from './visitors/requireContext.js';
+} from '../../util/input.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { BabelConfigObj } from '../babel/types.ts';
+import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
+import { requireContextCall } from './visitors/requireContext.ts';
 
 // https://webpack.js.org/configuration/
 

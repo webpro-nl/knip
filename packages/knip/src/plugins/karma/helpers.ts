@@ -1,6 +1,6 @@
-import { type Input, toDeferResolveEntry, toDependency } from '../../util/input.js';
-import { isInternal } from '../../util/path.js';
-import type { Config, ConfigOptions } from './types.js';
+import { type Input, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
+import type { Config, ConfigOptions } from './types.ts';
 
 //👇 All but CoffeeScript ones. Low usage nowadays compared to the effort to implement support for those files
 export const configFiles = ['karma.conf.js', 'karma.conf.ts', '.config/karma.conf.js', '.config/karma.conf.ts'];

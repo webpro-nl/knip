@@ -1,11 +1,11 @@
 import picomatch from 'picomatch';
-import type { IgnoreIssues } from './types/config.js';
-import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.js';
-import { partition } from './util/array.js';
-import type { MainOptions } from './util/create-options.js';
-import { initCounters, initIssues } from './util/issue-initializers.js';
-import { relative } from './util/path.js';
-import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.js';
+import type { IgnoreIssues } from './types/config.ts';
+import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.ts';
+import { partition } from './util/array.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { initCounters, initIssues } from './util/issue-initializers.ts';
+import { relative } from './util/path.ts';
+import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.ts';
 
 const createMatcher = (patterns: Set<string>) => {
   const [negated, positive] = partition(patterns, p => p[0] === '!');

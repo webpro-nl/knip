@@ -1,4 +1,4 @@
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 
 const isWin = process.platform === 'win32';

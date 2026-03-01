@@ -1,7 +1,7 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
-import { toRelative } from '../util/path.js';
-import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.ts';
+import { toRelative } from '../util/path.ts';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 const logIssueSet = (issues: string[], cwd: string) => {
   for (const filePath of issues.sort()) console.log(toRelative(filePath, cwd));

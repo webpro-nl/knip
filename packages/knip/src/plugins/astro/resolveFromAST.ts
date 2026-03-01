@@ -1,5 +1,7 @@
 import ts from 'typescript';
-import { getPropertyValues } from '../../typescript/ast-helpers.js';
+import { getPropertyValues } from '../../typescript/ast-helpers.ts';
+
+const ASTRO_CONFIG_SPECIFIER = 'astro/config';
 
 export const getSrcDir = (sourceFile: ts.SourceFile): string => {
   const srcDir = 'src';
@@ -26,4 +28,17 @@ export const getSrcDir = (sourceFile: ts.SourceFile): string => {
   }
 
   return visit(sourceFile) ?? srcDir;
+};
+
+export const usesSharpImageService = (sourceFile: ts.SourceFile) => {
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+    if (statement.moduleSpecifier.text !== ASTRO_CONFIG_SPECIFIER) continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) continue;
+    for (const el of bindings.elements) {
+      if ((el.propertyName?.text ?? el.name.text) === 'sharpImageService') return true;
+    }
+  }
+  return false;
 };

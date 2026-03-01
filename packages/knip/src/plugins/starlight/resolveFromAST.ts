@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
+import { getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
 
 export const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
   const componentPaths: Set<string> = new Set();

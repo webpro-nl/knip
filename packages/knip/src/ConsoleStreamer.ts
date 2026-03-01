@@ -1,4 +1,4 @@
-import type { MainOptions } from './util/create-options.js';
+import type { MainOptions } from './util/create-options.ts';
 
 /**
  * - Casts messages as a stream to stdout during the process

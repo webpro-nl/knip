@@ -1,21 +1,21 @@
 {
   "name": "@knip/templates-monorepo",
   "version": "1.0.0",
-  "description": "Knip case reproduction template - monorepo",
   "private": true,
+  "description": "Knip case reproduction template - monorepo",
+  "homepage": "https://knip.dev",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "tsc --build",
     "type-check": "tsc --build --noEmit",
     "knip": "knip"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "devDependencies": {
     "@types/node": "*",
     "knip": "*",
     "typescript": "*"
-  },
-  "bugs": "https://github.com/webpro-nl/knip/issues",
-  "homepage": "https://knip.dev"
+  }
 }

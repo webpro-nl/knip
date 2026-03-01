@@ -1,17 +1,17 @@
 import type { WatchListener } from 'node:fs';
 import { readFileSync } from 'node:fs';
-import type { ConfigurationChief } from '../ConfigurationChief.js';
-import { invalidateCache } from '../graph-explorer/cache.js';
-import type { IssueCollector } from '../IssueCollector.js';
-import type { PrincipalFactory } from '../PrincipalFactory.js';
-import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { Issues } from '../types/issues.js';
-import type { ModuleGraph } from '../types/module-graph.js';
-import type { MainOptions } from './create-options.js';
-import { debugLog } from './debug.js';
-import { isFile } from './fs.js';
-import { updateImportMap } from './module-graph.js';
-import { toAbsolute, toRelative } from './path.js';
+import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import { invalidateCache } from '../graph-explorer/cache.ts';
+import type { IssueCollector } from '../IssueCollector.ts';
+import type { PrincipalFactory } from '../PrincipalFactory.ts';
+import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { Issues } from '../types/issues.ts';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import type { MainOptions } from './create-options.ts';
+import { debugLog } from './debug.ts';
+import { isFile } from './fs.ts';
+import { updateImportMap } from './module-graph.ts';
+import { toAbsolute, toPosix, toRelative } from './path.ts';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
@@ -188,8 +188,11 @@ export const getSessionHandler = async (
   const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
     debugLog('*', `(raw) ${eventType} ${filePath}`);
     if (typeof filePath === 'string') {
-      const type = eventType === 'rename' ? (isFile(options.cwd, filePath) ? 'added' : 'deleted') : 'modified';
-      handleFileChanges([{ type, filePath }]);
+      // On Windows, fs.watch provides paths with backslash separators.
+      // Normalize to POSIX separators so downstream posix path utilities work correctly.
+      const normalizedPath = toPosix(filePath);
+      const type = eventType === 'rename' ? (isFile(options.cwd, normalizedPath) ? 'added' : 'deleted') : 'modified';
+      handleFileChanges([{ type, filePath: normalizedPath }]);
     }
   };
 

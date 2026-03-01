@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Issue } from 'codeclimate-types';
-import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.js';
-import { exec } from '../helpers/exec.js';
-import { resolve } from '../helpers/resolve.js';
+import { assertAndRemoveFingerprint, orderByPos } from '../helpers/assertAndRemoveProperty.ts';
+import { exec } from '../helpers/exec.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/exports');
 
@@ -114,7 +114,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Unused exported types',
       description: 'Unused exported type: MyType',
       categories: ['Bug Risk'],
-      location: { path: 'types.ts', positions: { begin: { line: 9, column: 15 }, end: { line: 9, column: 15 } } },
+      location: { path: 'types.ts', positions: { begin: { line: 8, column: 15 }, end: { line: 8, column: 15 } } },
       severity: 'major',
     },
     {
@@ -124,7 +124,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       categories: ['Bug Risk'],
       location: {
         path: 'my-namespace.ts',
-        positions: { begin: { line: 6, column: 18 }, end: { line: 6, column: 18 } },
+        positions: { begin: { line: 5, column: 18 }, end: { line: 5, column: 18 } },
       },
       severity: 'major',
     },

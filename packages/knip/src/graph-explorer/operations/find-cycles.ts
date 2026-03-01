@@ -1,5 +1,5 @@
-import type { Cycle } from '../../session/types.js';
-import type { ModuleGraph } from '../../types/module-graph.js';
+import type { Cycle } from '../../session/types.ts';
+import type { ModuleGraph } from '../../types/module-graph.ts';
 
 export const findCycles = (graph: ModuleGraph, filePath: string, maxDepth = 16) => {
   const cycles: Cycle[] = [];

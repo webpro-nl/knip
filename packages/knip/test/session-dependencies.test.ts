@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createGraphExplorer } from '../src/graph-explorer/explorer.js';
-import { run } from '../src/run.js';
-import { createSession } from '../src/session/session.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { createGraphExplorer } from '../src/graph-explorer/explorer.ts';
+import { run } from '../src/run.ts';
+import { createSession } from '../src/session/session.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/session-dependencies');
 

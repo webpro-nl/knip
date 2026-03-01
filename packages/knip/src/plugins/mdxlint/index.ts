@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
-import { isInternal } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MdxlintConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MdxlintConfig } from './types.ts';
 
 // https://github.com/remcohaszing/mdxlint
 

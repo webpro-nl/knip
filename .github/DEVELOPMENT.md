@@ -88,23 +88,23 @@ executable is available globally to run from any directory.
 
 ### Without compilation
 
-To run Knip without compilation, use e.g. `bun` or `tsx`:
+Run Knip without compilation:
 
 ```shell
-npx tsx path/to/knip/packages/knip/src/cli.ts
+node path/to/knip/packages/knip/src/cli.ts
 ```
 
 #### Alias
 
-Expanding on this idea, install `tsx` globally and set up an alias like so:
+Expanding on this idea, set up an alias like so:
 
 ```shell
-alias k="tsx --inspect ~/p/knip/packages/knip/src/cli.ts"
+alias k="node --inspect ~/p/knip/packages/knip/src/cli.ts"
 ```
 
 Invoke `k` to run Knip including any local changes. And if it's in the built-in
 terminal, it will stop at breakpoints. For the rest of this document, `knip` or
-`tsx --inspect` can be replaced with `k`.
+`node --inspect` can be replaced with `k`.
 
 ## Tests
 
@@ -120,7 +120,7 @@ with fixtures for you.
 ### Run single test file
 
 ```shell
-tsx --test test/my-feature.test.ts
+node --test test/my-feature.test.ts
 bun test test/plugins/my-plugin.test.ts
 ```
 
@@ -137,7 +137,7 @@ built-in terminal and allow the debugger to connect:
 
 ```shell
 cd fixtures/feature
-tsx --inspect ../../src/cli.ts
+node --inspect ../../src/cli.ts
 ```
 
 Make sure VS Code is set up to attach to the Node.js process ("Always" or "With

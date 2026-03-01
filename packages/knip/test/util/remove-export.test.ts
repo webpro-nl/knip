@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { FIX_FLAGS } from '../../src/constants.js';
-import { removeExport } from '../../src/util/remove-export.js';
+import { FIX_FLAGS } from '../../src/constants.ts';
+import { removeExport } from '../../src/util/remove-export.ts';
 
 const getOpts = (text: string, value: string, flags = FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.EMPTY_DECLARATION) => {
   const start = text.indexOf(value);

@@ -1,7 +1,7 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, IssueSet, ReporterOptions } from '../types/issues.js';
-import { relative, toRelative } from '../util/path.js';
-import { getIssueTypeTitle } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, IssueSet, ReporterOptions } from '../types/issues.ts';
+import { relative, toRelative } from '../util/path.ts';
+import { getIssueTypeTitle } from './util/util.ts';
 
 export default ({ report, issues, cwd }: ReporterOptions) => {
   console.log('# Knip report\n');

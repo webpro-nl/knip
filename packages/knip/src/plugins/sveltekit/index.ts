@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { findDescendants, stripQuotes } from '../../typescript/ast-helpers.js';
-import { toAlias, toIgnore, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { findDescendants, stripQuotes } from '../../typescript/ast-helpers.ts';
+import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://svelte.dev/docs/kit
 

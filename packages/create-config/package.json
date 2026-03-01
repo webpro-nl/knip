@@ -2,19 +2,16 @@
   "name": "@knip/create-config",
   "version": "1.2.1",
   "homepage": "https://knip.dev",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webpro-nl/knip",
-    "directory": "packages/create-config"
-  },
   "bugs": "https://github.com/webpro-nl/knip/issues",
   "license": "ISC",
   "author": {
     "name": "Lars Kappert",
     "email": "lars@webpro.nl"
   },
-  "scripts": {
-    "release": "release-it -c ../../.release-it.json"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webpro-nl/knip",
+    "directory": "packages/create-config"
   },
   "funding": [
     {
@@ -30,5 +27,8 @@
   "type": "module",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "release": "release-it -c ../../.release-it.json"
   }
 }

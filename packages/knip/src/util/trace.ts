@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.js';
+import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
 
 export const formatTrace = (
   node: ExportsTreeNode,

@@ -172,7 +172,6 @@ section.plugins li {
 
 .badges {
   margin: 4rem auto;
-  /* biome-ignore lint/style/noDescendingSpecificity: they're different props, biome */
   p {
     display: flex;
     justify-content: center;

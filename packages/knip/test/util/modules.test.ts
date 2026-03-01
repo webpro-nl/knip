@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, sanitizeSpecifier } from '../../src/util/modules.js';
+import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, sanitizeSpecifier } from '../../src/util/modules.ts';
 
 test('Should return definitely typed package for package name', () => {
   assert.equal(getDefinitelyTypedFor('node'), '@types/node');

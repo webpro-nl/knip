@@ -1,6 +1,6 @@
-import type { Import, ModuleGraph } from '../types/module-graph.js';
-import type { UsageResult } from './operations/get-usage.js';
-import type { DefinitionResult } from './operations/resolve-definition.js';
+import type { Import, ModuleGraph } from '../types/module-graph.ts';
+import type { UsageResult } from './operations/get-usage.ts';
+import type { DefinitionResult } from './operations/resolve-definition.ts';
 
 interface ExplorerCache {
   definitions: Map<string, Map<string, DefinitionResult | null>>;

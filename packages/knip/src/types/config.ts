@@ -1,16 +1,16 @@
 import type ts from 'typescript';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.js';
-import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
-import type { pluginSchema } from '../schema/plugins.js';
-import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.js';
-import type { ParsedCLIArgs } from '../util/cli-arguments.js';
-import type { Input } from '../util/input.js';
-import type { Args } from './args.js';
-import type { IssueType, SymbolType } from './issues.js';
-import type { Tags } from './options.js';
-import type { PluginName } from './PluginNames.js';
-import type { PackageJson } from './package-json.js';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
+import type { pluginSchema } from '../schema/plugins.ts';
+import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.ts';
+import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
+import type { Input } from '../util/input.ts';
+import type { Args } from './args.ts';
+import type { IssueType, SymbolType } from './issues.ts';
+import type { Tags } from './options.ts';
+import type { PluginName } from './PluginNames.ts';
+import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
@@ -160,6 +160,7 @@ export type RegisterCompilersOptions = {
   registerCompiler: RegisterCompiler;
 };
 
+/** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
 export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
 export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
@@ -170,6 +171,7 @@ export type RegisterVisitorsOptions = {
   registerVisitors: RegisterVisitor;
 };
 
+/** Plugin visitors are automatically registered if the plugin is enabled */
 export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
 
 export interface Plugin {

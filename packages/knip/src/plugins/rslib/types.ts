@@ -1,2 +1,2 @@
-// biome-ignore lint: complexity/noBannedTypes
+// oxlint-disable-next-line @typescript-eslint/no-empty-object-type
 export type RslibConfig = {};

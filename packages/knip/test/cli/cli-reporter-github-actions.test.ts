@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { resolve } from '../../src/util/path.js';
-import { showDiff } from '../helpers/diff.js';
-import { exec } from '../helpers/exec.js';
+import { resolve } from '../../src/util/path.ts';
+import { showDiff } from '../helpers/diff.ts';
+import { exec } from '../helpers/exec.ts';
 
 const moduleCwd = resolve('fixtures/module-resolution-non-std');
 

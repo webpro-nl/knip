@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { getGitHookPaths } from '../../util/git.js';
-import { fromBinary, toDependency } from '../../util/input.js';
-import { findByKeyDeep } from '../../util/object.js';
-import { extname } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { getGitHookPaths } from '../../util/git.ts';
+import { fromBinary, toDependency } from '../../util/input.ts';
+import { findByKeyDeep } from '../../util/object.ts';
+import { extname } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://github.com/evilmartians/lefthook
 

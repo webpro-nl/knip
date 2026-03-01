@@ -1,5 +1,5 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver } from '../../types/config.js';
+import type { BinaryResolver } from '../../types/config.ts';
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const { fromArgs, manifestScriptNames } = options;

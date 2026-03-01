@@ -1,16 +1,16 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from '../types/config.js';
-import type { ExportNode, ExportNodeMember } from '../types/exports.js';
-import type { ImportNode } from '../types/imports.js';
-import type { IssueSymbol, SymbolType } from '../types/issues.js';
-import type { Export, ExportMember, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.js';
-import { addNsValue, addValue, createImports } from '../util/module-graph.js';
-import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { timerify } from '../util/Performance.js';
-import { dirname, isInNodeModules, resolve } from '../util/path.js';
-import { shouldIgnore } from '../util/tag.js';
+import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from '../types/config.ts';
+import type { ExportNode, ExportNodeMember } from '../types/exports.ts';
+import type { ImportNode } from '../types/imports.ts';
+import type { IssueSymbol, SymbolType } from '../types/issues.ts';
+import type { Export, ExportMember, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
+import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
+import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import { timerify } from '../util/Performance.ts';
+import { dirname, isInNodeModules, resolve } from '../util/path.ts';
+import { shouldIgnore } from '../util/tag.ts';
 import {
   getAccessMembers,
   getDestructuredNames,
@@ -25,14 +25,14 @@ import {
   isKeyofTypeof,
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
-} from './ast-helpers.js';
-import { _hasRefsInFile } from './has-refs-in-file.js';
-import { getImportsFromPragmas } from './pragmas/index.js';
-import type { BoundSourceFile } from './SourceFile.js';
-import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
-import getExportVisitors from './visitors/exports/index.js';
-import getImportVisitors from './visitors/imports/index.js';
-import getScriptVisitors from './visitors/scripts/index.js';
+} from './ast-helpers.ts';
+import { _hasRefsInFile } from './has-refs-in-file.ts';
+import { getImportsFromPragmas } from './pragmas/index.ts';
+import type { BoundSourceFile } from './SourceFile.ts';
+import getDynamicImportVisitors from './visitors/dynamic-imports/index.ts';
+import getExportVisitors from './visitors/exports/index.ts';
+import getImportVisitors from './visitors/imports/index.ts';
+import getScriptVisitors from './visitors/scripts/index.ts';
 
 const getVisitors = (sourceFile: ts.SourceFile, visitors: Visitors) => ({
   export: getExportVisitors(sourceFile),
@@ -395,7 +395,7 @@ const getImportsAndExports = (
         // Pattern: const spread = { ...NS }; spread.member
         // Pattern: const assign = NS; assign.member
         const members = getAccessMembers(typeChecker, node);
-        // biome-ignore lint/style/noNonNullAssertion: deal with it
+        // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const { id: aliasedId, filePath: aliasFilePath } of importAliases.get(id)!) {
           const aliasImports = internal.get(aliasFilePath);
           if (aliasImports) addNsMemberRefs(aliasImports, aliasedId, members);

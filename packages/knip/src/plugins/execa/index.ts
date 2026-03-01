@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import execaVisitor from './visitors/execa.js';
+import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import execaVisitor from './visitors/execa.ts';
 
 // https://github.com/sindresorhus/execa
 

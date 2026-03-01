@@ -1,6 +1,5 @@
 import sst from 'sst';
 import 'sst-auth-stack-dep';
-// biome-ignore lint: suspicious/noShadowRestrictedNames
 import { StackContext, Function, FunctionProps } from 'sst/constructs';
 
 export function AuthStack({ stack, app }: StackContext) {

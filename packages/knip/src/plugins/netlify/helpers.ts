@@ -1,4 +1,4 @@
-import type { FunctionsConfig } from './types.js';
+import type { FunctionsConfig } from './types.ts';
 
 export const extractFunctionsConfigProperty = (config: FunctionsConfig, property: keyof FunctionsConfig) => [
   ...(config[property] ?? []),

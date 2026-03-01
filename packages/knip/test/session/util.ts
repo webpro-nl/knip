@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { createSession } from '../../src/session/session.js';
-import { join } from '../../src/util/path.js';
-import { createOptions } from '../helpers/create-options.js';
+import { createSession } from '../../src/session/session.ts';
+import { join } from '../../src/util/path.ts';
+import { createOptions } from '../helpers/create-options.ts';
 
 export const describeFile = async (cwd: string, relativePath: string) => {
   const options = await createOptions({ cwd, isSession: true });

@@ -1,4 +1,4 @@
-import { createOptions } from '../../src/util/create-options.js';
+import { createOptions } from '../../src/util/create-options.ts';
 
 const _createOptions: typeof createOptions = options => {
   options.isShowProgress = false;

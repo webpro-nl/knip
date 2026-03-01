@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MdxConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MdxConfig } from './types.ts';
 
 const title = 'MDX';
 

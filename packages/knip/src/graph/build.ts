@@ -1,22 +1,22 @@
-import { _getInputsFromScripts } from '../binaries/index.js';
-import type { CatalogCounselor } from '../CatalogCounselor.js';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
-import type { DependencyDeputy } from '../DependencyDeputy.js';
-import type { IssueCollector } from '../IssueCollector.js';
-import type { PrincipalFactory } from '../PrincipalFactory.js';
-import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.js';
-import type { Issue } from '../types/issues.js';
-import type { Import, ModuleGraph } from '../types/module-graph.js';
-import type { PluginName } from '../types/PluginNames.js';
-import { partition } from '../util/array.js';
-import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.js';
-import type { MainOptions } from '../util/create-options.js';
-import { debugLog, debugLogArray } from '../util/debug.js';
-import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.js';
+import { _getInputsFromScripts } from '../binaries/index.ts';
+import type { CatalogCounselor } from '../CatalogCounselor.ts';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
+import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import type { DependencyDeputy } from '../DependencyDeputy.ts';
+import type { IssueCollector } from '../IssueCollector.ts';
+import type { PrincipalFactory } from '../PrincipalFactory.ts';
+import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
+import type { Issue } from '../types/issues.ts';
+import type { Import, ModuleGraph } from '../types/module-graph.ts';
+import type { PluginName } from '../types/PluginNames.ts';
+import { partition } from '../util/array.ts';
+import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { debugLog, debugLogArray } from '../util/debug.ts';
+import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
   isAlias,
@@ -28,15 +28,15 @@ import {
   isProductionEntry,
   isProject,
   toProductionEntry,
-} from '../util/input.js';
-import { loadTSConfig } from '../util/load-tsconfig.js';
-import { createFileNode, updateImportMap } from '../util/module-graph.js';
-import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { perfObserver } from '../util/Performance.js';
-import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
-import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
-import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
-import { WorkspaceWorker } from '../WorkspaceWorker.js';
+} from '../util/input.ts';
+import { loadTSConfig } from '../util/load-tsconfig.ts';
+import { createFileNode, updateImportMap } from '../util/module-graph.ts';
+import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import { perfObserver } from '../util/Performance.ts';
+import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
+import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.ts';
+import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.ts';
+import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
 interface BuildOptions {
   chief: ConfigurationChief;
@@ -215,7 +215,7 @@ export async function build({
 
     const addPattern = (map: PatternMap, input: Input, pattern: string) => {
       if (input.group && !map.has(input.group)) map.set(input.group, new Set());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       map.get(input.group ?? DEFAULT_GROUP)!.add(pattern);
     };
 
@@ -508,7 +508,7 @@ export async function build({
   if (externalRefsFromInputs) {
     for (const [filePath, refs] of externalRefsFromInputs) {
       if (!graph.has(filePath)) graph.set(filePath, createFileNode());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
     }
   }

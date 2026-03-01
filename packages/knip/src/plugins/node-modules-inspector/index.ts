@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toUnconfig } from '../../util/plugin-config.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toUnconfig } from '../../util/plugin-config.ts';
 
 // https://github.com/antfu/node-modules-inspector
 

@@ -1,4 +1,4 @@
-// biome-ignore-all lint/suspicious/noConsole: deal with it
+/* oxlint-disable no-console */
 import pc from 'picocolors';
 
 export const showDiff = (actual: string, expected: string) => {

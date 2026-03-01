@@ -1,4 +1,4 @@
-// biome-ignore-all lint: suspicious/noConsole
+/* oxlint-disable no-console */
 import util, { parseArgs } from 'node:util';
 import picocolors from 'picocolors';
 

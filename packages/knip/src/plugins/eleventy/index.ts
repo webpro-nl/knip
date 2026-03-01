@@ -1,11 +1,11 @@
-import { DEFAULT_EXTENSIONS } from '../../constants.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isDirectory } from '../../util/fs.js';
-import { toDeferResolve, toProductionEntry } from '../../util/input.js';
-import { isInNodeModules, join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
-import type { EleventyConfig, EleventyConfigOrFn } from './types.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isDirectory } from '../../util/fs.ts';
+import { toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { isInNodeModules, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.ts';
+import type { EleventyConfig, EleventyConfigOrFn } from './types.ts';
 
 // https://www.11ty.dev/docs/
 

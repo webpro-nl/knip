@@ -1,11 +1,11 @@
-// biome-ignore-all lint/suspicious/noUselessEscapeInString: ignore
-// biome-ignore-all lint/suspicious/noTemplateCurlyInString: ignore
+/* oxlint-disable no-useless-escape */
+/* oxlint-disable no-template-curly-in-string */
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { _getInputsFromScripts } from '../../src/binaries/index.js';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.js';
-import { join } from '../../src/util/path.js';
-import { resolve } from '../helpers/resolve.js';
+import { _getInputsFromScripts } from '../../src/binaries/index.ts';
+import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { join } from '../../src/util/path.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
@@ -17,7 +17,7 @@ const js = toDeferResolveEntry('./script.js', opt);
 const ts = toDeferResolveEntry('./main.ts', opt);
 const req = toDeferResolve('./require.js');
 
-type T = (script: string | string[], dependencies: Input[], options?: { cwd: string }) => void;
+type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifestScriptNames?: Set<string> }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getInputsFromScripts(script, {
@@ -213,7 +213,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
-  t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, []);
+  t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, [toBinary('git')]);
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
@@ -226,6 +226,8 @@ test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
+  t('pnpm --recursive --parallel exec program', [toBinary('program')]);
+  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifestScriptNames: new Set(['program']) });
 });
 
 test('getInputsFromScripts (yarn)', () => {
@@ -299,32 +301,23 @@ test('getInputsFromScripts (double-dash)', () => {
   t('op run --env-file=.env -- node --import=mocks.ts server.ts', [toBinary('op'), toBinary('node'), toDeferResolveEntry('server.ts', opt), toDeferResolve('mocks.ts')]);
 });
 
-test('getInputsFromScripts (bash expressions)', () => {
+test('getInputsFromScripts (advanced bash syntax)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg'), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
   t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
-});
-
-test('getInputsFromScripts (bash expansion)', () => {
   t('var=$(node ./script.js)', [toBinary('node'), js]);
-  t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js', opt)]);
-});
-
-test('getInputsFromScripts (multiline)', () => {
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged')]);
+  t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js', opt)]);
+  t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint')]);
+  t('until curl -s localhost:3000; do sleep 1; done', [toBinary('curl'), toBinary('sleep')]);
+  t('coproc eslint .', [toBinary('eslint')]);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged'), toBinary('dirname')]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toDependency('rc', opt), toDependency('@scope/rc', opt)]);
-});
-
-test('getInputsFromScripts (bail outs)', () => {
   t('curl', [], knownOnly);
   t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
-});
-
-test('getInputsFromScripts (ignore parse error)', () => {
-  t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', []); // unclosed '
-  t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, []); // Unexpected 'OPEN_PAREN'
+  t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', [toBinary('node'), toBinary('node')]);
+  t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, [toBinary('cat'), toBinary('jq')]);
 });
 
 test('getInputsFromScripts (plugins → double-dash)', () => {

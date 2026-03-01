@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Table } from '../../src/util/table.js';
+import { Table } from '../../src/util/table.ts';
 
 test('Render table with column gaps and truncated values', () => {
   const table = new Table({ maxWidth: 72, truncateStart: ['col-2'] });

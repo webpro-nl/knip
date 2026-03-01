@@ -1,13 +1,13 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { formatly } from 'formatly';
-import type { Fixes } from './types/exports.js';
-import type { Issue, Issues } from './types/issues.js';
-import { DEFAULT_CATALOG } from './util/catalog.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogArray, debugLogObject } from './util/debug.js';
-import { load, save } from './util/package-json.js';
-import { extname, join } from './util/path.js';
-import { removeExport } from './util/remove-export.js';
+import type { Fixes } from './types/exports.ts';
+import type { Issue, Issues } from './types/issues.ts';
+import { DEFAULT_CATALOG } from './util/catalog.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { load, save } from './util/package-json.ts';
+import { extname, join } from './util/path.ts';
+import { removeExport } from './util/remove-export.ts';
 
 export const fix = async (issues: Issues, options: MainOptions) => {
   const fixer = new IssueFixer(options);

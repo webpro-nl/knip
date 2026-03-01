@@ -3,13 +3,13 @@ import { promisify } from 'node:util';
 import { walk as _walk, type Entry } from '@nodelib/fs.walk';
 import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
-import { GLOBAL_IGNORE_PATTERNS } from '../constants.js';
-import { compact, partition } from './array.js';
-import { debugLogObject } from './debug.js';
-import { isDirectory, isFile } from './fs.js';
-import { timerify } from './Performance.js';
-import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.js';
-import { dirname, join, relative, toPosix } from './path.js';
+import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
+import { compact, partition } from './array.ts';
+import { debugLogObject } from './debug.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { timerify } from './Performance.ts';
+import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
+import { dirname, join, relative, toPosix } from './path.ts';
 
 const walk = promisify(_walk);
 
@@ -55,7 +55,7 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
     const filePath = join(dir, '.gitignore');
     if (isFile(filePath)) gitignorePaths.push(filePath);
     if (isGitRoot(dir)) break;
-    // biome-ignore lint: suspicious/noAssignInExpressions
+    // oxlint-disable-next-line no-cond-assign
     dir = dirname((prev = dir));
     if (prev === dir || dir === '.') break;
   }
@@ -63,22 +63,17 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
 };
 
 /** @internal */
-export const findAndParseGitignores = async (cwd: string) => {
-  const init = ['.git', ...GLOBAL_IGNORE_PATTERNS];
-  const ignores: Set<string> = new Set(init);
+export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<string>) => {
+  const ignores: Set<string> = new Set(GLOBAL_IGNORE_PATTERNS);
   const unignores: string[] = [];
   const gitignoreFiles: string[] = [];
   const pmOptions = { ignore: unignores };
 
-  // Warning: earlier matchers don't include later unignores (perf win, but can't unignore from ancestor gitignores)
-  const matchers = new Set(init.map(pattern => _picomatch(pattern, pmOptions)));
+  let deepFilterMatcher: ((str: string) => boolean) | undefined;
 
-  const matcher = (str: string) => {
-    for (const isMatch of matchers) {
-      const state = isMatch(str);
-      if (state) return state;
-    }
-    return false;
+  const getMatcher = () => {
+    if (!deepFilterMatcher) deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
+    return deepFilterMatcher;
   };
 
   const addFile = (filePath: string, baseDir?: string) => {
@@ -88,7 +83,7 @@ export const findAndParseGitignores = async (cwd: string) => {
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
-    const ignoresForDir = new Set(base === '' ? init : []);
+    const ignoresForDir = new Set(base === '' ? GLOBAL_IGNORE_PATTERNS : []);
     const unignoresForDir = new Set<string>();
 
     const patterns = readFileSync(filePath, 'utf8');
@@ -138,7 +133,7 @@ export const findAndParseGitignores = async (cwd: string) => {
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    for (const pattern of ignoresForDir) matchers.add(_picomatch(pattern, pmOptions));
+    deepFilterMatcher = undefined;
   };
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
@@ -149,6 +144,30 @@ export const findAndParseGitignores = async (cwd: string) => {
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
 
+  // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
+  let isRelevantDir: ((absPath: string) => boolean) | undefined;
+  if (workspaceDirs && workspaceDirs.size > 0) {
+    const relevantAncestors = new Set<string>();
+    const nonRootDirs = new Set<string>();
+    for (const wsDir of workspaceDirs) {
+      if (wsDir !== cwd) nonRootDirs.add(wsDir);
+      let dir = wsDir;
+      while (dir.length >= cwd.length) {
+        relevantAncestors.add(dir);
+        const parent = dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+      }
+    }
+    if (nonRootDirs.size > 0) {
+      isRelevantDir = (absPath: string) => {
+        if (relevantAncestors.has(absPath)) return true;
+        for (const wsDir of nonRootDirs) if (absPath.startsWith(`${wsDir}/`)) return true;
+        return false;
+      };
+    }
+  }
+
   const entryFilter = (entry: Entry) => {
     if (entry.dirent.isFile() && entry.name === '.gitignore') {
       addFile(entry.path);
@@ -157,9 +176,11 @@ export const findAndParseGitignores = async (cwd: string) => {
     return false;
   };
 
-  const deepFilter = (entry: Entry) => !matcher(relative(cwd, entry.path));
+  const deepFilter = (entry: Entry) =>
+    (!isRelevantDir || isRelevantDir(toPosix(entry.path))) && !getMatcher()(relative(cwd, entry.path));
 
   await walk(cwd, {
+    concurrency: 16,
     entryFilter: timerify(entryFilter),
     deepFilter: timerify(deepFilter),
   });
@@ -178,26 +199,22 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
-  const _ignore: string[] = [];
+  const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
-  if (options.gitignore) {
-    if (willCache) {
-      let dir = options.dir;
-      let prev: string;
-      while (dir) {
-        const cacheForDir = cachedGitIgnores.get(dir);
-        if (cacheForDir) {
-          // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
-          _ignore.push(...cacheForDir.ignores);
-        }
-        // biome-ignore lint: suspicious/noAssignInExpressions
-        dir = dirname((prev = dir));
-        if (prev === dir || dir === '.') break;
+  if (options.gitignore && willCache) {
+    let dir = options.dir;
+    let prev: string;
+    while (dir) {
+      const cacheForDir = cachedGitIgnores.get(dir);
+      if (cacheForDir) {
+        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
+        _ignore.push(...cacheForDir.ignores);
       }
+      // oxlint-disable-next-line no-cond-assign
+      dir = dirname((prev = dir));
+      if (prev === dir || dir === '.') break;
     }
-  } else {
-    _ignore.push(...GLOBAL_IGNORE_PATTERNS);
   }
 
   if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
@@ -221,12 +238,15 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   return paths;
 }
 
-export async function getGitIgnoredHandler(options: Options): Promise<(path: string) => boolean> {
+export async function getGitIgnoredHandler(
+  options: Options,
+  workspaceDirs?: Set<string>
+): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
 
   if (options.gitignore === false) return () => false;
 
-  const { ignores, unignores } = await _parseFindGitignores(options.cwd);
+  const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
   const matcher = _picomatch(Array.from(ignores), { ignore: unignores });
 
   const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));

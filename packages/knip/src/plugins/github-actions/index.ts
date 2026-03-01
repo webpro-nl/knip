@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { hasFileWithExtension } from '../../util/fs.js';
-import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
-import { findByKeyDeep } from '../../util/object.js';
-import { join, relative } from '../../util/path.js';
-import type { Job, Runs } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { hasFileWithExtension } from '../../util/fs.ts';
+import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { findByKeyDeep } from '../../util/object.ts';
+import { join, relative } from '../../util/path.ts';
+import type { Job, Runs } from './types.ts';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 

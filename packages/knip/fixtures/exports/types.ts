@@ -1,7 +1,6 @@
 export type MyNum = number;
 export type MyString = string;
 export enum MyEnum {}
-// biome-ignore lint: suspicious/noEmptyInterface
 export interface MyInterface {}
 
 type MyType = 1;

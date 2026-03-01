@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.js';
-import type { Fix } from '../types/exports.js';
-import type { SymbolType } from '../types/issues.js';
-import { isInternal } from '../util/path.js';
-import type { BoundSourceFile } from './SourceFile.js';
+import { FIX_FLAGS, MEMBER_FLAGS, SYMBOL_TYPE } from '../constants.ts';
+import type { Fix } from '../types/exports.ts';
+import type { SymbolType } from '../types/issues.ts';
+import { isInternal } from '../util/path.ts';
+import type { BoundSourceFile } from './SourceFile.ts';
 
 function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
   return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
@@ -102,11 +102,11 @@ export function stripQuotes(name: string) {
   return name;
 }
 
-enum CharacterCodes {
-  backtick = 0x60,
-  doubleQuote = 0x22,
-  singleQuote = 0x27,
-}
+const CharacterCodes = {
+  backtick: 0x60,
+  doubleQuote: 0x22,
+  singleQuote: 0x27,
+};
 
 function isQuoteOrBacktick(charCode: number) {
   return (

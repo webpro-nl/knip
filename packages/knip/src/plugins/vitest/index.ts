@@ -1,13 +1,14 @@
 import type { ParsedArgs } from 'minimist';
-import { DEFAULT_EXTENSIONS } from '../../constants.js';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
-import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { isAbsolute, isInternal, join, toPosix } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getEnvSpecifier, getExternalReporters } from './helpers.js';
-import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
+import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getIndexHtmlEntries } from '../vite/helpers.ts';
+import { getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
 
@@ -21,7 +22,7 @@ const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,proj
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const entry = ['**/*.{bench,test,test-d,spec}.?(c|m)[jt]s?(x)', ...mocks];
+const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const { configFileDir: dir } = options;
@@ -38,8 +39,8 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
       : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
-  const hasCoverageEnabled = testConfig.coverage && testConfig.coverage.enabled !== false;
-  const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
+  const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
+  const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
@@ -146,7 +147,15 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
   };
 
+  const seenRoots = new Set<string>();
+
   for (const cfg of configs) {
+    const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
+    if (!seenRoots.has(viteRoot)) {
+      seenRoots.add(viteRoot);
+      for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
+    }
+
     const dir = join(options.cwd, cfg.test?.root ?? '.');
 
     if (cfg.test) {
@@ -187,9 +196,8 @@ const args: Args = {
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
-    if (parsed['coverage']) {
-      const provider = typeof parsed['coverage'] === 'object' ? parsed['coverage'].provider : undefined;
-      inputs.push(toDependency(`@vitest/coverage-${provider ?? 'v8'}`));
+    if (typeof parsed['coverage'] === 'object' && parsed['coverage'].provider) {
+      inputs.push(toDependency(`@vitest/coverage-${parsed['coverage'].provider}`));
     }
     if (parsed['reporter']) {
       for (const reporter of getExternalReporters([parsed['reporter']].flat())) {

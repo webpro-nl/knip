@@ -1,5 +1,5 @@
-import { ISSUE_TYPES } from '../../src/constants.js';
-import type { IssueType } from '../../src/types/issues.js';
+import { ISSUE_TYPES } from '../../src/constants.ts';
+import type { IssueType } from '../../src/types/issues.ts';
 
 const baseCounters = {
   ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 0])) as Record<IssueType, number>),

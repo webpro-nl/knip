@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { CORE_CLIENT_API, resolveConfigItems } from './helpers.js';
-import type { DocusaurusConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
+import type { DocusaurusConfig } from './types.ts';
 
 // https://docusaurus.io/docs/configuration
 

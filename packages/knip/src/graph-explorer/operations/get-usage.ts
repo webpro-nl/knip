@@ -1,9 +1,9 @@
-import { IMPORT_STAR } from '../../constants.js';
-import type { Identifier, ModuleGraph, Position } from '../../types/module-graph.js';
-import { getCachedUsage, setCachedUsage } from '../cache.js';
-import { CONTINUE } from '../constants.js';
-import { findImportRef } from '../utils.js';
-import { type Via, walkDown } from '../walk-down.js';
+import { IMPORT_STAR } from '../../constants.ts';
+import type { Identifier, ModuleGraph, Position } from '../../types/module-graph.ts';
+import { getCachedUsage, setCachedUsage } from '../cache.ts';
+import { CONTINUE } from '../constants.ts';
+import { findImportRef } from '../utils.ts';
+import { type Via, walkDown } from '../walk-down.ts';
 
 export interface UsageLocation extends Position {
   filePath: string;

@@ -5,8 +5,7 @@ labels: ['feature request']
 body:
   - type: markdown
     attributes:
-      value:
-        Use common sense and provide the necessary information to explain why
+      value: Use common sense and provide the necessary information to explain why
         the feature is useful to you and to others. Thanks!
   - type: textarea
     id: description

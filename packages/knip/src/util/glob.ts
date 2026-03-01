@@ -1,8 +1,8 @@
 import { globSync } from 'tinyglobby';
-import { compact } from './array.js';
-import { glob } from './glob-core.js';
-import { timerify } from './Performance.js';
-import { isAbsolute, join, relative } from './path.js';
+import { compact } from './array.ts';
+import { glob } from './glob-core.ts';
+import { timerify } from './Performance.ts';
+import { isAbsolute, join, relative } from './path.ts';
 
 interface GlobOptions {
   cwd: string;

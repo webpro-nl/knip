@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import type { Workspace } from './ConfigurationChief.js';
+import type { Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
@@ -7,26 +7,26 @@ import {
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
-} from './constants.js';
-import { getDependencyMetaData } from './manifest/index.js';
-import { PackagePeeker } from './PackagePeeker.js';
-import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
-import type { PackageJson } from './types/package-json.js';
+} from './constants.ts';
+import { getDependencyMetaData } from './manifest/index.ts';
+import { PackagePeeker } from './PackagePeeker.ts';
+import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.ts';
+import type { PackageJson } from './types/package-json.ts';
 import type {
   DependencyArray,
   DependencySet,
   HostDependencies,
   InstalledBinaries,
   WorkspaceManifests,
-} from './types/workspace.js';
-import type { MainOptions } from './util/create-options.js';
+} from './types/workspace.ts';
+import type { MainOptions } from './util/create-options.ts';
 import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
   getPackageNameFromModuleSpecifier,
   isDefinitelyTyped,
-} from './util/modules.js';
-import { findMatch, toRegexOrString } from './util/regex.js';
+} from './util/modules.ts';
+import { findMatch, toRegexOrString } from './util/regex.ts';
 
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
@@ -202,7 +202,7 @@ export class DependencyDeputy {
    * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
    * wants to mark the dependency as "unlisted".
    */
-  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
+  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string, isDevOnly?: boolean): boolean {
     if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
@@ -211,12 +211,12 @@ export class DependencyDeputy {
     if (packageName === workspace.pkgName) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
+    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
     const closestWorkspaceNameForTypes =
-      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
+      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOnly));
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
       if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
@@ -251,10 +251,10 @@ export class DependencyDeputy {
     return;
   }
 
-  private isInDependencies(workspaceName: string, packageName: string) {
+  private isInDependencies(workspaceName: string, packageName: string, isDevOnly?: boolean) {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return false;
-    if (this.isStrict) return this.getProductionDependencies(workspaceName).includes(packageName);
+    if (this.isStrict && !isDevOnly) return this.getProductionDependencies(workspaceName).includes(packageName);
     return manifest.allDependencies.has(packageName);
   }
 

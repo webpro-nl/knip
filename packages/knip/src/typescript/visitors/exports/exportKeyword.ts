@@ -1,16 +1,16 @@
 import ts from 'typescript';
-import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
-import type { Fix } from '../../../types/exports.js';
-import { compact } from '../../../util/array.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.ts';
+import type { Fix } from '../../../types/exports.ts';
+import { compact } from '../../../util/array.ts';
 import {
   getClassMember,
   getDefaultKeywordNode,
   getEnumMember,
   getExportKeywordNode,
   isNonPrivateDeclaration,
-} from '../../ast-helpers.js';
-import { isModule } from '../helpers.js';
-import { exportVisitor as visit } from '../index.js';
+} from '../../ast-helpers.ts';
+import { isModule } from '../helpers.ts';
+import { exportVisitor as visit } from '../index.ts';
 
 export default visit(isModule, (node, { isFixExports, isFixTypes, isReportClassMembers }) => {
   const exportKeyword = getExportKeywordNode(node);

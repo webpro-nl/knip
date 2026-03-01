@@ -1,6 +1,6 @@
-import { ISSUE_TYPES } from '../constants.js';
-import type { Report } from '../types/issues.js';
-import { ConfigurationError } from './errors.js';
+import { ISSUE_TYPES } from '../constants.ts';
+import type { Report } from '../types/issues.ts';
+import { ConfigurationError } from './errors.ts';
 
 type GetIncludedIssueTypesOptions = {
   isProduction?: boolean;

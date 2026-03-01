@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { stripQuotes } from '../../ast-helpers.js';
-import { hasImportSpecifier } from '../helpers.js';
-import { scriptVisitor as visit } from '../index.js';
+import { stripQuotes } from '../../ast-helpers.ts';
+import { hasImportSpecifier } from '../helpers.ts';
+import { scriptVisitor as visit } from '../index.ts';
 
 export default visit(
   sourceFile => sourceFile.statements.some(node => hasImportSpecifier(node, 'bun', '$')),

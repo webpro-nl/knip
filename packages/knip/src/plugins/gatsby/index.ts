@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.ts';
 
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/config-files/gatsby-config.md

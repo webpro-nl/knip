@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { AvaConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { AvaConfig } from './types.ts';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
 

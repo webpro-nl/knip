@@ -1,12 +1,12 @@
 import type ts from 'typescript';
-import type { ImportVisitor } from '../index.js';
-import importCall from './importCall.js';
-import importType from './importType.js';
-import jsDocType from './jsDocType.js';
-import moduleRegister from './moduleRegister.js';
-import requireCall from './requireCall.js';
-import resolveCall from './resolveCall.js';
-import urlConstructor from './urlConstructor.js';
+import type { ImportVisitor } from '../index.ts';
+import importCall from './importCall.ts';
+import importType from './importType.ts';
+import jsDocType from './jsDocType.ts';
+import moduleRegister from './moduleRegister.ts';
+import requireCall from './requireCall.ts';
+import resolveCall from './resolveCall.ts';
+import urlConstructor from './urlConstructor.ts';
 
 const visitors = [importCall, importType, jsDocType, moduleRegister, resolveCall, requireCall, urlConstructor];
 

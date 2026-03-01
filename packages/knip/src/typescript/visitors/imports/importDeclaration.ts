@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.js';
-import { isDefaultImport } from '../../ast-helpers.js';
-import { importVisitor as visit } from '../index.js';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../../../constants.ts';
+import { isDefaultImport } from '../../ast-helpers.ts';
+import { importVisitor as visit } from '../index.ts';
 
 export default visit(
   () => true,
