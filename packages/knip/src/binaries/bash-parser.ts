@@ -1,4 +1,4 @@
-import { parse, type Node, type Script, type Statement } from 'unbash';
+import { parse, type Node, type Script, type Statement, type Word } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
@@ -15,16 +15,12 @@ type KnownResolver = keyof typeof PackageManagerResolvers;
 
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
-const collectExpansionScripts = (word: { parts?: ReadonlyArray<unknown> }, out: Script[]) => {
+const collectExpansionScripts = (word: Word, out: Script[]) => {
   if (!word.parts) return;
-  for (const part of word.parts as Array<{
-    type: string;
-    script?: Script;
-    parts?: Array<{ type: string; script?: Script }>;
-  }>) {
+  for (const part of word.parts) {
     if ((part.type === 'CommandExpansion' || part.type === 'ProcessSubstitution') && part.script) {
       out.push(part.script);
-    } else if ((part.type === 'DoubleQuoted' || part.type === 'LocaleString') && part.parts) {
+    } else if (part.type === 'DoubleQuoted' || part.type === 'LocaleString') {
       for (const child of part.parts) {
         if (child.type === 'CommandExpansion' && child.script) out.push(child.script);
       }
@@ -64,7 +60,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   const getDependenciesFromNode = (node: Node, pending: Script[]): Input[] => {
     switch (node.type) {
       case 'Command': {
-        const text = node.name?.text;
+        const text = node.name?.value;
         const binary = text ? extractBinary(text) : text;
 
         if (node.name) collectExpansionScripts(node.name, pending);
@@ -73,17 +69,17 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
         // Bunch of early bail outs for things we can't or don't want to resolve
         if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
-        if (binary.startsWith('-') || binary.startsWith('"') || binary.startsWith('..')) return [];
+        if (binary.startsWith('-') || binary.startsWith('..')) return [];
         if (definedFunctions.has(binary)) return [];
 
-        const args = node.suffix.map(arg => arg.text);
+        const args = node.suffix.map(w => w.value);
 
         // Commands that precede other commands, try again with the rest
         if (['!', 'test'].includes(binary)) return fromArgs(args);
 
         const fromNodeOptions = node.prefix
-          .filter(a => a.text.startsWith('NODE_OPTIONS='))
-          .flatMap(a => a.text.split('=')[1])
+          .filter(a => a.name === 'NODE_OPTIONS' && a.value)
+          .map(a => a.value!.value)
           .map(arg => parseNodeArgs(arg.split(' ')))
           .filter(args => args.require)
           .flatMap(arg => arg.require)
@@ -99,9 +95,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
         }
 
         if (spawningBinaries.includes(binary)) {
-          // Run again with everything behind `binary -- ` (bash-parser AST is lacking)
-          const command = script.replace(new RegExp(`.*${text ?? binary}(\\s--\\s)?`), '');
-          return [toBinary(binary), ...getDependenciesFromScript(command, options)];
+          const rest = node.suffix.filter(w => w.text !== '--').map(w => w.text).join(' ');
+          return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
         }
 
         if (binary in Plugins) {
@@ -118,25 +113,24 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
       case 'Pipeline':
         return node.commands.flatMap(n => getDependenciesFromNode(n, pending));
       case 'If':
-        return getDependenciesFromNode(node.clause, pending).concat(
-          getDependenciesFromNode(node.then, pending),
-          node.else ? getDependenciesFromNode(node.else, pending) : []
-        );
-      case 'For':
-      case 'Select':
-        return getDependenciesFromStatements(node.body.commands, pending);
+        return [
+          ...getDependenciesFromStatements(node.clause.commands, pending),
+          ...getDependenciesFromStatements(node.then.commands, pending),
+          ...(node.else ? getDependenciesFromNode(node.else, pending) : []),
+        ];
       case 'While':
         return [
-          ...getDependenciesFromNode(node.clause, pending),
+          ...getDependenciesFromStatements(node.clause.commands, pending),
           ...getDependenciesFromStatements(node.body.commands, pending),
         ];
-      case 'CompoundList':
-        return getDependenciesFromStatements(node.commands, pending);
-      case 'Function':
-        return getDependenciesFromNode(node.body, pending);
+      case 'For':
+      case 'Select':
       case 'Subshell':
       case 'BraceGroup':
         return getDependenciesFromStatements(node.body.commands, pending);
+      case 'CompoundList':
+        return getDependenciesFromStatements(node.commands, pending);
+      case 'Function':
       case 'Coproc':
         return getDependenciesFromNode(node.body, pending);
       case 'Statement':
@@ -148,7 +142,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
   try {
     const parsed = parse(script);
-    if (!parsed?.commands) return [];
+    if (!parsed.commands) return [];
     return processScript(parsed);
   } catch (error) {
     const msg = `Warning: failed to parse and ignoring script in ${relative(options.cwd, options.containingFilePath)} (${truncate(script, 30)})`;

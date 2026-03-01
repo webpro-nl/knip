@@ -107,7 +107,7 @@
     "picomatch": "^4.0.1",
     "smol-toml": "^1.5.2",
     "strip-json-comments": "5.0.3",
-    "unbash": "^1.0.1",
+    "unbash": "^2.1.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
