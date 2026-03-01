@@ -97,7 +97,6 @@
   },
   "dependencies": {
     "@nodelib/fs.walk": "^1.2.3",
-    "fast-glob": "^3.3.3",
     "formatly": "^0.3.0",
     "jiti": "^2.6.0",
     "js-yaml": "^4.1.1",
@@ -107,6 +106,7 @@
     "picomatch": "^4.0.1",
     "smol-toml": "^1.5.2",
     "strip-json-comments": "5.0.3",
+    "tinyglobby": "^0.2.15",
     "unbash": "^1.0.1",
     "zod": "^4.1.11"
   },

@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { glob } from 'fast-glob';
+import { glob } from 'tinyglobby';
 import { dirname, join } from '../src/util/path.ts';
 
 const FIXTURES_DIR = join(process.cwd(), 'fixtures');
