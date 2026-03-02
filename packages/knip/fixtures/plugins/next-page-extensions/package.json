@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/next-page-extensions",
+  "dependencies": {
+    "next": "*"
+  }
+}
