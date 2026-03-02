@@ -81,7 +81,7 @@ const main = async () => {
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
 
-    if (options.isFix) await fix(finalData.issues, options);
+    if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
 
