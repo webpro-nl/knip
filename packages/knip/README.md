@@ -26,6 +26,34 @@ performance, less maintenance and easier refactorings.
 - Follow [@webpro.nl on Bluesky][13] for updates
 - [Sponsor Knip!][14]
 
+## AI Agent Skill
+
+This repository includes a ready-to-use [agent skill](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
+in the [`skill/`](./skill) directory. It gives AI coding agents structured
+guidance on running Knip — setup, configuration, interpreting results, handling
+false positives, and safe auto-fixing.
+
+Install with a single command:
+
+```bash
+npx skills add https://github.com/webpro-nl/knip --skill using-knip
+```
+
+Or copy the `skill/` folder manually into your agent's skill directory:
+
+```bash
+# GitHub Copilot
+cp -r path/to/knip/skill .github/skills/using-knip
+
+# Claude Code
+cp -r path/to/knip/skill .claude/skills/using-knip
+```
+
+The skill triggers on phrases like "knip", "unused dependencies", "unused
+exports", "dead code", and similar. It includes configuration templates for
+common setups (Next.js, Expo, Astro, monorepos) in
+[`skill/references/`](./skill/references).
+
 ## Contributors
 
 Special thanks to [the wonderful people who have contributed to Knip][15]!
