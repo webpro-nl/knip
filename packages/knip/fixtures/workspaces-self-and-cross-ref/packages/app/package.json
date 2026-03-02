@@ -3,8 +3,8 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@fixtures/self-and-cross-ref-lib": "workspace:*",
-    "@fixtures/self-and-cross-ref-shared": "workspace:*"
+    "@fixtures/workspaces-self-and-cross-ref__lib": "workspace:*",
+    "@fixtures/workspaces-self-and-cross-ref__shared": "workspace:*"
   },
   "sideEffects": false
 }
