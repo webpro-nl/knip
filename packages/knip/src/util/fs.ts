@@ -1,6 +1,6 @@
 import { readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import yaml from 'js-yaml';
+import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.ts';
@@ -81,5 +81,5 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 };
 
 export const parseYAML = (contents: string) => {
-  return yaml.load(contents);
+  return parseYAMLContents(contents, { logLevel: 'error' });
 };
