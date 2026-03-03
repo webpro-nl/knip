@@ -15,8 +15,7 @@ import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
-import { requireContextCall } from './visitors/requireContext.ts';
-
+import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
 
 const title = 'webpack';
@@ -166,8 +165,8 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return inputs;
 };
 
-const registerVisitors: RegisterVisitors = ({ registerVisitors }) => {
-  registerVisitors({ dynamicImport: [requireContextCall] });
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createRequireContextVisitor(ctx));
 };
 
 const isFilterTransitiveDependencies = true;

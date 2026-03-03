@@ -46,7 +46,6 @@ export type Issues = {
   nsTypes: IssueRecords;
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
-  classMembers: IssueRecords;
   catalog: IssueRecords;
 };
 

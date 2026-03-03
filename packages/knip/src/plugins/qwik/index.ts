@@ -19,9 +19,9 @@ const production = ['src/root.tsx', 'src/entry.*.tsx'];
 
 const routeProduction = ['src/routes/**/*.{tsx,ts,md,mdx}'];
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const srcDir = getSrcDir(sourceFile);
-  const routesDirs = getRoutesDirs(sourceFile, srcDir);
+const resolveFromAST: ResolveFromAST = program => {
+  const srcDir = getSrcDir(program);
+  const routesDirs = getRoutesDirs(program, srcDir);
   const setSrcDir = (pattern: string) => pattern.replace(/^src\//, `${srcDir}/`);
   const setRoutesDir = (pattern: string, routesDir: string) => pattern.replace(/^src\/routes\//, `${routesDir}/`);
 

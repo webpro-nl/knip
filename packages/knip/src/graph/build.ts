@@ -6,8 +6,7 @@ import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
-import type { PrincipalFactory } from '../PrincipalFactory.ts';
-import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
 import type { Issue } from '../types/issues.ts';
 import type { Import, ModuleGraph } from '../types/module-graph.ts';
@@ -34,7 +33,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, relative, toRelative } from '../util/path.ts';
 import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
@@ -43,7 +42,7 @@ interface BuildOptions {
   collector: IssueCollector;
   counselor: CatalogCounselor;
   deputy: DependencyDeputy;
-  factory: PrincipalFactory;
+  principals: Map<string, ProjectPrincipal>;
   isGitIgnored: (path: string) => boolean;
   streamer: ConsoleStreamer;
   workspaces: Workspace[];
@@ -55,7 +54,7 @@ export async function build({
   collector,
   counselor,
   deputy,
-  factory,
+  principals,
   isGitIgnored,
   streamer,
   workspaces,
@@ -126,7 +125,7 @@ export async function build({
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
-      getSourceFile: (filePath: string) => principal.backend.fileManager.getSourceFile(filePath),
+      readFile: (filePath: string) => principal.backend.fileManager.readFile(filePath),
       configFilesMap,
       options,
     });
@@ -181,7 +180,8 @@ export async function build({
     for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
 
     // workspace + worker → principal
-    const principal = factory.createPrincipal(options, {
+    if (isFile && compilerOptions.module !== 1) compilerOptions.moduleResolution ??= 100;
+    const principal = new ProjectPrincipal(options, {
       dir,
       isFile,
       compilerOptions,
@@ -189,6 +189,7 @@ export async function build({
       pkgName,
       toSourceFilePath: toModuleSourceFilePath,
     });
+    principals.set(pkgName, principal);
 
     principal.addPaths(config.paths, dir);
 
@@ -197,9 +198,9 @@ export async function build({
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
-    worker.registerVisitors(visitors => {
-      if (visitors.dynamicImport) principal.visitors.dynamicImport.push(...visitors.dynamicImport);
-      if (visitors.script) principal.visitors.script.push(...visitors.script);
+    worker.registerVisitors({
+      ctx: principal.pluginCtx,
+      registerVisitor: visitors => principal.pluginVisitorObjects.push(visitors),
     });
 
     const DEFAULT_GROUP = 'default';
@@ -333,15 +334,13 @@ export async function build({
 
     // Add knip.ts (might import dependencies)
     if (options.configFilePath) {
-      factory.getPrincipals().at(0)?.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
+      principals.values().next().value?.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
     }
 
     worker.onDispose();
   }
 
-  const principals: Array<ProjectPrincipal | undefined> = factory.getPrincipals();
-
-  debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
+  debugLog('*', `Created ${principals.size} principals for ${workspaces.length} workspaces`);
 
   const graph: ModuleGraph = new Map();
   const analyzedFiles = new Set<string>();
@@ -352,26 +351,36 @@ export async function build({
 
   const getPrincipalByFilePath = (filePath: string) => {
     const workspace = chief.findWorkspaceByFilePath(filePath);
-    if (workspace) return factory.getPrincipalByPackageName(workspace.pkgName);
+    if (workspace) return principals.get(workspace.pkgName);
   };
 
   const analyzeOpts: GetImportsAndExportsOptions = {
     isFixExports: options.isFixUnusedExports,
     isFixTypes: options.isFixUnusedTypes,
-    isReportClassMembers: options.isReportClassMembers,
     isReportExports: options.isReportExports,
     skipTypeOnly: options.isStrict,
     tags: options.tags,
   };
 
-  const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
+  const analyzeSourceFile = (
+    filePath: string,
+    principal: ProjectPrincipal,
+    parseResult?: import('oxc-parser').ParseResult,
+    sourceText?: string
+  ) => {
     if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
 
     if (workspace) {
-      const file = principal.analyzeSourceFile(filePath, analyzeOpts, chief.config.ignoreExportsUsedInFile);
+      const file = principal.analyzeSourceFile(
+        filePath,
+        analyzeOpts,
+        chief.config.ignoreExportsUsedInFile,
+        parseResult,
+        sourceText
+      );
 
       // Post-processing
       const unresolvedImports = new Set<Import>();
@@ -460,10 +469,7 @@ export async function build({
     }
   };
 
-  for (let i = 0; i < principals.length; ++i) {
-    const principal = principals[i];
-    if (!principal) continue;
-
+  for (const [pkgName, principal] of principals) {
     principal.init();
 
     if (principal.asyncCompilers.size > 0) {
@@ -473,36 +479,27 @@ export async function build({
 
     streamer.cast('Analyzing source files', toRelative(principal.cwd, options.cwd));
 
-    let size = principal.entryPaths.size;
-    let round = 0;
-
-    do {
-      size = principal.entryPaths.size;
-      const resolvedFiles = principal.getUsedResolvedFiles();
-      const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
-
-      debugLogArray('*', `Analyzing used resolved files [P${i + 1}/${++round}]`, files);
-      for (const filePath of files) analyzeSourceFile(filePath, principal);
-    } while (size !== principal.entryPaths.size);
+    principal.walkAndAnalyze((filePath, parseResult, sourceText) => {
+      analyzeSourceFile(filePath, principal, parseResult, sourceText);
+      const node = graph.get(filePath);
+      if (!node) return;
+      const paths: string[] = [];
+      for (const importPath of node.imports.internal.keys()) {
+        if (!isInNodeModules(importPath)) paths.push(importPath);
+      }
+      return paths;
+    });
 
     for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
     for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
     principal.reconcileCache(graph);
 
-    // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch && !options.isSession)) {
-      factory.deletePrincipal(principal, options.cwd);
-      principals[i] = undefined;
+    if (!options.isWatch && !options.isSession) {
+      debugLog('*', `Deleting principal at ${toRelative(principal.cwd, options.cwd)} (${pkgName})`);
+      principals.delete(pkgName);
     }
-    perfObserver.addMemoryMark(factory.getPrincipalCount());
-  }
-
-  if (!options.isWatch && !options.isSession && options.isSkipLibs && !options.isIsolateWorkspaces) {
-    for (const principal of principals) {
-      if (principal) factory.deletePrincipal(principal, options.cwd);
-    }
-    principals.length = 0;
+    perfObserver.addMemoryMark(principals.size);
   }
 
   if (externalRefsFromInputs) {

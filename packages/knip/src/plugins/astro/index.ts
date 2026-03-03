@@ -26,15 +26,15 @@ const production = [
   'src/actions/index.{js,ts}',
 ];
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const srcDir = getSrcDir(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const srcDir = getSrcDir(program);
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
   const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
     ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
 
-  if (usesSharpImageService(sourceFile)) inputs.push(toDependency('sharp'));
+  if (usesSharpImageService(program)) inputs.push(toDependency('sharp'));
 
   return inputs;
 };

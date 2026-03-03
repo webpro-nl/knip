@@ -3,18 +3,30 @@ import { DEFAULT_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
 
-const createSyncModuleResolver = (extensions: string[]) => {
+const extensionAlias = {
+  '.js': ['.js', '.ts', '.tsx', '.d.ts'],
+  '.jsx': ['.jsx', '.tsx'],
+  '.mjs': ['.mjs', '.mts', '.d.mts'],
+  '.cjs': ['.cjs', '.cts', '.d.cts'],
+};
+
+const createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) => {
+  const aliasOpt = alias && { alias };
   const resolver = new ResolverFactory({
     tsconfig: 'auto',
     extensions,
-    extensionAlias: {
-      '.js': ['.js', '.ts'],
-      '.jsx': ['.jsx', '.tsx'],
-      '.mjs': ['.mjs', '.mts'],
-      '.cjs': ['.cjs', '.cts'],
-    },
+    extensionAlias,
     conditionNames: ['require', 'import', 'node', 'default'],
     nodePath: false,
+    ...aliasOpt,
+  });
+
+  const fallbackResolver = new ResolverFactory({
+    extensions,
+    extensionAlias,
+    conditionNames: ['require', 'import', 'node', 'default'],
+    nodePath: false,
+    ...aliasOpt,
   });
 
   return function resolveSync(specifier: string, basePath: string) {
@@ -22,20 +34,41 @@ const createSyncModuleResolver = (extensions: string[]) => {
       const resolved = resolver.resolveFileSync(basePath, specifier);
       if (resolved?.path) return toPosix(resolved.path);
     } catch (_error) {}
+    try {
+      const resolved = fallbackResolver.resolveFileSync(basePath, specifier);
+      if (resolved?.path) return toPosix(resolved.path);
+    } catch (_error) {}
   };
 };
 
-const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
+const resolveModuleSync = createSyncModuleResolver([
+  ...DEFAULT_EXTENSIONS,
+  '.d.ts',
+  '.d.mts',
+  '.d.cts',
+  '.json',
+  '.jsonc',
+]);
 
 /**
- * Resolver for the TS program during module resolution (i.e. used in
- * languageServiceHost.resolveModuleNames + compilerHost.resolveModuleNames).
- * Serves as fast resolver, with fallback to `ts.resolveModuleName`.
+ * Default module resolver (no custom extensions or path aliases).
  */
 export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
 
-export const _createSyncModuleResolver: typeof createSyncModuleResolver = extensions =>
-  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
+export const _createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) =>
+  timerify(createSyncModuleResolver(extensions, alias), 'resolveModuleSync');
+
+/** Convert TS compilerOptions.paths to oxc-resolver alias format */
+export function convertPathsToAlias(paths: Record<string, string[]> | undefined): Record<string, string[]> | undefined {
+  if (!paths) return undefined;
+  const alias: Record<string, string[]> = {};
+  for (const key in paths) {
+    const stripWildcard = key.endsWith('/*');
+    const aliasKey = stripWildcard ? key.slice(0, -2) : key;
+    alias[aliasKey] = stripWildcard ? paths[key].map(v => (v.endsWith('/*') ? v.slice(0, -2) : v)) : paths[key];
+  }
+  return alias;
+}
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
@@ -52,7 +85,7 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.d.ts', '.d.mts', '.d.cts', '.json', '.jsonc']);
+const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
 
 /**
  * Resolver for everything outside the realm of TS module resolution.

@@ -249,7 +249,15 @@ export async function getGitIgnoredHandler(
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
   const matcher = _picomatch(Array.from(ignores), { ignore: unignores });
 
-  const isGitIgnored = (filePath: string) => matcher(relative(options.cwd, filePath));
+  const cache = new Map<string, boolean>();
+  const isGitIgnored = (filePath: string) => {
+    let result = cache.get(filePath);
+    if (result === undefined) {
+      result = matcher(relative(options.cwd, filePath));
+      cache.set(filePath, result);
+    }
+    return result;
+  };
 
   return timerify(isGitIgnored);
 }

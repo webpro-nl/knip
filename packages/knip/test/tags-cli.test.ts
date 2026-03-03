@@ -19,10 +19,6 @@ test('Include or exclude tagged exports (package.json)', async () => {
   assert(issues.exports['tags.ts']['NS.UnusedInternal']);
   assert(issues.exports['tags.ts']['NS.UnusedCustomAndInternal']);
   assert(issues.exports['tags.ts']['NS.MyCustomClass']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedCustom']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedCustomAndInternal']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedUntagged']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedCustom']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedInternal']);
@@ -33,7 +29,6 @@ test('Include or exclude tagged exports (package.json)', async () => {
     ...baseCounters,
     exports: 7,
     types: 1,
-    classMembers: 4,
     enumMembers: 4,
     processed: 3,
     total: 3,
@@ -65,8 +60,6 @@ test('Include or exclude tagged exports (package.json/exclude)', async () => {
 
   assert(issues.exports['tags.ts']['NS.UnusedUntagged']);
   assert(issues.exports['tags.ts']['NS.UnusedInternal']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedUntagged']);
-  assert(issues.classMembers['tags.ts']['MyClass.UnusedInternal']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedUntagged']);
   assert(issues.enumMembers['tags.ts']['MyEnum.UnusedInternal']);
 
@@ -85,7 +78,6 @@ test('Include or exclude tagged exports (package.json/exclude)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 3,
-    classMembers: 2,
     enumMembers: 2,
     processed: 3,
     total: 3,

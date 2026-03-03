@@ -48,7 +48,7 @@
     },
     "exclude": {
       "title": "Exclude issue types from the report",
-      "examples": ["classMembers", "enumMembers"],
+      "examples": ["enumMembers"],
       "$ref": "#/definitions/issueTypes"
     },
     "ignoreExportsUsedInFile": {
@@ -101,7 +101,7 @@
       "examples": [
         {
           "src/generated/**": ["exports", "types"],
-          "**/*.generated.ts": ["exports", "classMembers"]
+          "**/*.generated.ts": ["exports"]
         }
       ],
       "type": "object",
@@ -139,9 +139,6 @@
           "$ref": "#/definitions/ruleValue"
         },
         "catalog": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "classMembers": {
           "$ref": "#/definitions/ruleValue"
         },
         "dependencies": {
@@ -243,7 +240,6 @@
           "nsTypes",
           "duplicates",
           "enumMembers",
-          "classMembers",
           "catalog"
         ]
       }

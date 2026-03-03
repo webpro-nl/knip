@@ -15,7 +15,7 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.config.js',
 ];
 
-export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
+export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
@@ -196,7 +196,6 @@ export const ISSUE_TYPES = [
   'types',
   'nsTypes',
   'enumMembers',
-  'classMembers',
   'duplicates',
   'catalog',
 ] as const;
@@ -215,7 +214,6 @@ export const ISSUE_TYPE_TITLE = {
   types: 'Unused exported types',
   nsTypes: 'Exported types in used namespace',
   enumMembers: 'Unused exported enum members',
-  classMembers: 'Unused exported class members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
 } as const;
@@ -238,11 +236,6 @@ export const FIX_FLAGS = {
   WITH_NEWLINE: 1 << 2, // remove with newline
 } as const;
 
-export const MEMBER_FLAGS = {
-  NONE: 0,
-  SETTER: 1 << 0,
-} as const;
-
 export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
@@ -257,5 +250,3 @@ export const IMPORT_FLAGS = {
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
 } as const;
-
-export const EMPTY_ARRAY: readonly never[] = [];

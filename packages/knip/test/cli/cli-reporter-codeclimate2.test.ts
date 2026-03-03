@@ -22,7 +22,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: 'Unlisted dependency: unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 9, column: 28 }, end: { line: 9, column: 28 } } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 9, column: 27 }, end: { line: 9, column: 27 } } },
       severity: 'major',
     },
     {
@@ -30,7 +30,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unlisted dependencies',
       description: 'Unlisted dependency: @org/unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 10, column: 28 }, end: { line: 10, column: 28 } } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 10, column: 27 }, end: { line: 10, column: 27 } } },
       severity: 'major',
     },
     {
@@ -38,7 +38,7 @@ test('knip --reporter codeclimate (files, unlisted & unresolved)', () => {
       check_name: 'Unresolved imports',
       description: 'Unresolved import: ./unresolved',
       categories: ['Bug Risk'],
-      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 25 }, end: { line: 8, column: 25 } } },
+      location: { path: 'src/index.ts', positions: { begin: { line: 8, column: 24 }, end: { line: 8, column: 24 } } },
       severity: 'major',
     },
   ];

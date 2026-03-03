@@ -33,3 +33,15 @@ export * from './something.generated';
 
 /** @ignoreunresolved */
 const NS = require('./commmonjs');
+
+export interface UsedViaJSDoc {
+  name: string;
+}
+
+export interface UnusedInterface {
+  value: number;
+}
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface InternalWithLineComment {}

@@ -6,7 +6,6 @@ import { DependencyDeputy } from './DependencyDeputy.ts';
 import { analyze } from './graph/analyze.ts';
 import { build } from './graph/build.ts';
 import { IssueCollector } from './IssueCollector.ts';
-import { PrincipalFactory } from './PrincipalFactory.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
@@ -21,7 +20,7 @@ export const run = async (options: MainOptions) => {
 
   const chief = new ConfigurationChief(options);
   const deputy = new DependencyDeputy(options);
-  const factory = new PrincipalFactory();
+  const principals = new Map<string, import('./ProjectPrincipal.ts').ProjectPrincipal>();
   const streamer = new ConsoleStreamer(options);
   const collector = new IssueCollector(options);
   const counselor = new CatalogCounselor(options);
@@ -44,7 +43,7 @@ export const run = async (options: MainOptions) => {
     collector,
     counselor,
     deputy,
-    factory,
+    principals,
     isGitIgnored,
     streamer,
     workspaces,
@@ -58,7 +57,6 @@ export const run = async (options: MainOptions) => {
     collector,
     deputy,
     entryPaths,
-    factory,
     graph,
     streamer,
     unreferencedFiles,
@@ -83,7 +81,7 @@ export const run = async (options: MainOptions) => {
       chief,
       collector,
       analyze: reAnalyze,
-      factory,
+      principals,
       graph,
       isIgnored,
       onFileChange,

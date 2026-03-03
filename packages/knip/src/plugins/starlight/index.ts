@@ -1,4 +1,3 @@
-import type ts from 'typescript';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -13,8 +12,8 @@ const enablers = ['@astrojs/starlight'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const componentPaths = getComponentPathsFromSourceFile(program);
   return Array.from(componentPaths).map(id => toProductionEntry(id));
 };
 

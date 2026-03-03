@@ -1,25 +1,26 @@
 import picomatch from 'picomatch';
+import stripJsonComments from 'strip-json-comments';
 import { _getInputsFromScripts } from './binaries/index.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { isDefaultPattern, type Workspace } from './ConfigurationChief.ts';
-import { ROOT_WORKSPACE_NAME } from './constants.ts';
+import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import { getFilteredScripts } from './manifest/helpers.ts';
 import { PluginEntries, Plugins } from './plugins.ts';
 import type {
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
-  GetSourceFile,
   HandleInput,
   Plugin,
   RegisterCompiler,
-  RegisterVisitor,
+  RegisterVisitorsOptions,
   WorkspaceConfiguration,
 } from './types/config.ts';
 import type { ConfigurationHint } from './types/issues.ts';
 import type { PluginName } from './types/PluginNames.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
-import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
+import { parseSync, Visitor, rawTransferSupported } from 'oxc-parser';
+import { defaultParseOptions } from './typescript/visitors/helpers.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';
@@ -42,6 +43,59 @@ import { basename, dirname, extname, isInternal, join } from './util/path.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
 
+const workerParseOptions = { sourceType: 'unambiguous' as const, experimentalRawTransfer: rawTransferSupported() };
+
+const isExternalReExportsOnly = (sourceText: string, filePath: string): boolean => {
+  try {
+    const ext = extname(filePath);
+    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') return false;
+    const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
+    const result = parseSync(parseFileName, sourceText, workerParseOptions);
+    const mod = result.module;
+    if (mod.staticExports.length === 0) return false;
+    for (const se of mod.staticExports) {
+      for (const entry of se.entries) {
+        if (!entry.moduleRequest) return false;
+        if (isInternal(entry.moduleRequest.value)) return false;
+      }
+    }
+    if (mod.staticImports.length > 0) return false;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const collectJsonStringLiterals = (obj: unknown, literals: Set<string>) => {
+  if (typeof obj === 'string') {
+    literals.add(obj);
+  } else if (Array.isArray(obj)) {
+    for (const item of obj) collectJsonStringLiterals(item, literals);
+  } else if (obj && typeof obj === 'object') {
+    for (const val of Object.values(obj)) collectJsonStringLiterals(val, literals);
+  }
+};
+
+const collectStringLiterals = (sourceText: string, filePath: string): Set<string> => {
+  const literals = new Set<string>();
+  try {
+    const ext = extname(filePath);
+    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') {
+      collectJsonStringLiterals(JSON.parse(stripJsonComments(sourceText, { trailingCommas: true })), literals);
+      return literals;
+    }
+    const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
+    const result = parseSync(parseFileName, sourceText, workerParseOptions);
+    const visitor = new Visitor({
+      Literal(node: any) {
+        if (typeof node.value === 'string') literals.add(node.value);
+      },
+    });
+    visitor.visit(result.program);
+  } catch {}
+  return literals;
+};
+
 type WorkspaceManagerOptions = {
   name: string;
   dir: string;
@@ -51,7 +105,7 @@ type WorkspaceManagerOptions = {
   rootManifest: PackageJson | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -83,7 +137,7 @@ export class WorkspaceWorker {
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -109,7 +163,7 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     handleInput,
     findWorkspaceByFilePath,
-    getSourceFile,
+    readFile,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -126,7 +180,7 @@ export class WorkspaceWorker {
 
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
-    this.getSourceFile = getSourceFile;
+    this.readFile = readFile;
 
     this.options = options;
 
@@ -257,10 +311,10 @@ export class WorkspaceWorker {
     }
   }
 
-  public registerVisitors(registerVisitors: RegisterVisitor) {
+  public registerVisitors(options: RegisterVisitorsOptions) {
     for (const pluginName of this.enabledPlugins) {
       const plugin = Plugins[pluginName];
-      if (plugin.registerVisitors) plugin.registerVisitors({ registerVisitors });
+      if (plugin.registerVisitors) plugin.registerVisitors(options);
     }
   }
 
@@ -387,8 +441,8 @@ export class WorkspaceWorker {
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
           if (extname(configFilePath) !== '.json') {
-            const sourceFile = this.getSourceFile(configFilePath);
-            if (sourceFile && isExternalReExportsOnly(sourceFile)) {
+            const sourceText = this.readFile(configFilePath);
+            if (sourceText && isExternalReExportsOnly(sourceText, configFilePath)) {
               cache.resolveConfig = [];
             }
           }
@@ -409,10 +463,11 @@ export class WorkspaceWorker {
         }
 
         if (plugin.resolveFromAST) {
-          const sourceFile = this.getSourceFile(configFilePath);
-          const resolveASTOpts = { ...resolveOpts, getSourceFile: this.getSourceFile };
-          if (sourceFile) {
-            const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
+          const sourceText = this.readFile(configFilePath);
+          if (sourceText) {
+            const result = parseSync(configFilePath, sourceText, defaultParseOptions);
+            const resolveASTOpts = { ...resolveOpts, readFile: this.readFile };
+            const inputs = plugin.resolveFromAST(result.program, resolveASTOpts);
             for (const input of inputs) addInput(input, configFilePath);
             cache.resolveFromAST = inputs;
           }
@@ -479,9 +534,9 @@ export class WorkspaceWorker {
     const collect = (filePath: string) => {
       if (visited.has(filePath)) return;
       visited.add(filePath);
-      const sourceFile = this.getSourceFile(filePath);
-      if (!sourceFile) return;
-      for (const literal of collectStringLiterals(sourceFile)) {
+      const sourceText = this.readFile(filePath);
+      if (!sourceText) return;
+      for (const literal of collectStringLiterals(sourceText, filePath)) {
         literals.add(literal);
         if (isInternal(literal)) collect(join(dirname(filePath), literal));
       }

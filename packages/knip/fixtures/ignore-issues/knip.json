@@ -3,6 +3,6 @@
   "includeEntryExports": true,
   "ignoreIssues": {
     "src/generated/**": ["exports", "types"],
-    "**/*.generated.ts": ["exports", "classMembers"]
+    "**/*.generated.ts": ["exports"]
   }
 }

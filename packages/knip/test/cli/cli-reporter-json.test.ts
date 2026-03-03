@@ -68,8 +68,8 @@ test('knip --reporter json (exports & types)', () => {
         enumMembers: {},
         duplicates: [
           [
-            { name: 'exportedResult', line: 26, col: 13, pos: 769 },
-            { name: 'default', line: 30, col: 15, pos: 854 },
+            { name: 'exportedResult', line: 26, col: 14, pos: 770 },
+            { name: 'default', line: 30, col: 16, pos: 855 },
           ],
         ],
         catalog: [],

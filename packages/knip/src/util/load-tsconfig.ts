@@ -1,14 +1,101 @@
-import ts from 'typescript';
-import { isFile } from './fs.ts';
-import { dirname } from './path.ts';
+import { readFileSync } from 'node:fs';
+import { parseTsconfig } from 'get-tsconfig';
+import stripJsonComments from 'strip-json-comments';
+import type { CompilerOptions } from '../types/project.ts';
+import { isFile as _isFile } from './fs.ts';
+import { _syncGlob } from './glob.ts';
+import { dirname, isAbsolute, join } from './path.ts';
+
+const hasGlobChar = (p: string) => p.includes('*') || p.includes('?');
+const hasExtension = (p: string) => {
+  const last = p.lastIndexOf('/');
+  const base = last >= 0 ? p.slice(last + 1) : p;
+  return base !== '.' && base !== '..' && base.includes('.');
+};
+
+const resolvePatterns = (patterns: string[] | undefined, dir: string, expandDirs = false): string[] | undefined => {
+  if (!patterns) return undefined;
+  return patterns.map(p => {
+    const resolved = isAbsolute(p) ? p : join(dir, p);
+    return expandDirs && !hasGlobChar(p) && !hasExtension(p) ? join(resolved, '**/*') : resolved;
+  });
+};
+
+const DEFAULT_INCLUDE = ['**/*'];
+
+const TS_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs']);
+const isDtsExt = /\.d\.(m|c)?ts$/;
+const isTsRelevant = (filePath: string) => {
+  if (isDtsExt.test(filePath)) return true;
+  const ext = filePath.slice(filePath.lastIndexOf('.'));
+  return TS_EXTENSIONS.has(ext);
+};
+
+const expandFileNames = (
+  dir: string,
+  compilerOptions: CompilerOptions,
+  include?: string[],
+  exclude?: string[],
+  files?: string[]
+): string[] => {
+  const result: string[] = [];
+
+  if (files) {
+    for (const file of files) result.push(file);
+  }
+
+  const effectiveExclude = [...(exclude ?? []), join(dir, 'node_modules/**')];
+  if (compilerOptions.outDir) {
+    effectiveExclude.push(join(compilerOptions.outDir, '**'));
+  }
+
+  const effectiveInclude = include ?? (files ? undefined : DEFAULT_INCLUDE.map(p => join(dir, p)));
+  if (effectiveInclude) {
+    const negated = effectiveExclude.map(p => `!${p}`);
+    const globbed = _syncGlob({ patterns: [...effectiveInclude, ...negated], cwd: dir });
+    for (const f of globbed) if (isTsRelevant(f)) result.push(f);
+  }
+
+  return result;
+};
+
+const resolveConfig = (tsConfigFilePath: string) => {
+  try {
+    return parseTsconfig(tsConfigFilePath);
+  } catch {
+    try {
+      const raw = readFileSync(tsConfigFilePath, 'utf8');
+      return JSON.parse(stripJsonComments(raw));
+    } catch {
+      return undefined;
+    }
+  }
+};
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
-  if (isFile(tsConfigFilePath)) {
-    const config = ts.readConfigFile(tsConfigFilePath, ts.sys.readFile);
-    const parsedConfig = ts.parseJsonConfigFileContent(config.config, ts.sys, dirname(tsConfigFilePath));
-    const compilerOptions = parsedConfig.options ?? {};
-    const fileNames = parsedConfig.fileNames;
+  if (_isFile(tsConfigFilePath)) {
+    const config = resolveConfig(tsConfigFilePath);
+    if (!config) return { isFile: true, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+
+    const dir = dirname(tsConfigFilePath);
+    const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
+
+    if (compilerOptions.outDir && !isAbsolute(compilerOptions.outDir)) {
+      compilerOptions.outDir = join(dir, compilerOptions.outDir);
+    }
+    if (compilerOptions.rootDir && !isAbsolute(compilerOptions.rootDir)) {
+      compilerOptions.rootDir = join(dir, compilerOptions.rootDir);
+    }
+    if (compilerOptions.paths) {
+      compilerOptions.pathsBasePath ??= dir;
+    }
+
+    const include = resolvePatterns(config.include, dir, true);
+    const exclude = resolvePatterns(config.exclude, dir, true);
+    const files = resolvePatterns(config.files, dir);
+    const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+
     return { isFile: true, compilerOptions, fileNames };
   }
-  return { isFile: false, compilerOptions: {}, fileNames: [] };
+  return { isFile: false, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
 };

@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
-import type { PrincipalFactory } from '../PrincipalFactory.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
@@ -28,7 +27,7 @@ type WatchOptions = {
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
-  factory: PrincipalFactory;
+  principals: Map<string, ProjectPrincipal>;
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
   onFileChange?: OnFileChange;
@@ -50,7 +49,7 @@ export const getSessionHandler = async (
     chief,
     collector,
     analyze,
-    factory,
+    principals,
     graph,
     isIgnored,
     onFileChange,
@@ -77,7 +76,7 @@ export const getSessionHandler = async (
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (!workspace) continue;
 
-      const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+      const principal = principals.get(workspace.pkgName);
       if (!principal) continue;
 
       switch (change.type) {
@@ -94,8 +93,8 @@ export const getSessionHandler = async (
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
         default: {
-          const cached = principal.backend.fileManager.sourceFileCache.get(filePath);
-          if (cached && cached.text === readFileSync(filePath, 'utf8')) {
+          const cached = principal.backend.fileManager.sourceTextCache.get(filePath);
+          if (cached !== undefined && cached === readFileSync(filePath, 'utf8')) {
             debugLog(workspace.name, `Watcher: = ${relativePath}`);
             continue;
           }
@@ -118,14 +117,14 @@ export const getSessionHandler = async (
     for (const filePath of added) cachedUnusedFiles.add(filePath);
     for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
 
-    const filePaths = factory.getPrincipals().flatMap(p => p.getUsedResolvedFiles());
+    const filePaths = [...principals.values()].flatMap(p => p.getUsedResolvedFiles());
 
     if (added.size > 0 || deleted.size > 0) {
       graph.clear();
       for (const filePath of filePaths) {
         const workspace = chief.findWorkspaceByFilePath(filePath);
         if (workspace) {
-          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+          const principal = principals.get(workspace.pkgName);
           if (principal) analyzeSourceFile(filePath, principal);
         }
       }
@@ -138,7 +137,7 @@ export const getSessionHandler = async (
           analyzedFiles.delete(filePath);
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            const principal = principals.get(workspace.pkgName);
             if (principal?.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
           }
         }
@@ -148,7 +147,7 @@ export const getSessionHandler = async (
         if (!graph.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            const principal = principals.get(workspace.pkgName);
             if (principal) analyzeSourceFile(filePath, principal);
           }
         }
@@ -158,7 +157,7 @@ export const getSessionHandler = async (
         if (!cachedUnusedFiles.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
+            const principal = principals.get(workspace.pkgName);
             if (principal) analyzeSourceFile(filePath, principal);
           }
         }
