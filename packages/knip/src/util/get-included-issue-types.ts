@@ -11,7 +11,7 @@ type GetIncludedIssueTypesOptions = {
 };
 
 /** @internal */
-export const defaultExcludedIssueTypes = ['classMembers', 'nsExports', 'nsTypes'];
+export const defaultExcludedIssueTypes = ['nsExports', 'nsTypes'];
 const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));

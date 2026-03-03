@@ -37,7 +37,6 @@ type Row = {
   nsTypes?: Items;
   duplicates?: Array<Items>;
   enumMembers?: Record<string, Items>;
-  classMembers?: Record<string, Items>;
   catalog?: Items;
 };
 
@@ -71,7 +70,6 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
       ...(report.types && { types: [] }),
       ...(report.nsTypes && { nsTypes: [] }),
       ...(report.enumMembers && { enumMembers: {} }),
-      ...(report.classMembers && { classMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),
       ...(report.catalog && { catalog: [] }),
     };
@@ -88,7 +86,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {
             symbols && json[filePath][type]?.push(symbols.map(convert));
-          } else if (type === 'enumMembers' || type === 'classMembers') {
+          } else if (type === 'enumMembers') {
             const item = json[filePath][type];
             if (parentSymbol && item) {
               item[parentSymbol] = item[parentSymbol] ?? [];

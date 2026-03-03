@@ -104,10 +104,6 @@ const main = async () => {
       logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
     }
 
-    if (options.isIsolateWorkspaces && options.includedIssueTypes.classMembers) {
-      logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
-    }
-
     if (
       (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
       (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)

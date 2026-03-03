@@ -133,7 +133,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Duplicate exports',
       description: 'Duplicate export: exportedResult',
       categories: ['Duplication'],
-      location: { path: 'my-module.ts', positions: { begin: { line: 26, column: 13 }, end: { line: 26, column: 13 } } },
+      location: { path: 'my-module.ts', positions: { begin: { line: 26, column: 14 }, end: { line: 26, column: 14 } } },
       severity: 'major',
     },
     {
@@ -141,7 +141,7 @@ test('knip --reporter codeclimate (exports & types)', () => {
       check_name: 'Duplicate exports',
       description: 'Duplicate export: default',
       categories: ['Duplication'],
-      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 15 }, end: { line: 30, column: 15 } } },
+      location: { path: 'my-module.ts', positions: { begin: { line: 30, column: 16 }, end: { line: 30, column: 16 } } },
       severity: 'major',
     },
   ];

@@ -1,15 +1,21 @@
-import ts from 'typescript';
+import { parseSync, Visitor, rawTransferSupported, type ParseResult, type VisitorObject } from 'oxc-parser';
+import { isStringLiteral, getStringValue, stripQuotes } from './typescript/visitors/helpers.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
-import { ANONYMOUS, DEFAULT_EXTENSIONS, MEMBER_FLAGS, PUBLIC_TAG } from './constants.ts';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from './types/config.ts';
-import type { Export, ExportMember, FileNode, ModuleGraph } from './types/module-graph.ts';
-import type { Paths, PrincipalOptions } from './types/project.ts';
-import { createHosts } from './typescript/create-hosts.ts';
+import { ANONYMOUS, DEFAULT_EXTENSIONS } from './constants.ts';
+import type {
+  GetImportsAndExportsOptions,
+  IgnoreExportsUsedInFile,
+  PluginVisitorContext,
+  PluginVisitorObject,
+} from './types/config.ts';
+import type { FileNode, ModuleGraph } from './types/module-graph.ts';
+import type { CompilerOptions, Paths, PrincipalOptions } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
-import type { ResolveModuleNames } from './typescript/resolve-module-names.ts';
-import type { BoundSourceFile } from './typescript/SourceFile.ts';
+import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
+import { coreVisitorObject } from './typescript/visitors/walk.ts';
+import { createCustomModuleResolver, type ResolveModuleNames } from './typescript/resolve-module-names.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
@@ -17,8 +23,38 @@ import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath } from './util/to-source-path.ts';
 
+const parseOptions = { sourceType: 'unambiguous' as const, experimentalRawTransfer: rawTransferSupported() };
+
+const _requireSpecs: string[] = [];
+const _requireVisitor = new Visitor({
+  CallExpression(node) {
+    if (node.callee?.type === 'Identifier' && node.callee.name === 'require') {
+      const arg = node.arguments?.[0];
+      if (isStringLiteral(arg)) _requireSpecs.push(getStringValue(arg)!);
+    }
+    if (
+      node.callee?.type === 'MemberExpression' &&
+      !node.callee.computed &&
+      node.callee.object?.type === 'Identifier' &&
+      node.callee.object.name === 'require' &&
+      node.callee.property?.name === 'resolve'
+    ) {
+      const arg = node.arguments?.[0];
+      if (isStringLiteral(arg)) _requireSpecs.push(getStringValue(arg)!);
+    }
+  },
+  TSImportEqualsDeclaration(node) {
+    if (node.moduleReference?.type === 'TSExternalModuleReference') {
+      const expr = node.moduleReference.expression;
+      if (isStringLiteral(expr)) _requireSpecs.push(getStringValue(expr)!);
+    }
+  },
+});
+
+const _jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)/g;
+
 // These compiler options override local options
-const baseCompilerOptions: ts.CompilerOptions = {
+const baseCompilerOptions: CompilerOptions = {
   allowJs: true,
   allowSyntheticDefaultImports: true,
   declaration: false,
@@ -26,7 +62,7 @@ const baseCompilerOptions: ts.CompilerOptions = {
   esModuleInterop: true,
   inlineSourceMap: false,
   inlineSources: false,
-  jsx: ts.JsxEmit.Preserve,
+  jsx: 1,
   jsxImportSource: undefined,
   lib: [],
   noEmit: true,
@@ -36,20 +72,12 @@ const baseCompilerOptions: ts.CompilerOptions = {
   types: ['node'],
 };
 
-const tsCreateProgram = timerify(ts.createProgram);
+interface ResolvedModule {
+  resolvedFileName: string;
+  isExternalLibraryImport: boolean;
+}
 
-/**
- * Abstracts away TypeScript API from the main flow
- *
- * - Provided by the principal factory
- * - Collects entry and project paths
- * - Installs TS backend: file manager, language and compiler hosts for the TS program
- * - Creates TS program and typechecker
- * - Run async compilers ahead of time since the TS machinery is fully sync
- * - Bridge between main flow and TS AST walker
- */
 export class ProjectPrincipal {
-  // Configured by user and returned from plugins
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
   programPaths = new Set<string>();
@@ -57,10 +85,17 @@ export class ProjectPrincipal {
   // Don't report unused exports of config/plugin entry files
   skipExportsAnalysis = new Set<string>();
 
-  visitors: Visitors = { dynamicImport: [], script: [] };
+  pluginCtx: PluginVisitorContext = {
+    filePath: '',
+    sourceText: '',
+    addScript: () => {},
+    addImport: () => {},
+  };
+  pluginVisitorObjects: PluginVisitorObject[] = [];
+  private _visitor: Visitor | undefined;
 
   cwd: string;
-  compilerOptions: ts.CompilerOptions;
+  compilerOptions: CompilerOptions;
   extensions: Set<string>;
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
@@ -72,15 +107,10 @@ export class ProjectPrincipal {
 
   backend: {
     fileManager: SourceFileManager;
-    compilerHost?: ts.CompilerHost;
-    resolveModuleNames: ResolveModuleNames;
-    program?: ts.Program;
-    typeChecker?: ts.TypeChecker;
-    languageServiceHost: ts.LanguageServiceHost;
+    resolveModule: ResolveModuleNames;
   };
 
-  findReferences?: ts.LanguageService['findReferences'];
-  getImplementationAtPosition?: ts.LanguageService['getImplementationAtPosition'];
+  private resolvedFiles = new Set<string>();
 
   constructor(options: MainOptions, { compilerOptions, compilers, pkgName, toSourceFilePath }: PrincipalOptions) {
     this.compilerOptions = {
@@ -98,6 +128,7 @@ export class ProjectPrincipal {
     this.isWatch = options.isWatch || options.isSession;
     this.cache = new CacheConsultant(pkgName || ANONYMOUS, options);
     this.toSourceFilePath = toSourceFilePath;
+    this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
 
     // @ts-expect-error Don't want to ignore this, but we're not touching this until after init()
     this.backend = {
@@ -106,19 +137,13 @@ export class ProjectPrincipal {
   }
 
   init() {
-    const { compilerHost, resolveModuleNames, languageServiceHost } = createHosts({
-      cwd: this.cwd,
-      compilerOptions: this.compilerOptions,
-      entryPaths: this.entryPaths,
-      compilers: [this.syncCompilers, this.asyncCompilers],
-      toSourceFilePath: this.toSourceFilePath,
-      useResolverCache: !this.isWatch,
-      fileManager: this.backend.fileManager,
-    });
-
-    this.backend.compilerHost = compilerHost;
-    this.backend.resolveModuleNames = resolveModuleNames;
-    this.backend.languageServiceHost = languageServiceHost;
+    const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
+    this.backend.resolveModule = createCustomModuleResolver(
+      this.compilerOptions,
+      customCompilerExtensions,
+      this.toSourceFilePath,
+      !this.isWatch
+    );
   }
 
   addPaths(paths: Paths, basePath: string) {
@@ -132,28 +157,6 @@ export class ProjectPrincipal {
         this.compilerOptions.paths[key] = prefixes;
       }
     }
-  }
-
-  addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
-    this.syncCompilers = new Map([...this.syncCompilers, ...compilers[0]]);
-    this.asyncCompilers = new Map([...this.asyncCompilers, ...compilers[1]]);
-    this.extensions = new Set([...this.extensions, ...getCompilerExtensions(compilers)]);
-  }
-
-  /**
-   * `ts.createProgram()` resolves files starting from the provided entry/root
-   * files. Calling `program.getTypeChecker()` binds files and symbols
-   */
-  private createProgram() {
-    this.backend.program = tsCreateProgram(
-      [...this.entryPaths, ...this.programPaths],
-      this.compilerOptions,
-      this.backend.compilerHost,
-      this.backend.program
-    );
-
-    const typeChecker = timerify(this.backend.program.getTypeChecker);
-    this.backend.typeChecker = typeChecker();
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -207,138 +210,244 @@ export class ProjectPrincipal {
     }
   }
 
-  public getUsedResolvedFiles() {
-    this.createProgram();
-    const sourceFiles = this.getProgramSourceFiles();
-    return Array.from(this.projectPaths).filter(filePath => sourceFiles.has(filePath));
+  /**
+   * Walk import graph from entries, analyzing each project file inline.
+   * Each file is parsed ONCE — the parse result is used for both graph following and full analysis.
+   * For project files, analyzeFile is called with the parse result.
+   * For non-project files, lightweight import following is used.
+   */
+  public walkAndAnalyze(
+    analyzeFile: (
+      filePath: string,
+      parseResult: ParseResult | undefined,
+      sourceText: string
+    ) => Iterable<string> | undefined
+  ) {
+    this.resolvedFiles.clear();
+    const queue = [...this.entryPaths, ...this.programPaths];
+    const visited = new Set<string>();
+    let lastEntrySize = this.entryPaths.size;
+    let lastProgramSize = this.programPaths.size;
+
+    for (let i = 0; i < queue.length; i++) {
+      const filePath = queue[i];
+      if (visited.has(filePath)) continue;
+      visited.add(filePath);
+
+      const sourceText = this.backend.fileManager.readFile(filePath);
+
+      if (!sourceText) {
+        if (this.projectPaths.has(filePath)) analyzeFile(filePath, undefined, '');
+        continue;
+      }
+
+      try {
+        const ext = extname(filePath);
+        const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
+        const result = parseSync(parseFileName, sourceText, parseOptions);
+
+        this.backend.fileManager.sourceTextCache.delete(filePath);
+
+        if (this.projectPaths.has(filePath)) {
+          const internalPaths = analyzeFile(filePath, result, sourceText);
+          if (internalPaths) {
+            for (const p of internalPaths) {
+              if (!visited.has(p)) queue.push(p);
+            }
+          }
+        } else {
+          this.followImportsLightweight(result, sourceText, filePath, visited, queue);
+        }
+
+        // Pick up new entries added by analysis (e.g. from script handling)
+        if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
+          for (const p of this.entryPaths) {
+            if (!visited.has(p)) queue.push(p);
+          }
+          for (const p of this.programPaths) {
+            if (!visited.has(p)) queue.push(p);
+          }
+          lastEntrySize = this.entryPaths.size;
+          lastProgramSize = this.programPaths.size;
+        }
+      } catch {
+        // Parse error — skip this file
+      }
+    }
+
+    this.resolvedFiles = visited;
   }
 
-  private getProgramSourceFiles() {
-    const programSourceFiles = this.backend.program?.getSourceFiles().map(sourceFile => sourceFile.fileName);
-    return new Set(programSourceFiles);
+  private followImportsLightweight(
+    result: ParseResult,
+    sourceText: string,
+    filePath: string,
+    visited: Set<string>,
+    queue: string[]
+  ) {
+    const mod = result.module;
+
+    for (const si of mod.staticImports) {
+      const resolved = this.resolveSpecifier(si.moduleRequest.value, filePath);
+      if (resolved && !isInNodeModules(resolved)) {
+        if (!visited.has(resolved)) queue.push(resolved);
+      }
+    }
+
+    for (const se of mod.staticExports) {
+      for (const entry of se.entries) {
+        if (entry.moduleRequest) {
+          const resolved = this.resolveSpecifier(entry.moduleRequest.value, filePath);
+          if (resolved && !isInNodeModules(resolved)) {
+            if (!visited.has(resolved)) queue.push(resolved);
+          }
+        }
+      }
+    }
+
+    for (const di of mod.dynamicImports) {
+      const cleaned = stripQuotes(sourceText.slice(di.moduleRequest.start, di.moduleRequest.end));
+      if (cleaned && !cleaned.includes('$') && !cleaned.includes('+')) {
+        const resolved = this.resolveSpecifier(cleaned, filePath);
+        if (resolved && !isInNodeModules(resolved)) {
+          if (!visited.has(resolved)) queue.push(resolved);
+        }
+      }
+    }
+
+    if (!isInNodeModules(filePath)) {
+      _requireSpecs.length = 0;
+      _requireVisitor.visit(result.program);
+      for (const spec of _requireSpecs) {
+        const resolved = this.resolveSpecifier(spec, filePath);
+        if (resolved && !isInNodeModules(resolved)) {
+          if (!visited.has(resolved)) queue.push(resolved);
+        }
+      }
+    }
+
+    for (const comment of result.comments) {
+      if (comment.type !== 'Block') continue;
+      let m: RegExpExecArray | null;
+      _jsDocImportRe.lastIndex = 0;
+      while ((m = _jsDocImportRe.exec(comment.value)) !== null) {
+        const resolved = this.resolveSpecifier(m[1], filePath);
+        if (resolved && !isInNodeModules(resolved)) {
+          if (!visited.has(resolved)) queue.push(resolved);
+        }
+      }
+    }
+  }
+
+  /**
+   * Legacy graph walk without inline analysis.
+   * Only used when walkAndAnalyze is not applicable (e.g. watch mode re-walks).
+   */
+  public getUsedResolvedFiles() {
+    this.resolvedFiles.clear();
+    const queue = [...this.entryPaths, ...this.programPaths];
+    const visited = new Set<string>();
+
+    for (let i = 0; i < queue.length; i++) {
+      const filePath = queue[i];
+      if (visited.has(filePath)) continue;
+      visited.add(filePath);
+
+      const sourceText = this.backend.fileManager.readFile(filePath);
+      if (!sourceText) continue;
+
+      try {
+        const ext = extname(filePath);
+        const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
+        const result = parseSync(parseFileName, sourceText, parseOptions);
+        this.followImportsLightweight(result, sourceText, filePath, visited, queue);
+      } catch {
+        // Parse error — skip this file
+      }
+    }
+
+    this.resolvedFiles = visited;
+    return Array.from(this.projectPaths).filter(filePath => visited.has(filePath));
+  }
+
+  private resolveSpecifier(specifier: string, containingFile: string): string | undefined {
+    return this.backend.resolveModule(specifier, containingFile)?.resolvedFileName;
   }
 
   public getUnreferencedFiles() {
-    const sourceFiles = this.getProgramSourceFiles();
-    return Array.from(this.projectPaths).filter(filePath => !sourceFiles.has(filePath));
+    return Array.from(this.projectPaths).filter(filePath => !this.resolvedFiles.has(filePath));
   }
 
   public analyzeSourceFile(
     filePath: string,
     options: GetImportsAndExportsOptions,
-    ignoreExportsUsedInFile: IgnoreExportsUsedInFile
+    ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
+    parseResult?: ParseResult,
+    sourceText?: string
   ) {
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return fd.meta.data;
 
-    const typeChecker = this.backend.typeChecker;
-
-    if (!typeChecker) throw new Error('TypeChecker must be initialized before source file analysis');
-
-    // We request it from `fileManager` directly as `program` does not contain cross-referenced files
-    const sourceFile: BoundSourceFile | undefined = this.backend.fileManager.getSourceFile(filePath);
-
-    if (!sourceFile) throw new Error(`Unable to find ${filePath}`);
+    sourceText ??= this.backend.fileManager.readFile(filePath);
 
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
     if (options.isFixExports || options.isFixTypes) {
       const ext = extname(filePath);
-      if (!DEFAULT_EXTENSIONS.includes(ext) && (this.syncCompilers.has(ext) || this.asyncCompilers.has(ext))) {
+      if (!DEFAULT_EXTENSIONS.has(ext) && (this.syncCompilers.has(ext) || this.asyncCompilers.has(ext))) {
         options = { ...options, isFixExports: false, isFixTypes: false };
       }
     }
 
-    const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
+    const resolveModule = (specifier: string, containingFile: string): ResolvedModule | undefined => {
+      const resolved = this.backend.resolveModule(specifier, containingFile);
+      if (!resolved) return undefined;
+      return {
+        resolvedFileName: resolved.resolvedFileName,
+        isExternalLibraryImport: resolved.isExternalLibraryImport ?? false,
+      };
+    };
+
+    if (!this._visitor) this._visitor = this.buildVisitor();
 
     return _getImportsAndExports(
-      sourceFile,
-      resolve,
-      typeChecker,
+      filePath,
+      sourceText,
+      resolveModule,
       options,
       ignoreExportsUsedInFile,
       skipExports,
-      this.visitors
+      this._visitor,
+      this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
+      parseResult
     );
+  }
+
+  private buildVisitor(): Visitor {
+    if (this.pluginVisitorObjects.length === 0) return new Visitor(coreVisitorObject);
+    type HandlerMap = Record<string, ((node: never) => void) | undefined>;
+    const merged: HandlerMap = { ...(coreVisitorObject as HandlerMap) };
+    for (const obj of this.pluginVisitorObjects) {
+      const handlers = obj as HandlerMap;
+      for (const key in handlers) {
+        const existing = merged[key];
+        const pluginFn = handlers[key];
+        if (!pluginFn) continue;
+        if (existing) {
+          merged[key] = (node: never) => {
+            existing(node);
+            pluginFn(node);
+          };
+        } else {
+          merged[key] = pluginFn;
+        }
+      }
+    }
+    return new Visitor(merged as VisitorObject);
   }
 
   invalidateFile(filePath: string) {
     this.backend.fileManager.invalidate(filePath);
-  }
-
-  /**
-   * Find unused class members:
-   * - Include members with no or only write references
-   * - Exclude setters and members implementing external types
-   */
-  public findUnusedMembers(filePath: string, members: ExportMember[]) {
-    if (!this.findReferences || !this.getImplementationAtPosition) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-      this.getImplementationAtPosition = timerify(languageService.getImplementationAtPosition);
-    }
-
-    return members.filter(member => {
-      if (member.jsDocTags.has(PUBLIC_TAG)) return false;
-
-      const implementations =
-        // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.getImplementationAtPosition!(filePath, member.pos)?.filter(
-          impl => impl.fileName !== filePath || impl.textSpan.start !== member.pos
-        ) ?? [];
-
-      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const referencedSymbols = this.findReferences!(filePath, member.pos) ?? [];
-
-      if (referencedSymbols.length > 1 && referencedSymbols.some(sym => isInNodeModules(sym.definition.fileName))) {
-        return false;
-      }
-
-      const refs = referencedSymbols
-        .filter(
-          sym =>
-            !implementations.some(
-              impl =>
-                impl.fileName === sym.definition.fileName &&
-                impl.textSpan.start === sym.definition.textSpan.start &&
-                impl.textSpan.length === sym.definition.textSpan.length
-            )
-        )
-        .flatMap(refs => refs.references)
-        .filter(ref => !ref.isDefinition);
-
-      if (refs.length === 0) return true;
-      if (member.flags & MEMBER_FLAGS.SETTER) return false;
-      return !refs.some(ref => !ref.isWriteAccess);
-    });
-  }
-
-  public hasExternalReferences(filePath: string, exportedItem: Export) {
-    if (exportedItem.jsDocTags.has(PUBLIC_TAG)) return false;
-
-    if (!this.findReferences) {
-      const languageService = ts.createLanguageService(this.backend.languageServiceHost, ts.createDocumentRegistry());
-      this.findReferences = timerify(languageService.findReferences);
-    }
-
-    const referencedSymbols = this.findReferences(filePath, exportedItem.pos);
-
-    if (!referencedSymbols?.length) return false;
-
-    const externalRefs = referencedSymbols
-      .flatMap(refs => refs.references)
-      .filter(ref => !ref.isDefinition && ref.fileName !== filePath)
-      .filter(ref => {
-        // Filter out re-exports
-        const sourceFile = this.backend.program?.getSourceFile(ref.fileName);
-        if (!sourceFile) return true;
-        // @ts-expect-error ts.getTokenAtPosition is internal fn
-        const node = ts.getTokenAtPosition(sourceFile, ref.textSpan.start);
-        if (!node?.parent?.parent?.parent) return true;
-        return !(ts.isExportSpecifier(node.parent) && node.parent.parent.parent.moduleSpecifier);
-      });
-
-    return externalRefs.length > 0;
   }
 
   reconcileCache(graph: ModuleGraph) {

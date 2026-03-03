@@ -59,7 +59,7 @@ class IssueFixer {
     const touchedFiles = new Set<string>();
 
     const types = [
-      ...(this.options.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
+      ...(this.options.isFixUnusedTypes ? (['types', 'nsTypes', 'enumMembers'] as const) : []),
       ...(this.options.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
     ];
 

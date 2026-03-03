@@ -1,4 +1,4 @@
-import type { CompilerOptions } from 'typescript';
+import type { CompilerOptions } from '../types/project.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import { DEFAULT_EXTENSIONS } from '../constants.ts';
 import { debugLog, debugLogArray } from './debug.ts';
@@ -6,7 +6,7 @@ import { isDirectory } from './fs.ts';
 import { _glob, _syncGlob, prependDirToPattern } from './glob.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
-const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
+const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 

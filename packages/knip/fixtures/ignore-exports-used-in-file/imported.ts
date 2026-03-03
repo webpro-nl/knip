@@ -24,3 +24,12 @@ export default declaredThenExportedDefault;
 
 function DeclaredThenExportedNamed() {}
 export { DeclaredThenExportedNamed };
+
+export const scout = () => {};
+export const ranger = () => {};
+
+export class Paladin {
+  static ally = scout;
+}
+
+(0, ranger)();

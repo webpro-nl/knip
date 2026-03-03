@@ -5,7 +5,6 @@ import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
-import type { PrincipalFactory } from '../PrincipalFactory.ts';
 import traceReporter from '../reporters/trace.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from '../util/create-options.ts';
@@ -20,7 +19,6 @@ interface AnalyzeOptions {
   collector: IssueCollector;
   deputy: DependencyDeputy;
   entryPaths: Set<string>;
-  factory: PrincipalFactory;
   graph: ModuleGraph;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
@@ -34,7 +32,6 @@ export const analyze = async ({
   collector,
   deputy,
   entryPaths,
-  factory,
   graph,
   streamer,
   unreferencedFiles,
@@ -71,8 +68,6 @@ export const analyze = async ({
 
         if (workspace) {
           const { isIncludeEntryExports } = workspace.config;
-
-          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
           const isEntry = entryPaths.has(filePath);
 
@@ -157,35 +152,6 @@ export const analyze = async ({
                   }
                 }
 
-                if (principal && options.isReportClassMembers && exportedItem.type === 'class') {
-                  const members = exportedItem.members.filter(
-                    member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
-                  );
-                  for (const member of principal.findUnusedMembers(filePath, members)) {
-                    if (shouldIgnoreTags(member.jsDocTags)) {
-                      const identifier = `${exportedItem.identifier}.${member.identifier}`;
-                      for (const tagName of exportedItem.jsDocTags) {
-                        if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
-                          collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
-                        }
-                      }
-                      continue;
-                    }
-
-                    collector.addIssue({
-                      type: 'classMembers',
-                      filePath,
-                      workspace: workspace.name,
-                      symbol: member.identifier,
-                      parentSymbol: exportedItem.identifier,
-                      pos: member.pos,
-                      line: member.line,
-                      col: member.col,
-                      fixes: member.fix ? [member.fix] : [],
-                    });
-                  }
-                }
-
                 // This id was imported, so we bail out early
                 continue;
               }
@@ -200,9 +166,7 @@ export const analyze = async ({
               exportedItem.hasRefsInFile ||
               isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports) ||
               (hasStrictlyNsRefs &&
-                ((!options.includedIssueTypes.nsTypes && isType) ||
-                  !(options.includedIssueTypes.nsExports || isType))) ||
-              (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem))
+                ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))
             ) {
               continue;
             }

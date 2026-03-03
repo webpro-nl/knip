@@ -1,39 +1,49 @@
-import ts from 'typescript';
-import { stripQuotes } from '../../../typescript/ast-helpers.ts';
-import { hasImportSpecifier } from '../../../typescript/visitors/helpers.ts';
-import { scriptVisitor as visit } from '../../../typescript/visitors/index.ts';
+import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
 
 const tags = new Set(['$', '$sync']);
 const methods = new Set(['execa', 'execaSync', 'execaCommand', 'execaCommandSync', '$sync']);
 
-export default visit(
-  sourceFile => sourceFile.statements.some(node => hasImportSpecifier(node, 'execa')),
-  node => {
-    if (ts.isTaggedTemplateExpression(node)) {
-      if (tags.has(node.tag.getText()) || (ts.isCallExpression(node.tag) && tags.has(node.tag.expression.getText()))) {
-        return stripQuotes(node.template.getText());
+export function createExecaVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
+  return {
+    TaggedTemplateExpression(node) {
+      const tag = node.tag;
+      const tagName =
+        tag.type === 'Identifier'
+          ? tag.name
+          : tag.type === 'CallExpression' && tag.callee.type === 'Identifier'
+            ? tag.callee.name
+            : undefined;
+      if (tagName && tags.has(tagName)) {
+        for (const q of node.quasi.quasis) {
+          if (q.value.raw) ctx.addScript(q.value.raw);
+        }
       }
-    }
-
-    if (ts.isCallExpression(node)) {
-      const functionName = node.expression.getText();
-      if (methods.has(functionName)) {
-        if (functionName.startsWith('execaCommand')) {
-          if (node.arguments[0] && ts.isStringLiteral(node.arguments[0])) {
-            return stripQuotes(node.arguments[0].getText());
-          }
-        } else {
-          const [executable, args] = node.arguments;
-          if (executable && ts.isStringLiteral(executable)) {
-            const executableStr = stripQuotes(executable.getText());
-            if (args && ts.isArrayLiteralExpression(args)) {
-              const argStrings = args.elements.filter(ts.isStringLiteral).map(arg => stripQuotes(arg.getText()));
-              return [executableStr, ...argStrings].join(' ');
+    },
+    CallExpression(node) {
+      if (node.callee.type !== 'Identifier' || !methods.has(node.callee.name)) return;
+      const fnName = node.callee.name;
+      if (fnName.startsWith('execaCommand')) {
+        if (node.arguments[0] && isStringLiteral(node.arguments[0])) {
+          const val = getStringValue(node.arguments[0]);
+          if (val) ctx.addScript(val);
+        }
+      } else {
+        const executable = node.arguments[0];
+        if (executable && isStringLiteral(executable)) {
+          const executableStr = getStringValue(executable)!;
+          const args = node.arguments[1];
+          if (args?.type === 'ArrayExpression') {
+            const argStrings: string[] = [];
+            for (const a of args.elements) {
+              if (a && isStringLiteral(a)) argStrings.push(getStringValue(a)!);
             }
-            return executableStr;
+            ctx.addScript([executableStr, ...argStrings].join(' '));
+          } else {
+            ctx.addScript(executableStr);
           }
         }
       }
-    }
-  }
-);
+    },
+  };
+}

@@ -28,7 +28,6 @@ const issueTypeSchema = z.union([
   z.literal('nsTypes'),
   z.literal('duplicates'),
   z.literal('enumMembers'),
-  z.literal('classMembers'),
   z.literal('catalog'),
 ]);
 

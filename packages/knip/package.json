@@ -99,8 +99,10 @@
     "@nodelib/fs.walk": "^1.2.3",
     "fast-glob": "^3.3.3",
     "formatly": "^0.3.0",
+    "get-tsconfig": "4.13.6",
     "jiti": "^2.6.0",
     "minimist": "^1.2.8",
+    "oxc-parser": "^0.116.0",
     "oxc-resolver": "^11.19.1",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.1",
@@ -122,10 +124,6 @@
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3"
-  },
-  "peerDependencies": {
-    "@types/node": ">=18",
-    "typescript": ">=5.0.4 <7"
   },
   "engines": {
     "node": ">=18.18.0"

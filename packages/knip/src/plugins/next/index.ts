@@ -35,8 +35,8 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
 
 const production = getEntryFilePatterns();
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const pageExtensions = getPageExtensions(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const pageExtensions = getPageExtensions(program);
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
   const patterns = getEntryFilePatterns(extensions);
   return patterns.map(id => toProductionEntry(id));

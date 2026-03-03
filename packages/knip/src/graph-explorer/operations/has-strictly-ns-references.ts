@@ -31,9 +31,14 @@ export const hasStrictlyNsReferences = (
     for (const ns of importMaps.importNs.keys()) {
       if (!importMaps.refs.has(ns)) return [false, ns];
 
+      let hasMemberRef = false;
       for (const ref of importMaps.refs) {
-        if (ref.startsWith(`${ns}.`)) return [false, ns];
+        if (ref.startsWith(`${ns}.`)) {
+          hasMemberRef = true;
+          break;
+        }
       }
+      if (hasMemberRef) return [false, ns];
 
       namespace = ns;
 
