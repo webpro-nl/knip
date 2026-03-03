@@ -82,6 +82,7 @@ export const pluginsSchema = z.object({
   nuxt: pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,
+  'openapi-ts': pluginSchema,
   oclif: pluginSchema,
   oxlint: pluginSchema,
   parcel: pluginSchema,

@@ -3,6 +3,9 @@ name: workflow
 on:
   pull_request:
 
+env:
+  ROLE_ARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/role-name'
+
 jobs:
   test:
     runs-on: ubuntu-latest

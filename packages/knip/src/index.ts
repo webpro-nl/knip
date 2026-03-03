@@ -4,6 +4,6 @@ import type { MainOptions } from './util/create-options.ts';
 
 export const main = async (options: MainOptions) => {
   const { results } = await run(options);
-  if (options.isFix) await fix(results.issues, options);
+  if (options.isFix) await fix(results.issues, results.counters, options);
   return results;
 };

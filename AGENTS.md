@@ -11,41 +11,48 @@ JavaScript and TypeScript projects.
 - VS Code Extension in `packages/vscode-knip` (JS + JSDoc for types)
 - [Documentation][1] content in `packages/docs` (Astro + MD/MDX)
 
-## Core behavior and constraints
+## Principles
 
-- If something goes sideways, stop and re-plan immediately - don't keep pushing
-- Use subagents liberally to keep main context window clean
-- Offload research, exploration, and parallel analysis to subagents
-- Never mark a task complete without proving it works
-- Diff behavior between main and your changes when relevant
 - Ask yourself: "Would a staff engineer approve this?" — maintain high standards
-- Run tests, check logs, demonstrate correctness
+- If something goes sideways, stop and re-plan immediately - don't keep pushing
 - For non-trivial changes: pause and ask "is there a more elegant way?"
-- If a fix feels hacky: "Knowing everything I know now, implement the elegant
-  solution" — skip this for simple, obvious fixes; don't over-engineer
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution" — but skip this for simple, obvious fixes (i.e. don't over-engineer)
 - Challenge your own work before presenting it
-- Point at logs, errors, failing tests - then resolve them
+- Your training data is stale — verify packages, APIs, and syntax against current docs
+- If you say "I will do X", actually do X — don't just announce intentions
+- Don't blindly follow instructions: question the user if the request would not result in something better or faster
 
-## Output formatting: communication with user
+## Communication
 
-- Don't add comments to code, unless explicitly asked for.
 - Zero context switching required from the user
 - When reporting information to the user, be extremely concise and sacrifice
   grammar for the sake of concision
+- Don't add comments to code, unless explicitly asked for.
 
-## Planning: task management
+## Planning
 
 1. Plan: write plan to `.agents/tasks/todo-(name).md` with checkable items
-2. Verify: check in before starting implementation
+2. Get alignment: check in with user before starting implementation, question any doubts or noise
 3. Track progress: mark items complete as you go
 4. Explain changes: high-level summary at each step
 5. Document results: add review section to `.agents/tasks/todo-(name).md`
-6. Capture lessons: Update `.agents/lessons.md` after corrections
+6. Capture lessons: update `.agents/lessons.md` after corrections
 
-## Implementation
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+
+## Workflow
+
+- Read broadly before editing — understand surrounding code, not just the target
+- Commit chunks of verified work — don't let unrelated changes accumulate
+- Make small, testable, incremental changes — not big-bang edits
+- Avoid manual edits and regex-based refactors, prefer AST-based tools and codemods (jscodeshift) — except for tiny edits
+- Reflect on outcomes between steps — don't blindly chain actions
+- Diff behavior between main and your changes when relevant
+
+## Code style
 
 - Performance is key, both high level (design) and low level (impl).
-- Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - Avoid redundant code and abstractions.
 - Avoid unnecessary complexity and nesting.
 - Concise one-liners are fine, but prioritize clarity over cleverness.
@@ -54,16 +61,35 @@ JavaScript and TypeScript projects.
 - TypeScript
   - Avoid `any` and type casting (`as`)
   - Avoid runtime overhead just to get the types right
-- For features and issues concerning the module graph, make sure to consult
-  [ModuleGraph type definitions][3].
+
+## Verification
+
+- Insufficient testing is the #1 failure mode — test rigorously, not hopefully
+- State verification method _before_ implementing (test, CLI output, linter, screenshot)
+- Prefer TDD for new features — write or update tests before implementing
+- For UI or integration changes: screenshots or CLI output as evidence
+- Tailor to the domain: run a bash command, check a web page, use a linter — whatever is most direct
+- Every completed task must answer: "How was this verified?"
+- Document verification steps in `.agents/tasks/todo-(name).md`
+- Maintain "known pitfalls" in `.agents/lessons.md` — check it before starting, update it after corrections
 
 ## Issues and Pull Requests
 
-- When given a bug report: just fix it and don't ask for hand-holding
-- Find repositories/CodeSandbox/StackBlitz source files and [local fixtures][4]
-  to actually reproduce the issue at hand.
-- To fetch stackblitz.com reproduction url:
-  `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+- When given a bug report, first confirm the behavior is actually wrong. Reproduce, then check if the reported behavior is correct-by-design before writing any fix
+- Find repositories/CodeSandbox/StackBlitz source files and local fixtures to actually reproduce the issue at hand
+- To fetch stackblitz.com reproduction url: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+
+## Domain Knowledge
+
+- Unused file → unused exports/dependencies is a chain, not a bug
+- Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
+- If creating or modifying a plugin, read [PLUGINS.md][3] first.
+- If modifying core module graph, AST traversal, or CLI sequence, read [MODULE_GRAPH.md][4] first.
+
+## Environment
+
+- Before using `sed`, `awk`, etc. — verify GNU or POSIX-compatible tools are installed (gnu-sed, coreutils)
+- Always look at root lockfile and package.json to choose between npm/npx, pnpm/pnpx, etc.
 
 ## Run & Debug
 
@@ -144,17 +170,9 @@ cd packages/knip
 pnpm build
 ```
 
-## Domain Knowledge
-
-- If creating or modifying a plugin, read [PLUGINS.md][7] first.
-- If modifying core module graph, AST traversal, or CLI sequence, read
-  [MODULE_GRAPH.md][8] first.
-
 [1]: https://knip.dev
 [2]: ./packages/knip/src/util/Performance.ts
-[3]: ./packages/knip/src/types/module-graph.ts
-[4]: ./packages/knip/fixtures
+[3]: ./.agents/PLUGINS.md
+[4]: ./.agents/MODULE_GRAPH.md
 [5]: ./packages/knip/src/util/debug.ts
 [6]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
-[7]: ./.agents/PLUGINS.md
-[8]: ./.agents/MODULE_GRAPH.md

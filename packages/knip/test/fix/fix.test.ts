@@ -9,7 +9,7 @@ import { createOptions } from '../helpers/create-options.ts';
 test('Fix exports and dependencies', async () => {
   const cwd = await copyFixture('fixtures/fix');
   const options = await createOptions({ cwd, tags: ['-lintignore'], isFix: true });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['access.js']['UNUSED']);
   assert(issues.exports['access.js']['ACCESS']);
@@ -135,6 +135,11 @@ export const {  set: setter } = fn();
 }
 `
   );
+
+  assert.equal(counters.exports, 0);
+  assert.equal(counters.types, 0);
+  assert.equal(counters.dependencies, 0);
+  assert.equal(counters.devDependencies, 0);
 });
 
 test('Fix only exported types', async () => {

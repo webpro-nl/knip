@@ -30,7 +30,7 @@ Example:
 export const myUnusedExport = 1;
 
 /** @lintignore */
-import Unresolved from './generated/lib.js';
+import Unresolved from "./generated/lib.js";
 ```
 
 And then include (`+`) or exclude (`-`) these tagged exports from the report
@@ -41,6 +41,17 @@ knip --tags=-lintignore,-internal
 ```
 
 Tags can also be [configured in `knip.json`][2].
+
+When an excluded tag is no longer necessary because the export is actually used,
+Knip reports a **tag hint**:
+
+```sh
+Tag hints (1)
+ignored  unimported.ts  Unused tag in unimported.ts: ignored → @custom
+```
+
+This helps you clean up tags that were added to suppress issues that have since
+been resolved.
 
 ## `@public`
 
