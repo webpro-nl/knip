@@ -34,7 +34,6 @@ test('Select only root workspace with . selector', async () => {
     ...baseCounters,
     dependencies: 1,
     unlisted: 1,
-    binaries: 1,
     processed: 1,
     total: 1,
   });
