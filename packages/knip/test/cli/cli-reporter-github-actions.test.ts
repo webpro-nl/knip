@@ -11,10 +11,10 @@ test('knip --reporter github-actions (files, unlisted & unresolved)', () => {
   const expected = `Unused files (1)
 ::error file=src/unused.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::src/unused.ts
 Unlisted dependencies (2)
-::error file=src/index.ts,line=9,endLine=9,col=27,endColumn=27,title=✂️ Knip / Unlisted dependencies::unresolved in src/index.ts
-::error file=src/index.ts,line=10,endLine=10,col=27,endColumn=27,title=✂️ Knip / Unlisted dependencies::@org/unresolved in src/index.ts
+::error file=src/index.ts,line=9,endLine=9,col=28,endColumn=28,title=✂️ Knip / Unlisted dependencies::unresolved in src/index.ts
+::error file=src/index.ts,line=10,endLine=10,col=28,endColumn=28,title=✂️ Knip / Unlisted dependencies::@org/unresolved in src/index.ts
 Unresolved imports (1)
-::error file=src/index.ts,line=8,endLine=8,col=24,endColumn=24,title=✂️ Knip / Unresolved imports::./unresolved in src/index.ts`;
+::error file=src/index.ts,line=8,endLine=8,col=25,endColumn=25,title=✂️ Knip / Unresolved imports::./unresolved in src/index.ts`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -32,11 +32,11 @@ Unused devDependencies (1)
 Referenced optional peerDependencies (1)
 ::warning file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Referenced optional peerDependencies::optional-peer-dep in package.json
 Unlisted dependencies (1)
-::warning file=index.ts,line=5,endLine=5,col=8,endColumn=8,title=✂️ Knip / Unlisted dependencies::unlisted in index.ts
+::warning file=index.ts,line=5,endLine=5,col=9,endColumn=9,title=✂️ Knip / Unlisted dependencies::unlisted in index.ts
 Unlisted binaries (1)
 ::warning file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted binaries::unlisted in package.json
 Unresolved imports (1)
-::warning file=index.ts,line=4,endLine=4,col=8,endColumn=8,title=✂️ Knip / Unresolved imports::./unresolved in index.ts
+::warning file=index.ts,line=4,endLine=4,col=9,endColumn=9,title=✂️ Knip / Unresolved imports::./unresolved in index.ts
 Unused exports (2)
 ::warning file=exports.ts,line=2,endLine=2,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in exports.ts
 ::warning file=ns.ts,line=2,endLine=2,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in ns.ts
@@ -65,9 +65,9 @@ Unused dependencies (4)
 ::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=20,endColumn=20,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts
@@ -92,9 +92,9 @@ Unused dependencies (4)
 ::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=20,endColumn=20,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts
@@ -114,9 +114,9 @@ Unused dependencies (4)
 ::error file=package.json,line=11,endLine=11,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::minimist in package.json
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
-::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=3,endLine=3,col=25,endColumn=25,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
 ::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
-::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
+::error file=apps/frontend/index.ts,line=3,endLine=3,col=20,endColumn=20,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
 ::error file=packages/tools/utils.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::helperFn in packages/tools/utils.ts

@@ -16,14 +16,14 @@ test('knip --reporter markdown', () => {
 
 | Name            | Location           | Severity |
 | :-------------- | :----------------- | :------- |
-| @org/unresolved | src/index.ts:10:27 | error    |
-| unresolved      | src/index.ts:9:27  | error    |
+| @org/unresolved | src/index.ts:10:28 | error    |
+| unresolved      | src/index.ts:9:28  | error    |
 
 ## Unresolved imports (1)
 
 | Name         | Location          | Severity |
 | :----------- | :---------------- | :------- |
-| ./unresolved | src/index.ts:8:24 | error    |`;
+| ./unresolved | src/index.ts:8:25 | error    |`;
   const out = exec('knip --reporter markdown', { cwd }).stdout;
   assert.equal(out, markdown);
 });
