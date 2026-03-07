@@ -5,8 +5,8 @@
     "before:init": [
       "pnpm lint",
       "pnpm build",
-      "pnpm knip",
-      "pnpm knip:production",
+      "NODE_PATH= pnpm knip",
+      "NODE_PATH= pnpm knip:production",
       "pnpm test"
     ]
   },

@@ -77,8 +77,8 @@
     }
   },
   "scripts": {
-    "knip": "node ./dist/cli.js --directory ../..",
-    "knip:production": "node ./dist/cli.js --directory ../.. --production --strict",
+    "knip": "node ./src/cli.ts --directory ../..",
+    "knip:production": "node ./src/cli.ts --directory ../.. --production --strict",
     "lint": "oxlint",
     "format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.prettierignore",
     "test": "node scripts/run-test.ts",
