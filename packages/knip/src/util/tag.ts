@@ -22,10 +22,21 @@ export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   return false;
 };
 
+const isIgnoredUntilValid = (jsDocTags: Set<string>) => {
+  for (const tag of jsDocTags) {
+    const match = tag.match(/@knip-ignore-until\s+(\S+)/);
+    if (match && new Date(match[1]) > new Date()) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const getShouldIgnoreHandler = (isProduction: boolean) => (jsDocTags: Set<string>) =>
   jsDocTags.has(PUBLIC_TAG) ||
   jsDocTags.has(BETA_TAG) ||
   jsDocTags.has(ALIAS_TAG) ||
-  (isProduction && jsDocTags.has(INTERNAL_TAG));
+  (isProduction && jsDocTags.has(INTERNAL_TAG)) ||
+  isIgnoredUntilValid(jsDocTags);
 
 export const getShouldIgnoreTagHandler = (tags: Tags) => (jsDocTags: Set<string>) => shouldIgnore(jsDocTags, tags);

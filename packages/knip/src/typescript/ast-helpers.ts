@@ -229,7 +229,8 @@ export const getJSDocTags = (node: ts.Node) => {
     tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
   }
   for (const tagNode of tagNodes) {
-    const match = tagNode.getText()?.match(/@\S+/);
+    const text = tagNode.getText();
+    const match = text?.match(/@knip-ignore-until\s+\S+/) ?? text?.match(/@\S+/);
     if (match) tags.add(match[0]);
   }
   return tags;
