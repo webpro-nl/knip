@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "nuxt": ["../node_modules/nuxt"],
+      "~": [".."],
+      "~/*": ["../*"],
+      "@": [".."],
+      "@/*": ["../*"],
+      "~~": [".."],
+      "~~/*": ["../*"],
+      "@@": [".."],
+      "@@/*": ["../*"],
+      "#build": ["."],
+      "#build/*": ["./*"],
+      "#components": ["./components"]
+    },
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  }
+}
