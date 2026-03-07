@@ -134,6 +134,7 @@ export type PluginName =
   | 'webpack'
   | 'wireit'
   | 'wrangler'
+  | 'wxt'
   | 'xo'
   | 'yarn'
   | 'yorkie'
@@ -274,6 +275,7 @@ export const pluginNames = [
   'webpack',
   'wireit',
   'wrangler',
+  'wxt',
   'xo',
   'yarn',
   'yorkie',
