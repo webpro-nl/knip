@@ -1,0 +1,13 @@
+{
+  "jsPlugins": [
+    "eslint-plugin-unused-imports",
+    "eslint-plugin-security",
+    { "name": "jsdoc-js", "specifier": "eslint-plugin-jsdoc" },
+    "./local-plugin.mjs"
+  ],
+  "overrides": [
+    {
+      "jsPlugins": ["eslint-plugin-unused-imports"]
+    }
+  ]
+}

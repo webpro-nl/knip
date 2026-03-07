@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/oxlint-js-plugins",
+  "scripts": {
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "oxlint": "*",
+    "eslint-plugin-security": "*",
+    "eslint-plugin-unused-imports": "*",
+    "eslint-plugin-jsdoc": "*"
+  }
+}
