@@ -120,7 +120,8 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 
       if (templateTags) {
         for (const [name, specifiers] of componentMap) {
-          if (templateTags.has(name) || templateTags.has(toKebabCase(name))) {
+          const kebab = toKebabCase(name);
+          if (templateTags.has(name) || templateTags.has(kebab) || templateTags.has(`Lazy${name}`) || templateTags.has(`lazy-${kebab}`)) {
             syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
             for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
           }
