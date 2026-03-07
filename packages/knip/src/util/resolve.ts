@@ -14,6 +14,7 @@ const createSyncModuleResolver = (extensions: string[]) => {
       '.cjs': ['.cjs', '.cts'],
     },
     conditionNames: ['require', 'import', 'node', 'default'],
+    nodePath: false,
   });
 
   return function resolveSync(specifier: string, basePath: string) {
@@ -40,6 +41,7 @@ const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
     extensions,
     conditionNames: ['require', 'import', 'node', 'default'],
+    nodePath: false,
   });
 
   return function resolveSync(specifier: string, baseDir: string) {
