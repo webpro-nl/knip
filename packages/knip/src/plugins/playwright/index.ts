@@ -30,7 +30,7 @@ const toEntryPatterns = (
   return patterns.map(pattern => toEntry(join(dir, pattern)));
 };
 
-const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github'];
+const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github', 'null'];
 
 export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
