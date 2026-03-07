@@ -1,10 +1,4 @@
-import type {
-  IsPluginEnabled,
-  Plugin,
-  PluginOptions,
-  RegisterCompilers,
-  ResolveConfig,
-} from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, PluginOptions, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { debugLog } from '../../util/debug.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
@@ -36,8 +30,7 @@ const title = 'Nuxt';
 
 const enablers = ['nuxt', 'nuxt-nightly'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nuxt.config.{js,mjs,ts}'];
 
@@ -49,13 +42,7 @@ const middleware = (dir = 'middleware') => join(dir, '**/*.ts');
 const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
 const plugins = (dir = 'plugins') => join(dir, '**/*.ts');
 const modules = 'modules/**/*.{ts,vue}';
-const server = [
-  'api/**/*.ts',
-  'middleware/**/*.ts',
-  'plugins/**/*.ts',
-  'routes/**/*.ts',
-  'tasks/**/*.ts',
-];
+const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
 
 const production: string[] = [
   ...app,
@@ -64,7 +51,7 @@ const production: string[] = [
   pages(),
   plugins(),
   modules,
-  ...server.map((id) => join('server', id)),
+  ...server.map(id => join('server', id)),
 ];
 
 const setup = async () => {
@@ -77,11 +64,7 @@ const setup = async () => {
   }
 };
 
-const registerCompilers: RegisterCompilers = async ({
-  cwd,
-  hasDependency,
-  registerCompiler,
-}) => {
+const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
   if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
     const vueSfc = getVueSfc(cwd);
 
@@ -98,8 +81,7 @@ const registerCompilers: RegisterCompilers = async ({
     for (const file of definitionFiles) {
       const sourceFile = createSourceFile(join(cwd, file));
       const maps = buildAutoImportMap(sourceFile);
-      for (const [id, specifier] of maps.importMap)
-        importMap.set(id, specifier);
+      for (const [id, specifier] of maps.importMap) importMap.set(id, specifier);
       for (const [id, components] of maps.componentMap) {
         const store = componentMap.get(id);
         if (store) store.push(...components);
@@ -107,15 +89,11 @@ const registerCompilers: RegisterCompilers = async ({
       }
     }
 
-    const getSyntheticImports = (
-      identifiers: Set<string>,
-      templateTags?: Set<string>,
-    ) => {
+    const getSyntheticImports = (identifiers: Set<string>, templateTags?: Set<string>) => {
       const syntheticImports: string[] = [];
 
       for (const [name, specifier] of importMap) {
-        if (identifiers.has(name))
-          syntheticImports.push(`import { ${name} } from '${specifier}';`);
+        if (identifiers.has(name)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
       }
 
       if (templateTags) {
@@ -127,11 +105,8 @@ const registerCompilers: RegisterCompilers = async ({
             templateTags.has(`Lazy${name}`) ||
             templateTags.has(`lazy-${kebab}`)
           ) {
-            syntheticImports.push(
-              `import { default as ${name} } from '${specifiers[0]}';`,
-            );
-            for (let i = 1; i < specifiers.length; i++)
-              syntheticImports.push(`import '${specifiers[i]}';`);
+            syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
+            for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
           }
         }
       }
@@ -144,8 +119,7 @@ const registerCompilers: RegisterCompilers = async ({
       const scripts: string[] = [];
 
       if (descriptor.script?.content) scripts.push(descriptor.script.content);
-      if (descriptor.scriptSetup?.content)
-        scripts.push(descriptor.scriptSetup.content);
+      if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
 
       const identifiers = collectIdentifiers(scripts.join('\n'), path);
       let templateTags: Set<string> | undefined;
@@ -175,43 +149,26 @@ const registerCompilers: RegisterCompilers = async ({
 
 // Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
 const _resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
-  if (specifier.startsWith('~~/') || specifier.startsWith('@@/'))
-    return join(rootDir, specifier.slice(3));
-  if (specifier.startsWith('~/') || specifier.startsWith('@/'))
-    return join(srcDir, specifier.slice(2));
+  if (specifier.startsWith('~~/') || specifier.startsWith('@@/')) return join(rootDir, specifier.slice(3));
+  if (specifier.startsWith('~/') || specifier.startsWith('@/')) return join(srcDir, specifier.slice(2));
   return specifier;
 };
 
-const addAppEntries = (
-  inputs: Input[],
-  srcDir: string,
-  serverDir: string,
-  config: NuxtConfig,
-  dir: string,
-) => {
+const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, config: NuxtConfig, dir: string) => {
   for (const id of entry) inputs.push(toEntry(join(srcDir, id)));
   for (const id of app) inputs.push(toProductionEntry(join(srcDir, id)));
   inputs.push(toProductionEntry(join(srcDir, layout(config.dir?.layouts))));
-  inputs.push(
-    toProductionEntry(join(srcDir, middleware(config.dir?.middleware))),
-  );
+  inputs.push(toProductionEntry(join(srcDir, middleware(config.dir?.middleware))));
   inputs.push(toProductionEntry(join(srcDir, pages(config.dir?.pages))));
   inputs.push(toProductionEntry(join(srcDir, plugins(config.dir?.plugins))));
-  inputs.push(
-    toProductionEntry(join(srcDir, 'components/global/**/*.{vue,jsx,tsx}')),
-  );
-  for (const id of server)
-    inputs.push(toProductionEntry(join(dir, serverDir, id)));
+  inputs.push(toProductionEntry(join(srcDir, 'components/global/**/*.{vue,jsx,tsx}')));
+  for (const id of server) inputs.push(toProductionEntry(join(dir, serverDir, id)));
   inputs.push(toProductionEntry(join(dir, modules)));
   if (config.css)
-    for (const id of config.css)
-      inputs.push(
-        toDeferResolveProductionEntry(_resolveAlias(id, srcDir, dir)),
-      );
+    for (const id of config.css) inputs.push(toDeferResolveProductionEntry(_resolveAlias(id, srcDir, dir)));
 };
 
-const findLayerConfigs = (cwd: string): string[] =>
-  _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
+const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
 
 interface NuxtNitroOptions {
   imports?: false | Record<string, unknown>;
@@ -233,14 +190,14 @@ const resolveConfigWithNuxt = async (options: PluginOptions) => {
   const sourcePatterns = new Set<string>();
   const dependencies = new Set<string>();
 
-  nuxt.hook('imports:extend', (imports) => {
+  nuxt.hook('imports:extend', imports => {
     for (const i of imports) {
       if (isAbsolute(i.from)) sourcePatterns.add(i.from);
       else dependencies.add(i.from);
     }
   });
 
-  nuxt.hook('components:extend', (components) => {
+  nuxt.hook('components:extend', components => {
     for (const c of components) {
       if (isAbsolute(c.filePath)) sourcePatterns.add(c.filePath);
     }
@@ -251,8 +208,7 @@ const resolveConfigWithNuxt = async (options: PluginOptions) => {
   try {
     for (const m of opts._installedModules) {
       if (m.entryPath) inputs.push(toProductionEntry(m.entryPath));
-      else if (m.meta?.name && !m.meta.name.startsWith('nuxt:'))
-        dependencies.add(m.meta.name);
+      else if (m.meta?.name && !m.meta.name.startsWith('nuxt:')) dependencies.add(m.meta.name);
     }
 
     for (const l of opts.extends || []) {
@@ -262,51 +218,27 @@ const resolveConfigWithNuxt = async (options: PluginOptions) => {
 
     const isPagesEnabled = opts.pages !== false;
     const pagesOpts = typeof opts.pages !== 'boolean' && opts.pages;
-    const pagesPatterns =
-      pagesOpts && pagesOpts.pattern
-        ? toArray(pagesOpts.pattern)
-        : [`**/*{${extensionGlob}}`];
+    const pagesPatterns = pagesOpts && pagesOpts.pattern ? toArray(pagesOpts.pattern) : [`**/*{${extensionGlob}}`];
 
-    const nitroOpts =
-      'nitro' in opts
-        ? (opts.nitro as NuxtNitroOptions)
-        : ({} as NuxtNitroOptions);
-    const isNitroImportsEnabled =
-      nitroOpts.imports !== false && opts.imports?.scan !== false;
+    const nitroOpts = 'nitro' in opts ? (opts.nitro as NuxtNitroOptions) : ({} as NuxtNitroOptions);
+    const isNitroImportsEnabled = nitroOpts.imports !== false && opts.imports?.scan !== false;
 
     for (const layer of opts._layers) {
       const cfg = layer.config;
       const srcDir = cfg.srcDir || layer.cwd;
       const rootDir = layer.cwd;
 
-      const middlewareDir = resolve(
-        srcDir,
-        resolveAlias(cfg.dir?.middleware || 'middleware', opts.alias),
-      );
-      const pluginsDir = resolve(
-        srcDir,
-        resolveAlias(cfg.dir?.plugins || 'plugins', opts.alias),
-      );
-      const serverDir = resolve(
-        srcDir,
-        resolveAlias(cfg.serverDir || 'server', opts.alias),
-      );
+      const middlewareDir = resolve(srcDir, resolveAlias(cfg.dir?.middleware || 'middleware', opts.alias));
+      const pluginsDir = resolve(srcDir, resolveAlias(cfg.dir?.plugins || 'plugins', opts.alias));
+      const serverDir = resolve(srcDir, resolveAlias(cfg.serverDir || 'server', opts.alias));
 
       const entryPatterns: string[] = [
         resolve(serverDir, nitroOpts.apiDir || 'api', `**/*{${extensionGlob}}`),
-        resolve(
-          serverDir,
-          nitroOpts.routesDir || 'routes',
-          `**/*{${extensionGlob}}`,
-        ),
+        resolve(serverDir, nitroOpts.routesDir || 'routes', `**/*{${extensionGlob}}`),
         resolve(serverDir, `middleware/**/*{${extensionGlob}}`),
         resolve(serverDir, `plugins/**/*{${extensionGlob}}`),
         resolve(serverDir, `tasks/**/*{${extensionGlob}}`),
-        resolve(
-          srcDir,
-          resolveAlias(cfg.dir?.layouts || 'layouts', opts.alias),
-          `**/*{${extensionGlob}}`,
-        ),
+        resolve(srcDir, resolveAlias(cfg.dir?.layouts || 'layouts', opts.alias), `**/*{${extensionGlob}}`),
         join(middlewareDir, `*{${extensionGlob}}`),
         join(middlewareDir, `*/index{${extensionGlob}}`),
         join(pluginsDir, `*{${extensionGlob}}`),
@@ -317,41 +249,21 @@ const resolveConfigWithNuxt = async (options: PluginOptions) => {
 
       if (isPagesEnabled) {
         for (const pattern of pagesPatterns) {
-          entryPatterns.push(
-            resolve(
-              srcDir,
-              resolveAlias(cfg.dir?.pages || 'pages', opts.alias),
-              pattern,
-            ),
-          );
+          entryPatterns.push(resolve(srcDir, resolveAlias(cfg.dir?.pages || 'pages', opts.alias), pattern));
         }
       }
 
       if (isNitroImportsEnabled) {
-        sourcePatterns.add(
-          resolve(
-            rootDir,
-            cfg.dir?.shared ?? 'shared',
-            `utils/*{${extensionGlob}}`,
-          ),
-        );
-        sourcePatterns.add(
-          resolve(
-            rootDir,
-            cfg.dir?.shared ?? 'shared',
-            `types/*{${extensionGlob}}`,
-          ),
-        );
+        sourcePatterns.add(resolve(rootDir, cfg.dir?.shared ?? 'shared', `utils/*{${extensionGlob}}`));
+        sourcePatterns.add(resolve(rootDir, cfg.dir?.shared ?? 'shared', `types/*{${extensionGlob}}`));
       }
 
-      inputs.push(...entryPatterns.map((s) => toProductionEntry(s)));
+      inputs.push(...entryPatterns.map(s => toProductionEntry(s)));
     }
 
-    for (const path of sourcePatterns)
-      inputs.push(toProductionEntry(path, { allowIncludeExports: true }));
+    for (const path of sourcePatterns) inputs.push(toProductionEntry(path, { allowIncludeExports: true }));
     for (const dep of dependencies) inputs.push(toDependency(dep));
-    for (const alias in opts.alias)
-      inputs.push(toAlias(alias, opts.alias[alias]));
+    for (const alias in opts.alias) inputs.push(toAlias(alias, opts.alias[alias]));
 
     return inputs;
   } finally {
@@ -359,10 +271,7 @@ const resolveConfigWithNuxt = async (options: PluginOptions) => {
   }
 };
 
-const resolveConfigStatic = async (
-  localConfig: NuxtConfig,
-  options: PluginOptions,
-) => {
+const resolveConfigStatic = async (localConfig: NuxtConfig, options: PluginOptions) => {
   const { configFileDir: cwd } = options;
   const hasAppDir = isDirectory(cwd, 'app');
   const srcDir = localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd);
@@ -370,8 +279,7 @@ const resolveConfigStatic = async (
   const inputs: Input[] = [];
 
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string')
-      inputs.push(toDependency(id[0]));
+    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
     if (typeof id === 'string') inputs.push(toDependency(id));
   }
 
@@ -403,8 +311,7 @@ const resolveConfigStatic = async (
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
     const sourceFile = createSourceFile(join(cwd, file));
-    for (const path of collectLocalImportPaths(sourceFile))
-      inputs.push(toProductionEntry(path));
+    for (const path of collectLocalImportPaths(sourceFile)) inputs.push(toProductionEntry(path));
   }
 
   // In case typescript isn't listed
@@ -424,10 +331,7 @@ const resolveConfigStatic = async (
   return inputs;
 };
 
-const resolveConfig: ResolveConfig<NuxtConfig> = async (
-  localConfig,
-  options,
-) => {
+const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) => {
   try {
     return await resolveConfigWithNuxt(options);
   } catch (error) {
