@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/react-native",
+  "dependencies": {
+    "@react-native-community/cli": "*",
+    "@react-native-community/cli-platform-android": "*",
+    "@react-native-community/cli-platform-ios": "*",
+    "react-native": "*",
+    "react-native-macos": "*",
+    "react-native-vector-icons": "*"
+  }
+}

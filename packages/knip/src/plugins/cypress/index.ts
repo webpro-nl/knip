@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { resolveDependencies } from './helpers.js';
-import type { CypressConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { resolveDependencies } from './helpers.ts';
+import type { CypressConfig } from './types.ts';
 
 // https://docs.cypress.io/guides/references/configuration
 

@@ -1,7 +1,7 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
-import { toRelative } from '../util/path.js';
-import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.ts';
+import { toRelative } from '../util/path.ts';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 const logIssueSet = (issues: string[], cwd: string) => {
   for (const filePath of issues.sort()) console.log(toRelative(filePath, cwd));
@@ -24,10 +24,12 @@ export default ({ report, issues, isShowProgress, cwd }: ReporterOptions) => {
         ? Array.from(issues[reportType] as IssueSet)
         : reportType === 'duplicates'
           ? Object.values(issues[reportType]).flatMap(Object.values)
-          : Object.values(issues[reportType] as IssueRecords).map(issues => {
-              const items = Object.values(issues);
-              return { ...items[0], symbols: items };
-            });
+          : Object.values(issues[reportType] as IssueRecords)
+              .filter(issues => Object.keys(issues).length > 0)
+              .map(issues => {
+                const items = Object.values(issues);
+                return { ...items[0], symbols: items };
+              });
 
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));

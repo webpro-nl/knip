@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { TsupConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { TsupConfig } from './types.ts';
 
 // https://paka.dev/npm/tsup/api
 // https://github.com/egoist/tsup/blob/dev/src/load.ts

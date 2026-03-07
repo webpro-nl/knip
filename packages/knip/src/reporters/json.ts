@@ -1,9 +1,9 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.js';
-import { createOwnershipEngine } from '../util/codeowners.js';
-import { isFile } from '../util/fs.js';
-import { relative, resolve } from '../util/path.js';
-import { convert } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
+import { createOwnershipEngine } from '../util/codeowners.ts';
+import { isFile } from '../util/fs.ts';
+import { relative, resolve } from '../util/path.ts';
+import { convert } from './util/util.ts';
 
 type ExtraReporterOptions = {
   codeowners?: string;

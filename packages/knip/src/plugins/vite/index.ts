@@ -1,10 +1,11 @@
 import type ts from 'typescript';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { resolveConfig } from '../vitest/index.js';
-import { getReactBabelPlugins } from './helpers.js';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, Resolve, ResolveFromAST } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { resolveConfig } from '../vitest/index.ts';
+import { getIndexHtmlEntries, getReactBabelPlugins } from './helpers.ts';
+import { importMetaGlobCall } from './visitors/importMetaGlob.ts';
 
 // https://vitejs.dev/config/
 
@@ -21,6 +22,14 @@ const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
   return babelPlugins.map(plugin => toDependency(plugin));
 };
 
+const resolve: Resolve = async options => {
+  return getIndexHtmlEntries(options.cwd);
+};
+
+const registerVisitors: RegisterVisitors = ({ registerVisitors }) => {
+  registerVisitors({ dynamicImport: [importMetaGlobCall] });
+};
+
 const args: Args = {
   config: true,
 };
@@ -32,6 +41,8 @@ const plugin: Plugin = {
   config,
   resolveConfig,
   resolveFromAST,
+  resolve,
+  registerVisitors,
   args,
 };
 

@@ -1,22 +1,22 @@
-import { _getInputsFromScripts } from '../binaries/index.js';
-import type { CatalogCounselor } from '../CatalogCounselor.js';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import { getCompilerExtensions, getIncludedCompilers } from '../compilers/index.js';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.js';
-import type { DependencyDeputy } from '../DependencyDeputy.js';
-import type { IssueCollector } from '../IssueCollector.js';
-import type { PrincipalFactory } from '../PrincipalFactory.js';
-import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { GetImportsAndExportsOptions } from '../types/config.js';
-import type { Issue } from '../types/issues.js';
-import type { Import, ModuleGraph } from '../types/module-graph.js';
-import type { PluginName } from '../types/PluginNames.js';
-import { partition } from '../util/array.js';
-import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.js';
-import type { MainOptions } from '../util/create-options.js';
-import { debugLog, debugLogArray } from '../util/debug.js';
-import { _glob, _syncGlob, negate, prependDirToPattern } from '../util/glob.js';
+import { _getInputsFromScripts } from '../binaries/index.ts';
+import type { CatalogCounselor } from '../CatalogCounselor.ts';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
+import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import type { DependencyDeputy } from '../DependencyDeputy.ts';
+import type { IssueCollector } from '../IssueCollector.ts';
+import type { PrincipalFactory } from '../PrincipalFactory.ts';
+import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
+import type { Issue } from '../types/issues.ts';
+import type { Import, ModuleGraph } from '../types/module-graph.ts';
+import type { PluginName } from '../types/PluginNames.ts';
+import { partition } from '../util/array.ts';
+import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { debugLog, debugLogArray } from '../util/debug.ts';
+import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
   isAlias,
@@ -28,15 +28,15 @@ import {
   isProductionEntry,
   isProject,
   toProductionEntry,
-} from '../util/input.js';
-import { loadTSConfig } from '../util/load-tsconfig.js';
-import { createFileNode, updateImportMap } from '../util/module-graph.js';
-import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { perfObserver } from '../util/Performance.js';
-import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.js';
-import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.js';
-import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.js';
-import { WorkspaceWorker } from '../WorkspaceWorker.js';
+} from '../util/input.ts';
+import { loadTSConfig } from '../util/load-tsconfig.ts';
+import { createFileNode, updateImportMap } from '../util/module-graph.ts';
+import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import { perfObserver } from '../util/Performance.ts';
+import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
+import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.ts';
+import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.ts';
+import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
 interface BuildOptions {
   chief: ConfigurationChief;
@@ -94,8 +94,8 @@ export async function build({
     counselor.addWorkspace(manifest);
   }
 
-  collector.addIgnorePatterns(chief.config.ignore.map(p => prependDirToPattern(options.cwd, p)));
-  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(p => prependDirToPattern(options.cwd, p)));
+  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 
   for (const workspace of workspaces) {
     const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
@@ -106,11 +106,7 @@ export async function build({
     if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
-
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
-    const extensions = getCompilerExtensions(compilers);
-    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
-    const config = chief.getConfigForWorkspace(name, extensions);
+    const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
@@ -121,7 +117,7 @@ export async function build({
     const worker = new WorkspaceWorker({
       name,
       dir,
-      config,
+      config: baseConfig,
       manifest,
       dependencies,
       rootManifest,
@@ -137,6 +133,20 @@ export async function build({
 
     await worker.init();
 
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
+      const ext = normalizeCompilerExtension(extension);
+      if (compilers[0].has(ext)) return;
+      compilers[0].set(ext, compiler);
+    };
+
+    await worker.registerCompilers(registerCompiler);
+
+    const extensions = getCompilerExtensions(compilers);
+    const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
+    const config = chief.getConfigForWorkspace(name, extensions);
+    worker.config = config;
+
     const inputs = new Set<Input>();
 
     if (definitionPaths.length > 0) {
@@ -146,10 +156,9 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    collector.addIgnorePatterns(config.ignore.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p))));
-    collector.addIgnoreFilesPatterns(
-      config.ignoreFiles.map(p => prependDirToPattern(options.cwd, prependDirToPattern(name, p)))
-    );
+    const fn = (id: string) => ({ pattern: prependDir(options.cwd, prependDir(name, id)), id, workspaceName: name });
+    collector.addIgnorePatterns(config.ignore.map(fn));
+    collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
     // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
@@ -188,6 +197,11 @@ export async function build({
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
+    worker.registerVisitors(visitors => {
+      if (visitors.dynamicImport) principal.visitors.dynamicImport.push(...visitors.dynamicImport);
+      if (visitors.script) principal.visitors.script.push(...visitors.script);
+    });
+
     const DEFAULT_GROUP = 'default';
     type PatternMap = Map<string, Set<string>>;
     const createPatternMap = (): PatternMap => new Map([[DEFAULT_GROUP, new Set()]]);
@@ -201,7 +215,7 @@ export async function build({
 
     const addPattern = (map: PatternMap, input: Input, pattern: string) => {
       if (input.group && !map.has(input.group)) map.set(input.group, new Set());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       map.get(input.group ?? DEFAULT_GROUP)!.add(pattern);
     };
 
@@ -225,6 +239,8 @@ export async function build({
           deputy.addIgnoredDependencies(name, input.specifier);
         } else if (input.issueType === 'binaries') {
           deputy.addIgnoredBinaries(name, input.specifier);
+        } else if (input.issueType === 'unresolved') {
+          deputy.addIgnoredUnresolved(name, input.specifier);
         }
       } else if (!isConfig(input)) {
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
@@ -372,11 +388,9 @@ export async function build({
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
-          const isIgnored = isGitIgnored(join(dirname(filePath), sanitizedSpecifier));
-          if (!isIgnored) {
+          if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
             const ext = extname(sanitizedSpecifier);
-            const hasIgnoredExtension = FOREIGN_FILE_EXTENSIONS.has(ext);
-            if (!ext || (ext !== '.json' && !hasIgnoredExtension)) unresolvedImports.add(unresolvedImport);
+            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
           }
         }
       }
@@ -494,7 +508,7 @@ export async function build({
   if (externalRefsFromInputs) {
     for (const [filePath, refs] of externalRefsFromInputs) {
       if (!graph.has(filePath)) graph.set(filePath, createFileNode());
-      // biome-ignore lint/style/noNonNullAssertion: srsly
+      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
       for (const ref of refs) graph.get(filePath)!.imports.externalRefs.add(ref);
     }
   }

@@ -1,10 +1,10 @@
 import { readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import yaml from 'js-yaml';
+import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
-import { LoaderError } from './errors.js';
-import { extname, join } from './path.js';
+import { LoaderError } from './errors.ts';
+import { extname, join } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
@@ -36,18 +36,15 @@ export const loadFile = async (filePath: string) => {
   }
 };
 
-export const hasFilesWithExtensions = (cwd: string, dirName: string, extensions: string[]): boolean => {
+export const hasFileWithExtension = (cwd: string, dirName: string, extensions: string[]): boolean => {
   if (!isDirectory(cwd, dirName)) return false;
 
   try {
-    const files = readdirSync(join(cwd, dirName));
-    return files.some(file => {
-      const ext = extname(file).slice(1);
-      return extensions.includes(ext);
-    });
-  } catch {
-    return false;
-  }
+    for (const file of readdirSync(join(cwd, dirName))) {
+      if (extensions.includes(extname(file))) return true;
+    }
+  } catch {}
+  return false;
 };
 
 export const loadJSON = async (filePath: string) => {
@@ -84,5 +81,5 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 };
 
 export const parseYAML = (contents: string) => {
-  return yaml.load(contents);
+  return parseYAMLContents(contents, { logLevel: 'error' });
 };

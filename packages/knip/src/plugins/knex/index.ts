@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency, toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { clientToPackages } from './helpers.js';
-import type { KnexConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDependency, toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { clientToPackages } from './helpers.ts';
+import type { KnexConfig } from './types.ts';
 
 // https://knexjs.org
 

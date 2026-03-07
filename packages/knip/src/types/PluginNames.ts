@@ -28,7 +28,9 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'execa'
   | 'expo'
+  | 'expressive-code'
   | 'gatsby'
   | 'github-action'
   | 'github-actions'
@@ -68,18 +70,23 @@ export type PluginName =
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'openapi-ts'
   | 'oxlint'
   | 'parcel'
+  | 'payload'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
   | 'plop'
+  | 'pm2'
   | 'pnpm'
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'qwik'
   | 'react-cosmos'
+  | 'react-native'
   | 'react-router'
   | 'relay'
   | 'release-it'
@@ -100,6 +107,7 @@ export type PluginName =
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'sveltekit'
   | 'svgo'
   | 'svgr'
   | 'swc'
@@ -128,7 +136,8 @@ export type PluginName =
   | 'wrangler'
   | 'xo'
   | 'yarn'
-  | 'yorkie';
+  | 'yorkie'
+  | 'zx';
 
 export const pluginNames = [
   'angular',
@@ -159,7 +168,9 @@ export const pluginNames = [
   'drizzle',
   'eleventy',
   'eslint',
+  'execa',
   'expo',
+  'expressive-code',
   'gatsby',
   'github-action',
   'github-actions',
@@ -199,18 +210,23 @@ export const pluginNames = [
   'nx',
   'nyc',
   'oclif',
+  'openapi-ts',
   'oxlint',
   'parcel',
+  'payload',
   'playwright',
   'playwright-ct',
   'playwright-test',
   'plop',
+  'pm2',
   'pnpm',
   'postcss',
   'preconstruct',
   'prettier',
   'prisma',
+  'qwik',
   'react-cosmos',
+  'react-native',
   'react-router',
   'relay',
   'release-it',
@@ -231,6 +247,7 @@ export const pluginNames = [
   'stryker',
   'stylelint',
   'svelte',
+  'sveltekit',
   'svgo',
   'svgr',
   'swc',
@@ -260,4 +277,5 @@ export const pluginNames = [
   'xo',
   'yarn',
   'yorkie',
+  'zx',
 ] as const;

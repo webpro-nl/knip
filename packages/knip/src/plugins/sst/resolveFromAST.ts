@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import type { ResolveFromAST } from '../../types/config.js';
-import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
-import { toDeferResolveProductionEntry } from '../../util/input.js';
-import { dirname } from '../../util/path.js';
-import { _resolveSync } from '../../util/resolve.js';
+import type { ResolveFromAST } from '../../types/config.ts';
+import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { toDeferResolveProductionEntry } from '../../util/input.ts';
+import { dirname } from '../../util/path.ts';
+import { _resolveSync } from '../../util/resolve.ts';
 
 export const getInputsFromHandlers: ResolveFromAST = (sourceFile, options) => {
   const entries = new Set<string>();

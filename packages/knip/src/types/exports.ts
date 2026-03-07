@@ -1,5 +1,5 @@
 import type ts from 'typescript';
-import type { SymbolType } from './issues.js';
+import type { SymbolType } from './issues.ts';
 
 type Identifier = string;
 

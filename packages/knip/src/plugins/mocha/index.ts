@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MochaConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MochaConfig } from './types.ts';
 
 // https://mochajs.org/#configuring-mocha-nodejs
 

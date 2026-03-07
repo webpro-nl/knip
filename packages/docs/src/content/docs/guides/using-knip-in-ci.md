@@ -21,10 +21,12 @@ on: push
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Ubuntu/Node v20
+    name: Ubuntu/Node v24
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - name: Install dependencies
         run: npm install --ignore-scripts
       - name: Run knip
@@ -33,22 +35,16 @@ jobs:
 
 ## Notes
 
-In CI environments, the [--no-progress][1] flag is set automatically.
+- Use [--cache][1] to speed up consecutive runs (default location:
+  `./node_modules/.cache/knip`).
+- See [Reporters][2] including the GitHub Actions reporter.
+- Consider running Knip twice: a default run and a [production mode][3] run.
+- See [CLI arguments → Output][4] for some relevant options such as
+  `--treat-config-hints-as-errors` and `--no-exit-code`.
+- In CI environments, the [--no-progress][5] flag is set automatically.
 
-## Related features
-
-- [--cache][2]
-- [--max-issues][3]
-- [--no-exit-code][4]
-- [--reporter][5]
-
-## Related reading
-
-- [Why use Knip?][6]
-
-[1]: ../reference/cli.md#--no-progress
-[2]: ../reference/cli.md#--cache
-[3]: ../reference/cli.md#--max-issues
-[4]: ../reference/cli.md#--no-exit-code
-[5]: ../reference/cli.md#--reporter-reporter
-[6]: ../explanations/why-use-knip.md
+[1]: ../reference/cli.md#--cache
+[2]: ../features/reporters.md
+[3]: ../features/production-mode.md
+[4]: ../reference/cli.md#output
+[5]: ../reference/cli.md#--no-progress

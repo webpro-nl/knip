@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { arrayify } from '../../util/array.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { join, relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PlaywrightTestConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { arrayify } from '../../util/array.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { join, relative } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PlaywrightTestConfig } from './types.ts';
 
 // https://playwright.dev/docs/test-configuration
 
@@ -30,7 +30,7 @@ const toEntryPatterns = (
   return patterns.map(pattern => toEntry(join(dir, pattern)));
 };
 
-const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github'];
+const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github', 'null'];
 
 export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;

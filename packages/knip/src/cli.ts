@@ -1,21 +1,22 @@
-// biome-ignore-all lint/suspicious/noConsole: ignore
-import { fix } from './IssueFixer.js';
-import { run } from './run.js';
-import type { IssueType, ReporterOptions } from './types/issues.js';
-import parseArgs, { helpText } from './util/cli-arguments.js';
-import { createOptions } from './util/create-options.js';
+/* oxlint-disable no-console */
+import { fix } from './IssueFixer.ts';
+import { run } from './run.ts';
+import type { IssueType, ReporterOptions } from './types/issues.ts';
+import parseArgs, { helpText } from './util/cli-arguments.ts';
+import { createOptions } from './util/create-options.ts';
 import {
   getKnownErrors,
   hasErrorCause,
   isConfigurationError,
   isKnownError,
+  isLoaderError,
   isModuleNotFoundError,
-} from './util/errors.js';
-import { logError, logWarning } from './util/log.js';
-import { perfObserver } from './util/Performance.js';
-import { runPreprocessors, runReporters } from './util/reporter.js';
-import { prettyMilliseconds } from './util/string.js';
-import { version } from './version.js';
+} from './util/errors.ts';
+import { logError, logWarning } from './util/log.ts';
+import { perfObserver } from './util/Performance.ts';
+import { runPreprocessors, runReporters } from './util/reporter.ts';
+import { prettyMilliseconds } from './util/string.ts';
+import { version } from './version.ts';
 
 let args: ReturnType<typeof parseArgs> = {};
 try {
@@ -80,7 +81,7 @@ const main = async () => {
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
 
-    if (options.isFix) await fix(finalData.issues, options);
+    if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
 
@@ -122,6 +123,8 @@ const main = async () => {
         console.error('Reason:', knownErrors[0].cause.message);
         if (isModuleNotFoundError(knownErrors[0].cause))
           console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+        if (isLoaderError(knownErrors[0]))
+          console.log('Configuration file load error? Visit https://knip.dev/reference/known-issues');
       }
       if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);

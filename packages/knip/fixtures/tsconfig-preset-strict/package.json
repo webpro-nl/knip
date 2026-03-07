@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tsconfig-preset-strict",
+  "devDependencies": {
+    "@tsconfig/strictest": "*",
+    "typescript": "*"
+  }
+}

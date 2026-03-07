@@ -1,7 +1,9 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getSrcDir } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
+import mdxCompiler from './compiler-mdx.ts';
+import { getSrcDir, usesSharpImageService } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -27,11 +29,22 @@ const production = [
 const resolveFromAST: ResolveFromAST = sourceFile => {
   const srcDir = getSrcDir(sourceFile);
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
-
-  return [
+  const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
     ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
+
+  if (usesSharpImageService(sourceFile)) inputs.push(toDependency('sharp'));
+
+  return inputs;
+};
+
+// https://docs.astro.build/en/guides/integrations-guide/mdx/
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('astro')) registerCompiler({ extension: '.astro', compiler });
+  if (hasDependency('@astrojs/mdx') || hasDependency('@astrojs/starlight')) {
+    registerCompiler({ extension: '.mdx', compiler: mdxCompiler });
+  }
 };
 
 const resolve: Resolve = options => {
@@ -56,6 +69,7 @@ const plugin: Plugin = {
   config,
   entry,
   production,
+  registerCompilers,
   resolveFromAST,
   resolve,
 };

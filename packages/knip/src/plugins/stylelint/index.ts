@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toCosmiconfig } from '../../util/plugin-config.js';
-import type { StyleLintConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toCosmiconfig } from '../../util/plugin-config.ts';
+import type { StyleLintConfig } from './types.ts';
 
 // https://stylelint.io/user-guide/configure/
 

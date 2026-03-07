@@ -1,15 +1,16 @@
 import type ts from 'typescript';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
-import type { pluginSchema } from '../schema/plugins.js';
-import type { ParsedCLIArgs } from '../util/cli-arguments.js';
-import type { Input } from '../util/input.js';
-import type { Args } from './args.js';
-import type { IssueType, SymbolType } from './issues.js';
-import type { Tags } from './options.js';
-import type { PluginName } from './PluginNames.js';
-import type { PackageJson } from './package-json.js';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
+import type { pluginSchema } from '../schema/plugins.ts';
+import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.ts';
+import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
+import type { Input } from '../util/input.ts';
+import type { Args } from './args.ts';
+import type { IssueType, SymbolType } from './issues.ts';
+import type { Tags } from './options.ts';
+import type { PluginName } from './PluginNames.ts';
+import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
@@ -127,9 +128,7 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
-type PluginSetup = (options: PluginOptions) => Promise<void> | void;
-
-type PluginTeardown = (options: PluginOptions) => Promise<void> | void;
+type PluginSetup = () => Promise<void> | void;
 
 export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
 
@@ -141,12 +140,39 @@ export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
 
 export type HandleInput = (input: Input) => string | undefined;
 
+export type RegisterCompilerInput = {
+  extension: string;
+  compiler: CompilerSync;
+};
+
+export type RegisterCompiler = (input: RegisterCompilerInput) => void;
+
 export type ResolveFromAST = (
   sourceFile: ts.SourceFile,
   options: PluginOptions & {
     getSourceFile: GetSourceFile;
   }
 ) => Input[];
+
+export type RegisterCompilersOptions = {
+  cwd: string;
+  hasDependency: HasDependency;
+  registerCompiler: RegisterCompiler;
+};
+
+/** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
+export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
+
+export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
+
+export type RegisterVisitor = (visitors: Partial<Visitors>) => void;
+
+export type RegisterVisitorsOptions = {
+  registerVisitors: RegisterVisitor;
+};
+
+/** Plugin visitors are automatically registered if the plugin is enabled */
+export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
 
 export interface Plugin {
   title: string;
@@ -160,11 +186,13 @@ export interface Plugin {
   production?: string[];
   project?: string[];
   setup?: PluginSetup;
-  teardown?: PluginTeardown;
   isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   resolveFromAST?: ResolveFromAST;
+  isFilterTransitiveDependencies?: boolean;
+  registerCompilers?: RegisterCompilers;
+  registerVisitors?: RegisterVisitors;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

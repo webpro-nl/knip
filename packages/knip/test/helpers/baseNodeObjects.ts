@@ -1,4 +1,4 @@
-import type { Export, FileNode, Import, ImportMaps } from '../../src/types/module-graph.js';
+import type { Export, FileNode, Import, ImportMaps } from '../../src/types/module-graph.ts';
 
 export const baseImportMaps: ImportMaps = {
   refs: new Set(),

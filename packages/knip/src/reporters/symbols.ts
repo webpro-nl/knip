@@ -1,7 +1,7 @@
-import type { Entries } from '../types/entries.js';
-import type { ReporterOptions } from '../types/issues.js';
-import { printConfigurationHints } from './util/configuration-hints.js';
-import { dim, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { ReporterOptions } from '../types/issues.ts';
+import { printConfigurationHints } from './util/configuration-hints.ts';
+import { dim, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 export default (options: ReporterOptions) => {
   const { report, issues, isDisableConfigHints, isShowProgress } = options;

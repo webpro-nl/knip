@@ -4,10 +4,10 @@ title: Related Tooling
 
 This is an overview of related tooling for features Knip does not support.
 
-## Unused variables
+## Unused imports & variables
 
-Knip doesn't look for unused variables within a file. The focus is on exported
-and imported values and types across files.
+Knip doesn't look for unused imports and variables within a file. The focus is
+on exported values and types across files.
 
 Use [ESLint][1], [Biome][2] or [oxlint][3] to find unused variables within
 files.

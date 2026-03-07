@@ -7,3 +7,29 @@ import Styles from './styles.css';
 <Component />
 
 <Docs />
+
+Using a top-level `import type` declaration (`import type { A, B } from 'fake-module'`) ensures the entire import statement is removed during transpilation.
+
+You can also use `import { something } from 'another-fake'` inline.
+
+Multiple inline codes: `import x from 'x'` and `import y from 'y'` on same line.
+
+Nested backticks won't happen but edge case: `import Default from "double-quotes"`.
+
+```js
+import { fenced } from 'fenced-module';
+import * as ns from 'namespace-module';
+
+const x = 1;
+```
+
+```typescript
+import type { Type } from 'typed-module';
+export const y = 2;
+```
+
+```
+import { noLang } from 'no-lang-module';
+```
+
+Real import after fenced block should still work (see actual imports at top).

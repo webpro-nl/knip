@@ -1,4 +1,4 @@
-import type { Plugin } from '../../types/config.js';
+import type { Plugin } from '../../types/config.ts';
 
 // https://github.com/isaacs/node-glob
 

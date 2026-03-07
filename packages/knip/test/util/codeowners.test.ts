@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseCodeowners } from '../../src/util/codeowners.js';
+import { parseCodeowners } from '../../src/util/codeowners.ts';
 
 test('codeowners', () => {
   const content = `

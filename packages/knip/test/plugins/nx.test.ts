@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/nx');
 
@@ -18,8 +18,12 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.devDependencies['package.json']['@nrwl/workspace']);
   assert(issues.devDependencies['package.json']['rimraf']);
 
+  assert(issues.unlisted['package.json']['nx']);
   assert(issues.unlisted['apps/b/project.json']['@js/cypress']);
   assert(issues.unlisted['libs/b/project.json']['nx']);
+  assert(issues.unlisted['libs/b/project.json']['@nx/vitest']);
+  assert(issues.unlisted['libs/b/project.json']['@nx/webpack']);
+  assert(issues.unlisted['libs/b/project.json']['webpack-cli']);
 
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
@@ -30,7 +34,7 @@ test('Find dependencies with the Nx plugin', async () => {
     ...baseCounters,
     binaries: 5,
     devDependencies: 6,
-    unlisted: 5,
+    unlisted: 6,
     files: 3,
     processed: 3,
     total: 3,

@@ -1,9 +1,9 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.js';
-import { isBinary, isDependency, toBinary, toDependency } from '../../util/input.js';
-import { stripVersionFromSpecifier } from '../../util/modules.js';
-import { join } from '../../util/path.js';
-import { argsFrom } from '../util.js';
+import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.ts';
+import { isBinary, isDependency, toBinary, toDependency } from '../../util/input.ts';
+import { stripVersionFromSpecifier } from '../../util/modules.ts';
+import { join } from '../../util/path.ts';
+import { argsFrom } from '../util.ts';
 
 // https://yarnpkg.com/cli
 
@@ -64,7 +64,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (!command && !binary) return [];
 
-  const _childArgs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+  const _childArgs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--'], { knownBinsOnly: true }) : [];
 
   if (command === 'run') {
     if (manifestScriptNames.has(binary)) return _childArgs;

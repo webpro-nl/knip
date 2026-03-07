@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import fg from 'fast-glob';
-import type { PackageJson, WorkspacePackage } from '../types/package-json.js';
-import { partition } from './array.js';
-import { ConfigurationError } from './errors.js';
-import { getPackageName } from './package-name.js';
-import { join } from './path.js';
+import type { PackageJson, WorkspacePackage } from '../types/package-json.ts';
+import { partition } from './array.ts';
+import { ConfigurationError } from './errors.ts';
+import { getPackageName } from './package-name.ts';
+import { join } from './path.ts';
 
 type Packages = Map<string, WorkspacePackage>;
 type WorkspacePkgNames = Set<string>;

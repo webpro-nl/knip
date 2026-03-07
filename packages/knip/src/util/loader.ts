@@ -1,8 +1,8 @@
-import { LoaderError } from './errors.js';
-import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.js';
-import { jiti } from './jiti.js';
-import { timerify } from './Performance.js';
-import { extname, isInternal } from './path.js';
+import { LoaderError } from './errors.ts';
+import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
+import { jiti } from './jiti.ts';
+import { timerify } from './Performance.ts';
+import { extname, isInternal } from './path.ts';
 
 const load = async (filePath: string) => {
   try {
@@ -32,7 +32,7 @@ const load = async (filePath: string) => {
       return await loadJSONC(filePath);
     }
 
-    if (typeof Bun !== 'undefined') {
+    if ('Bun' in globalThis) {
       const imported = await import(filePath);
       return imported.default ?? imported;
     }

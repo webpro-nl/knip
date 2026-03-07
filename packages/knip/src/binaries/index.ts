@@ -1,7 +1,7 @@
-import type { GetInputsFromScripts } from '../types/config.js';
-import { fromBinary, type Input, isBinary, isDependency } from '../util/input.js';
-import { timerify } from '../util/Performance.js';
-import { getDependenciesFromScript } from './bash-parser.js';
+import type { GetInputsFromScripts } from '../types/config.ts';
+import { fromBinary, type Input, isBinary, isDependency } from '../util/input.ts';
+import { timerify } from '../util/Performance.ts';
+import { getDependenciesFromScript } from './bash-parser.ts';
 
 const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
   const scripts = typeof npmScripts === 'string' ? [npmScripts] : Array.from(npmScripts);

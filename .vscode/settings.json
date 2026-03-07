@@ -1,9 +1,12 @@
 {
   "[javascript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[json]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[markdown]": {
     "editor.defaultFormatter": "unifiedjs.vscode-remark"
@@ -12,14 +15,12 @@
     "editor.defaultFormatter": "remcohaszing.vscode-mdxlint"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "editor.codeActionsOnSave": {
-    "source.organizeImports.biome": "explicit"
-  },
+  "oxc.fmt.configPath": ".oxfmtrc.json",
   "cSpell.enabled": true,
   "cSpell.words": [
     "astro",

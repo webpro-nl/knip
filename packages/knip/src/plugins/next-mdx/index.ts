@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getMdxPlugins } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getMdxPlugins } from './resolveFromAST.ts';
 
 // https://nextjs.org/docs/pages/building-your-application/configuring/mdx
 

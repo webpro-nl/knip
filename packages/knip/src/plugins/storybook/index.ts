@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join, relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { StorybookConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { join, relative } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { StorybookConfig } from './types.ts';
 
 // https://storybook.js.org/docs/react/configure/overview
 

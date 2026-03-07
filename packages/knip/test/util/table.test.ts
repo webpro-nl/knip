@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Table } from '../../src/util/table.js';
+import { Table } from '../../src/util/table.ts';
 
 test('Render table with column gaps and truncated values', () => {
   const table = new Table({ maxWidth: 72, truncateStart: ['col-2'] });
@@ -18,6 +18,20 @@ test('Render table with column gaps and truncated values', () => {
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
   assert.equal(output.split('\n')[0].length, 72);
+});
+
+test('Render single column table with start-truncated values', () => {
+  const table = new Table({ maxWidth: 40, truncateStart: ['filePath'] });
+  table.row();
+  table.cell('filePath', 'packages/astro/src/core/client-directive/default.ts');
+  table.row();
+  table.cell('filePath', 'packages/astro/src/integrations/hooks.ts');
+
+  const expected = `
+…ro/src/core/client-directive/default.ts
+packages/astro/src/integrations/hooks.ts`;
+
+  assert.equal(expected.trimStart(), table.toString());
 });
 
 test('Render table with no- and start-truncated values', () => {

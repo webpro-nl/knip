@@ -1,7 +1,7 @@
 import ts from 'typescript';
-import { timerify } from '../util/Performance.js';
-import { isIdChar } from '../util/regex.js';
-import type { ExportWithSymbol, MemberWithSymbol } from './get-imports-and-exports.js';
+import { timerify } from '../util/Performance.ts';
+import { isIdChar } from '../util/regex.ts';
+import type { ExportWithSymbol, MemberWithSymbol } from './get-imports-and-exports.ts';
 
 const findInFlow = (flowNode: any, targetSymbol: ts.Symbol): boolean => {
   if (!flowNode?.node) return false;
@@ -35,7 +35,7 @@ const hasRefsInFile = (
 
   let index = 0;
 
-  // biome-ignore lint: suspicious/noAssignInExpressions
+  // oxlint-disable-next-line no-cond-assign
   while (index < text.length && (index = text.indexOf(id, index)) !== -1) {
     if (isIdChar(text.charAt(index - 1)) || isIdChar(text.charAt(index + id.length))) {
       index += id.length;

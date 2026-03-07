@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { Input } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { NanoStagedConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { Input } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { NanoStagedConfig } from './types.ts';
 
 // https://github.com/usmanyunusov/nano-staged
 

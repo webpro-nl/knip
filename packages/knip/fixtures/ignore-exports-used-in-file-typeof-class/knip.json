@@ -1,0 +1,7 @@
+{
+  "ignoreExportsUsedInFile": {
+    "enum": true,
+    "interface": true,
+    "type": true
+  }
+}

@@ -1,11 +1,12 @@
 import type { ParsedArgs } from 'minimist';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isDirectory } from '../../util/fs.js';
-import { type Input, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PrismaConfig } from './types.js';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import { isDirectory } from '../../util/fs.ts';
+import { type Input, toEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
+import type { PrismaConfig } from './types.ts';
 
 // https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration
 // https://www.prisma.io/docs/orm/reference/prisma-config-reference
@@ -54,6 +55,10 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
   return inputs;
 };
 
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('prisma')) registerCompiler({ extension: '.prisma', compiler });
+};
+
 const args: Args = {
   config: true,
   resolveInputs: (parsed: ParsedArgs, { cwd }) => {
@@ -73,6 +78,7 @@ const plugin: Plugin = {
   config,
   args,
   resolveConfig,
+  registerCompilers,
 };
 
 export default plugin;

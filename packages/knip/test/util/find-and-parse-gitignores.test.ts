@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import test from 'node:test';
-import { findAndParseGitignores } from '../../src/util/glob-core.js';
-import { join } from '../../src/util/path.js';
-import { resolve } from '../helpers/resolve.js';
+import { findAndParseGitignores } from '../../src/util/glob-core.ts';
+import { join } from '../../src/util/path.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 test('findAndParseGitignores', async () => {
   const cwd = resolve('fixtures/glob');
@@ -11,6 +11,8 @@ test('findAndParseGitignores', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../../.gitignore', '../../../../.gitignore', '.gitignore', 'a/.gitignore', 'a/b/.gitignore'],
     ignores: new Set([
+      '**/.DS_Store',
+      '**/.DS_Store/**',
       '**/.cache',
       '**/.cache/**',
       '.git',
@@ -23,6 +25,10 @@ test('findAndParseGitignores', async () => {
       '**/a/b/c/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });
@@ -42,10 +48,16 @@ test('findAndParseGitignores (/a)', async () => {
       '.yarn',
       '**/b/c',
       '**/b/c/**',
+      '**/.DS_Store',
+      '**/.DS_Store/**',
       '**/.cache',
       '**/.cache/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });
@@ -71,10 +83,16 @@ test('findAndParseGitignores (/a/b', async () => {
       '.yarn',
       '**/c',
       '**/c/**',
+      '**/.DS_Store',
+      '**/.DS_Store/**',
       '**/.cache',
       '**/.cache/**',
       '**/.npmrc',
       '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+      '**/bin/knip-bun/**',
+      '**/bin/knip/**',
     ]),
     unignores: [],
   });

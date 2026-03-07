@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pad, truncate, truncateStart } from '../../src/util/string.js';
+import { pad, truncate, truncateStart } from '../../src/util/string.ts';
 
 test('truncate', () => {
   assert.equal(truncate('hello world', 8), 'hello w…');

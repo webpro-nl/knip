@@ -1,9 +1,9 @@
-import type { Results } from '../../run.js';
-import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
-import { relative, toRelative } from '../../util/path.js';
-import { Table } from '../../util/table.js';
-import { byPathDepth } from '../../util/workspace.js';
-import { bright, dim, getColoredTitle, getDimmedTitle } from './util.js';
+import type { Results } from '../../run.ts';
+import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.ts';
+import { relative, toRelative } from '../../util/path.ts';
+import { Table } from '../../util/table.ts';
+import { byPathDepth } from '../../util/workspace.ts';
+import { bright, dim, getColoredTitle, getDimmedTitle } from './util.ts';
 
 interface PrintHintOptions {
   type: ConfigurationHintType;
@@ -25,8 +25,11 @@ const getWorkspaceName = (hint: ConfigurationHint) =>
     ? hint.workspaceName
     : '';
 
-const getIdentifier = (hint: ConfigurationHint) =>
-  hint.identifier === '.' ? `. ${dim('(root)')}` : hint.identifier.toString();
+const getIdentifier = (hint: ConfigurationHint) => {
+  if (hint.identifier === '.') return `. ${dim('(root)')}`;
+  if (hint.identifier instanceof RegExp) return hint.identifier.source.replaceAll('\\/', '/');
+  return hint.identifier.toString();
+};
 
 const getTableForHints = (hints: TableRow[]) => {
   const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
@@ -59,6 +62,8 @@ const addWorkspace = (options: PrintHintOptions) =>
 const packageEntry = () => 'Package entry file not found';
 
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
+  ['ignore', { print: unused }],
+  ['ignoreFiles', { print: unused }],
   ['ignoreBinaries', { print: unused }],
   ['ignoreDependencies', { print: unused }],
   ['ignoreUnresolved', { print: unused }],
@@ -79,6 +84,7 @@ export { hintPrinters };
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['top-level-unconfigured', 'workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
+  ['ignore', 'ignoreFiles'],
   ['ignoreWorkspaces'],
   ['ignoreDependencies'],
   ['ignoreBinaries'],
@@ -111,7 +117,7 @@ export const finalizeConfigurationHints = (
     } else {
       const topWorkspaces = workspaces.sort((a, b) => b.size - a.size).filter(ws => ws.size > 1);
       for (const { dir, size } of topWorkspaces) {
-        const identifier = toRelative(dir, options.cwd) || '.';
+        const identifier = toRelative(dir, options.cwd);
         results.configurationHints.push({
           type: 'workspace-unconfigured',
           workspaceName: identifier,

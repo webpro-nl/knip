@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import { resolve } from 'node:path';
 
 const runtime = process.argv[0];

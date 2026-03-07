@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://next-intl.dev/docs/getting-started/app-router
 

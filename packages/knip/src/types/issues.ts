@@ -1,5 +1,5 @@
-import type { SYMBOL_TYPE } from '../constants.js';
-import type { Fixes } from './exports.js';
+import type { SYMBOL_TYPE } from '../constants.ts';
+import type { Fixes } from './exports.ts';
 
 export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
@@ -91,6 +91,8 @@ export type Rules = Record<IssueType, IssueSeverity>;
 export type ConfigurationHints = Map<string, ConfigurationHint>;
 
 export type ConfigurationHintType =
+  | 'ignore'
+  | 'ignoreFiles'
   | 'ignoreBinaries'
   | 'ignoreDependencies'
   | 'ignoreUnresolved'

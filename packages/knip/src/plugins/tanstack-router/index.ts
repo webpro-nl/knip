@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { TanStackRouterConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { TanStackRouterConfig } from './types.ts';
 
 // https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing
 

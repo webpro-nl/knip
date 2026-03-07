@@ -1,5 +1,5 @@
 import type { ParsedArgs } from 'minimist';
-import type { Input } from '../util/input.js';
+import type { Input } from '../util/input.ts';
 
 export type ConfigArg = boolean | (string | [string, (id: string) => string])[];
 

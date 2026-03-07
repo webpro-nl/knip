@@ -1,7 +1,7 @@
 import type { Issue, IssueType } from 'knip/session';
 
 export type Config = {
-  enabled: boolean;
+  deferSession: boolean;
   configFilePath?: string;
   editor: {
     exports: {

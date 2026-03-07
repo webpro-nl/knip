@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/openapi-ts",
+  "devDependencies": {
+    "@hey-api/openapi-ts": "*"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "*",
+    "zod": "*"
+  },
+  "scripts": {
+    "generate": "openapi-ts"
+  }
+}

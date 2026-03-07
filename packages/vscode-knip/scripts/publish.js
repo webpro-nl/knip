@@ -77,6 +77,10 @@ const pkg = JSON.parse(pkgOriginal);
 delete pkg.type;
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
+// Copy package.json to dist for test run
+const distPkg = { ...pkg, main: './extension.js' };
+writeFileSync(join(dist, 'package.json'), JSON.stringify(distPkg, null, 2));
+
 const selectedTargets = args.target
   ? [[args.target, targets[args.target]]]
   : args.publish

@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "api",
+      "script": "./src/index.js"
+    },
+    {
+      "name": "another",
+      "script": "./src/another.js"
+    }
+  ]
+}

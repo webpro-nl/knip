@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { hasFilesWithExtensions } from '../../util/fs.js';
-import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
-import { findByKeyDeep } from '../../util/object.js';
-import { join, relative } from '../../util/path.js';
-import type { Job, Runs } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { hasFileWithExtension } from '../../util/fs.ts';
+import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { findByKeyDeep } from '../../util/object.ts';
+import { join, relative } from '../../util/path.ts';
+import type { Job, Runs } from './types.ts';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -11,9 +11,7 @@ const title = 'GitHub Actions';
 
 const enablers = 'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
 
-const isEnabled: IsPluginEnabled = ({ cwd }) => {
-  return hasFilesWithExtensions(cwd, '.github/workflows', ['yml', 'yaml']);
-};
+const isEnabled: IsPluginEnabled = ({ cwd }) => hasFileWithExtension(cwd, '.github/workflows', ['.yml', '.yaml']);
 
 const isRootOnly = true;
 

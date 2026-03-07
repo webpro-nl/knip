@@ -1,7 +1,7 @@
 import type ts from 'typescript';
-import importDeclaration from './importDeclaration.js';
-import importEqualsDeclaration from './importEqualsDeclaration.js';
-import reExportDeclaration from './reExportDeclaration.js';
+import importDeclaration from './importDeclaration.ts';
+import importEqualsDeclaration from './importEqualsDeclaration.ts';
+import reExportDeclaration from './reExportDeclaration.ts';
 
 const visitors = [importDeclaration, importEqualsDeclaration, reExportDeclaration];
 

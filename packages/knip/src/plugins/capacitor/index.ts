@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { CapacitorConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { CapacitorConfig } from './types.ts';
 
 // https://capacitorjs.com/docs/config
 

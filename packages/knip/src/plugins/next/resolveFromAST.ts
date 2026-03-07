@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { getPropertyValues } from '../../typescript/ast-helpers.js';
+import { getPropertyValues } from '../../typescript/ast-helpers.ts';
 
 export const getPageExtensions = (sourceFile: ts.SourceFile) => {
   const pageExtensions: Set<string> = new Set();

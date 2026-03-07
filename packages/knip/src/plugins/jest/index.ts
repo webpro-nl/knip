@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { isInternal, join, toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getReportersDependencies, resolveExtensibleConfig } from './helpers.js';
-import type { JestConfig, JestInitialOptions } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
+import type { JestConfig, JestInitialOptions } from './types.ts';
 
 // https://jestjs.io/docs/configuration
 
@@ -114,7 +114,7 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));
 
   const result = inputs.map(dependency => {
-    dependency.specifier = replaceRootDir(dependency.specifier);
+    dependency.specifier = normalize(replaceRootDir(dependency.specifier));
     return dependency;
   });
 

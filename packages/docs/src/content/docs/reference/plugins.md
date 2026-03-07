@@ -1,5 +1,5 @@
 ---
-title: Plugins (127)
+title: Plugins (137)
 tableOfContents: false
 ---
 
@@ -7,6 +7,7 @@ tableOfContents: false
 - [Angular](/reference/plugins/angular "Angular")
 - [Astro](/reference/plugins/astro "Astro")
 - [Astro DB](/reference/plugins/astro-db "Astro DB")
+- [astro-og-canvas](/reference/plugins/astro-og-canvas "astro-og-canvas")
 - [Ava](/reference/plugins/ava "Ava")
 - [Babel](/reference/plugins/babel "Babel")
 - [Biome](/reference/plugins/biome "Biome")
@@ -31,7 +32,9 @@ tableOfContents: false
 - [Drizzle](/reference/plugins/drizzle "Drizzle")
 - [Eleventy](/reference/plugins/eleventy "Eleventy")
 - [ESLint](/reference/plugins/eslint "ESLint")
+- [execa](/reference/plugins/execa "execa")
 - [Expo](/reference/plugins/expo "Expo")
+- [Expressive Code](/reference/plugins/expressive-code "Expressive Code")
 - [Gatsby](/reference/plugins/gatsby "Gatsby")
 - [GitHub Action](/reference/plugins/github-action "GitHub Action")
 - [GitHub Actions](/reference/plugins/github-actions "GitHub Actions")
@@ -62,6 +65,7 @@ tableOfContents: false
 - [Next.js](/reference/plugins/next "Next.js")
 - [next-intl](/reference/plugins/next-intl "next-intl")
 - [Next.js MDX](/reference/plugins/next-mdx "Next.js MDX")
+- [Nitro](/reference/plugins/nitro "Nitro")
 - [Node.js](/reference/plugins/node "Node.js")
 - [node-modules-inspector](/reference/plugins/node-modules-inspector "node-modules-inspector")
 - [nodemon](/reference/plugins/nodemon "nodemon")
@@ -72,16 +76,20 @@ tableOfContents: false
 - [oclif](/reference/plugins/oclif "oclif")
 - [Oxlint](/reference/plugins/oxlint "Oxlint")
 - [Parcel](/reference/plugins/parcel "Parcel")
+- [Payload CMS](/reference/plugins/payload "Payload CMS")
 - [Playwright](/reference/plugins/playwright "Playwright")
 - [Playwright for components](/reference/plugins/playwright-ct "Playwright for components")
 - [playwright-test](/reference/plugins/playwright-test "playwright-test")
 - [Plop](/reference/plugins/plop "Plop")
+- [pm2](/reference/plugins/pm2 "pm2")
 - [pnpm](/reference/plugins/pnpm "pnpm")
 - [PostCSS](/reference/plugins/postcss "PostCSS")
 - [Preconstruct](/reference/plugins/preconstruct "Preconstruct")
 - [Prettier](/reference/plugins/prettier "Prettier")
 - [Prisma](/reference/plugins/prisma "Prisma")
+- [Qwik](/reference/plugins/qwik "Qwik")
 - [React Cosmos](/reference/plugins/react-cosmos "React Cosmos")
+- [React Native](/reference/plugins/react-native "React Native")
 - [React Router](/reference/plugins/react-router "React Router")
 - [Relay](/reference/plugins/relay "Relay")
 - [Release It!](/reference/plugins/release-it "Release It!")
@@ -102,6 +110,7 @@ tableOfContents: false
 - [Stryker](/reference/plugins/stryker "Stryker")
 - [Stylelint](/reference/plugins/stylelint "Stylelint")
 - [Svelte](/reference/plugins/svelte "Svelte")
+- [SvelteKit](/reference/plugins/sveltekit "SvelteKit")
 - [SVGO](/reference/plugins/svgo "SVGO")
 - [SVGR](/reference/plugins/svgr "SVGR")
 - [SWC](/reference/plugins/swc "SWC")
@@ -131,6 +140,7 @@ tableOfContents: false
 - [xo](/reference/plugins/xo "xo")
 - [Yarn](/reference/plugins/yarn "Yarn")
 - [yorkie](/reference/plugins/yorkie "yorkie")
+- [zx](/reference/plugins/zx "zx")
 
 
 :::

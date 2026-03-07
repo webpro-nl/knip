@@ -1,6 +1,6 @@
 import { stripVTControlCharacters } from 'node:util';
 
-// biome-ignore lint: suspicious/noControlCharactersInRegex
+// oxlint-disable-next-line no-control-regex
 const CONTROL_CHARACTERS = /\u001b\[[0-9;]+m/g;
 export const ELLIPSIS = '…';
 

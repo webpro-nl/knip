@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { join } from '../../src/util/path.js';
-import { resolve } from '../helpers/resolve.js';
-import { describeFile } from './util.js';
+import { join } from '../../src/util/path.ts';
+import { resolve } from '../helpers/resolve.ts';
+import { describeFile } from './util.ts';
 
 const cwd = resolve('fixtures/session-re-exports');
 

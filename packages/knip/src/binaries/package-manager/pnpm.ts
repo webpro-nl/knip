@@ -1,7 +1,8 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver } from '../../types/config.js';
-import { toBinary } from '../../util/input.js';
-import { resolveDlx } from './pnpx.js';
+import type { BinaryResolver } from '../../types/config.ts';
+import { toBinary } from '../../util/input.ts';
+import { isValidBinary } from '../../util/modules.ts';
+import { resolveDlx } from './pnpx.ts';
 
 // https://pnpm.io/cli/add
 
@@ -67,7 +68,7 @@ const commands = [
 
 export const resolve: BinaryResolver = (_binary, args, options) => {
   const parsed = parseArgs(args, {
-    boolean: ['recursive', 'silent', 'shell-mode'],
+    boolean: ['aggregate-output', 'if-present', 'parallel', 'recursive', 'reverse', 'shell-mode', 'silent', 'stream'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
     '--': true,
   });
@@ -82,7 +83,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (parsed.filter && !parsed.recursive) return [];
 
-  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--'], { knownBinsOnly: true }) : [];
 
   if (command === 'exec') {
     return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));
@@ -91,5 +92,5 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const isScript = manifestScriptNames.has(command);
   if (isScript || commands.includes(command)) return childInputs;
 
-  return command ? [toBinary(command)] : [];
+  return command && isValidBinary(command) ? [toBinary(command)] : [];
 };

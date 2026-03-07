@@ -1,7 +1,7 @@
-import type { ParsedCLIArgs } from './cli-arguments.js';
-import { debugLogObject } from './debug.js';
-import { ConfigurationError } from './errors.js';
-import { _load } from './loader.js';
+import type { ParsedCLIArgs } from './cli-arguments.ts';
+import { debugLogObject } from './debug.ts';
+import { ConfigurationError } from './errors.ts';
+import { _load } from './loader.ts';
 
 const unwrapFunction = async (maybeFunction: unknown, options: ParsedCLIArgs) => {
   if (typeof maybeFunction === 'function') {

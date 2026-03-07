@@ -1,6 +1,6 @@
 import ts from 'typescript';
-import { isFile } from './fs.js';
-import { dirname } from './path.js';
+import { isFile } from './fs.ts';
+import { dirname } from './path.ts';
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   if (isFile(tsConfigFilePath)) {

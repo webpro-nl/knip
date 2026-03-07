@@ -4,8 +4,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test with tsx/Node.js",
-      "runtimeExecutable": "${workspaceFolder}/packages/knip/node_modules/.bin/tsx",
+      "name": "Debug test with Node.js",
       "runtimeArgs": ["--test"],
       "args": ["${file}"],
       "cwd": "${workspaceFolder}/packages/knip",
@@ -60,7 +59,6 @@
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/**",
-
         "!**/node_modules/**"
       ]
     }

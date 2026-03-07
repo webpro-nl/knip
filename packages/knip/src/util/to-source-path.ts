@@ -1,10 +1,10 @@
 import type { CompilerOptions } from 'typescript';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { debugLog, debugLogArray } from './debug.js';
-import { isDirectory } from './fs.js';
-import { _glob, _syncGlob, prependDirToPattern } from './glob.js';
-import { isAbsolute, isInternal, join, toRelative } from './path.js';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { debugLog, debugLogArray } from './debug.ts';
+import { isDirectory } from './fs.ts';
+import { _glob, _syncGlob, prependDirToPattern } from './glob.ts';
+import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;

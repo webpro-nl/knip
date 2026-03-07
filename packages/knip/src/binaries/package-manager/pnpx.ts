@@ -1,7 +1,7 @@
 import parseArgs from 'minimist';
-import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { stripVersionFromSpecifier } from '../../util/modules.js';
+import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
+import { stripVersionFromSpecifier } from '../../util/modules.ts';
 
 export const resolveDlx = (args: string[], options: BinaryResolverOptions) => {
   const parsed = parseArgs(args, {

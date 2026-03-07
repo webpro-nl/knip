@@ -1,16 +1,16 @@
-import type { ConfigArg } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { TsConfigJson } from '../../types/tsconfig-json.js';
-import { compact } from '../../util/array.js';
-import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { ConfigArg } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { TsConfigJson } from '../../types/tsconfig-json.ts';
+import { compact } from '../../util/array.ts';
+import { toAlias, toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
+import { dirname, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://www.typescriptlang.org/tsconfig
 
 const title = 'TypeScript';
 
-const enablers = ['typescript'];
+const enablers = ['typescript', '@typescript/native-preview'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -40,16 +40,26 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
+  const paths = compilerOptions.paths as Record<string, string[]> | undefined;
+  const configFileDir = dirname(options.configFilePath);
+  const aliases =
+    paths && configFileDir !== options.cwd
+      ? Object.entries(paths).map(([key, prefixes]) =>
+          toAlias(key, prefixes, { dir: join(configFileDir, (compilerOptions.baseUrl as string) ?? '.') })
+        )
+      : [];
+
   return compact([
     ...extend,
     ...references,
     ...[...types, ...plugins, ...importHelpers].map(id => toDeferResolve(id)),
     ...jsx,
+    ...aliases,
   ]);
 };
 
 const args = {
-  binaries: ['tsc'],
+  binaries: ['tsc', 'tsgo'],
   string: ['project'],
   alias: { project: ['p'] },
   config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,

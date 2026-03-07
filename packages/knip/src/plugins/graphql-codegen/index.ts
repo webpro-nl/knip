@@ -1,16 +1,16 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency, toEntry } from '../../util/input.js';
-import { get } from '../../util/object.js';
-import { isInternal } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
+import { get } from '../../util/object.ts';
+import { isInternal } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 import type {
   ConfiguredPlugin,
   GraphqlCodegenTypes,
   GraphqlConfigTypes,
   GraphqlProjectsConfigTypes,
   PresetNames,
-} from './types.js';
-import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.js';
+} from './types.ts';
+import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.ts';
 
 // Both use Cosmiconfig with custom searchPlaces - not using helper as a result
 // Codegen:

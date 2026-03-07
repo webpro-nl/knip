@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { join } from './path.js';
+import { join } from './path.ts';
 
 // TODO More hooks exists, but is it worth adding all of them?
 // https://git-scm.com/docs/githooks

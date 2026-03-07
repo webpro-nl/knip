@@ -1,5 +1,5 @@
-import type { Fix, Fixes } from './exports.js';
-import type { IssueSymbol, SymbolType } from './issues.js';
+import type { Fix, Fixes } from './exports.ts';
+import type { IssueSymbol, SymbolType } from './issues.ts';
 
 export type Identifier = string;
 type FilePath = string;

@@ -1,10 +1,9 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toAlias } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { config as viteConfig } from '../vite/index.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { config as viteConfig } from '../vite/index.ts';
+import compiler from './compiler.ts';
 
-// https://kit.svelte.dev/docs
+// https://svelte.dev/docs
 
 const title = 'Svelte';
 
@@ -14,21 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['svelte.config.js', ...viteConfig];
 
-const production = [
-  'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
-  'src/hooks.{server,client}.{js,ts}',
-  'src/params/*.{js,ts}',
-  'src/service-worker.{js,ts}',
-  'src/service-worker/index.{js,ts}',
-  'src/instrumentation.server.{js,ts}',
-];
-
-const resolve: Resolve = options => {
-  const alias = toAlias('$app/*', [join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/app/*')]);
-  const serviceWorkerAlias = toAlias('$service-worker', [
-    join(options.cwd, 'node_modules/@sveltejs/kit/src/runtime/service-worker.js'),
-  ]);
-  return [alias, serviceWorkerAlias];
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('svelte')) registerCompiler({ extension: '.svelte', compiler });
 };
 
 const plugin: Plugin = {
@@ -36,8 +22,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   entry,
-  production,
-  resolve,
+  registerCompilers,
 };
 
 export default plugin;

@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/metro-defaults",
+  "dependencies": {
+    "metro": "*"
+  }
+}

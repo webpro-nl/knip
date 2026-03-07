@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { _syncGlob } from '../src/util/glob.js';
-import { resolve } from './helpers/resolve.js';
+import { _syncGlob } from '../src/util/glob.ts';
+import { resolve } from './helpers/resolve.ts';
 
 test('syncGlob should not traverse circular symlinks', () => {
   const libACwd = resolve('fixtures/workspaces-circular-symlinks/packages/lib-a');

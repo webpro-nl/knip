@@ -1,6 +1,6 @@
-import type { Entries } from '../types/entries.js';
-import type { ReporterOptions } from '../types/issues.js';
-import { getIssueTypeTitle, getTableForType } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { ReporterOptions } from '../types/issues.ts';
+import { getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 export default ({ report, issues, cwd }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;

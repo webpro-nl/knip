@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/subpath-import-from-plugin');
 
@@ -15,8 +15,8 @@ test('Allows subpath-imports from plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -28,8 +28,8 @@ test('Allows subpath-imports from plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -41,7 +41,7 @@ test('Allows subpath-imports from plugin (strict)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

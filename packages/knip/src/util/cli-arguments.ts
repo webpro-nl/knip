@@ -8,7 +8,8 @@ Options:
   -h, --help               Print this help text
   -V, --version            Print version
   -n, --no-progress        Don't show dynamic progress updates (automatically enabled in CI environments)
-  -c, --config [file]      Configuration file path (default: [.]knip.json[c], knip.(js|ts), knip.config.(js|ts) or package.json#knip)
+  -c, --config [file]      Configuration file path
+                           (default: [.]knip.json[c], knip.(js|ts), knip.config.(js|ts) or package.json#knip)
   --use-tsconfig-files     Use tsconfig.json to define project files (override \`project\` patterns)
   -t, --tsConfig [file]    TypeScript configuration path (default: tsconfig.json)
 
@@ -42,7 +43,7 @@ Fix
 Output
   --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
   --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
-  --reporter               Select reporter: symbols, compact, codeowners, json, codeclimate, markdown, disclosure, github-actions, can be repeated (default: symbols)
+  --reporter               Select reporter (default: symbols), can be repeated (3)
   --reporter-options       Pass extra options to the reporter (as JSON string, see example)
   --no-config-hints        Suppress configuration hints
   --treat-config-hints-as-errors    Exit with non-zero code (1) if there are any configuration hints
@@ -62,7 +63,8 @@ Troubleshooting
   --trace-file [file]      Show trace output for exports in file
 
 (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, classMembers, types, nsTypes, enumMembers, duplicates, catalog
-(2) Fixable issue types: dependencies, exports, types, catalog
+(2) Fixable issue types: dependencies, exports, types, files, catalog
+(3) Built-in reporters: symbols (default), compact, codeowners, json, codeclimate, markdown, disclosure, github-actions
 
 Examples:
 

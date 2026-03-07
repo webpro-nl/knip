@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://docs.lost-pixel.com/user-docs/api-reference/lost-pixel.config.js-or-ts
 

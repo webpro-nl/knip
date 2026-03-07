@@ -1,15 +1,15 @@
-import { IMPORT_STAR } from '../constants.js';
-import type { GraphExplorer } from '../graph-explorer/explorer.js';
-import type { UsageLocation } from '../graph-explorer/operations/get-usage.js';
-import { getExportedIdentifiers } from '../graph-explorer/utils.js';
+import { IMPORT_STAR } from '../constants.ts';
+import type { GraphExplorer } from '../graph-explorer/explorer.ts';
+import type { UsageLocation } from '../graph-explorer/operations/get-usage.ts';
+import { getExportedIdentifiers } from '../graph-explorer/utils.ts';
 import {
   forEachAliasReExport,
   forEachNamespaceReExport,
   forEachPassThroughReExport,
   getStarReExportSources,
-} from '../graph-explorer/visitors.js';
-import type { FileNode, ModuleGraph } from '../types/module-graph.js';
-import type { Export, ImportLookup, InternalImport } from './types.js';
+} from '../graph-explorer/visitors.ts';
+import type { FileNode, ModuleGraph } from '../types/module-graph.ts';
+import type { Export, ImportLookup, InternalImport } from './types.ts';
 
 const FALLBACK_LOCATION = { identifier: undefined, pos: 0, line: 0, col: 0 };
 

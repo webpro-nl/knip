@@ -2,8 +2,11 @@ export class PackagePeeker {
   private lines: string[] = [];
   private sections: Record<string, { startLine: number; startPos: number }> = {};
   private ready = false;
+  private manifestStr: string;
 
-  constructor(private manifestStr: string) {}
+  constructor(manifestStr: string) {
+    this.manifestStr = manifestStr;
+  }
 
   private init() {
     this.lines = this.manifestStr.split('\n');

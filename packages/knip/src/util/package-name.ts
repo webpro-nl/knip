@@ -1,5 +1,5 @@
-import type { PackageJson } from '../types/package-json.js';
-import { basename, dirname } from './path.js';
+import type { PackageJson } from '../types/package-json.ts';
+import { basename, dirname } from './path.ts';
 
 const getPkgName = (parent: string, base: string) => (parent.charAt(0) === '@' ? `${parent}/${base}` : base);
 

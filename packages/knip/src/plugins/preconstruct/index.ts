@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PreconstructConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PreconstructConfig } from './types.ts';
 
 // https://preconstruct.tools/configuration
 

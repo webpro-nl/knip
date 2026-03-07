@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun3",
+  "scripts": {
+    "test": "bun test --preload ./setup.ts --preload ./setup-env.ts"
+  }
+}

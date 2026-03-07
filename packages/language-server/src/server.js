@@ -4,6 +4,7 @@ import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/sessio
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import pkg from '../package.json' with { type: 'json' };
 import {
   createAddJSDocTagEdit,
   createDeleteFileEdit,
@@ -24,6 +25,21 @@ import {
 import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
+
+/** @type {Config} */
+const DEFAULT_CONFIG = {
+  deferSession: false,
+  editor: {
+    exports: {
+      codelens: { enabled: true },
+      hover: { enabled: true, includeImportLocationSnippet: false, maxSnippets: 10, timeout: 300 },
+      quickfix: { enabled: true },
+      highlight: { dimExports: false, dimTypes: false },
+    },
+  },
+  imports: { enabled: true },
+  exports: { enabled: true, contention: { enabled: true } },
+};
 
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
@@ -76,9 +92,16 @@ export class LanguageServer {
   /** @type TextDocuments<TextDocument> */
   documents;
 
+  /** @type {Config | undefined} */
+  initConfig;
+
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
     this.documents = new TextDocuments(TextDocument);
+    console.log = this.connection.console.log.bind(this.connection.console);
+    console.warn = this.connection.console.warn.bind(this.connection.console);
+    console.error = this.connection.console.error.bind(this.connection.console);
+    console.info = this.connection.console.info.bind(this.connection.console);
     this.setupHandlers();
     this.documents.listen(this.connection);
     this.connection.listen();
@@ -92,16 +115,27 @@ export class LanguageServer {
 
       this.cwd = fileURLToPath(uri);
 
+      this.initConfig = params.initializationOptions?.config;
+
       const capabilities = {
         codeActionProvider: {
           codeActionKinds: [CodeActionKind.QuickFix],
         },
       };
 
-      return { capabilities };
+      return {
+        capabilities,
+        serverInfo: {
+          name: pkg.name,
+          version: pkg.version,
+        },
+      };
     });
 
-    this.connection.onInitialized(() => {});
+    this.connection.onInitialized(async () => {
+      const config = await this.getConfig();
+      if (config?.deferSession !== true) this.start();
+    });
 
     this.connection.onRequest(REQUEST_START, () => this.start());
 
@@ -128,7 +162,11 @@ export class LanguageServer {
 
   /** @returns {Promise<Config>} */
   async getConfig() {
-    return await this.connection.workspace.getConfiguration('knip');
+    try {
+      const config = await this.connection.workspace.getConfiguration('knip');
+      if (config?.editor) return config;
+    } catch {}
+    return this.initConfig ?? DEFAULT_CONFIG;
   }
 
   /**
@@ -174,16 +212,12 @@ export class LanguageServer {
 
     try {
       const config = await this.getConfig();
-      if (!config?.enabled) return;
 
-      const configFilePath = config.configFilePath
+      const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
           ? config.configFilePath
           : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
         : undefined;
-
-      if (configFilePath) this.cwd = path.dirname(configFilePath);
-      if (this.cwd) process.chdir(this.cwd);
 
       this.connection.console.log('Creating options');
       const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
@@ -228,26 +262,36 @@ export class LanguageServer {
     this.packageJsonCache = undefined;
     if (!this.session) return;
 
+    const cwd = this.cwd ?? process.cwd();
+
     /** @type {{ type: "added" | "deleted" | "modified"; filePath: string }[]} */
     const changes = [];
     for (const change of params.changes) {
+      if (!change.uri.startsWith('file:')) continue;
       const filePath = fileURLToPath(change.uri);
+      if (!filePath.startsWith(cwd) || filePath.includes('/.git/')) continue;
       if (RESTART_FOR.has(path.basename(change.uri))) return this.restart();
       const type = FILE_CHANGE_TYPES.get(change.type);
       if (!type) continue;
       changes.push({ type, filePath });
     }
 
-    const result = await this.session.handleFileChanges(changes);
+    if (changes.length === 0) return;
 
-    if (result) {
+    try {
+      const result = await this.session.handleFileChanges(changes);
+
+      if (!result) return;
+
       this.connection.console.log(
         `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
       );
-    }
 
-    const config = await this.getConfig();
-    this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+      const config = await this.getConfig();
+      this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+    } catch (_error) {
+      this.connection.console.error(`Error handling file changes: ${_error}`);
+    }
   }
 
   /**
@@ -360,22 +404,27 @@ export class LanguageServer {
       }
 
       if (issueType === 'unlisted') {
+        const workspacePath = path.resolve(this.cwd ?? process.cwd(), issue.workspace);
         codeActions.push({
-          title: `Add '${issue.symbol}' to dependencies in package.json`,
+          title: `Install '${issue.symbol}' as dependency`,
           kind: CodeActionKind.QuickFix,
           diagnostics: [diagnostic],
+          command: {
+            title: `Install '${issue.symbol}' as dependency`,
+            command: 'knip.installDependency',
+            arguments: [issue.symbol, 'dependencies', workspacePath],
+          },
         });
 
         codeActions.push({
-          title: `Add '${issue.symbol}' to devDependencies in package.json`,
+          title: `Install '${issue.symbol}' as devDependency`,
           kind: CodeActionKind.QuickFix,
           diagnostics: [diagnostic],
-        });
-
-        codeActions.push({
-          title: `Add '@types/${issue.symbol}' to devDependencies in package.json`,
-          kind: CodeActionKind.QuickFix,
-          diagnostics: [diagnostic],
+          command: {
+            title: `Install '${issue.symbol}' as devDependency`,
+            command: 'knip.installDependency',
+            arguments: [issue.symbol, 'devDependencies', workspacePath],
+          },
         });
       }
 

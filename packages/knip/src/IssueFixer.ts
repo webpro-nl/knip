@@ -1,17 +1,25 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import { formatly } from 'formatly';
-import type { Fixes } from './types/exports.js';
-import type { Issue, Issues } from './types/issues.js';
-import { DEFAULT_CATALOG } from './util/catalog.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogArray, debugLogObject } from './util/debug.js';
-import { load, save } from './util/package-json.js';
-import { extname, join } from './util/path.js';
-import { removeExport } from './util/remove-export.js';
+import type { Fixes } from './types/exports.ts';
+import type { Counters, Issue, Issues, IssueType } from './types/issues.ts';
+import { DEFAULT_CATALOG } from './util/catalog.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { load, save } from './util/package-json.ts';
+import { extname, join } from './util/path.ts';
+import { removeExport } from './util/remove-export.ts';
 
-export const fix = async (issues: Issues, options: MainOptions) => {
+export const fix = async (issues: Issues, counters: Counters, options: MainOptions) => {
   const fixer = new IssueFixer(options);
   const touchedFiles = await fixer.fixIssues(issues);
+
+  for (const type in issues) {
+    const group = issues[type as IssueType];
+    if (group instanceof Set) continue;
+    for (const filePath in group)
+      for (const key in group[filePath]) if (group[filePath][key].isFixed) counters[type as IssueType]--;
+  }
+
   if (options.isFormat) {
     const report = await formatly(Array.from(touchedFiles));
     if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
@@ -68,6 +76,7 @@ class IssueFixer {
     }
 
     for (const [filePath, fixes] of allFixes) {
+      if (fixes.length === 0) continue;
       const absFilePath = join(this.options.cwd, filePath);
       const sourceFileText = fixes
         .sort((a, b) => b[0] - a[0])

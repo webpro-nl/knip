@@ -36,6 +36,8 @@ depcheck
 knip --dependencies
 ```
 
+**Project status**: The project is archived and recommends Knip.
+
 ### unimported
 
 > Find and fix dangling files and unused dependencies in your JavaScript
@@ -94,6 +96,8 @@ Use `knip --exports` to also include class and enum members.
 [tsr][8] (previously `ts-remove-unused`) removes unused exports, and works based
 on a single `tsconfig.json` file (`includes` and `excludes`) and requires no
 configuration. It removes the `export` keyword or the whole export declaration.
+
+**Project status**: The project is archived and recommends Knip.
 
 ## Related projects
 

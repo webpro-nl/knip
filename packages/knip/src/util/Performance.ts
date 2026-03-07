@@ -2,8 +2,8 @@ import os from 'node:os';
 import { type PerformanceEntry, PerformanceObserver, performance } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import { parseArgs } from 'node:util';
-import { getStats } from './math.js';
-import { Table } from './table.js';
+import { getStats } from './math.ts';
+import { Table } from './table.ts';
 
 const { values } = parseArgs({
   strict: false,
@@ -43,9 +43,9 @@ const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) :
 const inMB = (bytes: number) => bytes / 1024 / 1024;
 
 const keys = ['heapUsed', 'heapTotal', 'freemem'] as const;
-// biome-ignore lint: suspicious
+// oxlint-disable-next-line no-console
 const logHead = () => console.log(keys.map(key => key.padStart(10)).join('  '));
-// biome-ignore lint: suspicious
+// oxlint-disable-next-line no-console
 const log = (memInfo: MemInfo) => console.log(keys.map(key => twoFixed(inMB(memInfo[key])).padStart(10)).join('  '));
 
 class Performance {

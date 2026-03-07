@@ -1,6 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
-import type { PackageJson } from '../types/package-json.js';
+import type { PackageJson } from '../types/package-json.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -61,22 +61,31 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
 
   const entryPaths = new Set<string>();
 
-  if (typeof main === 'string') entryPaths.add(main);
-  if (typeof module === 'string') entryPaths.add(module);
-  if (typeof browser === 'string') entryPaths.add(browser);
-  if (typeof bin === 'string') entryPaths.add(bin);
-  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
+  if (typeof main === 'string' && main) entryPaths.add(main);
+  if (typeof module === 'string' && module) entryPaths.add(module);
+  if (typeof browser === 'string' && browser) entryPaths.add(browser);
+  if (typeof bin === 'string' && bin) entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) if (id) entryPaths.add(id);
+  if (typeof types === 'string' && types) entryPaths.add(types);
+  if (typeof typings === 'string' && typings) entryPaths.add(typings);
 
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
-      if (item === './*') continue;
+      if (item === './*' || item.trim() === '') continue;
       const expanded = item
         .replace(/\/\*$/, '/**') // /* → /**
         .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
         .replace(/\/\*\//, '/**/'); // /*/ → /**/
       entryPaths.add(expanded);
+    }
+  }
+
+  if (manifest.imports) {
+    for (const [key, value] of Object.entries(manifest.imports)) {
+      if (!key.startsWith('#')) continue;
+      for (const item of getEntriesFromExports(value)) {
+        if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
+      }
     }
   }
 

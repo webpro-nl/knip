@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
-import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.js';
-import { isAbsolute, isInNodeModules, toPosix } from './path.js';
+import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
+import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
   if (!isStartsLikePackageName(moduleSpecifier)) return;
@@ -10,10 +10,11 @@ export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
 export const getPackageNameFromFilePath = (value: string) => {
-  if (value.includes('node_modules/.bin/')) return extractBinary(value);
-  const match = toPosix(value).match(lastPackageNameMatch);
+  const name = value.startsWith('file://') ? value.slice(7) : value;
+  if (name.includes('node_modules/.bin/')) return extractBinary(name);
+  const match = toPosix(name).match(lastPackageNameMatch);
   if (match) return match[match.length - 1];
-  return value;
+  return name;
 };
 
 export const getPackageNameFromSpecifier = (specifier: string) =>
@@ -36,6 +37,8 @@ export const extractBinary = (command: string) =>
       .replace(/^(\.bin\/)/, '')
       .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
   );
+
+export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 

@@ -1,15 +1,15 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MetroConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MetroConfig } from './types.ts';
 
 // https://metrobundler.dev/docs/configuration
 
 const title = 'Metro';
 
-const enablers = ['metro', 'react-native'];
+const enablers = ['metro', '@react-native/metro-config'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
 
@@ -18,6 +18,8 @@ const config = ['metro.config.{js,cjs,json}', 'package.json'];
 const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
 const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
 const DEFAULT_EXTENSIONS = ['js', 'jsx', 'json', 'ts', 'tsx'];
+const DEFAULT_TRANSFORMER_PACKAGE = 'metro-transform-worker';
+const DEFAULT_MINIFIER_PACKAGE = 'metro-minify-terser';
 
 const production = [`src/**/*.{${PLATFORMS.join(',')}}.{${DEFAULT_EXTENSIONS.join(',')}}`];
 
@@ -45,8 +47,16 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   if (transformer?.minifierPath) inputs.push(transformer.minifierPath);
   if (transformer?.babelTransformerPath) inputs.push(transformer.babelTransformerPath);
 
-  return Array.from(i).concat([...inputs].map(id => toDeferResolve(id)));
+  return Array.from(i).concat(
+    [...inputs].map(id =>
+      toDeferResolve(id, {
+        optional: id === DEFAULT_TRANSFORMER_PACKAGE || id === DEFAULT_MINIFIER_PACKAGE,
+      })
+    )
+  );
 };
+
+const isFilterTransitiveDependencies = true;
 
 const note = `False positives for platform-specific unused files?
 Override the default \`entry\` patterns to match platforms and extensions.`;
@@ -61,6 +71,7 @@ const plugin: Plugin = {
   config,
   production,
   resolveConfig,
+  isFilterTransitiveDependencies,
 };
 
 export default plugin;

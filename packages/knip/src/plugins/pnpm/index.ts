@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
 
 // https://pnpm.io/pnpmfile
 

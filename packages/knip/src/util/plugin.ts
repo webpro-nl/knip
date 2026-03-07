@@ -1,10 +1,10 @@
-export { _load as load } from './loader.js';
+export { _load as load } from './loader.ts';
 
-import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.js';
-import { arrayify } from './array.js';
-import { _load as load } from './loader.js';
-import { get } from './object.js';
-import { basename } from './path.js';
+import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.ts';
+import { arrayify } from './array.ts';
+import { _load as load } from './loader.ts';
+import { get } from './object.ts';
+import { basename } from './path.ts';
 
 export const hasDependency = (dependencies: Set<string>, values: (string | RegExp)[]) =>
   values.some(value => {

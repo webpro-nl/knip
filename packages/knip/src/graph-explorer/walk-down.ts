@@ -1,6 +1,6 @@
-import type { ModuleGraph } from '../types/module-graph.js';
-import { STOP } from './constants.js';
-import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from './visitors.js';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import { STOP } from './constants.ts';
+import { getAliasReExportMap, getPassThroughReExportSources, getStarReExportSources } from './visitors.ts';
 
 export type Via = 'import' | 'importAs' | 'importNS' | 'reExport' | 'reExportAs' | 'reExportNS' | 'reExportStar';
 

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { IMPORT_STAR } from '../../src/constants.js';
-import type { RE_EXPORT_KIND } from '../../src/graph-explorer/constants.js';
-import { walkUp } from '../../src/graph-explorer/walk-up.js';
-import type { ModuleGraph } from '../../src/types/module-graph.js';
-import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.js';
-import { resolve } from '../helpers/resolve.js';
+import { IMPORT_STAR } from '../../src/constants.ts';
+import type { RE_EXPORT_KIND } from '../../src/graph-explorer/constants.ts';
+import { walkUp } from '../../src/graph-explorer/walk-up.ts';
+import type { ModuleGraph } from '../../src/types/module-graph.ts';
+import { baseExport, baseFileNode, baseImportMaps } from '../helpers/baseNodeObjects.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 type ReExportKind = (typeof RE_EXPORT_KIND)[keyof typeof RE_EXPORT_KIND];
 

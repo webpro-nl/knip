@@ -1,9 +1,9 @@
 import type { ParsedArgs } from 'minimist';
-import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getInputs, resolveFormatters } from './helpers.js';
-import type { ESLintConfigDeprecated } from './types.js';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getInputs, resolveFormatters } from './helpers.ts';
+import type { ESLintConfigDeprecated } from './types.ts';
 
 // https://eslint.org/docs/latest/use/configure/configuration-files
 // Deprecated: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated

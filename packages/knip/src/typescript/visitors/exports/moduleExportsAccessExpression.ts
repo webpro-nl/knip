@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.js';
-import type { Fix } from '../../../types/exports.js';
-import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.js';
-import { isJS } from '../helpers.js';
-import { exportVisitor as visit } from '../index.js';
+import { EMPTY_ARRAY, FIX_FLAGS, SYMBOL_TYPE } from '../../../constants.ts';
+import type { Fix } from '../../../types/exports.ts';
+import { hasRequireCall, isModuleExportsAccess, stripQuotes } from '../../ast-helpers.ts';
+import { isJS } from '../helpers.ts';
+import { exportVisitor as visit } from '../index.ts';
 
 export default visit(isJS, (node, { isFixExports }) => {
   if (ts.isExpressionStatement(node)) {

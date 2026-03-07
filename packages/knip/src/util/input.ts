@@ -1,6 +1,6 @@
-import type { IssueType } from '../types/issues.js';
-import type { PluginName } from '../types/PluginNames.js';
-import { isAbsolute, toRelative } from './path.js';
+import type { IssueType } from '../types/issues.ts';
+import type { PluginName } from '../types/PluginNames.ts';
+import { isAbsolute, toRelative } from './path.ts';
 
 type InputType =
   | 'binary'

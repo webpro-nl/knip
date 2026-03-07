@@ -1,16 +1,16 @@
 import { isBuiltin } from 'node:module';
 import ts from 'typescript';
-import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.js';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.js';
-import type { ExportNode, ExportNodeMember } from '../types/exports.js';
-import type { ImportNode } from '../types/imports.js';
-import type { IssueSymbol, SymbolType } from '../types/issues.js';
-import type { Export, ExportMember, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.js';
-import { addNsValue, addValue, createImports } from '../util/module-graph.js';
-import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.js';
-import { timerify } from '../util/Performance.js';
-import { dirname, isInNodeModules, resolve } from '../util/path.js';
-import { shouldIgnore } from '../util/tag.js';
+import { ALIAS_TAG, IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, Visitors } from '../types/config.ts';
+import type { ExportNode, ExportNodeMember } from '../types/exports.ts';
+import type { ImportNode } from '../types/imports.ts';
+import type { IssueSymbol, SymbolType } from '../types/issues.ts';
+import type { Export, ExportMember, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
+import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
+import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import { timerify } from '../util/Performance.ts';
+import { dirname, isInNodeModules, resolve } from '../util/path.ts';
+import { shouldIgnore } from '../util/tag.ts';
 import {
   getAccessMembers,
   getDestructuredNames,
@@ -25,20 +25,29 @@ import {
   isKeyofTypeof,
   isObjectEnumerationCallExpressionArgument,
   isReferencedInExport,
-} from './ast-helpers.js';
-import { _hasRefsInFile } from './has-refs-in-file.js';
-import { getImportsFromPragmas } from './pragmas/index.js';
-import type { BoundSourceFile } from './SourceFile.js';
-import getDynamicImportVisitors from './visitors/dynamic-imports/index.js';
-import getExportVisitors from './visitors/exports/index.js';
-import getImportVisitors from './visitors/imports/index.js';
-import getScriptVisitors from './visitors/scripts/index.js';
+} from './ast-helpers.ts';
+import { _hasRefsInFile } from './has-refs-in-file.ts';
+import { getImportsFromPragmas } from './pragmas/index.ts';
+import type { BoundSourceFile } from './SourceFile.ts';
+import getDynamicImportVisitors from './visitors/dynamic-imports/index.ts';
+import getExportVisitors from './visitors/exports/index.ts';
+import getImportVisitors from './visitors/imports/index.ts';
+import getScriptVisitors from './visitors/scripts/index.ts';
 
-const getVisitors = (sourceFile: ts.SourceFile) => ({
+const isInTopLevelScope = (node: ts.Node, sourceFile: ts.SourceFile) => {
+  let current = node.parent;
+  while (current && current !== sourceFile) {
+    if (ts.isFunctionLike(current) || ts.isClassLike(current)) return false;
+    current = current.parent;
+  }
+  return current === sourceFile;
+};
+
+const getVisitors = (sourceFile: ts.SourceFile, visitors: Visitors) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
-  dynamicImport: getDynamicImportVisitors(sourceFile),
-  script: getScriptVisitors(sourceFile),
+  dynamicImport: getDynamicImportVisitors(sourceFile, visitors.dynamicImport),
+  script: getScriptVisitors(sourceFile, visitors.script),
 });
 
 const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile, type: SymbolType) =>
@@ -66,6 +75,7 @@ const createMember = (node: ts.Node, member: ExportNodeMember, pos: number): Mem
 };
 
 interface AddInternalImportOptions extends ImportNode {
+  specifier: string;
   filePath: string;
   line: number;
   col: number;
@@ -77,7 +87,8 @@ const getImportsAndExports = (
   typeChecker: ts.TypeChecker,
   options: GetImportsAndExportsOptions,
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
-  skipExportsForFile: boolean
+  skipExportsForFile: boolean,
+  pluginVisitors: Visitors
 ): FileNode => {
   const skipExports = skipExportsForFile || !options.isReportExports;
   const internal: ImportMap = new Map();
@@ -101,7 +112,7 @@ const getImportsAndExports = (
 
   const referencedInExport = new Map<string, Set<string>>();
 
-  const visitors = getVisitors(sourceFile);
+  const visitors = getVisitors(sourceFile, pluginVisitors);
 
   const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {
@@ -246,8 +257,8 @@ const getImportsAndExports = (
         return;
       }
 
-      // @ts-expect-error TODO
-      const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
+      // @ts-expect-error ts.ImportDeclaration
+      const pos = node.moduleSpecifier?.getStart() ?? node.pos;
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
       unresolved.add({
         filePath: undefined,
@@ -337,8 +348,8 @@ const getImportsAndExports = (
   const visit = (node: ts.Node) => {
     const addImportWithNode = (result: ImportNode) => addImport(result, node);
 
-    // @ts-expect-error Skip work by handling only top-level import/export declarations
-    const isTopLevel = node !== sourceFile && ts.isInTopLevelContext(node);
+    // Skip work by handling only top-level import/export declarations
+    const isTopLevel = node !== sourceFile && isInTopLevelScope(node, sourceFile);
 
     if (isTopLevel) {
       for (const visitor of visitors.import) {
@@ -393,7 +404,7 @@ const getImportsAndExports = (
         // Pattern: const spread = { ...NS }; spread.member
         // Pattern: const assign = NS; assign.member
         const members = getAccessMembers(typeChecker, node);
-        // biome-ignore lint/style/noNonNullAssertion: deal with it
+        // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
         for (const { id: aliasedId, filePath: aliasFilePath } of importAliases.get(id)!) {
           const aliasImports = internal.get(aliasFilePath);
           if (aliasImports) addNsMemberRefs(aliasImports, aliasedId, members);
@@ -516,17 +527,18 @@ const getImportsAndExports = (
             }
           }
         }
+      }
 
-        // Store exports referenced in exported types, including `typeof` values
-        // Simplifies and speeds up (*) below while we still have the typeChecker
-        if (!isTopLevel && symbol.exportSymbol) {
-          const containingExport = isReferencedInExport(node);
-          if (containingExport) {
-            const referencedId = String(symbol.exportSymbol.escapedName);
-            const refs = referencedInExport.get(referencedId);
-            if (refs) refs.add(containingExport);
-            else referencedInExport.set(referencedId, new Set([containingExport]));
-          }
+      // Store exports referenced in exported types (both imported and local)
+      // Simplifies and speeds up (*) below while we still have the typeChecker
+      // TODO: Does not handle transitive A used in B used in C where only C is imported (use ignoreExportsUsedInFile)
+      if (ts.isTypeReferenceNode(node.parent) || ts.isTypeQueryNode(node.parent)) {
+        const containingExport = isReferencedInExport(node);
+        if (containingExport && containingExport !== id) {
+          const refId = symbol?.exportSymbol ? String(symbol.exportSymbol.escapedName) : id;
+          const refs = referencedInExport.get(refId);
+          if (refs) refs.add(containingExport);
+          else referencedInExport.set(refId, new Set([containingExport]));
         }
       }
     }

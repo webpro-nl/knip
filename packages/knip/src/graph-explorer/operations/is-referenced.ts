@@ -1,11 +1,11 @@
-import { OPAQUE } from '../../constants.js';
-import type { Identifier, ModuleGraph } from '../../types/module-graph.js';
+import { OPAQUE } from '../../constants.ts';
+import type { Identifier, ModuleGraph } from '../../types/module-graph.ts';
 import {
   getAliasReExportMap,
   getNamespaceReExportSources,
   getPassThroughReExportSources,
   getStarReExportSources,
-} from '../visitors.js';
+} from '../visitors.ts';
 
 export const isReferenced = (
   graph: ModuleGraph,

@@ -1,13 +1,13 @@
 import pc from 'picocolors';
-import type { GraphExplorer } from '../graph-explorer/explorer.js';
-import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.js';
-import type { ModuleGraph } from '../types/module-graph.js';
-import type { MainOptions } from '../util/create-options.js';
-import { toRelative } from '../util/path.js';
-import { toRegexOrString } from '../util/regex.js';
-import { Table } from '../util/table.js';
-import { formatTrace } from '../util/trace.js';
-import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.js';
+import type { GraphExplorer } from '../graph-explorer/explorer.ts';
+import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { toRelative } from '../util/path.ts';
+import { toRegexOrString } from '../util/regex.ts';
+import { Table } from '../util/table.ts';
+import { formatTrace } from '../util/trace.ts';
+import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
 
 interface TraceReporterOptions {
   graph: ModuleGraph;

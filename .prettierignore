@@ -1,0 +1,7 @@
+**/dist
+**/tmp
+**/fixtures
+**/*.md
+**/*.mdx
+templates/language-server-client
+packages/docs/.astro

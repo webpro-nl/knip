@@ -135,6 +135,17 @@ Example:
 - [Collect dependency snippets][26]
 - [Render dependency hover][27]
 
+## CLI
+
+To run the language server directly from CLI:
+
+```sh
+npx @knip/language-server
+```
+
+Add `--node-ipc`, `--stdio`, `--socket <port>` or `--pipe <name>` to set
+transport (default: `--stdio`).
+
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip
 [3]: https://bsky.app/profile/webpro.nl

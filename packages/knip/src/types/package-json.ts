@@ -1,4 +1,4 @@
-import type { PluginMap, WorkspaceConfiguration } from './config.js';
+import type { PluginMap, WorkspaceConfiguration } from './config.ts';
 
 type Primitive = null | undefined | string | number | boolean | symbol | bigint;
 

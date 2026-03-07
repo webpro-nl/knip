@@ -1,6 +1,6 @@
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://rollupjs.org/guide/en/#configuration-files
 

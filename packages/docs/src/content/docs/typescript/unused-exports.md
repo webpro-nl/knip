@@ -68,7 +68,7 @@ to easily navigate around.
 
 ## How is Knip different from ESLint for finding unused exports?
 
-While linters like ESLint can find unused variables and imports within
+While linters like ESLint can find unused imports and variables within
 individual files, Knip analyzes the entire project to determine which exports
 are actually unused. By building [a comprehensive module graph][7], Knip
 identifies exports that are not imported or used anywhere in the codebase. This
