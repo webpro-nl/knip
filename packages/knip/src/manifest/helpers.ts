@@ -1,22 +1,15 @@
+import { createRequire } from 'node:module';
 import type { Scripts } from '../types/package-json.ts';
 import { join } from '../util/path.ts';
-import { _require } from '../util/require.ts';
 
 type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
 
 export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManifestOptions) => {
-  // TODO Not sure what's the most efficient way to get a package.json, but this seems to do the job across package
-  // managers (npm, Yarn, pnpm)
   try {
-    return _require(join(dir, 'node_modules', packageName, 'package.json'));
+    const _require = createRequire(join(dir, 'package.json'));
+    const manifestPath = _require.resolve(join(packageName, 'package.json'));
+    if (manifestPath.startsWith(cwd)) return _require(manifestPath);
   } catch (_error) {
-    if (dir !== cwd) {
-      try {
-        return _require(join(cwd, 'node_modules', packageName, 'package.json'));
-      } catch (_error) {
-        // Explicitly suppressing errors here
-      }
-    }
     // Explicitly suppressing errors here
   }
 };
