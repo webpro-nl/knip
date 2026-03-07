@@ -248,8 +248,8 @@ const getImportsAndExports = (
         return;
       }
 
-      // @ts-expect-error TODO
-      const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
+      // @ts-expect-error ts.ImportDeclaration
+      const pos = node.moduleSpecifier?.getStart() ?? node.pos;
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
       unresolved.add({
         filePath: undefined,

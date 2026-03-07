@@ -76,6 +76,7 @@ class IssueFixer {
     }
 
     for (const [filePath, fixes] of allFixes) {
+      if (fixes.length === 0) continue;
       const absFilePath = join(this.options.cwd, filePath);
       const sourceFileText = fixes
         .sort((a, b) => b[0] - a[0])

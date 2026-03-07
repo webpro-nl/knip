@@ -242,6 +242,13 @@ export class ProjectPrincipal {
 
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
+    if (options.isFixExports || options.isFixTypes) {
+      const ext = extname(filePath);
+      if (!DEFAULT_EXTENSIONS.includes(ext) && (this.syncCompilers.has(ext) || this.asyncCompilers.has(ext))) {
+        options = { ...options, isFixExports: false, isFixTypes: false };
+      }
+    }
+
     const resolve = (specifier: string) => this.backend.resolveModuleNames([specifier], sourceFile.fileName)[0];
 
     return _getImportsAndExports(
