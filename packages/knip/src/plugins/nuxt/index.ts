@@ -155,7 +155,7 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
       const identifiers = collectIdentifiers(source, path);
       const syntheticImports = getSyntheticImports(identifiers);
       if (syntheticImports.length === 0) return source;
-      return `${syntheticImports.join('\n')}\n${source}`;
+      return `${source}\n${syntheticImports.join('\n')}`;
     };
 
     registerCompiler({ extension: '.vue', compiler });
