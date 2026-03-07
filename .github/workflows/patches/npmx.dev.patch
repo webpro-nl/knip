@@ -1,12 +1,8 @@
 diff --git a/knip.ts b/knip.ts
-index e0a3199..5c5a779 100644
+index f885994f..27d68897 100644
 --- a/knip.ts
 +++ b/knip.ts
-@@ -1,21 +1,9 @@
--import type { KnipConfig } from 'knip'
-+import type { KnipConfig } from 'knip';
- 
- const config: KnipConfig = {
+@@ -4,18 +4,6 @@ const config: KnipConfig = {
    workspaces: {
      '.': {
        entry: [
@@ -25,57 +21,70 @@ index e0a3199..5c5a779 100644
          'config/**/*.ts!',
          'lunaria/**/*.ts!',
          'shared/**/*.ts!',
-@@ -24,8 +12,8 @@ const config: KnipConfig = {
+@@ -24,11 +12,12 @@ const config: KnipConfig = {
          'pwa-assets.config.ts',
          '.lighthouserc.cjs',
          'lighthouse-setup.cjs',
 -        'uno-preset-rtl.ts!',
--        'scripts/**/*.ts',
 +        'uno-preset-*.ts!',
-+        'scripts/**/*.ts'
+         'scripts/**/*.ts',
        ],
-       project: ['**/*.{ts,vue,cjs,mjs}', '!test/fixtures/**'],
-       ignoreDependencies: [
-@@ -44,17 +32,33 @@ const config: KnipConfig = {
+       project: [
+-        '**/*.{ts,vue,cjs,mjs}',
++        '**/*.{ts,vue,cjs,mjs}!',
++        '!test/**!',
+         '!test/fixtures/**',
+         '!test/test-utils/**',
+         '!test/e2e/helpers/**',
+@@ -48,31 +37,39 @@ const config: KnipConfig = {
+         /** Some components import types from here, but installing it directly could lead to a version mismatch */
+         'vue-router',
+
+-        /** Required by @nuxtjs/i18n at runtime but not directly imported in production code */
+-        '@intlify/shared',
+-
          /** Oxlint plugins don't get picked up yet */
          '@e18e/eslint-plugin',
          'eslint-plugin-regexp',
+
+         /** Used in test/e2e/helpers/ which is excluded from knip project scope */
+         'h3-next',
 +
 +        /** Not referenced in production source code (either pending/inactive, or effectively devDependencies) */
 +        '@deno/doc!',
 +        '@floating-ui/vue!',
++        '@intlify/shared!',
 +        '@shikijs/langs!',
 +        '@shikijs/themes!',
 +        '@upstash/redis!',
 +        '@vueuse/integrations!',
 +        'algoliasearch!',
 +        'focus-trap!',
++        'ipaddr.js!',
 +        'marked!',
 +        'sanitize-html!',
 +        'semver!',
 +        'shiki!',
 +        'virtua!',
-+        'vue-data-ui!'
++        'vue-data-ui!',
        ],
 -      ignoreUnresolved: ['#components', '#oauth/config'],
-+      ignoreUnresolved: ['#oauth/config']
++      ignoreUnresolved: ['#oauth/config'],
      },
--    'cli': {
--      project: ['src/**/*.ts!'],
-+    cli: {
-+      project: ['src/**/*.ts!']
+     'cli': {
+       project: ['src/**/*.ts!', '!src/mock-*.ts'],
      },
--    'docs': {
-+    docs: {
-       entry: ['app/**/*.{ts,vue}'],
--      ignoreDependencies: ['docus', 'better-sqlite3', '@nuxtjs/mdc', 'nuxt!'],
--    },
--  },
--}
-+      ignoreDependencies: ['docus', 'better-sqlite3', '@nuxtjs/mdc', 'nuxt!']
-+    }
-+  }
-+};
- 
--export default config
-+export default config;
+     'docs': {
+       entry: ['app/**/*.{ts,vue,css}'],
+-      ignoreDependencies: [
+-        'docus',
+-        'better-sqlite3',
+-        '@nuxtjs/mdc',
+-        'nuxt!',
+-        '@nuxt/ui',
+-        'tailwindcss',
+-      ],
++      ignoreDependencies: ['docus', 'better-sqlite3', '@nuxtjs/mdc', 'nuxt!'],
+     },
+   },
+ }
