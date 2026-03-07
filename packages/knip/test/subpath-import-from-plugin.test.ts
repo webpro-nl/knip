@@ -15,8 +15,8 @@ test('Allows subpath-imports from plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -28,8 +28,8 @@ test('Allows subpath-imports from plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -41,7 +41,7 @@ test('Allows subpath-imports from plugin (strict)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
