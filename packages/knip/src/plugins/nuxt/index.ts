@@ -195,6 +195,13 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
+  for (const ext of localConfig.extends ?? []) {
+    const resolved = resolveAlias(ext, srcDir, cwd);
+    for (const cfg of _syncGlob({ cwd: resolved, patterns: config })) {
+      inputs.push(toConfig('nuxt', join(resolved, cfg)));
+    }
+  }
+
   for (const layerConfig of findLayerConfigs(cwd)) {
     inputs.push(toConfig('nuxt', layerConfig));
   }
@@ -206,9 +213,10 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     for (const path of collectLocalImportPaths(sourceFile)) inputs.push(toProductionEntry(path));
   }
 
+  // In case typescript isn't listed
   const dir = join(cwd, '.nuxt');
-  const config = await loadTSConfig(join(dir, 'tsconfig.json'));
-  const paths = config.compilerOptions?.paths;
+  const tsConfig = await loadTSConfig(join(dir, 'tsconfig.json'));
+  const paths = tsConfig.compilerOptions?.paths;
   if (paths) {
     for (const key in paths) {
       if (key === '#imports' || key === '#components') continue;

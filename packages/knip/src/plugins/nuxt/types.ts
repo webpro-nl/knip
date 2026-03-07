@@ -13,9 +13,8 @@ export interface NuxtConfig {
     autoImport?: boolean;
     dirs?: string[];
   };
-  components?: {
-    dirs?: Array<string | { path: string }>;
-  };
+  extends?: string[];
+  components?: Array<string | { path: string }> | { dirs?: Array<string | { path: string }> };
   css?: string[];
   alias?: Record<string, string>;
 }

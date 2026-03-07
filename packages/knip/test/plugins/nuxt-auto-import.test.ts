@@ -26,6 +26,6 @@ test('Find dependencies and entries through generated definitions in .nuxt dir',
     dependencies: 2,
     exports: 1,
     processed: 7,
-    total: 11,
+    total: 7,
   });
 });

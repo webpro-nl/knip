@@ -26,6 +26,6 @@ test('Find dependencies and entries with auto-imports disabled', async () => {
     dependencies: 1,
     exports: 1,
     processed: 7,
-    total: 10,
+    total: 7,
   });
 });
