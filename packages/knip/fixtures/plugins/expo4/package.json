@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/expo4",
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}
