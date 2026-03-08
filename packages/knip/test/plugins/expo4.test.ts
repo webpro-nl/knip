@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { join } from 'node:path';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
+import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';

@@ -13,7 +13,11 @@ const enablers = ['metro', '@react-native/metro-config', 'expo'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
 
-const config = ['metro.config.{js,cjs,json}', 'package.json'];
+const config = [
+  'metro.config.{js,cjs,mjs,ts,cts,mts,json}',
+  '.config/metro.{js,cjs,mjs,ts,cts,mts,json}',
+  'package.json',
+];
 
 const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
 const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];
