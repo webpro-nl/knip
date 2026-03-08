@@ -628,6 +628,10 @@
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
+        "oxfmt": {
+          "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
+          "$ref": "#/definitions/plugin"
+        },
         "payload": {
           "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
           "$ref": "#/definitions/plugin"
