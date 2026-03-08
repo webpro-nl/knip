@@ -9,7 +9,7 @@ const enablers = ['oxlint'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['.oxlintrc.json'];
+const config: string[] = ['.oxlintrc.json', 'oxlint.config.ts'];
 
 const args = {
   config: true,
