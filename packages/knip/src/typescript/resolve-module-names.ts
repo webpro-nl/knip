@@ -27,8 +27,8 @@ export function createCustomModuleResolver(
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.d.ts', '.d.mts', '.d.cts'];
   const alias = convertPathsToAlias(compilerOptions.paths as Record<string, string[]>);
-  const resolveSync =
-    alias || customCompilerExtensionsSet.size > 0 ? _createSyncModuleResolver(extensions, alias) : _resolveModuleSync;
+  const resolveSync = customCompilerExtensionsSet.size > 0 ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
+  const resolveWithAlias = alias ? _createSyncModuleResolver(extensions, alias) : undefined;
 
   const localMisses = new Set<string>();
 
@@ -52,34 +52,40 @@ export function createCustomModuleResolver(
     return resolvedModule;
   }
 
+  function toResult(resolvedFileName: string): ResolvedModuleFull {
+    const ext = extname(resolvedFileName);
+
+    if (!customCompilerExtensionsSet.has(ext)) {
+      const srcFilePath = toSourceFilePath(resolvedFileName);
+      if (srcFilePath) {
+        return {
+          resolvedFileName: srcFilePath,
+          extension: extname(srcFilePath),
+          isExternalLibraryImport: false,
+          resolvedUsingTsExtension: false,
+        };
+      }
+    }
+
+    return {
+      resolvedFileName,
+      extension: customCompilerExtensionsSet.has(ext) ? '.js' : ext,
+      isExternalLibraryImport: isInNodeModules(resolvedFileName),
+      resolvedUsingTsExtension: false,
+    };
+  }
+
   function resolveModuleName(name: string, containingFile: string): ResolvedModuleFull | undefined {
     const sanitizedSpecifier = sanitizeSpecifier(name);
 
     if (isBuiltin(sanitizedSpecifier)) return undefined;
 
     const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile);
+    if (resolvedFileName) return toResult(resolvedFileName);
 
-    if (resolvedFileName) {
-      const ext = extname(resolvedFileName);
-
-      if (!customCompilerExtensionsSet.has(ext)) {
-        const srcFilePath = toSourceFilePath(resolvedFileName);
-        if (srcFilePath) {
-          return {
-            resolvedFileName: srcFilePath,
-            extension: extname(srcFilePath),
-            isExternalLibraryImport: false,
-            resolvedUsingTsExtension: false,
-          };
-        }
-      }
-
-      return {
-        resolvedFileName,
-        extension: customCompilerExtensionsSet.has(ext) ? '.js' : ext,
-        isExternalLibraryImport: isInNodeModules(resolvedFileName),
-        resolvedUsingTsExtension: false,
-      };
+    if (resolveWithAlias) {
+      const aliasResolved = resolveWithAlias(sanitizedSpecifier, containingFile);
+      if (aliasResolved) return toResult(aliasResolved);
     }
 
     const candidate = isAbsolute(sanitizedSpecifier)
