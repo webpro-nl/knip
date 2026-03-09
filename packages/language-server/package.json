@@ -26,6 +26,6 @@
     "vscode-languageserver-textdocument": "^1.0.12"
   },
   "engines": {
-    "node": ">=18.20.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }
