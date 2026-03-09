@@ -220,8 +220,11 @@ const getImportsAndExports = (
   const lineStarts = buildLineStarts(sourceText);
   const getJSDocTags = buildJSDocTagLookup(result.comments, sourceText);
 
+  let hasNodeModuleImport = false;
+
   for (const _imports of result.module.staticImports) {
     const specifier = _imports.moduleRequest.value;
+    if (specifier === 'node:module' || specifier === 'module') hasNodeModuleImport = true;
     const pos = _imports.moduleRequest.start;
     const jsdocTags = getJSDocTags(_imports.start);
 
@@ -311,6 +314,7 @@ const getImportsAndExports = (
     referencedInExport,
     skipBareExprRefs: !!ignoreExportsUsedInFile,
     destructuredExports,
+    hasNodeModuleImport,
     resolveModule,
     programFiles,
     entryFiles,

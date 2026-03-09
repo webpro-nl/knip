@@ -48,6 +48,7 @@ interface WalkContext {
   referencedInExport: Map<string, Set<string>>;
   skipBareExprRefs: boolean;
   destructuredExports: Set<string>;
+  hasNodeModuleImport: boolean;
   resolveModule: ResolveModule;
   programFiles: Set<string>;
   entryFiles: Set<string>;

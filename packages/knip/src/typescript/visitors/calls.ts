@@ -68,6 +68,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   }
 
   if (
+    s.hasNodeModuleImport &&
     node.callee.type === 'Identifier' &&
     node.callee.name === 'register' &&
     node.arguments.length >= 1 &&
