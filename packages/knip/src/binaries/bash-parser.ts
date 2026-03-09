@@ -94,6 +94,25 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
           return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
         }
 
+        // Detect commands called by find -exec, similar to spawningBinaries handling below
+        if (binary === 'find') {
+          let execIndex = args.indexOf('-exec');
+          if (execIndex < 0) {
+            execIndex = args.indexOf('-execdir');
+          }
+
+          if (execIndex >= 0) {
+            const rest = node.suffix
+              .slice(execIndex + 1)
+              .filter(
+                w => w.text !== '{}' && w.text !== `'{}'` && w.text !== '\;' && w.text !== `';'` && w.text !== '+'
+              )
+              .map(w => w.text)
+              .join(' ');
+            return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
+          }
+        }
+
         if (spawningBinaries.includes(binary)) {
           const rest = node.suffix
             .filter(w => w.text !== '--')

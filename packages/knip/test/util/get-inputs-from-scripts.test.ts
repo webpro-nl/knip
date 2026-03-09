@@ -331,3 +331,10 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
 });
+
+test('getInputsFromScripts (find -exec)', () => {
+  t("find blah -exec node -r {} ';'", [toBinary('find'), toBinary('node')]);
+  t('find blah -exec node -r {} \;', [toBinary('find'), toBinary('node')]);
+  t('find blah -execdir node -r {} +', [toBinary('find'), toBinary('node')]);
+  t('find blah -echo', [toBinary('find')]);
+});
