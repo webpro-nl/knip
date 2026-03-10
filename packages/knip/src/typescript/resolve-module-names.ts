@@ -14,43 +14,18 @@ interface ResolvedModuleFull {
   resolvedUsingTsExtension: boolean;
 }
 
-const resolutionCache = new Map<string, ResolvedModuleFull | undefined>();
-
 export type ResolveModuleNames = ReturnType<typeof createCustomModuleResolver>;
 
 export function createCustomModuleResolver(
   compilerOptions: { paths?: Record<string, string[]> },
   customCompilerExtensions: string[],
-  toSourceFilePath: ToSourceFilePath,
-  useCache = true
+  toSourceFilePath: ToSourceFilePath
 ) {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.d.ts', '.d.mts', '.d.cts'];
   const alias = convertPathsToAlias(compilerOptions.paths as Record<string, string[]>);
   const resolveSync = customCompilerExtensionsSet.size > 0 ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
   const resolveWithAlias = alias ? _createSyncModuleResolver(extensions, alias) : undefined;
-
-  const localMisses = new Set<string>();
-
-  function resolveCached(moduleName: string, containingFile: string): ResolvedModuleFull | undefined {
-    if (!useCache) return resolveModuleName(moduleName, containingFile);
-
-    const key = moduleName.startsWith('.')
-      ? join(dirname(containingFile), moduleName)
-      : `${containingFile}:${moduleName}`;
-
-    const cached = resolutionCache.get(key);
-    if (cached) return cached;
-    if (localMisses.has(key)) return undefined;
-
-    const resolvedModule = resolveModuleName(moduleName, containingFile);
-
-    // Don't save resolution misses in shared cache — a different principal may resolve it
-    if (resolvedModule) resolutionCache.set(key, resolvedModule);
-    else localMisses.add(key);
-
-    return resolvedModule;
-  }
 
   function toResult(resolvedFileName: string): ResolvedModuleFull {
     const ext = extname(resolvedFileName);
@@ -101,5 +76,5 @@ export function createCustomModuleResolver(
     }
   }
 
-  return timerify(resolveCached);
+  return timerify(resolveModuleName);
 }

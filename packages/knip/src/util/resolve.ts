@@ -10,34 +10,23 @@ const extensionAlias = {
   '.cjs': ['.cjs', '.cts', '.d.cts'],
 };
 
+const resolverInstances: ResolverFactory[] = [];
+
 const createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) => {
   const aliasOpt = alias && { alias };
-  const resolver = new ResolverFactory({
-    tsconfig: 'auto',
-    extensions,
-    extensionAlias,
-    conditionNames: ['require', 'import', 'node', 'default'],
-    nodePath: false,
-    ...aliasOpt,
-  });
+  const baseOptions = { extensions, extensionAlias, conditionNames: ['require', 'import', 'node', 'default'], nodePath: false, ...aliasOpt };
+  const resolver = new ResolverFactory({ tsconfig: 'auto', ...baseOptions });
+  const fallbackResolver = new ResolverFactory(baseOptions);
 
-  const fallbackResolver = new ResolverFactory({
-    extensions,
-    extensionAlias,
-    conditionNames: ['require', 'import', 'node', 'default'],
-    nodePath: false,
-    ...aliasOpt,
-  });
+  resolverInstances.push(resolver, fallbackResolver);
 
   return function resolveSync(specifier: string, basePath: string) {
-    try {
-      const resolved = resolver.resolveFileSync(basePath, specifier);
-      if (resolved?.path) return toPosix(resolved.path);
-    } catch (_error) {}
-    try {
-      const resolved = fallbackResolver.resolveFileSync(basePath, specifier);
-      if (resolved?.path) return toPosix(resolved.path);
-    } catch (_error) {}
+    const resolved = resolver.resolveFileSync(basePath, specifier);
+    if (resolved.path) return toPosix(resolved.path);
+    if (resolved.error) {
+      const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
+      if (fallback.path) return toPosix(fallback.path);
+    }
   };
 };
 
@@ -77,13 +66,17 @@ const createSyncResolver = (extensions: string[]) => {
     nodePath: false,
   });
 
+  resolverInstances.push(resolver);
+
   return function resolveSync(specifier: string, baseDir: string) {
-    try {
-      const resolved = resolver.sync(baseDir, specifier);
-      if (resolved?.path) return toPosix(resolved.path);
-    } catch (_error) {}
+    const resolved = resolver.sync(baseDir, specifier);
+    if (resolved.path) return toPosix(resolved.path);
   };
 };
+
+export function clearResolverCache() {
+  for (const resolver of resolverInstances) resolver.clearCache();
+}
 
 const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
 
