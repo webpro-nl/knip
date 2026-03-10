@@ -362,11 +362,7 @@ export class LanguageServer {
 
       const { issue, issueType } = issuesForFile;
 
-      if (
-        issueType === 'exports' ||
-        issueType === 'types' ||
-        issueType === 'enumMembers'
-      ) {
+      if (issueType === 'exports' || issueType === 'types' || issueType === 'enumMembers') {
         const removeExportEdit = createRemoveExportEdit(document, uri, issue);
         if (!removeExportEdit) continue;
         codeActions.push({

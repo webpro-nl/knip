@@ -14,7 +14,13 @@ const resolverInstances: ResolverFactory[] = [];
 
 const createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) => {
   const aliasOpt = alias && { alias };
-  const baseOptions = { extensions, extensionAlias, conditionNames: ['require', 'import', 'node', 'default'], nodePath: false, ...aliasOpt };
+  const baseOptions = {
+    extensions,
+    extensionAlias,
+    conditionNames: ['require', 'import', 'node', 'default'],
+    nodePath: false,
+    ...aliasOpt,
+  };
   const resolver = new ResolverFactory({ tsconfig: 'auto', ...baseOptions });
   const fallbackResolver = new ResolverFactory(baseOptions);
 

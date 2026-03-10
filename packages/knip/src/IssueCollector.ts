@@ -135,7 +135,9 @@ export class IssueCollector {
       if (this.shouldIgnoreIssue(filePath, 'files')) continue;
 
       const symbol = relative(this.cwd, filePath);
-      this.issues.files[symbol] = { [symbol]: { type: 'files', filePath, symbol, workspace: '', severity: this.rules.files, fixes: [] } };
+      this.issues.files[symbol] = {
+        [symbol]: { type: 'files', filePath, symbol, workspace: '', severity: this.rules.files, fixes: [] },
+      };
 
       this.counters.files++;
       this.counters.processed++;

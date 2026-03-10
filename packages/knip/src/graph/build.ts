@@ -34,7 +34,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join, relative, toRelative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
 import { augmentWorkspace, getToSourcePathsHandler } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
@@ -101,7 +101,7 @@ export async function build({
   }
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
+    const { name, dir, ancestors, manifestPath: filePath } = workspace;
 
     streamer.cast('Analyzing workspace', name);
 

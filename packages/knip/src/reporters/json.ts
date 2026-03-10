@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
+import type { IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { isFile } from '../util/fs.ts';
 import { relative, resolve } from '../util/path.ts';

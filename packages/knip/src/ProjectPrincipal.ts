@@ -120,7 +120,10 @@ export class ProjectPrincipal {
   }
 
   init() {
-    this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions([this.syncCompilers, this.asyncCompilers])]);
+    this.extensions = new Set([
+      ...DEFAULT_EXTENSIONS,
+      ...getCompilerExtensions([this.syncCompilers, this.asyncCompilers]),
+    ]);
     const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
     const pathsOrUndefined = Object.keys(this.paths).length > 0 ? this.paths : undefined;
     this.resolver = createCustomModuleResolver(
