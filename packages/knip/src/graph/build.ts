@@ -15,6 +15,7 @@ import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { existsSync } from 'node:fs';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -169,8 +170,10 @@ export async function build({
     // Add configuration hints for missing package.json#main|exports|etc. targets (that aren't git-ignored)
     for (const identifier of entrySpecifiersFromManifest) {
       if (!identifier.startsWith('!') && !isGitIgnored(join(dir, identifier))) {
-        const files = _syncGlob({ patterns: [identifier], cwd: dir });
-        if (files.length === 0) {
+        const exists = identifier.includes('*')
+          ? _syncGlob({ patterns: [identifier], cwd: dir }).length > 0
+          : existsSync(join(dir, identifier));
+        if (!exists) {
           collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
         }
       }
