@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
@@ -25,6 +25,13 @@ export const isFile = (cwdOrPath: string, name?: string) => {
 export const findFile = (cwd: string, fileName: string) => {
   const filePath = join(cwd, fileName);
   return isFile(filePath) ? filePath : undefined;
+};
+
+export const findFileWithExtensions = (basePath: string, extensions: string[]): string | undefined => {
+  for (const ext of extensions) {
+    const candidate = basePath + ext;
+    if (existsSync(candidate)) return candidate;
+  }
 };
 
 export const loadFile = async (filePath: string) => {
