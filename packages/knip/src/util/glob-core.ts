@@ -70,6 +70,8 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   const pmOptions = { ignore: unignores };
 
   let deepFilterMatcher: ((str: string) => boolean) | undefined;
+  let prevIgnoreSize = ignores.size;
+  let prevUnignoreLength = unignores.length;
 
   const getMatcher = () => {
     if (!deepFilterMatcher) deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
@@ -133,7 +135,11 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    deepFilterMatcher = undefined;
+    if (ignores.size !== prevIgnoreSize || unignores.length !== prevUnignoreLength) {
+      deepFilterMatcher = undefined;
+      prevIgnoreSize = ignores.size;
+      prevUnignoreLength = unignores.length;
+    }
   };
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);
