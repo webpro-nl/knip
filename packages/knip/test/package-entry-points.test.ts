@@ -13,8 +13,8 @@ test('Resolve package entry points to source files', async () => {
   const { issues, counters, configurationHints } = await main(options);
 
   assert(issues.exports['feature/internal/system/used.ts'].unused);
-  assert(issues.files.has(join(cwd, 'feature/internal/system/unused.ts')));
-  assert(issues.files.has(join(cwd, 'src/public/lib/rary/lost.js')));
+  assert('feature/internal/system/unused.ts' in issues.files);
+  assert('src/public/lib/rary/lost.js' in issues.files);
 
   const filePath = join(cwd, 'package.json');
   assert.deepEqual(configurationHints, [
@@ -40,8 +40,8 @@ test('Resolve package entry points to source files and report unused exports', a
   assert(issues.exports['src/public/lib/rary/index.ts'].entryExport);
   assert(issues.exports['lib/index.js'].entryExport);
 
-  assert(issues.files.has(join(cwd, 'feature/internal/system/unused.ts')));
-  assert(issues.files.has(join(cwd, 'src/public/lib/rary/lost.js')));
+  assert('feature/internal/system/unused.ts' in issues.files);
+  assert('src/public/lib/rary/lost.js' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,

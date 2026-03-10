@@ -10,5 +10,5 @@ test('Obey gitignore', async () => {
   const options = await createOptions({ cwd, gitignore: true });
   const { issues } = await main(options);
 
-  assert.equal(issues.files.size, 0);
+  assert.equal(Object.keys(issues.files).length, 0);
 });

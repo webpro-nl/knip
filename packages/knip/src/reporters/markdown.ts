@@ -1,6 +1,6 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueSet, ReporterOptions } from '../types/issues.ts';
-import { relative, toRelative } from '../util/path.ts';
+import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.ts';
+import { relative } from '../util/path.ts';
 import { getIssueTypeTitle } from './util/util.ts';
 
 export default ({ report, issues, cwd }: ReporterOptions) => {
@@ -16,29 +16,20 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = getIssueTypeTitle(reportType);
-      const isSet = issues[reportType] instanceof Set;
-      const issuesForType = isSet
-        ? Array.from(issues[reportType] as IssueSet)
-        : Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = Object.values(issues[reportType] as IssueRecords).flatMap(Object.values);
 
       if (issuesForType.length > 0) {
         console.log(`## ${title} (${issuesForType.length})\n`);
-        if (isSet) {
-          for (const issue of issuesForType.sort()) {
-            console.log(`* ${toRelative(issue, cwd)}`);
-          }
-        } else {
-          const longestSymbol = issuesForType.sort(sortLongestSymbol)[0].symbol.length;
-          const sortedByFilePath = issuesForType.sort(sortLongestFilePath);
-          const longestFilePath = getFilePath(sortedByFilePath[0]).length;
+        const longestSymbol = issuesForType.sort(sortLongestSymbol)[0].symbol.length;
+        const sortedByFilePath = issuesForType.sort(sortLongestFilePath);
+        const longestFilePath = getFilePath(sortedByFilePath[0]).length;
 
-          console.log(`| ${'Name'.padEnd(longestSymbol)} | ${'Location'.padEnd(longestFilePath)} | Severity |`);
-          console.log(`| :${'-'.repeat(longestSymbol - 1)} | :${'-'.repeat(longestFilePath - 1)} | :------- |`);
-          for (const issue of sortedByFilePath) {
-            console.log(
-              `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(issue.severity ?? '').padEnd(8)} |`
-            );
-          }
+        console.log(`| ${'Name'.padEnd(longestSymbol)} | ${'Location'.padEnd(longestFilePath)} | Severity |`);
+        console.log(`| :${'-'.repeat(longestSymbol - 1)} | :${'-'.repeat(longestFilePath - 1)} | :------- |`);
+        for (const issue of sortedByFilePath) {
+          console.log(
+            `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(issue.severity ?? '').padEnd(8)} |`
+          );
         }
         console.log('');
       }

@@ -79,9 +79,7 @@ export default ({
   const core = createGitHubActionsLogger();
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
-  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === 'files') reportType = '_files';
-
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
@@ -96,7 +94,7 @@ export default ({
           const log = issue.severity === 'error' ? core.error : core.warning;
           const filePath = relative(cwd, issue.filePath);
 
-          const message = reportType === '_files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
+          const message = reportType === 'files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
 
           log(message, {
             file: filePath,

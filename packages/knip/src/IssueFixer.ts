@@ -49,7 +49,7 @@ class IssueFixer {
   private async removeUnusedFiles(issues: Issues) {
     if (!this.options.isFixFiles) return;
 
-    for (const issue of Object.values(issues._files).flatMap(Object.values)) {
+    for (const issue of Object.values(issues.files).flatMap(Object.values)) {
       await rm(issue.filePath);
       issue.isFixed = true;
     }

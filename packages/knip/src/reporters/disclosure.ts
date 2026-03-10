@@ -5,9 +5,7 @@ import { getIssueTypeTitle, getTableForType } from './util/util.ts';
 export default ({ report, issues, cwd }: ReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
-  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === 'files') reportType = '_files';
-
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = reportMultipleGroups ? getIssueTypeTitle(reportType) : undefined;
       const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);

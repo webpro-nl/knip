@@ -202,7 +202,6 @@ export const ISSUE_TYPES = [
 
 export const ISSUE_TYPE_TITLE = {
   files: 'Unused files',
-  _files: 'Unused files',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',

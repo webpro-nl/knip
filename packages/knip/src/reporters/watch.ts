@@ -19,11 +19,9 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
   let totalIssues = 0;
   const lines: string[] = [];
 
-  for (let [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
+  for (const [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
     typeof options.includedIssueTypes
   >) {
-    if (reportType === 'files') reportType = '_files';
-
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
       const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);

@@ -11,7 +11,7 @@ test('Handle bare directory names in tsconfig include', async () => {
   const options = await createOptions({ cwd, isUseTscFiles: true });
   const { issues, counters } = await main(options);
 
-  assert.equal(issues.files.size, 0);
+  assert.equal(Object.keys(issues.files).length, 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,

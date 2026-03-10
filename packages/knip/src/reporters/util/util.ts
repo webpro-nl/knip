@@ -72,7 +72,6 @@ export const getTableForType = (
 
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
-    // @ts-expect-error TODO Fix up in next major
     const isFileIssue = issue.type === 'files';
     const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
     if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);

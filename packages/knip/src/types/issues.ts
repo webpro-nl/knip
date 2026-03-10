@@ -27,13 +27,10 @@ export interface Issue {
   isFixed?: boolean;
 }
 
-export type IssueSet = Set<string>;
-
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
-  files: IssueSet;
-  _files: IssueRecords;
+  files: IssueRecords;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;
@@ -51,7 +48,7 @@ export type Issues = {
 
 export type IssueType = keyof Issues;
 
-export type SymbolIssueType = Exclude<IssueType, 'files'>;
+export type SymbolIssueType = IssueType;
 
 export type Report = {
   [key in keyof Issues]: boolean;

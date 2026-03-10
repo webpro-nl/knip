@@ -78,8 +78,8 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
-      if (type === 'files' || type === '_files') {
-        // Ignore, added below - we should probably deprecate and make all issue types consistent
+      if (type === 'files') {
+        // Handled separately below
       } else {
         for (const issue of flatten(issues[type] as IssueRecords)) {
           const { filePath, symbol, symbols, parentSymbol } = issue;
@@ -105,7 +105,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
   }
 
   const output = JSON.stringify({
-    files: Array.from(issues.files).map(filePath => relative(cwd, filePath)),
+    files: Object.keys(issues.files),
     issues: Object.values(json),
   });
 

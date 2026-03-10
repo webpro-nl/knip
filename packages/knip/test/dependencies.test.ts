@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.ts';
-import { join } from '../src/util/path.ts';
 import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
@@ -12,7 +11,7 @@ test('Find unused dependencies', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'unused-module.ts')));
+  assert('unused-module.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
@@ -38,7 +37,7 @@ test('Find unused dependencies (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'unused-module.ts')));
+  assert('unused-module.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert(issues.dependencies['package.json']['@tootallnate/once']);
@@ -64,7 +63,7 @@ test('Find unused dependencies (strict)', async () => {
   const options = await createOptions({ cwd, isProduction: true, isStrict: true });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'unused-module.ts')));
+  assert('unused-module.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 3);
   assert(issues.dependencies['package.json']['@tootallnate/once']);

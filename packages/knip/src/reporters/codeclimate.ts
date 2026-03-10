@@ -21,16 +21,14 @@ export default async ({ report, issues, cwd }: ReporterOptions) => {
       continue;
     }
 
-    const fixedType = type === 'files' ? '_files' : type;
-
-    for (const issue of flatten(issues[fixedType])) {
+    for (const issue of flatten(issues[type])) {
       const { filePath } = issue;
 
-      if (fixedType === 'duplicates' && issue.symbols) {
+      if (type === 'duplicates' && issue.symbols) {
         entries.push(
           ...issue.symbols.map<codeclimate.Issue>(symbol => ({
             type: 'issue',
-            check_name: getIssueTypeTitle(fixedType),
+            check_name: getIssueTypeTitle(type),
             description: getSymbolDescription({ type: issue.type, symbol, parentSymbol: issue.parentSymbol }),
             categories: ['Duplication'],
             location: createLocation(filePath, cwd, symbol.line, symbol.col),
@@ -41,7 +39,7 @@ export default async ({ report, issues, cwd }: ReporterOptions) => {
       } else {
         entries.push({
           type: 'issue',
-          check_name: getIssueTypeTitle(fixedType),
+          check_name: getIssueTypeTitle(type),
           description: getIssueDescription(issue),
           categories: ['Bug Risk'],
           location: createLocation(filePath, cwd, issue.line, issue.col),

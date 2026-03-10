@@ -16,7 +16,7 @@ test('Ignore files in .git directory (branch names ending in .ts)', async () => 
     const options = await createOptions({ cwd });
     const { issues } = await main(options);
 
-    assert.equal(issues.files.size, 0);
+    assert.equal(Object.keys(issues.files).length, 0);
   } finally {
     rmSync(resolve('fixtures/git-branch-file/.git'), { recursive: true, force: true });
   }

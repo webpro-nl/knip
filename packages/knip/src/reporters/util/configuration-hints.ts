@@ -107,9 +107,11 @@ export const finalizeConfigurationHints = (
       .reverse()
       .map(dir => ({ dir, size: 0 }));
 
-    for (const filePath of results.issues.files) {
-      const workspace = workspaces.find(ws => filePath.startsWith(ws.dir));
-      if (workspace) workspace.size++;
+    for (const issues of Object.values(results.issues.files)) {
+      for (const issue of Object.values(issues)) {
+        const workspace = workspaces.find(ws => issue.filePath.startsWith(ws.dir));
+        if (workspace) workspace.size++;
+      }
     }
 
     if (workspaces.length === 1) {
