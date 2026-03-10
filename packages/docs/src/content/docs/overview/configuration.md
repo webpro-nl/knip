@@ -46,7 +46,7 @@ folder:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
   "project": ["src/**/*.ts", "scripts/**/*.js"]
 }

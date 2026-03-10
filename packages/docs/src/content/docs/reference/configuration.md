@@ -16,7 +16,7 @@ In JSON, use the provided JSON schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json"
+  "$schema": "https://unpkg.com/knip@6/schema.json"
 }
 ```
 
@@ -26,7 +26,7 @@ In JSONC, use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json"
 }
 ```
 

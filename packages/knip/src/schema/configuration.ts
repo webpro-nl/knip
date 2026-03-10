@@ -56,7 +56,7 @@ const rootConfigurationSchema = z.object({
    *
    * ```json title="knip.json"
    * {
-   *   "$schema": "https://unpkg.com/knip@5/schema.json"
+   *   "$schema": "https://unpkg.com/knip@6/schema.json"
    * }
    * ```
    *
@@ -64,7 +64,7 @@ const rootConfigurationSchema = z.object({
    * In JSONC, use the provided JSONC schema:
    * ```jsonc title="knip.jsonc"
    * {
-   *   "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+   *   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json"
    * }
    * ```
    *
