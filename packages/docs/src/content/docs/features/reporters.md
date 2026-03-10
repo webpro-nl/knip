@@ -61,12 +61,6 @@ object per file structured like this:
           { "name": "unusedKey", "line": 15, "col": 3, "pos": 205 }
         ]
       },
-      "classMembers": {
-        "MyClass": [
-          { "name": "unusedMember", "line": 40, "col": 3, "pos": 687 },
-          { "name": "unusedSetter", "line": 61, "col": 14, "pos": 1071 }
-        ]
-      },
       "duplicates": ["Registration", "default"]
     }
   ]

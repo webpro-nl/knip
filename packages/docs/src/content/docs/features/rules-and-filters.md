@@ -73,7 +73,6 @@ Example:
 {
   "rules": {
     "files": "warn",
-    "classMembers": "off",
     "duplicates": "off"
   }
 }

@@ -61,14 +61,9 @@ Knip does not install the TypeScript Language Service (LS) by default. This is
 expensive, as TypeScript needs to set up symbols and caching for the rather slow
 `findReferences` function. Even more so for multiple projects/workspaces.
 
-There are two cases that enforce Knip to install the LS:
+There is one case that enforces Knip to install the LS:
 
-### 1. Class members
-
-The `findReferences` function is used to find unused members of imported classes
-(i.e. when the issue type `classMembers` is included).
-
-### 2. Include external type definitions
+### Include external type definitions
 
 When [`--include-libs`][3] is enabled, Knip loads type definitions of external
 dependencies. This will also install the LS to access its `findReferences`
@@ -83,7 +78,7 @@ functions (e.g. `findReferences`) are invoked and how much time is spent in
 those functions. Example usage:
 
 ```sh
-knip --include classMembers --performance
+knip --include-libs --performance
 ```
 
 ## ignoreExportsUsedInFile

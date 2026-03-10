@@ -235,7 +235,7 @@ required to create the report including all issue types:
 - Duplicate exports
 
 And optionally more issue types like individual exports and exported types in
-namespace imports, and unused class members.
+namespace imports.
 
 The graphs allows to report more interesting details, such as:
 
@@ -354,10 +354,8 @@ comprehensive graph include:
 - enables more features
 - usable for other tools to build upon as well
 
-Without sacrificing these benefits, Knip does use `ts.findReferences` to find
-references to class members (i.e. when the issue type `classMembers` is
-included). In case analysis of exports requires type information of external
-dependencies, the [`--include-libs ` flag][8] will trigger the same.
+In case analysis of exports requires type information of external dependencies,
+the [`--include-libs` flag][8] will trigger `ts.findReferences`.
 
 ### Why can't I use path aliases to reference other workspaces?
 

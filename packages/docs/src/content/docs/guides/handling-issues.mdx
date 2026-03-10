@@ -590,8 +590,7 @@ knip --include-libs
 ```
 
 This comes at a performance and memory penalty, but should give better results
-if you need it. This flag is implied when [classMembers][48] are included (that
-feature comes with roughly the same performance penalty).
+if you need it.
 
 ### Exclude exports from the report
 
@@ -615,24 +614,6 @@ to make Knip also report unused exports in entry files.
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
 `.svelte` are not available by default. See [compilers][21] for more details on
 how to include them.
-
-### Class members
-
-Unused members of exported classes are not reported by default, here's how to
-enable them:
-
-```sh
-knip --include classMembers
-```
-
-This option is also available in the Knip configuration file. Note that this
-feature comes at a cost: linting will take more time and more memory.
-
-Individual class members can be [tagged using JSDoc syntax][50].
-
-Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][46] to make Knip also report members of unused exports
-in entry files.
 
 ### Enum members
 
@@ -702,7 +683,6 @@ issue on GitHub. It'll make Knip better for everyone!
 [45]: #external-libraries
 [46]: ../reference/configuration.md#includeentryexports
 [47]: ../guides/namespace-imports.md
-[48]: #class-members
 [49]: ../reference/configuration.md#ignoreexportsusedinfile
 [50]: ../reference/jsdoc-tsdoc-tags.md
 [51]: ../guides/issue-reproduction.md

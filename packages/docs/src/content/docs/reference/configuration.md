@@ -347,7 +347,7 @@ reporting other issues in those same files.
 {
   "ignoreIssues": {
     "src/generated/**": ["exports", "types"],
-    "**/*.generated.ts": ["exports", "classMembers"]
+    "**/*.generated.ts": ["exports", "enumMembers"]
   }
 }
 ```

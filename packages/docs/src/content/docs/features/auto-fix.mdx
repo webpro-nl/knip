@@ -12,7 +12,6 @@ following [issue types][1]:
 - Remove `export` keyword for unused exports, re-exports, and exported types
 - Remove `export default` keywords for unused default exports
 - Remove unused enum members
-- Remove unused class members (disabled by default)
 - Remove unused `dependencies` and `devDependencies` from `package.json`
 - Remove unused files
 - Remove unused catalog entries
@@ -288,34 +287,6 @@ Unused dependencies are removed from `package.json`:
  }
 ```
 
-### Class members   <Badge text="experimental" variant="caution" />
-
-Unused members of classes can be removed:
-
-```diff title="file.ts"
-export class Rectangle {
-  constructor(public width: number, public height: number) {}
-
--  static Key = 1;
-+
-
-  area() {
-    return this.width * this.height;
-  }
-
--  public get unusedGetter(): string {
--    return 'unusedGetter';
--  }
-}
-```
-
-Currently Knip might be too eager removing class members when they're not
-referenced internally but meant to be called by an external library. For
-instance, Knip might think `componentDidMount` and `render` in React class
-component are unused and will remove those.
-
-Note that [`classMembers` aren't included by default][4].
-
 ### Catalog entries
 
 Unused [catalog][5] entries are removed from `pnpm-workspace.yaml`:
@@ -344,5 +315,4 @@ Operations that auto-fix does not (yet) perform and why:
 [1]: ../reference/issue-types.md
 [2]: https://github.com/JoshuaKGoldberg/formatly
 [3]: https://github.com/webpro-nl/remove-unused-vars
-[4]: ../guides/handling-issues.mdx#class-members
 [5]: https://pnpm.io/catalogs

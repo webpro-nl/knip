@@ -172,8 +172,7 @@ Exclude provided issue types from report. Can be comma-separated or repeated.
 Example:
 
 ```sh
-knip --exclude classMembers,enumMembers
-knip --exclude classMembers --exclude enumMembers
+knip --exclude enumMembers
 ```
 
 ### `--include`
@@ -196,7 +195,6 @@ Available [issue types][11] when filtering output using `--include` or
 - `unresolved`
 - `exports`
 - `nsExports`
-- `classMembers`
 - `types`
 - `nsTypes`
 - `enumMembers`
@@ -216,7 +214,7 @@ Shortcut to include all types of dependency issues:
 Shortcut to include all types of export issues:
 
 ```sh
---include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
+--include exports,nsExports,types,nsTypes,enumMembers,duplicates
 ```
 
 ### `--files`
