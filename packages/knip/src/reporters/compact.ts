@@ -1,6 +1,6 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.ts';
-import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
+import type { Issue, ReporterOptions } from '../types/issues.ts';
+import { flattenIssues, getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 const logIssueRecord = (issues: Issue[], cwd: string) => {
   const sortedByFilePath = issues.sort((a, b) => (a.filePath > b.filePath ? 1 : -1));
@@ -16,8 +16,8 @@ export default ({ report, issues, isShowProgress, cwd }: ReporterOptions) => {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
       const issuesForType =
         reportType === 'duplicates'
-          ? Object.values(issues[reportType]).flatMap(Object.values)
-          : Object.values(issues[reportType] as IssueRecords)
+          ? flattenIssues(issues[reportType])
+          : Object.values(issues[reportType])
               .filter(issues => Object.keys(issues).length > 0)
               .map(issues => {
                 const items = Object.values(issues);

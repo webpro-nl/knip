@@ -1,6 +1,6 @@
 import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
-import type { Issue, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
+import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
 import { relative } from '../../util/path.ts';
 import { Table } from '../../util/table.ts';
 
@@ -88,5 +88,7 @@ export const getTableForType = (
 
   return table;
 };
+
+export const flattenIssues = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
 export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');

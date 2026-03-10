@@ -5,7 +5,7 @@ import type { Issues } from '../types/issues.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { prettyMilliseconds } from '../util/string.ts';
-import { getIssueTypeTitle, getTableForType } from './util/util.ts';
+import { flattenIssues, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 interface WatchReporter {
   issues: Issues;
@@ -24,7 +24,7 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
   >) {
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
-      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
 
       if (issuesForType.length > 0) {
         if (title) {

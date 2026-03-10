@@ -10,7 +10,7 @@ import {
 } from './constants.ts';
 import { getDependencyMetaData } from './manifest/index.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
-import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.ts';
+import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type {
   DependencyArray,
@@ -345,7 +345,7 @@ export class DependencyDeputy {
     return { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues };
   }
 
-  handleIgnoredDependencies(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredDependencies(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
@@ -380,7 +380,7 @@ export class DependencyDeputy {
     }
   }
 
-  handleIgnoredBinaries(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredBinaries(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {

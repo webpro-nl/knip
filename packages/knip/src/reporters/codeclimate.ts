@@ -1,17 +1,9 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
 import type { Entries } from '../types/entries.ts';
-import type {
-  Issue,
-  IssueRecords,
-  IssueSeverity,
-  IssueSymbol,
-  Report,
-  ReporterOptions,
-  SymbolIssueType,
-} from '../types/issues.ts';
+import type { Issue, IssueSeverity, IssueSymbol, IssueType, Report, ReporterOptions } from '../types/issues.ts';
 import { toRelative } from '../util/path.ts';
-import { getIssuePrefix, getIssueTypeTitle } from './util/util.ts';
+import { flattenIssues, getIssuePrefix, getIssueTypeTitle } from './util/util.ts';
 
 export default async ({ report, issues, cwd }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
@@ -21,7 +13,7 @@ export default async ({ report, issues, cwd }: ReporterOptions) => {
       continue;
     }
 
-    for (const issue of flatten(issues[type])) {
+    for (const issue of flattenIssues(issues[type])) {
       const { filePath } = issue;
 
       if (type === 'duplicates' && issue.symbols) {
@@ -58,10 +50,6 @@ export default async ({ report, issues, cwd }: ReporterOptions) => {
   process.stdout.write(`${output}\n`);
 };
 
-function flatten(issues: IssueRecords): Issue[] {
-  return Object.values(issues).flatMap(Object.values);
-}
-
 function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
   switch (severity) {
     case 'error':
@@ -83,7 +71,7 @@ function getSymbolDescription({
   symbol,
   parentSymbol,
 }: {
-  type: SymbolIssueType;
+  type: IssueType;
   symbol: IssueSymbol;
   parentSymbol?: string;
 }) {

@@ -1,7 +1,7 @@
 import type { Entries } from '../types/entries.ts';
 import type { ReporterOptions } from '../types/issues.ts';
 import { printConfigurationHints } from './util/configuration-hints.ts';
-import { dim, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.ts';
+import { dim, flattenIssues, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 export default (options: ReporterOptions) => {
   const { report, issues, isDisableConfigHints, isShowProgress } = options;
@@ -12,7 +12,7 @@ export default (options: ReporterOptions) => {
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
-      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
       if (issuesForType.length > 0) {
         title && console.log(getColoredTitle(title, issuesForType.length));
         const issues =

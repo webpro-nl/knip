@@ -3,7 +3,7 @@ import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issu
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { isFile } from '../util/fs.ts';
 import { relative, resolve } from '../util/path.ts';
-import { convert } from './util/util.ts';
+import { convert, flattenIssues } from './util/util.ts';
 
 type ExtraReporterOptions = {
   codeowners?: string;
@@ -52,8 +52,6 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const findOwners = isFile(codeownersFilePath) && createOwnershipEngine(codeownersFilePath);
 
-  const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
-
   const initRow = (filePath: string) => {
     const file = relative(cwd, filePath);
     const row: Row = {
@@ -81,7 +79,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
       if (type === 'files') {
         // Handled separately below
       } else {
-        for (const issue of flatten(issues[type] as IssueRecords)) {
+        for (const issue of flattenIssues(issues[type] as IssueRecords)) {
           const { filePath, symbol, symbols, parentSymbol } = issue;
           json[filePath] = json[filePath] ?? initRow(filePath);
           if (type === 'duplicates') {

@@ -1,9 +1,9 @@
 import { ISSUE_TYPE_TITLE } from '../constants.ts';
 import type { Entries } from '../types/entries.ts';
-import type { Issue, ReporterOptions } from '../types/issues.ts';
+import type { ReporterOptions } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
 import { hintPrinters } from './util/configuration-hints.ts';
-import { getIssueTypeTitle } from './util/util.ts';
+import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (
@@ -83,7 +83,7 @@ export default ({
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
-      const issuesForType: Issue[] = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
       issuesForType.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       if (issuesForType.length > 0) {
         title && core.info(`${title} (${issuesForType.length})`);

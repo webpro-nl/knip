@@ -11,7 +11,7 @@ export interface IssueSymbol {
 }
 
 export interface Issue {
-  type: SymbolIssueType;
+  type: IssueType;
   filePath: string;
   workspace: string;
   symbol: string;
@@ -47,8 +47,6 @@ export type Issues = {
 };
 
 export type IssueType = keyof Issues;
-
-export type SymbolIssueType = IssueType;
 
 export type Report = {
   [key in keyof Issues]: boolean;

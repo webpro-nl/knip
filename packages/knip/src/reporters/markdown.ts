@@ -1,7 +1,7 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueRecords, ReporterOptions } from '../types/issues.ts';
+import type { Issue, ReporterOptions } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
-import { getIssueTypeTitle } from './util/util.ts';
+import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
 export default ({ report, issues, cwd }: ReporterOptions) => {
   console.log('# Knip report\n');
@@ -16,7 +16,7 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = getIssueTypeTitle(reportType);
-      const issuesForType = Object.values(issues[reportType] as IssueRecords).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
 
       if (issuesForType.length > 0) {
         console.log(`## ${title} (${issuesForType.length})\n`);
