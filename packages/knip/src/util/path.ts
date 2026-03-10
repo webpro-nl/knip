@@ -13,7 +13,7 @@ export const basename = path.posix.basename;
 
 export const join = path.posix.join;
 
-export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
+export const toPosix = isWin ? (value: string) => value.split(path.sep).join(path.posix.sep) : (value: string) => value;
 
 export const resolve = path.posix.resolve;
 
