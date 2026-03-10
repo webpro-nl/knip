@@ -57,7 +57,8 @@
               }
             ]
           }
-        ]
+        ],
+        "import/extensions": ["error", "always", { "ignorePackages": true }]
       }
     },
     {
@@ -86,7 +87,8 @@
         "no-duplicate-enum-values": "off",
         "no-restricted-imports": "off",
         "triple-slash-reference": "off",
-        "import/namespace": "off"
+        "import/namespace": "off",
+        "import/extensions": "off"
       }
     }
   ]

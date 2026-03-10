@@ -80,6 +80,15 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
     }
   }
 
+  if (manifest.imports) {
+    for (const [key, value] of Object.entries(manifest.imports)) {
+      if (!key.startsWith('#')) continue;
+      for (const item of getEntriesFromExports(value)) {
+        if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
+      }
+    }
+  }
+
   return entryPaths;
 };
 

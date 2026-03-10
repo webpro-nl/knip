@@ -34,6 +34,15 @@ import getExportVisitors from './visitors/exports/index.ts';
 import getImportVisitors from './visitors/imports/index.ts';
 import getScriptVisitors from './visitors/scripts/index.ts';
 
+const isInTopLevelScope = (node: ts.Node, sourceFile: ts.SourceFile) => {
+  let current = node.parent;
+  while (current && current !== sourceFile) {
+    if (ts.isFunctionLike(current) || ts.isClassLike(current)) return false;
+    current = current.parent;
+  }
+  return current === sourceFile;
+};
+
 const getVisitors = (sourceFile: ts.SourceFile, visitors: Visitors) => ({
   export: getExportVisitors(sourceFile),
   import: getImportVisitors(sourceFile),
@@ -248,8 +257,8 @@ const getImportsAndExports = (
         return;
       }
 
-      // @ts-expect-error TODO
-      const pos = 'moduleSpecifier' in node ? node.moduleSpecifier.pos : node.pos;
+      // @ts-expect-error ts.ImportDeclaration
+      const pos = node.moduleSpecifier?.getStart() ?? node.pos;
       const { line, character } = sourceFile.getLineAndCharacterOfPosition(pos);
       unresolved.add({
         filePath: undefined,
@@ -339,8 +348,8 @@ const getImportsAndExports = (
   const visit = (node: ts.Node) => {
     const addImportWithNode = (result: ImportNode) => addImport(result, node);
 
-    // @ts-expect-error Skip work by handling only top-level import/export declarations
-    const isTopLevel = node !== sourceFile && ts.isInTopLevelContext(node);
+    // Skip work by handling only top-level import/export declarations
+    const isTopLevel = node !== sourceFile && isInTopLevelScope(node, sourceFile);
 
     if (isTopLevel) {
       for (const visitor of visitors.import) {

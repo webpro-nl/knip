@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@root/*": ["./shared/*"]
+    }
+  },
+  "references": [
+    { "path": "./src/ui/tsconfig.json" },
+    { "path": "./src/server/tsconfig.json" }
+  ]
+}

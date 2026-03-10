@@ -278,16 +278,20 @@ export class LanguageServer {
 
     if (changes.length === 0) return;
 
-    const result = await this.session.handleFileChanges(changes);
+    try {
+      const result = await this.session.handleFileChanges(changes);
 
-    if (!result) return;
+      if (!result) return;
 
-    this.connection.console.log(
-      `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
-    );
+      this.connection.console.log(
+        `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
+      );
 
-    const config = await this.getConfig();
-    this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+      const config = await this.getConfig();
+      this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+    } catch (_error) {
+      this.connection.console.error(`Error handling file changes: ${_error}`);
+    }
   }
 
   /**

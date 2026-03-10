@@ -1,6 +1,6 @@
 {
   "name": "@knip/mcp",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Knip MCP Server",
   "keywords": [
     "knip",
@@ -30,7 +30,7 @@
     "release": "release-it -c ../../.release-it.json"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.3",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "knip": "workspace:^",
     "zod": "^4.1.11"
   },

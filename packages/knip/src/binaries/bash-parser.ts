@@ -95,7 +95,10 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
         }
 
         if (spawningBinaries.includes(binary)) {
-          const rest = node.suffix.filter(w => w.text !== '--').map(w => w.text).join(' ');
+          const rest = node.suffix
+            .filter(w => w.text !== '--')
+            .map(w => w.text)
+            .join(' ');
           return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
         }
 

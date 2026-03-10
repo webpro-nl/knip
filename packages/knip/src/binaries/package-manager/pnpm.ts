@@ -39,6 +39,7 @@ const commands = [
   'patch-commit',
   'patch-remove',
   'patch',
+  'pkg',
   'prepare',
   'prune',
   'publish',

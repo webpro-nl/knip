@@ -70,6 +70,8 @@ export type PluginName =
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'openapi-ts'
+  | 'oxfmt'
   | 'oxlint'
   | 'parcel'
   | 'payload'
@@ -209,6 +211,8 @@ export const pluginNames = [
   'nx',
   'nyc',
   'oclif',
+  'openapi-ts',
+  'oxfmt',
   'oxlint',
   'parcel',
   'payload',

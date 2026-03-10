@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
 import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
 
@@ -66,7 +65,7 @@ const CHAR_QUESTION = 63; // '?'
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
 export const sanitizeSpecifier = (specifier: string) => {
   if (
-    isBuiltin(specifier) ||
+    specifier.startsWith('node:') ||
     isAbsolute(specifier) ||
     specifier.charCodeAt(0) === CHAR_COLON ||
     specifier.startsWith(PROTOCOL_VIRTUAL)

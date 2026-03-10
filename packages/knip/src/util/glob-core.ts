@@ -70,9 +70,18 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   const pmOptions = { ignore: unignores };
 
   let deepFilterMatcher: ((str: string) => boolean) | undefined;
+  let prevUnignoreLength = unignores.length;
+  const pendingIgnores: string[] = [];
 
   const getMatcher = () => {
-    if (!deepFilterMatcher) deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
+    if (!deepFilterMatcher) {
+      deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
+      pendingIgnores.length = 0;
+    } else if (pendingIgnores.length > 0) {
+      const prev = deepFilterMatcher;
+      const incr = _picomatch(pendingIgnores.splice(0), pmOptions);
+      deepFilterMatcher = (path: string) => prev(path) || incr(path);
+    }
     return deepFilterMatcher;
   };
 
@@ -85,6 +94,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
     const ignoresForDir = new Set(base === '' ? GLOBAL_IGNORE_PATTERNS : []);
     const unignoresForDir = new Set<string>();
+    const prevIgnoreSize = ignores.size;
 
     const patterns = readFileSync(filePath, 'utf8');
 
@@ -133,7 +143,12 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    deepFilterMatcher = undefined;
+    if (unignores.length !== prevUnignoreLength) {
+      deepFilterMatcher = undefined;
+      prevUnignoreLength = unignores.length;
+    } else if (ignores.size !== prevIgnoreSize) {
+      for (const p of ignoresForDir) if (!GLOBAL_IGNORE_PATTERNS.includes(p)) pendingIgnores.push(p);
+    }
   };
 
   for (const filePath of findAncestorGitignoreFiles(cwd)) addFile(filePath);

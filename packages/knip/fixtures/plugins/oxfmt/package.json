@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/oxfmt",
+  "private": true,
+  "scripts": {
+    "format": "oxfmt",
+    "format:custom": "oxfmt --config .oxfmtrc-1.jsonc"
+  },
+  "devDependencies": {
+    "oxfmt": "*"
+  }
+}
