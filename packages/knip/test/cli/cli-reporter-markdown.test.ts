@@ -10,7 +10,9 @@ test('knip --reporter markdown', () => {
 
 ## Unused files (1)
 
-* src/unused.ts
+| Name          | Location      | Severity |
+| :------------ | :------------ | :------- |
+| src/unused.ts | src/unused.ts | error    |
 
 ## Unlisted dependencies (2)
 

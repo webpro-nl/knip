@@ -53,7 +53,8 @@ test('Unused dependencies in npm scripts', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters, configurationHints } = await main(options);
 
-  assert.deepEqual(issues.files, new Set([join(cwd, 'script.js')]));
+  assert('script.js' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
 
   assert(issues.dependencies['package.json']['express']);
 
