@@ -15,7 +15,7 @@ import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
 import { coreVisitorObject } from './typescript/visitors/walk.ts';
-import { createCustomModuleResolver, type ResolveModuleNames } from './typescript/resolve-module-names.ts';
+import { createCustomModuleResolver, type CustomModuleResolver } from './typescript/resolve-module-names.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
@@ -53,11 +53,6 @@ const _requireVisitor = new Visitor({
 
 const _jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)/g;
 
-interface ResolvedModule {
-  resolvedFileName: string;
-  isExternalLibraryImport: boolean;
-}
-
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
@@ -82,7 +77,7 @@ export class ProjectPrincipal {
   toSourceFilePath: ToSourceFilePath;
 
   fileManager: SourceFileManager;
-  private resolveModule!: ResolveModuleNames;
+  private resolver!: CustomModuleResolver;
 
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
@@ -128,7 +123,7 @@ export class ProjectPrincipal {
     this.extensions = new Set([...DEFAULT_EXTENSIONS, ...getCompilerExtensions([this.syncCompilers, this.asyncCompilers])]);
     const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
     const pathsOrUndefined = Object.keys(this.paths).length > 0 ? this.paths : undefined;
-    this.resolveModule = createCustomModuleResolver(
+    this.resolver = createCustomModuleResolver(
       { paths: pathsOrUndefined },
       customCompilerExtensions,
       this.toSourceFilePath
@@ -334,7 +329,7 @@ export class ProjectPrincipal {
   }
 
   private resolveSpecifier(specifier: string, containingFile: string): string | undefined {
-    return this.resolveModule(specifier, containingFile)?.resolvedFileName;
+    return this.resolver.resolveFileName(specifier, containingFile);
   }
 
   getUnreferencedFiles() {
@@ -362,14 +357,7 @@ export class ProjectPrincipal {
       }
     }
 
-    const resolveModule = (specifier: string, containingFile: string): ResolvedModule | undefined => {
-      const resolved = this.resolveModule(specifier, containingFile);
-      if (!resolved) return undefined;
-      return {
-        resolvedFileName: resolved.resolvedFileName,
-        isExternalLibraryImport: resolved.isExternalLibraryImport ?? false,
-      };
-    };
+    const resolveModule = this.resolver.resolveModuleName;
 
     if (!this._visitor) this._visitor = this.buildVisitor();
 
