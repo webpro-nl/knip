@@ -1,6 +1,3 @@
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
-import type { ToSourceFilePath } from '../util/to-source-path.ts';
-
 export type Paths = Record<string, string[]> | undefined;
 
 export interface CompilerOptions {
@@ -30,12 +27,3 @@ export interface CompilerOptions {
   types?: string[];
   [key: string]: unknown;
 }
-
-export type PrincipalOptions = {
-  dir: string;
-  isFile: boolean;
-  compilerOptions: CompilerOptions;
-  compilers: [SyncCompilers, AsyncCompilers];
-  pkgName: string;
-  toSourceFilePath: ToSourceFilePath;
-};

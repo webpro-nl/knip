@@ -6,10 +6,12 @@ import { DependencyDeputy } from './DependencyDeputy.ts';
 import { analyze } from './graph/analyze.ts';
 import { build } from './graph/build.ts';
 import { IssueCollector } from './IssueCollector.ts';
+import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
+import { getModuleSourcePathHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
@@ -20,7 +22,6 @@ export const run = async (options: MainOptions) => {
 
   const chief = new ConfigurationChief(options);
   const deputy = new DependencyDeputy(options);
-  const principals = new Map<string, import('./ProjectPrincipal.ts').ProjectPrincipal>();
   const streamer = new ConsoleStreamer(options);
   const collector = new IssueCollector(options);
   const counselor = new CatalogCounselor(options);
@@ -29,6 +30,9 @@ export const run = async (options: MainOptions) => {
 
   const workspaces = await chief.getWorkspaces();
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
+
+  const toSourceFilePath = getModuleSourcePathHandler(chief);
+  const principal = new ProjectPrincipal(options, toSourceFilePath);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);
@@ -43,7 +47,7 @@ export const run = async (options: MainOptions) => {
     collector,
     counselor,
     deputy,
-    principals,
+    principal,
     isGitIgnored,
     streamer,
     workspaces,
@@ -81,7 +85,7 @@ export const run = async (options: MainOptions) => {
       chief,
       collector,
       analyze: reAnalyze,
-      principals,
+      principal,
       graph,
       isIgnored,
       onFileChange,

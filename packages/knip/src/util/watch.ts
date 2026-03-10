@@ -11,6 +11,7 @@ import { debugLog } from './debug.ts';
 import { isFile } from './fs.ts';
 import { updateImportMap } from './module-graph.ts';
 import { toAbsolute, toPosix, toRelative } from './path.ts';
+import { clearResolverCache } from './resolve.ts';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
@@ -27,7 +28,7 @@ type WatchOptions = {
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
-  principals: Map<string, ProjectPrincipal>;
+  principal: ProjectPrincipal;
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
   onFileChange?: OnFileChange;
@@ -49,7 +50,7 @@ export const getSessionHandler = async (
     chief,
     collector,
     analyze,
-    principals,
+    principal,
     graph,
     isIgnored,
     onFileChange,
@@ -76,9 +77,6 @@ export const getSessionHandler = async (
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (!workspace) continue;
 
-      const principal = principals.get(workspace.pkgName);
-      if (!principal) continue;
-
       switch (change.type) {
         case 'added':
           added.add(filePath);
@@ -93,7 +91,7 @@ export const getSessionHandler = async (
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
         default: {
-          const cached = principal.backend.fileManager.sourceTextCache.get(filePath);
+          const cached = principal.fileManager.sourceTextCache.get(filePath);
           if (cached !== undefined && cached === readFileSync(filePath, 'utf8')) {
             debugLog(workspace.name, `Watcher: = ${relativePath}`);
             continue;
@@ -109,6 +107,7 @@ export const getSessionHandler = async (
 
     if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
 
+    clearResolverCache();
     invalidateCache(graph);
 
     unreferencedFiles.clear();
@@ -117,15 +116,14 @@ export const getSessionHandler = async (
     for (const filePath of added) cachedUnusedFiles.add(filePath);
     for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
 
-    const filePaths = [...principals.values()].flatMap(p => p.getUsedResolvedFiles());
+    const filePaths = principal.getUsedResolvedFiles();
 
     if (added.size > 0 || deleted.size > 0) {
       graph.clear();
       for (const filePath of filePaths) {
         const workspace = chief.findWorkspaceByFilePath(filePath);
         if (workspace) {
-          const principal = principals.get(workspace.pkgName);
-          if (principal) analyzeSourceFile(filePath, principal);
+          analyzeSourceFile(filePath, principal);
         }
       }
     } else {
@@ -136,10 +134,7 @@ export const getSessionHandler = async (
           graph.delete(filePath);
           analyzedFiles.delete(filePath);
           const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace) {
-            const principal = principals.get(workspace.pkgName);
-            if (principal?.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
-          }
+          if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
         }
       }
 
@@ -147,8 +142,7 @@ export const getSessionHandler = async (
         if (!graph.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = principals.get(workspace.pkgName);
-            if (principal) analyzeSourceFile(filePath, principal);
+            analyzeSourceFile(filePath, principal);
           }
         }
       }
@@ -157,8 +151,7 @@ export const getSessionHandler = async (
         if (!cachedUnusedFiles.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = principals.get(workspace.pkgName);
-            if (principal) analyzeSourceFile(filePath, principal);
+            analyzeSourceFile(filePath, principal);
           }
         }
       }
