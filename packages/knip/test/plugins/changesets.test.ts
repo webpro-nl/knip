@@ -12,6 +12,7 @@ test('Find dependencies with the Changesets plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.unlisted['.changeset/config.json']['@changesets/changelog-github']);
+  assert(!issues.devDependencies['package.json']?.['@changesets/config']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

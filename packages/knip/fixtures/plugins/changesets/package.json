@@ -1,6 +1,7 @@
 {
   "name": "@plugins/changesets",
   "devDependencies": {
-    "@changesets/cli": "*"
+    "@changesets/cli": "*",
+    "@changesets/config": "*"
   }
 }
