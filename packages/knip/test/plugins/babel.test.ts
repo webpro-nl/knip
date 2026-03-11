@@ -19,6 +19,7 @@ test('Find dependencies with the Babel plugin (1)', async () => {
   assert(issues.unresolved['.babelrc']['react-hot-loader/babel']);
 
   assert(issues.unlisted['.babelrc.js']['@babel/plugin-transform-runtime']);
+  assert(issues.unlisted['.babelrc.js']['@babel/runtime']);
   assert(issues.unresolved['.babelrc.js']['babel-plugin-preval']);
   assert(issues.unresolved['.babelrc.js']['babel-plugin-transform-imports']);
   assert(issues.unlisted['.babelrc.js']['dotenv']);
@@ -53,6 +54,7 @@ test('Find dependencies with the Babel plugin (1)', async () => {
   assert(issues.unlisted['babel.config.js']['@babel/plugin-proposal-object-rest-spread']);
   assert(issues.unlisted['babel.config.js']['@babel/plugin-proposal-optional-chaining']);
   assert(issues.unlisted['babel.config.js']['@babel/plugin-transform-runtime']);
+  assert(issues.unlisted['babel.config.js']['@babel/runtime']);
   assert(issues.unresolved['babel.config.js']['babel-plugin-lodash']);
 
   assert(issues.unresolved['babel.config.cts']['./dir/plugin.js']);
@@ -63,7 +65,7 @@ test('Find dependencies with the Babel plugin (1)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 2,
-    unlisted: 24,
+    unlisted: 26,
     unresolved: 17,
     processed: 3,
     total: 3,
