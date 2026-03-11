@@ -93,7 +93,14 @@ test('Resolve included issue types (--exports)', async () => {
     ...base,
     includeOverrides: shorthandExports,
   });
-  assert.deepEqual(config, { ...none, exports: true, types: true, enumMembers: true, duplicates: true });
+  assert.deepEqual(config, {
+    ...none,
+    exports: true,
+    types: true,
+    enumMembers: true,
+    namespaceMembers: true,
+    duplicates: true,
+  });
 });
 
 test('Resolve included issue types (--files)', async () => {
@@ -115,6 +122,7 @@ test('Resolve included issue types (all)', async () => {
       'exports',
       'types',
       'enumMembers',
+      'namespaceMembers',
       'duplicates',
       'files',
       'catalog',

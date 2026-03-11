@@ -160,9 +160,14 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.nsExports ||
       includedIssueTypes.nsTypes ||
       includedIssueTypes.enumMembers ||
+      includedIssueTypes.namespaceMembers ||
       includedIssueTypes.duplicates,
     isReportFiles: includedIssueTypes.files,
-    isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
+    isReportTypes:
+      includedIssueTypes.types ||
+      includedIssueTypes.nsTypes ||
+      includedIssueTypes.enumMembers ||
+      includedIssueTypes.namespaceMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports,
     isSession: options.isSession ?? false,
     isShowProgress:

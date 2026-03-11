@@ -23,6 +23,7 @@ test('knip --reporter json (dependencies)', () => {
         exports: [],
         types: [],
         enumMembers: {},
+        namespaceMembers: {},
         duplicates: [],
         catalog: [],
       },

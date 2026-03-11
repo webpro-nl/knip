@@ -28,7 +28,7 @@ Scope
   --include                Report only provided issue type(s), can be comma-separated or repeated (1)
   --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
   --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved,catalog
-  --exports                Shortcut for --include exports,nsExports,types,nsTypes,enumMembers,duplicates
+  --exports                Shortcut for --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
   --files                  Shortcut for --include files
   --tags                   Include or exclude tagged exports
 
@@ -60,7 +60,7 @@ Troubleshooting
   --trace-export [name]    Show trace output for named export(s)
   --trace-file [file]      Show trace output for exports in file
 
-(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, duplicates, catalog
+(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog
 (2) Fixable issue types: dependencies, exports, types, files, catalog
 (3) Built-in reporters: symbols (default), compact, codeowners, json, codeclimate, markdown, disclosure, github-actions
 

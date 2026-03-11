@@ -620,6 +620,21 @@ Enums exported from entry files are ignored, and so are their members. Use
 [--include-entry-exports][46] to make Knip also report members of unused exports
 in entry files.
 
+### Namespace members
+
+Unused members of exported TypeScript namespaces are reported by default.
+Reporting such members can be disabled:
+
+```sh
+knip --exclude namespaceMembers
+```
+
+Individual namespace members can be [tagged using JSDoc syntax][50].
+
+Namespaces exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][46] to make Knip also report members of unused exports
+in entry files.
+
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a

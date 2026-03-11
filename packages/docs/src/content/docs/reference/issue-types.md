@@ -20,6 +20,7 @@ Knip reports the following types of issues:
 | Exports in used namespace            | Namespace with export is referenced, but not export itself | 🔧 🟠 | `nsExports`    |
 | Exported types in used namespace     | Namespace with type is referenced, but not type itself     | 🔧 🟠 | `nsTypes`      |
 | Unused exported enum members         | Unable to find a reference to this enum member             | 🔧    | `enumMembers`  |
+| Unused exported namespace members    | Unable to find a reference to this namespace member        | 🔧    | `namespaceMembers` |
 | Duplicate exports                    | This is exported more than once                            |       | `duplicates`   |
 
 ## Legend

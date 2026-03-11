@@ -28,6 +28,7 @@ const issueTypeSchema = z.union([
   z.literal('nsTypes'),
   z.literal('duplicates'),
   z.literal('enumMembers'),
+  z.literal('namespaceMembers'),
   z.literal('catalog'),
 ]);
 
@@ -196,7 +197,7 @@ const rootConfigurationSchema = z.object({
    */
   ignoreDependencies: z.optional(stringOrRegexSchema),
   /**
-   * Array of class and enum members to exclude from the report. Regular expressions
+   * Array of enum and namespace members to exclude from the report. Regular expressions
    * allowed.
    *
    * @example

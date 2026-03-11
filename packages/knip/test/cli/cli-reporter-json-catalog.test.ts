@@ -20,6 +20,7 @@ test('knip --reporter json (catalog)', () => {
         exports: [],
         types: [],
         enumMembers: {},
+        namespaceMembers: {},
         duplicates: [],
         catalog: [{ name: 'lodash', line: 7, col: 3 }],
       },

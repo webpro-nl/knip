@@ -112,9 +112,17 @@ export const analyze = async ({
               }
 
               if (isReferenced) {
-                if (options.includedIssueTypes.enumMembers && exportedItem.type === 'enum') {
+                const isEnumMembers = options.includedIssueTypes.enumMembers && exportedItem.type === 'enum';
+                const isNsMembers =
+                  options.includedIssueTypes.namespaceMembers &&
+                  exportedItem.members.length > 0 &&
+                  exportedItem.type !== 'enum';
+
+                if ((isEnumMembers || isNsMembers) && exportedItem.members.length > 0) {
                   if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
-                  if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
+                  if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) continue;
+
+                  const issueType = isEnumMembers ? 'enumMembers' : 'namespaceMembers';
 
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
@@ -131,7 +139,7 @@ export const analyze = async ({
                         if (isIgnored) continue;
 
                         collector.addIssue({
-                          type: 'enumMembers',
+                          type: issueType,
                           filePath,
                           workspace: workspace.name,
                           symbol: member.identifier,

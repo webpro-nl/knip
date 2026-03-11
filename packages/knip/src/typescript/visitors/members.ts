@@ -92,6 +92,15 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
           if (midImport) s.addNsMemberRefs(midImport, mid, node.property.name);
         }
       }
+    } else {
+      const exp = s.exports.get(rootName);
+      if (exp && exp.members.length > 0) {
+        const mid = node.object.property.name;
+        const dottedName = `${mid}.${node.property.name}`;
+        for (const member of exp.members) {
+          if (member.identifier === mid || member.identifier === dottedName) member.hasRefsInFile = true;
+        }
+      }
     }
   }
 
@@ -114,7 +123,21 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
         const a = node.object.object.property.name;
         const b = node.object.property.name;
         const c = node.property.name;
+        s.addNsMemberRefs(internalImport, rootName, a);
+        s.addNsMemberRefs(internalImport, rootName, `${a}.${b}`);
         s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
+      }
+    } else {
+      const exp = s.exports.get(rootName);
+      if (exp && exp.members.length > 0) {
+        const a = node.object.object.property.name;
+        const b = node.object.property.name;
+        const c = node.property.name;
+        const dottedName = `${a}.${b}.${c}`;
+        for (const member of exp.members) {
+          if (member.identifier === a || member.identifier === `${a}.${b}` || member.identifier === dottedName)
+            member.hasRefsInFile = true;
+        }
       }
     }
   }
