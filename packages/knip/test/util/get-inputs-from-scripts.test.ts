@@ -334,7 +334,7 @@ test('getInputsFromScripts (plugins → config)', () => {
 
 test('getInputsFromScripts (find -exec)', () => {
   t("find blah -exec node -r {} ';'", [toBinary('find'), toBinary('node')]);
-  t('find blah -exec node -r {} \;', [toBinary('find'), toBinary('node')]);
+  t('find blah -exec node -r {} \\;', [toBinary('find'), toBinary('node')]);
   t('find blah -execdir node -r {} +', [toBinary('find'), toBinary('node')]);
-  t('find blah -echo', [toBinary('find')]);
+  t('find blah -name "*.ts"', [toBinary('find')]);
 });

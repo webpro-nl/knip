@@ -7,11 +7,11 @@ import { extractBinary, isValidBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { truncate } from '../util/string.ts';
 import { resolve as fallbackResolve } from './fallback.ts';
-import PackageManagerResolvers from './package-manager/index.ts';
+import KnownResolvers from './resolvers/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
 import { parseNodeArgs } from './util.ts';
 
-type KnownResolver = keyof typeof PackageManagerResolvers;
+type KnownResolver = keyof typeof KnownResolvers;
 
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
@@ -85,32 +85,13 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
           .flatMap(arg => arg.require)
           .map(id => toDeferResolve(id));
 
-        if (binary in PackageManagerResolvers) {
-          const resolver = PackageManagerResolvers[binary as KnownResolver];
+        if (binary in KnownResolvers) {
+          const resolver = KnownResolvers[binary as KnownResolver];
           return resolver(binary, args, { ...options, fromArgs });
         }
 
         if (pluginArgsMap.has(binary)) {
           return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
-        }
-
-        // Detect commands called by find -exec, similar to spawningBinaries handling below
-        if (binary === 'find') {
-          let execIndex = args.indexOf('-exec');
-          if (execIndex < 0) {
-            execIndex = args.indexOf('-execdir');
-          }
-
-          if (execIndex >= 0) {
-            const rest = node.suffix
-              .slice(execIndex + 1)
-              .filter(
-                w => w.text !== '{}' && w.text !== `'{}'` && w.text !== '\;' && w.text !== `';'` && w.text !== '+'
-              )
-              .map(w => w.text)
-              .join(' ');
-            return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
-          }
         }
 
         if (spawningBinaries.includes(binary)) {
