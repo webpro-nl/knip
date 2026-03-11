@@ -88,7 +88,6 @@ export class ProjectPrincipal {
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: [this.syncCompilers, this.asyncCompilers],
-      isSkipLibs: options.isSkipLibs,
     });
   }
 

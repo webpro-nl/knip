@@ -17,7 +17,6 @@ Mode
   --cache                  Enable caching
   --cache-location         Change cache location (default: node_modules/.cache/knip)
   --include-entry-exports  Include entry files when reporting unused exports
-  --include-libs           Include type definitions from external dependencies (default: false)
   --no-gitignore           Don't respect .gitignore
   --production             Analyze only production source files (e.g. no test files, devDependencies)
   --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
@@ -100,7 +99,7 @@ export default function parseCLIArgs() {
       'allow-remove-files': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
       include: { type: 'string', multiple: true },
-      'include-libs': { type: 'boolean' },
+
       'include-entry-exports': { type: 'boolean' },
       'max-issues': { type: 'string' },
       'max-show-issues': { type: 'string' },

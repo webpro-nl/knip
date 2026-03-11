@@ -55,22 +55,6 @@ incompatible `compilerOptions` across workspaces. Workspaces are analyzed
 sequentially to spread out memory usage more evenly, which may prevent crashes
 on large monorepos.
 
-## Language Service
-
-Knip does not install the TypeScript Language Service (LS) by default. This is
-expensive, as TypeScript needs to set up symbols and caching for the rather slow
-`findReferences` function. Even more so for multiple projects/workspaces.
-
-There is one case that enforces Knip to install the LS:
-
-### Include external type definitions
-
-When [`--include-libs`][3] is enabled, Knip loads type definitions of external
-dependencies. This will also install the LS to access its `findReferences`
-function. It acts as an extra line of defense: only exports that Knip thinks
-aren't referenced (during the default/fast procedure), will now receive a second
-opinion from `findReferences`.
-
 ## Metrics
 
 Use [the `--performance` flag][4] to see how many times potentially expensive
@@ -78,7 +62,7 @@ functions (e.g. `findReferences`) are invoked and how much time is spent in
 those functions. Example usage:
 
 ```sh
-knip --include-libs --performance
+knip --performance
 ```
 
 ## ignoreExportsUsedInFile
@@ -97,7 +81,6 @@ individual workspaces][6].
 
 [1]: ./configuring-project-files.md
 [2]: ../reference/cli.md#--isolate-workspaces
-[3]: ../guides/handling-issues.mdx#external-libraries
 [4]: ../reference/cli.md#--performance
 [5]: ../reference/configuration.md#ignoreexportsusedinfile
 [6]: ../features/monorepos-and-workspaces.md#filter-workspaces

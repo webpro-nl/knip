@@ -8,7 +8,7 @@ import { resolve } from './helpers/resolve.ts';
 const cwd = resolve('fixtures/include-libs');
 
 test('Find used exports through external lib definitions', async () => {
-  const options = await createOptions({ cwd, isIncludeLibs: true });
+  const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {

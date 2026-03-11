@@ -354,8 +354,8 @@ comprehensive graph include:
 - enables more features
 - usable for other tools to build upon as well
 
-In case analysis of exports requires type information of external dependencies,
-the [`--include-libs` flag][8] will trigger `ts.findReferences`.
+Knip includes type definitions of external dependencies to improve accuracy of
+export usage analysis.
 
 ### Why can't I use path aliases to reference other workspaces?
 
