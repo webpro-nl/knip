@@ -19,31 +19,20 @@ const config = ['babel.config.{json,js,cjs,mjs,cts,ts}', '.babelrc.{json,js,cjs,
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
 
-// presence of dependency (key) implies that dependencies (value) are needed
-const impliedDependencies = {
-  '@babel/plugin-transform-runtime': ['@babel/runtime'],
-};
-
 export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
   const overrides = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
-
-  const dependencies = [
+  return compact([
     ...presets.map(id => toDeferResolve(id)),
     ...plugins.map(id => toDeferResolve(id)),
+    ...(plugins.includes('@babel/plugin-transform-runtime')
+      ? [toDeferResolve('@babel/runtime', { optional: true })]
+      : []),
     ...nested,
     ...overrides,
-  ];
-
-  for (const [dependency, extraDependencies] of Object.entries(impliedDependencies)) {
-    if (dependencies.find(dep => dep.specifier === dependency)) {
-      dependencies.push(...extraDependencies.map(dep => toDeferResolve(dep)));
-    }
-  }
-
-  return compact(dependencies);
+  ]);
 };
 
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {
