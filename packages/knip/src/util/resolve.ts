@@ -25,17 +25,12 @@ const createSyncModuleResolver = (extensions: string[]) => {
   };
 };
 
-const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
-
 /**
- * Resolver for the TS program during module resolution (i.e. used in
- * languageServiceHost.resolveModuleNames + compilerHost.resolveModuleNames).
- * Serves as fast resolver, with fallback to `ts.resolveModuleName`.
+ * Default module resolver (no custom extensions or path aliases).
  */
-export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
+export const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
 
-export const _createSyncModuleResolver: typeof createSyncModuleResolver = extensions =>
-  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
+export { createSyncModuleResolver };
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({

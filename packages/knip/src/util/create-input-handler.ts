@@ -17,7 +17,7 @@ import {
 } from './input.ts';
 import { getPackageNameFromSpecifier } from './modules.ts';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
-import { _resolveModuleSync, _resolveSync } from './resolve.ts';
+import { resolveModuleSync, _resolveSync } from './resolve.ts';
 
 export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
 
@@ -130,7 +130,7 @@ export const createInputHandler =
     // oxc-resolver does not resolve "file" or "file.ts" without "./" so we best-guess-absolutify
     const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
     const basePath = input.dir ? join(input.dir, 'file.ts') : containingFilePath;
-    const resolvedFilePath = _resolveModuleSync(filePath, basePath);
+    const resolvedFilePath = resolveModuleSync(filePath, basePath);
 
     if (resolvedFilePath && isInternal(resolvedFilePath)) {
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
