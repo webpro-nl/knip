@@ -724,6 +724,10 @@
           "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
           "$ref": "#/definitions/plugin"
         },
+        "sanity": {
+          "title": "sanity plugin configuration (https://knip.dev/reference/plugins/sanity)",
+          "$ref": "#/definitions/plugin"
+        },
         "semantic-release": {
           "title": "semantic-release plugin configuration (https://knip.dev/reference/plugins/semantic-release)",
           "$ref": "#/definitions/plugin"
