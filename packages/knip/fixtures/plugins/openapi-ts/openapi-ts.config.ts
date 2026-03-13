@@ -2,9 +2,10 @@ export default {
   input: 'https://api.example.com/openapi.json',
   output: 'src/client',
   plugins: [
-    '@tanstack/react-query',
+    '@hey-api/typescript',
+    '@hey-api/client-fetch',
     {
-      name: 'zod',
+      name: '@hey-api/sdk',
     },
   ],
 };
