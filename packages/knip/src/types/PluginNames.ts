@@ -98,6 +98,7 @@ export type PluginName =
   | 'rslib'
   | 'rspack'
   | 'rstest'
+  | 'sanity'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
@@ -239,6 +240,7 @@ export const pluginNames = [
   'rslib',
   'rspack',
   'rstest',
+  'sanity',
   'semantic-release',
   'sentry',
   'simple-git-hooks',
