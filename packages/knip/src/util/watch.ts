@@ -82,9 +82,9 @@ export const getSessionHandler = async (
 
       switch (change.type) {
         case 'added':
-          added.add(filePath);
           principal.addProjectPath(filePath);
           principal.deletedFiles.delete(filePath);
+          if (principal.projectPaths.has(filePath)) added.add(filePath);
           debugLog(workspace.name, `Watcher: + ${relativePath}`);
           break;
         case 'deleted':
@@ -159,7 +159,9 @@ export const getSessionHandler = async (
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
             const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-            if (principal) analyzeSourceFile(filePath, principal);
+            if (principal && (principal.projectPaths.has(filePath) || graph.has(filePath))) {
+              analyzeSourceFile(filePath, principal);
+            }
           }
         }
       }
