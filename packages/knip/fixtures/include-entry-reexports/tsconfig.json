@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@fixtures/include-entry-reexports__app": ["packages/app/index.mjs"],
+      "@fixtures/include-entry-reexports__shared": ["packages/shared/index.mjs"]
+    }
+  }
+}
