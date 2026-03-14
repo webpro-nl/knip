@@ -3,7 +3,7 @@ import test from 'node:test';
 import { main } from '../../src/index.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
-import { isCaseSensitiveFS } from '../helpers/fs-case-sensitive.ts';
+import { isCaseSensitiveFileSystem } from '../helpers/fs-case-sensitive.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/cspell');
@@ -18,7 +18,7 @@ test('Find dependencies with the Cspell plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     // case-sensitivity: fast-glob returns two files (.cspell.json and .cSpell.json) while there's only one
-    unlisted: isCaseSensitiveFS(cwd) ? 1 : 2,
+    unlisted: isCaseSensitiveFileSystem(cwd) ? 1 : 2,
     processed: 0,
     total: 0,
   });

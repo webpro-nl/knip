@@ -3,7 +3,7 @@ import test from 'node:test';
 import { main } from '../../src/index.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
-import { isCaseSensitiveFS } from '../helpers/fs-case-sensitive.ts';
+import { isCaseSensitiveFileSystem } from '../helpers/fs-case-sensitive.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/taskfile');
@@ -26,8 +26,8 @@ test('Find dependencies with the taskfile plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     // case-sensitivity: fast-glob returns two files (taskfile.yml and Taskfile.yml) while there's only one
-    binaries: isCaseSensitiveFS(cwd) ? 9 : 15,
-    unresolved: isCaseSensitiveFS(cwd) ? 1 : 2,
+    binaries: isCaseSensitiveFileSystem(cwd) ? 9 : 15,
+    unresolved: isCaseSensitiveFileSystem(cwd) ? 1 : 2,
     processed: 7,
     total: 7,
   });
