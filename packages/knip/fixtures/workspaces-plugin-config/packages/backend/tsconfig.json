@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@fixtures/workspaces-plugin-config__shared/*": ["../shared/*"]
+    }
+  }
+}
