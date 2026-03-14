@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
 import type { DocusaurusConfig } from './types.ts';
@@ -18,6 +19,13 @@ const production = ['src/pages/**/*.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx', 'v
 
 const entry = ['babel.config.{js,cjs,mjs,cts}'];
 
+const resolveStaticAssets = (items: (string | { src?: string; href?: string; [key: string]: unknown })[], cwd: string) =>
+  items.flatMap(item => {
+    const path = typeof item === 'string' ? item : (item.src ?? item.href);
+    if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//')) return [];
+    return [toProductionEntry(join(cwd, 'static', path))];
+  });
+
 const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) => {
   const themes = await resolveConfigItems(config.themes ?? [], 'theme', options);
   const plugins = await resolveConfigItems(config.plugins ?? [], 'plugin', options);
@@ -26,6 +34,9 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
   const hasClassicTheme =
     options.manifest.dependencies?.['@docusaurus/theme-classic'] ||
     options.manifest.dependencies?.['@docusaurus/preset-classic'];
+
+  const scripts = resolveStaticAssets(config.scripts ?? [], options.cwd);
+  const stylesheets = resolveStaticAssets(config.stylesheets ?? [], options.cwd);
 
   return [
     toAlias('@site/*', './*'),
@@ -39,6 +50,8 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     ...themes,
     ...plugins,
     ...presets,
+    ...scripts,
+    ...stylesheets,
   ];
 };
 
