@@ -1,7 +1,9 @@
 export default {
   title: 'Docusaurus',
   url: 'https://docusaurus.io',
-  experimental_faster: true,
+  future: {
+    experimental_faster: true,
+  },
   themes: ['@docusaurus/theme-mermaid', '@docusaurus/theme-search-algolia'],
   markdown: {
     mermaid: true,
