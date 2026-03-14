@@ -34,6 +34,8 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     ...(hasClassicTheme ? [toIgnore('(@theme|@theme-init|@theme-original)/*', 'dependencies')] : []),
     // Ignore aliases for @docusaurus/core/lib/client/exports/ https://docusaurus.io/docs/docusaurus-core
     toIgnore(`@docusaurus/(${CORE_CLIENT_API.join('|')})`, 'dependencies'),
+    // https://docusaurus.io/blog/releases/3.8
+    ...(config.experimental_faster ? [toDependency('@docusaurus/faster')] : []),
     ...production.map(id => toProductionEntry(id)),
     ...entry.map(id => toEntry(id)),
     ...themes,
