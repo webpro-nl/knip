@@ -20,7 +20,7 @@ test('Treat Raycast commands and tools as entries from package.json', async () =
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    total: 1,
-    processed: 1,
+    total: 4,
+    processed: 4,
   });
 });

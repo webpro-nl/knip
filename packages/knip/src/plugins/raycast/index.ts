@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { PackageJson } from '../../types/package-json.ts';
-import { toEntry } from '../../util/input.ts';
+import { toProductionEntry } from "../../util/input.ts";
 import { hasDependency } from '../../util/plugin.ts';
 import type { RaycastManifest } from './types.ts';
 
@@ -25,7 +25,7 @@ const mapEntries = (items: { name?: unknown }[] | undefined, directory: string) 
     }
   }
 
-  return [...paths].map(path => toEntry(path));
+  return [...paths].map((path) => toProductionEntry(path));
 };
 
 const resolveConfig: ResolveConfig<RaycastManifest> = async manifest => {
