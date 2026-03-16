@@ -119,13 +119,20 @@
     "@wdio/types": "^9.20.0",
     "codeclimate-types": "^0.3.1",
     "glob-bin": "^1.0.0",
+    "nuxt": "^4.1.2",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "@types/node": ">=18",
+    "nuxt": ">=3.0.0",
     "typescript": ">=5.0.4 <7"
+  },
+  "peerDependenciesMeta": {
+    "nuxt": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=18.18.0"

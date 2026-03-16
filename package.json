@@ -15,7 +15,8 @@
     "url": "https://github.com/webpro-nl/knip"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/knip/fixtures/plugins/nuxt"
   ],
   "type": "module",
   "scripts": {

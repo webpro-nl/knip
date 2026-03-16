@@ -12,12 +12,13 @@ test('Find dependencies with the nuxt plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.dependencies['package.json']['vue']);
-  assert(issues.exports['utils/fn.ts']['unused']);
+  assert(issues.dependencies['package.json']['@pinia/nuxt']);
+  assert(issues.dependencies['package.json']['@nuxt/eslint']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
-    exports: 1,
+    binaries: 1,
+    dependencies: 3,
     processed: 4,
     total: 4,
   });
