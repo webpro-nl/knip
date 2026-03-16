@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency } from '../../util/input.ts';
+import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { OxlintConfig } from './types.ts';
@@ -23,6 +23,7 @@ const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins']): Input[] => {
   for (const plugin of jsPlugins ?? []) {
     const specifier = typeof plugin === 'string' ? plugin : plugin.specifier;
     if (!isInternal(specifier)) inputs.push(toDependency(specifier));
+    else inputs.push(toEntry(specifier))
   }
   return inputs;
 };
