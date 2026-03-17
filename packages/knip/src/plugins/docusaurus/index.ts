@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { type Input, toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
@@ -19,12 +19,14 @@ const production = ['src/pages/**/*.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx', 'v
 
 const entry = ['babel.config.{js,cjs,mjs,cts}'];
 
-const resolveStaticAssets = (items: (string | { src?: string; href?: string; [key: string]: unknown })[], cwd: string) =>
-  items.flatMap(item => {
-    const path = typeof item === 'string' ? item : (item.src ?? item.href);
-    if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//')) return [];
-    return [toProductionEntry(join(cwd, 'static', path))];
-  });
+const resolveStaticAssets = (items: DocusaurusConfig['scripts'] | DocusaurusConfig['stylesheets'], cwd: string) => {
+  const entries: Input[] = [];
+  for (const item of items ?? []) {
+    const value = typeof item === 'string' ? item : (item.src ?? item.href);
+    if (typeof value === 'string' && !value.includes('://')) entries.push(toProductionEntry(join(cwd, 'static', value)));
+  }
+  return entries;
+};
 
 const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) => {
   const themes = await resolveConfigItems(config.themes ?? [], 'theme', options);

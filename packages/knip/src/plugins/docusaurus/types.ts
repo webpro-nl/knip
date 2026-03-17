@@ -54,13 +54,10 @@ export type DocusaurusConfig = {
   themes?: PluginConfig[];
   plugins?: PluginConfig[];
   presets: PresetConfig[];
-<<<<<<< fix-1617
   scripts?: (string | ScriptTag)[];
   stylesheets?: (string | StylesheetLink)[];
-=======
   future?: {
     experimental_faster?: boolean | { [key: string]: unknown };
     [key: string]: unknown;
   };
->>>>>>> main
 };
