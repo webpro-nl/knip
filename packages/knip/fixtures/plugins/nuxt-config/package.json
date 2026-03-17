@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "nuxt": "*",
-    "a-module": "*"
+    "a-module": "*",
+    "a-nuxt-theme": "*"
   }
 }
