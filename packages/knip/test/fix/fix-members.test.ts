@@ -6,7 +6,7 @@ import { join } from '../../src/util/path.ts';
 import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
-test('Fix enum members', async () => {
+test('Fix enum and namespace members', async () => {
   const cwd = await copyFixture('fixtures/fix-members');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
@@ -24,6 +24,21 @@ test('Fix enum members', async () => {
 export enum Fruits {
   apple = 'apple',
   }
+`
+  );
+
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
+  assert.equal(
+    await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
+    `export namespace Animals {
+  export const cat = 'cat';
+  export function swim() {}
+
+  export namespace Birds {
+    export const eagle = 'eagle';
+    }
+}
 `
   );
 });

@@ -180,6 +180,7 @@ Available [issue types][9] when filtering output using `--include` or
 - `types`
 - `nsTypes`
 - `enumMembers`
+- `namespaceMembers`
 - `duplicates`
 - `catalog`
 
@@ -196,7 +197,7 @@ Shortcut to include all types of dependency issues:
 Shortcut to include all types of export issues:
 
 ```sh
---include exports,nsExports,types,nsTypes,enumMembers,duplicates
+--include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
 ```
 
 ### `--files`
@@ -231,7 +232,7 @@ knip --tags=+custom
 ```
 
 This way, you can either focus on or ignore specific tagged exports with tags
-you define yourself. This also works for individual class or enum members.
+you define yourself. This also works for individual enum and namespace members.
 
 The default directive is `+` (include) and the `@` prefix is ignored, so the
 notation below is valid and will report only exports tagged `@lintignore` or

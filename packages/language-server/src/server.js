@@ -62,6 +62,7 @@ const FILE_CHANGE_TYPES = new Map([
 
 const ISSUE_DESC = {
   enumMembers: 'enum member',
+  namespaceMembers: 'namespace member',
   types: 'export keyword',
   exports: 'export keyword',
 };
@@ -362,7 +363,12 @@ export class LanguageServer {
 
       const { issue, issueType } = issuesForFile;
 
-      if (issueType === 'exports' || issueType === 'types' || issueType === 'enumMembers') {
+      if (
+        issueType === 'exports' ||
+        issueType === 'types' ||
+        issueType === 'enumMembers' ||
+        issueType === 'namespaceMembers'
+      ) {
         const removeExportEdit = createRemoveExportEdit(document, uri, issue);
         if (!removeExportEdit) continue;
         codeActions.push({

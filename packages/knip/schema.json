@@ -156,6 +156,9 @@
         "enumMembers": {
           "$ref": "#/definitions/ruleValue"
         },
+        "namespaceMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "exports": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -218,7 +221,7 @@
       "type": "boolean"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "title": "Enum and namespace members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },
@@ -240,6 +243,7 @@
           "nsTypes",
           "duplicates",
           "enumMembers",
+          "namespaceMembers",
           "catalog"
         ]
       }

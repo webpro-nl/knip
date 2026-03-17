@@ -194,6 +194,7 @@ export const ISSUE_TYPES = [
   'types',
   'nsTypes',
   'enumMembers',
+  'namespaceMembers',
   'duplicates',
   'catalog',
 ] as const;
@@ -211,6 +212,7 @@ export const ISSUE_TYPE_TITLE = {
   types: 'Unused exported types',
   nsTypes: 'Exported types in used namespace',
   enumMembers: 'Unused exported enum members',
+  namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
 } as const;
@@ -221,6 +223,7 @@ export const SYMBOL_TYPE = {
   FUNCTION: 'function',
   INTERFACE: 'interface',
   MEMBER: 'member',
+  NAMESPACE: 'namespace',
   TYPE: 'type',
   UNKNOWN: 'unknown',
   VARIABLE: 'variable',

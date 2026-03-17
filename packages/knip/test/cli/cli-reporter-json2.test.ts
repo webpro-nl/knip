@@ -23,6 +23,7 @@ test('knip --reporter json (files, unlisted & unresolved)', () => {
         exports: [],
         types: [],
         enumMembers: {},
+        namespaceMembers: {},
         duplicates: [],
         catalog: [],
       },

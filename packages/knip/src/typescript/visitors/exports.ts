@@ -11,7 +11,13 @@ import type { Fix } from '../../types/exports.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import { addNsValue, addValue } from '../../util/module-graph.ts';
-import { extractEnumMembers, getLineAndCol, getStringValue, isStringLiteral } from './helpers.ts';
+import {
+  extractEnumMembers,
+  extractNamespaceMembers,
+  getLineAndCol,
+  getStringValue,
+  isStringLiteral,
+} from './helpers.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import type { WalkState } from './walk.ts';
 
@@ -171,6 +177,10 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
       const members = extractEnumMembers(decl, s.options, s.lineStarts, s.getJSDocTags);
       const fix = s.getTypeFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.ENUM, decl.id.start, members, fix, false, s.getJSDocTags(exportStart));
+    } else if (decl.type === 'TSModuleDeclaration' && decl.kind !== 'global' && decl.id.type === 'Identifier') {
+      const members = extractNamespaceMembers(decl, s.options, s.lineStarts, s.getJSDocTags);
+      const fix = s.getFix(exportStart, exportStart + 7);
+      s.addExport(decl.id.name, SYMBOL_TYPE.NAMESPACE, decl.id.start, members, fix, false, s.getJSDocTags(exportStart));
     }
   }
 

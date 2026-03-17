@@ -52,6 +52,7 @@ Knip has shortcuts to include only specific issue types.
    - `exports`
    - `types`
    - `enumMembers`
+   - `namespaceMembers`
    - `duplicates`
 
 3. The `--files` flag is a shortcut for `--include files`

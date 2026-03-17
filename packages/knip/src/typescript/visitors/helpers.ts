@@ -1,4 +1,4 @@
-import { rawTransferSupported, type TSEnumDeclaration, type TSEnumMember } from 'oxc-parser';
+import { rawTransferSupported, type TSEnumDeclaration, type TSEnumMember, type TSModuleDeclaration } from 'oxc-parser';
 import { FIX_FLAGS, SYMBOL_TYPE } from '../../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../../types/config.ts';
 import type { Fix } from '../../types/exports.ts';
@@ -75,6 +75,54 @@ export const getStringValue = (node: any): string | undefined => {
 export const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile, type: SymbolType) =>
   ignoreExportsUsedInFile === true ||
   (typeof ignoreExportsUsedInFile === 'object' && type !== 'unknown' && ignoreExportsUsedInFile[type]);
+
+export function extractNamespaceMembers(
+  decl: TSModuleDeclaration,
+  options: GetImportsAndExportsOptions,
+  lineStarts: number[],
+  getJSDocTags: (start: number) => Set<string>,
+  prefix?: string
+): ExportMember[] {
+  if (!decl.body || decl.body.type !== 'TSModuleBlock') return [];
+  const members: ExportMember[] = [];
+
+  const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number) => {
+    const fullName = prefix ? `${prefix}.${name}` : name;
+    const { line, col } = getLineAndCol(lineStarts, pos);
+    const fix: Fix = options.isFixExports
+      ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
+      : undefined;
+    members.push({
+      identifier: fullName,
+      type: SYMBOL_TYPE.MEMBER as SymbolType,
+      pos,
+      line,
+      col,
+      fix,
+      hasRefsInFile: false,
+      jsDocTags: getJSDocTags(stmtStart),
+      flags: 0,
+    });
+  };
+
+  for (const stmt of decl.body.body) {
+    if (stmt.type !== 'ExportNamedDeclaration' || !stmt.declaration) continue;
+    const d = stmt.declaration;
+
+    if (d.type === 'VariableDeclaration') {
+      for (const declarator of d.declarations) {
+        if (declarator.id.type === 'Identifier') addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
+      }
+    } else if (d.type === 'TSModuleDeclaration' && d.kind !== 'global' && d.id.type === 'Identifier') {
+      const nestedPrefix = prefix ? `${prefix}.${d.id.name}` : d.id.name;
+      const nested = extractNamespaceMembers(d as TSModuleDeclaration, options, lineStarts, getJSDocTags, nestedPrefix);
+      for (const m of nested) members.push(m);
+    } else if (d.id && 'name' in d.id) {
+      addMember(d.id.name, d.id.start, stmt.start, stmt.end);
+    }
+  }
+  return members;
+}
 
 export function extractEnumMembers(
   decl: TSEnumDeclaration,

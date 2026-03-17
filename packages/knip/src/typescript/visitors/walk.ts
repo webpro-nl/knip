@@ -259,8 +259,12 @@ export const coreVisitorObject: VisitorObject = {
       } else if (parts.length > 0) {
         const exp = state.exports.get(rootName);
         if (exp) {
-          for (const member of exp.members) {
-            if (member.identifier === parts[0]) member.hasRefsInFile = true;
+          let path = '';
+          for (const part of parts) {
+            path = path ? `${path}.${part}` : part;
+            for (const member of exp.members) {
+              if (member.identifier === path) member.hasRefsInFile = true;
+            }
           }
         }
       }

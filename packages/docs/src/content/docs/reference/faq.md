@@ -232,6 +232,7 @@ required to create the report including all issue types:
 - Unused exports
 - Unused exported types
 - Unused exported enum members
+- Unused exported namespace members
 - Duplicate exports
 
 And optionally more issue types like individual exports and exported types in
