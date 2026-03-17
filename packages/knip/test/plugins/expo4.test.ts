@@ -12,7 +12,7 @@ test('Find Metro config in Expo project without direct Metro dependency', async 
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!issues.files.has(join(cwd, 'metro.config.js')));
+  assert(counters.files === 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,
