@@ -27,6 +27,9 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
   return compact([
     ...presets.map(id => toDeferResolve(id)),
     ...plugins.map(id => toDeferResolve(id)),
+    ...(plugins.includes('@babel/plugin-transform-runtime')
+      ? [toDeferResolve('@babel/runtime', { optional: true })]
+      : []),
     ...nested,
     ...overrides,
   ]);

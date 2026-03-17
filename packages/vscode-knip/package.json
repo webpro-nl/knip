@@ -1,7 +1,7 @@
 {
   "name": "vscode-knip",
   "displayName": "Knip",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "categories": [
@@ -248,6 +248,21 @@
             "type": "boolean",
             "default": false,
             "description": "Dim unused types (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimEnumMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused enum members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimClassMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused class members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimDuplicates": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim duplicate exports (instead of warnings)"
           }
         }
       },

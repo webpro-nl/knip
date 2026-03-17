@@ -9,6 +9,7 @@ import traceReporter from '../reporters/trace.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
+import { perfObserver } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.ts';
 
@@ -283,6 +284,8 @@ export const analyze = async ({
   };
 
   await analyzeGraph();
+
+  perfObserver.addMemoryMark('analyze');
 
   if (options.isTrace) {
     traceReporter({ graph, explorer, options, workspaceFilePathFilter: chief.workspaceFilePathFilter });

@@ -21,6 +21,9 @@ export type Config = {
       highlight: {
         dimExports: boolean;
         dimTypes: boolean;
+        dimEnumMembers: boolean;
+        dimClassMembers: boolean;
+        dimDuplicates: boolean;
       };
     };
   };

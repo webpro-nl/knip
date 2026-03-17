@@ -55,6 +55,13 @@
       "options": {
         "webpackConfig": "libs/b/webpack.config.js"
       }
+    },
+    "build-from-subdir": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tsconfig.build.json",
+        "cwd": "libs/b"
+      }
     }
   }
 }

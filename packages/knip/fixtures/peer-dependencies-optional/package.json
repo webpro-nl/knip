@@ -1,5 +1,8 @@
 {
   "name": "@fixtures/peer-dependencies-optional",
+  "devDependencies": {
+    "@types/pg": "*"
+  },
   "peerDependencies": {
     "@types/pg": "*",
     "pg": "*"

@@ -2,6 +2,7 @@ import type { ParsedArgs } from 'minimist';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
 import { toConfig, toDependency } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
@@ -54,19 +55,19 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .filter(executor => executor && !executor.startsWith('.'))
     .map(executor => executor?.split(':')[0]);
 
-  const scripts = targets
+  const inputs = targets
     .filter(target => target.executor === 'nx:run-commands' || target.command)
     .flatMap(target => {
-      if (target.command) return [target.command];
-      if (target.options?.command) return [target.options.command];
-      if (target.options?.commands)
-        return target.options.commands.map(commandConfig =>
+      let commands: string[] = [];
+      if (target.command) commands = [target.command];
+      else if (target.options?.command) commands = [target.options.command];
+      else if (target.options?.commands)
+        commands = target.options.commands.map(commandConfig =>
           typeof commandConfig === 'string' ? commandConfig : commandConfig.command
         );
-      return [];
+      const cwd = target.options?.cwd ? join(options.cwd, target.options.cwd) : undefined;
+      return options.getInputsFromScripts(commands, { cwd });
     });
-
-  const inputs = options.getInputsFromScripts(scripts);
 
   const configInputs = targets.flatMap(target => {
     const opts = target.options;
