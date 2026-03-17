@@ -17,6 +17,7 @@ import {
   shouldCountRefs,
   stripQuotes,
   type ResolveModule,
+  type ResolvedModule,
 } from './visitors/helpers.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
 import { collectLocalRefs } from './visitors/local-refs.ts';
@@ -138,11 +139,12 @@ const getImportsAndExports = (
     pos: number,
     modifiers: number,
     specifierPos?: number,
-    jsDocTags?: Set<string>
+    jsDocTags?: Set<string>,
+    preResolvedModule?: ResolvedModule | undefined
   ) => {
     if (!specifier || isBuiltin(specifier)) return;
 
-    const module = resolveModule(specifier, filePath);
+    const module = preResolvedModule ?? resolveModule(specifier, filePath);
 
     if (module) {
       const resolvedFileName = module.resolvedFileName;
@@ -244,20 +246,20 @@ const getImportsAndExports = (
 
       if (entry.importName.kind === 'NamespaceObject') {
         const localName = entry.localName.value;
-        addImport(specifier, IMPORT_STAR, localName, undefined, entry.localName.start, modifiers, pos, jsdocTags);
+        addImport(specifier, IMPORT_STAR, localName, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
         if (internalPath)
           localImportMap.set(localName, { importedName: IMPORT_STAR, filePath: internalPath, isNamespace: true });
       } else if (entry.importName.kind === 'Default') {
         const localName = entry.localName.value;
         const alias = localName !== 'default' ? localName : undefined;
-        addImport(specifier, 'default', alias, undefined, entry.localName.start, modifiers, pos, jsdocTags);
+        addImport(specifier, 'default', alias, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
         if (internalPath)
           localImportMap.set(localName, { importedName: 'default', filePath: internalPath, isNamespace: false });
       } else {
         const importedName = entry.importName.name!;
         const localName = entry.localName.value;
         const alias = localName !== importedName ? localName : undefined;
-        addImport(specifier, importedName, alias, undefined, entry.localName.start, modifiers, pos, jsdocTags);
+        addImport(specifier, importedName, alias, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
         if (internalPath) localImportMap.set(localName, { importedName, filePath: internalPath, isNamespace: false });
       }
     }
@@ -265,21 +267,27 @@ const getImportsAndExports = (
 
   for (const se of result.module.staticExports) {
     const jsdocTags = getJSDocTags(se.start);
+    let reExportResolved: ResolvedModule | undefined;
+    let reExportSpecifier: string | undefined;
     for (const entry of se.entries) {
       if (entry.moduleRequest) {
         const specifier = entry.moduleRequest.value;
         const modifiers = IMPORT_FLAGS.RE_EXPORT | (entry.isType ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE);
         const pos = entry.moduleRequest.start;
+        if (specifier !== reExportSpecifier) {
+          reExportSpecifier = specifier;
+          reExportResolved = resolveModule(specifier, filePath);
+        }
         if (entry.importName.kind === 'AllButDefault') {
-          addImport(specifier, IMPORT_STAR, undefined, undefined, pos, modifiers, undefined, jsdocTags);
+          addImport(specifier, IMPORT_STAR, undefined, undefined, pos, modifiers, undefined, jsdocTags, reExportResolved);
         } else if (entry.importName.kind === 'All') {
           const ns = entry.exportName.name!;
-          addImport(specifier, IMPORT_STAR, undefined, ns, entry.start, modifiers, pos, jsdocTags);
+          addImport(specifier, IMPORT_STAR, undefined, ns, entry.start, modifiers, pos, jsdocTags, reExportResolved);
         } else if (entry.importName.kind === 'Name') {
           const importedName = entry.importName.name!;
           const exportedName = entry.exportName.name;
           const alias = exportedName && exportedName !== importedName ? exportedName : undefined;
-          addImport(specifier, importedName, alias, undefined, entry.start, modifiers, pos);
+          addImport(specifier, importedName, alias, undefined, entry.start, modifiers, pos, undefined, reExportResolved);
         }
         continue;
       }
