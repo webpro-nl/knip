@@ -51,4 +51,8 @@ export type DocusaurusConfig = {
   themes?: PluginConfig[];
   plugins?: PluginConfig[];
   presets: PresetConfig[];
+  future?: {
+    experimental_faster?: boolean | { [key: string]: unknown };
+    [key: string]: unknown;
+  };
 };
