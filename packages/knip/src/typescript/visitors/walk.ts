@@ -167,7 +167,7 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
 const _isInNamespace = (node: Span) =>
   state.nsRanges.length > 0 && state.nsRanges.some(([start, end]) => node.start >= start && node.end <= end);
 
-export const coreVisitorObject: VisitorObject = {
+const coreVisitorObject: VisitorObject = {
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
   },
