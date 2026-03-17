@@ -1,5 +1,6 @@
-import { parseSync, Visitor, rawTransferSupported, type ParseResult, type VisitorObject } from 'oxc-parser';
-import { isStringLiteral, getStringValue, stripQuotes } from './typescript/visitors/helpers.ts';
+import { parseSync, type ParseResult, type Visitor } from 'oxc-parser';
+import { extractSpecifiers } from './typescript/follow-imports.ts';
+import { defaultParseOptions } from './typescript/visitors/helpers.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
@@ -14,44 +15,15 @@ import type { FileNode, ModuleGraph } from './types/module-graph.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
-import { coreVisitorObject } from './typescript/visitors/walk.ts';
-import { createCustomModuleResolver, type CustomModuleResolver } from './typescript/resolve-module-names.ts';
+import { buildVisitor } from './typescript/visitors/walk.ts';
+import { createCustomModuleResolver } from './typescript/resolve-module-names.ts';
+import type { ResolveModule } from './typescript/visitors/helpers.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath } from './util/to-source-path.ts';
-
-const parseOptions = { sourceType: 'unambiguous' as const, experimentalRawTransfer: rawTransferSupported() };
-
-const _requireSpecs: string[] = [];
-const _requireVisitor = new Visitor({
-  CallExpression(node) {
-    if (node.callee?.type === 'Identifier' && node.callee.name === 'require') {
-      const arg = node.arguments?.[0];
-      if (isStringLiteral(arg)) _requireSpecs.push(getStringValue(arg)!);
-    }
-    if (
-      node.callee?.type === 'MemberExpression' &&
-      !node.callee.computed &&
-      node.callee.object?.type === 'Identifier' &&
-      node.callee.object.name === 'require' &&
-      node.callee.property?.name === 'resolve'
-    ) {
-      const arg = node.arguments?.[0];
-      if (isStringLiteral(arg)) _requireSpecs.push(getStringValue(arg)!);
-    }
-  },
-  TSImportEqualsDeclaration(node) {
-    if (node.moduleReference?.type === 'TSExternalModuleReference') {
-      const expr = node.moduleReference.expression;
-      if (isStringLiteral(expr)) _requireSpecs.push(getStringValue(expr)!);
-    }
-  },
-});
-
-const _jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -77,7 +49,7 @@ export class ProjectPrincipal {
   toSourceFilePath: ToSourceFilePath;
 
   fileManager: SourceFileManager;
-  private resolver!: CustomModuleResolver;
+  private resolveModule: ResolveModule = () => undefined;
 
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
@@ -125,7 +97,7 @@ export class ProjectPrincipal {
     ]);
     const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
     const pathsOrUndefined = Object.keys(this.paths).length > 0 ? this.paths : undefined;
-    this.resolver = createCustomModuleResolver(
+    this.resolveModule = createCustomModuleResolver(
       { paths: pathsOrUndefined },
       customCompilerExtensions,
       this.toSourceFilePath
@@ -209,7 +181,7 @@ export class ProjectPrincipal {
       try {
         const ext = extname(filePath);
         const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
-        const result = parseSync(parseFileName, sourceText, parseOptions);
+        const result = parseSync(parseFileName, sourceText, defaultParseOptions);
 
         this.fileManager.sourceTextCache.delete(filePath);
 
@@ -221,7 +193,12 @@ export class ProjectPrincipal {
             }
           }
         } else {
-          this.followImportsLightweight(result, sourceText, filePath, visited, queue);
+          for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+            const resolved = this.resolveSpecifier(specifier, filePath);
+            if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
+              queue.push(resolved);
+            }
+          }
         }
 
         if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
@@ -242,67 +219,6 @@ export class ProjectPrincipal {
     this.resolvedFiles = visited;
   }
 
-  private followImportsLightweight(
-    result: ParseResult,
-    sourceText: string,
-    filePath: string,
-    visited: Set<string>,
-    queue: string[]
-  ) {
-    const mod = result.module;
-
-    for (const si of mod.staticImports) {
-      const resolved = this.resolveSpecifier(si.moduleRequest.value, filePath);
-      if (resolved && !isInNodeModules(resolved)) {
-        if (!visited.has(resolved)) queue.push(resolved);
-      }
-    }
-
-    for (const se of mod.staticExports) {
-      for (const entry of se.entries) {
-        if (entry.moduleRequest) {
-          const resolved = this.resolveSpecifier(entry.moduleRequest.value, filePath);
-          if (resolved && !isInNodeModules(resolved)) {
-            if (!visited.has(resolved)) queue.push(resolved);
-          }
-        }
-      }
-    }
-
-    for (const di of mod.dynamicImports) {
-      const cleaned = stripQuotes(sourceText.slice(di.moduleRequest.start, di.moduleRequest.end));
-      if (cleaned && !cleaned.includes('$') && !cleaned.includes('+')) {
-        const resolved = this.resolveSpecifier(cleaned, filePath);
-        if (resolved && !isInNodeModules(resolved)) {
-          if (!visited.has(resolved)) queue.push(resolved);
-        }
-      }
-    }
-
-    if (!isInNodeModules(filePath)) {
-      _requireSpecs.length = 0;
-      _requireVisitor.visit(result.program);
-      for (const spec of _requireSpecs) {
-        const resolved = this.resolveSpecifier(spec, filePath);
-        if (resolved && !isInNodeModules(resolved)) {
-          if (!visited.has(resolved)) queue.push(resolved);
-        }
-      }
-    }
-
-    for (const comment of result.comments) {
-      if (comment.type !== 'Block') continue;
-      let m: RegExpExecArray | null;
-      _jsDocImportRe.lastIndex = 0;
-      while ((m = _jsDocImportRe.exec(comment.value)) !== null) {
-        const resolved = this.resolveSpecifier(m[1], filePath);
-        if (resolved && !isInNodeModules(resolved)) {
-          if (!visited.has(resolved)) queue.push(resolved);
-        }
-      }
-    }
-  }
-
   getUsedResolvedFiles() {
     this.resolvedFiles.clear();
     const queue = [...this.entryPaths, ...this.programPaths];
@@ -319,8 +235,13 @@ export class ProjectPrincipal {
       try {
         const ext = extname(filePath);
         const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
-        const result = parseSync(parseFileName, sourceText, parseOptions);
-        this.followImportsLightweight(result, sourceText, filePath, visited, queue);
+        const result = parseSync(parseFileName, sourceText, defaultParseOptions);
+        for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+          const resolved = this.resolveSpecifier(specifier, filePath);
+          if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
+            queue.push(resolved);
+          }
+        }
       } catch {
         // Parse error — skip this file
       }
@@ -331,7 +252,7 @@ export class ProjectPrincipal {
   }
 
   private resolveSpecifier(specifier: string, containingFile: string): string | undefined {
-    return this.resolver.resolveFileName(specifier, containingFile);
+    return this.resolveModule(specifier, containingFile)?.resolvedFileName;
   }
 
   getUnreferencedFiles() {
@@ -359,14 +280,12 @@ export class ProjectPrincipal {
       }
     }
 
-    const resolveModule = this.resolver.resolveModuleName;
-
-    if (!this._visitor) this._visitor = this.buildVisitor();
+    if (!this._visitor) this._visitor = buildVisitor(this.pluginVisitorObjects);
 
     return _getImportsAndExports(
       filePath,
       sourceText,
-      resolveModule,
+      this.resolveModule,
       options,
       ignoreExportsUsedInFile,
       skipExports,
@@ -374,29 +293,6 @@ export class ProjectPrincipal {
       this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
       parseResult
     );
-  }
-
-  private buildVisitor(): Visitor {
-    if (this.pluginVisitorObjects.length === 0) return new Visitor(coreVisitorObject);
-    type HandlerMap = Record<string, ((node: never) => void) | undefined>;
-    const merged: HandlerMap = { ...(coreVisitorObject as HandlerMap) };
-    for (const obj of this.pluginVisitorObjects) {
-      const handlers = obj as HandlerMap;
-      for (const key in handlers) {
-        const existing = merged[key];
-        const pluginFn = handlers[key];
-        if (!pluginFn) continue;
-        if (existing) {
-          merged[key] = (node: never) => {
-            existing(node);
-            pluginFn(node);
-          };
-        } else {
-          merged[key] = pluginFn;
-        }
-      }
-    }
-    return new Visitor(merged as VisitorObject);
   }
 
   invalidateFile(filePath: string) {

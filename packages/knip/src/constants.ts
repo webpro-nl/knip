@@ -15,6 +15,8 @@ export const KNIP_CONFIG_LOCATIONS = [
 
 export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
 
+export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
+
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
 export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules/**', '.yarn', '.git'];

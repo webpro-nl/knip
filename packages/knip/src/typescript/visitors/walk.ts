@@ -1,4 +1,5 @@
-import type { Program, Span, TSTypeName, Visitor, VisitorObject } from 'oxc-parser';
+import { Visitor, type Program, type Span, type TSTypeName, type VisitorObject } from 'oxc-parser';
+import type { PluginVisitorObject } from '../../types/config.ts';
 import { FIX_FLAGS, IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
 import type { GetImportsAndExportsOptions } from '../../types/config.ts';
 import type { Fix } from '../../types/exports.ts';
@@ -330,6 +331,29 @@ export const coreVisitorObject: VisitorObject = {
     }
   },
 };
+
+export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[]): Visitor {
+  if (pluginVisitorObjects.length === 0) return new Visitor(coreVisitorObject);
+  type HandlerMap = Record<string, ((node: never) => void) | undefined>;
+  const merged: HandlerMap = { ...(coreVisitorObject as HandlerMap) };
+  for (const obj of pluginVisitorObjects) {
+    const handlers = obj as HandlerMap;
+    for (const key in handlers) {
+      const existing = merged[key];
+      const pluginFn = handlers[key];
+      if (!pluginFn) continue;
+      if (existing) {
+        merged[key] = (node: never) => {
+          existing(node);
+          pluginFn(node);
+        };
+      } else {
+        merged[key] = pluginFn;
+      }
+    }
+  }
+  return new Visitor(merged as VisitorObject);
+}
 
 export function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
   const isJS =

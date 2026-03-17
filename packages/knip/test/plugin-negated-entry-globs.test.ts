@@ -8,7 +8,7 @@ import { resolve } from './helpers/resolve.ts';
 const cwd = resolve('fixtures/plugin-negated-entry-globs');
 
 test('Handles config file shared by multiple plugins', async () => {
-  const options = await createOptions({ cwd, isIsolateWorkspaces: true });
+  const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert('src/pages/_util.ts' in issues.files);

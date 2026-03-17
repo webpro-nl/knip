@@ -1,5 +1,5 @@
 import { ResolverFactory } from 'oxc-resolver';
-import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
 
@@ -38,9 +38,7 @@ const createSyncModuleResolver = (extensions: string[], alias?: Record<string, s
 
 const resolveModuleSync = createSyncModuleResolver([
   ...DEFAULT_EXTENSIONS,
-  '.d.ts',
-  '.d.mts',
-  '.d.cts',
+  ...DTS_EXTENSIONS,
   '.json',
   '.jsonc',
 ]);

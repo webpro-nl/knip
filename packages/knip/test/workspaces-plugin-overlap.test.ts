@@ -8,7 +8,7 @@ import { resolve } from './helpers/resolve.ts';
 const cwd = resolve('fixtures/workspaces-plugin-overlap');
 
 test('Handles config file shared by multiple plugins in workspaces', async () => {
-  const options = await createOptions({ cwd, isIsolateWorkspaces: true });
+  const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
