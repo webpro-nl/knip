@@ -323,15 +323,13 @@ export class DependencyDeputy {
         dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
-      const productionDeps = new Set(this.getProductionDependencies(workspace));
-      const isDuplicateOrUnreferenced = (dep: string) => productionDeps.has(dep) || isNotReferencedDependency(dep);
+      const manifest = this._manifests.get(workspace)!;
 
-      for (const symbol of this.getDevDependencies(workspace).filter(isDuplicateOrUnreferenced)) {
+      for (const symbol of this.getDevDependencies(workspace)) {
+        if (!manifest.dependencies.includes(symbol) && !isNotReferencedDependency(symbol)) continue;
         const position = peeker.getLocation('devDependencies', symbol);
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
-
-      const manifest = this._manifests.get(workspace)!;
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
         if (!isReferencedDependency(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
