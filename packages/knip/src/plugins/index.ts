@@ -85,6 +85,7 @@ import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
 import { default as qwik } from './qwik/index.ts';
+import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
 import { default as reactNative } from './react-native/index.ts';
 import { default as reactRouter } from './react-router/index.ts';
@@ -227,6 +228,7 @@ export const Plugins = {
   prettier,
   prisma,
   qwik,
+  raycast,
   'react-cosmos': reactCosmos,
   'react-native': reactNative,
   'react-router': reactRouter,
