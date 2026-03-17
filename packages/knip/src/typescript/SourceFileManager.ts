@@ -2,24 +2,18 @@ import { readFileSync } from 'node:fs';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.ts';
 import { debugLog } from '../util/debug.ts';
-import { extname, isInNodeModules, isInternal } from '../util/path.ts';
-
-const isDeclarationFileExtension = (extension: string) =>
-  extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
+import { extname, isInternal } from '../util/path.ts';
 
 interface SourceFileManagerOptions {
-  isSkipLibs: boolean;
   compilers: [SyncCompilers, AsyncCompilers];
 }
 
 export class SourceFileManager {
-  isSkipLibs: boolean;
   sourceTextCache = new Map<string, string>();
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
 
-  constructor({ compilers, isSkipLibs }: SourceFileManagerOptions) {
-    this.isSkipLibs = isSkipLibs;
+  constructor({ compilers }: SourceFileManagerOptions) {
     this.syncCompilers = compilers[0];
     this.asyncCompilers = compilers[1];
   }
@@ -29,11 +23,6 @@ export class SourceFileManager {
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
     if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) {
-      this.sourceTextCache.set(filePath, '');
-      return '';
-    }
-    if (this.isSkipLibs && isInNodeModules(filePath)) {
-      if (isDeclarationFileExtension(ext)) return '';
       this.sourceTextCache.set(filePath, '');
       return '';
     }

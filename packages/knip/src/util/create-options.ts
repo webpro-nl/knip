@@ -120,8 +120,6 @@ export const createOptions = async (options: CreateOptions) => {
 
   const fixTypes = options.fixTypes ?? args['fix-type'] ?? [];
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
-  const isIncludeLibs = args['include-libs'] ?? options.isIncludeLibs ?? false;
-
   const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? args['experimental-tags'] ?? []);
 
   const workspace = options.workspace ?? args.workspace;
@@ -174,7 +172,7 @@ export const createOptions = async (options: CreateOptions) => {
       options.isShowProgress !== false &&
       process.stdout.isTTY &&
       typeof process.stdout.cursorTo === 'function',
-    isSkipLibs: !isIncludeLibs,
+
     isStrict,
     isTrace,
     isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,

@@ -99,17 +99,6 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][5].
 
-### `--include-libs`
-
-Getting false positives for exports consumed by external libraries? Try the
-`--include-libs` flag:
-
-```sh
-knip --include-libs
-```
-
-Also see [external libs][6].
-
 ### `--isolate-workspaces`
 
 By default, Knip optimizes performance using [workspace sharing][7] to existing
@@ -493,7 +482,6 @@ Trace file to see where its exports are imported. Implies [--trace][19].
 [3]: https://no-color.org/
 [4]: https://www.npmjs.com/package/picocolors
 [5]: ./configuration.md#includeentryexports
-[6]: ../guides/handling-issues.mdx#external-libraries
 [7]: ../guides/performance.md#workspace-sharing
 [8]: ../features/production-mode.md
 [9]: #--production
