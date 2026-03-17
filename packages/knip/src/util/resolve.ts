@@ -36,12 +36,7 @@ const createSyncModuleResolver = (extensions: string[], alias?: Record<string, s
   };
 };
 
-const resolveModuleSync = createSyncModuleResolver([
-  ...DEFAULT_EXTENSIONS,
-  ...DTS_EXTENSIONS,
-  '.json',
-  '.jsonc',
-]);
+const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DTS_EXTENSIONS, '.json', '.jsonc']);
 
 /**
  * Default module resolver (no custom extensions or path aliases).

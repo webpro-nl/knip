@@ -111,7 +111,9 @@ export function extractNamespaceMembers(
 
     if (d.type === 'VariableDeclaration') {
       for (const declarator of d.declarations) {
-        if (declarator.id.type === 'Identifier') addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
+        if (declarator.id.type === 'Identifier') {
+          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
+        }
       }
     } else if (d.type === 'TSModuleDeclaration' && d.kind !== 'global' && d.id.type === 'Identifier') {
       const nestedPrefix = prefix ? `${prefix}.${d.id.name}` : d.id.name;

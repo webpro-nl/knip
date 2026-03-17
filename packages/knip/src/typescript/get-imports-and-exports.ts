@@ -246,7 +246,17 @@ const getImportsAndExports = (
 
       if (entry.importName.kind === 'NamespaceObject') {
         const localName = entry.localName.value;
-        addImport(specifier, IMPORT_STAR, localName, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
+        addImport(
+          specifier,
+          IMPORT_STAR,
+          localName,
+          undefined,
+          entry.localName.start,
+          modifiers,
+          pos,
+          jsdocTags,
+          resolved
+        );
         if (internalPath)
           localImportMap.set(localName, { importedName: IMPORT_STAR, filePath: internalPath, isNamespace: true });
       } else if (entry.importName.kind === 'Default') {
@@ -259,7 +269,17 @@ const getImportsAndExports = (
         const importedName = entry.importName.name!;
         const localName = entry.localName.value;
         const alias = localName !== importedName ? localName : undefined;
-        addImport(specifier, importedName, alias, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
+        addImport(
+          specifier,
+          importedName,
+          alias,
+          undefined,
+          entry.localName.start,
+          modifiers,
+          pos,
+          jsdocTags,
+          resolved
+        );
         if (internalPath) localImportMap.set(localName, { importedName, filePath: internalPath, isNamespace: false });
       }
     }
@@ -279,7 +299,17 @@ const getImportsAndExports = (
           reExportResolved = resolveModule(specifier, filePath);
         }
         if (entry.importName.kind === 'AllButDefault') {
-          addImport(specifier, IMPORT_STAR, undefined, undefined, pos, modifiers, undefined, jsdocTags, reExportResolved);
+          addImport(
+            specifier,
+            IMPORT_STAR,
+            undefined,
+            undefined,
+            pos,
+            modifiers,
+            undefined,
+            jsdocTags,
+            reExportResolved
+          );
         } else if (entry.importName.kind === 'All') {
           const ns = entry.exportName.name!;
           addImport(specifier, IMPORT_STAR, undefined, ns, entry.start, modifiers, pos, jsdocTags, reExportResolved);
@@ -287,7 +317,17 @@ const getImportsAndExports = (
           const importedName = entry.importName.name!;
           const exportedName = entry.exportName.name;
           const alias = exportedName && exportedName !== importedName ? exportedName : undefined;
-          addImport(specifier, importedName, alias, undefined, entry.start, modifiers, pos, undefined, reExportResolved);
+          addImport(
+            specifier,
+            importedName,
+            alias,
+            undefined,
+            entry.start,
+            modifiers,
+            pos,
+            undefined,
+            reExportResolved
+          );
         }
         continue;
       }
