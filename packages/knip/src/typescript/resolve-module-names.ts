@@ -5,7 +5,7 @@ import { DEFAULT_EXTENSIONS } from '../constants.ts';
 import { sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.ts';
-import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
+import { createSyncModuleResolver, resolveModuleSync } from '../util/resolve.ts';
 import type { ToSourceFilePath } from '../util/to-source-path.ts';
 import { isDeclarationFileExtension } from './ast-helpers.ts';
 
@@ -35,8 +35,7 @@ export function createCustomModuleResolver(
 ) {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
-  const resolveSync =
-    customCompilerExtensionsSet.size === 0 ? _resolveModuleSync : _createSyncModuleResolver(extensions);
+  const resolveSync = customCompilerExtensionsSet.size === 0 ? resolveModuleSync : createSyncModuleResolver(extensions);
 
   const virtualDeclarationFiles = new Map<string, { path: string; ext: string }>();
 

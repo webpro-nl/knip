@@ -1,0 +1,30 @@
+{
+  "name": "@fixtures/raycast",
+  "dependencies": {
+    "@raycast/api": "^1.0.0"
+  },
+  "commands": [
+    {
+      "name": "search-bookmarks"
+    },
+    {
+      "name": "search-bookmarks"
+    },
+    {},
+    {
+      "name": 123
+    }
+  ],
+  "tools": [
+    {
+      "name": "organize-tabs"
+    },
+    {
+      "name": "organize-tabs"
+    },
+    {},
+    {
+      "name": 456
+    }
+  ]
+}

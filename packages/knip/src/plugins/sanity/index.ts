@@ -1,22 +1,21 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { toC12config } from '../../util/plugin-config.ts';
 
-// https://heyapi.dev/openapi-ts/configuration
+// https://www.sanity.io/docs/configuration
 
-const title = 'openapi-ts';
+const title = 'Sanity';
 
-const enablers = ['@hey-api/openapi-ts'];
+const enablers = ['sanity'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', ...toC12config('openapi-ts')];
+const entry = ['sanity.config.{js,jsx,ts,tsx}', 'sanity.cli.{ts,js}', 'sanity.blueprint.{ts,js,json}'];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

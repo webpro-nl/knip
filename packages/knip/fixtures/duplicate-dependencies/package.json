@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/duplicate-dependencies",
+  "dependencies": {
+    "typescript": "*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

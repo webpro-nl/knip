@@ -13,8 +13,6 @@ import { dirname, join, relative, toPosix } from './path.ts';
 
 const walk = promisify(_walk);
 
-const _picomatch = timerify(picomatch);
-
 type Options = { gitignore: boolean; cwd: string };
 
 interface GlobOptions extends FastGlobOptions {
@@ -75,11 +73,11 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
   const getMatcher = () => {
     if (!deepFilterMatcher) {
-      deepFilterMatcher = _picomatch(Array.from(ignores), pmOptions);
+      deepFilterMatcher = picomatch(Array.from(ignores), pmOptions);
       pendingIgnores.length = 0;
     } else if (pendingIgnores.length > 0) {
       const prev = deepFilterMatcher;
-      const incr = _picomatch(pendingIgnores.splice(0), pmOptions);
+      const incr = picomatch(pendingIgnores.splice(0), pmOptions);
       deepFilterMatcher = (path: string) => prev(path) || incr(path);
     }
     return deepFilterMatcher;
@@ -196,8 +194,8 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
   await walk(cwd, {
     concurrency: 16,
-    entryFilter: timerify(entryFilter),
-    deepFilter: timerify(deepFilter),
+    entryFilter,
+    deepFilter,
   });
 
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
@@ -262,7 +260,7 @@ export async function getGitIgnoredHandler(
   if (options.gitignore === false) return () => false;
 
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
-  const matcher = _picomatch(Array.from(ignores), { ignore: unignores });
+  const matcher = picomatch(Array.from(ignores), { ignore: unignores });
 
   const cache = new Map<string, boolean>();
   const isGitIgnored = (filePath: string) => {
@@ -274,5 +272,5 @@ export async function getGitIgnoredHandler(
     return result;
   };
 
-  return timerify(isGitIgnored);
+  return isGitIgnored;
 }

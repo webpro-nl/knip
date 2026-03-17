@@ -460,6 +460,8 @@ export async function build({
     }
   };
 
+  perfObserver.addMemoryMark('init');
+
   for (let i = 0; i < principals.length; ++i) {
     const principal = principals[i];
     if (!principal) continue;
@@ -495,7 +497,7 @@ export async function build({
       factory.deletePrincipal(principal, options.cwd);
       principals[i] = undefined;
     }
-    perfObserver.addMemoryMark(factory.getPrincipalCount());
+    perfObserver.addMemoryMark(`P${factory.getPrincipalCount()}`);
   }
 
   if (!options.isWatch && !options.isSession && options.isSkipLibs && !options.isIsolateWorkspaces) {
@@ -504,6 +506,8 @@ export async function build({
     }
     principals.length = 0;
   }
+
+  perfObserver.addMemoryMark('build');
 
   if (externalRefsFromInputs) {
     for (const [filePath, refs] of externalRefsFromInputs) {
