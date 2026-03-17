@@ -100,6 +100,7 @@ export async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
+  let memMark = 0;
   for (const workspace of workspaces) {
     const { name, dir, ancestors, manifestPath: filePath } = workspace;
 
@@ -325,6 +326,7 @@ export async function build({
     }
 
     worker.onDispose();
+    perfObserver.addMemoryMark(++memMark);
   }
 
   debugLog('*', `Created 1 principal for ${workspaces.length} workspaces`);
