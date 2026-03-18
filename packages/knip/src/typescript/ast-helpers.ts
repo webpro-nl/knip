@@ -1,5 +1,8 @@
-import type { Program } from 'oxc-parser';
+import type { ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
+import stripJsonComments from 'strip-json-comments';
+import { extname, isInternal } from '../util/path.ts';
+import { parseFile } from './visitors/helpers.ts';
 
 const isStringLiteral = (node: any): boolean =>
   node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string');
@@ -124,6 +127,19 @@ export const getStringValues = (node: any): Set<string> => {
   return values;
 };
 
+export const isExternalReExportsOnly = (result: ParseResult): boolean => {
+  const mod = result.module;
+  if (mod.staticExports.length === 0) return false;
+  for (const se of mod.staticExports) {
+    for (const entry of se.entries) {
+      if (!entry.moduleRequest) return false;
+      if (isInternal(entry.moduleRequest.value)) return false;
+    }
+  }
+  if (mod.staticImports.length > 0) return false;
+  return true;
+};
+
 /** Check if a specific named import exists from a module */
 export const hasImportSpecifier = (program: Program, modulePath: string, specifierName: string): boolean => {
   for (const node of (program as any).body ?? []) {
@@ -136,4 +152,33 @@ export const hasImportSpecifier = (program: Program, modulePath: string, specifi
     }
   }
   return false;
+};
+
+const collectJsonStringLiterals = (obj: unknown, literals: Set<string>) => {
+  if (typeof obj === 'string') {
+    literals.add(obj);
+  } else if (Array.isArray(obj)) {
+    for (const item of obj) collectJsonStringLiterals(item, literals);
+  } else if (obj && typeof obj === 'object') {
+    for (const val of Object.values(obj)) collectJsonStringLiterals(val, literals);
+  }
+};
+
+export const collectStringLiterals = (sourceText: string, filePath: string): Set<string> => {
+  const literals = new Set<string>();
+  try {
+    const ext = extname(filePath);
+    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') {
+      collectJsonStringLiterals(JSON.parse(stripJsonComments(sourceText, { trailingCommas: true })), literals);
+      return literals;
+    }
+    const result = parseFile(filePath, sourceText);
+    const visitor = new Visitor({
+      Literal(node: any) {
+        if (typeof node.value === 'string') literals.add(node.value);
+      },
+    });
+    visitor.visit(result.program);
+  } catch {}
+  return literals;
 };

@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import { parseSync, type ParseResult, type Visitor } from 'oxc-parser';
+import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
@@ -7,13 +7,12 @@ import type { Export, FileNode, ImportMap, ImportMaps, Imports } from '../types/
 import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
-import { dirname, extname, isInNodeModules, resolve } from '../util/path.ts';
+import { dirname, isInNodeModules, resolve } from '../util/path.ts';
 import { shouldIgnore } from '../util/tag.ts';
 import {
-  STANDARD_EXTENSIONS,
   buildLineStarts,
-  defaultParseOptions,
   getLineAndCol,
+  parseFile,
   shouldCountRefs,
   stripQuotes,
   type ResolveModule,
@@ -53,8 +52,6 @@ const getImportsAndExports = (
   cachedParseResult?: ParseResult
 ): FileNode => {
   const skipExports = skipExportsForFile || !options.isReportExports;
-  const ext = extname(filePath);
-  const parseFilePath = STANDARD_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
   const internal: ImportMap = new Map();
   const external: Imports = new Set();
   const unresolved: Imports = new Set();
@@ -218,7 +215,7 @@ const getImportsAndExports = (
     }
   };
 
-  const result = cachedParseResult ?? parseSync(parseFilePath, sourceText, defaultParseOptions);
+  const result = cachedParseResult ?? parseFile(filePath, sourceText);
   const lineStarts = buildLineStarts(sourceText);
   const getJSDocTags = buildJSDocTagLookup(result.comments, sourceText);
 

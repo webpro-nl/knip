@@ -1,6 +1,7 @@
-import { parseSync, Visitor } from 'oxc-parser';
+import { Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues, getImportMap } from '../../typescript/ast-helpers.ts';
+import { parseFile } from '../../typescript/visitors/helpers.ts';
 import { toDeferResolveProductionEntry } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
@@ -30,7 +31,7 @@ export const getInputsFromHandlers: ResolveFromAST = (program, options) => {
               if (resolvedPath) {
                 const stackText = options.readFile(resolvedPath);
                 if (stackText) {
-                  const stackResult = parseSync('stack.ts', stackText, { sourceType: 'unambiguous' });
+                  const stackResult = parseFile('stack.ts', stackText);
                   addHandlers(collectPropertyValues(stackResult.program, 'handler'));
                 }
               }

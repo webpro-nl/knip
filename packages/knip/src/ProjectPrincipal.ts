@@ -1,6 +1,6 @@
-import { parseSync, type ParseResult, type Visitor } from 'oxc-parser';
+import type { ParseResult, Visitor } from 'oxc-parser';
 import { extractSpecifiers } from './typescript/follow-imports.ts';
-import { defaultParseOptions } from './typescript/visitors/helpers.ts';
+import { parseFile } from './typescript/visitors/helpers.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
@@ -179,9 +179,7 @@ export class ProjectPrincipal {
       }
 
       try {
-        const ext = extname(filePath);
-        const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
-        const result = parseSync(parseFileName, sourceText, defaultParseOptions);
+        const result = parseFile(filePath, sourceText);
 
         this.fileManager.sourceTextCache.delete(filePath);
 
@@ -233,9 +231,7 @@ export class ProjectPrincipal {
       if (!sourceText) continue;
 
       try {
-        const ext = extname(filePath);
-        const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
-        const result = parseSync(parseFileName, sourceText, defaultParseOptions);
+        const result = parseFile(filePath, sourceText);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
           if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {

@@ -1,27 +1,26 @@
-import { rawTransferSupported, type TSEnumDeclaration, type TSEnumMember, type TSModuleDeclaration } from 'oxc-parser';
-import { FIX_FLAGS, SYMBOL_TYPE } from '../../constants.ts';
+import {
+  parseSync,
+  rawTransferSupported,
+  type TSEnumDeclaration,
+  type TSEnumMember,
+  type TSModuleDeclaration,
+} from 'oxc-parser';
+import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../../constants.ts';
+import { extname } from '../../util/path.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../../types/config.ts';
 import type { Fix } from '../../types/exports.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
 
-export const STANDARD_EXTENSIONS = new Set([
-  '.js',
-  '.mjs',
-  '.cjs',
-  '.jsx',
-  '.ts',
-  '.tsx',
-  '.mts',
-  '.cts',
-  '.d.ts',
-  '.d.mts',
-  '.d.cts',
-]);
-
-export const defaultParseOptions = {
+const defaultParseOptions = {
   sourceType: 'unambiguous' as const,
   experimentalRawTransfer: rawTransferSupported(),
+};
+
+export const parseFile = (filePath: string, sourceText: string) => {
+  const ext = extname(filePath);
+  const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
+  return parseSync(parseFileName, sourceText, defaultParseOptions);
 };
 
 export type ResolveModule = (specifier: string, containingFile: string) => ResolvedModule | undefined;

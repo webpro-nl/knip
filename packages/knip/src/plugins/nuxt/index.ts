@@ -20,7 +20,7 @@ import {
   collectLocalImportPaths,
   collectTemplateInfo,
   getVueSfc,
-  parseFile,
+  readAndParseFile,
   toKebabCase,
 } from './helpers.ts';
 import type { NuxtConfig } from './types.ts';
@@ -102,7 +102,7 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 
     for (const file of definitionFiles) {
       const path = join(cwd, file);
-      const result = parseFile(path);
+      const result = readAndParseFile(path);
       const maps = buildAutoImportMap(path, result);
       for (const [id, specifier] of maps.importMap) importMap.set(id, specifier);
       for (const [id, components] of maps.componentMap) {
@@ -211,7 +211,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
     const fp = join(cwd, file);
-    const result = parseFile(fp);
+    const result = readAndParseFile(fp);
     for (const p of collectLocalImportPaths(fp, result)) inputs.push(toProductionEntry(p));
   }
 
