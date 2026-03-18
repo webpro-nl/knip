@@ -149,7 +149,6 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
     const refs = state.referencedInExport.get(name);
     if (refs) refs.add(exportName);
     else state.referencedInExport.set(name, new Set([exportName]));
-    return;
   }
   for (const key in node) {
     if (key === 'type' || key === 'parent') continue;
