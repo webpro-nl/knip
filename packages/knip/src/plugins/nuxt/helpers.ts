@@ -37,7 +37,8 @@ export const collectIdentifiers = (source: string, fileName: string) => {
       identifiers.add(node.name);
     },
   });
-  visitor.visit(parseSync(fileName, source, defaultParseOptions).program);
+  const tsFileName = fileName.endsWith('.vue') ? `${fileName}.ts` : fileName;
+  visitor.visit(parseSync(tsFileName, source, defaultParseOptions).program);
   return identifiers;
 };
 
