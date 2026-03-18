@@ -102,7 +102,7 @@
     "get-tsconfig": "4.13.6",
     "jiti": "^2.6.0",
     "minimist": "^1.2.8",
-    "oxc-parser": "^0.116.0",
+    "oxc-parser": "^0.120.0",
     "oxc-resolver": "^11.19.1",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.1",
