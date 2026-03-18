@@ -5,7 +5,7 @@ import { hasDependency } from '../../util/plugin.ts';
 
 const title = 'Oxlint';
 
-const enablers = ['oxlint'];
+const enablers = ['oxlint', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

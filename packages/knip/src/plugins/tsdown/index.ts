@@ -7,7 +7,7 @@ import type { Entry, TsdownConfig } from './types.ts';
 
 const title = 'tsdown';
 
-const enablers = ['tsdown'];
+const enablers = ['tsdown', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

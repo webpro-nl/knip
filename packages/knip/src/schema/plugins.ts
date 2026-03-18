@@ -143,6 +143,7 @@ export const pluginsSchema = z.object({
   'vercel-og': pluginSchema,
   vike: pluginSchema,
   vite: pluginSchema,
+  "vite-plus": pluginSchema,
   vitepress: pluginSchema,
   vitest: pluginSchema,
   vue: pluginSchema,

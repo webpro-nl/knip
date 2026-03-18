@@ -14,7 +14,7 @@ import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWor
 
 const title = 'Vitest';
 
-const enablers = ['vitest'];
+const enablers = ['vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

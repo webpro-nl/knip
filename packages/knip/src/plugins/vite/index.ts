@@ -11,7 +11,7 @@ import { importMetaGlobCall } from './visitors/importMetaGlob.ts';
 
 const title = 'Vite';
 
-const enablers = ['vite', 'vitest'];
+const enablers = ['vite', 'vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

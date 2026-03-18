@@ -130,6 +130,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vite-plus'
   | 'vitepress'
   | 'vitest'
   | 'vue'
@@ -273,6 +274,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vite-plus',
   'vitepress',
   'vitest',
   'vue',

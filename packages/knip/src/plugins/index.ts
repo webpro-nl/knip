@@ -129,6 +129,7 @@ import { default as unocss } from './unocss/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
 import { default as vite } from './vite/index.ts';
+import { default as vitePlus } from './vite-plus/index.ts';
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
 import { default as vue } from './vue/index.ts';
@@ -272,6 +273,7 @@ export const Plugins = {
   'vercel-og': vercelOg,
   vike,
   vite,
+  "vite-plus": vitePlus,
   vitepress,
   vitest,
   vue,
