@@ -1,0 +1,12 @@
+diff --git a/knip.jsonc b/knip.jsonc
+index f471ada9b2..83844be8aa 100644
+--- a/knip.jsonc
++++ b/knip.jsonc
+@@ -32,6 +32,7 @@
+     "ignoreExportsUsedInFile": {
+         "enum": true,
+         "interface": true,
++        "namespace": true,
+         "type": true
+     },
+     "mocha": false
