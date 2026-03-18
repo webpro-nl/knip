@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '!**'
+      - "!**"
 
 jobs:
   test:
@@ -26,11 +26,11 @@ jobs:
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
       - name: Install dependencies
         run: pnpm install
       - name: Build knip

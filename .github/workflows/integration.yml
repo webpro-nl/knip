@@ -5,9 +5,9 @@ on:
   pull_request:
   push:
     branches:
-      - '**'
+      - "**"
     tags:
-      - '!**'
+      - "!**"
 
 permissions:
   issues: write
@@ -19,8 +19,8 @@ jobs:
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
       - run: pnpm run build
@@ -30,7 +30,7 @@ jobs:
           pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'
       - name: Comment on referenced issues
         if: github.event_name == 'push'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const sha = '${{ steps.publish.outputs.sha }}';
@@ -179,10 +179,10 @@ jobs:
               npm run knip
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check out ${{ matrix.project.repo }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ matrix.project.repo }}
           path: ${{ matrix.project.name }}
@@ -194,13 +194,13 @@ jobs:
           PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
           [ -f "$PATCH_FILE" ] && git apply --verbose "$PATCH_FILE" || true
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - uses: oven-sh/setup-bun@v2
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}
