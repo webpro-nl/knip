@@ -149,10 +149,11 @@ export class Extension {
 
     /** @type {ServerOptions} */
     const serverOptions = {
-      run: { module: Extension.#serverModule, transport: TransportKind.ipc },
+      run: { module: Extension.#serverModule, transport: TransportKind.ipc, runtime: 'node' },
       debug: {
         module: Extension.#serverModule,
         transport: TransportKind.ipc,
+        runtime: 'node',
         options: { execArgv: ['--inspect=6009'] },
       },
     };

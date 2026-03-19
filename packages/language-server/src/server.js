@@ -226,8 +226,8 @@ export class LanguageServer {
     this.published = new Set(newDiags.keys());
   }
 
-  async #resolveKnipSession() {
-    const config = await this.getConfig();
+  /** @param {Config} config */
+  async #resolveKnipSession(config) {
     if (config?.useLocalVersion && this.cwd) {
       try {
         const localRequire = createRequire(path.join(this.cwd, 'package.json'));
@@ -239,7 +239,12 @@ export class LanguageServer {
         this.connection.console.warn(`Local knip not found, using bundled version (${error})`);
       }
     }
-    this.connection.console.log(`Using bundled knip${readKnipVersion(fileURLToPath(import.meta.resolve('knip/session')))}`);
+    try {
+      const bundledRequire = createRequire(__filename);
+      this.connection.console.log(`Using bundled knip${readKnipVersion(bundledRequire.resolve('knip/session'))}`);
+    } catch {
+      this.connection.console.log('Using bundled knip');
+    }
     return { createOptions, createSession };
   }
 
@@ -248,7 +253,7 @@ export class LanguageServer {
 
     try {
       const config = await this.getConfig();
-      const knip = await this.#resolveKnipSession();
+      const knip = await this.#resolveKnipSession(config);
 
       const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
