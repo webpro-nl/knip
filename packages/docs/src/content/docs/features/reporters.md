@@ -29,7 +29,6 @@ object per file structured like this:
 
 ```json
 {
-  "files": ["src/unused.ts"],
   "issues": [
     {
       "file": "package.json",
@@ -55,12 +54,22 @@ object per file structured like this:
         { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
         { "name": "unusedType", "line": 8, "col": 14, "pos": 145 }
       ],
-      "enumMembers": {
-        "MyEnum": [
-          { "name": "unusedMember", "line": 13, "col": 3, "pos": 167 },
-          { "name": "unusedKey", "line": 15, "col": 3, "pos": 205 }
-        ]
-      },
+      "enumMembers": [
+        {
+          "namespace": "MyEnum",
+          "name": "unusedMember",
+          "line": 13,
+          "col": 3,
+          "pos": 167
+        },
+        {
+          "namespace": "MyEnum",
+          "name": "unusedKey",
+          "line": 15,
+          "col": 3,
+          "pos": 205
+        }
+      ],
       "duplicates": ["Registration", "default"]
     }
   ]

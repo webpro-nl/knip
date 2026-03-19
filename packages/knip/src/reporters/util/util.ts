@@ -33,6 +33,7 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({
+  namespace: 'parentSymbol' in issue ? issue.parentSymbol : undefined,
   name: issue.symbol,
   line: issue.line,
   col: issue.col,

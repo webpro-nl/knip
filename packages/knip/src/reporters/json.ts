@@ -14,6 +14,7 @@ interface BaseItem {
 }
 
 interface Item extends BaseItem {
+  namespace?: string;
   pos?: number;
   line?: number;
   col?: number;
@@ -25,20 +26,21 @@ type Items = Array<Item>;
 type Row = {
   file: string;
   owners?: BaseItems;
+  binaries?: BaseItems;
+  catalog?: Items;
   dependencies?: Items;
   devDependencies?: Items;
-  optionalPeerDependencies?: Items;
-  unlisted?: BaseItems;
-  binaries?: BaseItems;
-  unresolved?: Items;
+  duplicates?: Array<Items>;
+  enumMembers?: Items;
   exports?: Items;
-  types?: Items;
+  files?: Items;
+  namespaceMembers?: Items;
   nsExports?: Items;
   nsTypes?: Items;
-  duplicates?: Array<Items>;
-  enumMembers?: Record<string, Items>;
-  namespaceMembers?: Record<string, Items>;
-  catalog?: Items;
+  optionalPeerDependencies?: Items;
+  types?: Items;
+  unlisted?: BaseItems;
+  unresolved?: Items;
 };
 
 export default async ({ report, issues, options, cwd }: ReporterOptions) => {
@@ -58,54 +60,42 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
     const row: Row = {
       file,
       ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
+      ...(report.binaries && { binaries: [] }),
+      ...(report.catalog && { catalog: [] }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
-      ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
-      ...(report.unlisted && { unlisted: [] }),
-      ...(report.binaries && { binaries: [] }),
-      ...(report.unresolved && { unresolved: [] }),
-      ...(report.exports && { exports: [] }),
-      ...(report.nsExports && { nsExports: [] }),
-      ...(report.types && { types: [] }),
-      ...(report.nsTypes && { nsTypes: [] }),
-      ...(report.enumMembers && { enumMembers: {} }),
-      ...(report.namespaceMembers && { namespaceMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),
-      ...(report.catalog && { catalog: [] }),
+      ...(report.enumMembers && { enumMembers: [] }),
+      ...(report.exports && { exports: [] }),
+      ...(report.files && { files: [] }),
+      ...(report.namespaceMembers && { namespaceMembers: [] }),
+      ...(report.nsExports && { nsExports: [] }),
+      ...(report.nsTypes && { nsTypes: [] }),
+      ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
+      ...(report.types && { types: [] }),
+      ...(report.unlisted && { unlisted: [] }),
+      ...(report.unresolved && { unresolved: [] }),
     };
     return row;
   };
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
-      if (type === 'files') {
-        // Handled separately below
-      } else {
-        for (const issue of flattenIssues(issues[type] as IssueRecords)) {
-          const { filePath, symbol, symbols, parentSymbol } = issue;
-          json[filePath] = json[filePath] ?? initRow(filePath);
-          if (type === 'duplicates') {
-            symbols && json[filePath][type]?.push(symbols.map(convert));
-          } else if (type === 'enumMembers' || type === 'namespaceMembers') {
-            const item = json[filePath][type];
-            if (parentSymbol && item) {
-              item[parentSymbol] = item[parentSymbol] ?? [];
-              item[parentSymbol].push(convert(issue));
-            }
-          } else {
-            if (type === 'binaries') {
-              json[filePath][type]?.push({ name: symbol });
-            } else {
-              json[filePath][type]?.push(convert(issue));
-            }
-          }
+      for (const issue of flattenIssues(issues[type] as IssueRecords)) {
+        const { filePath, symbol, symbols } = issue;
+        json[filePath] = json[filePath] ?? initRow(filePath);
+        if (type === 'duplicates') {
+          symbols && json[filePath][type]?.push(symbols.map(convert));
+        } else if (type === 'binaries') {
+          json[filePath][type]?.push({ name: symbol });
+        } else {
+          json[filePath][type]?.push(convert(issue));
         }
       }
     }
   }
 
   const output = JSON.stringify({
-    files: Object.keys(issues.files),
     issues: Object.values(json),
   });
 
