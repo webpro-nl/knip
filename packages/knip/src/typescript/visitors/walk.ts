@@ -333,22 +333,33 @@ const coreVisitorObject: VisitorObject = {
 
 export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[]): Visitor {
   if (pluginVisitorObjects.length === 0) return new Visitor(coreVisitorObject);
-  type HandlerMap = Record<string, ((node: never) => void) | undefined>;
-  const merged: HandlerMap = { ...(coreVisitorObject as HandlerMap) };
+  type HandlerFn = (node: never) => void;
+  type HandlerMap = Record<string, HandlerFn | undefined>;
+  const handlerLists = new Map<string, HandlerFn[]>();
+  const coreHandlers = coreVisitorObject as HandlerMap;
+  for (const key in coreHandlers) {
+    const fn = coreHandlers[key];
+    if (fn) handlerLists.set(key, [fn]);
+  }
   for (const obj of pluginVisitorObjects) {
     const handlers = obj as HandlerMap;
     for (const key in handlers) {
-      const existing = merged[key];
-      const pluginFn = handlers[key];
-      if (!pluginFn) continue;
-      if (existing) {
-        merged[key] = (node: never) => {
-          existing(node);
-          pluginFn(node);
-        };
-      } else {
-        merged[key] = pluginFn;
-      }
+      const fn = handlers[key];
+      if (!fn) continue;
+      const list = handlerLists.get(key);
+      if (list) list.push(fn);
+      else handlerLists.set(key, [fn]);
+    }
+  }
+  const merged: HandlerMap = {};
+  for (const [key, list] of handlerLists) {
+    if (list.length === 1) {
+      merged[key] = list[0];
+    } else {
+      const fns = list;
+      merged[key] = ((node: never) => {
+        for (let i = 0; i < fns.length; i++) fns[i](node);
+      }) as HandlerFn;
     }
   }
   return new Visitor(merged as VisitorObject);
