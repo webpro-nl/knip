@@ -1,7 +1,7 @@
 {
   "name": "vscode-knip",
   "displayName": "Knip",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "categories": [
