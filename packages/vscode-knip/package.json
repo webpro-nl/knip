@@ -181,6 +181,11 @@
             "type": "string",
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
+          },
+          "knip.useLocalVersion": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use the workspace-local knip instead of the version bundled with the extension"
           }
         }
       },
