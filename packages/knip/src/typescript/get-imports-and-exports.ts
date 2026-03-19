@@ -37,7 +37,7 @@ import getScriptVisitors from './visitors/scripts/index.ts';
 const isInTopLevelScope = (node: ts.Node, sourceFile: ts.SourceFile) => {
   let current = node.parent;
   while (current && current !== sourceFile) {
-    if (ts.isFunctionLike(current) || ts.isClassLike(current)) return false;
+    if (ts.isFunctionLike(current) || ts.isClassLike(current) || ts.isModuleDeclaration(current)) return false;
     current = current.parent;
   }
   return current === sourceFile;
