@@ -259,8 +259,12 @@ export class WorkspaceWorker {
 
   public registerVisitors(options: RegisterVisitorsOptions) {
     for (const pluginName of this.enabledPlugins) {
+      if (options.registeredPlugins.has(pluginName)) continue;
       const plugin = Plugins[pluginName];
-      if (plugin.registerVisitors) plugin.registerVisitors(options);
+      if (plugin.registerVisitors) {
+        options.registeredPlugins.add(pluginName);
+        plugin.registerVisitors(options);
+      }
     }
   }
 

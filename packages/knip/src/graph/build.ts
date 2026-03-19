@@ -64,6 +64,7 @@ export async function build({
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
+  const registeredVisitorPlugins = new Set<string>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
@@ -193,6 +194,7 @@ export async function build({
     worker.registerVisitors({
       ctx: principal.pluginCtx,
       registerVisitor: visitors => principal.pluginVisitorObjects.push(visitors),
+      registeredPlugins: registeredVisitorPlugins,
     });
 
     const DEFAULT_GROUP = 'default';

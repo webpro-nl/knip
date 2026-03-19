@@ -171,6 +171,7 @@ export type PluginVisitorObject = VisitorObject;
 export type RegisterVisitorsOptions = {
   ctx: PluginVisitorContext;
   registerVisitor: (visitor: PluginVisitorObject) => void;
+  registeredPlugins: Set<string>;
 };
 
 export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
