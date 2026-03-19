@@ -2,7 +2,7 @@ import type { ParsedArgs } from 'minimist';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getInputs, resolveFormatters } from './helpers.ts';
+import { getInputs, isFlatConfig, resolveFormatters } from './helpers.ts';
 import { getInputsFromFlatConfigAST } from './resolveFromAST.ts';
 import type { ESLintConfigDeprecated } from './types.ts';
 
@@ -32,7 +32,7 @@ const config = [
 
 const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) => {
   // Flat configs (eslint.config.*) are handled by resolveFromAST — skip loading
-  if (/eslint\.config/.test(configFileName)) return false;
+  if (isFlatConfig(configFileName)) return false;
 
   const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
   if (version) {
@@ -47,9 +47,7 @@ const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) 
 const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
 
 const resolveFromAST: ResolveFromAST = (program, options) => {
-  if (/eslint\.config/.test(options.configFileName)) {
-    return getInputsFromFlatConfigAST(program);
-  }
+  if (isFlatConfig(options.configFileName)) return getInputsFromFlatConfigAST(program);
   return [];
 };
 

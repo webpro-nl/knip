@@ -6,13 +6,15 @@ import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.ts';
 
+export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName);
+
 export const getInputs = (
   config: ESLintConfigDeprecated | OverrideConfigDeprecated | ESLintConfig,
   options: PluginOptions
 ): (Input | ConfigInput)[] => {
   const { configFileName } = options;
 
-  if (extname(configFileName) === '.json' || !/eslint\.config/.test(configFileName)) {
+  if (extname(configFileName) === '.json' || !isFlatConfig(configFileName)) {
     return getInputsDeprecated(config as ESLintConfigDeprecated | OverrideConfigDeprecated, options);
   }
 

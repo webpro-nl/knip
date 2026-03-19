@@ -74,32 +74,28 @@ export const getPropertyValues = (node: any, propertyName: string) => {
 /** Collect all values of a named property from any ObjectExpression in the program */
 export const collectPropertyValues = (program: Program, propertyName: string): Set<string> => {
   const values = new Set<string>();
-  try {
-    const visitor = new Visitor({
-      ObjectExpression(node) {
-        for (const v of getPropertyValues(node, propertyName)) values.add(v);
-      },
-    });
-    visitor.visit(program);
-  } catch {}
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      for (const v of getPropertyValues(node, propertyName)) values.add(v);
+    },
+  });
+  visitor.visit(program);
   return values;
 };
 
 /** Find the first ObjectExpression argument of a named function call */
 export const findCallArg = (program: Program, fnName: string): any | undefined => {
   let result: any;
-  try {
-    const visitor = new Visitor({
-      CallExpression(node) {
-        if (result) return;
-        if (node.callee?.type === 'Identifier' && node.callee.name === fnName) {
-          const arg = node.arguments?.[0];
-          if (arg?.type === 'ObjectExpression') result = arg;
-        }
-      },
-    });
-    visitor.visit(program);
-  } catch {}
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (result) return;
+      if (node.callee?.type === 'Identifier' && node.callee.name === fnName) {
+        const arg = node.arguments?.[0];
+        if (arg?.type === 'ObjectExpression') result = arg;
+      }
+    },
+  });
+  visitor.visit(program);
   return result;
 };
 
