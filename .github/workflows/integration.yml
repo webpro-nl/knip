@@ -120,16 +120,16 @@ jobs:
               pnpm install
               pnpm add -D $PKG_URL
               bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
+              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format
               bunx --bun knip --tags=-knipignore --production
 
-          # - name: npmx.dev
-          #   repo: npmx-dev/npmx.dev
-          #   commands: |
-          #     pnpm install
-          #     pnpm add -D -w $PKG_URL
-          #     pnpm knip --fix --allow-remove-files --no-exit-code
-          #     pnpm knip --production
+          - name: npmx.dev
+            repo: npmx-dev/npmx.dev
+            commands: |
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm knip
+              pnpm knip --production --exclude dependencies
 
           - name: prettier
             repo: prettier/prettier
@@ -162,7 +162,6 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
-              pnpm run knip --fix --no-exit-code
               pnpm run knip
 
           - name: slonik
