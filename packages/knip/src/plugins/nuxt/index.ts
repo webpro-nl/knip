@@ -198,9 +198,9 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   for (const ext of localConfig.extends ?? []) {
     const resolved = resolveAlias(ext, srcDir, cwd);
-    for (const cfg of _syncGlob({ cwd: resolved, patterns: config })) {
-      inputs.push(toConfig('nuxt', join(resolved, cfg)));
-    }
+    const configs = _syncGlob({ cwd: resolved, patterns: config });
+    if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', join(resolved, cfg)));
+    else inputs.push(toDependency(ext));
   }
 
   for (const layerConfig of findLayerConfigs(cwd)) {

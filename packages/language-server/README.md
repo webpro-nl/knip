@@ -84,7 +84,7 @@ Example:
 
 ### Imports
 
-The file desciptor can be used to display an overview of imports of a document
+The file descriptor can be used to display an overview of imports of a document
 with direct links to their definition location.
 
 Optionally, the client can implement:
@@ -99,7 +99,7 @@ Example:
 
 ### Exports
 
-The file desciptor can be used to display an overview of exports of a document
+The file descriptor can be used to display an overview of exports of a document
 with direct links to their usage locations.
 
 Optionally, the client can implement:

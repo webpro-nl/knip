@@ -30,7 +30,7 @@ Example:
 export const myUnusedExport = 1;
 
 /** @lintignore */
-import Unresolved from "./generated/lib.js";
+import Unresolved from './generated/lib.js';
 ```
 
 And then include (`+`) or exclude (`-`) these tagged exports from the report

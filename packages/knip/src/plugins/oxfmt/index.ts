@@ -9,7 +9,7 @@ const enablers = ['oxfmt'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.oxfmtrc.json', '.oxfmtrc.jsonc'];
+const config = ['.oxfmtrc.json', '.oxfmtrc.jsonc', 'oxfmt.config.ts'];
 
 const args = {
   config: true,

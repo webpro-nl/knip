@@ -1,0 +1,13 @@
+diff --git a/knip.json b/knip.json
+--- a/knip.json
++++ b/knip.json
+@@ -11,7 +11,8 @@
+         "src/graphql/definitions/*.ts",
+         "scripts/*.ts"
+       ],
+-      "ignore": ["**/bin/**/*"]
++      "ignore": ["**/bin/**/*"],
++      "ignoreDependencies": ["@argos/knex-scripts", "moment"]
+     },
+     "apps/frontend": {
+       "ignore": ["vite.config.mts"],

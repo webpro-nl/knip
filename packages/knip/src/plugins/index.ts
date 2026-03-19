@@ -85,6 +85,7 @@ import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
 import { default as qwik } from './qwik/index.ts';
+import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
 import { default as reactNative } from './react-native/index.ts';
 import { default as reactRouter } from './react-router/index.ts';
@@ -97,6 +98,7 @@ import { default as rsbuild } from './rsbuild/index.ts';
 import { default as rslib } from './rslib/index.ts';
 import { default as rspack } from './rspack/index.ts';
 import { default as rstest } from './rstest/index.ts';
+import { default as sanity } from './sanity/index.ts';
 import { default as semanticRelease } from './semantic-release/index.ts';
 import { default as sentry } from './sentry/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
@@ -226,6 +228,7 @@ export const Plugins = {
   prettier,
   prisma,
   qwik,
+  raycast,
   'react-cosmos': reactCosmos,
   'react-native': reactNative,
   'react-router': reactRouter,
@@ -238,6 +241,7 @@ export const Plugins = {
   rslib,
   rspack,
   rstest,
+  sanity,
   'semantic-release': semanticRelease,
   sentry,
   'simple-git-hooks': simpleGitHooks,

@@ -323,12 +323,13 @@ export class DependencyDeputy {
         dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
-      for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
+      const manifest = this._manifests.get(workspace)!;
+
+      for (const symbol of this.getDevDependencies(workspace)) {
+        if (!manifest.dependencies.includes(symbol) && !isNotReferencedDependency(symbol)) continue;
         const position = peeker.getLocation('devDependencies', symbol);
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
-
-      const manifest = this._manifests.get(workspace)!;
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
         if (!isReferencedDependency(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
@@ -355,6 +356,11 @@ export class DependencyDeputy {
         const packageName = getPackageNameFromModuleSpecifier(issue.symbol);
         if (!packageName) continue;
         if (IGNORED_DEPENDENCIES.has(packageName)) {
+          // Don't ignore a devDependency that duplicates a production dependency
+          if (type === 'devDependencies') {
+            const manifest = this.getWorkspaceManifest(issue.workspace);
+            if (manifest?.dependencies.includes(packageName)) continue;
+          }
           delete issueSet[issueKey];
           counters[type]--;
         } else {

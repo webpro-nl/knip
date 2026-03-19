@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
@@ -25,6 +27,17 @@ import {
 import { issueToDiagnostic } from './diagnostics.js';
 
 const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
+
+/** @param {string} resolvedPath */
+function readKnipVersion(resolvedPath) {
+  try {
+    for (let dir = path.dirname(resolvedPath); dir !== path.dirname(dir); dir = path.dirname(dir)) {
+      const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));
+      if (pkg.name === 'knip') return ` v${pkg.version}`;
+    }
+  } catch {}
+  return '';
+}
 
 /** @type {Config} */
 const DEFAULT_CONFIG = {
@@ -213,11 +226,29 @@ export class LanguageServer {
     this.published = new Set(newDiags.keys());
   }
 
+  async #resolveKnipSession() {
+    const config = await this.getConfig();
+    if (config?.useLocalVersion && this.cwd) {
+      try {
+        const localRequire = createRequire(path.join(this.cwd, 'package.json'));
+        const resolved = localRequire.resolve('knip/session');
+        const local = await import(pathToFileURL(resolved).href);
+        this.connection.console.log(`Using local knip${readKnipVersion(resolved)}`);
+        return local;
+      } catch (error) {
+        this.connection.console.warn(`Local knip not found, using bundled version (${error})`);
+      }
+    }
+    this.connection.console.log(`Using bundled knip${readKnipVersion(fileURLToPath(import.meta.resolve('knip/session')))}`);
+    return { createOptions, createSession };
+  }
+
   async start() {
     if (this.session) return;
 
     try {
       const config = await this.getConfig();
+      const knip = await this.#resolveKnipSession();
 
       const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
@@ -226,12 +257,12 @@ export class LanguageServer {
         : undefined;
 
       this.connection.console.log('Creating options');
-      const options = await createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
+      const options = await knip.createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
       this.rules = options.rules;
 
       this.connection.console.log('Building module graph...');
       const start = Date.now();
-      const session = await createSession(options);
+      const session = await knip.createSession(options);
       this.connection.console.log(`Finished building module graph (${Date.now() - start}ms)`);
 
       this.session = session;
