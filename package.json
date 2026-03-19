@@ -38,6 +38,11 @@
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.1.1"
   },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid",
+    "trailingComma": "es5"
+  },
   "remarkConfig": {
     "plugins": [
       "preset-webpro"

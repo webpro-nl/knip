@@ -21,8 +21,7 @@ just for you!
 - 2023-03-22: [Knip v2][5] saw a full rewrite of the TypeScript backend.
 - 2023-10-15: [Introduction of Knip v3][6].
 
-[1]:
-  https://github.com/webpro-nl/knip/commit/9589dfe22608da7d89f2613383da6db5826226d2
+[1]: https://github.com/webpro-nl/knip/commit/9589dfe22608da7d89f2613383da6db5826226d2
 [2]: https://github.com/webpro-nl/knip/tree/0.1.2
 [3]: https://github.com/webpro-nl/knip/releases/tag/1.0.0-alpha.0
 [4]: https://github.com/webpro-nl/knip/tree/1.0.0

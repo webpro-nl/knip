@@ -385,8 +385,7 @@ plugin, this might be the right time to open a pull request!
 [1]: #create-a-new-plugin
 [2]: ../reference/plugins.md
 [3]: ../explanations/plugins.md#entry-files-from-config-files
-[4]:
-  https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
+[4]: https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
 [5]: ./inputs.md
 [6]: ../features/script-parser.md
 [7]: ./argument-parsing.md
