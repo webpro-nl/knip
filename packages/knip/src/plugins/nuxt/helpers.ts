@@ -110,19 +110,18 @@ export function buildAutoImportMap(filePath: string, result: ParseResult) {
         importMap.set(name, absSpecifier);
       }
     },
+    ExportNamedDeclaration(node) {
+      if (!node.source) return;
+      const specifier = node.source.value;
+      if (!isLocalSpecifier(specifier)) return;
+      const absSpecifier = join(dir, specifier);
+      for (const s of node.specifiers) {
+        const name = s.exported.type === 'Identifier' ? s.exported.name : s.exported.value;
+        if (name) importMap.set(name, absSpecifier);
+      }
+    },
   });
   matchVisitor.visit(result.program);
-
-  for (const se of result.module.staticExports) {
-    for (const entry of se.entries) {
-      if (!entry.moduleRequest) continue;
-      const specifier = entry.moduleRequest.value;
-      if (!isLocalSpecifier(specifier)) continue;
-      if (entry.exportName.kind === 'Name' && entry.exportName.name) {
-        importMap.set(entry.exportName.name, join(dir, specifier));
-      }
-    }
-  }
 
   return { importMap, componentMap };
 }

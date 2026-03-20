@@ -7,6 +7,7 @@ export interface NuxtConfig {
     layouts?: string;
     middleware?: string;
     plugins?: string;
+    shared?: string;
   };
   modules?: Array<string | ((inlineOptions: any, nuxt: any) => any) | [string, Record<string, any>]>;
   imports?: {

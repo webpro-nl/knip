@@ -5,4 +5,7 @@ export default defineNuxtConfig({
     plugins: 'my-plugins',
   },
   components: ['~/components', '~/other-components'],
+  imports: {
+    dirs: ['custom-utils'],
+  },
 });

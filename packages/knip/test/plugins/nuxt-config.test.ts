@@ -13,7 +13,7 @@ test('Find dependencies with the nuxt plugin (config options)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });
