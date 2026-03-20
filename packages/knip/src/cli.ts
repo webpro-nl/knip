@@ -100,10 +100,6 @@ const main = async () => {
       perfObserver.reset();
     }
 
-    if (args['experimental-tags'] && args['experimental-tags'].length > 0) {
-      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
-    }
-
     if (
       (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
       (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)

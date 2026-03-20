@@ -55,9 +55,9 @@ them to ensure no unintended modifications were made.
 
 ## Can Knip handle large codebases?
 
-Absolutely. Knip supports [monorepos with workspaces][5] and utilizes [workspace
-sharing][6] to efficiently analyze large monorepos. This makes it easier and
-more fun to manage and optimize large multi-package projects.
+Absolutely. Knip supports [monorepos with workspaces][5] to efficiently analyze
+large monorepos. This makes it easier and more fun to manage and optimize large
+multi-package projects.
 
 ## Does Knip work with my favorite editor or IDE?
 
@@ -70,18 +70,17 @@ to easily navigate around.
 
 While linters like ESLint can find unused imports and variables within
 individual files, Knip analyzes the entire project to determine which exports
-are actually unused. By building [a comprehensive module graph][7], Knip
+are actually unused. By building [a comprehensive module graph][6], Knip
 identifies exports that are not imported or used anywhere in the codebase. This
 allows Knip to catch unused exports and dead code that ESLint and other linters
 would miss.
 
-Also see [Why isn't Knip an ESLint plugin?][8]
+Also see [Why isn't Knip an ESLint plugin?][7]
 
 [1]: ../overview/getting-started.mdx
 [2]: ../reference/faq.md#what-does-knip-look-for-in-source-files
 [3]: ../guides/working-with-commonjs.md
 [4]: ../features/auto-fix.mdx
 [5]: ../features/monorepos-and-workspaces.md
-[6]: ../guides/performance.md#workspace-sharing
-[7]: ../reference/faq.md#whats-in-the-graphs
-[8]: ../reference/faq.md#why-isnt-knip-an-eslint-plugin
+[6]: ../reference/faq.md#whats-in-the-graphs
+[7]: ../reference/faq.md#why-isnt-knip-an-eslint-plugin

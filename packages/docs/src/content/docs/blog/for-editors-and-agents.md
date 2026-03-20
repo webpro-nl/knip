@@ -2,7 +2,7 @@
 title: Knip for Editors & Agents
 date: 2025-12-17
 sidebar:
-  order: 1
+  order: 2
 ---
 
 _Published: 2025-12-17_

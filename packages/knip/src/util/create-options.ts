@@ -120,7 +120,7 @@ export const createOptions = async (options: CreateOptions) => {
 
   const fixTypes = options.fixTypes ?? args['fix-type'] ?? [];
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
-  const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? args['experimental-tags'] ?? []);
+  const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? []);
 
   const workspace = options.workspace ?? args.workspace;
 
