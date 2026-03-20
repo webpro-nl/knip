@@ -30,12 +30,12 @@ const RESTART_FOR = new Set(['package.json', ...KNIP_CONFIG_LOCATIONS]);
 
 /** @param {string} resolvedPath */
 function readKnipVersion(resolvedPath) {
-  try {
-    for (let dir = path.dirname(resolvedPath); dir !== path.dirname(dir); dir = path.dirname(dir)) {
+  for (let dir = path.dirname(resolvedPath); dir !== path.dirname(dir); dir = path.dirname(dir)) {
+    try {
       const pkg = JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8'));
       if (pkg.name === 'knip') return ` v${pkg.version}`;
-    }
-  } catch {}
+    } catch {}
+  }
   return '';
 }
 
@@ -226,25 +226,17 @@ export class LanguageServer {
     this.published = new Set(newDiags.keys());
   }
 
-  /** @param {Config} config */
-  async #resolveKnipSession(config) {
-    if (config?.useLocalVersion && this.cwd) {
+  async #resolveKnipSession() {
+    if (this.cwd) {
       try {
         const localRequire = createRequire(path.join(this.cwd, 'package.json'));
         const resolved = localRequire.resolve('knip/session');
         const local = await import(pathToFileURL(resolved).href);
         this.connection.console.log(`Using local knip${readKnipVersion(resolved)}`);
         return local;
-      } catch (error) {
-        this.connection.console.warn(`Local knip not found, using bundled version (${error})`);
-      }
+      } catch {}
     }
-    try {
-      const bundledRequire = createRequire(__filename);
-      this.connection.console.log(`Using bundled knip${readKnipVersion(bundledRequire.resolve('knip/session'))}`);
-    } catch {
-      this.connection.console.log('Using bundled knip');
-    }
+    this.connection.console.log(`Using bundled knip${readKnipVersion(createRequire(__filename).resolve('knip/session'))}`);
     return { createOptions, createSession };
   }
 
@@ -253,7 +245,7 @@ export class LanguageServer {
 
     try {
       const config = await this.getConfig();
-      const knip = await this.#resolveKnipSession(config);
+      const knip = await this.#resolveKnipSession();
 
       const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
