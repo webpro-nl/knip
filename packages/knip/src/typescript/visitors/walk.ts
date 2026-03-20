@@ -142,9 +142,8 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
     }
     return;
   }
-  if (signatureOnly) {
-    if (node.type === 'FunctionBody' || node.type === 'BlockStatement') return;
-  } else if (node.type === 'TSTypeReference' && node.typeName.type === 'Identifier') {
+  if (signatureOnly && (node.type === 'FunctionBody' || node.type === 'BlockStatement')) return;
+  if (node.type === 'TSTypeReference' && node.typeName.type === 'Identifier') {
     const name = node.typeName.name;
     const refs = state.referencedInExport.get(name);
     if (refs) refs.add(exportName);

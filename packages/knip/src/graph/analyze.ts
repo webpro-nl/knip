@@ -43,15 +43,27 @@ export const analyze = async ({
 
   const explorer = createGraphExplorer(graph, entryPaths);
 
-  const isReferencedInUsedExport = (exportedItem: Export, filePath: string, includeEntryExports: boolean) => {
+  const isReferencedInUsedExport = (
+    exportedItem: Export,
+    filePath: string,
+    includeEntryExports: boolean,
+    visited?: Set<string>
+  ) => {
     if (!exportedItem.referencedIn) return false;
     const file = graph.get(filePath);
     if (!file) return false;
     for (const containingExport of exportedItem.referencedIn) {
       if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
       const inExport = file.exports.get(containingExport);
-      if (!inExport) return false;
+      if (!inExport) continue;
       if (inExport.hasRefsInFile && (inExport.type === 'type' || inExport.type === 'interface')) return true;
+      if (inExport.referencedIn) {
+        const v = visited ?? new Set();
+        if (!v.has(containingExport)) {
+          v.add(containingExport);
+          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, v)) return true;
+        }
+      }
     }
     return false;
   };
