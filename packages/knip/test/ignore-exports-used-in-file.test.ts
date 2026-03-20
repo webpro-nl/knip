@@ -26,8 +26,8 @@ test('Find unused exports respecting ignoreExportsUsedInFile: true', async () =>
     exports: 4,
     nsExports: 0,
     nsTypes: 0,
-    processed: 9,
-    total: 9,
+    processed: 10,
+    total: 10,
     types: 1,
   });
 });

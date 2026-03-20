@@ -147,6 +147,7 @@ const visitor = new Visitor({
   },
   MemberExpression(node) {
     if (node.object?.type === 'Identifier') add(node.object.name);
+    if (node.computed && node.property?.type === 'Identifier') add(node.property.name);
   },
   TaggedTemplateExpression(node) {
     if (node.tag?.type === 'Identifier') add(node.tag.name);

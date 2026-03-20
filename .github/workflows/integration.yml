@@ -163,6 +163,7 @@ jobs:
               pnpm install
               pnpm add -D $PKG_URL
               pnpm run knip
+              pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
