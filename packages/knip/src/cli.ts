@@ -12,7 +12,7 @@ import {
   isLoaderError,
   isModuleNotFoundError,
 } from './util/errors.ts';
-import { logError, logWarning } from './util/log.ts';
+import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
 import { runPreprocessors, runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';

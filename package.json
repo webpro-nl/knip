@@ -39,8 +39,8 @@
     "remark-preset-webpro": "^2.1.1"
   },
   "prettier": {
-    "singleQuote": true,
     "arrowParens": "avoid",
+    "singleQuote": true,
     "trailingComma": "es5"
   },
   "remarkConfig": {

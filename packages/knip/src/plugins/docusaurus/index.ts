@@ -23,7 +23,8 @@ const resolveStaticAssets = (items: DocusaurusConfig['scripts'] | DocusaurusConf
   const entries: Input[] = [];
   for (const item of items ?? []) {
     const value = typeof item === 'string' ? item : (item.src ?? item.href);
-    if (typeof value === 'string' && !value.includes('://')) entries.push(toProductionEntry(join(cwd, 'static', value)));
+    if (typeof value === 'string' && !value.includes('://'))
+      entries.push(toProductionEntry(join(cwd, 'static', value)));
   }
   return entries;
 };

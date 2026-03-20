@@ -236,7 +236,9 @@ export class LanguageServer {
         return local;
       } catch {}
     }
-    this.connection.console.log(`Using bundled knip${readKnipVersion(createRequire(__filename).resolve('knip/session'))}`);
+    this.connection.console.log(
+      `Using bundled knip${readKnipVersion(createRequire(__filename).resolve('knip/session'))}`
+    );
     return { createOptions, createSession };
   }
 
