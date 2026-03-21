@@ -85,6 +85,7 @@ JavaScript and TypeScript projects.
 - Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - If creating or modifying a plugin, read [PLUGINS.md][3] first.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE_GRAPH.md][4] first.
+- For issues re. exported identifiers (following refs, shadowing, `ignoreExportsUsedInFile`), see [EXPORTS.md][5].
 
 ## Environment
 
@@ -102,8 +103,8 @@ or `bun (path/to/)src/cli.ts` and keep using what works.
 - Run `knip` directly in a fixture or temp directory (over creating test scripts
   that import the `main` function).
 - Knip requires `package.json` in root dir.
-- Enable [debug & helpers][5] with `--debug` (not `DEBUG=`). Warning: noisy.
-- Use [trace][6] to debug
+- Enable [debug & helpers][6] with `--debug` (not `DEBUG=`). Warning: noisy.
+- Use [trace][7] to debug
   - exported identifiers (`knip --trace-export [name] --trace-file [file]`)
   - external dependencies (`knip --trace-dependency [name] --workspace [dir]`)
 
@@ -174,5 +175,6 @@ pnpm build
 [2]: ./packages/knip/src/util/Performance.ts
 [3]: ./.agents/PLUGINS.md
 [4]: ./.agents/MODULE_GRAPH.md
-[5]: ./packages/knip/src/util/debug.ts
-[6]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[5]: ./.agents/EXPORTS.md
+[6]: ./packages/knip/src/util/debug.ts
+[7]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
