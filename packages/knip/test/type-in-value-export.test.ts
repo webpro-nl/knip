@@ -12,12 +12,12 @@ test('Find unused types in value exports', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.types['src/api.ts']['GetPointsResponse']);
-  assert(!issues.types['src/api.ts']['GetPoints']);
-  assert(!issues.types['src/api.ts']['GetPointsParams']);
+  assert(issues.types['src/api.ts']['GetPoints']);
+  assert(issues.types['src/api.ts']['GetPointsParams']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    types: 1,
+    types: 3,
     processed: 2,
     total: 2,
   });

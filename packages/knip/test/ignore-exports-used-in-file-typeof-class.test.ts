@@ -12,15 +12,15 @@ test('Ignore exports used in file for typeof function and class references', asy
   const { issues, counters } = await main(options);
 
   assert(issues.exports['src/api.ts']['TreeLeaf']);
+  assert(issues.exports['src/api.ts']['TreeNode']);
+  assert(issues.exports['src/api.ts']['logger']);
 
-  assert(!issues.exports['src/api.ts']?.['TreeNode']);
-  assert(!issues.exports['src/api.ts']?.['logger']);
   assert(!issues.exports['src/api.ts']?.['Leaf']);
   assert(!issues.exports['src/api.ts']?.['Node']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 3,
     processed: 2,
     total: 2,
   });

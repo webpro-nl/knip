@@ -86,6 +86,7 @@ export interface WalkState extends WalkContext {
   getFix: (start: number, end: number, flags?: number) => Fix;
   getTypeFix: (start: number, end: number) => Fix;
   collectRefsInType: (node: any, exportName: string, signatureOnly: boolean) => void;
+  addRefInExport: (name: string, exportName: string) => void;
   isInNamespace: (node: Span) => boolean;
 }
 
@@ -165,6 +166,12 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
       _collectRefsInType(val, exportName, signatureOnly);
     }
   }
+};
+
+const _addRefInExport = (name: string, exportName: string) => {
+  const refs = state.referencedInExport.get(name);
+  if (refs) refs.add(exportName);
+  else state.referencedInExport.set(name, new Set([exportName]));
 };
 
 const _isInNamespace = (node: Span) =>
@@ -621,6 +628,7 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     getFix: _getFix,
     getTypeFix: _getTypeFix,
     collectRefsInType: _collectRefsInType,
+    addRefInExport: _addRefInExport,
     isInNamespace: _isInNamespace,
   };
 

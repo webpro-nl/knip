@@ -161,7 +161,6 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
     } else if ((decl.type === 'FunctionDeclaration' || decl.type === 'TSDeclareFunction') && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.FUNCTION, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
-      s.collectRefsInType(decl, decl.id.name, true);
     } else if (decl.type === 'ClassDeclaration' && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.CLASS, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
@@ -173,6 +172,9 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
       const fix = s.getTypeFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.INTERFACE, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
       s.collectRefsInType(decl.body, decl.id.name, false);
+      for (const ext of decl.extends ?? []) {
+        if (ext.expression?.type === 'Identifier') s.addRefInExport(ext.expression.name, decl.id.name);
+      }
     } else if (decl.type === 'TSEnumDeclaration') {
       const members = extractEnumMembers(decl, s.options, s.lineStarts, s.getJSDocTags);
       const fix = s.getTypeFix(exportStart, exportStart + 7);
@@ -243,7 +245,6 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   if (decl.type === 'FunctionDeclaration') {
     type = SYMBOL_TYPE.FUNCTION;
     pos = decl.id?.start ?? decl.start;
-    s.collectRefsInType(decl, 'default', false);
   } else if (decl.type === 'ClassDeclaration') {
     type = SYMBOL_TYPE.CLASS;
     pos = decl.id?.start ?? decl.start;
