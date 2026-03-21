@@ -48,6 +48,7 @@ interface WalkContext {
   importAliases: Map<string, Set<{ id: string; filePath: string }>>;
   referencedInExport: Map<string, Set<string>>;
   skipBareExprRefs: boolean;
+  localRefs: Set<string> | undefined;
   destructuredExports: Set<string>;
   hasNodeModuleImport: boolean;
   resolveModule: ResolveModule;
@@ -69,6 +70,10 @@ export interface WalkState extends WalkContext {
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
   nsRanges: [number, number][];
+  scopeDepth: number;
+  scopeStarts: number[];
+  scopeEnds: number[];
+  shadowScopes: Map<string, [number, number][]>;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -165,7 +170,38 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
 const _isInNamespace = (node: Span) =>
   state.nsRanges.length > 0 && state.nsRanges.some(([start, end]) => node.start >= start && node.end <= end);
 
+export const isShadowed = (name: string, pos: number): boolean => {
+  if (state.shadowScopes.size === 0) return false;
+  const ranges = state.shadowScopes.get(name);
+  if (!ranges) return false;
+  if (state.localImportMap.get(name)?.isDynamicImport) return false;
+  for (const range of ranges) {
+    if (pos >= range[0] && pos <= range[1]) return true;
+  }
+  return false;
+};
+
+const _addLocalRef = (name: string, pos: number) => {
+  if (!state.localImportMap.has(name) && !isShadowed(name, pos)) state.localRefs!.add(name);
+};
+
+const _addShadow = (name: string) => {
+  const i = state.scopeDepth - 1;
+  const range: [number, number] = [state.scopeStarts[i], state.scopeEnds[i]];
+  const ranges = state.shadowScopes.get(name);
+  if (ranges) ranges.push(range);
+  else state.shadowScopes.set(name, [range]);
+};
+
 const coreVisitorObject: VisitorObject = {
+  BlockStatement(node) {
+    state.scopeStarts[state.scopeDepth] = node.start;
+    state.scopeEnds[state.scopeDepth] = node.end;
+    state.scopeDepth++;
+  },
+  'BlockStatement:exit'() {
+    state.scopeDepth--;
+  },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
   },
@@ -173,12 +209,24 @@ const coreVisitorObject: VisitorObject = {
     if (node.id?.name) state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
   },
   FunctionDeclaration(node) {
-    if (node.id?.name) state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
+    if (node.id?.name) {
+      state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
+      if (state.scopeDepth > 0) _addShadow(node.id.name);
+    }
   },
   VariableDeclaration(node) {
     state.currentVarDeclStart = node.start;
-    for (const decl of node.declarations) {
-      if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+    if (state.scopeDepth > 0) {
+      for (const decl of node.declarations) {
+        if (decl.id.type === 'Identifier') {
+          state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+          _addShadow(decl.id.name);
+        }
+      }
+    } else {
+      for (const decl of node.declarations) {
+        if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+      }
     }
   },
   TSEnumDeclaration(node) {
@@ -215,7 +263,7 @@ const coreVisitorObject: VisitorObject = {
     handleJSXMemberExpression(node, state);
   },
   ForInStatement(node) {
-    if (node.right.type === 'Identifier') {
+    if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
         const internalImport = state.internal.get(_import.filePath);
@@ -224,7 +272,7 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   ForOfStatement(node) {
-    if (node.right.type === 'Identifier') {
+    if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
         const internalImport = state.internal.get(_import.filePath);
@@ -239,7 +287,7 @@ const coreVisitorObject: VisitorObject = {
       if (left.right.type === 'Identifier') parts.unshift(left.right.name);
       left = left.left;
     }
-    if (left.type === 'Identifier') {
+    if (left.type === 'Identifier' && !isShadowed(left.name, left.start)) {
       const rootName = left.name;
       const _import = state.localImportMap.get(rootName);
       if (_import) {
@@ -272,20 +320,24 @@ const coreVisitorObject: VisitorObject = {
   TSTypeReference(node) {
     if (node.typeName.type === 'Identifier') {
       const name = node.typeName.name;
-      const _import = state.localImportMap.get(name);
-      if (_import) {
-        const internalImport = state.internal.get(_import.filePath);
-        if (internalImport) internalImport.refs.add(name);
+      if (!isShadowed(name, node.typeName.start)) {
+        const _import = state.localImportMap.get(name);
+        if (_import) {
+          const internalImport = state.internal.get(_import.filePath);
+          if (internalImport) internalImport.refs.add(name);
+        }
       }
     }
   },
   TSTypeQuery(node) {
     if (node.exprName.type === 'Identifier') {
       const name = node.exprName.name;
-      const _import = state.localImportMap.get(name);
-      if (_import) {
-        const internalImport = state.internal.get(_import.filePath);
-        if (internalImport) internalImport.refs.add(name);
+      if (!isShadowed(name, node.exprName.start)) {
+        const _import = state.localImportMap.get(name);
+        if (_import) {
+          const internalImport = state.internal.get(_import.filePath);
+          if (internalImport) internalImport.refs.add(name);
+        }
       }
     }
   },
@@ -330,8 +382,185 @@ const coreVisitorObject: VisitorObject = {
   },
 };
 
-export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[]): Visitor {
-  if (pluginVisitorObjects.length === 0) return new Visitor(coreVisitorObject);
+const localRefsVisitorObject: VisitorObject = {
+  ClassDeclaration(node) {
+    if (node.superClass?.type === 'Identifier') _addLocalRef(node.superClass.name, node.superClass.start);
+    for (const impl of node.implements ?? []) {
+      if (impl.expression?.type === 'Identifier') _addLocalRef(impl.expression.name, impl.expression.start);
+    }
+  },
+  TSInterfaceDeclaration(node) {
+    for (const ext of node.extends ?? []) {
+      if (ext.expression?.type === 'Identifier') _addLocalRef(ext.expression.name, ext.expression.start);
+    }
+  },
+  Property(node) {
+    if (node.value?.type === 'Identifier') _addLocalRef(node.value.name, node.value.start);
+  },
+  ReturnStatement(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  AssignmentExpression(node) {
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  SpreadElement(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  ConditionalExpression(node) {
+    if (node.test?.type === 'Identifier') _addLocalRef(node.test.name, node.test.start);
+    if (node.consequent?.type === 'Identifier') _addLocalRef(node.consequent.name, node.consequent.start);
+    if (node.alternate?.type === 'Identifier') _addLocalRef(node.alternate.name, node.alternate.start);
+  },
+  ArrayExpression(node) {
+    for (const el of node.elements ?? []) {
+      if (el?.type === 'Identifier') _addLocalRef(el.name, el.start);
+    }
+  },
+  TemplateLiteral(node) {
+    for (const expr of node.expressions ?? []) {
+      if (expr.type === 'Identifier') _addLocalRef(expr.name, expr.start);
+    }
+  },
+  BinaryExpression(node) {
+    if (node.left?.type === 'Identifier') _addLocalRef(node.left.name, node.left.start);
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  LogicalExpression(node) {
+    if (node.left?.type === 'Identifier') _addLocalRef(node.left.name, node.left.start);
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  UnaryExpression(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  SwitchStatement(node) {
+    if (node.discriminant?.type === 'Identifier') _addLocalRef(node.discriminant.name, node.discriminant.start);
+    for (const c of node.cases ?? []) {
+      if (c.test?.type === 'Identifier') _addLocalRef(c.test.name, c.test.start);
+    }
+  },
+  IfStatement(node) {
+    if (node.test?.type === 'Identifier') _addLocalRef(node.test.name, node.test.start);
+  },
+  ThrowStatement(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  WhileStatement(node) {
+    if (node.test?.type === 'Identifier') _addLocalRef(node.test.name, node.test.start);
+  },
+  DoWhileStatement(node) {
+    if (node.test?.type === 'Identifier') _addLocalRef(node.test.name, node.test.start);
+  },
+  YieldExpression(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  AwaitExpression(node) {
+    if (node.argument?.type === 'Identifier') _addLocalRef(node.argument.name, node.argument.start);
+  },
+  ArrowFunctionExpression(node) {
+    if (node.body?.type === 'Identifier') _addLocalRef(node.body.name, node.body.start);
+  },
+  AssignmentPattern(node) {
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  SequenceExpression(node) {
+    for (const expr of node.expressions ?? []) {
+      if (expr.type === 'Identifier') _addLocalRef(expr.name, expr.start);
+    }
+  },
+  TSAsExpression(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  TSSatisfiesExpression(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  TSNonNullExpression(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  TSTypeAssertion(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  ParenthesizedExpression(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  PropertyDefinition(node) {
+    if (node.value?.type === 'Identifier') _addLocalRef(node.value.name, node.value.start);
+  },
+  ForInStatement(node) {
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  ForOfStatement(node) {
+    if (node.right?.type === 'Identifier') _addLocalRef(node.right.name, node.right.start);
+  },
+  JSXOpeningElement(node) {
+    if (node.name?.type === 'JSXIdentifier') _addLocalRef(node.name.name, node.name.start);
+    for (const attr of node.attributes ?? []) {
+      if (attr.type === 'JSXSpreadAttribute' && attr.argument?.type === 'Identifier')
+        _addLocalRef(attr.argument.name, attr.argument.start);
+    }
+  },
+  JSXExpressionContainer(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  VariableDeclarator(node) {
+    if (node.init?.type === 'Identifier') _addLocalRef(node.init.name, node.init.start);
+  },
+  ExpressionStatement(node) {
+    if (node.expression?.type === 'Identifier') _addLocalRef(node.expression.name, node.expression.start);
+  },
+  CallExpression(node) {
+    if (node.callee?.type === 'Identifier') _addLocalRef(node.callee.name, node.callee.start);
+    for (const arg of node.arguments ?? []) {
+      if (arg.type === 'Identifier') _addLocalRef(arg.name, arg.start);
+    }
+  },
+  NewExpression(node) {
+    if (node.callee?.type === 'Identifier') _addLocalRef(node.callee.name, node.callee.start);
+    for (const arg of node.arguments ?? []) {
+      if (arg.type === 'Identifier') _addLocalRef(arg.name, arg.start);
+    }
+  },
+  MemberExpression(node) {
+    if (node.object?.type === 'Identifier') _addLocalRef(node.object.name, node.object.start);
+    if (node.computed && node.property?.type === 'Identifier') _addLocalRef(node.property.name, node.property.start);
+  },
+  TaggedTemplateExpression(node) {
+    if (node.tag?.type === 'Identifier') _addLocalRef(node.tag.name, node.tag.start);
+  },
+  TSQualifiedName(node) {
+    let left: TSTypeName = node;
+    const parts: string[] = [];
+    while (left.type === 'TSQualifiedName') {
+      if (left.right.type === 'Identifier') parts.unshift(left.right.name);
+      left = left.left;
+    }
+    if (left.type === 'Identifier') {
+      const rootName = left.name;
+      if (!state.localImportMap.has(rootName) && !isShadowed(rootName, left.start) && parts.length > 0) {
+        const exp = state.exports.get(rootName);
+        if (exp) {
+          state.localRefs!.add(rootName);
+          for (const member of exp.members) {
+            if (member.identifier === parts[0]) member.hasRefsInFile = true;
+          }
+        }
+      }
+    }
+  },
+  TSTypeReference(node) {
+    if (node.typeName?.type === 'Identifier') {
+      const name = node.typeName.name;
+      if (!state.localImportMap.has(name)) _addLocalRef(name, node.typeName.start);
+    }
+  },
+  TSTypeQuery(node) {
+    if (node.exprName?.type === 'Identifier') {
+      const name = node.exprName.name;
+      if (!state.localImportMap.has(name)) _addLocalRef(name, node.exprName.start);
+    }
+  },
+};
+
+export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[], includeLocalRefs?: boolean): Visitor {
   type HandlerFn = (node: never) => void;
   type HandlerMap = Record<string, HandlerFn | undefined>;
   const handlerLists = new Map<string, HandlerFn[]>();
@@ -340,16 +569,19 @@ export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[]): Visit
     const fn = coreHandlers[key];
     if (fn) handlerLists.set(key, [fn]);
   }
-  for (const obj of pluginVisitorObjects) {
-    const handlers = obj as HandlerMap;
-    for (const key in handlers) {
-      const fn = handlers[key];
+  const extras = includeLocalRefs
+    ? [localRefsVisitorObject as HandlerMap, ...(pluginVisitorObjects as HandlerMap[])]
+    : (pluginVisitorObjects as HandlerMap[]);
+  for (const obj of extras) {
+    for (const key in obj) {
+      const fn = obj[key];
       if (!fn) continue;
       const list = handlerLists.get(key);
       if (list) list.push(fn);
       else handlerLists.set(key, [fn]);
     }
   }
+  if (extras.length === 0) return new Visitor(coreVisitorObject);
   const merged: HandlerMap = {};
   for (const [key, list] of handlerLists) {
     if (list.length === 1) {
@@ -381,6 +613,10 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     chainedMemberExprs: new WeakSet(),
     currentVarDeclStart: -1,
     nsRanges: [],
+    scopeDepth: 0,
+    scopeStarts: [],
+    scopeEnds: [],
+    shadowScopes: new Map(),
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,
@@ -425,5 +661,7 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     }
   }
 
+  const localRefs = state.localRefs;
   state = undefined!;
+  return localRefs;
 }

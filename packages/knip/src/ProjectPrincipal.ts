@@ -276,7 +276,7 @@ export class ProjectPrincipal {
       }
     }
 
-    if (!this._visitor) this._visitor = buildVisitor(this.pluginVisitorObjects);
+    if (!this._visitor) this._visitor = buildVisitor(this.pluginVisitorObjects, !!ignoreExportsUsedInFile);
 
     return _getImportsAndExports(
       filePath,

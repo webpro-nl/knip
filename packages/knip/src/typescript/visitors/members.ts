@@ -2,7 +2,7 @@ import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
 import { OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { getStringValue, isStringLiteral } from './helpers.ts';
-import type { WalkState } from './walk.ts';
+import { isShadowed, type WalkState } from './walk.ts';
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
   if (node.object.type === 'MemberExpression' && node.object.object.type === 'MemberExpression') {
@@ -11,7 +11,8 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
 
   if (node.object.type === 'Identifier') {
     const localName = node.object.name;
-    const _import = s.localImportMap.get(localName);
+    const shadowed = isShadowed(localName, node.object.start);
+    const _import = !shadowed ? s.localImportMap.get(localName) : undefined;
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
       if (internalImport) {
@@ -32,7 +33,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
           }
         }
       }
-    } else {
+    } else if (!shadowed) {
       const memberName =
         node.computed === false && node.property.type === 'Identifier' ? node.property.name : undefined;
       if (memberName) {
@@ -74,31 +75,33 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
-    const _import = s.localImportMap.get(rootName);
-    if (_import) {
-      const internalImport = s.internal.get(_import.filePath);
-      if (internalImport) {
-        const mid = node.object.property.name;
-        s.addNsMemberRefs(internalImport, rootName, mid);
-        if (!s.chainedMemberExprs.has(node)) {
-          s.addNsMemberRefs(internalImport, rootName, `${mid}.${node.property.name}`);
+    if (!isShadowed(rootName, node.object.object.start)) {
+      const _import = s.localImportMap.get(rootName);
+      if (_import) {
+        const internalImport = s.internal.get(_import.filePath);
+        if (internalImport) {
+          const mid = node.object.property.name;
+          s.addNsMemberRefs(internalImport, rootName, mid);
+          if (!s.chainedMemberExprs.has(node)) {
+            s.addNsMemberRefs(internalImport, rootName, `${mid}.${node.property.name}`);
+          }
         }
-      }
-      if (!_import.isNamespace) {
-        const mid = node.object.property.name;
-        const _import = s.localImportMap.get(mid);
-        if (_import) {
-          const midImport = s.internal.get(_import.filePath);
-          if (midImport) s.addNsMemberRefs(midImport, mid, node.property.name);
+        if (!_import.isNamespace) {
+          const mid = node.object.property.name;
+          const _import = s.localImportMap.get(mid);
+          if (_import) {
+            const midImport = s.internal.get(_import.filePath);
+            if (midImport) s.addNsMemberRefs(midImport, mid, node.property.name);
+          }
         }
-      }
-    } else {
-      const exp = s.exports.get(rootName);
-      if (exp && exp.members.length > 0) {
-        const mid = node.object.property.name;
-        const dottedName = `${mid}.${node.property.name}`;
-        for (const member of exp.members) {
-          if (member.identifier === mid || member.identifier === dottedName) member.hasRefsInFile = true;
+      } else {
+        const exp = s.exports.get(rootName);
+        if (exp && exp.members.length > 0) {
+          const mid = node.object.property.name;
+          const dottedName = `${mid}.${node.property.name}`;
+          for (const member of exp.members) {
+            if (member.identifier === mid || member.identifier === dottedName) member.hasRefsInFile = true;
+          }
         }
       }
     }
@@ -116,27 +119,29 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.object.name;
-    const _import = s.localImportMap.get(rootName);
-    if (_import) {
-      const internalImport = s.internal.get(_import.filePath);
-      if (internalImport) {
-        const a = node.object.object.property.name;
-        const b = node.object.property.name;
-        const c = node.property.name;
-        s.addNsMemberRefs(internalImport, rootName, a);
-        s.addNsMemberRefs(internalImport, rootName, `${a}.${b}`);
-        s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
-      }
-    } else {
-      const exp = s.exports.get(rootName);
-      if (exp && exp.members.length > 0) {
-        const a = node.object.object.property.name;
-        const b = node.object.property.name;
-        const c = node.property.name;
-        const dottedName = `${a}.${b}.${c}`;
-        for (const member of exp.members) {
-          if (member.identifier === a || member.identifier === `${a}.${b}` || member.identifier === dottedName)
-            member.hasRefsInFile = true;
+    if (!isShadowed(rootName, node.object.object.object.start)) {
+      const _import = s.localImportMap.get(rootName);
+      if (_import) {
+        const internalImport = s.internal.get(_import.filePath);
+        if (internalImport) {
+          const a = node.object.object.property.name;
+          const b = node.object.property.name;
+          const c = node.property.name;
+          s.addNsMemberRefs(internalImport, rootName, a);
+          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}`);
+          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
+        }
+      } else {
+        const exp = s.exports.get(rootName);
+        if (exp && exp.members.length > 0) {
+          const a = node.object.object.property.name;
+          const b = node.object.property.name;
+          const c = node.property.name;
+          const dottedName = `${a}.${b}.${c}`;
+          for (const member of exp.members) {
+            if (member.identifier === a || member.identifier === `${a}.${b}` || member.identifier === dottedName)
+              member.hasRefsInFile = true;
+          }
         }
       }
     }

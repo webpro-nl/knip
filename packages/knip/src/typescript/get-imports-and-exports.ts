@@ -19,7 +19,6 @@ import {
   type ResolvedModule,
 } from './visitors/helpers.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
-import { collectLocalRefs } from './visitors/local-refs.ts';
 import { walkAST } from './visitors/walk.ts';
 
 const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
@@ -341,7 +340,7 @@ const getImportsAndExports = (
       addImport(spec, undefined, undefined, undefined, pos, mod);
   }
 
-  walkAST(result.program, sourceText, filePath, {
+  const localRefs = walkAST(result.program, sourceText, filePath, {
     lineStarts,
     skipExports,
     options,
@@ -358,6 +357,7 @@ const getImportsAndExports = (
     importAliases,
     referencedInExport,
     skipBareExprRefs: !!ignoreExportsUsedInFile,
+    localRefs: ignoreExportsUsedInFile ? new Set() : undefined,
     destructuredExports,
     hasNodeModuleImport,
     resolveModule,
@@ -410,8 +410,6 @@ const getImportsAndExports = (
       }
     }
   }
-
-  const localRefs = ignoreExportsUsedInFile ? collectLocalRefs(result.program, localImportMap, exports) : undefined;
 
   for (const [id, item] of exports) {
     item.referencedIn = referencedInExport.get(id);
