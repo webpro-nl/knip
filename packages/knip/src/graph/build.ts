@@ -186,6 +186,7 @@ export async function build({
     for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
 
     principal.addPaths(config.paths, dir);
+    if (compilerOptions.rootDirs) principal.addRootDirs(compilerOptions.rootDirs);
 
     const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));

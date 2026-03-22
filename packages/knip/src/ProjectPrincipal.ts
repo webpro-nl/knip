@@ -43,6 +43,7 @@ export class ProjectPrincipal {
   syncCompilers: SyncCompilers = new Map();
   asyncCompilers: AsyncCompilers = new Map();
   private paths: Record<string, string[]> = {};
+  private rootDirs: string[] = [];
   private extensions = new Set(DEFAULT_EXTENSIONS);
 
   cache: CacheConsultant<FileNode>;
@@ -90,6 +91,12 @@ export class ProjectPrincipal {
     }
   }
 
+  addRootDirs(rootDirs: string[]) {
+    for (const dir of rootDirs) {
+      if (!this.rootDirs.includes(dir)) this.rootDirs.push(dir);
+    }
+  }
+
   init() {
     this.extensions = new Set([
       ...DEFAULT_EXTENSIONS,
@@ -97,8 +104,9 @@ export class ProjectPrincipal {
     ]);
     const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
     const pathsOrUndefined = Object.keys(this.paths).length > 0 ? this.paths : undefined;
+    const rootDirsOrUndefined = this.rootDirs.length > 1 ? this.rootDirs : undefined;
     this.resolveModule = createCustomModuleResolver(
-      { paths: pathsOrUndefined },
+      { paths: pathsOrUndefined, rootDirs: rootDirsOrUndefined },
       customCompilerExtensions,
       this.toSourceFilePath
     );

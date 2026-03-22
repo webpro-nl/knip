@@ -9,7 +9,7 @@ import type { ToSourceFilePath } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './visitors/helpers.ts';
 
 export function createCustomModuleResolver(
-  compilerOptions: { paths?: Record<string, string[]> },
+  compilerOptions: { paths?: Record<string, string[]>; rootDirs?: string[] },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath
 ): ResolveModule {
@@ -19,6 +19,7 @@ export function createCustomModuleResolver(
   const alias = convertPathsToAlias(compilerOptions.paths as Record<string, string[]>);
   const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
   const resolveWithAlias = alias ? _createSyncModuleResolver(extensions, alias) : undefined;
+  const rootDirs = compilerOptions.rootDirs;
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -53,6 +54,20 @@ export function createCustomModuleResolver(
       : join(dirname(containingFile), sanitizedSpecifier);
     if (existsSync(candidate)) {
       return { resolvedFileName: candidate, isExternalLibraryImport: false };
+    }
+
+    if (rootDirs && !isAbsolute(sanitizedSpecifier)) {
+      const containingDir = dirname(containingFile);
+      for (const srcRoot of rootDirs) {
+        if (!containingDir.startsWith(srcRoot)) continue;
+        const relPath = containingDir.slice(srcRoot.length);
+        for (const targetRoot of rootDirs) {
+          if (targetRoot === srcRoot) continue;
+          const mapped = join(targetRoot, relPath, sanitizedSpecifier);
+          const resolved = resolveSync(mapped, containingFile);
+          if (resolved) return toResult(resolved);
+        }
+      }
     }
   }
 

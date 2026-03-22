@@ -59,6 +59,18 @@ const expandFileNames = (
   return result;
 };
 
+const findRootDirsBase = (tsConfigFilePath: string): string | undefined => {
+  try {
+    const raw = JSON.parse(stripJsonComments(readFileSync(tsConfigFilePath, 'utf8')));
+    if (raw.compilerOptions?.rootDirs) return dirname(tsConfigFilePath);
+    if (raw.extends) {
+      const extPath = join(dirname(tsConfigFilePath), raw.extends);
+      return findRootDirsBase(extPath);
+    }
+  } catch {}
+  return undefined;
+};
+
 const resolveConfig = (tsConfigFilePath: string) => {
   try {
     return parseTsconfig(tsConfigFilePath);
@@ -88,6 +100,12 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
     }
     if (compilerOptions.paths) {
       compilerOptions.pathsBasePath ??= dir;
+    }
+    if (compilerOptions.rootDirs) {
+      const rootDirsBase = findRootDirsBase(tsConfigFilePath) ?? dir;
+      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
+        isAbsolute(d) ? d : join(rootDirsBase, d)
+      );
     }
 
     const include = resolvePatterns(config.include, dir, true);
