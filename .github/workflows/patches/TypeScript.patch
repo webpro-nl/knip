@@ -10,3 +10,15 @@ index f471ada9b2..83844be8aa 100644
          "type": true
      },
      "mocha": false
+diff --git a/src/compiler/sys.ts b/src/compiler/sys.ts
+--- a/src/compiler/sys.ts
++++ b/src/compiler/sys.ts
+@@ -563,7 +563,7 @@
+
+ let curSysLog: (s: string) => void = noop;
+
+-/** @internal */
++/** @internal @knipignore */
+ export function sysLog(s: string): void {
+     return curSysLog(s);
+ }
