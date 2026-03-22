@@ -99,7 +99,7 @@
     "@nodelib/fs.walk": "^1.2.3",
     "fast-glob": "^3.3.3",
     "formatly": "^0.3.0",
-    "get-tsconfig": "4.13.6",
+    "get-tsconfig": "4.13.7",
     "jiti": "^2.6.0",
     "minimist": "^1.2.8",
     "oxc-parser": "^0.120.0",
