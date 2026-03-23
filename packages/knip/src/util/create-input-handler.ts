@@ -115,7 +115,9 @@ export const createInputHandler =
           }
 
           // Return resolved path for refs to internal workspaces
-          const internalPath = _resolveSync(specifier, dirname(containingFilePath));
+          const internalPath =
+            _resolveSync(specifier, dirname(containingFilePath)) ??
+            _resolveModuleSync(specifier, containingFilePath);
           if (internalPath && isInternal(internalPath) && !isGitIgnored(internalPath)) return internalPath;
         }
 

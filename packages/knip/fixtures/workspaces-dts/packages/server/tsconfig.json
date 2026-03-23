@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@fixtures/workspaces-dts__shared": ["../../packages/shared/src/index.js"]
+    }
+  },
   "include": ["**/*.js"],
   "exclude": []
 }
