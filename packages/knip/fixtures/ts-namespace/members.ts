@@ -1,3 +1,7 @@
+function useSeasons(): Seasons.Name {
+  return Seasons.getName();
+}
+
 export namespace Fruits {
   export const apple = 1;
   export const unusedBanana = 2;
@@ -34,4 +38,10 @@ export namespace Standalone {
   export namespace Nested {
     export const deep = 3;
   }
+}
+
+export namespace Seasons {
+  export type Name = string;
+  export function getName(): string { return 'spring'; }
+  export const unusedCount = 0;
 }

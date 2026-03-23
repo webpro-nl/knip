@@ -58,3 +58,35 @@ shape. E.g. `{ type: true, interface: true }` only counts refs for those types.
 The `localRefsVisitorObject` handles computed member access
 (`obj[EXPORTED_KEY]`) — without this, exports used only as computed keys would
 be false positives when `ignoreExportsUsedInFile` is enabled.
+
+## Namespace/enum member `hasRefsInFile`
+
+Namespace and enum members each have their own `hasRefsInFile` flag (on
+`ExportMember`), separate from the export-level `hasRefsInFile` (on `Export`).
+
+Member `hasRefsInFile` is set via **deferred resolution**: during the AST walk,
+same-file member references (e.g. `Bar.value` where `Bar` is a local namespace)
+are collected into a flat `memberRefsInFile: string[]` array on `WalkState`
+(interleaved pairs: `[nsName, memberId, nsName, memberId, ...]`). After the walk
+completes, the array is resolved against the final `exports` map.
+
+This deferred approach is necessary because the AST visitor walks in source
+order — a function can reference namespace members before the namespace
+declaration appears (forward references). Inline resolution during the walk
+would miss these. Same pattern as `bareExprRefs` (export-level deferred refs).
+
+**Collection points** (all push to `memberRefsInFile`):
+- `members.ts`: `handleMemberExpression` — 3 depth levels (simple, nested,
+  triple-nested)
+- `walk.ts`: `coreVisitorObject.TSQualifiedName` — type-position qualified names
+- `walk.ts`: `localRefsVisitorObject.TSQualifiedName` — same, when
+  `ignoreExportsUsedInFile` is enabled (also adds namespace name to `localRefs`)
+
+**Resolution** (in `walkAST`, after `visitor.visit()`):
+iterates pairs, calls `exports.get(nsName)`, sets matching
+`member.hasRefsInFile = true`.
+
+**Analysis** (`analyze.ts`): for each namespace/enum export that IS externally
+referenced, iterates members — if `!member.hasRefsInFile`, checks
+`explorer.isReferenced(filePath, "Ns.member")`. If neither, reports as unused
+namespace/enum member.

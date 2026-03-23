@@ -37,12 +37,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
       const memberName =
         node.computed === false && node.property.type === 'Identifier' ? node.property.name : undefined;
       if (memberName) {
-        const exp = s.exports.get(localName);
-        if (exp) {
-          for (const member of exp.members) {
-            if (member.identifier === memberName) member.hasRefsInFile = true;
-          }
-        }
+        s.memberRefsInFile.push(localName, memberName);
       }
     }
 
@@ -95,14 +90,8 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
           }
         }
       } else {
-        const exp = s.exports.get(rootName);
-        if (exp && exp.members.length > 0) {
-          const mid = node.object.property.name;
-          const dottedName = `${mid}.${node.property.name}`;
-          for (const member of exp.members) {
-            if (member.identifier === mid || member.identifier === dottedName) member.hasRefsInFile = true;
-          }
-        }
+        const mid = node.object.property.name;
+        s.memberRefsInFile.push(rootName, mid, rootName, `${mid}.${node.property.name}`);
       }
     }
   }
@@ -132,17 +121,10 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
           s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
         }
       } else {
-        const exp = s.exports.get(rootName);
-        if (exp && exp.members.length > 0) {
-          const a = node.object.object.property.name;
-          const b = node.object.property.name;
-          const c = node.property.name;
-          const dottedName = `${a}.${b}.${c}`;
-          for (const member of exp.members) {
-            if (member.identifier === a || member.identifier === `${a}.${b}` || member.identifier === dottedName)
-              member.hasRefsInFile = true;
-          }
-        }
+        const a = node.object.object.property.name;
+        const b = node.object.property.name;
+        const c = node.property.name;
+        s.memberRefsInFile.push(rootName, a, rootName, `${a}.${b}`, rootName, `${a}.${b}.${c}`);
       }
     }
   }

@@ -70,6 +70,7 @@ export interface WalkState extends WalkContext {
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
   nsRanges: [number, number][];
+  memberRefsInFile: string[];
   scopeDepth: number;
   scopeStarts: number[];
   scopeEnds: number[];
@@ -311,15 +312,10 @@ const coreVisitorObject: VisitorObject = {
           }
         }
       } else if (parts.length > 0) {
-        const exp = state.exports.get(rootName);
-        if (exp) {
-          let path = '';
-          for (const part of parts) {
-            path = path ? `${path}.${part}` : part;
-            for (const member of exp.members) {
-              if (member.identifier === path) member.hasRefsInFile = true;
-            }
-          }
+        let path = '';
+        for (const part of parts) {
+          path = path ? `${path}.${part}` : part;
+          state.memberRefsInFile.push(rootName, path);
         }
       }
     }
@@ -543,13 +539,8 @@ const localRefsVisitorObject: VisitorObject = {
     if (left.type === 'Identifier') {
       const rootName = left.name;
       if (!state.localImportMap.has(rootName) && !isShadowed(rootName, left.start) && parts.length > 0) {
-        const exp = state.exports.get(rootName);
-        if (exp) {
-          state.localRefs!.add(rootName);
-          for (const member of exp.members) {
-            if (member.identifier === parts[0]) member.hasRefsInFile = true;
-          }
-        }
+        state.localRefs!.add(rootName);
+        state.memberRefsInFile.push(rootName, parts[0]);
       }
     }
   },
@@ -620,6 +611,7 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     chainedMemberExprs: new WeakSet(),
     currentVarDeclStart: -1,
     nsRanges: [],
+    memberRefsInFile: [],
     scopeDepth: 0,
     scopeStarts: [],
     scopeEnds: [],
@@ -633,6 +625,16 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
   };
 
   ctx.visitor.visit(program);
+
+  for (let i = 0; i < state.memberRefsInFile.length; i += 2) {
+    const exp = state.exports.get(state.memberRefsInFile[i]);
+    if (exp) {
+      const id = state.memberRefsInFile[i + 1];
+      for (const member of exp.members) {
+        if (member.identifier === id) member.hasRefsInFile = true;
+      }
+    }
+  }
 
   for (const [aliasName, aliasSet] of state.importAliases) {
     if (!state.accessedAliases.has(aliasName)) {
