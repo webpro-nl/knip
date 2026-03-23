@@ -4,7 +4,7 @@ import stripJsonComments from 'strip-json-comments';
 import type { CompilerOptions } from '../types/project.ts';
 import { isFile as _isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
-import { dirname, isAbsolute, join } from './path.ts';
+import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
 
 const hasGlobChar = (p: string) => p.includes('*') || p.includes('?');
 const hasExtension = (p: string) => {
@@ -92,12 +92,8 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
     const dir = dirname(tsConfigFilePath);
     const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-    if (compilerOptions.outDir && !isAbsolute(compilerOptions.outDir)) {
-      compilerOptions.outDir = join(dir, compilerOptions.outDir);
-    }
-    if (compilerOptions.rootDir && !isAbsolute(compilerOptions.rootDir)) {
-      compilerOptions.rootDir = join(dir, compilerOptions.rootDir);
-    }
+    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
+    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
     if (compilerOptions.paths) {
       compilerOptions.pathsBasePath ??= dir;
     }
