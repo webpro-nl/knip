@@ -1,10 +1,16 @@
 import pc from 'picocolors';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
 
+export interface TraceMemberStatus {
+  identifier: string;
+  referenced: boolean;
+}
+
 export const formatTrace = (
   node: ExportsTreeNode,
   toRelative: (path: string) => string,
-  isReferenced: boolean
+  isReferenced: boolean,
+  memberStatuses?: TraceMemberStatus[]
 ): string => {
   const lines: string[] = [];
 
@@ -58,6 +64,14 @@ export const formatTrace = (
   if (node.children.length === 0) {
     const leafMarker = isReferenced ? ok(' ✓') : fail(' ✗');
     lines.push(`${dim('└── (no imports found)')}${leafMarker}`);
+  }
+
+  if (memberStatuses && memberStatuses.length > 0) {
+    const parts = memberStatuses.map(m => {
+      const marker = m.referenced ? ok(' ✓') : fail(' ✗');
+      return `${id(m.identifier)}${marker}`;
+    });
+    lines.push(`${dim('    members: [')}${parts.join(dim(', '))}${dim(']')}`);
   }
 
   return lines.join('\n');
