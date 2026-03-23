@@ -13,8 +13,8 @@ export const getSrcDir = (program: Program): string => {
 export const getRoutesDirs = (program: Program, srcDir: string): string[] => {
   const arg = findCallArg(program, 'qwikCity');
   if (arg) {
-    const values = getPropertyValues(arg, 'routesDir');
-    if (values.size > 0) return Array.from(values);
+    const values = Array.from(getPropertyValues(arg, 'routesDir')).filter(Boolean);
+    if (values.length > 0) return values;
   }
   return [`${srcDir}/routes`];
 };

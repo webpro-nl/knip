@@ -19,7 +19,7 @@ test('Find dependencies with the Qwik plugin', async () => {
   });
 });
 
-test('Find dependencies with the Qwik plugin (custom srcDir and routesDir[])', async () => {
+test('Find dependencies with the Qwik plugin (custom srcDir and routesDir[] with empty string)', async () => {
   const options = await createOptions({ cwd: cwdCustomDirs });
   const { issues, counters } = await main(options);
 
