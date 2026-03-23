@@ -2,5 +2,5 @@
   "compilerOptions": {
     "strict": true
   },
-  "files": ["types/globals.d.ts", "types/styles.d.ts"]
+  "files": ["types/globals.d.ts", "types/styles.d.ts", "node_modules/@shared/config/env.d.ts"]
 }

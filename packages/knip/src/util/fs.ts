@@ -1,10 +1,10 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.ts';
-import { extname, join } from './path.ts';
+import { extname, join, toPosix } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
@@ -89,4 +89,12 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 
 export const parseYAML = (contents: string) => {
   return parseYAMLContents(contents, { logLevel: 'error' });
+};
+
+export const tryRealpath = (filePath: string) => {
+  try {
+    return toPosix(realpathSync.native(filePath));
+  } catch {
+    return filePath;
+  }
 };

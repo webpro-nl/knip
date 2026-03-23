@@ -15,7 +15,7 @@ test('Preserve tsconfig files from extended config when include is set', async (
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

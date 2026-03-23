@@ -16,6 +16,7 @@ import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
+import { tryRealpath } from '../util/fs.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -157,7 +158,7 @@ export async function build({
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
-      for (const id of definitionPaths) inputs.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+      for (const id of definitionPaths) inputs.add(toProductionEntry(tryRealpath(id), { containingFilePath: tsConfigFilePath }));
     }
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
@@ -303,7 +304,8 @@ export async function build({
     if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
       debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
-      for (const filePath of tscSourcePaths) {
+      for (const tscPath of tscSourcePaths) {
+        const filePath = tryRealpath(tscPath);
         if (!isGitIgnored(filePath) && !isIgnoredWorkspace(filePath)) {
           principal.addProgramPath(filePath);
           principal.addProjectPath(filePath);
