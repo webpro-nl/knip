@@ -193,12 +193,41 @@ const _addLocalRef = (name: string, pos: number) => {
   if (!state.localImportMap.has(name) && !isShadowed(name, pos)) state.localRefs!.add(name);
 };
 
-const _addShadow = (name: string) => {
-  const i = state.scopeDepth - 1;
-  const range: [number, number] = [state.scopeStarts[i], state.scopeEnds[i]];
+const _addShadowRange = (name: string, range: [number, number]) => {
   const ranges = state.shadowScopes.get(name);
   if (ranges) ranges.push(range);
   else state.shadowScopes.set(name, [range]);
+};
+
+const _addShadow = (name: string) => {
+  const i = state.scopeDepth - 1;
+  _addShadowRange(name, [state.scopeStarts[i], state.scopeEnds[i]]);
+};
+
+const _collectBindingNames = (pattern: any, range: [number, number]) => {
+  if (!pattern) return;
+  if (pattern.type === 'Identifier') {
+    _addShadowRange(pattern.name, range);
+  } else if (pattern.type === 'ObjectPattern') {
+    for (const prop of pattern.properties ?? []) {
+      _collectBindingNames(prop.value ?? prop.argument, range);
+    }
+  } else if (pattern.type === 'ArrayPattern') {
+    for (const el of pattern.elements ?? []) {
+      _collectBindingNames(el, range);
+    }
+  } else if (pattern.type === 'AssignmentPattern') {
+    _collectBindingNames(pattern.left, range);
+  } else if (pattern.type === 'RestElement') {
+    _collectBindingNames(pattern.argument, range);
+  }
+};
+
+const _addParamShadows = (params: any, body: any) => {
+  if (!body || !params) return;
+  const range: [number, number] = [body.start, body.end];
+  const items = Array.isArray(params) ? params : params.items ?? params;
+  for (const param of items) _collectBindingNames(param, range);
 };
 
 const coreVisitorObject: VisitorObject = {
@@ -220,6 +249,18 @@ const coreVisitorObject: VisitorObject = {
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
       if (state.scopeDepth > 0) _addShadow(node.id.name);
+    }
+    _addParamShadows(node.params, node.body);
+  },
+  FunctionExpression(node) {
+    _addParamShadows(node.params, node.body);
+  },
+  ArrowFunctionExpression(node) {
+    _addParamShadows(node.params, node.body);
+  },
+  CatchClause(node) {
+    if (node.param?.type === 'Identifier' && node.body) {
+      _addShadowRange(node.param.name, [node.body.start, node.body.end]);
     }
   },
   VariableDeclaration(node) {
@@ -271,6 +312,9 @@ const coreVisitorObject: VisitorObject = {
     handleJSXMemberExpression(node, state);
   },
   ForInStatement(node) {
+    if (node.left.type === 'VariableDeclaration' && node.body) {
+      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
+    }
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -280,6 +324,9 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   ForOfStatement(node) {
+    if (node.left.type === 'VariableDeclaration' && node.body) {
+      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
+    }
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -540,7 +587,6 @@ const localRefsVisitorObject: VisitorObject = {
       const rootName = left.name;
       if (!state.localImportMap.has(rootName) && !isShadowed(rootName, left.start) && parts.length > 0) {
         state.localRefs!.add(rootName);
-        state.memberRefsInFile.push(rootName, parts[0]);
       }
     }
   },

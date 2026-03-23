@@ -2,6 +2,20 @@ function useSeasons(): Seasons.Name {
   return Seasons.getName();
 }
 
+function paramShadow(Fruits: { unusedBanana: number }) {
+  return Fruits.unusedBanana;
+}
+
+const arrowShadow = (Animals: { unusedDog: number }) => Animals.unusedDog;
+
+function destructuredShadow({ Shapes }: { Shapes: { unusedSquare: number } }) {
+  return Shapes.unusedSquare;
+}
+
+for (const Standalone of [{ unusedValue: 1 }]) {
+  console.log(Standalone.unusedValue);
+}
+
 export namespace Fruits {
   export const apple = 1;
   export const unusedBanana = 2;

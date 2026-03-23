@@ -9,4 +9,9 @@ function inner() {
   return serialize('  shadowed  ');
 }
 
+function paramShadow(serialize: (v: string) => string) {
+  return serialize('  param  ');
+}
+
 inner();
+paramShadow((v) => v.trim());
