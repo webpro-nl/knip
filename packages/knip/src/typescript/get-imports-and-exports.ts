@@ -24,7 +24,7 @@ import { walkAST } from './visitors/walk.ts';
 const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
 const jsDocImportTagRe = /@import\s+(?:\{[^}]*\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
 const jsxImportSourceRe = /@jsxImportSource\s+(\S+)/;
-const referenceTypesRe = /\/\s*<reference\s+types\s*=\s*"([^"]+)"\s*\/>/;
+const referenceTypesRe = /\s*<reference\s+types\s*=\s*"([^"]+)"\s*\/>/;
 const envRe = /@(?:vitest|jest)-environment\s+(\S+)/g;
 
 interface AddInternalImportOptions {
@@ -404,7 +404,7 @@ const getImportsAndExports = (
     }
 
     if (comment.type === 'Line') {
-      const refMatch = ('/' + comment.value).match(referenceTypesRe);
+      const refMatch = comment.value.match(referenceTypesRe);
       if (refMatch) {
         addImport(refMatch[1], undefined, undefined, undefined, comment.start, IMPORT_FLAGS.TYPE_ONLY);
       }
