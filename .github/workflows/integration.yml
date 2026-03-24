@@ -79,9 +79,10 @@ jobs:
           - name: astro
             repo: withastro/astro
             commands: |
-              pnpm install
+              pnpm install --config.minimumReleaseAge=0
               pnpm build
-              pnpm add -D -w $PKG_URL
+              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
@@ -129,7 +130,7 @@ jobs:
               pnpm install
               pnpm add -D -w $PKG_URL
               pnpm knip
-              pnpm knip --production --exclude dependencies
+              pnpm knip --production --exclude dependencies --fix
 
           - name: prettier
             repo: prettier/prettier
@@ -157,12 +158,19 @@ jobs:
               pnpm add -D -w knip@$PKG_URL
               pnpm knip
 
+          - name: sanity
+            repo: sanity-io/sanity
+            commands: |
+              pnpm install --no-frozen-lockfile --config.minimumReleaseAge=0
+              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm knip --exclude duplicates
+
           - name: sentry
             repo: getsentry/sentry
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
-              pnpm run knip
+              pnpm run knip --fix
               pnpm run knip:prod
 
           - name: slonik
@@ -192,7 +200,7 @@ jobs:
         working-directory: ${{ matrix.project.name }}
         run: |
           PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
-          [ -f "$PATCH_FILE" ] && git apply --verbose "$PATCH_FILE" || true
+          [ -f "$PATCH_FILE" ] && git apply --verbose -C0 --ignore-whitespace "$PATCH_FILE" || true
 
       - uses: actions/setup-node@v6
         with:
