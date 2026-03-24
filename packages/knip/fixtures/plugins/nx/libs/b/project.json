@@ -62,12 +62,6 @@
         "command": "tsc -p tsconfig.build.json",
         "cwd": "libs/b"
       }
-    },
-    "serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bun run apps/b/server.ts"
-      }
     }
   }
 }
