@@ -59,3 +59,25 @@ export namespace Seasons {
   export function getName(): string { return 'spring'; }
   export const unusedCount = 0;
 }
+
+export namespace Overloads {
+  /** @public */
+  export function tagged(x: number): number
+  /** @public */
+  export function tagged(x: string): number
+  export function tagged(x: number | string): number { return 1; }
+
+  export function tagOnSecond(x: number): number
+  /** @public */
+  export function tagOnSecond(x: string): number
+  export function tagOnSecond(x: number | string): number { return 1; }
+
+  export function tagOnImpl(x: number): number
+  export function tagOnImpl(x: string): number
+  /** @public */
+  export function tagOnImpl(x: number | string): number { return 1; }
+
+  export function untagged(x: number): number
+  export function untagged(x: string): number
+  export function untagged(x: number | string): number { return 1; }
+}

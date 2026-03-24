@@ -15,6 +15,11 @@ test('Find exports from jsdoc @type tags', async () => {
   assert(issues.exports['module.ts']['internalUnusedFn']);
   assert(issues.exports['module.ts']['invalidTaggedFn']);
   assert(issues.exports['module.ts']['unusedFn']);
+  assert(issues.exports['module.ts']['overloadUntagged']);
+
+  assert(!issues.exports['module.ts']?.['overloadFn']);
+  assert(!issues.exports['module.ts']?.['overloadTagOnSecond']);
+  assert(!issues.exports['module.ts']?.['overloadTagOnImpl']);
 
   assert(issues.types['module.ts']['UnusedInterface']);
   assert(issues.types['module.ts']['InternalWithLineComment']);
@@ -22,7 +27,7 @@ test('Find exports from jsdoc @type tags', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 4,
+    exports: 5,
     types: 2,
     processed: 3,
     total: 3,
@@ -36,13 +41,18 @@ test('Find exports from jsdoc @type tags (production)', async () => {
   assert(issues.exports['module.ts']['alphaFn']);
   assert(issues.exports['module.ts']['invalidTaggedFn']);
   assert(issues.exports['module.ts']['unusedFn']);
+  assert(issues.exports['module.ts']['overloadUntagged']);
+
+  assert(!issues.exports['module.ts']?.['overloadFn']);
+  assert(!issues.exports['module.ts']?.['overloadTagOnSecond']);
+  assert(!issues.exports['module.ts']?.['overloadTagOnImpl']);
 
   assert(issues.types['module.ts']['UnusedInterface']);
   assert(issues.types['module.ts']['UsedViaJSDoc']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    exports: 4,
     types: 2,
     processed: 2,
     total: 2,
@@ -57,7 +67,7 @@ test('JSDoc tag with line comment between tag and export is respected', async ()
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    exports: 4,
     types: 1,
     processed: 3,
     total: 3,

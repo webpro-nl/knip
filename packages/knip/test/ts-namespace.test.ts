@@ -39,6 +39,11 @@ test('Find unused namespace members', async () => {
   assert(!issues.namespaceMembers['members.ts']?.['Seasons.Name']);
   assert(!issues.namespaceMembers['members.ts']?.['Seasons.getName']);
 
+  assert(!issues.namespaceMembers['members.ts']?.['Overloads.tagged']);
+  assert(!issues.namespaceMembers['members.ts']?.['Overloads.tagOnSecond']);
+  assert(!issues.namespaceMembers['members.ts']?.['Overloads.tagOnImpl']);
+  assert(issues.namespaceMembers['members.ts']['Overloads.untagged']);
+
   assert(issues.namespaceMembers['modules.ts']['Colors.unusedBlue']);
   assert(issues.namespaceMembers['modules.ts']['Colors.Shades.unusedLight']);
   assert(!issues.namespaceMembers['modules.ts']?.['Colors.red']);
@@ -50,7 +55,7 @@ test('Find unused namespace members', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     enumMembers: 2,
-    namespaceMembers: 12,
+    namespaceMembers: 13,
     processed: 5,
     total: 5,
   });

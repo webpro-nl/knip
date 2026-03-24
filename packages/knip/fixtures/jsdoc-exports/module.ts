@@ -25,6 +25,26 @@ export function overloadFn(x: number | boolean): string | number {
   return '0';
 }
 
+export function overloadTagOnSecond(x: number): string;
+/** @public */
+export function overloadTagOnSecond(x: boolean): number;
+export function overloadTagOnSecond(x: number | boolean): string | number {
+  return '0';
+}
+
+export function overloadTagOnImpl(x: number): string;
+export function overloadTagOnImpl(x: boolean): number;
+/** @public */
+export function overloadTagOnImpl(x: number | boolean): string | number {
+  return '0';
+}
+
+export function overloadUntagged(x: number): string;
+export function overloadUntagged(x: boolean): number;
+export function overloadUntagged(x: number | boolean): string | number {
+  return '0';
+}
+
 /** @ignoreunresolved */
 import unresolvedAndIgnored from './unresolved';
 

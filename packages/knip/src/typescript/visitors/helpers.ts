@@ -8,6 +8,7 @@ import {
 import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../../constants.ts';
 import { extname } from '../../util/path.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../../types/config.ts';
+import { EMPTY_TAGS } from './jsdoc.ts';
 import type { Fix } from '../../types/exports.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
@@ -87,6 +88,15 @@ export function extractNamespaceMembers(
 
   const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number) => {
     const fullName = prefix ? `${prefix}.${name}` : name;
+    const tags = getJSDocTags(stmtStart);
+    const existing = members.find(m => m.identifier === fullName);
+    if (existing) {
+      if (tags.size) {
+        if (existing.jsDocTags === EMPTY_TAGS) existing.jsDocTags = new Set(tags);
+        else for (const t of tags) existing.jsDocTags.add(t);
+      }
+      return;
+    }
     const { line, col } = getLineAndCol(lineStarts, pos);
     const fix: Fix = options.isFixExports
       ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
@@ -99,7 +109,7 @@ export function extractNamespaceMembers(
       col,
       fix,
       hasRefsInFile: false,
-      jsDocTags: getJSDocTags(stmtStart),
+      jsDocTags: tags,
       flags: 0,
     });
   };

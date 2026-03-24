@@ -1,6 +1,6 @@
 import { Fruits, Animals } from './members.ts';
 import * as NS from './members.ts';
-import { standalone, Standalone, Seasons } from './members.ts';
+import { standalone, Standalone, Seasons, Overloads } from './members.ts';
 import { Types } from './types.ts';
 import { Validator, format, Status } from './merged.ts';
 import { Colors } from './modules.ts';
@@ -26,3 +26,5 @@ console.log(format('hello') + format.separator);
 console.log(Status.Active, Status.label(Status.Active));
 
 console.log(Colors.red + Colors.Shades.dark);
+
+console.log(Overloads);
