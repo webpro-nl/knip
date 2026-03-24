@@ -65,7 +65,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
         commands = target.options.commands.map(commandConfig =>
           typeof commandConfig === 'string' ? commandConfig : commandConfig.command
         );
-      const cwd = target.options?.cwd ? join(options.cwd, target.options.cwd) : undefined;
+      const cwd = target.options?.cwd ? join(options.cwd, target.options.cwd) : options.cwd;
       return options.getInputsFromScripts(commands, { cwd });
     });
 
