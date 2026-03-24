@@ -107,7 +107,7 @@ export const analyze = async ({
                 (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
               ) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
+                  if (options.tags[1].includes(tagName)) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -164,7 +164,7 @@ export const analyze = async ({
                         });
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
-                          if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
+                          if (options.tags[1].includes(tagName)) {
                             collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
                           }
                         }
