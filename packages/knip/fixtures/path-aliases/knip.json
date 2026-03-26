@@ -3,6 +3,7 @@
     "~/*": ["./*"],
     "@lib": ["./lib/index.ts"],
     "@lib/*": ["./lib/*"],
-    "xyz/*": ["abc/*"]
+    "xyz/*": ["abc/*"],
+    "~icons/*": ["./types/virtual.d.ts"]
   }
 }

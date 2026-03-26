@@ -4,9 +4,29 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.ts';
-import { _createSyncModuleResolver, _resolveModuleSync, convertPathsToAlias } from '../util/resolve.ts';
+import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
 import type { ToSourceFilePath } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './visitors/helpers.ts';
+
+interface PathMapping {
+  prefix: string;
+  wildcard: boolean;
+  values: string[];
+}
+
+function compilePathMappings(paths: Record<string, string[]> | undefined): PathMapping[] | undefined {
+  if (!paths) return undefined;
+  const mappings: PathMapping[] = [];
+  for (const key in paths) {
+    const starIdx = key.indexOf('*');
+    if (starIdx >= 0) {
+      mappings.push({ prefix: key.slice(0, starIdx), wildcard: true, values: paths[key] });
+    } else {
+      mappings.push({ prefix: key, wildcard: false, values: paths[key] });
+    }
+  }
+  return mappings.length > 0 ? mappings : undefined;
+}
 
 export function createCustomModuleResolver(
   compilerOptions: { paths?: Record<string, string[]>; rootDirs?: string[] },
@@ -16,9 +36,8 @@ export function createCustomModuleResolver(
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS];
-  const alias = convertPathsToAlias(compilerOptions.paths as Record<string, string[]>);
   const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
-  const resolveWithAlias = alias ? _createSyncModuleResolver(extensions, alias) : undefined;
+  const pathMappings = compilePathMappings(compilerOptions.paths as Record<string, string[]>);
   const rootDirs = compilerOptions.rootDirs;
 
   function toSourcePath(resolvedFileName: string): string {
@@ -37,37 +56,46 @@ export function createCustomModuleResolver(
   }
 
   function resolveModuleName(name: string, containingFile: string): ResolvedModule | undefined {
-    const sanitizedSpecifier = sanitizeSpecifier(name);
+    const specifier = sanitizeSpecifier(name);
 
-    if (isBuiltin(sanitizedSpecifier)) return undefined;
+    if (isBuiltin(specifier)) return undefined;
 
-    const resolvedFileName = resolveSync(sanitizedSpecifier, containingFile);
+    const resolvedFileName = resolveSync(specifier, containingFile);
     if (resolvedFileName) return toResult(resolvedFileName);
 
-    if (resolveWithAlias) {
-      const aliasResolved = resolveWithAlias(sanitizedSpecifier, containingFile);
-      if (aliasResolved) return toResult(aliasResolved);
+    // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths
+    if (pathMappings) {
+      for (const { prefix, wildcard, values } of pathMappings) {
+        if (wildcard ? specifier.startsWith(prefix) : specifier === prefix) {
+          const captured = wildcard ? specifier.slice(prefix.length) : '';
+          for (const value of values) {
+            const starIdx = value.indexOf('*');
+            const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value;
+            const resolved = resolveSync(mapped, containingFile);
+            if (resolved) return toResult(resolved);
+          }
+        }
+      }
     }
 
-    const candidate = isAbsolute(sanitizedSpecifier)
-      ? sanitizedSpecifier
-      : join(dirname(containingFile), sanitizedSpecifier);
-    if (existsSync(candidate)) {
-      return { resolvedFileName: candidate, isExternalLibraryImport: false };
-    }
-
-    if (rootDirs && !isAbsolute(sanitizedSpecifier)) {
+    // Fallback for https://github.com/oxc-project/oxc-resolver/issues/1075
+    if (rootDirs && !isAbsolute(specifier)) {
       const containingDir = dirname(containingFile);
       for (const srcRoot of rootDirs) {
         if (!containingDir.startsWith(srcRoot)) continue;
         const relPath = containingDir.slice(srcRoot.length);
         for (const targetRoot of rootDirs) {
           if (targetRoot === srcRoot) continue;
-          const mapped = join(targetRoot, relPath, sanitizedSpecifier);
+          const mapped = join(targetRoot, relPath, specifier);
           const resolved = resolveSync(mapped, containingFile);
           if (resolved) return toResult(resolved);
         }
       }
+    }
+
+    const candidate = isAbsolute(specifier) ? specifier : join(dirname(containingFile), specifier);
+    if (existsSync(candidate)) {
+      return { resolvedFileName: candidate, isExternalLibraryImport: false };
     }
   }
 

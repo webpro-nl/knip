@@ -43,20 +43,8 @@ const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DT
  */
 export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
 
-export const _createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) =>
-  timerify(createSyncModuleResolver(extensions, alias), 'resolveModuleSync');
-
-/** Convert TS compilerOptions.paths to oxc-resolver alias format */
-export function convertPathsToAlias(paths: Record<string, string[]> | undefined): Record<string, string[]> | undefined {
-  if (!paths) return undefined;
-  const alias: Record<string, string[]> = {};
-  for (const key in paths) {
-    const stripWildcard = key.endsWith('/*');
-    const aliasKey = stripWildcard ? key.slice(0, -2) : key;
-    alias[aliasKey] = stripWildcard ? paths[key].map(v => (v.endsWith('/*') ? v.slice(0, -2) : v)) : paths[key];
-  }
-  return alias;
-}
+export const _createSyncModuleResolver = (extensions: string[]) =>
+  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({

@@ -13,7 +13,7 @@ test('Resolve import path aliases', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
