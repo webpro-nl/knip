@@ -397,14 +397,16 @@ export async function build({
         if (!isIgnored) pp.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
+      const wsDependencies = deputy.getDependencies(workspace.name);
       for (const _import of file.imports.imports) {
-        if (_import.filePath) {
-          const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
-          if (packageName && isInternalWorkspace(packageName)) {
-            file.imports.external.add({ ..._import, specifier: packageName });
-            if (!isGitIgnored(_import.filePath)) {
-              pp.addProgramPath(_import.filePath);
-            }
+        if (!_import.filePath) continue;
+        const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
+        if (!packageName) continue;
+        const isWorkspace = isInternalWorkspace(packageName);
+        if (isWorkspace || wsDependencies.has(packageName)) {
+          file.imports.external.add({ ..._import, specifier: packageName });
+          if (isWorkspace && !isGitIgnored(_import.filePath)) {
+            pp.addProgramPath(_import.filePath);
           }
         }
       }
