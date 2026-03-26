@@ -1,4 +1,11 @@
-import type { IsLoadConfig, IsPluginEnabled, Plugin, Resolve, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import type {
+  IsLoadConfig,
+  IsPluginEnabled,
+  Plugin,
+  Resolve,
+  ResolveConfig,
+  ResolveFromAST,
+} from '../../types/config.ts';
 import { toDependency, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getEntryFromAST } from './resolveFromAST.ts';
