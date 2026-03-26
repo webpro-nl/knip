@@ -181,6 +181,11 @@
             "type": "string",
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
+          },
+          "knip.nodeRuntimePath": {
+            "type": "string",
+            "default": "",
+            "description": "Absolute path to the Node.js binary (e.g. /usr/local/bin/node)"
           }
         }
       },
