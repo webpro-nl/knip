@@ -158,7 +158,8 @@ export async function build({
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
-      for (const id of definitionPaths) inputs.add(toProductionEntry(tryRealpath(id), { containingFilePath: tsConfigFilePath }));
+      for (const id of definitionPaths)
+        inputs.add(toProductionEntry(tryRealpath(id), { containingFilePath: tsConfigFilePath }));
     }
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };

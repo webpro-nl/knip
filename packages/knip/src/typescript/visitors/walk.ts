@@ -226,7 +226,7 @@ const _collectBindingNames = (pattern: any, range: [number, number]) => {
 const _addParamShadows = (params: any, body: any) => {
   if (!body || !params) return;
   const range: [number, number] = [body.start, body.end];
-  const items = Array.isArray(params) ? params : params.items ?? params;
+  const items = Array.isArray(params) ? params : (params.items ?? params);
   for (const param of items) _collectBindingNames(param, range);
 };
 
