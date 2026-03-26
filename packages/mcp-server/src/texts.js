@@ -56,6 +56,9 @@ export const ERROR_HINT = `For unexpected errors (exit code 2) such as "error lo
 - If no config file exists, create knip.json in the project root
 - Run knip again`;
 
+export const UNCONFIGURED_HINT =
+  'Issues are suppressed because the project is not yet configured. Reported issues might be false positives. Address configuration hints first, then re-run to get the actual issues.';
+
 export const CONFIG_REVIEW_HINT = `Review the existing configuration for potential improvements:
 
 - Never use "ignore" patterns (hides real issues!), always prefer specific solutions; other ignore* options are allowed
