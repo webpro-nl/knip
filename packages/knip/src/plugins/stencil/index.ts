@@ -13,7 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['stencil.config.{ts,js}'];
 
-const production = ['src/**/*.tsx', '!src/**/*.{spec,e2e}.tsx'];
+const production = ['src/**/*.tsx'];
 
 const resolveFromAST: ResolveFromAST = program => {
   const inputs = [];
