@@ -1,12 +1,5 @@
-import type {
-  IsLoadConfig,
-  IsPluginEnabled,
-  Plugin,
-  Resolve,
-  ResolveConfig,
-  ResolveFromAST,
-} from '../../types/config.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getEntryFromAST } from './resolveFromAST.ts';
 import type { Entry, TsdownConfig } from './types.ts';
@@ -54,14 +47,6 @@ const resolveFromAST: ResolveFromAST = program => {
   return [...entries].map(id => toProductionEntry(id, { allowIncludeExports: true }));
 };
 
-const resolve: Resolve = ({ manifest }) => {
-  const deps = { ...manifest.dependencies, ...manifest.devDependencies, ...manifest.peerDependencies };
-  if (!('@tsdown/css' in deps)) return [];
-  return ['postcss', 'postcss-import', 'postcss-modules', 'sass', 'sass-embedded']
-    .filter(dep => dep in deps)
-    .map(dep => toDependency(dep));
-};
-
 const args = {
   config: true,
 };
@@ -72,7 +57,6 @@ const plugin: Plugin = {
   isEnabled,
   config,
   isLoadConfig,
-  resolve,
   resolveConfig,
   resolveFromAST,
   args,
