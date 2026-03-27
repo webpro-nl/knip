@@ -119,6 +119,7 @@ export const pluginsSchema = z.object({
   'size-limit': pluginSchema,
   sst: pluginSchema,
   starlight: pluginSchema,
+  stencil: pluginSchema,
   storybook: pluginSchema,
   stryker: pluginSchema,
   stylelint: pluginSchema,

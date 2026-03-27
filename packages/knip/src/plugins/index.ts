@@ -105,6 +105,7 @@ import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
+import { default as stencil } from './stencil/index.ts';
 import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
 import { default as stylelint } from './stylelint/index.ts';
@@ -248,6 +249,7 @@ export const Plugins = {
   'size-limit': sizeLimit,
   sst,
   starlight,
+  stencil,
   storybook,
   stryker,
   stylelint,

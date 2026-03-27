@@ -106,6 +106,7 @@ export type PluginName =
   | 'size-limit'
   | 'sst'
   | 'starlight'
+  | 'stencil'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
@@ -249,6 +250,7 @@ export const pluginNames = [
   'size-limit',
   'sst',
   'starlight',
+  'stencil',
   'storybook',
   'stryker',
   'stylelint',
