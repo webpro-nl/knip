@@ -27,6 +27,14 @@ export const findFile = (cwd: string, fileName: string) => {
   return isFile(filePath) ? filePath : undefined;
 };
 
+export const findManifestFile = (cwd: string): string | undefined => {
+  const candidates = ['package.json', 'package.yaml', 'package.yml'];
+  for (const candidate of candidates) {
+    const filePath = join(cwd, candidate);
+    if (isFile(filePath)) return filePath;
+  }
+};
+
 export const findFileWithExtensions = (basePath: string, extensions: string[]): string | undefined => {
   for (const ext of extensions) {
     const candidate = basePath + ext;
@@ -61,6 +69,11 @@ export const loadJSON = async (filePath: string) => {
   } catch {
     return parseJSONC(filePath, contents);
   }
+};
+
+export const loadManifest = async (filePath: string) => {
+  const ext = extname(filePath);
+  return ext === '.yaml' || ext === '.yml' ? await loadYAML(filePath) : await loadJSON(filePath);
 };
 
 export const loadJSONC = async (filePath: string) => {

@@ -8,7 +8,7 @@ import type { PackageJson } from '../types/package-json.ts';
 import { getCatalogContainer } from './catalog.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
-import { findFile, loadJSON } from './fs.ts';
+import { findFile, findManifestFile, loadManifest } from './fs.ts';
 import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.ts';
 import { defaultRules } from './issue-initializers.ts';
 import { loadResolvedConfigFile } from './load-config.ts';
@@ -23,7 +23,7 @@ interface CreateOptions extends Partial<Options> {
 }
 
 /**
- * - Loads package.json/pnpm-workspace.yaml
+ * - Loads package manifest/pnpm-workspace.yaml
  * - Loads & validates knip.json
  * - Creates options
  */
@@ -32,11 +32,11 @@ export const createOptions = async (options: CreateOptions) => {
   const pcwd = process.cwd();
   const cwd = normalize(toPosix(toAbsolute(options.cwd ?? args.directory ?? pcwd, pcwd)));
 
-  const manifestPath = findFile(cwd, 'package.json');
-  const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
+  const manifestPath = findManifestFile(cwd);
+  const manifest: PackageJson = manifestPath && (await loadManifest(manifestPath));
 
   if (!(manifestPath && manifest)) {
-    throw new ConfigurationError('Unable to find package.json');
+    throw new ConfigurationError('Unable to find package manifest (package.json, package.yaml, or package.yml)');
   }
 
   let configFilePath: string | undefined;
@@ -49,7 +49,8 @@ export const createOptions = async (options: CreateOptions) => {
   }
 
   if (args.config && !configFilePath && !manifest.knip) {
-    throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
+    const manifestFileName = manifestPath.split('/').pop() ?? 'package.json';
+    throw new ConfigurationError(`Unable to find ${args.config} or ${manifestFileName}#knip`);
   }
 
   const loadedConfig = Object.assign(

@@ -300,9 +300,10 @@ dependencies found in webpack configuration, handled by Knip's webpack plugin.
 
 ### What's the difference between workspaces, projects and programs?
 
-A workspace is a directory with a `package.json` file. They're configured in
-`package.json#workspaces` (or `pnpm-workspaces.yml`). In case a directory has a
-`package.json` file, but is not a workspace (from a package manager
+A workspace is a directory with a package manifest (`package.json`,
+`package.yaml` or `package.yml`). They're configured in
+`package.json#workspaces` (or `pnpm-workspace.yaml`). In case a directory has a
+package manifest file, but is not a workspace (from a package manager
 perspective), it can be added as a workspace to the Knip configuration.
 
 Projects - in the context of TypeScript - are directories with a `tsconfig.json`
@@ -314,7 +315,7 @@ resolver.
 ### Why doesn't Knip match my TypeScript project structure?
 
 Repositories and workspaces in a monorepo aren't necessarily structured like
-TypeScript projects. Put simply, the location of `package.json` files isn't
+TypeScript projects. Put simply, the location of package manifest files isn't
 always adjacent to `tsconfig.json` files. Knip follows the structure of
 workspaces in a monorepo.
 
@@ -327,7 +328,7 @@ and installs a single "kitchen sink" module resolver function per workspace.
 Different strategies might add more complexity and performance penalties, while
 the current strategy is simple, fast and good enough.
 
-Note that any directory with a `package.json` not listed in the root
+Note that any directory with a package manifest not listed in the root
 `package.json#workspaces` can be added to the Knip configuration manually to
 have it handled as a separate workspace.
 

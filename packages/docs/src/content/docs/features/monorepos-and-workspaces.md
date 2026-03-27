@@ -8,7 +8,8 @@ Workspaces are handled out-of-the-box by Knip.
 
 Workspaces are sometimes also referred to as package-based monorepos, or as
 packages in a monorepo. Knip uses the term workspace exclusively to indicate a
-directory that has a `package.json`.
+directory that has a package manifest (`package.json`, `package.yaml` or
+`package.yml`).
 
 ## Configuration
 
@@ -66,11 +67,15 @@ The `workspaces` in Knip configuration (4) not already defined in the root
 
 :::caution
 
-A workspace must have a `package.json` file.
+A workspace must have a package manifest file (`package.json`, `package.yaml`
+or `package.yml`).
+
+If multiple manifest files are present in the same workspace, Knip prefers
+`package.json`.
 
 :::
 
-For projects with only a root `package.json`, please see [integrated
+For projects with only a root package manifest, please see [integrated
 monorepos][2].
 
 ## Additional workspaces

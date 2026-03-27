@@ -14,12 +14,18 @@ export class PackagePeeker {
 
     for (let i = 0; i < this.lines.length; i++) {
       const line = this.lines[i];
+      const jsonDeps = line.indexOf('"dependencies"') !== -1;
+      const jsonDevDeps = line.indexOf('"devDependencies"') !== -1;
+      const jsonOptPeerDeps = line.indexOf('"optionalPeerDependencies"') !== -1;
+      const yamlDeps = /^\s*dependencies:\s*/.test(line);
+      const yamlDevDeps = /^\s*devDependencies:\s*/.test(line);
+      const yamlOptPeerDeps = /^\s*optionalPeerDependencies:\s*/.test(line);
       const section =
-        line.indexOf('"dependencies"') !== -1
+        jsonDeps || yamlDeps
           ? 'dependencies'
-          : line.indexOf('"devDependencies"') !== -1
+          : jsonDevDeps || yamlDevDeps
             ? 'devDependencies'
-            : line.indexOf('"optionalPeerDependencies"') !== -1
+            : jsonOptPeerDeps || yamlOptPeerDeps
               ? 'optionalPeerDependencies'
               : undefined;
       if (section) this.sections[section] = { startLine: i, startPos: pos };
@@ -38,10 +44,14 @@ export class PackagePeeker {
     if (lines.length === 0 || !section) return;
 
     let pos = section.startPos + lines[section.startLine].length + 1;
+    const escapedPackageName = packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const yamlMatcher = new RegExp(`^\\s*${escapedPackageName}:\\s*`);
 
     for (let i = section.startLine + 1; i < lines.length; i++) {
       const line = lines[i];
-      if (line.includes(`"${packageName}"`)) {
+      const jsonMatch = line.includes(`"${packageName}"`);
+      const yamlMatch = yamlMatcher.test(line);
+      if (jsonMatch || yamlMatch) {
         const col = line.indexOf(packageName);
         return { line: i + 1, col: col + 1, pos: pos + col };
       }
