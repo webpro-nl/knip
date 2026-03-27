@@ -6,5 +6,5 @@ export const getSrcDir = (program: Program): string => {
   return values.size > 0 ? Array.from(values)[0] : 'src';
 };
 
-export const usesSharpImageService = (program: Program) =>
-  hasImportSpecifier(program, 'astro/config', 'sharpImageService');
+export const usesPassthroughImageService = (program: Program) =>
+  hasImportSpecifier(program, 'astro/config', 'passthroughImageService');

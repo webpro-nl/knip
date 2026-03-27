@@ -1,7 +1,7 @@
-import { defineConfig, sharpImageService } from 'astro/config';
+import { defineConfig, passthroughImageService } from 'astro/config';
 
 export default defineConfig({
   image: {
-    service: sharpImageService(),
+    service: passthroughImageService(),
   },
 });
