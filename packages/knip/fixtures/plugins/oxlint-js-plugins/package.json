@@ -1,7 +1,7 @@
 {
   "name": "@plugins/oxlint-js-plugins",
   "scripts": {
-    "lint": "oxlint"
+    "lint": "oxlint --config .oxlintrc-0.json"
   },
   "devDependencies": {
     "oxlint": "*",
