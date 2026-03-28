@@ -7,7 +7,7 @@
   ],
   "overrides": [
     {
-      "jsPlugins": ["eslint-plugin-unused-imports"]
+      "jsPlugins": ["eslint-plugin-import"]
     }
   ]
 }
