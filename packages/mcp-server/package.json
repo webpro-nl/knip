@@ -30,7 +30,7 @@
     "release": "release-it -c ../../.release-it.json"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/sdk": "^1.28.0",
     "knip": "workspace:^",
     "zod": "^4.1.11"
   },
