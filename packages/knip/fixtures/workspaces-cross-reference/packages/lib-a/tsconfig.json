@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "@fixtures/workspaces-cross-reference__lib-b/*": ["../../packages/lib-b/*"]
+    }
   }
 }
