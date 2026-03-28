@@ -151,6 +151,7 @@ export const pluginsSchema = z.object({
   webpack: pluginSchema,
   wireit: pluginSchema,
   wrangler: pluginSchema,
+  wxt: pluginSchema,
   xo: pluginSchema,
   yarn: pluginSchema,
   yorkie: pluginSchema,

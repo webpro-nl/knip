@@ -137,6 +137,7 @@ import { default as webdriverIo } from './webdriver-io/index.ts';
 import { default as webpack } from './webpack/index.ts';
 import { default as wireit } from './wireit/index.ts';
 import { default as wrangler } from './wrangler/index.ts';
+import { default as wxt } from './wxt/index.ts';
 import { default as xo } from './xo/index.ts';
 import { default as yarn } from './yarn/index.ts';
 import { default as yorkie } from './yorkie/index.ts';
@@ -281,6 +282,7 @@ export const Plugins = {
   webpack,
   wireit,
   wrangler,
+  wxt,
   xo,
   yarn,
   yorkie,
