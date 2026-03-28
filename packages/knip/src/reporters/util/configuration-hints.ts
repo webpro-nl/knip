@@ -141,7 +141,7 @@ export const finalizeConfigurationHints = (
       const hints = hintsByType.get(hintType) ?? [];
       const topHints = hints.length > 10 ? Array.from(hints).slice(0, 10) : hints;
       const row = topHints.map(hint => {
-        hint.filePath = relative(options.cwd, hint.filePath ?? options.configFilePath ?? '');
+        hint.filePath = relative(options.cwd, hint.filePath || options.configFilePath || options.cwd);
         const hintPrinter = hintPrinters.get(hint.type);
         // @ts-expect-error
         const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath: options.configFilePath }) : '';
