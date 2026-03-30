@@ -101,9 +101,9 @@ importers:
       '@nodelib/fs.walk':
         specifier: ^1.2.3
         version: 1.2.8
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
+      '@types/node':
+        specifier: '>=18'
+        version: 24.3.0
       formatly:
         specifier: ^0.3.0
         version: 0.3.0
@@ -134,6 +134,9 @@ importers:
       strip-json-comments:
         specifier: 5.0.3
         version: 5.0.3
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       unbash:
         specifier: ^2.2.0
         version: 2.2.0

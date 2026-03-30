@@ -31,10 +31,6 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
         const basePath = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, '');
         const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
         if (srcFilePath) toSourceMapCache.set(filePath, srcFilePath);
-        if (srcFilePath && srcFilePath !== filePath) {
-          debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
-          return srcFilePath;
-        }
       }
     }
   };
