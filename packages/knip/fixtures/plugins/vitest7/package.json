@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/vitest7",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

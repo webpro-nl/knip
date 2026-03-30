@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
 import type { PackageJson } from '../../types/package-json.js';
 import { type Input, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import { join, toAbsolute } from '../../util/path.js';
 import { hasDependency } from '../../util/plugin.js';
 import { getEnvPackageName, getExternalReporters } from './helpers.js';
 import type { COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.js';
@@ -41,7 +41,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions)
     (testConfig.coverage && testConfig.coverage.enabled !== false) || hasScriptWithCoverage(manifest.scripts);
   const coverage = hasCoverageEnabled ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const dir = join(configFileDir, testConfig.root ?? '.');
+  const dir = toAbsolute(testConfig.root ?? '.', configFileDir);
   const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
@@ -75,7 +75,7 @@ export const resolveEntryPaths: ResolveEntryPaths<ViteConfigOrFn | VitestWorkspa
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
   const configs = await getConfigs(localConfig);
   for (const cfg of configs) {
-    const dir = join(options.configFileDir, cfg.test?.root ?? '.');
+    const dir = toAbsolute(cfg.test?.root ?? '.', options.configFileDir);
     if (cfg.test?.include) {
       for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
     } else {
@@ -91,7 +91,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   for (const cfg of configs) {
     for (const dependency of findConfigDependencies(cfg, options)) inputs.add(dependency);
     const entry = cfg.build?.lib?.entry ?? [];
-    const dir = join(options.configFileDir, cfg.test?.root ?? '.');
+    const dir = toAbsolute(cfg.test?.root ?? '.', options.configFileDir);
     const deps = (typeof entry === 'string' ? [entry] : Object.values(entry))
       .map(specifier => join(dir, specifier))
       .map(toEntry);
