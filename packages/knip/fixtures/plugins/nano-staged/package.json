@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/nano-staged",
+  "devDependencies": {
+    "nano-staged": "*"
+  },
+  "nano-staged": {
+    "*.js": [
+      "eslint",
+      "prettier --write"
+    ]
+  }
+}

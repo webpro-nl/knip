@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/nx",
+  "name": "@plugins/nx",
   "scripts": {
     "nx": "nx"
   },
@@ -16,16 +16,17 @@
     "@nrwl/web": "*",
     "@nrwl/workspace": "*",
     "@tsconfig/node20": "*",
+    "@tsconfig/strictest": "*",
     "rimraf": "*"
   },
   "nx": {
     "targets": {
-        "clean": {
-            "executor": "nx:run-commands",
-            "options": {
-                "command": "rimraf dist"
-            }
+      "clean": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "rimraf dist"
         }
+      }
     }
   }
 }

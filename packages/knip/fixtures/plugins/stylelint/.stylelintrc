@@ -10,7 +10,8 @@
       "files": [
         "**/*.html"
       ],
-      "extends": ["stylelint-config-html/html", "stylelint-config-standard"]
+      "extends": ["stylelint-config-html/html", "stylelint-config-standard"],
+      "plugins": ["stylelint-order"]
     }
   ]
 }

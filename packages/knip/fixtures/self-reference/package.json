@@ -1,5 +1,5 @@
 {
-  "name": "my-package",
+  "name": "@fixtures/self-reference",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",

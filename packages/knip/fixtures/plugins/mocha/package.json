@@ -1,9 +1,17 @@
 {
-  "name": "@fixtures/mocha",
+  "name": "@plugins/mocha",
   "mocha": {
-    "extension": [
-      "ts"
+    "spec": [
+      "**/*.test.ts"
     ],
-    "require": "ts-node/register"
+    "require": [
+      "ts-node/register",
+      "hooks.ts"
+    ]
+  },
+  "devDependencies": {
+    "@types/mocha": "*",
+    "mocha": "*",
+    "ts-node": "*"
   }
 }

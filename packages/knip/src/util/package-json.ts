@@ -1,8 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
-import type { PackageJson } from '../types/package-json.js';
-import { _glob } from './glob.js';
-import { getStringValues } from './object.js';
+import type { PackageJson } from '../types/package-json.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -30,6 +28,21 @@ const parseJson = (raw: string): ExtendedPackageJson => {
   return result;
 };
 
+const getEntriesFromExports = (obj: any): string[] => {
+  if (typeof obj === 'string') return [obj];
+  let values: string[] = [];
+  for (const prop in obj) {
+    if (typeof obj[prop] === 'string') {
+      values.push(obj[prop]);
+    } else if (obj[prop] === null) {
+      values.push(`!${prop}`);
+    } else if (typeof obj[prop] === 'object') {
+      values = values.concat(getEntriesFromExports(obj[prop]));
+    }
+  }
+  return values;
+};
+
 export const load = async (filePath: string) => {
   const file = await readFile(filePath, 'utf8');
   return parseJson(file);
@@ -43,35 +56,50 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntryPathsFromManifest = (
-  manifest: PackageJson,
-  sharedGlobOptions: { cwd: string; dir: string; gitignore: boolean; ignore: string[] }
-) => {
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
   const entryPaths = new Set<string>();
 
-  if (typeof main === 'string') entryPaths.add(main);
-
-  if (typeof module === 'string') entryPaths.add(module);
-
-  if (typeof browser === 'string') entryPaths.add(browser);
-
-  if (bin) {
-    if (typeof bin === 'string') entryPaths.add(bin);
-    if (typeof bin === 'object') for (const id of Object.values(bin)) entryPaths.add(id);
-  }
+  if (typeof main === 'string' && main) entryPaths.add(main);
+  if (typeof module === 'string' && module) entryPaths.add(module);
+  if (typeof browser === 'string' && browser) entryPaths.add(browser);
+  if (typeof bin === 'string' && bin) entryPaths.add(bin);
+  if (bin && typeof bin === 'object') for (const id of Object.values(bin)) if (id) entryPaths.add(id);
+  if (typeof types === 'string' && types) entryPaths.add(types);
+  if (typeof typings === 'string' && typings) entryPaths.add(typings);
 
   if (exports) {
-    for (const item of getStringValues(exports)) entryPaths.add(item);
+    for (const item of getEntriesFromExports(exports)) {
+      if (item === './*' || item.trim() === '') continue;
+      const expanded = item
+        .replace(/\/\*$/, '/**') // /* → /**
+        .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
+        .replace(/\/\*\//, '/**/'); // /*/ → /**/
+      entryPaths.add(expanded);
+    }
   }
 
-  if (typeof types === 'string') entryPaths.add(types);
-  if (typeof typings === 'string') entryPaths.add(typings);
+  if (manifest.imports) {
+    for (const [key, value] of Object.entries(manifest.imports)) {
+      if (!key.startsWith('#')) continue;
+      for (const item of getEntriesFromExports(value)) {
+        if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
+      }
+    }
+  }
 
-  // Use glob, as we only want source files that:
-  // - exist
-  // - are not (generated) files that are .gitignore'd
-  // - do not match configured `ignore` patterns
-  return _glob({ ...sharedGlobOptions, patterns: Array.from(entryPaths), label: 'package.json entry' });
+  return entryPaths;
+};
+
+export const getManifestImportDependencies = (manifest: PackageJson) => {
+  const dependencies = new Set<string>();
+  if (!manifest.imports) return dependencies;
+  for (const [entry, exportValue] of Object.entries(manifest.imports)) {
+    if (!entry.startsWith('#')) continue;
+    for (const item of getEntriesFromExports(exportValue)) {
+      if (!item.startsWith('.') && !item.startsWith('!')) dependencies.add(item);
+    }
+  }
+  return dependencies;
 };

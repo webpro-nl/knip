@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { CucumberConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { CucumberConfig } from './types.ts';
 
 // https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md
 
@@ -15,22 +15,20 @@ const config = ['cucumber.{json,yaml,yml,js,cjs,mjs}'];
 
 const entry = ['features/**/*.@(js|cjs|mjs)'];
 
-const resolveEntryPaths: ResolveEntryPaths<CucumberConfig> = config => {
-  return (config?.import ? config.import : []).map(toEntry);
-};
-
 const resolveConfig: ResolveConfig<CucumberConfig> = config => {
+  const imports = (config?.import ? config.import : entry).map(id => toEntry(id));
   const formatters = config?.format ? config.format : [];
   const requires = config?.require ? config.require : [];
-  return [...formatters, ...requires].map(toDeferResolve);
+  return imports.concat([...formatters, ...requires].map(id => toDeferResolve(id)));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

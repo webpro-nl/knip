@@ -1,1 +1,1 @@
-export { MyPage } from './my-page';
+import './module.ts';

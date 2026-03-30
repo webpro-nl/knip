@@ -1,11 +1,11 @@
-import { DEFAULT_EXTENSIONS } from '../../constants.js';
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { isDirectory } from '../../util/fs.js';
-import { toDeferResolve, toProductionEntry } from '../../util/input.js';
-import { isInNodeModules, join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.js';
-import type { EleventyConfig } from './types.js';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isDirectory } from '../../util/fs.ts';
+import { toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { isInNodeModules, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.ts';
+import type { EleventyConfig, EleventyConfigOrFn } from './types.ts';
 
 // https://www.11ty.dev/docs/
 
@@ -19,23 +19,23 @@ const config = ['.eleventy.js', 'eleventy.config.{js,cjs,mjs}'];
 
 const production = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
 
-type T = Partial<EleventyConfig> | ((arg: DummyEleventyConfig) => Promise<Partial<EleventyConfig>>);
-
-const resolveEntryPaths: ResolveEntryPaths<T> = async (localConfig, options) => {
+const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, options) => {
   const { configFileDir } = options;
 
   const dummyUserConfig = new DummyEleventyConfig();
-  if (typeof localConfig === 'function') localConfig = await localConfig(dummyUserConfig);
+
+  if (typeof localConfig === 'function') localConfig = (await localConfig(dummyUserConfig)) as EleventyConfig;
 
   const inputDir = localConfig?.dir?.input || defaultEleventyConfig.dir.input;
   const dataDir = localConfig?.dir?.data || defaultEleventyConfig.dir.data;
-  const templateFormats = localConfig.templateFormats || defaultEleventyConfig.templateFormats;
+  const templateFormats = localConfig?.templateFormats || defaultEleventyConfig.templateFormats;
 
-  const exts = DEFAULT_EXTENSIONS.map(extname => extname.slice(1)).join(',');
+  const exts = [...DEFAULT_EXTENSIONS].map(extname => extname.slice(1)).join(',');
   const copiedEntries = new Set<string>();
+  const copiedPackages = new Set<string>();
 
   for (const path of Object.keys(dummyUserConfig.passthroughCopies)) {
-    const isDir = !path.includes('*') && isDirectory(join(configFileDir, path));
+    const isDir = !path.includes('*') && isDirectory(configFileDir, path);
     if (isDir) {
       copiedEntries.add(join(path, `**/*.{${exts}}`));
     } else if (!isInNodeModules(path)) {
@@ -43,33 +43,29 @@ const resolveEntryPaths: ResolveEntryPaths<T> = async (localConfig, options) => 
     }
   }
 
-  return [
-    join(inputDir, dataDir, '**/*.{js,cjs,mjs}'),
-    join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
-    join(inputDir, '**/*.11tydata.js'),
-    ...copiedEntries,
-  ].map(id => toProductionEntry(id));
-};
-
-const resolveConfig: ResolveConfig<T> = async localConfig => {
-  const dummyUserConfig = new DummyEleventyConfig();
-  if (typeof localConfig === 'function') localConfig = await localConfig(dummyUserConfig);
-
-  const copiedPackages = new Set<string>();
-
   for (const path of Object.keys(dummyUserConfig.passthroughCopies)) {
     if (isInNodeModules(path)) copiedPackages.add(path);
   }
 
-  return [...copiedPackages].map(id => toDeferResolve(id));
+  return Array.from(copiedPackages)
+    .map(id => toDeferResolve(id))
+    .concat(
+      [
+        join(inputDir, dataDir, '**/*.{js,cjs,mjs}'),
+        join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
+        join(inputDir, '**/*.11tydata.js'),
+        ...copiedEntries,
+      ].map(id => toProductionEntry(id))
+    );
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
-  resolveEntryPaths,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

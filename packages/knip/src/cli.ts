@@ -1,153 +1,131 @@
-import prettyMilliseconds from 'pretty-ms';
-import { main } from './index.js';
-import type { IssueType, ReporterOptions } from './types/issues.js';
-import { perfObserver } from './util/Performance.js';
-import parsedArgValues, { helpText } from './util/cli-arguments.js';
-import { getKnownError, hasCause, isConfigurationError, isKnownError } from './util/errors.js';
-import { logError, logWarning } from './util/log.js';
-import { cwd, join, toPosix } from './util/path.js';
-import { runPreprocessors, runReporters } from './util/reporter.js';
-import { splitTags } from './util/tag.js';
-import { isTrace } from './util/trace.js';
-import { version } from './version.js';
+/* oxlint-disable no-console */
+import { fix } from './IssueFixer.ts';
+import { run } from './run.ts';
+import type { IssueType, ReporterOptions } from './types/issues.ts';
+import parseArgs, { helpText } from './util/cli-arguments.ts';
+import { createOptions } from './util/create-options.ts';
+import {
+  getKnownErrors,
+  hasErrorCause,
+  isConfigurationError,
+  isKnownError,
+  isLoaderError,
+  isModuleNotFoundError,
+} from './util/errors.ts';
+import { logError } from './util/log.ts';
+import { perfObserver } from './util/Performance.ts';
+import { runPreprocessors, runReporters } from './util/reporter.ts';
+import { prettyMilliseconds } from './util/string.ts';
+import { version } from './version.ts';
 
-const defaultCacheLocation = join(cwd, 'node_modules', '.cache', 'knip');
-
-const {
-  'allow-remove-files': isRemoveFiles = false,
-  cache: isCache = false,
-  'cache-location': cacheLocation = defaultCacheLocation,
-  debug: isDebug = false,
-  dependencies: isDependenciesShorthand = false,
-  exclude: excludedIssueTypes = [],
-  'experimental-tags': experimentalTags = [],
-  exports: isExportsShorthand = false,
-  files: isFilesShorthand = false,
-  fix: isFix = false,
-  'fix-type': fixTypes = [],
-  help: isHelp,
-  include: includedIssueTypes = [],
-  'include-entry-exports': isIncludeEntryExports = false,
-  'include-libs': isIncludeLibs = false,
-  'isolate-workspaces': isIsolateWorkspaces = false,
-  'max-issues': maxIssues = '0',
-  'no-config-hints': isHideConfigHints = false,
-  'no-exit-code': noExitCode = false,
-  'no-gitignore': isNoGitIgnore = false,
-  'no-progress': isNoProgress = isDebug || isTrace,
-  preprocessor = [],
-  'preprocessor-options': preprocessorOptions = '',
-  production: isProduction = false,
-  reporter = ['symbols'],
-  'reporter-options': reporterOptions = '',
-  strict: isStrict = false,
-  tags = [],
-  tsConfig,
-  version: isVersion,
-  watch: isWatch = false,
-  workspace: rawWorkspaceArg,
-} = parsedArgValues;
-
-if (isHelp) {
-  console.log(helpText);
-  process.exit(0);
+let args: ReturnType<typeof parseArgs> = {};
+try {
+  args = parseArgs();
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error(error.message);
+    console.log(`\n${helpText}`);
+    process.exit(1);
+  }
+  throw error;
 }
 
-if (isVersion) {
-  console.log(version);
-  process.exit(0);
-}
-
-const isShowProgress = isNoProgress === false && process.stdout.isTTY && typeof process.stdout.cursorTo === 'function';
-
-const workspace = rawWorkspaceArg ? toPosix(rawWorkspaceArg).replace(/^\.\//, '').replace(/\/$/, '') : undefined;
-
-const run = async () => {
+const main = async () => {
   try {
-    const { report, issues, counters, rules, tagHints, configurationHints } = await main({
-      cacheLocation,
-      cwd,
-      excludedIssueTypes,
-      fixTypes: fixTypes.flatMap(type => type.split(',')),
-      gitignore: !isNoGitIgnore,
-      includedIssueTypes,
-      isCache,
-      isDebug,
-      isDependenciesShorthand,
-      isExportsShorthand,
-      isFilesShorthand,
-      isFix: isFix || fixTypes.length > 0,
-      isHideConfigHints,
-      isIncludeEntryExports,
-      isIncludeLibs,
-      isIsolateWorkspaces,
-      isProduction: isStrict || isProduction,
-      isRemoveFiles,
-      isShowProgress,
-      isStrict,
-      isWatch,
-      tags: tags.length > 0 ? splitTags(tags) : splitTags(experimentalTags),
-      tsConfigFile: tsConfig,
-      workspace,
-    });
+    if (args.help) {
+      console.log(helpText);
+      process.exit(0);
+    }
 
-    // These modes have their own reporting mechanism
-    if (isWatch || isTrace) return;
+    if (args.version) {
+      console.log(version);
+      process.exit(0);
+    }
 
-    const initialData: ReporterOptions = {
-      report,
+    const options = await createOptions({ args });
+
+    const { results } = await run(options);
+
+    const {
       issues,
       counters,
       tagHints,
       configurationHints,
-      noConfigHints: isHideConfigHints,
-      cwd,
-      isProduction,
-      isShowProgress,
-      options: reporterOptions,
-      preprocessorOptions,
+      includedWorkspaceDirs,
+      enabledPlugins,
+      selectedWorkspaces,
+    } = results;
+
+    // These modes have their own reporting mechanism
+    if (options.isWatch || options.isTrace) return;
+
+    const initialData: ReporterOptions = {
+      report: options.includedIssueTypes,
+      issues,
+      counters,
+      tagHints,
+      configurationHints,
+      enabledPlugins,
+      includedWorkspaceDirs,
+      cwd: options.cwd,
+      configFilePath: options.configFilePath,
+      isDisableConfigHints: options.isDisableConfigHints,
+      isProduction: options.isProduction,
+      isShowProgress: options.isShowProgress,
+      isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
+      maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
+      options: args['reporter-options'] ?? '',
+      preprocessorOptions: args['preprocessor-options'] ?? '',
+      selectedWorkspaces,
     };
 
-    const finalData = await runPreprocessors(preprocessor, initialData);
+    const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
 
-    await runReporters(reporter, finalData);
+    if (options.isFix) await fix(finalData.issues, finalData.counters, options);
+
+    await runReporters(args.reporter ?? ['symbols'], finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
-      .filter(reportGroup => finalData.report[reportGroup] && rules[reportGroup] === 'error')
+      .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
+    if (perfObserver.isEnabled) await perfObserver.finalize();
+    if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
+    if (perfObserver.isMemoryUsageEnabled && !args['memory-realtime'])
+      console.log(`\n${perfObserver.getMemoryUsageTable()}`);
+
     if (perfObserver.isEnabled) {
-      await perfObserver.finalize();
-      console.log(`\n${perfObserver.getTable()}`);
-      const mem = perfObserver.getCurrentMemUsageInMb();
       const duration = perfObserver.getCurrentDurationInMs();
-      console.log('\nTotal running time:', prettyMilliseconds(duration), `(mem: ${mem}MB)`);
+      console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();
     }
 
-    if (experimentalTags.length > 0) {
-      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
-    }
-
-    if (isIsolateWorkspaces && report.classMembers) {
-      logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
-    }
-
-    if (!noExitCode && totalErrorCount > Number(maxIssues)) {
+    if (
+      (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
+      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
+    ) {
       process.exit(1);
     }
   } catch (error: unknown) {
     process.exitCode = 2;
-    if (!isDebug && error instanceof Error && isKnownError(error)) {
-      const knownError = getKnownError(error);
-      logError('ERROR', knownError.message);
-      if (hasCause(knownError)) console.error('Reason:', knownError.cause.message);
-      if (isConfigurationError(knownError)) console.log('\nRun `knip --help` or visit https://knip.dev for help');
+    if (!args.debug && error instanceof Error && isKnownError(error)) {
+      const knownErrors = getKnownErrors(error);
+      for (const knownError of knownErrors) logError('ERROR', knownError.message);
+      if (hasErrorCause(knownErrors[0])) {
+        console.error('Reason:', knownErrors[0].cause.message);
+        if (isModuleNotFoundError(knownErrors[0].cause))
+          console.log('Module load error? Visit https://knip.dev/reference/known-issues');
+        if (isLoaderError(knownErrors[0]))
+          console.log('Configuration file load error? Visit https://knip.dev/reference/known-issues');
+      }
+      if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
       process.exit(2);
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
+
+  process.exit(0);
 };
 
-await run();
+await main();

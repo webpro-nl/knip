@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-tooling/backend",
+  "name": "@fixtures/workspaces-tooling__backend",
   "scripts": {
     "lint": "eslint",
     "typeorm": "node --require @swc/register ../../node_modules/.bin/typeorm"

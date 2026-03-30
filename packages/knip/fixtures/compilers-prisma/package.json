@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/compilers-prisma",
+  "scripts": {
+    "prisma:generate": "prisma generate"
+  },
+  "devDependencies": {
+    "prisma": "*",
+    "prisma-json-types-generator": "*",
+    "prisma-zod-generator": "*",
+    "prisma-openapi": "*"
+  }
+}

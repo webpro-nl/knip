@@ -2,7 +2,7 @@
 
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const syntaxHighlight = require('@11ty/eleventy-plugin-syntaxhighlight');
-const path = require('path');
+const path = require('node:path');
 const highlighter = require('./src/_plugins/syntax-highlighter');
 path;
 highlighter;

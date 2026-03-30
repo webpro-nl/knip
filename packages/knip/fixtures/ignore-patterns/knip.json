@@ -1,0 +1,4 @@
+{
+  "ignore": ["dist/**", "generated/**", "scripts/**"],
+  "ignoreFiles": ["temp/**"]
+}

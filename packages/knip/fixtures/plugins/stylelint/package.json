@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/stylelint",
-  "version": "*",
+  "name": "@plugins/stylelint",
   "devDependencies": {
     "stylelint": "*"
   }

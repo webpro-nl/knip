@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/nest",
-  "version": "*",
+  "name": "@plugins/nest",
   "scripts": {
     "start": "nest start"
   },

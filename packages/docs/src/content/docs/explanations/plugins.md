@@ -24,8 +24,8 @@ plugin will:
 ## Configuration files
 
 Knip uses [entry files][6] as starting points to scan your source code and
-resolve other internal files and external dependencies. The dependency graph can
-be statically resolved through the `require` and `import` statements in those
+resolve other internal files and external dependencies. The module graph can be
+statically resolved through the `require` and `import` statements in those
 source files. However, configuration files reference external dependencies in
 various ways. Knip uses a plugin for each tool to parse configuration files and
 find those dependencies.
@@ -57,7 +57,7 @@ as unlisted. And vice versa, if there are any ESLint plugins listed in
 
 ### Example: Vitest
 
-The second example uses [the Vitest plugin][7]. Here's a minimal example of a
+The second example uses [the Vitest plugin][8]. Here's a minimal example of a
 Vitest configuration file:
 
 ```ts title="vitest.config.ts"
@@ -73,7 +73,7 @@ export default defineConfig({
 });
 ```
 
-The Vitest plugin reads this configuration and return two dependencies:
+The Vitest plugin reads this configuration and returns two dependencies:
 
 - `@vitest/coverage-istanbul`
 - `vitest-environment-happy-dom`
@@ -86,8 +86,8 @@ plugins contain `package.json` in the list of `config` files.
 
 :::tip[Summary]
 
-Plugins parse `config` files to find external dependencies. Knip uses this to
-determine unused and unlisted dependencies.
+Plugins load configuration files to find referenced dependencies, and determine
+unused and unlisted dependencies.
 
 :::
 
@@ -100,15 +100,15 @@ dependencies.
 For example, if `next` is listed as a dependency in `package.json`, the Next.js
 plugin will automatically add multiple patterns as entry files, such as
 `pages/**/*.{js,jsx,ts,tsx}`. If `vitest` is listed, the Vitest plugin adds
-`**/*.{test,test-d,spec}.ts` as entry file patterns. Most plugins have entry
-files configured, so you don't have to.
+`**/*.{test,test-d,spec,spec-d}.ts` as entry file patterns. Most plugins have
+entry files configured, so you don't have to.
 
 It's mostly plugins for meta frameworks and test runners that have `entry` files
 configured.
 
 :::tip[Plugins result in less configuration]
 
-Plugins uses entry file patterns as defined in the configuration files of these
+Plugins uses entry file patterns as defined in your configuration file of these
 tools. So you don't need to repeat this in your Knip configuration.
 
 :::
@@ -242,7 +242,8 @@ dependency.
 
 :::tip[Summary]
 
-Plugins can find additional entry files when parsing config files.
+In your config files, plugins can find additional entry files and also other
+config files recursively.
 
 :::
 
@@ -283,6 +284,14 @@ automatically added as `entry` files for Knip to **statically** resolve the
 
 Additionally, `./setup-tests.ts` will be added as an `entry` file.
 
+:::note
+
+When plugins dynamically load configuration files, conditional dependencies may
+not be detected if the condition evaluates differently during analysis. See
+[conditional or dynamic dependencies][9] for details and workarounds.
+
+:::
+
 ## Command-Line Arguments
 
 Plugins may define the arguments where Knip should look for entry files,
@@ -293,7 +302,24 @@ node --loader tsx scripts/deploy.ts
 playwright test -c playwright.web.config.ts
 ```
 
-Please see [script parser][8] for more details.
+Please see [script parser][10] for more details.
+
+## Config File Location
+
+If configuration files aren't in their default location and they are not
+referenced through some script like `vite -c ./dir/vite.config.ts`, then make
+sure to tell Knip about it. Two examples:
+
+```json title="knip.jsonc"
+{
+  "playwright": { "config": ["e2e/playwright.config.ts"] },
+  "vite": "packages/*/vite.config.ts" // shorthand without `config` and array notation
+}
+```
+
+This is common in projects where a directory like `packages/lib` is not an
+actual workspace with a `package.json` file. Also see [integrated monorepos][11]
+for similar cases.
 
 ## Summary
 
@@ -302,17 +328,20 @@ Please see [script parser][8] for more details.
 Plugins are configured with two distinct types of files:
 
 - `config` files are dynamically loaded and parsed by the plugin
-- `entry` files are added to the module dependency graph
+- `entry` files are added to the module graph
 - Both can recursively lead to additional entry files, config files and
   dependencies
 
 :::
 
 [1]: ../reference/plugins.md
-[2]: ../guides/writing-a-plugin.md
+[2]: ../writing-a-plugin/index.md
 [3]: #configuration-files
 [4]: #entry-files
 [5]: #command-line-arguments
 [6]: ./entry-files.md
 [7]: ../reference/plugins/eslint.md
-[8]: ../features/script-parser.md
+[8]: ../reference/plugins/vitest.md
+[9]: ../guides/handling-issues.mdx#conditional-or-dynamic-dependencies
+[10]: ../features/script-parser.md
+[11]: ../features/integrated-monorepos.md

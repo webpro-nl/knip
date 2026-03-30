@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://remix.run/docs/en/v1/api/conventions
 
@@ -18,10 +18,12 @@ const production = [
   'server.{js,ts}',
 ];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

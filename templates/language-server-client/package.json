@@ -1,0 +1,8 @@
+{
+  "name": "@knip-ls/root",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  }
+}

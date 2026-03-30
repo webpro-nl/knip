@@ -1,0 +1,12 @@
+diff --git a/knip.json b/knip.json
+index 8bbe72d..23921d7 100644
+--- a/knip.json
++++ b/knip.json
+@@ -1,6 +1,6 @@
+ {
+ 	"$schema": "https://unpkg.com/knip@5.71.0/schema.json",
+-	"entry": ["src/**/*.test.*", "src/index.ts"],
++	"entry": ["src/**/*.test.*"],
+ 	"ignoreDependencies": [
+ 		"all-contributors-cli",
+ 		"cspell-populate-words",

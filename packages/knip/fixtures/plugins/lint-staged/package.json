@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/lint-staged",
+  "name": "@plugins/lint-staged",
   "devDependencies": {
     "lint-staged": "*"
   },

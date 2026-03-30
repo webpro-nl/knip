@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/yarn",
-  "version": "*",
+  "name": "@plugins/yarn",
   "devDependencies": {
     "@yarnpkg/types": "latest"
   }

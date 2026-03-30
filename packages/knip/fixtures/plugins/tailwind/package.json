@@ -1,5 +1,5 @@
 {
-  "name": "tailwind",
+  "name": "@plugins/tailwind",
   "scripts": {
     "css": "tailwindcss"
   },

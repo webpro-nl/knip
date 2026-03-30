@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/expo2",
-  "version": "*",
+  "name": "@plugins/expo2",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start"

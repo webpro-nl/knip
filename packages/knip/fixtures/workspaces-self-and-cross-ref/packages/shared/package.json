@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/workspaces-self-and-cross-ref__shared",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./*": {
+      "default": "./build/*.js"
+    }
+  },
+  "sideEffects": false
+}

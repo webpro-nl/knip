@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/yorkie",
-  "version": "*",
+  "name": "@plugins/yorkie",
   "gitHooks": {
     "pre-commit": "lint-staged"
   },

@@ -1,19 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
-
-const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces-cross-reference');
 
-skipIfBun('Resolve imports in separate workspaces without entry file', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+test('Resolve imports in separate workspaces without entry file', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['packages/lib-a/mod-a.ts']['unused']);
   assert(issues.exports['packages/lib-b/mod-b.ts']['unused']);

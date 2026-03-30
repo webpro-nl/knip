@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/sst2",
+  "dependencies": {
+    "sst": "*"
+  }
+}

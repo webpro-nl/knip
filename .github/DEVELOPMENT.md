@@ -2,122 +2,171 @@
 
 Development in this repository is using:
 
-- Bun
+- pnpm
 - TypeScript
 - Biome
 
-You should have Bun installed, the rest comes with `bun install`.
+This document describes commands and tasks that might help during development.
+Use what fits your workflow best, but make sure [QA][1] passes.
+
+> [!TIP]
+>
+> tl;dr The quickest way to get started: `git clone`, `pnpm install`, find a
+> relevant test file in `packages/knip/test`, and [hit F5 in VS Code or
+> WebStorm][2].
+
+## Contents
+
+- [Getting started][3]
+- [Agents][4]
+- [Contributing a plugin?][5]
+- [Running Knip][6]
+- [Tests][7]
+- [QA][1]
+- [GitHub Action][8]
 
 ## Getting started
 
-This guide assumes familiarity with concepts like [forking][1] and [cloning a
-repo][2] and working with npm.
+This guide assumes familiarity with concepts like [forking][9], [cloning a
+repo][10] and working with a package manager.
 
-- Fork the project (e.g. using the [GitHub website][3] or the [gh CLI][4])
+- Fork the project using the [GitHub website][11] or the [`gh` CLI][12]
 - Clone the repository
 - Install dependencies
 
-Example terminal commands:
+Example terminal commands on your machine to get started:
 
 ```shell
-gh repo fork webpro-nl/knip --clone
+git clone git@github.com:[username]/knip.git
+# Or using gh CLI: gh repo fork webpro-nl/knip --clone
 cd knip
-bun install
+pnpm install
 cd packages/knip
-bun run build
-bun run test
+pnpm build
+pnpm test
 ```
 
-Depending on the goals and the way you like to work, below are a few things that
-might help during development:
-
-## Plugins
-
-There's a separate guide for [writing a plugin][5].
-
-## Watcher
+To skip slower tests related to CLI and `--fix`, while still covering all the
+essentials and plugins:
 
 ```shell
-bun watch
+pnpm test:smoke
+bun test:bun:smoke
 ```
 
-Changes in the source code are now automatically picked up, and `knip` is
-available globally to run from any directory.
+## Agents
 
-## Debugging
+Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][13]. Take
+responsibility and make sure to not cause unnecessary review and "wall of text"
+overhead to maintainers. Also [consider this before opening a pull request][14].
 
-### IDE
+## Contributing a plugin?
 
-- Open the Knip source repository
-- Set a breakpoint in Knip source code
-- In the built-in terminal, cd to your project
-- Enable e.g. "auto-attach" to Node.js process or "only attach with flag"
-- Run:
+In addition to the generic guidelines in this document, there's a guide for
+[writing a plugin][15].
+
+## Running Knip
+
+Knip is written in TypeScript, and there are a few options to run it including
+your changes:
+
+- [Compile][16] ahead of time to JavaScript to run in Node.js
+- [Without compilation][17]
+  - Transpile on the fly using e.g `tsx` to run in Node.js
+  - Use a runtime that supports TypeScript (i.e. Bun)
+
+### Compile
+
+Use `pnpm build` to compile using `tsc` once. To recompile on changes:
 
 ```shell
-tsx --inspect path/to/knip/packages/knip/src/cli.ts
+pnpm watch
 ```
 
-## Fixtures & Tests
+On source code changes, `tsc` will compile to JavaScript, and the `knip`
+executable is available globally to run from any directory.
 
-Pull requests should include one or more tests. See the `tests` and `fixtures`
-directories to find relevant files that you may want to borrow or copy from.
+### Without compilation
 
-Assuming you've created `fixtures/feature` and `test/feature.test.ts`, from the
-`packages/knip` location, here's 4 ways to run it:
-
-### 1. Run the test
+Run Knip without compilation:
 
 ```shell
-bun test ./test/feature.test.ts
+node path/to/knip/packages/knip/src/cli.ts
 ```
 
-### 2. Run Knip in the directory
+#### Alias
+
+Expanding on this idea, set up an alias like so:
+
+```shell
+alias k="node --inspect ~/p/knip/packages/knip/src/cli.ts"
+```
+
+Invoke `k` to run Knip including any local changes. And if it's in the built-in
+terminal, it will stop at breakpoints. For the rest of this document, `knip` or
+`node --inspect` can be replaced with `k`.
+
+## Tests
+
+Most pull requests should probably include one or more tests.
+
+Assuming you've created `test/feature.test.ts` and `fixtures/feature` (the
+plugin create command does for you), here's a few ideas to run and debug Knip
+from a test.
+
+Creating a new plugin? The [plugin guide][18] has a command to set up a test
+with fixtures for you.
+
+### Run single test file
+
+```shell
+node --test test/my-feature.test.ts
+bun test test/plugins/my-plugin.test.ts
+```
+
+### Run Knip in the directory
 
 ```shell
 knip --directory fixtures/feature
 ```
 
-### 3. Attach debugger to Node.js
+### Attach debugger to Node.js
 
-Attach to Node.js process launched in terminal in IDE, and then:
-
-```shell
-cd fixtures/feature
-tsx --inspect ../../src/cli.ts
-```
-
-### 4. VS Code: Attach to Bun
-
-- Install the
-  [VS Code Bun extension](https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode)
-  if you haven't already
-- Set a breakpoint and start Knip with Bun while waiting for the debugger to be
-  attached:
+To debug Knip in an IDE (e.g. [VS Code][19] or [WebStorm][20]), open the
+built-in terminal and allow the debugger to connect:
 
 ```shell
 cd fixtures/feature
-bun --inspect-wait=127.0.0.1:6499/knip run ../../src/cli.ts
+node --inspect ../../src/cli.ts
 ```
 
-Then run the "Attach to Bun" launch configuration.
+Make sure VS Code is set up to attach to the Node.js process ("Always" or "With
+flag").
 
-### 5. VS Code: Attach debugger to Bun from a test
+### Attach debugger from inside a test file
 
-- Install the
-  [VS Code Bun extension](https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode)
-  if you haven't already
-- Set a breakpoint and run the "Debug Bun test" launch configuration while in
-  any test file.
+Run configurations for VS Code and WebStorm² are set up in the repo. This a
+great way to debug almost anything in Knip.
+
+- Using Node.js
+  - From any test file, run the "Debug test with tsx/Node.js" launch config
+- Using Bun
+  - VS Code: ensure the [Bun extension][21] is enabled
+  - WebStorm: ensure the [Bun plugin][22] is enabled
+  - From any test file, run the "Debug test with Bun" launch config
+
+From now on, just set a breakpoint and hit `F5` (Code) or `ctrl-r` (WS) from any
+test file to run and debug.
+
+² Requires at least WebStorm 2025.2 EAP
 
 ### Attach debugger to tests
 
-In case you're wondering if/why some code is ever hit, it's possible to attach
-the debugger to each test. Set a breakpoint and run all tests (warning: slow):
+In case you're wondering if or why some code is ever hit, attach the debugger to
+each test. Set a breakpoint and run all tests in one of the following ways:
 
-```shell
-tsx --inspect --test --import ./transform-test.js test/**/*.test.ts
-```
+- From built-in terminal: `tsx --inspect --test test/**/*.test.ts`
+- Use the "Debug all tests with Bun" launch config.
 
 ## QA
 
@@ -125,31 +174,49 @@ Knip has a few tools set up to verify code quality and to format code and
 documentation:
 
 ```shell
-bun format
-bun lint
-bun knip
-bun knip:production
-bun run test
+pnpm format
+pnpm lint
+pnpm knip
+pnpm knip --strict
+pnpm test
 ```
 
 ## GitHub Action
 
-The [ci.yml][7] workflow runs the tests in Ubuntu, macOS and Windows. Tests must
-pass before pull requests can be merged. The [integration.yml][8] workflow runs
-Knip in multiple repositories using Knip.
+The [ci.yml][23] workflow runs the tests across Bun, recent Node.js versions,
+Ubuntu, macOS and Windows. QA in CI must be all green before a pull request can
+be merged. The [integration.yml][24] workflow runs Knip in multiple repositories
+using Knip, against the latest version of the code.
 
 ## Previews
 
-Thanks to [pkg.pr.new](https://pkg.pr.new) pull requests can be previewed by
-installing it as a regular package. Every push is published to their registry.
-Look for the `pkg-pr-new` bot in your pull request.
+Thanks to [pkg.pr.new][25] pull requests can be previewed by installing it as a
+regular package. Every push is published to their registry. Look for the
+`pkg-pr-new` bot in your pull request.
 
-[1]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[2]:
+[1]: #qa
+[2]: #attach-debugger-to-bun-from-a-test
+[3]: #getting-started
+[4]: #agents
+[5]: #contributing-a-plugin
+[6]: #running-knip
+[7]: #tests
+[8]: #github-action
+[9]: https://docs.github.com/get-started/quickstart/fork-a-repo
+[10]:
   https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
-[3]: https://github.com/webpro-nl/knip
-[4]: https://cli.github.com/
-[5]: https://knip.dev/guides/writing-a-plugin/
-[6]: ../.vscode/launch.json
-[7]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
-[8]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
+[11]: https://github.com/webpro-nl/knip
+[12]: https://cli.github.com/
+[13]: ../AGENTS.md
+[14]: ./CONTRIBUTING.md#open-a-pull-request
+[15]: https://knip.dev/guides/writing-a-plugin/
+[16]: #compile
+[17]: #without-compilation
+[18]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
+[19]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
+[20]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
+[21]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
+[22]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
+[23]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
+[24]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
+[25]: https://pkg.pr.new

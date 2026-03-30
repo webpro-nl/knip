@@ -1,5 +1,5 @@
 .hero {
-  padding-bottom: 5rem;
+  padding-bottom: 1rem;
 }
 
 .hero img {
@@ -35,7 +35,7 @@
   }
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .hero img {
     border-color: var(--sl-color-black);
   }

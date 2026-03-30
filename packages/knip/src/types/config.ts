@@ -1,13 +1,15 @@
-import type { z } from 'zod';
-import type { ConfigurationValidator } from '../ConfigurationValidator.js';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { pluginSchema } from '../schema/plugins.js';
-import type { Input } from '../util/input.js';
-import type { PluginName } from './PluginNames.js';
-import type { Args } from './args.js';
-import type { Tags } from './cli.js';
-import type { IssueType, Rules } from './issues.js';
-import type { PackageJson } from './package-json.js';
+import type { Program, VisitorObject } from 'oxc-parser';
+import type { z } from 'zod/mini';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
+import type { pluginSchema } from '../schema/plugins.ts';
+import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
+import type { Input } from '../util/input.ts';
+import type { Args } from './args.ts';
+import type { IssueType, SymbolType } from './issues.ts';
+import type { Tags } from './options.ts';
+import type { PluginName } from './PluginNames.ts';
+import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
@@ -24,7 +26,7 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
-type FromArgs = (args: string[]) => Input[];
+export type FromArgs = (args: string[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
 
 export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
@@ -32,35 +34,41 @@ export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
 
 export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
 
-export type RawConfiguration = z.infer<typeof ConfigurationValidator>;
+export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
+
+export type RawConfigurationOrFn =
+  | RawConfiguration
+  | ((options: ParsedCLIArgs) => RawConfiguration | Promise<RawConfiguration>);
 
 export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
 
+export type WorkspaceProjectConfig = z.infer<typeof workspaceConfigurationSchema>;
+
 export type IgnorePatterns = (string | RegExp)[];
 
-type IgnorableExport = 'class' | 'enum' | 'function' | 'interface' | 'member' | 'type';
+type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
-type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+
+export type IgnoreIssues = Record<string, IssueType[]>;
 
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
-  skipExports: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
-  isReportClassMembers: boolean;
-  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  isReportExports: boolean;
   tags: Tags;
 };
 
 export interface Configuration {
-  rules: Rules;
-  include: IssueType[];
-  exclude: IssueType[];
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  ignoreFiles: NormalizedGlob;
+  ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
+  ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
   syncCompilers: SyncCompilers;
@@ -81,6 +89,7 @@ interface BaseWorkspaceConfiguration {
   project: NormalizedGlob;
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
+  ignoreFiles: NormalizedGlob;
   isIncludeEntryExports: boolean;
 }
 
@@ -94,6 +103,7 @@ interface BaseOptions {
   rootCwd: string;
   cwd: string;
   manifestScriptNames: Set<string>;
+  rootManifest: PackageJson | undefined;
 }
 
 type IsPluginEnabledOptions = {
@@ -116,26 +126,75 @@ export interface PluginOptions extends BaseOptions {
   getInputsFromScripts: GetInputsFromScriptsPartial;
 }
 
-export type ResolveEntryPaths<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
+type PluginSetup = () => Promise<void> | void;
+
+export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
 
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
+export type HandleInput = (input: Input) => string | undefined;
+
+export type RegisterCompilerInput = {
+  extension: string;
+  compiler: CompilerSync;
+};
+
+export type RegisterCompiler = (input: RegisterCompilerInput) => void;
+
+export type ResolveFromAST = (
+  program: Program,
+  options: PluginOptions & {
+    readFile: (filePath: string) => string;
+  }
+) => Input[];
+
+export type RegisterCompilersOptions = {
+  cwd: string;
+  hasDependency: HasDependency;
+  registerCompiler: RegisterCompiler;
+};
+
+/** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
+export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
+
+export type PluginVisitorContext = {
+  filePath: string;
+  sourceText: string;
+  addScript: (script: string) => void;
+  addImport: (specifier: string, pos: number, modifiers: number) => void;
+};
+
+export type PluginVisitorObject = VisitorObject;
+
+export type RegisterVisitorsOptions = {
+  ctx: PluginVisitorContext;
+  registerVisitor: (visitor: PluginVisitorObject) => void;
+  registeredPlugins: Set<string>;
+};
+
+export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
+
 export interface Plugin {
   title: string;
   args?: Args;
-  packageJsonPath?: string | ((manifest: PackageJson) => string);
+  packageJsonPath?: string | ((manifest: PackageJson) => unknown);
   enablers?: IgnorePatterns | string;
   isEnabled?: IsPluginEnabled;
   isRootOnly?: boolean;
-  config?: string[];
+  config?: string[] | ((options: { cwd: string }) => string[]);
   entry?: string[];
   production?: string[];
   project?: string[];
-  resolveEntryPaths?: ResolveEntryPaths;
+  setup?: PluginSetup;
+  isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
+  resolveFromAST?: ResolveFromAST;
+  isFilterTransitiveDependencies?: boolean;
+  registerCompilers?: RegisterCompilers;
+  registerVisitors?: RegisterVisitors;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

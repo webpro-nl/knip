@@ -1,9 +1,8 @@
-import { OwnershipEngine } from '@snyk/github-codeowners/dist/lib/ownership/index.js';
-import picocolors from 'picocolors';
-import type { Entries } from 'type-fest';
-import type { Issue, IssueRecords, IssueSet, ReporterOptions } from '../types/issues.js';
-import { relative, resolve, toRelative } from '../util/path.js';
-import { getTitle, logIssueLine, logTitle } from './util.js';
+import type { Entries } from '../types/entries.ts';
+import type { Issue, ReporterOptions } from '../types/issues.ts';
+import { createOwnershipEngine } from '../util/codeowners.ts';
+import { relative, resolve } from '../util/path.ts';
+import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 type OwnedIssue = Issue & { owner: string };
 
@@ -11,20 +10,14 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueSet = (issues: { symbol: string; owner: string }[]) => {
-  for (const issue of issues.sort((a, b) => (a.owner < b.owner ? -1 : 1))) {
-    console.log(picocolors.cyan(issue.owner), toRelative(issue.symbol));
-  }
-};
-
-const logIssueRecord = (issues: OwnedIssue[]) => {
+const logIssueRecord = (issues: OwnedIssue[], cwd: string) => {
   const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
   for (const { filePath, symbols, owner, parentSymbol } of sortedByFilePath) {
-    logIssueLine({ owner, filePath, symbols, parentSymbol });
+    console.log(getIssueLine({ owner, filePath, symbols, parentSymbol }, cwd));
   }
 };
 
-export default ({ report, issues, isShowProgress, options }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, options, cwd }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -32,42 +25,31 @@ export default ({ report, issues, isShowProgress, options }: ReporterOptions) =>
     console.error(error);
   }
   const codeownersFilePath = resolve(opts.path ?? '.github/CODEOWNERS');
-  const codeownersEngine = OwnershipEngine.FromCodeownersFile(codeownersFilePath);
+  const findOwners = createOwnershipEngine(codeownersFilePath);
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
-  const [dependenciesOwner = '[no-owner]'] = codeownersEngine.calcFileOwnership('package.json');
-  const fallbackOwner = dependenciesOwner;
+  const [dependenciesOwner = '[no-owner]'] = findOwners('package.json');
   let totalIssues = 0;
 
-  const calcFileOwnership = (filePath: string) =>
-    codeownersEngine.calcFileOwnership(relative(filePath))[0] ?? fallbackOwner;
-  const addOwner = (issue: Issue) => ({ ...issue, owner: calcFileOwnership(issue.filePath) });
+  const calcFileOwnership = (filePath: string) => findOwners(relative(cwd, filePath))[0] ?? dependenciesOwner;
+  const addOwner = (issue: Issue) => ({
+    ...issue,
+    owner: calcFileOwnership(issue.filePath),
+  });
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && getTitle(reportType);
-      const isSet = issues[reportType] instanceof Set;
-      const toIssue = (filePath: string) => ({ type: reportType, filePath, symbol: filePath }) as Issue;
+      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
-      const issuesForType =
-        issues[reportType] instanceof Set
-          ? Array.from(issues[reportType] as IssueSet)
-              .map(toIssue)
-              .map(addOwner)
-          : reportType === 'duplicates'
-            ? Object.values(issues[reportType]).flatMap(Object.values).map(addOwner)
-            : Object.values(issues[reportType] as IssueRecords).map(issues => {
-                const symbols = Object.values(issues);
-                return addOwner({ ...symbols[0], symbols });
-              });
+      const issuesForType = Object.values(issues[reportType]).flatMap(issues => {
+        if (reportType === 'duplicates') return Object.values(issues).map(addOwner);
+        const symbols = Object.values(issues);
+        return addOwner({ ...symbols[0], symbols });
+      });
 
       if (issuesForType.length > 0) {
         if (totalIssues) console.log();
-        title && logTitle(title, issuesForType.length);
-        if (isSet) {
-          logIssueSet(issuesForType);
-        } else {
-          logIssueRecord(issuesForType);
-        }
+        title && console.log(getColoredTitle(title, issuesForType.length));
+        logIssueRecord(issuesForType, cwd);
       }
 
       totalIssues = totalIssues + issuesForType.length;

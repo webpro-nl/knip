@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/workspaces-plugin-config__shared",
+  "scripts": {
+    "test": "ava"
+  },
+  "devDependencies": {
+    "ava": "^5.3.1",
+    "webpack": "*",
+    "@storybook/builder-vite": "*"
+  }
+}

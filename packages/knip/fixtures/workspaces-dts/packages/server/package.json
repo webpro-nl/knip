@@ -1,10 +1,9 @@
 {
-  "name": "@workspaces-dts/server",
-  "version": "0.0.0",
+  "name": "@fixtures/workspaces-dts__server",
   "private": true,
   "type": "module",
   "typings": "server.d.ts",
   "dependencies": {
-    "@workspaces-dts/shared": "*"
+    "@fixtures/workspaces-dts__shared": "*"
   }
 }

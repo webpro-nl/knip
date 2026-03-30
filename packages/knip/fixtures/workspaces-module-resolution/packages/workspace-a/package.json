@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/workspaces-module-resolution__workspace-a",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@fixtures/workspaces-module-resolution__workspace-b": "*"
+  }
+}

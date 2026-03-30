@@ -1,0 +1,7 @@
+{
+  "entry": ["index.ts", "src/index.ts"],
+  "project": ["**/*.ts"],
+  "compilers": {
+    "md": true
+  }
+}

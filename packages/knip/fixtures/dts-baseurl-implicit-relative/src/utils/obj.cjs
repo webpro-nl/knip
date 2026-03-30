@@ -1,1 +1,1 @@
-export const obj = () => {};
+module.exports.obj = () => {};

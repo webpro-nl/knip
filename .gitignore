@@ -1,2 +1,6 @@
 node_modules
-.idea
+/.idea/*
+!/.idea/runConfigurations
+.DS_Store
+.npmrc
+packages/*/dist

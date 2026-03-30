@@ -1,9 +1,8 @@
-import { fencedCodeBlockMatcher, importMatcher } from './compilers.js';
-import type { HasDependency } from './types.js';
+import { fencedCodeBlockMatcher, frontmatterMatcher, inlineCodeMatcher } from './compilers.ts';
+import type { HasDependency } from './types.ts';
 
 // https://mdxjs.com/packages/
 const mdxDependencies = [
-  'astro',
   '@mdx-js/esbuild',
   '@mdx-js/loader',
   '@mdx-js/mdx',
@@ -17,6 +16,15 @@ const mdxDependencies = [
 
 const condition = (hasDependency: HasDependency) => mdxDependencies.some(hasDependency);
 
-const compiler = (text: string) => [...text.replace(fencedCodeBlockMatcher, '').matchAll(importMatcher)].join('\n');
+const mdxImportMatcher = /^import[^'"]+['"][^'"]+['"]/gm;
+
+const compiler = (text: string) =>
+  [
+    ...text
+      .replace(frontmatterMatcher, '')
+      .replace(fencedCodeBlockMatcher, '')
+      .replace(inlineCodeMatcher, '')
+      .matchAll(mdxImportMatcher),
+  ].join('\n');
 
 export default { condition, compiler };

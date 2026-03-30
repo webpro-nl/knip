@@ -1,3 +1,3 @@
-import { foo } from '@include-entry-reexports/shared';
+import { identifierA } from '@fixtures/include-entry-reexports__shared';
 
-console.log(foo());
+identifierA();

@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/i18next-parser",
+  "scripts": {
+    "i18next": "i18next -c custom.config.js"
+  },
+  "devDependencies": {
+    "i18next-parser": "*"
+  }
+}

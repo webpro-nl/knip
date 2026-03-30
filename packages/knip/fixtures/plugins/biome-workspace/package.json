@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/biome-workspace",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "*",
+    "@org/shared-configs": "*"
+  }
+}

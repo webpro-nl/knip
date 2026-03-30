@@ -1,17 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
-import baseCounters from '../helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/vitest');
 
-test('Find dependencies with Vitest plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+test('Find dependencies with the Vitest plugin', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['vite.config.ts']['@vitest/coverage-c8']);
   assert(issues.unlisted['vite.config.ts']['@edge-runtime/vm']);
@@ -20,13 +18,32 @@ test('Find dependencies with Vitest plugin', async () => {
   assert(issues.unlisted['vitest-default-coverage.config.ts']['@vitest/coverage-v8']);
   assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(issues.unlisted['vitest.config.ts']['@vitest/coverage-istanbul']);
+  assert(issues.unlisted['package.json']['@vitest/coverage-istanbul']);
+  assert(issues.unlisted['package.json']['vitest-sonar-reporter']);
+  assert(issues.unlisted['package.json']['jsdom']);
+  assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 7,
+    unlisted: 11,
     unresolved: 1,
-    processed: 8,
-    total: 8,
+    processed: 11,
+    total: 11,
+  });
+});
+
+test('Find dependencies with the Vitest plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert('src/setupTests.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    processed: 1,
+    total: 1,
   });
 });

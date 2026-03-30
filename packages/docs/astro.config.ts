@@ -1,8 +1,6 @@
-import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import starlight from '@astrojs/starlight';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import remarkDirective from 'remark-directive';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 import { transformDirectives } from './remark/transformDirectives.ts';
@@ -20,10 +18,10 @@ export default defineConfig({
   trailingSlash: 'never',
   redirects: {
     '/guides/commonjs': '/guides/working-with-commonjs',
+    '/guides/writing-a-plugin': '/writing-a-plugin',
   },
   markdown: {
     remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
-    rehypePlugins: [rehypeHeadingIds, rehypeAutolinkHeadings],
   },
   integrations: [
     starlight({
@@ -33,11 +31,11 @@ export default defineConfig({
         dark: './src/assets/title-dark.svg',
         replacesTitle: true,
       },
-      social: {
-        github: 'https://github.com/webpro-nl/knip',
-        discord: 'https://discord.gg/r5uXTtbTpc',
-        blueSky: 'https://bsky.app/profile/webpro.nl',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
+        { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/knip' },
+      ],
       components: {
         Head: './src/components/Head.astro',
         Footer: './src/components/Footer.astro',
@@ -62,6 +60,10 @@ export default defineConfig({
         {
           label: 'Guides',
           autogenerate: { directory: 'guides' },
+        },
+        {
+          label: 'Writing a Plugin',
+          autogenerate: { directory: 'writing-a-plugin' },
         },
         {
           label: 'Reference',

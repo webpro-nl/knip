@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getDependencies } from './helpers.js';
-import type { ExpoConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getConfig, getDependencies } from './helpers.ts';
+import type { ExpoConfig } from './types.ts';
 
 // https://docs.expo.dev/
 
@@ -17,18 +17,13 @@ const config = ['app.json', 'app.config.{ts,js}'];
 
 const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 
-/** @public */
-export const docs = { production };
-
-const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { manifest }) => {
-  const expoConfig = typeof localConfig === 'function' ? localConfig() : localConfig;
-  const config = 'expo' in expoConfig ? expoConfig.expo : expoConfig;
-
-  let patterns: string[] = [];
+const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
+  const { manifest } = options;
+  const config = getConfig(localConfig, options);
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {
-    patterns = [...production];
+    let patterns = [...production];
 
     const normalizedPlugins =
       config.plugins?.map(plugin => (Array.isArray(plugin) ? plugin : ([plugin] as const))) ?? [];
@@ -41,18 +36,20 @@ const resolveEntryPaths: ResolveEntryPaths<ExpoConfig> = async (localConfig, { m
         patterns = [join(options.root, '**/*.{js,jsx,ts,tsx}')];
       }
     }
+
+    return patterns.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
   }
 
-  return patterns.map(entry => toProductionEntry(entry));
+  return production.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
 };
 
-const resolveConfig: ResolveConfig<ExpoConfig> = async (expoConfig, options) => getDependencies(expoConfig, options);
-
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
-  resolveEntryPaths,
+  production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

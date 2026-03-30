@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/react-router",
+  "devDependencies": {
+    "@react-router/dev": "*"
+  }
+}

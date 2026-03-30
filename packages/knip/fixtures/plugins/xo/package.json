@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/xo",
+  "name": "@plugins/xo",
   "scripts": {
     "test": "xo"
   },
@@ -8,6 +8,8 @@
   },
   "xo": {
     "space": true,
-    "plugins": ["eslint-comments"]
+    "plugins": [
+      "eslint-comments"
+    ]
   }
 }

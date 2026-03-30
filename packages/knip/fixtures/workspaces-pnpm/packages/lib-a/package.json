@@ -1,4 +1,4 @@
 {
-  "name": "@workspaces-pnpm/lib-a",
+  "name": "@fixtures/workspaces-pnpm__lib-a",
   "main": "./index.js"
 }

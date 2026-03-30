@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/rollup",
+  "name": "@plugins/rollup",
   "scripts": {
     "build": "rollup"
   },

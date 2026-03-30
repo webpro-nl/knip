@@ -49,4 +49,13 @@ In that case, we could configure the ESLint and Cypress plugins like this:
 Adapt the file patterns to your project, and the relevant `config` and `entry`
 files and dependencies should no longer be reported as unused.
 
+## Internal Workspace Dependencies
+
+A note about repositories with multiple `package.json` files and **internal**
+workspace packages: it is recommended to list all dependencies in each consuming
+`package.json`, allowing Knip to do fine-grained reporting of both unused and
+unlisted dependencies.
+
+An alternative is to `ignoreDependencies: ["@internal/*"]`.
+
 [1]: https://nx.dev/getting-started/tutorials/integrated-repo-tutorial

@@ -38,7 +38,7 @@ const config = {
       },
     ],
     // Simulates a required plugin, should not be added to the unspecified plugins array
-    function myCustomPlugin() {}
+    function myCustomPlugin() {},
   ],
 };
 

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/barrel-namespace-chain",
+  "knip": {
+    "tags": ["-knipignore"]
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest3",
+  "name": "@plugins/vitest3",
   "devDependencies": {
     "@swc/plugin-styled-components": "*",
     "@vitejs/plugin-react-swc": "*",

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 143 16">
+  <defs>
+    <clipPath id="anthropic-a">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-b">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-c">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-d">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-e">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-f">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-g">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-h">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-i">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-j">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-k">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+    <clipPath id="anthropic-l">
+      <path d="M0 0h143v16H0z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#anthropic-a)">
+    <path fill="none" d="M142.5 0v16H0V0h142.5z"/>
+    <g clip-path="url(#anthropic-b)">
+      <g clip-path="url(#anthropic-c)">
+        <g clip-path="url(#anthropic-d)">
+          <path fill="currentColor" d="M10.716 10.829 3.756 0H0v15.47h3.204V4.641l6.96 10.829h3.756V0h-3.204v10.829z" transform="translate(18.3 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-e)">
+          <path fill="currentColor" d="M0 2.984h5.193V15.47h3.314V2.984H13.7V0H0v2.984z" transform="translate(34.87 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-f)">
+          <path fill="currentColor" d="M10.606 6.166H3.314V0H0v15.47h3.314V9.15h7.292v6.32h3.314V0h-3.314v6.166z" transform="translate(51.23 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-g)">
+          <path fill="currentColor" d="M3.315 2.984h4.089c1.635 0 2.497.596 2.497 1.723 0 1.127-.862 1.724-2.497 1.724H3.315V2.984zm9.901 1.723C13.216 1.79 11.073 0 7.56 0H0v15.47h3.315V9.415h3.69l3.316 6.055h3.67l-3.672-6.517c1.843-.708 2.897-2.2 2.897-4.246z" transform="translate(69.24 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-h)">
+          <path fill="currentColor" d="M7.622 12.906c-2.607 0-4.198-1.856-4.198-4.884 0-3.072 1.591-4.928 4.198-4.928 2.585 0 4.154 1.856 4.154 4.928 0 3.028-1.569 4.884-4.154 4.884zM7.622 0C3.16 0 0 3.315 0 8.022 0 12.685 3.16 16 7.622 16c4.44 0 7.578-3.315 7.578-7.978C15.2 3.315 12.063 0 7.622 0z" transform="translate(84.99)"/>
+        </g>
+        <g clip-path="url(#anthropic-i)">
+          <path fill="currentColor" d="M7.406 6.873h-4.09v-3.89h4.09c1.636 0 2.498.664 2.498 1.945 0 1.282-.862 1.945-2.498 1.945zM7.56 0H0v15.47h3.316V9.857h4.245c3.515 0 5.659-1.857 5.659-4.929S11.076 0 7.56 0z" transform="translate(103.29 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-j)">
+          <path fill="currentColor" d="M10.915 10.541c-.575 1.503-1.724 2.365-3.292 2.365-2.607 0-4.198-1.856-4.198-4.884 0-3.072 1.59-4.928 4.198-4.928 1.568 0 2.717.862 3.292 2.365h3.513C13.566 2.144 10.98 0 7.623 0 3.16 0 0 3.315 0 8.022 0 12.685 3.16 16 7.623 16c3.38 0 5.965-2.166 6.827-5.459h-3.535z" transform="translate(128.04)"/>
+        </g>
+        <g clip-path="url(#anthropic-k)">
+          <path fill="currentColor" d="m0 0 6.168 15.47H9.55L3.382 0H0z" transform="translate(117.83 .27)"/>
+        </g>
+        <g clip-path="url(#anthropic-l)">
+          <path fill="currentColor" d="m5.825 9.348 2.11-5.436 2.11 5.436h-4.22zM6.167 0 0 15.47h3.448l1.261-3.249h6.452l1.26 3.249h3.449L9.703 0H6.167z" transform="translate(0 .27)"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

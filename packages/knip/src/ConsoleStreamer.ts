@@ -1,12 +1,16 @@
+import type { MainOptions } from './util/create-options.ts';
+
 /**
  * - Casts messages as a stream to stdout during the process
  */
 export class ConsoleStreamer {
   isEnabled = false;
+  isWatch = false;
   private lines = 0;
 
-  constructor({ isEnabled = false }) {
-    this.isEnabled = isEnabled;
+  constructor(options: MainOptions) {
+    this.isEnabled = options.isShowProgress;
+    this.isWatch = options.isWatch;
   }
 
   private clearLines(count: number) {
@@ -19,24 +23,25 @@ export class ConsoleStreamer {
     process.stdout.cursorTo(0);
   }
 
-  private resetLines() {
-    this.clearLines(this.lines);
+  private clearScreen() {
+    process.stdout.write('\x1b[2J\x1b[1;1f');
   }
 
   private update(messages: string[]) {
-    this.resetLines();
+    this.clear();
     process.stdout.write(`${messages.join('\n')}\n`);
     this.lines = messages.length;
   }
 
-  cast(message: string | string[]) {
+  cast(message: string | string[], sub?: string) {
     if (!this.isEnabled) return;
     if (Array.isArray(message)) this.update(message);
-    else this.update([message]);
+    else this.update([`${message}${!sub || sub === '.' ? '' : ` (${sub})`}…`]);
   }
 
   clear() {
     if (!this.isEnabled) return;
-    this.resetLines();
+    if (this.isWatch) this.clearScreen();
+    else this.clearLines(this.lines);
   }
 }

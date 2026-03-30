@@ -13,13 +13,16 @@ project. That's why Knip supports compilers.
 Knip has built-in "compilers" for the following file extensions:
 
 - `.astro`
+- `.css` (only enabled by `tailwindcss`)
 - `.mdx`
+- `.prisma`
+- `.sass` + `.scss`
 - `.svelte`
 - `.vue`
 
 Knip does not include real compilers for those files, but regular expressions to
 collect `import` statements. This is fast, requires no dependencies, and enough
-for Knip to build the dependency graph.
+for Knip to build the module graph.
 
 On the other hand, real compilers may expose their own challenges in the context
 of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
@@ -28,6 +31,17 @@ reported as unused by Knip.
 
 The built-in functions seem to do a decent job, but override them however you
 like.
+
+Compilers are enabled only if certain dependencies are found. If that's not
+working for your project, set `true` and enable any compiler manually:
+
+```ts title="knip.ts"
+export default {
+  compilers: {
+    mdx: true,
+  },
+};
+```
 
 ## Custom compilers
 
@@ -53,28 +67,14 @@ to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
 
 :::
 
-### Svelte
+### Examples
 
-In a project with Svelte, the compiler is automatically enabled, but you may
-have unresolved imports starting with `$app/`:
+- [CSS][1]
+- [MDX][2]
+- [Svelte][3]
+- [Vue][4]
 
-```shell
-Unresolved imports (5)
-$app/stores       src/routes/Header.svelte:1:9
-$app/environment  src/routes/about/+page.ts:1:9
-```
-
-In this case, you can manually add the `$app` path alias:
-
-```json title="knip.json"
-{
-  "paths": {
-    "$app/*": ["node_modules/@sveltejs/kit/src/runtime/app/*"]
-  }
-}
-```
-
-### CSS
+#### CSS
 
 Here's an example, minimal compiler for CSS files:
 
@@ -88,12 +88,43 @@ export default {
 
 You may wonder why the CSS compiler is not included by default. It's currently
 not clear if it should be included. And if so, what would be the best way to
-determine it should be enabled, and what syntax(es) it should support.
+determine it should be enabled, and what syntax(es) it should support. Note that
+Tailwind CSS and SASS/SCSS compilers are included.
 
-### Vue
+#### MDX
 
-In a project with Vue, the compiler is automatically enabled. Override and use
-Vue's parser for better results if the built-in "compiler" is not enough:
+Another example, in case the built-in MDX compiler is not enough:
+
+```ts
+import { compile } from '@mdx-js/mdx';
+
+export default {
+  compilers: {
+    mdx: async text => (await compile(text)).toString(),
+  },
+};
+```
+
+#### Svelte
+
+In a Svelte project, the compiler is automatically enabled. Override and use
+Svelte's compiler for better results if the built-in "compiler" is not enough:
+
+```ts
+import type { KnipConfig } from 'knip';
+import { compile } from 'svelte/compiler';
+
+export default {
+  compilers: {
+    svelte: (source: string) => compile(source, {}).js.code,
+  },
+} satisfies KnipConfig;
+```
+
+#### Vue
+
+In a Vue project, the compiler is automatically enabled. Override and use Vue's
+parser for better results if the built-in "compiler" is not enough:
 
 ```ts
 import type { KnipConfig } from 'knip';
@@ -134,3 +165,8 @@ const config = {
 
 export default config;
 ```
+
+[1]: #css
+[2]: #mdx
+[3]: #svelte
+[4]: #vue

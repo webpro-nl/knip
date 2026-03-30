@@ -1,14 +1,15 @@
-import type { SyncCompilerFn } from './types.js';
+import type { CompilerSync } from './types.ts';
 
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
+export const inlineCodeMatcher = /`[^`]+`/g;
 
 // Extract imports from body of <script> nodes
 const scriptExtractor = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
-export const importMatcher = /import[^'"]+['"]([^'"]+)['"]/g;
-export const importsWithinScripts: SyncCompilerFn = (text: string) => {
+export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
+export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: ignore
+  // oxlint-disable-next-line no-cond-assign
   while ((scriptMatch = scriptExtractor.exec(text))) {
     for (const importMatch of scriptMatch[1].matchAll(importMatcher)) {
       scripts.push(importMatch);
@@ -17,14 +18,28 @@ export const importsWithinScripts: SyncCompilerFn = (text: string) => {
   return scripts.join(';\n');
 };
 
-// Extract body of <script lang="ts"> nodes
-const tsScriptExtractor = /<script\b[^>]*lang="ts"[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
-export const tsScriptBodies: SyncCompilerFn = (text: string) => {
+// Extract body of <script>、<script lang="ts">、<script setup>、<script lang="ts" setup> etc. nodes
+const scriptBodyExtractor = /<script\b[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
+export const scriptBodies: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: ignore
-  while ((scriptMatch = tsScriptExtractor.exec(text))) {
+  // oxlint-disable-next-line no-cond-assign
+  while ((scriptMatch = scriptBodyExtractor.exec(text))) {
     if (scriptMatch.groups?.body) scripts.push(scriptMatch.groups.body);
   }
   return scripts.join(';\n');
+};
+
+// Extract paths as imports from frontmatter for given keys (e.g., 'layout')
+export const frontmatterMatcher = /^---\r?\n([\s\S]*?)\r?\n---/;
+export const importsWithinFrontmatter = (text: string, keys: string[] = []) => {
+  const frontmatter = text.match(frontmatterMatcher)?.[1];
+  if (!frontmatter) return '';
+
+  const imports = keys.flatMap(key => {
+    const valueMatcher = new RegExp(`${key}:\\s*["']([^"']+)["']`, 'i');
+    const match = frontmatter.match(valueMatcher);
+    return match?.[1] ? [`import ${key} from "${match[1]}";`] : [];
+  });
+  return imports.join('\n');
 };

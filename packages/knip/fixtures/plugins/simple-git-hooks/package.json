@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/simple-git-hooks",
+  "name": "@plugins/simple-git-hooks",
   "devDependencies": {
     "simple-git-hooks": "*",
     "lint-staged": "*"

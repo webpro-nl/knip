@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://docs.sentry.io/platforms/javascript/configuration/
 
@@ -9,11 +9,13 @@ const enablers = [/^@sentry\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['sentry.{client,server,edge}.config.{js,ts}'];
+const production = ['sentry.{client,server,edge}.config.{js,ts}'];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  entry,
-} satisfies Plugin;
+  production,
+};
+
+export default plugin;

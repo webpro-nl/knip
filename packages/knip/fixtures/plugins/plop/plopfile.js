@@ -13,7 +13,7 @@ const page = {
     return [
       {
         type: 'add',
-        path: `./doc/{{ dashCase name }}.md`,
+        path: './doc/{{ dashCase name }}.md',
         templateFile: 'template.hbs',
       },
     ];

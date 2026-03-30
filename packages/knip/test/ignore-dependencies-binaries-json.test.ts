@@ -1,17 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/ignore-dependencies-binaries-json');
 
-test('Respect ignored binaries and dependencies, including string-to-regex, show config hints', async () => {
-  const { issues, counters, configurationHints } = await main({
-    ...baseArguments,
-    cwd,
-  });
+test('Respect ignored binaries and dependencies, including string-to-regex, config hints', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters, configurationHints } = await main(options);
 
   assert(issues.binaries['package.json']['formatter']);
 
@@ -22,28 +20,20 @@ test('Respect ignored binaries and dependencies, including string-to-regex, show
     total: 1,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
-      { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'stream' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: /.+unused-deps.+/ },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: /.*unused-bins.*/ },
+  ]);
 });
 
-test('Respect ignored binaries and dependencies, including string-to-regex, no config hints (production)', async () => {
-  const { counters, configurationHints } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+test('Respect ignored binaries and dependencies, including string-to-regex', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 1,
     total: 1,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });

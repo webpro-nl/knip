@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tagged-template-literal",
+  "dependencies": {
+    "astro": "*",
+    "dedent": "*"
+  }
+}

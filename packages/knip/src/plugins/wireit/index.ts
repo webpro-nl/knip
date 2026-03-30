@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { WireitConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { WireitConfig } from './types.ts';
 
 // https://github.com/google/wireit
 
@@ -20,10 +20,12 @@ const resolveConfig: ResolveConfig<WireitConfig> = (localConfig, options) => {
   return scriptDependencies;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

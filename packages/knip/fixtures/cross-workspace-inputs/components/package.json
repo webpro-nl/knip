@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cross-workspace-inputs__components",
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

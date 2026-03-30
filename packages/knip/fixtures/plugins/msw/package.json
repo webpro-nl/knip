@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/msw",
-  "version": "*",
+  "name": "@plugins/msw",
   "knip": {
     "msw": true
   },

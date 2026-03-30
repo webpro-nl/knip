@@ -8,7 +8,7 @@ export interface ReferencedInterfaceInternally {
 }
 
 export function referencedInternallyFunction(value: unknown) {
-  console.log(value);
+  //
 }
 
 export function usedFunction(options: ReferencedInterfaceInternally) {
@@ -16,5 +16,5 @@ export function usedFunction(options: ReferencedInterfaceInternally) {
 }
 
 export function referencedNeverFunction() {
-  console.log('Hello!');
+  //
 }

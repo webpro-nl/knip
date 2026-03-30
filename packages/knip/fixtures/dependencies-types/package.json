@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/dependencies-types",
+  "dependencies": {
+    "@eslint/js": "^9.20.0",
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/ajv": "^0.0.5",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.14.8"
+  }
+}

@@ -1,11 +1,11 @@
 {
-  "name": "@workspaces/frontend",
+  "name": "@fixtures/workspaces__frontend",
   "main": "./index.js",
   "dependencies": {
-    "@workspaces/shared": "1.0.0",
-    "@workspaces/tools": "1.0.0"
+    "@fixtures/workspaces__shared": "1.0.0",
+    "@fixtures/workspaces__tools": "1.0.0"
   },
   "devDependencies": {
-    "@workspaces/tsconfig": "1.0.0"
+    "@fixtures/workspaces__tsconfig": "1.0.0"
   }
 }

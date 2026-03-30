@@ -1,0 +1,28 @@
+{
+  "name": "@fixtures/workspaces",
+  "workspaces": [
+    "app"
+  ],
+  "dependencies": {
+    "minimist": "*",
+    "typescript": "*"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "knip": {
+    "ignoreWorkspaces": [
+      "apps/ignored-workspace"
+    ],
+    "workspaces": {
+      ".": {
+        "entry": "scripts/*.ts",
+        "project": "scripts/**/*.ts"
+      },
+      "app": {
+        "entry": "index.ts!",
+        "project": "**/*.ts!"
+      }
+    }
+  }
+}

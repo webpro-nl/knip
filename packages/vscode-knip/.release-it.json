@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "extends": "../../.release-it.json",
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "before:init": ["pnpm run -C ../mcp-server/ prepack", "pnpm test"],
+    "after:bump": "node scripts/publish.js --publish"
+  }
+}

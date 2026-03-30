@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { TypeDocConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { TypeDocConfig } from './types.ts';
 
 // https://typedoc.org/guides/overview/
 // https://github.com/TypeStrong/typedoc/blob/9f0fb048399c7a1273dc452d01cca92b34f4675b/src/lib/utils/options/readers/typedoc.ts#L168
@@ -27,14 +27,14 @@ const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConf
   const cfg = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
   const plugins = cfg?.plugin ?? [];
   const themes = cfg?.theme ?? [];
-  return [...plugins, ...themes].map(toDeferResolve);
+  return [...plugins, ...themes].map(id => toDeferResolve(id));
 };
 
 const args = {
   resolve: ['plugin', 'theme'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -42,4 +42,6 @@ export default {
   config,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

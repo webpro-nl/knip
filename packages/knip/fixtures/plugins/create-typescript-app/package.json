@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/create-typescript-app",
+  "devDependencies": {
+    "create-typescript-app": "*"
+  }
+}

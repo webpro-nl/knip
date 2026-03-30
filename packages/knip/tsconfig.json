@@ -1,8 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "baseUrl": ".",
+    "allowImportingTsExtensions": true,
     "declaration": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
@@ -13,6 +14,7 @@
     "outDir": "./dist",
     "removeComments": true,
     "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true,
     "rootDir": "./src",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
@@ -22,9 +24,5 @@
     "verbatimModuleSyntax": true
   },
   "include": ["./src/**/*.ts"],
-  "exclude": [],
-  "files": [
-    "./@types/github-codeowners/index.d.ts",
-    "./@types/summary/index.d.ts"
-  ]
+  "exclude": []
 }

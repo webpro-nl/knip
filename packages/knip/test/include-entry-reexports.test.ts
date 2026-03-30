@@ -1,18 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/include-entry-reexports');
 
 test('Skip unused nsExports in entry source files', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: false,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: false });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -22,13 +19,10 @@ test('Skip unused nsExports in entry source files', async () => {
 });
 
 test('Report unused nsExports in entry source files', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
 
-  assert(issues.exports['packages/shared/bar.mjs']['bar']);
+  assert(issues.exports['packages/shared/module-b.mjs']['identifierB']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

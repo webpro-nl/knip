@@ -4,7 +4,7 @@ export default {
   compilers: {
     vue: text => {
       const scripts = [];
-      let match;
+      let match: any[] | null;
       while ((match = compiler.exec(text))) scripts.push(match[1]);
       return scripts.join(';');
     },

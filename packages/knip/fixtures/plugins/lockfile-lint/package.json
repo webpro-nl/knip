@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/lockfile-lint",
-  "version": "*",
+  "name": "@plugins/lockfile-lint",
   "scripts": {
     "lockfile-lint": "lockfile-lint"
   },

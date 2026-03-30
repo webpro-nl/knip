@@ -1,4 +1,4 @@
-import circularA, { B1 } from '@workspaces-cross-reference/lib-b/mod-b';
+import circularA, { B1 } from '@fixtures/workspaces-cross-reference__lib-b/mod-b';
 
 export const A = B1;
 

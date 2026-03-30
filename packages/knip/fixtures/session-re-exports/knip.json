@@ -1,0 +1,8 @@
+{
+  "workspaces": {
+    "app": {
+      "entry": ["index.ts"]
+    },
+    "pkg": {}
+  }
+}

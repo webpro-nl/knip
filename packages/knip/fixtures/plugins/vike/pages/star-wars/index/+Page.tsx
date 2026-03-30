@@ -1,10 +1,10 @@
-export default Page
+export default Page;
 
-import { useData } from '../../../renderer/useData'
-import type { Data } from './+data'
+import { useData } from '../../../renderer/useData';
+import type { Data } from './+data';
 
 function Page() {
-  const { movies } = useData<Data>()
+  const { movies } = useData<Data>();
   return (
     <>
       <h1>Star Wars Movies</h1>
@@ -22,5 +22,5 @@ function Page() {
         Data can be fetched by using the <code>data()</code> hook.
       </p>
     </>
-  )
+  );
 }

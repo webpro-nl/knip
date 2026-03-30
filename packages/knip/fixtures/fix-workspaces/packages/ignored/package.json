@@ -1,5 +1,5 @@
 {
-  "name": "@org/ignored",
+  "name": "@fixtures/fix-workspaces__ignored",
   "dependencies": {
     "unused": "*"
   }

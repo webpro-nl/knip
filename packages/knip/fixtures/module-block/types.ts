@@ -1,7 +1,7 @@
 namespace MyNamespace {
-  export type Bar = number;
-  export const bar = 2;
+  export type Identifier = number;
+  export const identifier = 2;
 }
 
-type FooBar = MyNamespace.Bar;
-const foobar = MyNamespace.bar;
+type NS_ID = MyNamespace.Identifier;
+const ns_id = MyNamespace.identifier;

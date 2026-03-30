@@ -4,7 +4,7 @@
 const { defineConfig } = require('@yarnpkg/types');
 
 module.exports = defineConfig({
-  async constraints({Yarn}) {
+  async constraints({ Yarn }) {
     // `Yarn` is now well-typed ✨
   },
 });

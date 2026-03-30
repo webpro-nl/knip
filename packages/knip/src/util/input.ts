@@ -1,7 +1,17 @@
-import type { PluginName } from '../types/PluginNames.js';
-import { toRelative } from './path.js';
+import type { IssueType } from '../types/issues.ts';
+import type { PluginName } from '../types/PluginNames.ts';
+import { isAbsolute, toRelative } from './path.ts';
 
-type InputType = 'binary' | 'entry' | 'config' | 'dependency' | 'deferResolve' | 'deferResolveEntry';
+type InputType =
+  | 'binary'
+  | 'entry'
+  | 'project'
+  | 'config'
+  | 'dependency'
+  | 'deferResolve'
+  | 'deferResolveEntry'
+  | 'alias'
+  | 'ignore';
 
 export interface Input {
   type: InputType;
@@ -10,19 +20,32 @@ export interface Input {
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
+  allowIncludeExports?: boolean;
+  skipExportsAnalysis?: boolean;
+  group?: string;
 }
 
 export interface ConfigInput extends Input {
   type: 'config';
-  containingFilePath: string;
+  containingFilePath?: string;
   pluginName: PluginName;
 }
 
+interface AliasInput extends Input {
+  type: 'alias';
+  prefixes: string[];
+}
+
+interface IgnoreInput extends Input {
+  type: 'ignore';
+  issueType: IssueType;
+}
+
 type Options = {
-  production?: boolean;
   optional?: boolean;
   dir?: string;
   containingFilePath?: string;
+  allowIncludeExports?: boolean;
 };
 
 export const fromBinary = (input: Input) => input.specifier;
@@ -39,6 +62,10 @@ export const toEntry = (specifier: string): Input => ({ type: 'entry', specifier
 
 export const isEntry = (input: Input) => input.type === 'entry' && !input.production;
 
+export const toProject = (specifier: string): Input => ({ type: 'project', specifier });
+
+export const isProject = (input: Input) => input.type === 'project';
+
 export const toProductionEntry = (specifier: string, options: Options = {}): Input => ({
   type: 'entry',
   specifier,
@@ -48,14 +75,14 @@ export const toProductionEntry = (specifier: string, options: Options = {}): Inp
 
 export const isProductionEntry = (input: Input) => input.type === 'entry' && input.production === true;
 
-export const toConfig = (pluginName: PluginName, specifier: string, containingFilePath: string): ConfigInput => ({
+export const toConfig = (pluginName: PluginName, specifier: string, options: Options = {}): ConfigInput => ({
   type: 'config',
   specifier,
   pluginName,
-  containingFilePath,
+  ...options,
 });
 
-export const isConfigPattern = (input: Input): input is ConfigInput => input.type === 'config';
+export const isConfig = (input: Input): input is ConfigInput => input.type === 'config';
 
 export const toDependency = (specifier: string, options: Options = {}): Input => ({
   type: 'dependency',
@@ -71,13 +98,48 @@ export const toProductionDependency = (specifier: string): Input => ({
   production: true,
 });
 
-export const toDevDependency = (specifier: string): Input => ({ type: 'dependency', specifier });
+export const toDeferResolve = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolve',
+  specifier,
+  ...options,
+});
 
-export const toDeferResolve = (specifier: string): Input => ({ type: 'deferResolve', specifier });
+export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
 
-export const toDeferResolveEntry = (specifier: string): Input => ({ type: 'deferResolveEntry', specifier });
+export const toDeferResolveProductionEntry = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolveEntry',
+  specifier,
+  production: true,
+  ...options,
+});
+
+export const isDeferResolveProductionEntry = (input: Input) =>
+  input.type === 'deferResolveEntry' && input.production === true;
+
+export const toDeferResolveEntry = (specifier: string, options: Options = {}): Input => ({
+  type: 'deferResolveEntry',
+  specifier,
+  ...options,
+});
 
 export const isDeferResolveEntry = (input: Input) => input.type === 'deferResolveEntry';
 
-export const toDebugString = (input: Input) =>
-  `${input.type}:${input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath)})` : ''}`;
+export const toAlias = (specifier: string, prefix: string | string[], options: Options = {}): AliasInput => ({
+  type: 'alias',
+  specifier,
+  prefixes: Array.isArray(prefix) ? prefix : [prefix],
+  ...options,
+});
+
+export const isAlias = (input: Input): input is AliasInput => input.type === 'alias';
+
+export const toIgnore = (specifier: string, issueType: IssueType): IgnoreInput => ({
+  type: 'ignore',
+  specifier,
+  issueType,
+});
+
+export const isIgnore = (input: Input): input is IgnoreInput => input.type === 'ignore';
+
+export const toDebugString = (input: Input, cwd: string) =>
+  `${input.type}:${isAbsolute(input.specifier) ? toRelative(input.specifier, cwd) : input.specifier}${input.containingFilePath ? ` (${toRelative(input.containingFilePath, cwd)})` : ''}`;

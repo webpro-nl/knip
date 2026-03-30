@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/webpack-cli",
+  "name": "@plugins/webpack-cli",
   "scripts": {
     "build": "webpack"
   },

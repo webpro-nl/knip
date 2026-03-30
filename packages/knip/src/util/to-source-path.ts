@@ -1,45 +1,66 @@
-import fastGlob from 'fast-glob';
-import type { CompilerOptions } from 'typescript';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { debugLog } from './debug.js';
-import { isDirectory } from './fs.js';
-import { isInternal, join, toRelative } from './path.js';
+import type { CompilerOptions } from '../types/project.ts';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { debugLog, debugLogArray } from './debug.ts';
+import { findFileWithExtensions, isDirectory } from './fs.ts';
+import { _glob, prependDirToPattern } from './glob.ts';
+import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
-const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
-const hasJSExt = /\.(m|c)js$/;
+const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
+const sourceExtensions = [...DEFAULT_EXTENSIONS];
+
 export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOptions: CompilerOptions) => {
   const srcDir = join(dir, 'src');
-  workspace.srcDir = (compilerOptions.rootDir ?? isDirectory(srcDir)) ? srcDir : dir;
+  const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
+  workspace.srcDir = compilerOptions.rootDir ?? (outDirHasSrc ? dir : isDirectory(srcDir) ? srcDir : dir);
   workspace.outDir = compilerOptions.outDir || workspace.srcDir;
 };
 
-export const getToSourcePathHandler = (chief: ConfigurationChief) => {
+export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 
-  const toSourcePath = (filePath: string) => {
-    if (!isInternal(filePath) || hasJSExt.test(filePath) || hasTSExt.test(filePath)) return;
+  return (filePath: string) => {
+    if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
-    if (workspace) {
-      if (workspace.srcDir && workspace.outDir) {
-        if (filePath.startsWith(workspace.outDir)) {
-          const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
-          const [srcFilePath] = fastGlob.sync(pattern);
-          toSourceMapCache.set(filePath, srcFilePath);
-          if (srcFilePath && srcFilePath !== filePath) {
-            debugLog('*', `Rewiring ${toRelative(filePath)} → ${toRelative(srcFilePath)}`);
-            return srcFilePath;
-          }
+    if (workspace?.srcDir && workspace.outDir) {
+      if (filePath.startsWith(workspace.outDir) || workspace.srcDir === workspace.outDir) {
+        const basePath = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, '');
+        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        if (srcFilePath) toSourceMapCache.set(filePath, srcFilePath);
+        if (srcFilePath && srcFilePath !== filePath) {
+          debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
+          return srcFilePath;
         }
       }
     }
   };
-
-  return toSourcePath;
 };
 
-export type ToSourceFilePath = ReturnType<typeof getToSourcePathHandler>;
+export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
+  return async (specifiers: Set<string>, dir: string, extensions = defaultExtensions, label: string) => {
+    const patterns = new Set<string>();
+
+    for (const specifier of specifiers) {
+      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
+      const ws = chief.findWorkspaceByFilePath(absSpecifier);
+      if (ws?.srcDir && ws.outDir && !absSpecifier.startsWith(ws.srcDir) && absSpecifier.startsWith(ws.outDir)) {
+        const pattern = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
+        patterns.add(pattern);
+      } else {
+        patterns.add(absSpecifier);
+      }
+    }
+
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir, label });
+
+    debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
+
+    return filePaths;
+  };
+};
+
+export type ToSourceFilePath = ReturnType<typeof getModuleSourcePathHandler>;

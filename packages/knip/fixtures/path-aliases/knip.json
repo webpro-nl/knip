@@ -1,0 +1,9 @@
+{
+  "paths": {
+    "~/*": ["./*"],
+    "@lib": ["./lib/index.ts"],
+    "@lib/*": ["./lib/*"],
+    "xyz/*": ["abc/*"],
+    "~icons/*": ["./types/virtual.d.ts"]
+  }
+}

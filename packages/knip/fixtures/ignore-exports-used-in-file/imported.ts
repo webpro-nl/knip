@@ -8,7 +8,7 @@ export interface ReferencedInterfaceInternally {
 }
 
 export function referencedInternallyFunction(value: unknown) {
-  console.log(value);
+  //
 }
 
 export function usedFunction(options: ReferencedInterfaceInternally) {
@@ -16,5 +16,20 @@ export function usedFunction(options: ReferencedInterfaceInternally) {
 }
 
 export function referencedNeverFunction() {
-  console.log('Hello!');
+  //
 }
+
+function declaredThenExportedDefault() {}
+export default declaredThenExportedDefault;
+
+function DeclaredThenExportedNamed() {}
+export { DeclaredThenExportedNamed };
+
+export const scout = () => {};
+export const ranger = () => {};
+
+export class Paladin {
+  static ally = scout;
+}
+
+(0, ranger)();

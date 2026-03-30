@@ -36,3 +36,13 @@ function doSomething2(myValue) {
 
 /** @type {import('@jest/types')} */
 module.exports = {};
+
+// import('./should-not-resolve')
+// See import('./also-should-not-resolve') for details
+
+/**
+ * Example usage:
+ * const LazyComponent = lazy(() => import('./myComponent'))
+ * <LazyLoad component={LazyComponent} />
+ */
+function lazyLoad() {}

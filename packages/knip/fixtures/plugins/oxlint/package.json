@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/oxlint",
+  "devDependencies": {
+    "oxlint": "*"
+  },
+  "scripts": {
+    "build": "oxlint --config .oxlintrc-0.json",
+    "build-3": "oxlint --config .oxlintrc-3.json",
+    "build-4": "oxlint -c .oxlintrc-4.json",
+    "build-5": "oxlint --config oxlint-5.config.ts"
+  }
+}

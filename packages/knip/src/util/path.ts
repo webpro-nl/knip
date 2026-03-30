@@ -1,8 +1,7 @@
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
-import parsedArgValues from './cli-arguments.js';
 
-const { directory } = parsedArgValues;
+const isWin = process.platform === 'win32';
 
 export const isAbsolute = path.isAbsolute;
 
@@ -14,19 +13,26 @@ export const basename = path.posix.basename;
 
 export const join = path.posix.join;
 
-export const toPosix = (value: string) => value.split(path.sep).join(path.posix.sep);
+export const toPosix = isWin ? (value: string) => value.split(path.sep).join(path.posix.sep) : (value: string) => value;
 
-export const cwd = directory ? path.posix.resolve(directory) : toPosix(process.cwd());
+export const resolve = path.posix.resolve;
 
-export const resolve = (...paths: string[]) =>
-  paths.length === 1 ? path.posix.join(cwd, paths[0]) : path.posix.resolve(...paths);
-
-export const relative = (from: string, to?: string) => toPosix(path.relative(to ? from : cwd, to ?? from));
+export const relative = (from: string, to: string) => {
+  if (to.startsWith(from)) {
+    const next = to[from.length];
+    if (next === '/') return to.substring(from.length + 1);
+    if (next === undefined) return '.';
+  }
+  const result = path.relative(from, to);
+  return isWin ? toPosix(result) : result || '.';
+};
 
 export const isInNodeModules = (filePath: string) => filePath.includes('node_modules');
 
-export const toAbsolute = (id: string, base: string = cwd) => (isAbsolute(id) ? id : join(base, id));
+export const toAbsolute = (id: string, base: string) => (isAbsolute(id) ? id : join(base, id));
 
-export const toRelative = (id: string) => (isAbsolute(id) ? relative(id) : id);
+export const toRelative = (id: string, base: string) => (isAbsolute(id) ? relative(base, id) : id);
 
 export const isInternal = (id: string) => (id.startsWith('.') || isAbsolute(id)) && !isInNodeModules(id);
+
+export const normalize = path.posix.normalize;

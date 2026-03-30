@@ -1,0 +1,13 @@
+import { ISSUE_TYPES } from '../constants.ts';
+import type { Counters, Issues, IssueType, Rules } from '../types/issues.ts';
+
+export const initIssues = (): Issues =>
+  Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, {}])) as Record<IssueType, never>;
+
+export const initCounters = (): Counters => ({
+  ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 0])) as Record<IssueType, number>),
+  processed: 0,
+  total: 0,
+});
+
+export const defaultRules = Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 'error'])) as Rules;

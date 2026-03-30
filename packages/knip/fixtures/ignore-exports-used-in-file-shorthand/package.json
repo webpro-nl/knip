@@ -1,4 +1,3 @@
 {
-  "name": "@fixtures/ignore-exports-used-in-file-shorthand",
-  "version": "*"
+  "name": "@fixtures/ignore-exports-used-in-file-shorthand"
 }

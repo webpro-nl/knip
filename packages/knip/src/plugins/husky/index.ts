@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { getGitHookPaths } from '../../util/git.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { getGitHookPaths } from '../../util/git.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://typicode.github.io/husky
 
@@ -20,7 +20,7 @@ const gitHookPaths = getGitHookPaths('.husky', false);
 const config = [...gitHookPaths, 'package.json'];
 
 const resolveConfig: ResolveConfig = (script, options) => {
-  if (!script) return [];
+  if (!script || options.isProduction) return [];
 
   if (options.configFileName === 'package.json') {
     const hooks = script.hooks;
@@ -33,11 +33,13 @@ const resolveConfig: ResolveConfig = (script, options) => {
   return options.getInputsFromScripts(String(script), { knownBinsOnly: true });
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

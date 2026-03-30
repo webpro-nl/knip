@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/expo",
-  "version": "*",
+  "name": "@plugins/expo",
   "scripts": {
     "start": "expo start"
   },

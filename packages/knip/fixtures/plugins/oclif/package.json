@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/oclif",
-  "version": "*",
+  "name": "@plugins/oclif",
   "scripts": {
     "start": "oclif"
   },

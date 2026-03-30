@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/plop",
-  "version": "*",
+  "name": "@plugins/plop",
   "type": "module",
   "scripts": {
     "plop": "plop"

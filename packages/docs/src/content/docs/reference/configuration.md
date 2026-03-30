@@ -16,7 +16,7 @@ In JSON, use the provided JSON schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json"
+  "$schema": "https://unpkg.com/knip@6/schema.json"
 }
 ```
 
@@ -26,7 +26,7 @@ In JSONC, use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json"
 }
 ```
 
@@ -63,21 +63,6 @@ Array of glob patterns to find project files. Example:
 
 Also see [configuration][2] and [entry files][3].
 
-### `workspaces`
-
-Individual workspace configurations may contain all other options listed on this
-page, except for the following root-only options:
-
-- `exclude` / `include`
-- `ignoreExportsUsedInFile`
-- `ignoreWorkspaces`
-- `workspaces`
-
-Workspaces can't be nested in a Knip configuration, but they can be nested in a
-monorepo folder structure.
-
-Also see [Monorepos and workspaces][4].
-
 ### `paths`
 
 Tools like TypeScript, webpack and Babel support import aliases in various ways.
@@ -100,7 +85,22 @@ TypeScript semantics:
 - Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
-### Plugins
+## Workspaces
+
+Individual workspace configurations may contain all other options listed on this
+page, except for the following root-only options:
+
+- `exclude` / `include`
+- `ignoreExportsUsedInFile`
+- `ignoreWorkspaces`
+- `workspaces`
+
+Workspaces can't be nested in a Knip configuration, but they can be nested in a
+monorepo folder structure.
+
+Also see [Monorepos and workspaces][4].
+
+## Plugins
 
 There are a few options to modify the behavior of a plugin:
 
@@ -143,24 +143,104 @@ See [Rules & Filters][7].
 
 See [Rules & Filters][7].
 
+### `tags`
+
+Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
+
+```ts
+/**
+ * Description of my exported value
+ *
+ * @type number
+ * @internal Important matters
+ * @lintignore
+ */
+export const myExport = 1;
+```
+
+And then include (`+`) or exclude (`-`) these tagged exports from the report
+like so:
+
+```json
+{
+  "tags": ["-lintignore"]
+}
+```
+
+This way, you can either focus on or ignore specific tagged exports with tags
+you define yourself. This also works for individual enum and namespace members.
+
+The default directive is `+` (include) and the `@` prefix is ignored, so the
+notation below is valid and will report only exports tagged `@lintignore` or
+`@internal`:
+
+```json
+{
+  "tags": ["@lintignore", "@internal"]
+}
+```
+
+:::caution
+
+Tags must not contain hyphens or plus symbols, so it is recommended to stick to
+letters and avoid snake-case.
+
+:::
+
+Also see [JSDoc & TSDoc Tags][8].
+
+### `treatConfigHintsAsErrors`
+
+Exit with non-zero code (1) if there are any configuration hints.
+
+```json title="knip.json"
+{
+  "treatConfigHintsAsErrors": true
+}
+```
+
 ## Ignore Issues
 
 ### `ignore`
 
 :::tip
 
-Please read [project files configuration][8] before using the `ignore` option,
-because in many cases you'll want to **exclude project files** instead.
+Please read [configuring project files][9] before using the `ignore` option.
 
 :::
 
-Array of glob patterns to ignore issues from matching files. Example:
+Avoid `ignore` patterns. There is almost always a better solution:
+
+- Follow up on configuration hints (if there are any).
+- Fine-tune `entry` and `project` patterns.
+- Use [production mode][10].
+- Other `ignore*` options.
+
+**NOTE**: An exception to the rule: to _temporarily_ report only issues in files
+that match the negated `ignore` pattern:
 
 ```json title="knip.json"
 {
-  "ignore": ["src/generated.ts", "fixtures/**"]
+  "ignore": ["!src/dir/**"]
 }
 ```
+
+### `ignoreFiles`
+
+Array of glob patterns of files to exclude from the "Unused files" section only.
+
+Unlike `ignore`, which suppresses all issue types for matching files,
+`ignoreFiles` only affects the `files` issue type. Use this when a file should
+remain analyzed for other issues (exports, dependencies, unresolved) but should
+not be considered for unused file detection.
+
+```json title="knip.json"
+{
+  "ignoreFiles": ["src/generated/**", "fixtures/**"]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreBinaries`
 
@@ -181,6 +261,8 @@ export default {
 };
 ```
 
+Suffix an item with `!` to enable it only in production mode.
+
 ### `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -200,10 +282,14 @@ export default {
 };
 ```
 
+Suffix an item with `!` to enable it only in production mode.
+
+Also see [Unused dependencies][11].
+
 ### `ignoreMembers`
 
-Array of class and enum members to exclude from the report. Regular expressions
-allowed. Example:
+Array of enum and namespace members to exclude from the report. Regular
+expressions allowed. Example:
 
 ```json title="knip.json"
 {
@@ -213,6 +299,25 @@ allowed. Example:
 
 Actual regular expressions can be used in dynamic configurations.
 
+### `ignoreUnresolved`
+
+Array of specifiers to exclude from the report. Regular expressions allowed.
+Example:
+
+```json title="knip.json"
+{
+  "ignoreUnresolved": ["ignore-unresolved-import", "#virtual/.+"]
+}
+```
+
+Actual regular expressions can be used in dynamic configurations:
+
+```ts title="knip.ts"
+export default {
+  ignoreUnresolved: [/^#/.+/],
+};
+```
+
 ### `ignoreWorkspaces`
 
 Array of workspaces to ignore, globs allowed. Example:
@@ -221,9 +326,29 @@ Array of workspaces to ignore, globs allowed. Example:
 {
   "ignoreWorkspaces": [
     "packages/go-server",
-    "packages/flat/*"
+    "packages/flat/*",
     "packages/deep/**"
   ]
+}
+```
+
+Suffix an item with `!` to enable it only in production mode.
+
+Prefix an item with `!` to override an earlier wildcard.
+
+### `ignoreIssues`
+
+Ignore specific issue types for specific file patterns. Keys are glob patterns
+and values are arrays of issue types to ignore for matching files. This allows
+ignoring specific issues (like unused exports) in generated files while still
+reporting other issues in those same files.
+
+```json title="knip.json"
+{
+  "ignoreIssues": {
+    "src/generated/**": ["exports", "types"],
+    "**/*.generated.ts": ["exports", "enumMembers", "namespaceMembers"]
+  }
 }
 ```
 
@@ -265,15 +390,31 @@ entry files when reporting unused exports:
 }
 ```
 
-If enabled, Knip will report unused exports in entry source files and scripts
-such as those referenced in `package.json`. But not in entry and configuration
-files as configured by plugins, such as `next.config.js` or
-`src/routes/+page.svelte`.
+If enabled, Knip will report unused exports in entry source files. But not in
+entry and configuration files as configured by plugins, such as `next.config.js`
+or `src/routes/+page.svelte`.
 
-This will also enable reporting unused members of exported classes and enums.
+This will also enable reporting unused members of exported enums and namespaces.
 
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
+
+## Compilers
+
+Knip supports custom compilers to transform files before analysis.
+
+:::note
+
+Since compilers are functions, they can only be used in dynamic configuration
+files (`.js` or `.ts`), not in JSON configuration files.
+
+:::
+
+### `compilers`
+
+Override built-in compilers or add custom compilers for additional file types.
+
+Also see [Compilers][12].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -282,4 +423,8 @@ configurations individually.
 [5]: ../explanations/plugins.md#entry-files
 [6]: ../explanations/plugins.md
 [7]: ../features/rules-and-filters.md#filters
-[8]: ../guides/configuring-project-files.md
+[8]: ./jsdoc-tsdoc-tags.md
+[9]: ../guides/configuring-project-files.md
+[10]: ../features/production-mode.md
+[11]: ../guides/handling-issues.mdx#unused-dependencies
+[12]: ../features/compilers.md

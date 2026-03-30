@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/ignore-files",
+  "workspaces": [
+    "apples"
+  ]
+}

@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/react-cosmos",
-  "version": "*",
+  "name": "@plugins/react-cosmos",
   "scripts": {
     "cosmos": "cosmos",
     "cosmos-export": "cosmos-export",

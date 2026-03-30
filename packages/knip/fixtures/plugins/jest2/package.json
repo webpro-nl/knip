@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/jest2",
+  "name": "@plugins/jest2",
   "scripts": {},
   "devDependencies": {
     "jest": "*",

@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { getGitHookPaths } from '../../util/git.js';
-import { fromBinary, toDependency } from '../../util/input.js';
-import { findByKeyDeep } from '../../util/object.js';
-import { extname } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { getGitHookPaths } from '../../util/git.ts';
+import { fromBinary, toDependency } from '../../util/input.ts';
+import { findByKeyDeep } from '../../util/object.ts';
+import { extname } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://github.com/evilmartians/lefthook
 
@@ -13,16 +13,14 @@ const enablers = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const gitHookPaths = getGitHookPaths();
-
-const config = ['lefthook.yml', ...gitHookPaths];
-
 type Command = {
   run: string;
   root: string;
 };
 
 const resolveConfig: ResolveConfig = async (localConfig, options) => {
+  if (options.isProduction) return [];
+
   const { manifest, configFileName, cwd, getInputsFromScripts } = options;
 
   const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];
@@ -50,10 +48,12 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
   return matches ? [matches] : [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  config: options => ['lefthook.yml', ...getGitHookPaths('.git/hooks', true, options.cwd)],
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

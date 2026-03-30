@@ -1,0 +1,3 @@
+import 'mocha';
+
+describe('Tests', () => {});

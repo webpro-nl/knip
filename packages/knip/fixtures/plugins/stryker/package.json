@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/stryker",
+  "name": "@plugins/stryker",
   "scripts": {
     "stryker": "stryker"
   },

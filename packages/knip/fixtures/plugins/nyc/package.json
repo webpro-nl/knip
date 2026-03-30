@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/nyc",
+  "name": "@plugins/nyc",
   "devDependencies": {
     "nyc": "*"
   }

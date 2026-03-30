@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  deep-task:
+    cmd: node ../../scripts/deep.js
+  deep-binary:
+    cmd: npx yet-another-nonexistent-binary
+

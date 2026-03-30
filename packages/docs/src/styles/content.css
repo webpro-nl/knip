@@ -25,10 +25,6 @@ html {
   border: none;
 }
 
-:root[data-theme='dark'] .sl-markdown-content table td code {
-  padding-left: 0;
-}
-
 .sl-markdown-content table thead {
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
@@ -89,16 +85,20 @@ section.plugins li {
   }
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .header {
     border-bottom-color: var(--sl-color-orange);
   }
 }
 
+:root[data-theme="dark"] .sl-markdown-content table td code {
+  padding-left: 0;
+}
+
 .sl-markdown-content .sponsor {
-  font-size: 2rem;
+  font-size: 2.5rem;
   text-align: center;
-  margin: 5rem 0;
+  margin: 4rem 0;
 }
 
 .sl-badge.caution,
@@ -137,7 +137,7 @@ section.plugins li {
   margin: 2rem 0;
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .logo-border {
     border-color: var(--sl-color-black);
   }
@@ -152,7 +152,7 @@ section.plugins li {
   }
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   #starlight__search .pagefind-ui__result-title:not(:where(.pagefind-ui__result-nested *)):focus-within,
   #starlight__search .pagefind-ui__result-nested:focus-within {
     .pagefind-ui__result-link,
@@ -168,4 +168,21 @@ section.plugins li {
   svg {
     color: var(--sl-color-bright-orange);
   }
+}
+
+.badges {
+  margin: 4rem auto;
+  p {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    a {
+      border-bottom: none;
+    }
+  }
+}
+
+.projects {
+  margin: 6rem auto;
 }

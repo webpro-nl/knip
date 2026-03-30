@@ -1,17 +1,18 @@
-import type { Plugin } from '../../types/config.js';
+import type { Plugin } from '../../types/config.ts';
 
 // https://github.com/isaacs/node-glob
 
 const title = 'glob';
 
 const args = {
-  binaries: ['glob'],
   positional: true,
   alias: { cmd: ['c'] },
   fromArgs: ['cmd'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

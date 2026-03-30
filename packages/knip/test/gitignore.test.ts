@@ -1,27 +1,14 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/gitignore');
 
 test('Obey gitignore', async () => {
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    gitignore: true,
-  });
+  const options = await createOptions({ cwd, gitignore: true });
+  const { issues } = await main(options);
 
-  assert.equal(issues.files.size, 0);
-});
-
-test('Ignore gitignore', async () => {
-  const { issues } = await main({
-    ...baseArguments,
-    cwd,
-    gitignore: false,
-  });
-
-  assert.equal(issues.files.size, 3);
+  assert.equal(Object.keys(issues.files).length, 0);
 });

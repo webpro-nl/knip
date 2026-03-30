@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/playwright2",
+  "name": "@plugins/playwright2",
   "knip": {
     "playwright": true
   },

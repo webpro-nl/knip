@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/swc",
+  "scripts": {
+    "build": "swc src -d dist"
+  },
+  "dependencies": {
+    "@swc/helpers": "*"
+  },
+  "devDependencies": {
+    "@swc/cli": "*",
+    "@swc/core": "*",
+    "@swc/plugin-styled-components": "*"
+  }
+}

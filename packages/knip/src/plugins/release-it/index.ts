@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { ReleaseItConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { ReleaseItConfig } from './types.ts';
 
 // https://github.com/release-it/release-it/blob/master/docs/plugins.md#using-a-plugin
 // Uses CosmiConfig but with custom searchPlaces
@@ -29,10 +29,12 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   return [...plugins.map(id => toDependency(id)), ...inputs];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug Bun test" type="BunRunConfiguration">
+    <option name="program" value="$FilePath$" />
+    <option name="runtimeParameters">
+      <list>
+        <option value="test" />
+      </list>
+    </option>
+    <option name="workingDirectory" value="$PROJECT_DIR$/packages/knip" />
+    <method v="2" />
+  </configuration>
+</component>

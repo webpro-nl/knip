@@ -1,5 +1,5 @@
 // https://github.com/11ty/eleventy-base-blog/blob/main/eleventy.config.js
-module.exports = function (eleventyConfig) {
+module.exports = eleventyConfig => {
   eleventyConfig.addPassthroughCopy({
     './public/': '/',
     './node_modules/prismjs/themes/prism-okaidia.css': '/css/prism-okaidia.css',
@@ -31,8 +31,8 @@ module.exports = function (eleventyConfig) {
     return Math.min.apply(null, numbers);
   });
   eleventyConfig.addFilter('getAllTags', collection => {
-    let tagSet = new Set();
-    for (let item of collection) {
+    const tagSet = new Set();
+    for (const item of collection) {
       (item.data.tags || []).forEach(tag => tagSet.add(tag));
     }
     return Array.from(tagSet);

@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://vike.dev
 
@@ -13,9 +13,11 @@ const patterns = ['{pages,renderer}/**/+*.{js,jsx,ts,tsx,vue,react,solid}'];
 
 const production = [...patterns, ...patterns.map(pattern => `*/${pattern}`)];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;

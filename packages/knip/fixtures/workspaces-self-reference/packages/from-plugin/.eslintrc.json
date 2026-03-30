@@ -1,0 +1,4 @@
+{
+  "root": true,
+  "extends": ["@fixtures/x-self-reference/build", "./file"]
+}

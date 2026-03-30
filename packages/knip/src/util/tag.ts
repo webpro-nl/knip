@@ -1,19 +1,19 @@
-import { ALIAS_TAG, BETA_TAG, INTERNAL_TAG, PUBLIC_TAG } from '../constants.js';
-import type { Tags } from '../types/cli.js';
+import { ALIAS_TAG, BETA_TAG, INTERNAL_TAG, PUBLIC_TAG } from '../constants.ts';
+import type { Tags } from '../types/options.ts';
 
 export const splitTags = (rawTags: string[]) => {
   const tags = rawTags.flatMap(tag => tag.split(','));
   return tags.reduce<Tags>(
     ([incl, excl], tag) => {
       const match = tag.match(/[a-zA-Z]+/);
-      if (match) (tag.startsWith('-') ? excl : incl).push(match[0]);
+      if (match) (tag.startsWith('-') ? excl : incl).push(`@${match[0]}`);
       return [incl, excl];
     },
     [[], []]
   );
 };
 
-const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(`@${tag}`));
+const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(tag));
 
 export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   const [includeJSDocTags, excludeJSDocTags] = tags;

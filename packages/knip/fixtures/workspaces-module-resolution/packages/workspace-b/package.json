@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/workspaces-module-resolution__workspace-b",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./dist/*"
+  }
+}

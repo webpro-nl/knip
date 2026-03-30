@@ -20,16 +20,16 @@ report an issue with Knip for false positives).
 JSDoc comments always start with `/**` (not `//`) and can be single or
 multi-line.
 
-## Tags (CLI)
+## Tags
 
 Use arbitrary [tags][1] to exclude or include tagged exports from the report.
 Example:
 
 ```ts
-/** @knipignore */
+/** @lintignore */
 export const myUnusedExport = 1;
 
-/** @knipignore */
+/** @lintignore */
 import Unresolved from './generated/lib.js';
 ```
 
@@ -37,8 +37,21 @@ And then include (`+`) or exclude (`-`) these tagged exports from the report
 like so:
 
 ```shell
-knip --tags=-knipignore,-internal
+knip --tags=-lintignore,-internal
 ```
+
+Tags can also be [configured in `knip.json`][2].
+
+When an excluded tag is no longer necessary because the export is actually used,
+Knip reports a **tag hint**:
+
+```sh
+Tag hints (1)
+ignored  unimported.ts  Unused tag in unimported.ts: ignored → @custom
+```
+
+This helps you clean up tags that were added to suppress issues that have since
+been resolved.
 
 ## `@public`
 
@@ -56,14 +69,14 @@ export const unusedFunction = () => {};
 ```
 
 This tag can also be used to make exceptions in entry files when using
-[--include-entry-exports][2].
+[--include-entry-exports][3].
 
-[JSDoc: @public][3] and [TSDoc: @public][4]
+[JSDoc: @public][4] and [TSDoc: @public][5]
 
 ## `@internal`
 
 Internal exports are not meant for public consumption, but only for internal
-usage such as tests. This means they would be reported in [production mode][5].
+usage such as tests. This means they would be reported in [production mode][6].
 
 Mark the export with `@internal` and Knip will not report the export in
 production mode.
@@ -80,7 +93,7 @@ exceptions are possible. Those should not be reported as false positives, so
 when using production mode you'll need to help Knip out by tagging them as
 `@internal`.
 
-[TSDoc: @internal][6]
+[TSDoc: @internal][7]
 
 ## `@alias`
 
@@ -99,21 +112,22 @@ export default Component;
 An alternative solution is to use `--exclude duplicates` and exclude all
 duplicates from being reported.
 
-[JSDoc: @alias][7]
+[JSDoc: @alias][8]
 
 ## `@beta`
 
-Works identical to [`@public`][8]. Knip ignores other tags like `@alpha` and
+Works identical to [`@public`][9]. Knip ignores other tags like `@alpha` and
 `@experimental`.
 
-[TSDoc: @beta][9]
+[TSDoc: @beta][10]
 
 [1]: ../reference/cli.md#--tags
-[2]: ./cli.md#--include-entry-exports
-[3]: https://jsdoc.app/tags-public.html
-[4]: https://tsdoc.org/pages/tags/public/
-[5]: ../features/production-mode.md
-[6]: https://tsdoc.org/pages/tags/internal/
-[7]: https://jsdoc.app/tags-alias.html
-[8]: #public
-[9]: https://tsdoc.org/pages/tags/beta/
+[2]: ./configuration.md#tags
+[3]: ./cli.md#--include-entry-exports
+[4]: https://jsdoc.app/tags-public.html
+[5]: https://tsdoc.org/pages/tags/public/
+[6]: ../features/production-mode.md
+[7]: https://tsdoc.org/pages/tags/internal/
+[8]: https://jsdoc.app/tags-alias.html
+[9]: #public
+[10]: https://tsdoc.org/pages/tags/beta/

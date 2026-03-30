@@ -1,5 +1,5 @@
 {
-  "name": "@org/lib",
+  "name": "@fixtures/fix-workspaces__lib",
   "dependencies": {
     "unused": "*",
     "ignored": "*"

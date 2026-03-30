@@ -1,6 +1,9 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
+import mdxCompiler from './compiler-mdx.ts';
+import { getSrcDir, usesPassthroughImageService } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -10,14 +13,39 @@ const enablers = ['astro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['astro.config.{js,cjs,mjs,ts}', 'src/content/config.ts', 'src/content.config.ts'];
+export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
+
+const entry = ['src/content/config.ts', 'src/content.config.ts'];
 
 const production = [
   'src/pages/**/*.{astro,mdx,js,ts}',
+  '!src/pages/**/_*', // negate files prefixed with _.
+  '!src/pages/**/_*/**', // negate folders prefixed with _. The pattern _** would be collapsed into _* so we have to use **/_*/**
   'src/content/**/*.mdx',
   'src/middleware.{js,ts}',
   'src/actions/index.{js,ts}',
 ];
+
+const resolveFromAST: ResolveFromAST = program => {
+  const srcDir = getSrcDir(program);
+  const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
+  const inputs = [
+    ...entry.map(setSrcDir).map(path => toEntry(path)),
+    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
+  ];
+
+  if (!usesPassthroughImageService(program)) inputs.push(toDependency('sharp', { optional: true }));
+
+  return inputs;
+};
+
+// https://docs.astro.build/en/guides/integrations-guide/mdx/
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('astro')) registerCompiler({ extension: '.astro', compiler });
+  if (hasDependency('@astrojs/mdx') || hasDependency('@astrojs/starlight')) {
+    registerCompiler({ extension: '.mdx', compiler: mdxCompiler });
+  }
+};
 
 const resolve: Resolve = options => {
   const { manifest, isProduction } = options;
@@ -34,11 +62,16 @@ const resolve: Resolve = options => {
   return inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
+  config,
   entry,
   production,
+  registerCompilers,
+  resolveFromAST,
   resolve,
-} satisfies Plugin;
+};
+
+export default plugin;

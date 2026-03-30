@@ -1,21 +1,19 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/enum-members');
 
 test('Find unused enum members', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
   assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
-  assert(issues.enumMembers['members.ts']['MyEnum.D_Key']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D-Key']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -26,20 +24,16 @@ test('Find unused enum members', async () => {
 });
 
 test('Find unused enum members (isIncludeEntryExports)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isIncludeEntryExports: true,
-  });
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
   assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
-  assert(issues.enumMembers['members.ts']['MyEnum.D_Key']);
-  assert(issues.enumMembers['index.ts']['EntryEnum.UnusedMemberInEntryEnum']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D-Key']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    enumMembers: 3,
+    enumMembers: 2,
     processed: 2,
     total: 2,
   });

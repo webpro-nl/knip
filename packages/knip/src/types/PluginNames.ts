@@ -2,29 +2,46 @@
 export type PluginName =
   | 'angular'
   | 'astro'
+  | 'astro-db'
+  | 'astro-og-canvas'
   | 'ava'
   | 'babel'
+  | 'biome'
+  | 'bumpp'
+  | 'bun'
   | 'c8'
   | 'capacitor'
+  | 'changelogen'
+  | 'changelogithub'
   | 'changesets'
   | 'commitizen'
   | 'commitlint'
+  | 'convex'
+  | 'create-typescript-app'
   | 'cspell'
   | 'cucumber'
   | 'cypress'
+  | 'danger'
   | 'dependency-cruiser'
+  | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'execa'
   | 'expo'
+  | 'expressive-code'
   | 'gatsby'
+  | 'github-action'
   | 'github-actions'
   | 'glob'
   | 'graphql-codegen'
+  | 'hardhat'
   | 'husky'
+  | 'i18next-parser'
   | 'jest'
   | 'karma'
+  | 'knex'
   | 'ladle'
   | 'lefthook'
   | 'lint-staged'
@@ -32,47 +49,79 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'markdownlint'
+  | 'mdx'
+  | 'mdxlint'
   | 'metro'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
+  | 'nano-staged'
   | 'nest'
   | 'netlify'
   | 'next'
+  | 'next-intl'
+  | 'next-mdx'
+  | 'nitro'
   | 'node'
-  | 'node-test-runner'
+  | 'node-modules-inspector'
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'openapi-ts'
+  | 'oxfmt'
+  | 'oxlint'
+  | 'parcel'
+  | 'payload'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
   | 'plop'
+  | 'pm2'
+  | 'pnpm'
   | 'postcss'
   | 'preconstruct'
   | 'prettier'
+  | 'prisma'
+  | 'qwik'
+  | 'raycast'
   | 'react-cosmos'
+  | 'react-native'
+  | 'react-router'
+  | 'relay'
   | 'release-it'
   | 'remark'
   | 'remix'
   | 'rollup'
   | 'rsbuild'
+  | 'rslib'
   | 'rspack'
+  | 'rstest'
+  | 'sanity'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
   | 'size-limit'
+  | 'sst'
+  | 'starlight'
+  | 'stencil'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'sveltekit'
+  | 'svgo'
+  | 'svgr'
+  | 'swc'
   | 'syncpack'
   | 'tailwind'
+  | 'tanstack-router'
+  | 'taskfile'
   | 'travis'
   | 'ts-node'
+  | 'tsdown'
   | 'tsup'
   | 'tsx'
   | 'typedoc'
@@ -82,6 +131,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vitepress'
   | 'vitest'
   | 'vue'
   | 'webdriver-io'
@@ -90,34 +140,52 @@ export type PluginName =
   | 'wrangler'
   | 'xo'
   | 'yarn'
-  | 'yorkie';
+  | 'yorkie'
+  | 'zx';
 
 export const pluginNames = [
   'angular',
   'astro',
+  'astro-db',
+  'astro-og-canvas',
   'ava',
   'babel',
+  'biome',
+  'bumpp',
+  'bun',
   'c8',
   'capacitor',
+  'changelogen',
+  'changelogithub',
   'changesets',
   'commitizen',
   'commitlint',
+  'convex',
+  'create-typescript-app',
   'cspell',
   'cucumber',
   'cypress',
+  'danger',
   'dependency-cruiser',
+  'docusaurus',
   'dotenv',
   'drizzle',
   'eleventy',
   'eslint',
+  'execa',
   'expo',
+  'expressive-code',
   'gatsby',
+  'github-action',
   'github-actions',
   'glob',
   'graphql-codegen',
+  'hardhat',
   'husky',
+  'i18next-parser',
   'jest',
   'karma',
+  'knex',
   'ladle',
   'lefthook',
   'lint-staged',
@@ -125,47 +193,79 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'markdownlint',
+  'mdx',
+  'mdxlint',
   'metro',
   'mocha',
   'moonrepo',
   'msw',
+  'nano-staged',
   'nest',
   'netlify',
   'next',
+  'next-intl',
+  'next-mdx',
+  'nitro',
   'node',
-  'node-test-runner',
+  'node-modules-inspector',
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
   'nx',
   'nyc',
   'oclif',
+  'openapi-ts',
+  'oxfmt',
+  'oxlint',
+  'parcel',
+  'payload',
   'playwright',
   'playwright-ct',
   'playwright-test',
   'plop',
+  'pm2',
+  'pnpm',
   'postcss',
   'preconstruct',
   'prettier',
+  'prisma',
+  'qwik',
+  'raycast',
   'react-cosmos',
+  'react-native',
+  'react-router',
+  'relay',
   'release-it',
   'remark',
   'remix',
   'rollup',
   'rsbuild',
+  'rslib',
   'rspack',
+  'rstest',
+  'sanity',
   'semantic-release',
   'sentry',
   'simple-git-hooks',
   'size-limit',
+  'sst',
+  'starlight',
+  'stencil',
   'storybook',
   'stryker',
   'stylelint',
   'svelte',
+  'sveltekit',
+  'svgo',
+  'svgr',
+  'swc',
   'syncpack',
   'tailwind',
+  'tanstack-router',
+  'taskfile',
   'travis',
   'ts-node',
+  'tsdown',
   'tsup',
   'tsx',
   'typedoc',
@@ -175,6 +275,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vitepress',
   'vitest',
   'vue',
   'webdriver-io',
@@ -184,4 +285,5 @@ export const pluginNames = [
   'xo',
   'yarn',
   'yorkie',
+  'zx',
 ] as const;

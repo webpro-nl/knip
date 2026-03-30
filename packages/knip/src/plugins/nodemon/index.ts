@@ -1,15 +1,17 @@
-import type { Plugin } from '../../types/config.js';
+import type { Plugin } from '../../types/config.ts';
 
 const title = 'nodemon';
 
 const args = {
-  positional: true,
+  positional: false,
   nodeImportArgs: true,
   string: ['exec'],
   fromArgs: ['exec'],
 };
 
-export default {
+const plugin: Plugin = {
   title,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

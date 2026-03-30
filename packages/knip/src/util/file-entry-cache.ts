@@ -4,13 +4,13 @@
  * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
  */
 import fs from 'node:fs';
-// biome-ignore lint/nursery/noRestrictedImports: ignore
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
-import { timerify } from './Performance.js';
-import { debugLog } from './debug.js';
-import { isDirectory, isFile } from './fs.js';
-import { cwd, dirname, isAbsolute, resolve } from './path.js';
-import { deserialize, serialize } from './serialize.js';
+import { deserialize, serialize } from 'node:v8';
+import { debugLog } from './debug.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { timerify } from './Performance.ts';
+import { dirname, isAbsolute, resolve } from './path.ts';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
@@ -38,7 +38,7 @@ export class FileEntryCache<T> {
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
   constructor(cacheId: string, _path: string) {
-    this.filePath = isAbsolute(_path) ? path.resolve(_path, cacheId) : path.resolve(cwd, _path, cacheId);
+    this.filePath = path.resolve(_path, cacheId);
     if (isFile(this.filePath)) this.cache = create(this.filePath);
     this.removeNotFoundFiles();
   }
@@ -97,7 +97,7 @@ export class FileEntryCache<T> {
   }
 
   removeEntry(entryName: string) {
-    if (!isAbsolute(entryName)) entryName = resolve(cwd, entryName);
+    if (!isAbsolute(entryName)) entryName = resolve(entryName);
     this.normalizedEntries.delete(entryName);
     this.cache.delete(entryName);
   }
@@ -114,7 +114,7 @@ export class FileEntryCache<T> {
   reconcile() {
     this.removeNotFoundFiles();
 
-    for (const [entryName, cacheEntry] of this.normalizedEntries.entries()) {
+    for (const [entryName, cacheEntry] of this.normalizedEntries) {
       try {
         const meta = this._getMetaForFileUsingMtimeAndSize(cacheEntry);
         this.cache.set(entryName, meta);
@@ -127,7 +127,6 @@ export class FileEntryCache<T> {
     try {
       const dir = dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
-      // @ts-ignore please bun
       fs.writeFileSync(this.filePath, serialize(this.cache));
     } catch (_err) {
       debugLog('*', `Error writing cache to ${this.filePath}`);

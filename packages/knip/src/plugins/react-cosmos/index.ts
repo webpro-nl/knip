@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toDeferResolve, toEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { ReactCosmosConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { ReactCosmosConfig } from './types.ts';
 
 // https://reactcosmos.org/docs
 
@@ -22,26 +22,25 @@ const decoratorEntry = ['**/cosmos.decorator.{jsx,tsx}'];
 
 const entry = [...fixtureEntry, ...decoratorEntry];
 
-const resolveEntryPaths: ResolveEntryPaths<ReactCosmosConfig> = async localConfig => {
+const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {
   const { fixturesDir, fixtureFileSuffix } = localConfig;
   const entries = [
     join(fixturesDir ?? '__fixtures__', `**/*.${ext}`),
     join(fixturesDir ?? '', `**/*.${fixtureFileSuffix ?? 'fixture'}.${ext}`),
     join(fixturesDir ?? '', `**/${fixtureFileSuffix ?? 'fixture'}.${ext}`),
   ];
-  return [...entries, ...decoratorEntry].map(toEntry);
+  return [...entries, ...decoratorEntry]
+    .map(id => toEntry(id))
+    .concat((localConfig?.plugins ?? []).map(id => toDeferResolve(id)));
 };
 
-const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {
-  return (localConfig?.plugins ?? []).map(toDeferResolve);
-};
-
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
   resolveConfig,
-  resolveEntryPaths,
-} satisfies Plugin;
+};
+
+export default plugin;

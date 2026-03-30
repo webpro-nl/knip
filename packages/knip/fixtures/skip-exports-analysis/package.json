@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/skip-exports-analysis",
+  "scripts": {
+    "test": "node --test",
+    "dev": "node --experimental-strip-types src/dev.ts",
+    "e2e": "playwright 'e2e/*.js'",
+    "watch": "nodemon --watch 'lib/**/*.js'",
+    "lib": "node lib/index.js"
+  }
+}

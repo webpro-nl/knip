@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/graphql-codegen-graphql-config",
-  "version": "*",
+  "name": "@plugins/graphql-codegen-graphql-config",
   "scripts": {
     "codegen": "graphql-codegen"
   },
@@ -10,7 +9,10 @@
   },
   "graphql": {
     "schema": "schema.graphql",
-    "documents": ["src/**/*.tsx", "!src/gql/**/*"],
+    "documents": [
+      "src/**/*.tsx",
+      "!src/gql/**/*"
+    ],
     "extensions": {
       "codegen": {
         "generates": {

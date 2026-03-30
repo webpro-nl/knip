@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/eleventy3",
+  "name": "@plugins/eleventy3",
   "scripts": {
     "start": "npx @11ty/eleventy --serve",
     "build": "npx @11ty/eleventy",

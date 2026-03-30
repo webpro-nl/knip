@@ -1,6 +1,5 @@
 ---
-import sprites from '../assets/sprites.svg';
-import { type PostWithUser, formatTimestamp, replaceShortenedUrls } from '../util/post.js';
+import { formatTimestamp, type PostWithUser, replaceShortenedUrls } from '../util/post.js';
 
 const post: PostWithUser = replaceShortenedUrls(Astro.props.data);
 ---
@@ -61,43 +60,10 @@ const post: PostWithUser = replaceShortenedUrls(Astro.props.data);
       <p class="text" set:html={post.text.trim().replace(/\n/g, '<br />')} />
       <p class="timestamp">
         <a
-          href={`${post.id.length > 17 ? `https://twitter.com/${post.user.username}/status/${post.id}` : `https://bsky.app/profile/${post.user.username}/post/${post.id}`}`}>
+          href={`${post.url ? post.url : post.id.length > 17 ? `https://twitter.com/${post.user.username}/status/${post.id}` : `https://bsky.app/profile/${post.user.username}/post/${post.id}`}`}>
           {formatTimestamp(post.created_at)}
         </a>
       </p>
-      <footer class="engagement">
-        <div>
-          <svg width="24" height="24">
-            <title>replies</title>
-            <use href={`${sprites.src}#replies`} />
-          </svg>
-          <span>{post.public_metrics.reply_count}</span>
-        </div>
-        <div>
-          <svg width="24" height="24">
-            <title>reposts</title>
-            <use href={`${sprites.src}#reposts`} />
-          </svg>
-          <span>
-            {post.public_metrics.retweet_count +
-              post.public_metrics.quote_count}
-          </span>
-        </div>
-        <div>
-          <svg width="24" height="24">
-            <title>likes</title>
-            <use href={`${sprites.src}#likes`} />
-          </svg>
-          <span>{post.public_metrics.like_count}</span>
-        </div>
-        <div>
-          <svg width="24" height="24">
-            <title>bookmarks</title>
-            <use href={`${sprites.src}#bookmarks`} />
-          </svg>
-          <span>{post.public_metrics.bookmark_count}</span>
-        </div>
-      </footer>
     </>
   )
 }

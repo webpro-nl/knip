@@ -1,1 +1,1 @@
-import './mod.cjs';
+require('./mod.cjs');

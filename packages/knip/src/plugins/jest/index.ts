@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.js';
-import { isInternal, join, toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getReportersDependencies, resolveExtensibleConfig } from './helpers.js';
-import type { JestConfig, JestInitialOptions } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
+import type { JestConfig, JestInitialOptions } from './types.ts';
 
 // https://jestjs.io/docs/configuration
 
@@ -16,7 +16,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
 
 const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
 
-const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'];
+const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
+
+const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
 
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
@@ -70,7 +72,6 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const snapshotSerializers = config.snapshotSerializers ?? [];
   const testSequencer = config.testSequencer ? [config.testSequencer] : [];
 
-  // const resolve = (specifier: string) => resolveEntry(options, specifier);
   const setupFiles = config.setupFiles ?? [];
   const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
   const globalSetup = config.globalSetup ? [config.globalSetup] : [];
@@ -98,14 +99,6 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   ].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
 };
 
-const resolveEntryPaths: ResolveEntryPaths<JestConfig> = async (localConfig, options) => {
-  const { configFileDir } = options;
-  if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ?? configFileDir;
-  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
-  return (localConfig.testMatch ?? []).map(replaceRootDir).map(toEntry);
-};
-
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
@@ -114,25 +107,32 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
 
   const inputs = await resolveDependencies(localConfig, options);
 
+  const entries = localConfig.testMatch
+    ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
+    : entry.map(id => toEntry(id));
+
+  if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));
+
   const result = inputs.map(dependency => {
-    dependency.specifier = replaceRootDir(dependency.specifier);
+    dependency.specifier = normalize(replaceRootDir(dependency.specifier));
     return dependency;
   });
 
-  return result;
+  return entries.concat(result);
 };
 
 const args = {
   config: true,
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

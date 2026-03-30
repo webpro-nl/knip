@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDependency } from '../../util/input.js';
-import { toLilconfig } from '../../util/plugin-config.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PostCSSConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toLilconfig } from '../../util/plugin-config.ts';
+import type { PostCSSConfig } from './types.ts';
 
 // https://github.com/postcss/postcss-load-config/blob/main/src/index.js#L110
 // Additionally postcss.config.json is loaded by nextjs
@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = [
   'package.json',
   'postcss.config.json',
-  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['ts', 'mts', 'cts', 'yaml', 'yml'] }),
+  ...toLilconfig('postcss', { configDir: false, additionalExtensions: ['mts', 'cts', 'yaml', 'yml'] }),
 ];
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
@@ -28,16 +28,20 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
       })
     : [];
 
-  const inputs = plugins.map(toDeferResolve);
+  const inputs = plugins.map(id => toDeferResolve(id));
 
   // Because postcss is not included in peerDependencies of tailwindcss
-  return plugins.includes('tailwindcss') ? [...inputs, toDependency('postcss')] : inputs;
+  return ['tailwindcss', '@tailwindcss/postcss'].some(tailwindPlugin => plugins.includes(tailwindPlugin))
+    ? [...inputs, toDependency('postcss')]
+    : inputs;
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

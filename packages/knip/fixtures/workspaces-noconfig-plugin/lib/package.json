@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-noconfig-plugin__lib",
+  "exports": {
+    "./util": "./src/util.ts"
+  }
+}

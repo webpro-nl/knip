@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest-npm-script",
+  "name": "@plugins/vitest-npm-script",
   "scripts": {
     "test:coverage": "vitest --coverage"
   },

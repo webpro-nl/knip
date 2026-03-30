@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/nuxt",
-  "version": "*",
+  "name": "@plugins/nuxt",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -10,6 +9,8 @@
   },
   "dependencies": {
     "nuxt": "*",
-    "vue": "*"
+    "vue": "*",
+    "@pinia/nuxt": "*",
+    "@nuxt/eslint": "*"
   }
 }

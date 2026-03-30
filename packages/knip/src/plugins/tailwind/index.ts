@@ -1,5 +1,6 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
 
 // https://tailwindcss.com/docs/configuration
 // Tailwinds lilconfig dependency is only used for postcss
@@ -12,9 +13,16 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
-export default {
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('tailwindcss')) registerCompiler({ extension: '.css', compiler });
+};
+
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-} satisfies Plugin;
+  registerCompilers,
+};
+
+export default plugin;

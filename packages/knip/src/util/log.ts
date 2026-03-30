@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import picocolors from 'picocolors';
 
 export const logWarning = (prefix: string, message: string) => {

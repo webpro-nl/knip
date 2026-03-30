@@ -1,4 +1,4 @@
-import circularA from '@workspaces-circular/lib-a';
+import circularA from '@fixtures/workspaces__lib-a';
 
 circularA;
 

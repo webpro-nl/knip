@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
 
 // https://docs.travis-ci.com/user/customizing-the-build/
 
@@ -25,11 +25,13 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   return options.getInputsFromScripts(scripts, { knownBinsOnly: true });
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

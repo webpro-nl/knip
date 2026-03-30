@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/rspack",
-  "version": "*",
+  "name": "@plugins/rspack",
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build"

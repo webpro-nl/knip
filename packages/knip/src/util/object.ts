@@ -33,21 +33,6 @@ export const findByKeyDeep = <T>(obj: any, key: string): T[] => {
   return objects;
 };
 
-export const getStringValues = (obj: any): string[] => {
-  if (typeof obj === 'string') return [obj];
-  let values: string[] = [];
-  for (const prop in obj) {
-    if (obj[prop]) {
-      if (typeof obj[prop] === 'string') {
-        values.push(obj[prop]);
-      } else if (typeof obj[prop] === 'object') {
-        values = values.concat(getStringValues(obj[prop]));
-      }
-    }
-  }
-  return values;
-};
-
 export const getKeysByValue = <T>(obj: T, value: unknown): (keyof T)[] => {
   const keys = [];
   for (const key in obj) {

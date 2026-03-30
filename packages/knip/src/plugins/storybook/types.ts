@@ -6,7 +6,14 @@ export type StorybookConfig = {
   core?: {
     builder?: string | { name?: string };
   };
-  framework?: {
-    name?: string;
-  };
+  framework?:
+    | string
+    | {
+        name?: string;
+        options?: {
+          builder?: {
+            viteConfigPath?: string;
+          };
+        };
+      };
 };

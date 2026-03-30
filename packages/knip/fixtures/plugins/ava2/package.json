@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/ava2",
+  "name": "@plugins/ava2",
   "knip": {
     "ava": true
   }

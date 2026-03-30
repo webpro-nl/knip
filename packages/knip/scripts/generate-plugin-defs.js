@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { EOL } from 'node:os';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 
 const HEADER = '// This file is generated (no need to edit)';
@@ -23,7 +23,7 @@ const values = `export const pluginNames = [${pluginNames.map(name => `'${name}'
 
 fs.writeFileSync(outputFileTypes, HEADER + EOL + typeDefinition + EOL + EOL + values);
 
-const imports = pluginNames.map(name => `import { default as ${cc(name)} } from './${name}/index.js';`).join(EOL);
+const imports = pluginNames.map(name => `import { default as ${cc(name)} } from './${name}/index.ts';`).join(EOL);
 const pluginsObj = `export const Plugins = {${pluginNames
   .map(name => (name === cc(name) ? `${name},` : `'${name}': ${cc(name)},`))
   .join(EOL)} };`;
@@ -31,16 +31,16 @@ const pluginsObj = `export const Plugins = {${pluginNames
 fs.writeFileSync(outputFilePlugins, HEADER + EOL + imports + EOL + EOL + pluginsObj);
 
 const pluginSchemas = pluginNames.map(name => `'${name}': pluginSchema`).join(`,${EOL}`);
-const pluginSchema = `import { z } from 'zod';
+const pluginSchema = `import { z } from 'zod/mini';
 export const globSchema = z.union([z.string(), z.array(z.string())]);
 
 export const pluginSchema = z.union([
   z.boolean(),
   globSchema,
   z.object({
-    config: globSchema.optional(),
-    entry: globSchema.optional(),
-    project: globSchema.optional(),
+    config: z.optional(globSchema),
+    entry: z.optional(globSchema),
+    project: z.optional(globSchema),
   }),
 ]);
 

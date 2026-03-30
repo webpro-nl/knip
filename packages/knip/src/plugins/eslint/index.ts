@@ -1,10 +1,13 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getDependencies } from './helpers.js';
-import type { ESLintConfig } from './types.js';
+import type { ParsedArgs } from 'minimist';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import { type Input, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getInputs, isFlatConfig, resolveFormatters } from './helpers.ts';
+import { getInputsFromFlatConfigAST } from './resolveFromAST.ts';
+import type { ESLintConfigDeprecated } from './types.ts';
 
-// New: https://eslint.org/docs/latest/use/configure/configuration-files
-// Old: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
+// https://eslint.org/docs/latest/use/configure/configuration-files
+// Deprecated: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
 
 // Note: shareable configs should use `peerDependencies` for plugins
 // https://eslint.org/docs/latest/extend/shareable-configs#publishing-a-shareable-config
@@ -13,25 +16,84 @@ const title = 'ESLint';
 
 const enablers = ['eslint', '@eslint/js'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies, manifest, config }) =>
+const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
   hasDependency(dependencies, enablers) ||
-  'eslint' in config ||
   Boolean(manifest.name && /(^eslint-config|\/eslint-config)/.test(manifest.name));
 
 const packageJsonPath = 'eslintConfig';
 
-const entry = ['eslint.config.{js,cjs,mjs}'];
+const config = [
+  'eslint.config.{js,cjs,mjs,ts,cts,mts}',
+  '.eslintrc',
+  '.eslintrc.{js,json,cjs}',
+  '.eslintrc.{yml,yaml}',
+  'package.json',
+];
 
-const config = ['.eslintrc', '.eslintrc.{js,json,cjs}', '.eslintrc.{yml,yaml}', 'package.json'];
+const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) => {
+  // Flat configs (eslint.config.*) are handled by resolveFromAST — skip loading
+  if (isFlatConfig(configFileName)) return false;
 
-const resolveConfig: ResolveConfig<ESLintConfig> = (localConfig, options) => getDependencies(localConfig, options);
+  const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
+  if (version) {
+    const major = version.match(/\d+/);
+    if (major && Number.parseInt(major[0], 10) === 9 && dependencies.has('eslint-config-next')) {
+      return false;
+    }
+  }
+  return true;
+};
 
-export default {
+const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
+
+const resolveFromAST: ResolveFromAST = (program, options) => {
+  if (isFlatConfig(options.configFileName)) return getInputsFromFlatConfigAST(program);
+  return [];
+};
+
+const note = `### ESLint v9
+
+The ESLint plugin config resolver is disabled when using \`eslint-config-next\` (\`next lint\`).
+
+Root cause: [microsoft/rushstack#4965](https://github.com/microsoft/rushstack/issues/4965)/[#5049](https://github.com/microsoft/rushstack/issues/5049)
+
+### ESLint v8
+
+If relying on [configuration cascading](https://eslint.org/docs/v8.x/use/configure/configuration-files#cascading-and-hierarchy),
+consider using an extended glob pattern like this:
+
+\`\`\`json
+{
+  "eslint": ["**/.eslintrc.js"]
+}
+\`\`\`
+`;
+
+/** @public */
+export const docs = { note };
+
+const args = {
+  config: true,
+  alias: { format: ['f'] },
+  boolean: ['inspect-config'],
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [];
+    if (parsed['inspect-config']) inputs.push(toDependency('@eslint/config-inspector', { optional: true }));
+    if (parsed['format']) for (const input of resolveFormatters(parsed['format'])) inputs.push(input);
+    return inputs;
+  },
+};
+
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   packageJsonPath,
-  entry,
   config,
+  args,
+  isLoadConfig,
   resolveConfig,
-} satisfies Plugin;
+  resolveFromAST,
+};
+
+export default plugin;

@@ -1,18 +1,22 @@
 import fs from 'node:fs/promises';
-// biome-ignore lint/nursery/noRestrictedImports: script
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
 const {
-  values: { name },
+  values: { name, force = false, graceful = !force },
 } = parseArgs({
   options: {
     name: { type: 'string' },
+    force: { type: 'boolean' },
+    graceful: { type: 'boolean' },
   },
 });
 
+const errorOnExist = force ? false : !graceful;
+
 if (!name) {
-  console.error('Usage: npm run create-plugin -- --name [name]');
+  console.error('Usage: pnpm create-plugin --name [name]');
   process.exit(1);
 }
 
@@ -28,7 +32,7 @@ const newPluginDir = path.join(pluginsDir, name);
 const newPluginFile = path.join(newPluginDir, 'index.ts');
 const schemaFilePath = path.join(cwd, 'schema.json');
 const pluginTestsDir = path.join(cwd, 'test/plugins');
-const validatorFilePath = path.join(cwd, 'src/ConfigurationValidator.ts');
+const pluginSchemaPath = path.join(cwd, 'src/schema/plugins.ts');
 const pluginTestTemplateFilePath = path.join(pluginTestsDir, '_template.test.ts');
 const pluginTestFilePath = path.join(pluginTestsDir, `${name}.test.ts`);
 const pluginTestFixturesDir = path.join(cwd, 'fixtures/plugins');
@@ -36,38 +40,40 @@ const pluginTestFixtureTemplateDir = path.join(pluginTestFixturesDir, '_template
 const pluginTestFixturePluginDir = path.join(pluginTestFixturesDir, name);
 const pluginTestFixtureManifest = path.join(pluginTestFixturePluginDir, 'package.json');
 
-const relative = to => path.relative(cwd, to);
+const relative = (to: string) => path.relative(cwd, to);
 
 // Copy plugin implementation
 await fs.cp(templateDir, newPluginDir, {
   recursive: true,
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // Add plugin to Zod validator
-const validatorContent = String(await fs.readFile(validatorFilePath));
+const validatorContent = String(await fs.readFile(pluginSchemaPath));
 const pluginsPrefix = 'const pluginsSchema = z.object({';
 const pluginsReplacement = `${pluginsPrefix}\n'${name}': pluginSchema,`;
-await fs.writeFile(validatorFilePath, validatorContent.replace(pluginsPrefix, pluginsReplacement));
+await fs.writeFile(pluginSchemaPath, validatorContent.replace(pluginsPrefix, pluginsReplacement));
 
 // Copy fixtures
 await fs.cp(pluginTestFixtureTemplateDir, pluginTestFixturePluginDir, {
   recursive: true,
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // Copy test file
 await fs.cp(pluginTestTemplateFilePath, pluginTestFilePath, {
-  errorOnExist: true,
-  force: false,
+  errorOnExist,
+  force,
 });
 
 // String replacements
 for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureManifest]) {
-  const content = String(await fs.readFile(filePath));
-  await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
+  try {
+    const content = String(await fs.readFile(filePath));
+    await fs.writeFile(filePath, content.replaceAll('_template', name).replaceAll('__PLUGIN_NAME__', name));
+  } catch {}
 }
 
 // Add plugin to JSON Schema
@@ -82,7 +88,6 @@ properties[name] = {
 
 plugins.properties = Object.keys(properties)
   .sort()
-  // biome-ignore lint/performance/noAccumulatingSpread: ignore
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));

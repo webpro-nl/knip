@@ -1,0 +1,9 @@
+{
+  "name": "app",
+  "dependencies": {
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

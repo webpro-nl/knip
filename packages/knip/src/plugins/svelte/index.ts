@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { config as viteConfig } from '../vite/index.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { config as viteConfig } from '../vite/index.ts';
+import compiler from './compiler.ts';
 
-// https://kit.svelte.dev/docs
+// https://svelte.dev/docs
 
 const title = 'Svelte';
 
@@ -12,16 +13,16 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['svelte.config.js', ...viteConfig];
 
-const production = [
-  'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
-  'src/hooks.{server,client}.{js,ts}',
-  'src/params/*.{js,ts}',
-];
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('svelte')) registerCompiler({ extension: '.svelte', compiler });
+};
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-  production,
-} satisfies Plugin;
+  registerCompilers,
+};
+
+export default plugin;

@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/jsx",
+  "dependencies": {
+    "react": "*",
+    "preact": "*"
+  },
+  "knip": {
+    "entry": [
+      "App.tsx"
+    ],
+    "project": [
+      "*.tsx"
+    ]
+  }
+}

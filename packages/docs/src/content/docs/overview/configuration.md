@@ -6,7 +6,7 @@ description: config
 ## Defaults
 
 Knip has good defaults and aims for "zero config". Here's a simplified version
-of the default configuration:
+of the default `entry` and `project` values:
 
 ```json
 {
@@ -17,13 +17,6 @@ of the default configuration:
 
 Entry files are the starting point for Knip to find more source files and
 external dependencies.
-
-:::tip
-
-Run Knip without configuration. If it reports false positives, you need a
-configuration file. Please also read [configure project files][1].
-
-:::
 
 ## Location
 
@@ -53,16 +46,15 @@ folder:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/index.ts", "scripts/{build,create}.js"],
   "project": ["src/**/*.ts", "scripts/**/*.js"]
 }
 ```
 
-If you override the `entry` file patterns, you may also want to override
-`project` file patterns. The set of project files is used to determine what
-files are unused. The `project` patterns can also be negated to exclude files
-from the analysis. Also see [configuring project files][1].
+The set of `project` files determines the analysis scope. Use negated `project`
+patterns to exclude files from the analysis. See [configuring project files][1]
+for details.
 
 The values you set override the default values, they are not merged.
 
@@ -71,17 +63,20 @@ The values you set override the default values, they are not merged.
 Be specific with `entry` files. Minimize the number of entry files and wildcards
 for better results.
 
-Plugins set entry files for you, such as those for Next.js, Remix, Vitest, and
-many more.
+Plugins are enabled automatically, and their entry files are added
+automatically. Such as for Next.js, Astro, Remix, Vitest, Playwright and many
+more.
 
 :::
 
-Knip looks in many places for entry files. Learn more about this in the next
-page about [entry files][2].
+Knip looks for entry files in many places. Learn more in the next page about
+[entry files][2].
 
 ## Configuration Options
 
-See the [configuration reference documentation][3].
+See [configuration file options][3].
+
+Use JavaScript or TypeScript in a [dynamic configuration file][4].
 
 ## What's next?
 
@@ -90,19 +85,20 @@ in the "Understanding Knip" sections, starting with [entry files][2].
 
 Want to learn more about some of the main features?
 
-- Working with [monorepos & workspaces][4].
-- Learn more about [production mode][5].
+- Working with [monorepos & workspaces][5].
+- Learn more about [production mode][6].
 
-Having troubles configuring Knip?
+Having trouble configuring Knip?
 
 - [Configuring project files][1]
-- [Handling issues][6]
+- [Troubleshooting][7]
 
 Search this website using the bar at the top (`Ctrl+K` or `⌘+K`).
 
 [1]: ../guides/configuring-project-files.md
 [2]: ../explanations/entry-files.md
 [3]: ../reference/configuration.md
-[4]: ../features/monorepos-and-workspaces.md
-[5]: ../features/production-mode.md
-[6]: ../guides/handling-issues.md
+[4]: ../reference/dynamic-configuration.mdx
+[5]: ../features/monorepos-and-workspaces.md
+[6]: ../features/production-mode.md
+[7]: ../guides/troubleshooting.md

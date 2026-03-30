@@ -1,7 +1,6 @@
 {
-  "name": "@fixtures/astro",
+  "name": "@plugins/astro",
   "type": "module",
-  "version": "*",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -14,7 +13,8 @@
     "@astrojs/mdx": "*",
     "@astrojs/rss": "*",
     "@astrojs/sitemap": "*",
-    "astro": "*"
+    "astro": "*",
+    "sharp": "*"
   },
   "devDependencies": {
     "@astrojs/check": "*"

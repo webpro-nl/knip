@@ -84,6 +84,12 @@ const item = [NS];
 
 type TypeOf = typeof NS;
 
+Object.values(NS);
+
+for (const fruit in Fruits) {
+  //
+}
+
 export { NS };
 
 export { NS as AliasedNS };

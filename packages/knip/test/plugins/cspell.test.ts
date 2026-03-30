@@ -1,25 +1,23 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
-import baseCounters from '../helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/cspell');
 
 test('Find dependencies with the Cspell plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['.cspell.json']['@cspell/dict-cryptocurrencies/cspell-ext.json']);
+  assert(issues.unlisted['.cspell.json']['@cspell/dict-cryptocurrencies']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    // TODO fast-glob returns two files cspell.json and .cSpell.json while there's only one file on disk
-    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    // case-sensitivity: fast-glob returns two files (.cspell.json and .cSpell.json) while there's only one
+    unlisted: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
     processed: 0,
     total: 0,
   });

@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-plugin-config/frontend",
+  "name": "@fixtures/workspaces-plugin-config__frontend",
   "scripts": {
     "dev": "next dev",
     "start": "next start",
@@ -9,7 +9,7 @@
     "next": "^14.0.1"
   },
   "devDependencies": {
-    "@internal/tailwind": "*",
+    "@fixtures/workspaces-plugin-config__tailwind": "*",
     "@rollup/plugin-commonjs": "*",
     "jsdom": "*",
     "vitest": "*"

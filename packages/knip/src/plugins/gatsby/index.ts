@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.ts';
 
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/gatsby-project-structure.md
 // https://github.com/gatsbyjs/gatsby/blob/master/docs/docs/reference/config-files/gatsby-config.md
@@ -29,7 +29,7 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
   if (/gatsby-config/.test(configFileName)) {
     return (localConfig as GatsbyConfig).plugins
       .map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve))
-      .map(toDeferResolve);
+      .map(id => toDeferResolve(id));
   }
 
   if (/gatsby-node/.test(configFileName)) {
@@ -45,11 +45,13 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
   return [];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

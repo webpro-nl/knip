@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/eslint3",
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-plugin-no-secrets": "*",
+    "eslint-plugin-prettier": "*"
+  }
+}

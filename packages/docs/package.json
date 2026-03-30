@@ -1,52 +1,45 @@
 {
   "name": "@knip/docs",
   "version": "0.0.0",
-  "type": "module",
-  "description": "Documentation for Knip, hosted at knip.dev",
   "private": true,
+  "description": "Documentation for Knip, hosted at knip.dev",
   "homepage": "https://knip.dev",
   "repository": {
     "type": "git",
     "url": "github:webpro-nl/knip",
     "directory": "packages/docs"
   },
-  "engines": {
-    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
-  },
+  "type": "module",
   "scripts": {
-    "prebuild": "npx -y tsx@4.7.1 ./scripts/generate-plugin-docs.ts",
+    "prebuild": "node ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
     "postbuild": "[ \"$CF_PAGES\" = \"1\" ] && find dist -mindepth 2 -type f -name 'index.html' -exec bash -c 'f=\"$1\"; d=$(dirname \"$f\"); bn=$(basename \"$d\"); mv -v \"$f\" \"$d/../$bn.html\"' _ {} \\; && find dist -mindepth 1 -type d -empty -print -delete || true",
     "dev": "astro dev",
-    "preremark": ". remark/preremark.sh",
-    "remark": "remark README.md 'src/content/docs/**/*.{md,mdx}' --verbose -o",
-    "postremark": ". remark/postremark.sh"
+    "remark": "remark README.md 'src/content/docs/**/*.md' --verbose -o && mdxlint 'src/content/docs/**/*.mdx' --verbose -o"
   },
   "dependencies": {
-    "@astro-community/astro-embed-youtube": "0.5.6",
-    "@astrojs/starlight": "0.31.0",
-    "sharp": "0.33.5"
+    "@astro-community/astro-embed-youtube": "0.5.10",
+    "@astrojs/starlight": "0.38.2",
+    "sharp": "0.34.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.4",
-    "@astrojs/markdown-remark": "^6.0.2",
+    "@astrojs/check": "0.9.8",
+    "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "5.1.7",
-    "hastscript": "9.0.0",
+    "astro": "6.1.1",
+    "hastscript": "9.0.1",
     "picocolors": "^1.1.1",
-    "rehype-autolink-headings": "^7.1.0",
-    "remark-cli": "12.0.1",
-    "remark-directive": "3.0.0",
+    "remark-directive": "4.0.0",
     "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
-    "remark-preset-webpro": "^1.1.1",
     "remark-stringify": "11.0.0",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
-    "unist-util-visit": "5.0.0"
+    "unist-util-visit": "5.1.0"
   },
-  "remarkConfig": {
-    "plugins": ["preset-webpro"]
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

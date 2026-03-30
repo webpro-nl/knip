@@ -20,19 +20,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
       - name: Install dependencies
-        run: bun install --ignore-scripts --frozen-lockfile
-      - name: Run formatter, linter, import sorter
+        run: bun install --ignore-scripts
+      - name: Run linter and formatter
         run: bun ci
       - name: Build knip
         run: bun run build
         working-directory: packages/knip
       - name: Run knip
-        run: bunx --bun knip
+        run: ./packages/knip/bin/knip-bun.js
       - name: Run knip (production/strict)
-        run: bunx --bun knip --production --strict
+        run: ./packages/knip/bin/knip-bun.js --production --strict
       - name: Test knip
-        run: bun run test
+        run: bun run test:bun
         working-directory: packages/knip

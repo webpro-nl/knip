@@ -1,17 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
-import baseCounters from '../helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/rollup');
 
 test('Find dependencies with the Rollup plugin', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['rollup.config.js']['rollup-plugin-terser']);
   assert(issues.unlisted['rollup.config.js']['@rollup/plugin-node-resolve']);
@@ -21,7 +19,6 @@ test('Find dependencies with the Rollup plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 0,
-    files: 1,
     unlisted: 4,
     processed: 2,
     total: 2,

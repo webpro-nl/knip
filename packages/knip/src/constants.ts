@@ -1,10 +1,6 @@
-import type { IssueType } from './types/issues.js';
-
 export const ROOT_WORKSPACE_NAME = '.';
 
 export const IMPORT_STAR = '*';
-
-export const ANONYMOUS = '__anonymous';
 
 export const KNIP_CONFIG_LOCATIONS = [
   'knip.json',
@@ -17,10 +13,13 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.config.js',
 ];
 
-// TS extensions: https://github.com/microsoft/TypeScript/blob/da8dfbf0ff6a94df65568fd048aec0d763c65811/src/compiler/types.ts#L7637-L7651
-export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
+export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
 
-export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
+export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
+
+export const IS_DTS = /\.d\.(c|m)?ts$/;
+
+export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules/**', '.yarn', '.git'];
 
 export const PUBLIC_TAG = '@public';
 export const INTERNAL_TAG = '@internal';
@@ -31,9 +30,11 @@ export const DT_SCOPE = '@types';
 
 export const PROTOCOL_VIRTUAL = 'virtual:';
 
-// Binaries that are expected to be globally installed
-// In other words, https://www.npmjs.com/package/[name] is NOT the expected dependency
-// Package may exist in npm registry, but last publish is at least 6 years ago
+/**
+ * Binaries that are expected to be globally available. The package at
+ * https://www.npmjs.com/package/[name] might exist, but is not expected to be
+ * listed in package.json because last npm publish was >6 years ago OR weekly downloads <5_000
+ */
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'amplify',
   'aws',
@@ -43,17 +44,21 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'bun',
   'bundle',
   'bunx',
+  'cargo',
   'cat',
   'cd',
-  'chown',
   'chmod',
+  'chown',
   'cksum',
+  'clear',
+  'cmd',
   'comm',
   'command',
   'corepack',
   'cp',
   'curl',
   'cut',
+  'date',
   'deno',
   'df',
   'dir',
@@ -64,6 +69,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'exec',
   'exit',
   'expand',
+  'export',
   'expr',
   'factor',
   'false',
@@ -86,8 +92,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'mv',
   'nice',
   'nl',
-  'nohup',
   'node',
+  'nohup',
   'npm',
   'nproc',
   'npx',
@@ -101,11 +107,12 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'rmdir',
   'rsync',
   'scp',
+  'sed',
   'seq',
   'set',
+  'sh',
   'sha1sum',
   'sha512sum',
-  'sh',
   'shred',
   'shuf',
   'sort',
@@ -118,6 +125,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'tac',
   'tee',
   'test', // exception (node built-in module)
+  'time',
   'timeout',
   'touch',
   'tr',
@@ -127,6 +135,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'uname',
   'unexpand',
   'uniq',
+  'unzip',
   'wc',
   'who',
   'whoami',
@@ -174,7 +183,7 @@ export const IGNORE_DEFINITELY_TYPED = new Set([
   'jest',
 ]);
 
-export const ISSUE_TYPES: IssueType[] = [
+export const ISSUE_TYPES = [
   'files',
   'dependencies',
   'devDependencies',
@@ -187,13 +196,13 @@ export const ISSUE_TYPES: IssueType[] = [
   'types',
   'nsTypes',
   'enumMembers',
-  'classMembers',
+  'namespaceMembers',
   'duplicates',
-];
+  'catalog',
+] as const;
 
-export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
+export const ISSUE_TYPE_TITLE = {
   files: 'Unused files',
-  _files: 'Unused files',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',
@@ -205,13 +214,41 @@ export const ISSUE_TYPE_TITLE: Record<IssueType, string> = {
   types: 'Unused exported types',
   nsTypes: 'Exported types in used namespace',
   enumMembers: 'Unused exported enum members',
-  classMembers: 'Unused exported class members',
+  namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
-};
+  catalog: 'Unused catalog entries',
+} as const;
+
+export const SYMBOL_TYPE = {
+  CLASS: 'class',
+  ENUM: 'enum',
+  FUNCTION: 'function',
+  INTERFACE: 'interface',
+  MEMBER: 'member',
+  NAMESPACE: 'namespace',
+  TYPE: 'type',
+  UNKNOWN: 'unknown',
+  VARIABLE: 'variable',
+} as const;
 
 export const FIX_FLAGS = {
   NONE: 0,
   OBJECT_BINDING: 1 << 0, // remove next comma
   EMPTY_DECLARATION: 1 << 1, // remove declaration if empty
   WITH_NEWLINE: 1 << 2, // remove with newline
+} as const;
+
+export const SIDE_EFFECTS = '__side-effects';
+
+export const OPAQUE = '__opaque';
+
+export const IMPORT_FLAGS = {
+  NONE: 0,
+  RE_EXPORT: 1 << 0,
+  TYPE_ONLY: 1 << 1,
+  ENTRY: 1 << 2, // entry path, ignore exports
+  BRIDGE: 1 << 3, // add require() target in ts module to program
+  OPTIONAL: 1 << 4, // no error if not resolved
+  SIDE_EFFECTS: 1 << 5,
+  OPAQUE: 1 << 6,
 } as const;

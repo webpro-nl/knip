@@ -1,3 +1,11 @@
+interface Alias {
+  find: string | RegExp;
+  replacement: string;
+  customResolver?: any;
+}
+
+export type AliasOptions = readonly Alias[] | { [find: string]: string };
+
 interface VitestConfig {
   test: {
     include: string[];
@@ -8,17 +16,25 @@ interface VitestConfig {
     root?: string;
     environment?: string;
     globalSetup?: string | string[];
-    reporters?: (string | unknown)[];
+    reporters?: (string | [string, unknown] | unknown)[];
     setupFiles?: string | string[];
+    workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never } })[];
+    projects?: (string | (ViteConfig & { test: VitestConfig['test'] & { projects: never } }))[];
+    alias?: AliasOptions;
   };
 }
 
 export interface ViteConfig extends VitestConfig {
+  root?: string;
   plugins?: unknown[];
   build?: {
     lib?: {
       entry: string | string[] | { [entryAlias: string]: string };
     };
+  };
+  resolve?: {
+    alias?: AliasOptions;
+    extensions?: string[];
   };
 }
 

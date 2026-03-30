@@ -1,19 +1,17 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces');
 
-test('Find unused files, dependencies and exports in workspaces (default)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+test('Find unused dependencies, exports and files in workspaces (default)', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert.equal(Object.keys(issues.dependencies['apps/backend/package.json']).length, 2);
@@ -27,7 +25,7 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   assert(issues.unlisted['apps/frontend/index.ts']['vanilla-js']);
   assert(issues.unlisted['apps/backend/index.ts']['globby']);
   assert(issues.unlisted['apps/backend/index.ts']['js-yaml']);
-  assert(issues.unlisted['packages/tools/tsconfig.json']['@workspaces/tsconfig']);
+  assert(issues.unlisted['packages/tools/tsconfig.json']['@fixtures/workspaces__tsconfig']);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 
@@ -43,14 +41,11 @@ test('Find unused files, dependencies and exports in workspaces (default)', asyn
   });
 });
 
-test('Find unused files, dependencies and exports in workspaces (production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-  });
+test('Find unused dependencies, exports and files in workspaces (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 3);
   assert.equal(Object.keys(issues.dependencies['apps/backend/package.json']).length, 2);
@@ -77,5 +72,19 @@ test('Find unused files, dependencies and exports in workspaces (production)', a
     unlisted: 3,
     processed: 7,
     total: 7,
+  });
+});
+
+test('Analyze only ancestor and dependent workspaces', async () => {
+  const options = await createOptions({ cwd, workspace: 'packages/shared' });
+  const { issues, counters } = await main(options);
+
+  assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    types: 1,
+    processed: 4,
+    total: 4,
   });
 });

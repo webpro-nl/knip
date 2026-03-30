@@ -1,5 +1,5 @@
 {
-  "name": "@workspaces-ignored/b1",
+  "name": "@fixtures/workspaces-ignored__b1",
   "scripts": {
     "start": "ignored"
   }

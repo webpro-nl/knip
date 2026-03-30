@@ -1,30 +1,25 @@
-import { timerify } from './util/Performance.js';
-import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.js';
-import { version } from './version.js';
+import type { MainOptions } from './util/create-options.ts';
+import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.ts';
+import { timerify } from './util/Performance.ts';
+import { version } from './version.ts';
 
 const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };
-
-type CacheOptions = {
-  name: string;
-  isEnabled: boolean;
-  cacheLocation: string;
-};
 
 export class CacheConsultant<T> {
   private isEnabled: boolean;
   private cache: undefined | FileEntryCache<T>;
 
-  constructor(options: CacheOptions) {
-    this.isEnabled = options.isEnabled;
+  constructor(name: string, options: MainOptions) {
+    this.isEnabled = options.isCache;
     if (this.isEnabled) {
-      const cacheName = `${options.name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${version}`;
+      const cacheName = `${name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${options.isProduction ? '-prod' : ''}-${version}`;
       this.cache = new FileEntryCache(cacheName, options.cacheLocation);
       this.reconcile = timerify(this.cache.reconcile).bind(this.cache);
       this.getFileDescriptor = timerify(this.cache.getFileDescriptor).bind(this.cache);
     }
   }
-  public getFileDescriptor(file: string): FileDescriptor<T> {
-    if (this.isEnabled && this.cache) return this.cache.getFileDescriptor(file);
+  public getFileDescriptor(filePath: string): FileDescriptor<T> {
+    if (this.isEnabled && this.cache) return this.cache.getFileDescriptor(filePath);
     return dummyFileDescriptor;
   }
   public reconcile() {

@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveEntryPaths } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { AvaConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { AvaConfig } from './types.ts';
 
 // https://github.com/avajs/ava/blob/main/docs/06-configuration.md
 
@@ -26,27 +26,24 @@ const entry = [
   '!**/test?(s)/**/{helper,fixture}?(s)/**/*',
 ];
 
-const resolveEntryPaths: ResolveEntryPaths<AvaConfig> = localConfig => {
-  if (typeof localConfig === 'function') localConfig = localConfig();
-  return (localConfig?.files ?? []).map(toEntry);
-};
-
 const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => {
   if (typeof localConfig === 'function') localConfig = localConfig();
 
+  const files = (localConfig?.files ?? entry).map(id => toEntry(id));
   const nodeArgs = localConfig.nodeArguments ?? [];
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  return options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true });
+  return files.concat(options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true }));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   entry,
-  resolveEntryPaths,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

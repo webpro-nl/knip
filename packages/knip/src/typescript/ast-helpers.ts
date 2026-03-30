@@ -1,233 +1,180 @@
-import ts from 'typescript';
+import type { ParseResult, Program } from 'oxc-parser';
+import { Visitor } from 'oxc-parser';
+import stripJsonComments from 'strip-json-comments';
+import { extname, isInternal } from '../util/path.ts';
+import { parseFile } from './visitors/helpers.ts';
 
-export function isGetOrSetAccessorDeclaration(node: ts.Node): node is ts.AccessorDeclaration {
-  return node.kind === ts.SyntaxKind.SetAccessor || node.kind === ts.SyntaxKind.GetAccessor;
-}
+const isStringLiteral = (node: any): boolean =>
+  node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string');
 
-export function isPrivateMember(
-  node: ts.MethodDeclaration | ts.PropertyDeclaration | ts.SetAccessorDeclaration | ts.GetAccessorDeclaration
-): boolean {
-  return node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.PrivateKeyword) ?? false;
-}
+const getStringValue = (node: any): string | undefined => (isStringLiteral(node) ? node.value : undefined);
 
-export function isDefaultImport(
-  node: ts.ImportDeclaration | ts.ImportEqualsDeclaration | ts.ExportDeclaration
-): boolean {
-  return node.kind === ts.SyntaxKind.ImportDeclaration && !!node.importClause && !!node.importClause.name;
-}
-
-export function isAccessExpression(node: ts.Node): node is ts.AccessExpression {
-  return ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node);
-}
-
-export function isImportCall(node: ts.Node): node is ts.ImportCall {
-  return (
-    node.kind === ts.SyntaxKind.CallExpression &&
-    (node as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword
-  );
-}
-
-export function isRequireCall(callExpression: ts.Node): callExpression is ts.CallExpression {
-  if (callExpression.kind !== ts.SyntaxKind.CallExpression) {
-    return false;
-  }
-  const { expression, arguments: args } = callExpression as ts.CallExpression;
-
-  if (expression.kind !== ts.SyntaxKind.Identifier || (expression as ts.Identifier).escapedText !== 'require') {
-    return false;
-  }
-
-  return args.length === 1;
-}
-
-export function isPropertyAccessCall(node: ts.Node, identifier: string): node is ts.CallExpression {
-  return (
-    ts.isCallExpression(node) &&
-    ts.isPropertyAccessExpression(node.expression) &&
-    node.expression.getText() === identifier
-  );
-}
-
-export function stripQuotes(name: string) {
-  const length = name.length;
-  if (length >= 2 && name.charCodeAt(0) === name.charCodeAt(length - 1) && isQuoteOrBacktick(name.charCodeAt(0))) {
-    return name.substring(1, length - 1);
-  }
-  return name;
-}
-
-enum CharacterCodes {
-  backtick = 0x60,
-  doubleQuote = 0x22,
-  singleQuote = 0x27,
-}
-
-function isQuoteOrBacktick(charCode: number) {
-  return (
-    charCode === CharacterCodes.singleQuote ||
-    charCode === CharacterCodes.doubleQuote ||
-    charCode === CharacterCodes.backtick
-  );
-}
-
-export function findAncestor<T>(
-  node: ts.Node | undefined,
-  callback: (element: ts.Node) => boolean | 'STOP'
-): T | undefined {
-  node = node?.parent;
-  while (node) {
-    const result = callback(node);
-    if (result === 'STOP') {
-      return undefined;
+export const getImportMap = (program: Program) => {
+  const importMap = new Map<string, string>();
+  for (const node of (program as any).body ?? []) {
+    if (node.type === 'ImportDeclaration') {
+      const importPath = getStringValue(node.source);
+      if (!importPath) continue;
+      for (const spec of node.specifiers ?? []) {
+        if (spec.type === 'ImportDefaultSpecifier' && spec.local?.name) {
+          importMap.set(spec.local.name, importPath);
+        } else if (spec.type === 'ImportSpecifier' && spec.local?.name) {
+          importMap.set(spec.local.name, importPath);
+        }
+      }
     }
-    if (result) {
-      return node as T;
+    if (node.type === 'VariableDeclaration') {
+      for (const decl of node.declarations ?? []) {
+        if (
+          decl.init?.type === 'CallExpression' &&
+          decl.init.callee?.type === 'Identifier' &&
+          decl.init.callee.name === 'require' &&
+          isStringLiteral(decl.init.arguments?.[0]) &&
+          decl.id?.type === 'Identifier'
+        ) {
+          importMap.set(decl.id.name, decl.init.arguments[0].value);
+        }
+      }
     }
-    node = node.parent;
   }
-  return undefined;
-}
+  return importMap;
+};
 
-export function findDescendants<T>(node: ts.Node | undefined, callback: (element: ts.Node) => boolean | 'STOP'): T[] {
-  const results: T[] = [];
+export const getDefaultImportName = (importMap: Map<string, string>, specifier: string) => {
+  for (const [name, path] of importMap) {
+    if (path === specifier) return name;
+  }
+};
 
-  if (!node) return results;
-
-  function visit(node: ts.Node) {
-    const result = callback(node);
-    if (result === 'STOP') {
-      return;
+export const getPropertyValues = (node: any, propertyName: string) => {
+  const values = new Set<string>();
+  if (node?.type !== 'ObjectExpression') return values;
+  for (const prop of node.properties ?? []) {
+    if (prop.type !== 'Property') continue;
+    const name = prop.key?.name ?? prop.key?.value;
+    if (name !== propertyName) continue;
+    const init = prop.value;
+    if (isStringLiteral(init)) {
+      values.add(init.value);
+    } else if (init?.type === 'ArrayExpression') {
+      for (const el of init.elements ?? []) {
+        if (isStringLiteral(el)) values.add(el.value);
+      }
+    } else if (init?.type === 'ObjectExpression') {
+      for (const p of init.properties ?? []) {
+        if (p.type === 'Property' && isStringLiteral(p.value)) {
+          values.add(p.value.value);
+        }
+      }
     }
-    if (result) {
-      results.push(node as T);
+  }
+  return values;
+};
+
+/** Collect all values of a named property from any ObjectExpression in the program */
+export const collectPropertyValues = (program: Program, propertyName: string): Set<string> => {
+  const values = new Set<string>();
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      for (const v of getPropertyValues(node, propertyName)) values.add(v);
+    },
+  });
+  visitor.visit(program);
+  return values;
+};
+
+/** Find the first ObjectExpression argument of a named function call */
+export const findCallArg = (program: Program, fnName: string): any | undefined => {
+  let result: any;
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (result) return;
+      if (node.callee?.type === 'Identifier' && node.callee.name === fnName) {
+        const arg = node.arguments?.[0];
+        if (arg?.type === 'ObjectExpression') result = arg;
+      }
+    },
+  });
+  visitor.visit(program);
+  return result;
+};
+
+/** Find a named property in an ObjectExpression, returns the value node */
+export const findProperty = (node: any, name: string): any | undefined => {
+  if (node?.type !== 'ObjectExpression') return;
+  for (const prop of node.properties ?? []) {
+    if (prop.type === 'Property' && (prop.key?.name === name || prop.key?.value === name)) {
+      return prop.value;
     }
-    ts.forEachChild(node, visit);
-  }
-
-  visit(node);
-
-  return results;
-}
-
-export const isDeclarationFileExtension = (extension: string) =>
-  extension === '.d.ts' || extension === '.d.mts' || extension === '.d.cts';
-
-export const getJSDocTags = (node: ts.Node) => {
-  const tags = new Set<string>();
-  let tagNodes = ts.getJSDocTags(node);
-  if (ts.isExportSpecifier(node) || ts.isBindingElement(node)) {
-    tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent.parent)];
-  } else if (ts.isEnumMember(node) || ts.isClassElement(node)) {
-    tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
-  } else if (ts.isCallExpression(node)) {
-    tagNodes = [...tagNodes, ...ts.getJSDocTags(node.parent)];
-  }
-  for (const tagNode of tagNodes) {
-    const match = tagNode.getText()?.match(/@\S+/);
-    if (match) tags.add(match[0]);
-  }
-  return tags;
-};
-
-export const getLineAndCharacterOfPosition = (node: ts.Node, pos: number) => {
-  const { line, character } = node.getSourceFile().getLineAndCharacterOfPosition(pos);
-  return { line: line + 1, col: character + 1, pos };
-};
-
-const getMemberStringLiterals = (typeChecker: ts.TypeChecker, node: ts.Node) => {
-  if (ts.isElementAccessExpression(node)) {
-    if (ts.isStringLiteral(node.argumentExpression)) return [node.argumentExpression.text];
-    const type = typeChecker.getTypeAtLocation(node.argumentExpression);
-    if (type.isUnion()) return type.types.map(type => (type as ts.LiteralType).value as string);
-  }
-
-  if (ts.isPropertyAccessExpression(node)) {
-    return [node.name.escapedText as string];
   }
 };
 
-export const getAccessMembers = (typeChecker: ts.TypeChecker, node: ts.Identifier) => {
-  let members: string[] = [];
-  let current: ts.Node = node.parent;
-  while (current) {
-    const ms = getMemberStringLiterals(typeChecker, current);
-    if (!ms) break;
-    const joinIds = (id: string) => (members.length === 0 ? id : members.map(ns => `${ns}.${id}`));
-    members = members.concat(ms.flatMap(joinIds));
-    current = current.parent;
+/** Extract string values from an array expression, including [string, ...] tuples */
+export const getStringValues = (node: any): Set<string> => {
+  const values = new Set<string>();
+  if (node?.type !== 'ArrayExpression') return values;
+  for (const el of node.elements ?? []) {
+    if (isStringLiteral(el)) {
+      values.add(el.value);
+    } else if (el?.type === 'ArrayExpression' && isStringLiteral(el.elements?.[0])) {
+      values.add(el.elements[0].value);
+    }
   }
-  return members;
+  return values;
 };
 
-export const isDestructuring = (node: ts.Node) =>
-  node.parent &&
-  ts.isVariableDeclaration(node.parent) &&
-  ts.isVariableDeclarationList(node.parent.parent) &&
-  ts.isObjectBindingPattern(node.parent.name);
-
-export const getDestructuredIds = (name: ts.ObjectBindingPattern) =>
-  name.elements.map(element => element.name.getText());
-
-export const isConsiderReferencedNS = (node: ts.Identifier) =>
-  ts.isPropertyAssignment(node.parent) ||
-  ts.isShorthandPropertyAssignment(node.parent) ||
-  (ts.isCallExpression(node.parent) && node.parent.arguments.includes(node)) ||
-  ts.isSpreadAssignment(node.parent) ||
-  ts.isArrayLiteralExpression(node.parent) ||
-  ts.isExportAssignment(node.parent) ||
-  (ts.isVariableDeclaration(node.parent) && node.parent.initializer === node) ||
-  ts.isTypeQueryNode(node.parent);
-
-const objectEnumerationMethods = new Set(['keys', 'entries', 'values', 'getOwnPropertyNames']);
-export const isObjectEnumerationCallExpressionArgument = (node: ts.Identifier) =>
-  ts.isCallExpression(node.parent) &&
-  node.parent.arguments.includes(node) &&
-  ts.isPropertyAccessExpression(node.parent.expression) &&
-  ts.isIdentifier(node.parent.expression.expression) &&
-  node.parent.expression.expression.escapedText === 'Object' &&
-  objectEnumerationMethods.has(String(node.parent.expression.name.escapedText));
-
-export const isInForIteration = (node: ts.Node) =>
-  node.parent && (ts.isForInStatement(node.parent) || ts.isForOfStatement(node.parent));
-
-export const isTopLevel = (node: ts.Node) =>
-  ts.isSourceFile(node.parent) || (node.parent && ts.isSourceFile(node.parent.parent));
-
-export const getTypeName = (node: ts.Identifier) => {
-  if (!node.parent?.parent) return;
-  const typeRef = findAncestor<ts.TypeReferenceNode>(node, _node => ts.isTypeReferenceNode(_node));
-  if (typeRef && ts.isQualifiedName(typeRef.typeName)) return typeRef.typeName;
+export const isExternalReExportsOnly = (result: ParseResult): boolean => {
+  const mod = result.module;
+  if (mod.staticExports.length === 0) return false;
+  for (const se of mod.staticExports) {
+    for (const entry of se.entries) {
+      if (!entry.moduleRequest) return false;
+      if (isInternal(entry.moduleRequest.value)) return false;
+    }
+  }
+  if (mod.staticImports.length > 0) return false;
+  return true;
 };
 
-export const isImportSpecifier = (node: ts.Node) =>
-  ts.isImportSpecifier(node.parent) ||
-  ts.isImportEqualsDeclaration(node.parent) ||
-  ts.isImportClause(node.parent) ||
-  ts.isNamespaceImport(node.parent);
-
-const isInExportedNode = (node: ts.Node): boolean => {
-  if (getExportKeywordNode(node)) return true;
-  return node.parent ? isInExportedNode(node.parent) : false;
-};
-
-export const isReferencedInExport = (node: ts.Node) => {
-  if (ts.isTypeQueryNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
-  if (ts.isTypeReferenceNode(node.parent) && isInExportedNode(node.parent.parent)) return true;
+/** Check if a specific named import exists from a module */
+export const hasImportSpecifier = (program: Program, modulePath: string, specifierName: string): boolean => {
+  for (const node of (program as any).body ?? []) {
+    if (node.type !== 'ImportDeclaration' || getStringValue(node.source) !== modulePath) continue;
+    for (const spec of node.specifiers ?? []) {
+      if (spec.type === 'ImportSpecifier') {
+        const imported = spec.imported?.name ?? spec.local?.name;
+        if (imported === specifierName) return true;
+      }
+    }
+  }
   return false;
 };
 
-export const getExportKeywordNode = (node: ts.Node) =>
-  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
-  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.ExportKeyword);
-
-export const getDefaultKeywordNode = (node: ts.Node) =>
-  // @ts-expect-error Property 'modifiers' does not exist on type 'Node'.
-  (node.modifiers as ts.Modifier[])?.find(mod => mod.kind === ts.SyntaxKind.DefaultKeyword);
-
-export const hasRequireCall = (node: ts.Node): boolean => {
-  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'require') return true;
-  return node.getChildren().some(child => hasRequireCall(child));
+const collectJsonStringLiterals = (obj: unknown, literals: Set<string>) => {
+  if (typeof obj === 'string') {
+    literals.add(obj);
+  } else if (Array.isArray(obj)) {
+    for (const item of obj) collectJsonStringLiterals(item, literals);
+  } else if (obj && typeof obj === 'object') {
+    for (const val of Object.values(obj)) collectJsonStringLiterals(val, literals);
+  }
 };
 
-export const isModuleExportsAccess = (node: ts.PropertyAccessExpression) =>
-  ts.isIdentifier(node.expression) && node.expression.escapedText === 'module' && node.name.escapedText === 'exports';
+export const collectStringLiterals = (sourceText: string, filePath: string): Set<string> => {
+  const literals = new Set<string>();
+  try {
+    const ext = extname(filePath);
+    if (ext === '.json' || ext === '.jsonc' || ext === '.json5') {
+      collectJsonStringLiterals(JSON.parse(stripJsonComments(sourceText, { trailingCommas: true })), literals);
+      return literals;
+    }
+    const result = parseFile(filePath, sourceText);
+    const visitor = new Visitor({
+      Literal(node: any) {
+        if (typeof node.value === 'string') literals.add(node.value);
+      },
+    });
+    visitor.visit(result.program);
+  } catch {}
+  return literals;
+};

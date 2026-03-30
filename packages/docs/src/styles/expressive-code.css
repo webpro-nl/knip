@@ -6,7 +6,7 @@
   border-bottom: none;
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   .expressive-code .frame pre,
   .expressive-code .frame.has-title:not(.is-terminal) .header .title {
     background-color: #151419;

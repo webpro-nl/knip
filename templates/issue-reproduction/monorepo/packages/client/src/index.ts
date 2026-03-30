@@ -1,3 +1,3 @@
-import { sharedFunction } from '@monorepo/shared';
+import { sharedFunction } from '@monorepo/lib';
 
 sharedFunction();

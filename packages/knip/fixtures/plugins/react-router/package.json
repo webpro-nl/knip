@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/react-router",
+  "dependencies": {
+    "@react-router/node": "*",
+    "isbot": "*"
+  },
+  "devDependencies": {
+    "@react-router/dev": "*"
+  }
+}

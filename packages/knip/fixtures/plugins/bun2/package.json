@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun2",
+  "scripts": {
+    "test": "bun test src/**/*.check.ts"
+  }
+}

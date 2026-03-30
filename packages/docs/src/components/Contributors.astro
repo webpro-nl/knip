@@ -30,6 +30,12 @@ const getAllContributors = async (url: URL) => {
       },
     });
 
+    if (!response.ok) {
+      console.error('GitHub API request failed:');
+      console.log(await response.text());
+      return [];
+    }
+
     const contributors = await response.json();
     allContributors.push(...contributors);
 
@@ -56,6 +62,8 @@ if (!Array.isArray(contributors)) console.log(contributors);
   .contributors a {
     border: none !important;
     opacity: 0.8;
+    max-height: 100px;
+    overflow: hidden;
   }
   .contributors a:hover {
     opacity: 1;

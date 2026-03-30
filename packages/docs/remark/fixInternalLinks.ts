@@ -20,7 +20,7 @@ export const fixInternalLinks = () => (tree: Parent) => {
   const visitor: Visitor = node => {
     if (isLinkNode(node) && node.url.startsWith('.')) {
       const url = node.url;
-      node.url = url.replace(/\.mdx?(#.+)?$/, '$1');
+      node.url = url.replace(/(?:\/index)?\.mdx?(#.+)?$/, '$1');
       console.log(`${pc.dim(dateTimeFormat.format(new Date()))} ${pc.cyan('[fix-link]')} Modify ${url} → ${node.url}`);
     }
   };

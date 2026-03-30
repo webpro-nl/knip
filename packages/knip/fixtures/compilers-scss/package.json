@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/compilers-scss",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "*"
+  },
+  "devDependencies": {
+    "bootstrap": "*",
+    "sass": "*"
+  }
+}

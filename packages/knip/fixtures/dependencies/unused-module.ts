@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import once from '@tootallnate/once';
 
 const emitter = new EventEmitter();

@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/dependency-cruiser",
-  "version": "*",
+  "name": "@plugins/dependency-cruiser",
   "devDependencies": {
     "dependency-cruiser": "*"
   },
@@ -10,4 +9,4 @@
     "test:baseline": "depcruise-baseline -c baseline.config.js",
     "test:dependency-cruise": "dependency-cruise -c dependency-cruise.config.js"
   }
-} 
+}

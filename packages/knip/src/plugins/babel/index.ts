@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { type Input, toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { api, resolveName } from './helpers.js';
-import type { BabelConfig, BabelConfigObj } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { type Input, toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { api, resolveName } from './helpers.ts';
+import type { BabelConfig, BabelConfigObj } from './types.ts';
 
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization
@@ -14,7 +14,7 @@ const enablers = [/^@babel\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['babel.config.{json,js,cjs,mjs,cts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
+const config = ['babel.config.{json,js,cjs,mjs,cts,ts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
 
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
@@ -24,7 +24,15 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
   const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
   const overrides = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
-  return compact([...presets.map(toDeferResolve), ...plugins.map(toDeferResolve), ...nested, ...overrides]);
+  return compact([
+    ...presets.map(id => toDeferResolve(id)),
+    ...plugins.map(id => toDeferResolve(id)),
+    ...(plugins.includes('@babel/plugin-transform-runtime')
+      ? [toDeferResolve('@babel/runtime', { optional: true })]
+      : []),
+    ...nested,
+    ...overrides,
+  ]);
 };
 
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {
@@ -35,10 +43,12 @@ const resolveConfig: ResolveConfig<BabelConfig> = async config => {
   return getDependenciesFromConfig(config);
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

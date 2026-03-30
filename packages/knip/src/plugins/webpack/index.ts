@@ -1,20 +1,21 @@
-import type { RuleSetRule, RuleSetUseItem } from 'webpack';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
+import type { ParsedArgs } from 'minimist';
+import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import {
   type Input,
+  toAlias,
   toDeferResolve,
+  toDeferResolveEntry,
+  toDeferResolveProductionEntry,
   toDependency,
-  toDevDependency,
-  toEntry,
-  toProductionEntry,
-} from '../../util/input.js';
-import { isAbsolute, isInternal, join, relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getDependenciesFromConfig } from '../babel/index.js';
-import type { BabelConfigObj } from '../babel/types.js';
-import type { Argv, Env, WebpackConfig } from './types.js';
-
+} from '../../util/input.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { BabelConfigObj } from '../babel/types.ts';
+import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
+import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
 
 const title = 'webpack';
@@ -33,7 +34,16 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   use.loader === 'babel-loader' &&
   typeof use.options === 'object';
 
-const info = { compiler: '', issuer: '', realResource: '', resource: '', resourceQuery: '' };
+const info = {
+  compiler: '',
+  issuer: '',
+  realResource: '',
+  resource: '',
+  resourceQuery: '',
+  dependency: '',
+  descriptionData: {},
+  issuerLayer: '',
+};
 
 const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
   if (!rule || typeof rule === 'string') return [];
@@ -62,10 +72,12 @@ const resolveUseItem = (use: RuleSetUseItem) => {
   return [];
 };
 
-export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { config: WebpackConfig; cwd: string }) => {
+export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = async (config, options) => {
+  const { cwd, isProduction } = options;
+
   // Projects may use a single config function for both development and production modes, so resolve it twice
   // https://webpack.js.org/configuration/configuration-types/#exporting-a-function
-  const passes = typeof config === 'function' ? [false, true] : [false];
+  const passes = typeof config === 'function' ? [false, true] : [isProduction];
 
   const inputs = new Set<Input>();
 
@@ -75,17 +87,29 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
     const argv: Argv = { mode };
     const resolvedConfig = typeof config === 'function' ? await config(env, argv) : config;
 
-    for (const options of [resolvedConfig].flat()) {
+    for (const opts of [resolvedConfig].flat()) {
       const entries = [];
 
-      for (const loader of options.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
+      for (const loader of opts.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
         inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
       }
 
-      if (typeof options.entry === 'string') entries.push(options.entry);
-      else if (Array.isArray(options.entry)) entries.push(...options.entry);
-      else if (typeof options.entry === 'object') {
-        for (const entry of Object.values(options.entry)) {
+      for (const plugin of opts?.plugins ?? []) {
+        if (plugin && plugin.constructor.name === 'ProvidePlugin') {
+          const providePluginInstance = plugin as ProvidePlugin;
+          if (providePluginInstance.definitions) {
+            for (const values of Object.values(providePluginInstance.definitions)) {
+              const specifier = typeof values === 'string' ? values : values[0];
+              inputs.add(toDeferResolve(specifier));
+            }
+          }
+        }
+      }
+
+      if (typeof opts.entry === 'string') entries.push(opts.entry);
+      else if (Array.isArray(opts.entry)) entries.push(...opts.entry);
+      else if (typeof opts.entry === 'object') {
+        for (const entry of Object.values(opts.entry)) {
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
@@ -93,44 +117,79 @@ export const findWebpackDependenciesFromConfig = async ({ config, cwd }: { confi
         }
       }
 
+      if (entries.length === 0 && opts.context) entries.push('./src/index');
+
       for (const entry of entries) {
-        if (!isInternal(entry)) {
-          inputs.add(toDependency(entry));
+        if (isInternal(entry) || entry.startsWith('#')) {
+          const dir = opts.context ? opts.context : cwd;
+          const input = isProduction
+            ? toDeferResolveProductionEntry(entry, { dir })
+            : toDeferResolveEntry(entry, { dir });
+          inputs.add(input);
         } else {
-          const absoluteEntry = isAbsolute(entry) ? entry : join(options.context ? options.context : cwd, entry);
-          const item = relative(cwd, absoluteEntry);
-          const value = options.mode === 'development' ? toEntry(item) : toProductionEntry(item);
-          inputs.add(value);
+          inputs.add(toDeferResolve(entry));
         }
+      }
+
+      const processAlias = (aliases: NonNullable<ResolveOptions['alias']>) => {
+        const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
+        for (const [alias, value] of Object.entries(aliases)) {
+          if (!value) continue;
+          const prefixes = Array.isArray(value) ? value : [value];
+          if (alias.endsWith('$')) {
+            inputs.add(toAlias(alias.slice(0, -1), prefixes));
+          } else {
+            if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
+            for (const prefix of prefixes) {
+              inputs.add(toAlias(addStar(alias), [addStar(toAbsolute(prefix, options.configFileDir))]));
+            }
+          }
+        }
+      };
+
+      if (opts.resolve?.alias) {
+        processAlias(opts.resolve.alias);
+      }
+      if (opts.resolveLoader?.alias) {
+        processAlias(opts.resolveLoader.alias);
       }
     }
   }
 
-  return inputs;
+  return Array.from(inputs);
 };
 
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
-  const { cwd, manifest } = options;
-
-  const inputs = await findWebpackDependenciesFromConfig({ config: localConfig, cwd });
-
-  const scripts = Object.values(manifest.scripts ?? {});
-  const webpackCLI = scripts.some(script => script && /(?<=^|\s)webpack(?=\s|$)/.test(script)) ? ['webpack-cli'] : [];
-  const webpackDevServer = scripts.some(script => script?.includes('webpack serve')) ? ['webpack-dev-server'] : [];
-
-  return compact([...inputs, [...webpackCLI, ...webpackDevServer].map(toDevDependency)].flat());
+  const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
+  inputs.push(toDependency('webpack-cli', { optional: true }));
+  return inputs;
 };
 
-const args = {
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createRequireContextVisitor(ctx));
+};
+
+const isFilterTransitiveDependencies = true;
+
+const args: Args = {
   binaries: ['webpack', 'webpack-dev-server'],
   config: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [toDependency('webpack-cli')];
+    if (parsed._[0] === 'serve') inputs.push(toDependency('webpack-dev-server'));
+    return inputs;
+  },
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
+  isFilterTransitiveDependencies,
   args,
-} satisfies Plugin;
+};
+
+export default plugin;

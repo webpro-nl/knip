@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/re-exports-enum-members-workspace",
+  "workspaces": [
+    "lib"
+  ],
+  "dependencies": {
+    "@fixtures/re-exports-enum-members-workspace__lib": "workspaces:*"
+  }
+}

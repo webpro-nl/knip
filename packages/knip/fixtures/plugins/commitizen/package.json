@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/commitizen",
-  "version": "*",
+  "name": "@plugins/commitizen",
   "devDependencies": {
     "commitizen": "*"
   },

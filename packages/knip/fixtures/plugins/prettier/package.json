@@ -1,5 +1,6 @@
 {
-  "name": "@fixtures/prettier",
+  "name": "@plugins/prettier",
+  "type": "module",
   "devDependencies": {
     "prettier": "*"
   },

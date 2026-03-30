@@ -4,15 +4,19 @@ export type DependencyArray = Array<string>;
 type WorkspaceManifest = {
   workspaceDir: string;
   manifestPath: string;
+  manifestStr: string;
   dependencies: DependencyArray;
   devDependencies: DependencyArray;
   peerDependencies: DependencySet;
-  optionalPeerDependencies: DependencyArray;
+  optionalPeerDependencies: DependencySet;
+  requiredPeerDependencies: DependencyArray;
   allDependencies: DependencySet;
   ignoreDependencies: (string | RegExp)[];
   ignoreBinaries: (string | RegExp)[];
-  usedIgnoreDependencies: Set<string | RegExp>;
-  usedIgnoreBinaries: Set<string | RegExp>;
+  ignoreUnresolved: (string | RegExp)[];
+  unusedIgnoreDependencies: Set<string | RegExp>;
+  unusedIgnoreBinaries: Set<string | RegExp>;
+  unusedIgnoreUnresolved: Set<string | RegExp>;
 };
 
 export type WorkspaceManifests = Map<string, WorkspaceManifest>;

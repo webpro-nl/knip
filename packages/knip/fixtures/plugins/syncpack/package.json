@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/syncpack",
-  "version": "*",
+  "name": "@plugins/syncpack",
   "devDependencies": {
     "syncpack": "*"
   }

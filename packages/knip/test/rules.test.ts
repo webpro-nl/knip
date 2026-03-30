@@ -1,18 +1,16 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { getValuesByKeyDeep } from '../src/util/object.js';
-import { resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import { getValuesByKeyDeep } from '../src/util/object.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/rules');
 
 test('Respect warnings in rules', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   const severities = getValuesByKeyDeep(issues, 'severity');
 
@@ -31,7 +29,6 @@ test('Respect warnings in rules', async () => {
     types: 2,
     duplicates: 1,
     enumMembers: 1,
-    classMembers: 1,
     processed: 4,
     total: 4,
   });

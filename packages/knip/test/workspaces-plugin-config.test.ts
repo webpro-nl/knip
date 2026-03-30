@@ -1,17 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { join, resolve } from '../src/util/path.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces-plugin-config');
 
 test('Use root plugin config in workspaces', async () => {
-  const { counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -21,26 +19,18 @@ test('Use root plugin config in workspaces', async () => {
 });
 
 test('Use root plugin config in workspaces (strict production)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
 
-  assert.deepEqual(
-    issues.files,
-    new Set([
-      join(cwd, 'packages/frontend/components/component.js'),
-      join(cwd, 'packages/package1/components/component.js'),
-      join(cwd, 'packages/package1/jest-setup.ts'),
-    ])
-  );
+  assert('packages/frontend/components/component.js' in issues.files);
+  assert('packages/shared/components/component.js' in issues.files);
+  assert('packages/shared/jest-setup.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 3);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 3,
-    total: 7,
-    processed: 7,
+    total: 8,
+    processed: 8,
   });
 });

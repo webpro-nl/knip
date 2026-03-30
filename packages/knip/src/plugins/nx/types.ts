@@ -5,7 +5,13 @@ export interface NxProjectConfiguration {
       executor?: string;
       options?: {
         command?: string;
-        commands?: string[];
+        commands?: Array<string | { command: string }>;
+        cwd?: string;
+        eslintConfig?: string;
+        jestConfig?: string;
+        tsConfig?: string;
+        vitestConfig?: string;
+        webpackConfig?: string;
       };
     };
   };

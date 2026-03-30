@@ -1,15 +1,17 @@
-import { Plugins } from './plugins/index.js';
-import type { PluginName } from './types/PluginNames.js';
-import type { Args } from './types/args.js';
-import type { Entries, PluginMap } from './types/config.js';
-import { timerify } from './util/Performance.js';
-import parsedArgValues from './util/cli-arguments.js';
+import { parseArgs } from 'node:util';
+import { Plugins } from './plugins/index.ts';
+import type { Args } from './types/args.ts';
+import type { Entries, PluginMap } from './types/config.ts';
+import type { PluginName } from './types/PluginNames.ts';
+import { timerify } from './util/Performance.ts';
 
 const PMap: PluginMap = Plugins;
 
-const { performance: isEnabled = false } = parsedArgValues;
+const { values } = parseArgs({ strict: false, options: { performance: { type: 'boolean' } } });
 
-const timerifyMethods = ['resolve', 'resolveConfig', 'resolveEntryPaths'] as const;
+const isEnabled = !!values.performance;
+
+const timerifyMethods = ['resolve', 'resolveConfig', 'resolveAST'] as const;
 
 const PluginEntries = Object.entries(PMap) as Entries;
 

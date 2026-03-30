@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/remark",
+  "name": "@plugins/remark",
   "scripts": {
     "format": "remark README.md -o"
   },

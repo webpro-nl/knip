@@ -1809,11 +1809,11 @@ export interface WebpackBrowserSchemaForBuildFacade {
       }
     | boolean;
   /**
-   * Generate a seperate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
+   * Generate a separate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
    */
   vendorChunk?: boolean;
   /**
-   * Generate a seperate bundle containing code used across multiple bundles.
+   * Generate a separate bundle containing code used across multiple bundles.
    */
   commonChunk?: boolean;
   /**
@@ -2141,11 +2141,11 @@ interface EsbuildBrowserSchemaForBuildFacade {
       }
     | boolean;
   /**
-   * Generate a seperate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
+   * Generate a separate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
    */
   vendorChunk?: boolean;
   /**
-   * Generate a seperate bundle containing code used across multiple bundles.
+   * Generate a separate bundle containing code used across multiple bundles.
    */
   commonChunk?: boolean;
   /**
@@ -3076,7 +3076,7 @@ interface UniversalTarget {
    */
   deployUrl?: string;
   /**
-   * Generate a seperate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
+   * Generate a separate bundle containing only vendor libraries. This option should only be used for development to reduce the incremental compilation time.
    */
   vendorChunk?: boolean;
   /**

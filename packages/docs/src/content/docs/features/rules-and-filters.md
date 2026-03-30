@@ -1,7 +1,7 @@
 ---
 title: Rules & Filters
 sidebar:
-  order: 4
+  order: 5
 ---
 
 Use rules or filters to customize Knip's output. This has various use cases, a
@@ -42,17 +42,17 @@ Also see the [list of issue types][2].
 Knip has shortcuts to include only specific issue types.
 
 1. The `--dependencies` flag includes:
-
    - `dependencies` (and `devDependencies` + `optionalPeerDependencies`)
    - `unlisted`
    - `binaries`
    - `unresolved`
+   - `catalog`
 
 2. The `--exports` flag includes:
-
    - `exports`
    - `types`
    - `enumMembers`
+   - `namespaceMembers`
    - `duplicates`
 
 3. The `--files` flag is a shortcut for `--include files`
@@ -74,7 +74,6 @@ Example:
 {
   "rules": {
     "files": "warn",
-    "classMembers": "off",
     "duplicates": "off"
   }
 }

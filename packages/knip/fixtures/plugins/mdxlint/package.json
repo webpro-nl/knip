@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/mdxlint",
+  "scripts": {
+    "mdx": "mdxlint"
+  },
+  "devDependencies": {
+    "mdxlint": "*",
+    "remark-directive": "*",
+    "remark-gfm": "*"
+  }
+}

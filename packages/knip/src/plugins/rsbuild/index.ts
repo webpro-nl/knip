@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { RsbuildConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { RsbuildConfig } from './types.ts';
 
-// https://rsbuild.dev/config
+// https://rsbuild.rs/config/
 
 const title = 'Rsbuild';
 
@@ -12,14 +13,45 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveConfig: ResolveConfig<RsbuildConfig> = async () => {
-  return [];
+const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
+  const entries = new Set<string>();
+
+  const checkSource = (source: RsbuildConfig['source']) => {
+    if (source?.entry) {
+      for (const entry of Object.values(source.entry)) {
+        if (typeof entry === 'string') entries.add(entry);
+        else if (Array.isArray(entry)) for (const e of entry) entries.add(e);
+        else {
+          if (typeof entry.import === 'string') entries.add(entry.import);
+          else if (Array.isArray(entry.import)) for (const e of entry.import) entries.add(e);
+        }
+      }
+    }
+
+    if (source?.preEntry) {
+      const entry = source.preEntry;
+      if (typeof entry === 'string') entries.add(entry);
+      else if (Array.isArray(entry)) for (const e of entry) entries.add(e);
+    }
+  };
+
+  checkSource(config.source);
+
+  if (config.environments) {
+    for (const environment of Object.values(config.environments)) {
+      checkSource(environment.source);
+    }
+  }
+
+  return Array.from(entries).map(input => toProductionEntry(input));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

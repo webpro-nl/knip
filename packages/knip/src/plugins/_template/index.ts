@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDeferResolve } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDeferResolve } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PluginConfig } from './types.ts';
 
 // link to __PLUGIN_NAME__ docs
 
@@ -19,10 +19,10 @@ const production: string[] = [];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   const inputs = config?.plugins ?? [];
-  return [...inputs].map(toDeferResolve);
+  return [...inputs].map(id => toDeferResolve(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -30,4 +30,6 @@ export default {
   entry,
   production,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

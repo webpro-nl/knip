@@ -4,7 +4,7 @@
     "importHelpers": true,
     "paths": {
       "@": ["../trailing"],
-      "~": ["../comma"],
+      "~": ["../comma"]
     },
     "plugins": [
       {
@@ -14,12 +14,12 @@
         "name": "ts-graphql-plugin",
         "schema": "path-or-url-to-your-schema.graphql",
         "tag": "gql"
-      },
+      }
     ]
   },
   "references": [
     {
       "path": "./tsconfig.app.json"
-    },
+    }
   ]
 }

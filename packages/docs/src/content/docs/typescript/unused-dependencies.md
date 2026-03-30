@@ -35,7 +35,7 @@ JavaScript and TypeScript projects tidy.
 It's easy to [get started][1] and make package management easier and more fun!
 
 <div style="display: flex; justify-content: center; margin: 4rem auto;">
-  <img src="/logo.svg" alt="Logo of Knip, to find unused files, dependencies and exports" class="logo-border" />
+  <img src="/logo.svg" alt="Logo of Knip, to find unused dependencies, exports and files" class="logo-border" />
 </div>
 
 ## How does Knip identify unused dependencies?

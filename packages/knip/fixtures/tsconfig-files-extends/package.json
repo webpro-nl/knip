@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/tsconfig-files-extends",
+  "dependencies": {
+    "type-fest": "*"
+  }
+}

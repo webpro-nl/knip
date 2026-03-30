@@ -1,9 +1,9 @@
-export type BaseStyleLintConfig = {
+interface BaseStyleLintConfig {
   customSyntax?: string;
   extends?: string | string[];
-  plugins?: string[];
-};
+  plugins?: (string | BaseStyleLintConfig)[];
+}
 
-export type StyleLintConfig = BaseStyleLintConfig & {
-  overrides: BaseStyleLintConfig[];
-};
+export interface StyleLintConfig extends BaseStyleLintConfig {
+  overrides?: BaseStyleLintConfig[];
+}

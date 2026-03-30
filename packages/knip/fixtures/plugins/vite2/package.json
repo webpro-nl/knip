@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/vite2",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "*",
+    "@emotion/babel-plugin": "*",
+    "vite": "*"
+  }
+}

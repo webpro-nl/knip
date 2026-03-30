@@ -1,9 +1,8 @@
 {
-  "name": "@fixtures/vitest7",
-  "scripts": {
-    "test": "vitest"
-  },
+  "name": "@plugins/vitest7",
   "devDependencies": {
-    "vitest": "*"
+    "vitest": "*",
+    "ReporterString": "*",
+    "ReporterArray": "*"
   }
 }

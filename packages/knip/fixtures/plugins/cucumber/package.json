@@ -1,6 +1,5 @@
 {
-  "name": "@fixtures/cucumber",
-  "version": "*",
+  "name": "@plugins/cucumber",
   "devDependencies": {
     "@cucumber/cucumber": "*",
     "@cucumber/pretty-formatter": "*"

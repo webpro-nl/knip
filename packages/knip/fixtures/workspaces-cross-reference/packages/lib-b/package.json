@@ -1,6 +1,6 @@
 {
-  "name": "@workspaces-cross-reference/lib-b",
+  "name": "@fixtures/workspaces-cross-reference__lib-b",
   "dependencies": {
-    "@workspaces-cross-reference/lib-a": "*"
+    "@fixtures/workspaces-cross-reference__lib-a": "*"
   }
 }

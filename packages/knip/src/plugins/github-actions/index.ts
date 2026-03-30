@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.js';
-import { _firstGlob } from '../../util/glob.js';
-import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.js';
-import { findByKeyDeep } from '../../util/object.js';
-import { join, relative } from '../../util/path.js';
-import type { Job, Runs } from './types.js';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { hasFileWithExtension } from '../../util/fs.ts';
+import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { findByKeyDeep } from '../../util/object.ts';
+import { join, relative } from '../../util/path.ts';
+import type { Job, Runs } from './types.ts';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -11,8 +11,7 @@ const title = 'GitHub Actions';
 
 const enablers = 'This plugin is enabled when a `.yml` or `.yaml` file is found in the `.github/workflows` folder.';
 
-const isEnabled: IsPluginEnabled = async ({ cwd }) =>
-  Boolean(await _firstGlob({ cwd, patterns: ['.github/workflows/*.{yml,yaml}'] }));
+const isEnabled: IsPluginEnabled = ({ cwd }) => hasFileWithExtension(cwd, '.github/workflows', ['.yml', '.yaml']);
 
 const isRootOnly = true;
 
@@ -20,7 +19,7 @@ const config = ['.github/workflows/*.{yml,yaml}', '.github/**/action.{yml,yaml}'
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-const getActionDependencies = (config: any, options: PluginOptions) => {
+export const getActionDependencies = (config: any, options: PluginOptions) => {
   const { configFileDir, configFileName } = options;
   const isActionManifest = configFileName === 'action.yml' || configFileName === 'action.yaml';
   if (!(isActionManifest && config?.runs?.using?.startsWith('node'))) return [];
@@ -57,14 +56,16 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     }
   }
 
-  return [...inputs, ...getActionDependencies(config, options).map(toEntry)];
+  return [...inputs, ...getActionDependencies(config, options).map(id => toEntry(id))];
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   isRootOnly,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

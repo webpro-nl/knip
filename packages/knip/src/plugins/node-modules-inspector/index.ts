@@ -1,0 +1,27 @@
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toUnconfig } from '../../util/plugin-config.ts';
+
+// https://github.com/antfu/node-modules-inspector
+
+const title = 'node-modules-inspector';
+
+const enablers = ['node-modules-inspector'];
+
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const config: string[] = [...toUnconfig('node-modules-inspector.config')];
+
+const args = {
+  config: true,
+};
+
+const plugin: Plugin = {
+  title,
+  enablers,
+  isEnabled,
+  config,
+  args,
+};
+
+export default plugin;

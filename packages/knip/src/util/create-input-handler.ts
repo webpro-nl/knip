@@ -1,0 +1,164 @@
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
+import type { DependencyDeputy } from '../DependencyDeputy.ts';
+import type { Issue } from '../types/issues.ts';
+import type { ExternalRef } from '../types/module-graph.ts';
+import type { MainOptions } from './create-options.ts';
+import { debugLog } from './debug.ts';
+import {
+  fromBinary,
+  type Input,
+  isBinary,
+  isConfig,
+  isDeferResolve,
+  isDeferResolveEntry,
+  isDependency,
+  toDebugString,
+} from './input.ts';
+import { getPackageNameFromSpecifier } from './modules.ts';
+import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
+import { _resolveModuleSync, _resolveSync } from './resolve.ts';
+
+export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
+
+const isJoinable = (specifier: string) => {
+  const char = specifier.charCodeAt(0);
+  return char !== 35 && char !== 126 && char !== 64 && !isAbsolute(specifier); // not # ~ @, not absolute
+};
+
+const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Workspace) =>
+  (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
+  (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) ||
+  workspace;
+
+const addExternalRef = (map: ExternalRefsFromInputs, containingFilePath: string, ref: ExternalRef) => {
+  if (!map.has(containingFilePath)) map.set(containingFilePath, new Set());
+  // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
+  map.get(containingFilePath)!.add(ref);
+};
+
+export const createInputHandler =
+  (
+    deputy: DependencyDeputy,
+    chief: ConfigurationChief,
+    isGitIgnored: (filePath: string) => boolean,
+    addIssue: (issue: Issue) => void,
+    externalRefs: ExternalRefsFromInputs | undefined,
+    options: MainOptions
+  ) =>
+  (input: Input, workspace: Workspace) => {
+    const { specifier, containingFilePath } = input;
+
+    if (!containingFilePath || IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
+
+    if (isBinary(input)) {
+      const binaryName = fromBinary(input);
+      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
+
+      const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
+      if (dependencies) {
+        if (externalRefs) {
+          for (const dependency of dependencies) {
+            addExternalRef(externalRefs, containingFilePath, { specifier: dependency, identifier: binaryName });
+          }
+        }
+        return;
+      }
+
+      if (dependencies || input.optional) return;
+
+      addIssue({
+        type: 'binaries',
+        filePath: containingFilePath,
+        workspace: workspace.name,
+        symbol: binaryName,
+        specifier,
+        fixes: [],
+      });
+
+      return;
+    }
+
+    const packageName = getPackageNameFromSpecifier(specifier);
+
+    if (
+      packageName &&
+      (isDependency(input) ||
+        isDeferResolve(input) ||
+        (isDeferResolveEntry(input) && isInNodeModules(specifier)) ||
+        isConfig(input))
+    ) {
+      // Attempt fast path first for external dependencies (including internal workspaces)
+      const isWorkspace = chief.workspacesByPkgName.has(packageName);
+      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
+
+      if (inputWorkspace) {
+        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, isConfig(input));
+
+        if (externalRefs && !isWorkspace) {
+          addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });
+        }
+
+        if (isWorkspace || isDependency(input)) {
+          if (!isHandled) {
+            if (!input.optional && ((options.isProduction && input.production) || !options.isProduction)) {
+              addIssue({
+                type: 'unlisted',
+                filePath: containingFilePath,
+                workspace: inputWorkspace.name,
+                symbol: packageName,
+                specifier: packageName,
+                fixes: [],
+              });
+            }
+            return;
+          }
+
+          // Return resolved path for refs to internal workspaces
+          const internalPath = _resolveSync(specifier, dirname(containingFilePath));
+          if (internalPath && isInternal(internalPath) && !isGitIgnored(internalPath)) return internalPath;
+        }
+
+        if (isHandled) return;
+      }
+    }
+
+    if (isDeferResolve(input) && deputy.isProduction && !input.production) {
+      return;
+    }
+
+    // oxc-resolver does not resolve "file" or "file.ts" without "./" so we best-guess-absolutify
+    const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
+    const basePath = input.dir ? join(input.dir, 'file.ts') : containingFilePath;
+    const resolvedFilePath = _resolveModuleSync(filePath, basePath);
+
+    if (resolvedFilePath && isInternal(resolvedFilePath)) {
+      return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
+    }
+
+    if (input.optional) return;
+
+    if (!isInternal(filePath)) {
+      addIssue({
+        type: 'unlisted',
+        filePath: containingFilePath,
+        workspace: workspace.name,
+        symbol: packageName ?? specifier,
+        specifier: packageName ?? specifier,
+        fixes: [],
+      });
+    } else if (!isGitIgnored(filePath)) {
+      // Let's start out conservatively
+      if (!isDeferResolveEntry(input) && !isConfig(input)) {
+        addIssue({
+          type: 'unresolved',
+          filePath: containingFilePath,
+          workspace: workspace.name,
+          symbol: specifier,
+          fixes: [],
+        });
+      } else {
+        debugLog(workspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
+      }
+    }
+  };

@@ -9,9 +9,11 @@ Knip provides the following built-in reporters:
 - `codeowners`
 - `compact`
 - [`disclosure`][1]
-- [`json`][2]
-- [`markdown`][3]
-- `symbol` (default)
+- [`github-actions`][2]
+- [`json`][3]
+- [`markdown`][4]
+- [`codeclimate`][5]
+- `symbols` (default)
 
 Example usage:
 
@@ -27,13 +29,12 @@ object per file structured like this:
 
 ```json
 {
-  "files": ["src/unused.ts"],
   "issues": [
     {
       "file": "package.json",
       "owners": ["@org/admin"],
-      "dependencies": ["jquery", "moment"],
-      "devDependencies": [],
+      "dependencies": [{ "name": "jquery", "line": 5, "col": 6, "pos": 71 }],
+      "devDependencies": [{ "name": "lodash", "line": 9, "col": 6, "pos": 99 }],
       "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
       "exports": [],
       "types": [],
@@ -46,36 +47,52 @@ object per file structured like this:
       "devDependencies": [],
       "binaries": [],
       "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 403 }
+        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
       ],
       "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
       "types": [
         { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
         { "name": "unusedType", "line": 8, "col": 14, "pos": 145 }
       ],
-      "enumMembers": {
-        "MyEnum": [
-          { "name": "unusedMember", "line": 13, "col": 3, "pos": 167 },
-          { "name": "unusedKey", "line": 15, "col": 3, "pos": 205 }
-        ]
-      },
-      "classMembers": {
-        "MyClass": [
-          { "name": "unusedMember", "line": 40, "col": 3, "pos": 687 },
-          { "name": "unusedSetter", "line": 61, "col": 14, "pos": 1071 }
-        ]
-      },
+      "enumMembers": [
+        {
+          "namespace": "MyEnum",
+          "name": "unusedMember",
+          "line": 13,
+          "col": 3,
+          "pos": 167
+        },
+        {
+          "namespace": "MyEnum",
+          "name": "unusedKey",
+          "line": 15,
+          "col": 3,
+          "pos": 205
+        }
+      ],
       "duplicates": ["Registration", "default"]
     }
   ]
 }
 ```
 
-The keys match the [reported issue types][4]. Example usage:
+The keys match the [reported issue types][6]. Example usage:
 
 ```sh
 knip --reporter json
 ```
+
+### GitHub Actions
+
+Use the GitHub Actions reporter in a workflow for annotations in pull requests.
+Example usage:
+
+```sh
+knip --reporter github-actions
+```
+
+Changed files in pull requests will now contain inline annotations for lint
+findings.
 
 ### Markdown
 
@@ -126,8 +143,8 @@ dangling.js
 <summary>Unused dependencies (2)</summary>
 
 ```
-unused-dep     package.json
-my-package     package.json
+my-package     package.json:17:5
+unused-dep     package.json:20:5
 ```
 
 </details>
@@ -150,11 +167,40 @@ dangling.js
   <summary>Unused dependencies (2)</summary>
 
 ```
-unused-dep     package.json
-my-package     package.json
+my-package     package.json:17:5
+unused-dep     package.json:20:5
 ```
 
 </details>
+
+### CodeClimate
+
+The built-in `codeclimate` reporter generates output in the Code Climate Report
+JSON format. Example usage:
+
+```text
+$ knip --reporter codeclimate
+
+[
+  {
+    "type": "issue",
+    "check_name": "Unused exports",
+    "description": "isUnused",
+    "categories": ["Bug Risk"],
+    "location": {
+      "path": "path/to/file.ts",
+      "positions": {
+        "begin": {
+          "line": 6,
+          "column": 1
+        }
+      }
+    }
+    "severity": "major",
+    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84",
+  }
+]
+```
 
 ## Custom Reporters
 
@@ -176,8 +222,10 @@ type Reporter = async (options: ReporterOptions): void;
 type ReporterOptions = {
   report: Report;
   issues: Issues;
+  counters: Counters;
   configurationHints: ConfigurationHints;
-  noConfigHints: boolean;
+  isDisableConfigHints: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;
   isShowProgress: boolean;
@@ -252,6 +300,8 @@ knip --preprocessor ./preprocess.ts
 ```
 
 [1]: #disclosure
-[2]: #json
-[3]: #markdown
-[4]: ../reference/issue-types.md
+[2]: #github-actions
+[3]: #json
+[4]: #markdown
+[5]: #codeclimate
+[6]: ../reference/issue-types.md

@@ -1,11 +1,12 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../src/index.js';
-import { getDependencyMetaData } from '../src/manifest/index.js';
-import { join, resolve } from '../src/util/path.js';
-import { load } from '../src/util/plugin.js';
-import baseArguments from './helpers/baseArguments.js';
-import baseCounters from './helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../src/index.ts';
+import { getDependencyMetaData } from '../src/manifest/index.ts';
+import { join } from '../src/util/path.ts';
+import { load } from '../src/util/plugin.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/npm-scripts');
 const manifest = await load(join(cwd, 'package.json'));
@@ -17,7 +18,7 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
     packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 
-  const { hostDependencies, installedBinaries } = await getDependencyMetaData(config);
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
 
   const expectedHostDependencies = new Map();
   expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
@@ -49,10 +50,11 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
 });
 
 test('Unused dependencies in npm scripts', async () => {
-  const { issues, counters, configurationHints } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters, configurationHints } = await main(options);
+
+  assert('script.js' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
 
   assert(issues.dependencies['package.json']['express']);
 
@@ -72,38 +74,31 @@ test('Unused dependencies in npm scripts', async () => {
     dependencies: 1,
     devDependencies: 1,
     binaries: 3,
-    processed: 2,
-    total: 2,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 
-  assert.deepEqual(
-    configurationHints,
-    new Set([
-      { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
-      { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
-    ])
-  );
+  assert.deepEqual(configurationHints, [
+    { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+    { workspaceName: undefined, identifier: 'ignore.js', type: 'ignore' },
+  ]);
 });
 
 test('Unused dependencies in npm scripts (strict)', async () => {
-  const { issues, counters, configurationHints } = await main({
-    ...baseArguments,
-    cwd,
-    isProduction: true,
-    isStrict: true,
-  });
-
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { issues, counters } = await main(options);
   assert(issues.dependencies['package.json']['express']);
   assert(issues.dependencies['package.json']['unused-peer-dep']);
+  assert(issues.dependencies['package.json']['@sap/approuter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    dependencies: 2,
-    processed: 1,
-    total: 2,
+    files: 2,
+    dependencies: 3,
+    processed: 2,
+    total: 3,
   });
-
-  assert.deepEqual(configurationHints, new Set());
 });

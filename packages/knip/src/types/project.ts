@@ -1,20 +1,30 @@
-import type ts from 'typescript';
-import type { AsyncCompilers, SyncCompilers } from '../compilers/types.js';
-import type { ToSourceFilePath } from '../util/to-source-path.js';
+export type Paths = Record<string, string[]> | undefined;
 
-export type Paths = ts.CompilerOptions['paths'];
-
-export type PrincipalOptions = {
-  cwd: string;
-  isFile: boolean;
-  compilerOptions: ts.CompilerOptions;
-  paths: Paths;
-  compilers: [SyncCompilers, AsyncCompilers];
-  pkgName: string;
-  isIsolateWorkspaces: boolean;
-  isSkipLibs: boolean;
-  isWatch: boolean;
-  toSourceFilePath: ToSourceFilePath;
-  isCache: boolean;
-  cacheLocation: string;
-};
+export interface CompilerOptions {
+  allowJs?: boolean;
+  allowNonTsExtensions?: boolean;
+  allowSyntheticDefaultImports?: boolean;
+  baseUrl?: string;
+  declaration?: boolean;
+  declarationMap?: boolean;
+  esModuleInterop?: boolean;
+  inlineSourceMap?: boolean;
+  inlineSources?: boolean;
+  jsx?: number;
+  jsxImportSource?: string;
+  lib?: string[];
+  module?: number;
+  moduleResolution?: number;
+  noEmit?: boolean;
+  outDir?: string;
+  paths?: Record<string, string[]>;
+  pathsBasePath?: string;
+  plugins?: Array<{ name: string } | string>;
+  rootDir?: string;
+  rootDirs?: string[];
+  skipDefaultLibCheck?: boolean;
+  skipLibCheck?: boolean;
+  sourceMap?: boolean;
+  types?: string[];
+  [key: string]: unknown;
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/webpack-reexport",
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "@org/webpack-config": "*",
+    "webpack": "*",
+    "webpack-cli": "*"
+  },
+  "knip": {
+    "ignoreDependencies": [
+      "style-loader"
+    ]
+  }
+}

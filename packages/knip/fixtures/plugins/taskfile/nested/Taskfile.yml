@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  nested-task:
+    cmd: node ../scripts/nested.js
+  nested-binary:
+    cmd: npx some-nonexistent-binary
+

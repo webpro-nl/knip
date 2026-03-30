@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/sentry",
+  "name": "@plugins/sentry",
   "scripts": {},
   "dependencies": {
     "@sentry/nextjs": "*"

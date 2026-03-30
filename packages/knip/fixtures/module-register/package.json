@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/module-register",
+  "devDependencies": {
+    "@nodejs-loaders/css-module": "*",
+    "@nodejs-loaders/tsx": "*"
+  }
+}

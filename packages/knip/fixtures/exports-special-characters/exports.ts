@@ -1,6 +1,7 @@
 export const $dollar = '$';
 export const dollar$ = '$$';
 export const _underscore = '_';
+export const __underscores = '__';
 
 export class DollarMembers {
   $member: string;
@@ -14,6 +15,7 @@ export class $Dollar {}
 export type $DollarType = string;
 
 export enum Characters {
+  Used = 1,
   ' ' = ' ',
   '-' = '-',
   ',' = ',',

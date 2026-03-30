@@ -1,21 +1,133 @@
-<ul>
-  <li><a href="https://github.com/aws-samples/baseline-environment-on-aws">AWS (Amazon)</a></li>
-  <li><a href="https://github.com/arktypeio/arktype">ArkType</a></li>
-  <li><a href="https://github.com/backstage/backstage">Backstage (Spotify)</a></li>
-  <li><a href="https://github.com/sourcegraph/cody">Cody (SourceGraph)</a></li>
-  <li><a href="https://github.com/JoshuaKGoldberg/create-typescript-app">Create TypeScript App</a></>
-  <li><a href="https://github.com/eslint/eslint">ESLint</a></li>
-  <li><a href="https://github.com/freeCodeCamp/freeCodeCamp">freeCodeCamp</a></li>
-  <li><a href="https://github.com/grafana/grafana">Grafana</a></li>
-  <li><a href="https://github.com/mochajs/mocha">Mocha</a></li>
-  <li><a href="https://github.com/nuxt/nuxt">Nuxt</a></li>
-  <li><a href="https://github.com/prettier/prettier">Prettier</a></>
-  <li><a href="https://github.com/release-it/release-it">Release It!</a></>
-  <li><a href="https://github.com/storybookjs/storybook">Storybook</a></li>
-  <li><a href="https://github.com/sveltejs/svelte">Svelte</a></li>
-  <li><a href="https://github.com/TanStack/query">Query</a>, <a href="https://github.com/TanStack/table">Table</a> (TanStack)</li>
-  <li><a href="https://github.com/microsoft/TypeScript">TypeScript (Microsoft)</a></li>
-  <li><a href="https://github.com/typescript-eslint/typescript-eslint">typescript-eslint</a></li>
-  <li><a href="https://github.com/JoshuaKGoldberg/TypeStat">TypeStat</a></li>
-  <li><a href="https://github.com/statelyai/xstate">XState (Stately)</a></li>
-</ul>
+---
+import Adobe from '../assets/projects/adobe.svg';
+import AGGrid from '../assets/projects/ag-grid.svg';
+import AGGrid2 from '../assets/projects/ag-grid2.svg';
+import Anthropic from '../assets/projects/anthropic.svg';
+import ArkType from '../assets/projects/arktype.svg';
+import AstroLogo from '../assets/projects/astro.svg';
+import AWS from '../assets/projects/aws.svg';
+import Backstage from '../assets/projects/backstage.svg';
+import Cloudflare from '../assets/projects/cloudflare.svg';
+import CreateTypeScriptApp from '../assets/projects/create-typescript-app.png';
+import Datadog from '../assets/projects/datadog.svg';
+import ESLint from '../assets/projects/eslint.svg';
+import FreeCodeCamp from '../assets/projects/freecodecamp.svg';
+import Google from '../assets/projects/google.svg';
+import Grafana from '../assets/projects/grafana.svg';
+import Guardian from '../assets/projects/guardian.svg';
+import Microsoft from '../assets/projects/microsoft.svg';
+import Mocha from '../assets/projects/mocha.svg';
+import Nuxt from '../assets/projects/nuxt.svg';
+import Prettier from '../assets/projects/prettier.svg';
+import Sanity from '../assets/projects/sanity.svg';
+import SAP from '../assets/projects/sap.svg';
+import Sentry from '../assets/projects/sentry.svg';
+import Shopify from '../assets/projects/shopify.svg';
+import SourceGraph from '../assets/projects/sourcegraph.svg';
+import Stately from '../assets/projects/stately.svg';
+import Storybook from '../assets/projects/storybook.svg';
+import Svelte from '../assets/projects/svelte.svg';
+import TanStack from '../assets/projects/tanstack.png';
+import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
+import Vercel from '../assets/projects/vercel.svg';
+---
+
+<style>
+  div {
+    margin-top: 4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  a {
+    border-bottom: none !important;
+    display: flex;
+  }
+
+  svg, img {
+    width: auto;
+    height: 32px !important;
+    margin: 0 !important;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    filter: brightness(0.6) grayscale(100%)
+  }
+
+  [data-theme=light] svg {
+    opacity: 0.7;
+  }
+
+  .contrast svg {
+    opacity: 1;
+    filter: contrast(1) grayscale(100%)
+  }
+  .shrink {
+    margin: 0 -3%;
+    svg {
+      scale: 0.75;
+    }
+  }
+  .grow svg {
+    scale: 1.4;
+  }
+  .blowup svg {
+    scale: 2.5;
+  }
+  .raise svg {
+    translate: 0 -6px;
+  }
+  .sink svg {
+    translate: 0 6px;
+  }
+
+
+  a:hover svg,
+  a:hover img {
+    filter: none;
+  }
+
+  [data-theme=light] a:hover svg,
+  [data-theme=light] a:hover img {
+    opacity: 1;
+    filter: none;
+  }
+</style>
+
+<div id="projects">
+    <a href="https://github.com/search?type=code&q=org:adobe knip" class="contrast grow"><Adobe /></a>
+    <a href="https://github.com/search?type=code&q=org:ag-grid knip"><AGGrid /><AGGrid2 /></a>
+    <a href="https://github.com/search?type=code&q=org:anthropics knip" class="shrink"><Anthropic /></a>
+    <a href="https://github.com/search?type=code&q=org:arktypeio knip" class="grow"><ArkType  /></a>
+    <a href="https://github.com/search?type=code&q=org:withastro knip"><AstroLogo /></a>
+    <a href="https://github.com/search?type=code&q=org:aws-samples knip" class="sink" ><AWS/></a>
+    <a href="https://github.com/search?type=code&q=org:backstage knip"><Backstage /></a>
+    <a href="https://github.com/search?type=code&q=org:cloudflare knip" class="grow"><Cloudflare /></a>
+    <a href="https://github.com/search?type=code&q=org:datadog knip"><Datadog /></a>
+    <a href="https://github.com/search?type=code&q=org:eslint knip" class="contrast"><ESLint  /></a>
+    <a href="https://github.com/search?type=code&q=org:freeCodeCamp knip"><FreeCodeCamp  /></a>
+    <a href="https://github.com/search?type=code&q=org:google-gemini knip"><Google /></a>
+    <a href="https://github.com/search?type=code&q=org:grafana knip"><Grafana /></a>
+    <a href="https://github.com/search?type=code&q=org:guardian knip"><Guardian /></a>
+    <a href="https://github.com/search?type=code&q=org:JoshuaKGoldberg knip"><img src={CreateTypeScriptApp.src}/></a>
+    <a href="https://github.com/search?type=code&q=org:microsoft knip"><Microsoft /></a>
+    <a href="https://github.com/search?type=code&q=org:mochajs knip" class="contrast grow"><Mocha /></a>
+    <a href="https://github.com/search?type=code&q=org:nuxt knip"><Nuxt /></a>
+    <a href="https://github.com/search?type=code&q=org:prettier knip" class="contrast grow"><Prettier /></a>
+    <a href="https://github.com/search?type=code&q=org:sanity-io knip"><Sanity /></a>
+    <a href="https://github.com/search?type=code&q=org:SAP knip" class="blowup"><SAP /></a>
+    <a href="https://github.com/search?type=code&q=org:getsentry knip"><Sentry /></a>
+    <a href="https://github.com/search?type=code&q=org:shopify knip"><Shopify /></a>
+    <a href="https://github.com/search?type=code&q=org:sourcegraph knip"><SourceGraph /></a>
+    <a href="https://github.com/search?type=code&q=org:statelyai knip"><Stately /></a>
+    <a href="https://github.com/search?type=code&q=org:storybookjs knip"><Storybook  /></a>
+    <a href="https://github.com/search?type=code&q=org:sveltejs knip" class="contrast"><Svelte /></a>
+    <a href="https://github.com/search?type=code&q=org:tanstack knip" class="contrast"><img src={TanStack.src}/></a>
+    <a href="https://github.com/search?type=code&q=org:typescript-eslint knip" class="contrast grow"><TypeScriptESLint/></a>
+    <a href="https://github.com/search?type=pullrequests&q=org:vercel knip" class="shrink"><Vercel/></a>
+</div>

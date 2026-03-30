@@ -1,98 +1,78 @@
-import picocolors from 'picocolors';
-import type { DependencyGraph } from '../types/dependency-graph.js';
-import parsedArgValues from './cli-arguments.js';
-import { toAbsolute, toRelative } from './path.js';
+import pc from 'picocolors';
+import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
 
-const IS_ENTRY = ' ◯';
-const HAS_REF = ' ✓';
-const HAS_NO_REF = ' x';
+export interface TraceMemberStatus {
+  identifier: string;
+  referenced: boolean;
+}
 
-const { 'trace-export': traceExport, 'trace-file': traceFile, trace } = parsedArgValues;
+export const formatTrace = (
+  node: ExportsTreeNode,
+  toRelative: (path: string) => string,
+  isReferenced: boolean,
+  memberStatuses?: TraceMemberStatus[]
+): string => {
+  const lines: string[] = [];
 
-const isTrace = Boolean(trace || traceExport || traceFile);
+  const file = pc.white;
+  const id = pc.cyanBright;
+  const ref = pc.cyanBright;
+  const via = pc.dim;
+  const ok = pc.green;
+  const fail = pc.red;
+  const dim = pc.dim;
 
-type CreateNode = {
-  identifier?: string;
-  hasRef?: boolean;
-  isEntry?: boolean;
-};
+  const entryMarker = node.isEntry ? dim(' ⎆') : '';
+  lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);
 
-type Create = (filePath: string, options?: CreateNode) => TraceNode;
+  const formatVia = (child: ExportsTreeNode): string => {
+    if (!child.via) return id(child.identifier);
+    const parts = child.identifier.split('.');
+    const name = parts[0];
+    const rest = parts.slice(1).join('.');
+    const nameDisplay = child.originalId ? `${id(child.originalId)}${dim(' → ')}${id(name)}` : id(name);
+    return `${via(child.via)}${dim('[')}${nameDisplay}${rest ? `${dim('.')}${id(rest)}` : ''}${dim(']')}`;
+  };
 
-export type TraceNode = {
-  filePath: string;
-  identifier?: string;
-  hasRef: boolean;
-  isEntry: boolean;
-  children: Set<TraceNode>;
-};
+  const formatChild = (child: ExportsTreeNode, prefix: string, isLast: boolean) => {
+    const connector = isLast ? '└── ' : '├── ';
+    const childPrefix = isLast ? '    ' : '│   ';
+    const entryMarker = child.isEntry ? dim(' ⎆') : '';
+    const isLeaf = child.children.length === 0;
+    const leafMarker = isLeaf && !child.via?.startsWith('reExport') ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
 
-export { isTrace };
+    lines.push(
+      `${dim(prefix)}${dim(connector)}${file(toRelative(child.filePath))}${dim(':')}${formatVia(child)}${entryMarker}${leafMarker}`
+    );
 
-const getPadding = (level: number, levels: Set<number>) => {
-  let padding = '';
-  for (let i = 0; i < level; i++) padding += levels.has(i) ? `${picocolors.dim('│')}  ` : '   ';
-  return padding;
-};
-
-const renderTrace = (node: TraceNode, level = 0, levels = new Set<number>()) => {
-  let index = 0;
-  const size = node.children.size;
-  const padding = getPadding(level, levels);
-  for (const child of node.children) {
-    const isLast = ++index === size;
-    const hasRef = child.hasRef === true;
-    const rel = toRelative(child.filePath);
-    const file = hasRef ? rel : picocolors.dim(rel);
-    const suffix = (hasRef ? HAS_REF : '') + (child.isEntry ? IS_ENTRY : '');
-    const text = `${padding}${picocolors.dim(isLast ? '└─' : '├─')} ${file}${suffix}`;
-    // biome-ignore lint/suspicious/noConsoleLog:
-    console.log(text);
-    if (child.children.size > 0) {
-      if (!isLast) levels.add(level);
-      if (isLast) levels.delete(level);
-      renderTrace(child, level + 1, levels);
+    if (child.refs.length > 0) {
+      const refsPrefix = isLeaf ? ' ' : '│';
+      lines.push(
+        `${dim(prefix)}${dim(childPrefix)}${dim(refsPrefix)} ${dim('refs: [')}${child.refs.map(r => ref(r)).join(dim(', '))}${dim(']')}`
+      );
     }
-  }
-};
 
-export const printTrace = isTrace
-  ? (node: TraceNode, filePath: string, identifier?: string) => {
-      if (traceExport && identifier && identifier !== traceExport) return;
-      if (traceFile && filePath !== toAbsolute(traceFile)) return;
-      const suffix = (node.isEntry ? IS_ENTRY : '') + (node.children.size === 0 ? HAS_NO_REF : '');
-      const header = `${toRelative(filePath)}${identifier ? `:${identifier}` : ''}${suffix}`;
-      // biome-ignore lint/suspicious/noConsoleLog:
-      console.log(header);
-      renderTrace(node);
-      // biome-ignore lint/suspicious/noConsoleLog:
-      console.log();
+    for (let i = 0; i < child.children.length; i++) {
+      formatChild(child.children[i], prefix + childPrefix, i === child.children.length - 1);
     }
-  : () => {};
+  };
 
-export const createNode: Create = (filePath, { hasRef = false, isEntry = false, identifier } = {}) => ({
-  filePath,
-  identifier,
-  hasRef,
-  isEntry,
-  children: new Set<TraceNode>(),
-});
-
-const addNode = (parent: TraceNode, filePath: string, { hasRef = false, isEntry = false }: CreateNode) => {
-  const node = createNode(filePath, { hasRef, isEntry });
-  parent.children.add(node);
-  return node;
-};
-
-export const addNodes = (node: TraceNode, id: string, importedSymbols: DependencyGraph, filePaths?: Set<string>) => {
-  if (!filePaths) return;
-  for (const filePath of filePaths) {
-    addNode(node, filePath, { hasRef: Boolean(importedSymbols.get(filePath)?.traceRefs?.has(id)) });
+  for (let i = 0; i < node.children.length; i++) {
+    formatChild(node.children[i], '', i === node.children.length - 1);
   }
-};
 
-export const createAndPrintTrace = (filePath: string, options: CreateNode = {}) => {
-  if (!isTrace || traceExport || traceFile) return;
-  const traceNode = createNode(filePath, options);
-  printTrace(traceNode, filePath, options.identifier);
+  if (node.children.length === 0) {
+    const leafMarker = isReferenced ? ok(' ✓') : fail(' ✗');
+    lines.push(`${dim('└── (no imports found)')}${leafMarker}`);
+  }
+
+  if (memberStatuses && memberStatuses.length > 0) {
+    const parts = memberStatuses.map(m => {
+      const marker = m.referenced ? ok(' ✓') : fail(' ✗');
+      return `${id(m.identifier)}${marker}`;
+    });
+    lines.push(`${dim('    members: [')}${parts.join(dim(', '))}${dim(']')}`);
+  }
+
+  return lines.join('\n');
 };

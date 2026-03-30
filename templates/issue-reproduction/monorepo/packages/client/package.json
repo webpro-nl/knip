@@ -5,6 +5,6 @@
   "type": "module",
   "main": "src/index.ts",
   "dependencies": {
-    "@monorepo/shared": "*"
+    "@monorepo/lib": "*"
   }
 }

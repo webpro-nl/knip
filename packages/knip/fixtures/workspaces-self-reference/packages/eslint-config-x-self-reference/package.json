@@ -1,0 +1,20 @@
+{
+  "name": "@fixtures/eslint-config-x-self-reference",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    },
+    "./build": {
+      "require": "./dist/build.cjs",
+      "import": "./dist/build.mjs"
+    },
+    "./module": {
+      "require": "./lib/module.js",
+      "import": "./lib/module.js"
+    }
+  },
+  "dependencies": {
+    "@fixtures/workspaces-self-reference__from-plugin": "*"
+  }
+}

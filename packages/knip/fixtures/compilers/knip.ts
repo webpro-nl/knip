@@ -2,7 +2,7 @@ import '@mdx-js/mdx';
 
 export default {
   compilers: {
-    md: (text, path) => {
+    md: (_text, path) => {
       if (!path) throw new Error('Path not passed to compiler');
       return '';
     },

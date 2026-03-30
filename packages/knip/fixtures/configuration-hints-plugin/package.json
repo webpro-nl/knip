@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/configuration-hints-plugin",
+  "dependencies": {
+    "create-typescript-app": "*",
+    "svgo": "*"
+  }
+}

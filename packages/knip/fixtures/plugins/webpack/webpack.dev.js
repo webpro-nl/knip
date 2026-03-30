@@ -6,8 +6,9 @@ module.exports = env =>
   merge(common(), {
     mode: env.production ? 'production' : 'development',
     entry: {
-      main: './src/app.ts',
-      vendor: './src/vendor.ts',
+      main: './src/app',
+      vendor: './src/vendor',
+      subpath: '#subpath/subpath-entry',
     },
     module: {
       rules: [

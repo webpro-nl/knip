@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { AWESOME_URL } from 'astro:env/client';
 ---
 
 <!doctype html>
@@ -44,6 +45,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					>astro-blog-template
 				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
 			</p>
+      <span>I am an awesome url: {AWESOME_URL}</span>
 		</main>
 		<Footer />
 	</body>

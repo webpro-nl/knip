@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "module": "es2022",
+    "paths": {
+      "ts-components/*": ["ts/components/*"],
+      "ts-shared/*": ["ts/shared/*"]
+    }
+  }
+}

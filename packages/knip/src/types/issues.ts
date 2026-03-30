@@ -1,17 +1,17 @@
-export enum SymbolType {
-  TYPE = 'type',
-  INTERFACE = 'interface',
-  ENUM = 'enum',
-  FUNCTION = 'function',
-  CLASS = 'class',
-  MEMBER = 'member',
-  UNKNOWN = 'unknown',
+import type { SYMBOL_TYPE } from '../constants.ts';
+import type { Fixes } from './exports.ts';
+
+export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
+
+export interface IssueSymbol {
+  symbol: string;
+  pos?: number;
+  line?: number;
+  col?: number;
 }
 
-export type IssueSymbol = { symbol: string; pos?: number; line?: number; col?: number };
-
-export type Issue = {
-  type: SymbolIssueType;
+export interface Issue {
+  type: IssueType;
   filePath: string;
   workspace: string;
   symbol: string;
@@ -23,16 +23,14 @@ export type Issue = {
   pos?: number;
   line?: number;
   col?: number;
+  fixes: Fixes;
   isFixed?: boolean;
-};
-
-export type IssueSet = Set<string>;
+}
 
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
-  files: IssueSet;
-  _files: Set<Issue>;
+  files: IssueRecords;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;
@@ -45,12 +43,11 @@ export type Issues = {
   nsTypes: IssueRecords;
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
-  classMembers: IssueRecords;
+  namespaceMembers: IssueRecords;
+  catalog: IssueRecords;
 };
 
 export type IssueType = keyof Issues;
-
-export type SymbolIssueType = Exclude<IssueType, 'files' | '_files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;
@@ -63,13 +60,19 @@ export type ReporterOptions = {
   issues: Issues;
   counters: Counters;
   tagHints: TagHints;
-  configurationHints: ConfigurationHints;
-  noConfigHints: boolean;
+  configurationHints: ConfigurationHint[];
+  enabledPlugins: Record<string, string[]>;
+  isDisableConfigHints: boolean;
+  isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
   preprocessorOptions: string;
+  includedWorkspaceDirs: string[];
+  selectedWorkspaces: string[] | undefined;
+  configFilePath: string | undefined;
+  maxShowIssues?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
@@ -80,12 +83,31 @@ export type IssueSeverity = 'error' | 'warn' | 'off';
 
 export type Rules = Record<IssueType, IssueSeverity>;
 
-export type ConfigurationHints = Set<ConfigurationHint>;
+export type ConfigurationHints = Map<string, ConfigurationHint>;
+
+export type ConfigurationHintType =
+  | 'ignore'
+  | 'ignoreFiles'
+  | 'ignoreBinaries'
+  | 'ignoreDependencies'
+  | 'ignoreUnresolved'
+  | 'ignoreWorkspaces'
+  | 'entry-redundant'
+  | 'project-redundant'
+  | 'entry-top-level'
+  | 'project-top-level'
+  | 'entry-empty'
+  | 'project-empty'
+  | 'package-entry'
+  | 'top-level-unconfigured'
+  | 'workspace-unconfigured';
 
 export type ConfigurationHint = {
-  type: 'ignoreBinaries' | 'ignoreDependencies' | 'ignoreWorkspaces';
+  type: ConfigurationHintType;
   identifier: string | RegExp;
+  filePath?: string;
   workspaceName?: string;
+  size?: number;
 };
 
 type TagHints = Set<TagHint>;

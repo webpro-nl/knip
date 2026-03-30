@@ -1,15 +1,15 @@
 import { existsSync } from 'node:fs';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { isInternal, join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import * as karma from '../karma/helpers.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { isInternal, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import * as karma from '../karma/helpers.ts';
 import type {
   AngularCLIWorkspaceConfiguration,
   KarmaTarget,
   Project,
   WebpackBrowserSchemaForBuildFacade,
-} from './types.js';
+} from './types.ts';
 
 // https://angular.io/guide/workspace-config
 
@@ -22,8 +22,6 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['angular.json'];
 
 const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (config, options) => {
-  const { cwd, configFilePath } = options;
-
   if (!config?.projects) return [];
 
   const inputs = new Set<Input>();
@@ -33,10 +31,10 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
     for (const [targetName, target] of Object.entries(project.architect)) {
       const { options: opts, configurations: configs } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
-      if (typeof packageName === 'string') inputs.add(toDependency(packageName));
+      if (packageName) inputs.add(toDependency(packageName));
       if (opts) {
         if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
-          inputs.add(toConfig('typescript', opts.tsConfig, configFilePath));
+          inputs.add(toConfig('typescript', opts.tsConfig));
         }
       }
       const defaultEntriesByOption: EntriesByOption = opts ? entriesByOption(opts) : new Map();
@@ -48,7 +46,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       const isBuildTarget = targetName === BUILD_TARGET_NAME;
       const maybeExternal = (option: string) => option === 'polyfills';
       const toInput = (specifier: string, opts: { isProduction: boolean; maybeExternal: boolean }): Input => {
-        const normalizedPath = join(cwd, specifier);
+        const normalizedPath = join(options.cwd, specifier);
         // 👇 `isInternal` will report `false` for specifiers not starting with `.`
         //    However, relative imports are usually specified in `angular.json` without `.` prefix
         //    Hence checking also that file doesn't exist before considering it external
@@ -57,8 +55,8 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         }
         return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
       };
-      for (const [configName, entriesByOption] of entriesByOptionByConfig.entries()) {
-        for (const [option, entries] of entriesByOption.entries()) {
+      for (const [configName, entriesByOption] of entriesByOptionByConfig) {
+        for (const [option, entries] of entriesByOption) {
           for (const entry of entries) {
             inputs.add(
               toInput(entry, {
@@ -69,7 +67,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           }
         }
       }
-      for (const [option, entries] of defaultEntriesByOption.entries()) {
+      for (const [option, entries] of defaultEntriesByOption) {
         for (const entry of entries) {
           inputs.add(
             toInput(entry, {
@@ -79,7 +77,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           );
         }
       }
-      if (target.builder === '@angular-devkit/build-angular:karma' && opts) {
+      if (target.builder && isAngularBuilderRefWithName({ builderRef: target.builder, name: 'karma' }) && opts) {
         const karmaBuilderOptions = opts as KarmaTarget;
         // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/schema.json#L143
         const testFilePatterns = karmaBuilderOptions.include ?? ['**/*.spec.ts'];
@@ -104,7 +102,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           karma.inputsFromFrameworks(['jasmine']).forEach(inputs.add, inputs);
         }
         if (karmaConfig && !karma.configFiles.includes(karmaConfig)) {
-          inputs.add(toConfig('karma', karmaConfig, options.configFilePath));
+          inputs.add(toConfig('karma', karmaConfig, { containingFilePath: options.configFilePath }));
         }
       }
     }
@@ -148,6 +146,11 @@ const entriesByOption = (opts: TargetOptions): EntriesByOption =>
     })
   );
 
+const isAngularBuilderRefWithName = ({ builderRef, name }: { builderRef: string; name: string }) => {
+  const [pkg, builderName] = builderRef.split(':');
+  return (pkg === '@angular-devkit/build-angular' || pkg === '@angular/build') && builderName === name;
+};
+
 type TargetOptions = Exclude<Target['options'], undefined>;
 type Target = Architect[string];
 type Architect = Exclude<Project['architect'], undefined>;
@@ -161,10 +164,12 @@ type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'],
 const PRODUCTION_CONFIG_NAME = 'production';
 const BUILD_TARGET_NAME = 'build';
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

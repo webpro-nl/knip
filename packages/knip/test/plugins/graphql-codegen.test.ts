@@ -1,17 +1,15 @@
-import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { main } from '../../src/index.js';
-import { resolve } from '../../src/util/path.js';
-import baseArguments from '../helpers/baseArguments.js';
-import baseCounters from '../helpers/baseCounters.js';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/graphql-codegen');
 
 test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', async () => {
-  const { issues, counters } = await main({
-    ...baseArguments,
-    cwd,
-  });
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/near-operation-file-preset']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/schema-ast']);
@@ -22,6 +20,7 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/typescript-msw']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/graphql-modules-preset']);
   assert(issues.unlisted['codegen.ts']['graphql-codegen-typescript-validation-schema']);
+  assert(issues.unlisted['codegen.ts']['graphql-codegen-apollo-next-ssr']);
 
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/add']);
   assert(issues.unlisted['codegen.yaml']['@graphql-codegen/typescript']);
@@ -33,7 +32,7 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 15,
+    unlisted: 16,
     processed: 1,
     total: 1,
   });

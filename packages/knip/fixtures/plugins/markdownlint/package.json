@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/markdownlint",
+  "name": "@plugins/markdownlint",
   "scripts": {
     "md": "markdownlint \"**/*.md\" --rules rule-package"
   }

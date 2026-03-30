@@ -16,7 +16,7 @@ module.exports = {
     './lib/': {
       documents: ['./lib/**/*.tsx'],
       preset: 'near-operation-file-preset',
-      plugins: ['typescript-operations', 'typescript-msw'],
+      plugins: ['typescript-operations', 'typescript-msw', 'graphql-codegen-apollo-next-ssr'],
     },
   },
 };

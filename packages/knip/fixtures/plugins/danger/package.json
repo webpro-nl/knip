@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/danger",
+  "devDependencies": {
+    "danger": "*"
+  }
+}

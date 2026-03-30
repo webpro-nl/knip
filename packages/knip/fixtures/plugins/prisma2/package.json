@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/prisma-2",
+  "scripts": {
+    "generate": "prisma generate"
+  },
+  "devDependencies": {
+    "prisma": "*"
+  }
+}

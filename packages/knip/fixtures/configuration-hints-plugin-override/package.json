@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/configuration-hints-plugin-override",
+  "dependencies": {
+    "create-typescript-app": "*",
+    "svgo": "*",
+    "yarn": "*"
+  }
+}

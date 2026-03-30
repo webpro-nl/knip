@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getArgumentValues } from './helpers.js';
-import type { MarkdownlintConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getArgumentValues } from './helpers.ts';
+import type { MarkdownlintConfig } from './types.ts';
 
 // https://github.com/igorshubovych/markdownlint-cli
 
@@ -26,10 +26,12 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   return [...extend, ...uses].map(id => toDependency(id));
 };
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
-} satisfies Plugin;
+};
+
+export default plugin;

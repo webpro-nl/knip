@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://vercel.com/docs/functions/og-image-generation
 
@@ -15,9 +15,11 @@ const production = [
   // 'api/og.{jsx,tsx}', // TODO maybe add for non-Next.js projects
 ];
 
-export default {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   production,
-} satisfies Plugin;
+};
+
+export default plugin;
