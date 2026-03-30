@@ -7,26 +7,25 @@ const cwd = resolve('fixtures/enum-members');
 
 test('knip --reporter json (enum members)', () => {
   const json = {
-    files: [],
     issues: [
       {
         file: 'members.ts',
+        binaries: [],
+        catalog: [],
         dependencies: [],
         devDependencies: [],
-        optionalPeerDependencies: [],
-        unlisted: [],
-        binaries: [],
-        unresolved: [],
-        exports: [],
-        types: [],
-        enumMembers: {
-          MyEnum: [
-            { name: 'B_Unused', line: 9, col: 3, pos: 127 },
-            { name: 'D-Key', line: 11, col: 3, pos: 165 },
-          ],
-        },
         duplicates: [],
-        catalog: [],
+        enumMembers: [
+          { namespace: 'MyEnum', name: 'B_Unused', line: 9, col: 3, pos: 127 },
+          { namespace: 'MyEnum', name: 'D-Key', line: 11, col: 3, pos: 165 },
+        ],
+        exports: [],
+        files: [],
+        namespaceMembers: [],
+        optionalPeerDependencies: [],
+        types: [],
+        unlisted: [],
+        unresolved: [],
       },
     ],
   };

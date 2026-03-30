@@ -6,7 +6,7 @@ import type { MainOptions } from '../util/create-options.ts';
 import { toRelative } from '../util/path.ts';
 import { toRegexOrString } from '../util/regex.ts';
 import { Table } from '../util/table.ts';
-import { formatTrace } from '../util/trace.ts';
+import { formatTrace, type TraceMemberStatus } from '../util/trace.ts';
 import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
 
 interface TraceReporterOptions {
@@ -37,7 +37,13 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
     }
     for (const line of table.toRows()) console.log(line);
   } else {
-    const nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
+    let nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
+
+    // Fallback: resolve dotted name as namespace member (e.g. Fruits.apple → Fruits)
+    if (nodes.length === 0 && options.traceExport?.includes('.')) {
+      const nsName = options.traceExport.substring(0, options.traceExport.indexOf('.'));
+      nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: nsName });
+    }
     nodes.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.identifier.localeCompare(b.identifier));
     const toRel = (path: string) => toRelative(path, options.cwd);
     const isReferenced = (node: ExportsTreeNode) => {
@@ -45,6 +51,19 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
       if (explorer.hasStrictlyNsReferences(node.filePath, node.identifier)[0]) return true;
       return !!graph.get(node.filePath)?.exports.get(node.identifier)?.hasRefsInFile;
     };
-    for (const node of nodes) console.log(formatTrace(node, toRel, isReferenced(node)));
+    for (const node of nodes) {
+      const exp = graph.get(node.filePath)?.exports.get(node.identifier);
+      let memberStatuses: TraceMemberStatus[] | undefined;
+      if (exp && exp.members.length > 0) {
+        memberStatuses = [];
+        for (const m of exp.members) {
+          const id = `${node.identifier}.${m.identifier}`;
+          const referenced =
+            m.hasRefsInFile || explorer.isReferenced(node.filePath, id, { includeEntryExports: true })[0];
+          memberStatuses.push({ identifier: m.identifier, referenced });
+        }
+      }
+      console.log(formatTrace(node, toRel, isReferenced(node), memberStatuses));
+    }
   }
 };

@@ -1,19 +1,4 @@
-import ts from 'typescript';
-import { getPropertyValues } from '../../typescript/ast-helpers.ts';
+import type { Program } from 'oxc-parser';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 
-export const getPageExtensions = (sourceFile: ts.SourceFile) => {
-  const pageExtensions: Set<string> = new Set();
-
-  function visit(node: ts.Node) {
-    if (ts.isObjectLiteralExpression(node)) {
-      const values = getPropertyValues(node, 'pageExtensions');
-      for (const value of values) pageExtensions.add(value);
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-
-  return Array.from(pageExtensions);
-};
+export const getPageExtensions = (program: Program) => Array.from(collectPropertyValues(program, 'pageExtensions'));

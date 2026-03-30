@@ -147,12 +147,15 @@ export class Extension {
 
     this.#outputChannel.info(`Starting Knip Language Server for ${folder.name}`);
 
+    const runtime = config.get('nodeRuntimePath', '') || 'node';
+
     /** @type {ServerOptions} */
     const serverOptions = {
-      run: { module: Extension.#serverModule, transport: TransportKind.ipc },
+      run: { module: Extension.#serverModule, transport: TransportKind.ipc, runtime },
       debug: {
         module: Extension.#serverModule,
         transport: TransportKind.ipc,
+        runtime,
         options: { execArgv: ['--inspect=6009'] },
       },
     };

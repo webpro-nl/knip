@@ -1,36 +1,40 @@
-import ts from 'typescript';
 import { IMPORT_FLAGS } from '../../../constants.ts';
-import { isPropertyAccessCall } from '../../../typescript/ast-helpers.ts';
-import type { ImportVisitor } from '../../../typescript/visitors/index.ts';
+import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 import { _syncGlob } from '../../../util/glob.ts';
 import { dirname, isAbsolute, join } from '../../../util/path.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
 
-export const importMetaGlobCall: ImportVisitor = sourceFile => {
-  return node => {
-    if (!isPropertyAccessCall(node, 'import.meta.glob')) return;
+export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
+  return {
+    CallExpression(node) {
+      if (
+        node.callee.type !== 'MemberExpression' ||
+        node.callee.computed ||
+        node.callee.object.type !== 'MetaProperty' ||
+        node.callee.property.name !== 'glob' ||
+        node.arguments.length < 1
+      )
+        return;
 
-    const arg = node.arguments[0];
-    if (!arg) return;
+      const arg = node.arguments[0];
+      let patterns: string[] | undefined;
+      if (isStringLiteral(arg)) {
+        patterns = [getStringValue(arg)!];
+      } else if (arg.type === 'ArrayExpression') {
+        patterns = [];
+        for (const e of arg.elements) {
+          if (e && isStringLiteral(e)) patterns.push(getStringValue(e)!);
+        }
+      }
 
-    const dir = dirname(sourceFile.fileName);
-    const patterns = ts.isStringLiteralLike(arg)
-      ? [arg.text]
-      : ts.isArrayLiteralExpression(arg)
-        ? arg.elements.filter(ts.isStringLiteralLike).map(e => e.text)
-        : undefined;
+      if (!patterns?.length) return;
 
-    if (!patterns?.length) return;
+      const dir = dirname(ctx.filePath);
+      const files = _syncGlob({ patterns, cwd: dir });
 
-    const files = _syncGlob({ patterns, cwd: dir });
-
-    return files.map(filePath => ({
-      specifier: isAbsolute(filePath) ? filePath : join(dir, filePath),
-      identifier: undefined,
-      pos: arg.pos,
-      modifiers: IMPORT_FLAGS.ENTRY,
-      alias: undefined,
-      namespace: undefined,
-      symbol: undefined,
-    }));
+      for (const f of files) {
+        ctx.addImport(isAbsolute(f) ? f : join(dir, f), arg.start, IMPORT_FLAGS.ENTRY);
+      }
+    },
   };
-};
+}

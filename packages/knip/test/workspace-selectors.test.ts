@@ -46,7 +46,7 @@ test('Select workspaces by package name with wildcard', async () => {
   const options = await createOptions({ cwd, workspace: '@fixtures/workspaces__*' });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 
   assert.deepEqual(counters, {
@@ -86,7 +86,7 @@ test('Exclude workspace by package name', async () => {
   const options = await createOptions({ cwd, workspace: ['@fixtures/workspaces__*', '!@fixtures/workspaces__tools'] });
   const { issues, counters, includedWorkspaceDirs, selectedWorkspaces } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
   assert(!includedWorkspaceDirs.includes(join(cwd, 'packages/tools')));
   assert(!selectedWorkspaces?.includes('packages/tools'));

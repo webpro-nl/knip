@@ -6,7 +6,6 @@ import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
-import type { PrincipalFactory } from '../PrincipalFactory.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
 import type { Issue } from '../types/issues.ts';
@@ -16,6 +15,8 @@ import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { existsSync } from 'node:fs';
+import { tryRealpath } from '../util/fs.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -34,8 +35,8 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, join, relative, toRelative } from '../util/path.ts';
-import { augmentWorkspace, getModuleSourcePathHandler, getToSourcePathsHandler } from '../util/to-source-path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { augmentWorkspace, getToSourcePathsHandler } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
 interface BuildOptions {
@@ -43,7 +44,7 @@ interface BuildOptions {
   collector: IssueCollector;
   counselor: CatalogCounselor;
   deputy: DependencyDeputy;
-  factory: PrincipalFactory;
+  principal: ProjectPrincipal;
   isGitIgnored: (path: string) => boolean;
   streamer: ConsoleStreamer;
   workspaces: Workspace[];
@@ -55,7 +56,7 @@ export async function build({
   collector,
   counselor,
   deputy,
-  factory,
+  principal,
   isGitIgnored,
   streamer,
   workspaces,
@@ -64,8 +65,8 @@ export async function build({
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
+  const registeredVisitorPlugins = new Set<string>();
 
-  const toModuleSourceFilePath = getModuleSourcePathHandler(chief);
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
   const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
@@ -97,8 +98,12 @@ export async function build({
   collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
   collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 
+  if (options.configFilePath) {
+    principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
+  }
+
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, pkgName, manifestPath: filePath } = workspace;
+    const { name, dir, ancestors, manifestPath: filePath } = workspace;
 
     streamer.cast('Analyzing workspace', name);
 
@@ -126,7 +131,7 @@ export async function build({
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
-      getSourceFile: (filePath: string) => principal.backend.fileManager.getSourceFile(filePath),
+      readFile: (filePath: string) => principal.readFile(filePath),
       configFilesMap,
       options,
     });
@@ -142,6 +147,8 @@ export async function build({
 
     await worker.registerCompilers(registerCompiler);
 
+    principal.addCompilers(compilers);
+
     const extensions = getCompilerExtensions(compilers);
     const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
     const config = chief.getConfigForWorkspace(name, extensions);
@@ -151,7 +158,8 @@ export async function build({
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
-      for (const id of definitionPaths) inputs.add(toProductionEntry(id, { containingFilePath: tsConfigFilePath }));
+      for (const id of definitionPaths)
+        inputs.add(toProductionEntry(tryRealpath(id), { containingFilePath: tsConfigFilePath }));
     }
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
@@ -160,46 +168,36 @@ export async function build({
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
-    // Add entry paths from package.json#main, #bin, #exports and apply source mapping
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
       inputs.add(toProductionEntry(filePath));
     }
 
-    // Add configuration hints for missing package.json#main|exports|etc. targets (that aren't git-ignored)
     for (const identifier of entrySpecifiersFromManifest) {
       if (!identifier.startsWith('!') && !isGitIgnored(join(dir, identifier))) {
-        const files = _syncGlob({ patterns: [identifier], cwd: dir });
-        if (files.length === 0) {
+        const exists = identifier.includes('*')
+          ? _syncGlob({ patterns: [identifier], cwd: dir }).length > 0
+          : existsSync(join(dir, identifier));
+        if (!exists) {
           collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
         }
       }
     }
 
-    // Consider dependencies in package.json#imports used
     for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
 
-    // workspace + worker → principal
-    const principal = factory.createPrincipal(options, {
-      dir,
-      isFile,
-      compilerOptions,
-      compilers,
-      pkgName,
-      toSourceFilePath: toModuleSourceFilePath,
-    });
-
     principal.addPaths(config.paths, dir);
+    if (compilerOptions.rootDirs) principal.addRootDirs(compilerOptions.rootDirs);
 
-    // Get dependencies from plugins
     const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
-    worker.registerVisitors(visitors => {
-      if (visitors.dynamicImport) principal.visitors.dynamicImport.push(...visitors.dynamicImport);
-      if (visitors.script) principal.visitors.script.push(...visitors.script);
+    worker.registerVisitors({
+      ctx: principal.pluginCtx,
+      registerVisitor: visitors => principal.pluginVisitorObjects.push(visitors),
+      registeredPlugins: registeredVisitorPlugins,
     });
 
     const DEFAULT_GROUP = 'default';
@@ -307,7 +305,8 @@ export async function build({
     if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
       debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
-      for (const filePath of tscSourcePaths) {
+      for (const tscPath of tscSourcePaths) {
+        const filePath = tryRealpath(tscPath);
         if (!isGitIgnored(filePath) && !isIgnoredWorkspace(filePath)) {
           principal.addProgramPath(filePath);
           principal.addProjectPath(filePath);
@@ -331,17 +330,11 @@ export async function build({
       for (const projectPath of projectPaths) principal.addProjectPath(projectPath);
     }
 
-    // Add knip.ts (might import dependencies)
-    if (options.configFilePath) {
-      factory.getPrincipals().at(0)?.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
-    }
-
     worker.onDispose();
+    perfObserver.addMemoryMark(name);
   }
 
-  const principals: Array<ProjectPrincipal | undefined> = factory.getPrincipals();
-
-  debugLog('*', `Created ${principals.length} programs for ${workspaces.length} workspaces`);
+  debugLog('*', `Created 1 principal for ${workspaces.length} workspaces`);
 
   const graph: ModuleGraph = new Map();
   const analyzedFiles = new Set<string>();
@@ -350,40 +343,40 @@ export async function build({
 
   const isInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
 
-  const getPrincipalByFilePath = (filePath: string) => {
-    const workspace = chief.findWorkspaceByFilePath(filePath);
-    if (workspace) return factory.getPrincipalByPackageName(workspace.pkgName);
-  };
-
   const analyzeOpts: GetImportsAndExportsOptions = {
     isFixExports: options.isFixUnusedExports,
     isFixTypes: options.isFixUnusedTypes,
-    isReportClassMembers: options.isReportClassMembers,
     isReportExports: options.isReportExports,
     skipTypeOnly: options.isStrict,
     tags: options.tags,
   };
 
-  const analyzeSourceFile = (filePath: string, principal: ProjectPrincipal) => {
+  const analyzeSourceFile = (
+    filePath: string,
+    pp: ProjectPrincipal,
+    parseResult?: import('oxc-parser').ParseResult,
+    sourceText?: string
+  ) => {
     if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
 
     if (workspace) {
-      const file = principal.analyzeSourceFile(filePath, analyzeOpts, chief.config.ignoreExportsUsedInFile);
+      const file = pp.analyzeSourceFile(
+        filePath,
+        analyzeOpts,
+        chief.config.ignoreExportsUsedInFile,
+        parseResult,
+        sourceText
+      );
 
-      // Post-processing
       const unresolvedImports = new Set<Import>();
       for (const unresolvedImport of file.imports.unresolved) {
         const { specifier } = unresolvedImport;
 
-        // Ignore Deno style http import specifiers
         if (specifier.startsWith('http')) continue;
 
-        // All bets are off after failing to resolve module:
-        // - either add to external dependencies if it quacks like that so it'll end up as unused or unlisted dependency
-        // - or maintain unresolved status if not ignored and not foreign
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
@@ -397,23 +390,24 @@ export async function build({
 
       for (const filePath of file.imports.programFiles) {
         const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) principal.addProgramPath(filePath);
+        if (!isIgnored) pp.addProgramPath(filePath);
       }
 
       for (const filePath of file.imports.entryFiles) {
         const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
+        if (!isIgnored) pp.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
+      const wsDependencies = deputy.getDependencies(workspace.name);
       for (const _import of file.imports.imports) {
-        if (_import.filePath) {
-          const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
-          if (packageName && isInternalWorkspace(packageName)) {
-            file.imports.external.add({ ..._import, specifier: packageName });
-            const principal = getPrincipalByFilePath(_import.filePath);
-            if (principal && !isGitIgnored(_import.filePath)) {
-              principal.addProgramPath(_import.filePath);
-            }
+        if (!_import.filePath) continue;
+        const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
+        if (!packageName) continue;
+        const isWorkspace = isInternalWorkspace(packageName);
+        if (isWorkspace || wsDependencies.has(packageName)) {
+          file.imports.external.add({ ..._import, specifier: packageName });
+          if (isWorkspace && !isGitIgnored(_import.filePath)) {
+            pp.addProgramPath(_import.filePath);
           }
         }
       }
@@ -435,7 +429,7 @@ export async function build({
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = handleInput(input, workspace);
-          if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+          if (specifierFilePath) pp.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }
 
@@ -460,50 +454,32 @@ export async function build({
     }
   };
 
-  for (let i = 0; i < principals.length; ++i) {
-    const principal = principals[i];
-    if (!principal) continue;
+  principal.init();
 
-    principal.init();
-
-    if (principal.asyncCompilers.size > 0) {
-      streamer.cast('Running async compilers');
-      await principal.runAsyncCompilers();
-    }
-
-    streamer.cast('Analyzing source files', toRelative(principal.cwd, options.cwd));
-
-    let size = principal.entryPaths.size;
-    let round = 0;
-
-    do {
-      size = principal.entryPaths.size;
-      const resolvedFiles = principal.getUsedResolvedFiles();
-      const files = resolvedFiles.filter(filePath => !analyzedFiles.has(filePath));
-
-      debugLogArray('*', `Analyzing used resolved files [P${i + 1}/${++round}]`, files);
-      for (const filePath of files) analyzeSourceFile(filePath, principal);
-    } while (size !== principal.entryPaths.size);
-
-    for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
-    for (const filePath of principal.entryPaths) entryPaths.add(filePath);
-
-    principal.reconcileCache(graph);
-
-    // Delete principals including TS programs for GC, except when we still need its `LS.findReferences`
-    if (options.isIsolateWorkspaces || (options.isSkipLibs && !options.isWatch && !options.isSession)) {
-      factory.deletePrincipal(principal, options.cwd);
-      principals[i] = undefined;
-    }
-    perfObserver.addMemoryMark(factory.getPrincipalCount());
+  if (principal.asyncCompilers.size > 0) {
+    streamer.cast('Running async compilers');
+    await principal.runAsyncCompilers();
   }
 
-  if (!options.isWatch && !options.isSession && options.isSkipLibs && !options.isIsolateWorkspaces) {
-    for (const principal of principals) {
-      if (principal) factory.deletePrincipal(principal, options.cwd);
+  streamer.cast('Analyzing source files');
+
+  principal.walkAndAnalyze((filePath, parseResult, sourceText) => {
+    analyzeSourceFile(filePath, principal, parseResult, sourceText);
+    const node = graph.get(filePath);
+    if (!node) return;
+    const paths: string[] = [];
+    for (const importPath of node.imports.internal.keys()) {
+      if (!isInNodeModules(importPath)) paths.push(importPath);
     }
-    principals.length = 0;
-  }
+    return paths;
+  });
+
+  for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
+  for (const filePath of principal.entryPaths) entryPaths.add(filePath);
+
+  principal.reconcileCache(graph);
+
+  perfObserver.addMemoryMark('build');
 
   if (externalRefsFromInputs) {
     for (const [filePath, refs] of externalRefsFromInputs) {

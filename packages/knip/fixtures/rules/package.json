@@ -21,7 +21,6 @@
   },
   "knip": {
     "include": [
-      "classMembers",
       "nsExports",
       "nsTypes"
     ],
@@ -38,8 +37,7 @@
       "nsExports": "warn",
       "nsTypes": "warn",
       "duplicates": "warn",
-      "enumMembers": "warn",
-      "classMembers": "warn"
+      "enumMembers": "warn"
     }
   }
 }

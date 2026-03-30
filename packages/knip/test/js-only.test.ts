@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.ts';
-import { join } from '../src/util/path.ts';
 import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
@@ -12,8 +11,8 @@ test('Find unused files and exports with only JS files', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.equal(issues.files.size, 1);
-  assert(issues.files.has(join(cwd, 'dangling.js')));
+  assert.equal(Object.keys(issues.files).length, 1);
+  assert('dangling.js' in issues.files);
 
   assert.equal(Object.values(issues.exports).length, 1);
   assert.equal(Object.values(issues.exports['my-namespace.js']).length, 2);

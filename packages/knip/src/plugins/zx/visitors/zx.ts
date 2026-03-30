@@ -1,12 +1,14 @@
-import ts from 'typescript';
-import { stripQuotes } from '../../../typescript/ast-helpers.ts';
-import { scriptVisitor as visit } from '../../../typescript/visitors/index.ts';
+import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 
-export default visit(
-  sourceFile => ts.getShebang(sourceFile.text) === '#!/usr/bin/env zx',
-  node => {
-    if (ts.isTaggedTemplateExpression(node) && node.tag.getText() === '$') {
-      return stripQuotes(node.template.getText());
-    }
-  }
-);
+export function createZxVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
+  return {
+    TaggedTemplateExpression(node) {
+      if (!ctx.sourceText.startsWith('#!/usr/bin/env zx')) return;
+      if (node.tag.type === 'Identifier' && node.tag.name === '$') {
+        for (const q of node.quasi.quasis) {
+          if (q.value.raw) ctx.addScript(q.value.raw);
+        }
+      }
+    },
+  };
+}

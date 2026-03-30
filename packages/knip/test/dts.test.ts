@@ -13,7 +13,8 @@ test('Include declaration files and allow unknown extensions', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    namespaceMembers: 1,
+    processed: 6,
+    total: 6,
   });
 });

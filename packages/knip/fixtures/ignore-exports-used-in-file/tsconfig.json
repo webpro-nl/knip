@@ -1,5 +1,4 @@
 {
-  "compilerOptions": {
-    "types": ["node"]
-  }
+  "compilerOptions": { "jsx": "react-jsx" },
+  "include": ["*.ts", "*.tsx"]
 }

@@ -5,6 +5,7 @@ import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/trace');
+const nsCwd = resolve('fixtures/ts-namespace');
 
 test('knip --trace', () => {
   const actual = exec('knip --trace', { cwd }).stdout;
@@ -33,6 +34,44 @@ string.ts:truncate
 └── barrel.ts:reExportNS[STR.truncate]
     └── module.ts:importNS[NS.STR.truncate] ✓
           refs: [NS.STR, NS.STR.truncate]`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export shows namespace member statuses', () => {
+  const actual = exec('knip --trace-export Fruits --trace-file members.ts', { cwd: nsCwd }).stdout;
+  const expected = `members.ts:Fruits
+└── index.ts:import[Fruits] ⎆ ✓
+      refs: [Fruits.apple, Fruits.Tropical, Fruits.Tropical.mango]
+    members: [apple ✓, unusedBanana ✗, Tropical.mango ✓, Tropical.unusedPapaya ✗]`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export resolves dotted namespace member', () => {
+  const actual = exec('knip --trace-export Fruits.apple --trace-file members.ts', { cwd: nsCwd }).stdout;
+  const expected = `members.ts:Fruits
+└── index.ts:import[Fruits] ⎆ ✓
+      refs: [Fruits.apple, Fruits.Tropical, Fruits.Tropical.mango]
+    members: [apple ✓, unusedBanana ✗, Tropical.mango ✓, Tropical.unusedPapaya ✗]`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export shows hasRefsInFile for forward-referenced members', () => {
+  const actual = exec('knip --trace-export Seasons --trace-file members.ts', { cwd: nsCwd }).stdout;
+  const expected = `members.ts:Seasons
+└── index.ts:import[Seasons] ⎆ ✓
+    members: [Name ✓, getName ✓, unusedCount ✗]`;
 
   if (actual !== expected) {
     showDiff(actual, expected);

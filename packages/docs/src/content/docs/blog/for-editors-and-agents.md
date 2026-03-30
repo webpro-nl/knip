@@ -2,7 +2,7 @@
 title: Knip for Editors & Agents
 date: 2025-12-17
 sidebar:
-  order: 1
+  order: 2
 ---
 
 _Published: 2025-12-17_
@@ -116,8 +116,7 @@ barrel files. Knip warns:
 [7]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
 [8]: https://open-vsx.org/extension/webpro/vscode-knip
 [9]: https://www.npmjs.com/package/@knip/mcp
-[10]:
-  https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
+[10]: https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
 [11]: #contention
 [12]: #circular-dependencies
 [13]: #conflicts

@@ -14,8 +14,14 @@ test('Find unused types but not types used in other exported types', async () =>
   assert(issues.exports['module.ts']['create']);
   assert(issues.types['types.ts']['Func']);
 
-  assert(!issues.types['types.ts']['B']);
   assert(!issues.types['types.ts']['A']);
+  assert(!issues.types['types.ts']['B']);
+  assert(!issues.types['types.ts']['Wrapped']);
+  assert(!issues.types['types.ts']['Mapped']);
+  assert(!issues.types['types.ts']['Tuple']);
+  assert(!issues.types['types.ts']['Intersection']);
+  assert(!issues.types['types.ts']['Conditional']);
+  assert(!issues.types['types.ts']['Nested']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

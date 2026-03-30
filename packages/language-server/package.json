@@ -1,6 +1,6 @@
 {
   "name": "@knip/language-server",
-  "version": "2.0.2",
+  "version": "3.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/webpro-nl/knip.git",
@@ -26,6 +26,6 @@
     "vscode-languageserver-textdocument": "^1.0.12"
   },
   "engines": {
-    "node": ">=18.20.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

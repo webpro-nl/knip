@@ -1,11 +1,8 @@
 import { ISSUE_TYPES } from '../constants.ts';
-import type { Counters, Issue, Issues, IssueType, Rules } from '../types/issues.ts';
+import type { Counters, Issues, IssueType, Rules } from '../types/issues.ts';
 
-export const initIssues = (): Issues => ({
-  ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, {}])) as Record<IssueType, never>),
-  files: new Set<string>(),
-  _files: {} as Record<string, Record<string, Issue>>,
-});
+export const initIssues = (): Issues =>
+  Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, {}])) as Record<IssueType, never>;
 
 export const initCounters = (): Counters => ({
   ...(Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 0])) as Record<IssueType, number>),

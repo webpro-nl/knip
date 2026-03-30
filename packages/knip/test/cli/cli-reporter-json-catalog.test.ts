@@ -7,21 +7,22 @@ const cwd = resolve('fixtures/catalog-pnpm');
 
 test('knip --reporter json (catalog)', () => {
   const json = {
-    files: [],
     issues: [
       {
         file: 'pnpm-workspace.yaml',
+        binaries: [],
+        catalog: [{ namespace: 'default', name: 'lodash', line: 7, col: 3 }],
         dependencies: [],
         devDependencies: [],
-        optionalPeerDependencies: [],
-        unlisted: [],
-        binaries: [],
-        unresolved: [],
-        exports: [],
-        types: [],
-        enumMembers: {},
         duplicates: [],
-        catalog: [{ name: 'lodash', line: 7, col: 3 }],
+        enumMembers: [],
+        exports: [],
+        files: [],
+        namespaceMembers: [],
+        optionalPeerDependencies: [],
+        types: [],
+        unlisted: [],
+        unresolved: [],
       },
     ],
   };

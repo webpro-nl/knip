@@ -45,10 +45,19 @@ type Config = PresetConfig | PluginConfig;
 
 export type ConfigItem = Config | (() => Config);
 
+type ScriptTag = { src: string; [key: string]: unknown };
+type StylesheetLink = { href: string; [key: string]: unknown };
+
 export type DocusaurusConfig = {
   title: string;
   url: string;
   themes?: PluginConfig[];
   plugins?: PluginConfig[];
   presets: PresetConfig[];
+  scripts?: (string | ScriptTag)[];
+  stylesheets?: (string | StylesheetLink)[];
+  future?: {
+    experimental_faster?: boolean | { [key: string]: unknown };
+    [key: string]: unknown;
+  };
 };

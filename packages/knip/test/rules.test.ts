@@ -29,7 +29,6 @@ test('Respect warnings in rules', async () => {
     types: 2,
     duplicates: 1,
     enumMembers: 1,
-    classMembers: 1,
     processed: 4,
     total: 4,
   });

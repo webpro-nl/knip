@@ -99,24 +99,6 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][5].
 
-### `--include-libs`
-
-Getting false positives for exports consumed by external libraries? Try the
-`--include-libs` flag:
-
-```sh
-knip --include-libs
-```
-
-Also see [external libs][6].
-
-### `--isolate-workspaces`
-
-By default, Knip optimizes performance using [workspace sharing][7] to existing
-TypeScript programs, based on the compatibility of their `compilerOptions`. This
-flag disables this behavior and creates one program per workspace, which is
-slower but memory usage is spread more evenly over time.
-
 ### `--no-gitignore`
 
 Ignore `.gitignore` files.
@@ -131,14 +113,14 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][6].
 
 ### `--strict`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][9].
+mode][7].
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][6].
 
 ### `--watch`
 
@@ -157,7 +139,7 @@ workspaces). The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][10] for more details and examples.
+See [filter workspaces][8] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -172,8 +154,7 @@ Exclude provided issue types from report. Can be comma-separated or repeated.
 Example:
 
 ```sh
-knip --exclude classMembers,enumMembers
-knip --exclude classMembers --exclude enumMembers
+knip --exclude enumMembers
 ```
 
 ### `--include`
@@ -187,7 +168,7 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-Available [issue types][11] when filtering output using `--include` or
+Available [issue types][9] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -196,10 +177,10 @@ Available [issue types][11] when filtering output using `--include` or
 - `unresolved`
 - `exports`
 - `nsExports`
-- `classMembers`
 - `types`
 - `nsTypes`
 - `enumMembers`
+- `namespaceMembers`
 - `duplicates`
 - `catalog`
 
@@ -216,7 +197,7 @@ Shortcut to include all types of dependency issues:
 Shortcut to include all types of export issues:
 
 ```sh
---include exports,nsExports,classMembers,types,nsTypes,enumMembers,duplicates
+--include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
 ```
 
 ### `--files`
@@ -251,7 +232,7 @@ knip --tags=+custom
 ```
 
 This way, you can either focus on or ignore specific tagged exports with tags
-you define yourself. This also works for individual class or enum members.
+you define yourself. This also works for individual enum and namespace members.
 
 The default directive is `+` (include) and the `@` prefix is ignored, so the
 notation below is valid and will report only exports tagged `@lintignore` or
@@ -265,13 +246,13 @@ knip --tags @lintignore --tags @internal
 
 ### `--fix`
 
-Read more at [auto-fix][12].
+Read more at [auto-fix][10].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][11]
+More info about fixable types at [issue types][9]
 
 ### `--allow-remove-files`
 
@@ -285,7 +266,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][13].
+Preprocess the results before providing it to the [reporter(s)][11].
 
 Can be repeated. Examples:
 
@@ -297,7 +278,7 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
-Also see [Reporters & Preprocessors][14].
+Also see [Reporters & Preprocessors][12].
 
 ### `--preprocessor-options [json]`
 
@@ -326,7 +307,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][14].
+Also see [Reporters & Preprocessors][12].
 
 ### `--reporter-options [json]`
 
@@ -372,7 +353,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][15].
+Show [debug output][13].
 
 ### `--memory`
 
@@ -401,9 +382,6 @@ knip --memory
 
 Total running time: 4.3s
 ```
-
-Can be used with [--isolate-workspaces][16] to see the difference in garbage
-collection during the process.
 
 ### `--memory-realtime`
 
@@ -452,7 +430,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][17]).
+`performance.timerify` ([GitHub issue][14]).
 
 ### `--performance-fn`
 
@@ -475,37 +453,34 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][18].
+Also see [Trace][15].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][19].
+[--trace][16].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][19].
+Trace export name to see where it's imported. Implies [--trace][16].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][19].
+Trace file to see where its exports are imported. Implies [--trace][16].
 
 [1]: https://bun.sh
 [2]: ../reference/known-issues.md
 [3]: https://no-color.org/
 [4]: https://www.npmjs.com/package/picocolors
 [5]: ./configuration.md#includeentryexports
-[6]: ../guides/handling-issues.mdx#external-libraries
-[7]: ../guides/performance.md#workspace-sharing
-[8]: ../features/production-mode.md
-[9]: #--production
-[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[11]: ./issue-types.md
-[12]: ../features/auto-fix.mdx
-[13]: #--reporter-reporter
-[14]: ../features/reporters.md
-[15]: ../guides/troubleshooting.md#debug
-[16]: #--isolate-workspaces
-[17]: https://github.com/oven-sh/bun/issues/9271
-[18]: ../guides/troubleshooting.md#trace
-[19]: #--trace
+[6]: ../features/production-mode.md
+[7]: #--production
+[8]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[9]: ./issue-types.md
+[10]: ../features/auto-fix.mdx
+[11]: #--reporter-reporter
+[12]: ../features/reporters.md
+[13]: ../guides/troubleshooting.md#debug
+[14]: https://github.com/oven-sh/bun/issues/9271
+[15]: ../guides/troubleshooting.md#trace
+[16]: #--trace

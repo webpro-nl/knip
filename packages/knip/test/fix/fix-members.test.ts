@@ -6,41 +6,15 @@ import { join } from '../../src/util/path.ts';
 import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
-test('Fix enum members', async () => {
+test('Fix enum and namespace members', async () => {
   const cwd = await copyFixture('fixtures/fix-members');
-  const options = await createOptions({ cwd, includedIssueTypes: ['classMembers'], isFix: true });
+  const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
   assert(issues.enumMembers['enums.ts']['Fruits.orange']);
   assert(issues.enumMembers['enums.ts']['Directions.North']);
   assert(issues.enumMembers['enums.ts']['Directions.South']);
   assert(issues.enumMembers['enums.ts']['Directions.West']);
-  assert(issues.classMembers['class.ts']['Rectangle.Key']);
-  assert(issues.classMembers['class.ts']['Rectangle.unusedGetter']);
-
-  assert.equal(
-    await readFile(join(cwd, 'class.ts'), 'utf8'),
-    `export class Rectangle {
-  constructor(
-    public width: number,
-    public height: number
-  ) {}
-
-` +
-      '  \n\n  ' +
-      `
-
-  private set unusedSetter(w: number) {
-    this.width = w;
-  }
-
-  area() {
-    return this.width * this.height;
-  }
-}
-`
-  );
-
   assert.equal(
     await readFile(join(cwd, 'enums.ts'), 'utf8'),
     `export enum Directions {
@@ -50,6 +24,21 @@ test('Fix enum members', async () => {
 export enum Fruits {
   apple = 'apple',
   }
+`
+  );
+
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
+  assert.equal(
+    await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
+    `export namespace Animals {
+  export const cat = 'cat';
+  export function swim() {}
+
+  export namespace Birds {
+    export const eagle = 'eagle';
+    }
+}
 `
   );
 });

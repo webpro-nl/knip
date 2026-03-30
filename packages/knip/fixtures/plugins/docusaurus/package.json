@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@docusaurus/core": "*",
+    "@docusaurus/faster": "*",
     "@docusaurus/plugin-content-pages": "*",
     "@docusaurus/plugin-sitemap": "*",
     "@docusaurus/preset-classic": "*",

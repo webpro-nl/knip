@@ -5,7 +5,7 @@ import type { Issues } from '../types/issues.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { prettyMilliseconds } from '../util/string.ts';
-import { getIssueTypeTitle, getTableForType } from './util/util.ts';
+import { flattenIssues, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 interface WatchReporter {
   issues: Issues;
@@ -19,14 +19,12 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
   let totalIssues = 0;
   const lines: string[] = [];
 
-  for (let [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
+  for (const [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
     typeof options.includedIssueTypes
   >) {
-    if (reportType === 'files') reportType = '_files';
-
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
-      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
 
       if (issuesForType.length > 0) {
         if (title) {

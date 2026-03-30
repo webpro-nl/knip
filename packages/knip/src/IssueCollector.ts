@@ -134,10 +134,10 @@ export class IssueCollector {
       }
       if (this.shouldIgnoreIssue(filePath, 'files')) continue;
 
-      this.issues.files.add(filePath);
       const symbol = relative(this.cwd, filePath);
-      // @ts-expect-error TODO Fix up in next major
-      this.issues._files[symbol] = [{ type: 'files', filePath, symbol, severity: this.rules.files }];
+      this.issues.files[symbol] = {
+        [symbol]: { type: 'files', filePath, symbol, workspace: '', severity: this.rules.files, fixes: [] },
+      };
 
       this.counters.files++;
       this.counters.processed++;
@@ -174,7 +174,10 @@ export class IssueCollector {
   }
 
   purge() {
-    const unusedFiles = this.issues.files;
+    const unusedFiles = new Set<string>();
+    for (const issues of Object.values(this.issues.files)) {
+      for (const issue of Object.values(issues)) unusedFiles.add(issue.filePath);
+    }
     this.issues = initIssues();
     this.counters = initCounters();
     return unusedFiles;

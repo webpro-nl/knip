@@ -12,12 +12,14 @@ test('Ignore duplicate exports with @alias (JSDoc)', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.duplicates['helpers.ts']['isUntagged|isUntaggedAlias']);
+  assert(!issues.duplicates['helpers.ts']['reExportedValue|reExportedAlias']);
+  assert(!issues.duplicates['specifier-default.ts'], 'export { X }; export default X should not be duplicate');
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
+    exports: 5,
     duplicates: 1,
-    processed: 2,
-    total: 2,
+    processed: 4,
+    total: 4,
   });
 });

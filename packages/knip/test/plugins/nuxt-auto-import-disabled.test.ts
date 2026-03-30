@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
-import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -12,8 +11,8 @@ test('Find dependencies and entries with auto-imports disabled', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'composables/useTheme.ts')));
-  assert(issues.files.has(join(cwd, 'components/StatusBadge.vue')));
+  assert('composables/useTheme.ts' in issues.files);
+  assert('components/StatusBadge.vue' in issues.files);
 
   assert(!issues.dependencies['package.json']['vue']);
   assert(issues.dependencies['package.json']['@vueuse/nuxt']);

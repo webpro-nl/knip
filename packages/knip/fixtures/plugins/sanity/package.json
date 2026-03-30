@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/sanity",
+  "dependencies": {
+    "@sanity/blueprints": "*",
+    "@sanity/vision": "*",
+    "sanity": "*"
+  }
+}

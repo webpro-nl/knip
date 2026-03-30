@@ -86,6 +86,7 @@ export type PluginName =
   | 'prettier'
   | 'prisma'
   | 'qwik'
+  | 'raycast'
   | 'react-cosmos'
   | 'react-native'
   | 'react-router'
@@ -98,12 +99,14 @@ export type PluginName =
   | 'rslib'
   | 'rspack'
   | 'rstest'
+  | 'sanity'
   | 'semantic-release'
   | 'sentry'
   | 'simple-git-hooks'
   | 'size-limit'
   | 'sst'
   | 'starlight'
+  | 'stencil'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
@@ -227,6 +230,7 @@ export const pluginNames = [
   'prettier',
   'prisma',
   'qwik',
+  'raycast',
   'react-cosmos',
   'react-native',
   'react-router',
@@ -239,12 +243,14 @@ export const pluginNames = [
   'rslib',
   'rspack',
   'rstest',
+  'sanity',
   'semantic-release',
   'sentry',
   'simple-git-hooks',
   'size-limit',
   'sst',
   'starlight',
+  'stencil',
   'storybook',
   'stryker',
   'stylelint',

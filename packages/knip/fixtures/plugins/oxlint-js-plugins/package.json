@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/oxlint-js-plugins",
+  "scripts": {
+    "lint": "oxlint --config .oxlintrc-0.json"
+  },
+  "devDependencies": {
+    "oxlint": "*",
+    "eslint-plugin-security": "*",
+    "eslint-plugin-unused-imports": "*",
+    "eslint-plugin-jsdoc": "*",
+    "eslint-plugin-import": "*"
+  }
+}

@@ -48,7 +48,7 @@
     },
     "exclude": {
       "title": "Exclude issue types from the report",
-      "examples": ["classMembers", "enumMembers"],
+      "examples": ["enumMembers"],
       "$ref": "#/definitions/issueTypes"
     },
     "ignoreExportsUsedInFile": {
@@ -101,7 +101,7 @@
       "examples": [
         {
           "src/generated/**": ["exports", "types"],
-          "**/*.generated.ts": ["exports", "classMembers"]
+          "**/*.generated.ts": ["exports"]
         }
       ],
       "type": "object",
@@ -141,9 +141,6 @@
         "catalog": {
           "$ref": "#/definitions/ruleValue"
         },
-        "classMembers": {
-          "$ref": "#/definitions/ruleValue"
-        },
         "dependencies": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -157,6 +154,9 @@
           "$ref": "#/definitions/ruleValue"
         },
         "enumMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "namespaceMembers": {
           "$ref": "#/definitions/ruleValue"
         },
         "exports": {
@@ -221,7 +221,7 @@
       "type": "boolean"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "title": "Enum and namespace members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },
@@ -243,7 +243,7 @@
           "nsTypes",
           "duplicates",
           "enumMembers",
-          "classMembers",
+          "namespaceMembers",
           "catalog"
         ]
       }
@@ -724,6 +724,10 @@
           "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
           "$ref": "#/definitions/plugin"
         },
+        "sanity": {
+          "title": "sanity plugin configuration (https://knip.dev/reference/plugins/sanity)",
+          "$ref": "#/definitions/plugin"
+        },
         "semantic-release": {
           "title": "semantic-release plugin configuration (https://knip.dev/reference/plugins/semantic-release)",
           "$ref": "#/definitions/plugin"
@@ -746,6 +750,10 @@
         },
         "starlight": {
           "title": "starlight plugin configuration (https://knip.dev/reference/plugins/starlight)",
+          "$ref": "#/definitions/plugin"
+        },
+        "stencil": {
+          "title": "stencil plugin configuration (https://knip.dev/reference/plugins/stencil)",
           "$ref": "#/definitions/plugin"
         },
         "storybook": {

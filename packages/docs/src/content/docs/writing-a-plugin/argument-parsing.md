@@ -190,8 +190,7 @@ returned as numbers by minimist.
 [3]: #boolean
 [4]: #string
 [5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[6]:
-  https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
+[6]: https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
 [7]: #args
 [8]: #binaries
 [9]: #config

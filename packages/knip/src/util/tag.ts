@@ -6,14 +6,14 @@ export const splitTags = (rawTags: string[]) => {
   return tags.reduce<Tags>(
     ([incl, excl], tag) => {
       const match = tag.match(/[a-zA-Z]+/);
-      if (match) (tag.startsWith('-') ? excl : incl).push(match[0]);
+      if (match) (tag.startsWith('-') ? excl : incl).push(`@${match[0]}`);
       return [incl, excl];
     },
     [[], []]
   );
 };
 
-const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(`@${tag}`));
+const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(tag));
 
 export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   const [includeJSDocTags, excludeJSDocTags] = tags;

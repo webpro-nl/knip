@@ -144,13 +144,13 @@ imports of internal modules or external dependencies, and so on.
 Even though a modular approach has its merits, for Knip it makes sense to have
 all the pieces in a single tool.
 
-Building up the module and dependency graphs requires non-standard module
+Building up the module and dependency graphs requires more than standard module
 resolution and not only static but also dynamic analysis (i.e. actually load and
 execute modules), such as for parsers of plugins to receive the exported value
 of dynamic tooling configuration files. Additionally, [exports consumed by
-external libraries][8] require type information, as supported by the TypeScript
-backend. Last but not least, shell script parsing is required to find the right
-entry files, configuration files and dependencies accurately.
+external libraries][8] require type information. Last but not least, shell
+script parsing is required to find the right entry files, configuration files
+and dependencies accurately.
 
 The rippling effect of plugins and recursively adding entry files and
 dependencies to build up the graphs is also exactly what's meant by
@@ -171,7 +171,7 @@ dependencies to build up the graphs is also exactly what's meant by
 - Through scripts inside template strings in source files such as:
 
 ```ts
-await $({ stdio: 'inherit' })`c8 node hydrate.js`; // execa
+await $({ stdio: "inherit" })`c8 node hydrate.js`; // execa
 await $`node scripts/parse.js`; // bun/zx
 ```
 
@@ -207,14 +207,14 @@ in additional entry files recursively until no more entry files are found.
 
 ### What does Knip look for in source files?
 
-The TypeScript source file parser is powerful and fault-tolerant. Knip visits
-all nodes of the generated AST to find:
+oxc-parser is powerful and fault-tolerant. Knip visits all nodes of the
+generated AST to find:
 
 - Imports and dynamic imports of internal modules and external dependencies
 - Exports
 - Accessed properties on namespace imports and re-exports to track individual
   export usage
-- Calls to `require.resolve` and `import.meta.resolve`
+- Calls to `require.resolve`, `import.meta.resolve` and more.
 - Scripts in template strings (passed to [script parser][11])
 
 ### What's in the graphs?
@@ -232,10 +232,11 @@ required to create the report including all issue types:
 - Unused exports
 - Unused exported types
 - Unused exported enum members
+- Unused exported namespace members
 - Duplicate exports
 
 And optionally more issue types like individual exports and exported types in
-namespace imports, and unused class members.
+namespace imports.
 
 The graphs allows to report more interesting details, such as:
 
@@ -249,11 +250,14 @@ The graphs allows to report more interesting details, such as:
 
 Knip reads the `package.json` file of each dependency. Most of the information
 required is in the lockfile as well, which would be more efficient. However,
-there are a few issues with this approach:
+lockfiles lack some data, including:
 
 - It requires lockfile parsing for each lockfile format and version of each
   package manager.
 - The lockfile doesn't contain whether the package [has types included][12].
+- The lockfile doesn't contain entry point fields (`main`, `module`, `exports`)
+  needed to resolve what a dependency actually exposes.
+- The lockfile doesn't contain `bin` entries to determine installed binaries.
 
 ## Module Resolution
 
@@ -273,13 +277,10 @@ seem to meet all requirements to be usable on its own by Knip:
 - Don't resolve to type definition paths like `module.d.ts` but source code at
   `module.js`
 
-A few strategies have been tried and tweaked, and Knip currently uses a
-combination of [oxc-resolver][13], the TypeScript module resolver and a few
-customizations. This single custom module resolver function is hooked into the
-TypeScript compiler and language service hosts.
-
-Everything else is handled by `oxc-resolver` for things like [script
-parsing][11] and resolving references to files in other workspaces.
+A few strategies have been tried and tweaked, and Knip currently uses
+[oxc-resolver][13] with customizations for extension aliases, path aliases and
+TypeScript-style resolution. This covers module resolution across all
+workspaces, [script parsing][11] and references to files in other workspaces.
 
 ### How does Knip handle non-standard import syntax?
 
@@ -288,8 +289,8 @@ webpack loaders or Vite asset imports. Knip strips off the prefixes and suffixes
 in import specifiers like this:
 
 ```ts title="component.ts"
-import Icon from './icon.svg?raw';
-import Styles from '-!style-loader!css-loader?modules!./styles.css';
+import Icon from "./icon.svg?raw";
+import Styles from "-!style-loader!css-loader?modules!./styles.css";
 ```
 
 In this example, the `style-loader` and `css-loader` dependencies should be
@@ -307,10 +308,8 @@ perspective), it can be added as a workspace to the Knip configuration.
 Projects - in the context of TypeScript - are directories with a `tsconfig.json`
 file. They're not a concept in Knip.
 
-A TypeScript program has a 1-to-1 relationship with workspaces if they're
-analyzed in isolation. However, by default Knip optimizes for performance and
-utilizes [workspace sharing][14]. That's why debug output contains messages like
-"Installed 2 programs for 29 workspaces".
+Knip analyzes all workspaces using a single module graph with a shared module
+resolver.
 
 ### Why doesn't Knip match my TypeScript project structure?
 
@@ -332,32 +331,22 @@ Note that any directory with a `package.json` not listed in the root
 `package.json#workspaces` can be added to the Knip configuration manually to
 have it handled as a separate workspace.
 
-### Why doesn't Knip analyze workspaces in isolation by default?
-
-Knip creates TypeScript programs to create a module graph and traverse file
-ASTs. In a monorepo, it would make a lot of sense to create one program per
-workspace. However, this slows down the whole process considerably. That's why
-Knip shares the files of multiple workspaces in a single program if their
-configuration allows it. This optimization is enabled by default, while it also
-allows the module resolver (one per program) to do some more caching.
-
-Also see [workspace sharing][14].
-
 ### Why doesn't Knip just use `ts.findReferences`?
 
 TypeScript has a very good "Find references" feature, that you might be using in
-your IDE as well. Yet at scale this becomes too slow. That's why Knip builds up
-its own module graph to look up export usages. Additional benefits for this
-comprehensive graph include:
+your IDE as well. There are a few reasons Knip doesn't use it:
 
-- serializable and cacheable
-- enables more features
-- usable for other tools to build upon as well
+- It requires the full TypeScript language service, which is heavy to
+  initialize.
+- It must be called per symbol. A project with thousands of exports would need
+  thousands of calls, each scanning potentially all files. Knip parses each file
+  once and resolves all export usages from the resulting graph.
+- It operates within a single TypeScript program. Monorepos with multiple
+  `tsconfig.json` files would need separate language service instances.
+- It cannot see into non-standard files like `.vue`, `.svelte` and `.astro`.
 
-Without sacrificing these benefits, Knip does use `ts.findReferences` to find
-references to class members (i.e. when the issue type `classMembers` is
-included). In case analysis of exports requires type information of external
-dependencies, the [`--include-libs ` flag][8] will trigger the same.
+Knip's module graph is also serializable and cacheable, and usable for other
+tools to build upon.
 
 ### Why can't I use path aliases to reference other workspaces?
 
@@ -369,19 +358,19 @@ The recommendation and best practice is to list such workspaces/dependencies in
 `package.json`, and import them as such. Other tooling should not have any
 issues with this standard approach either.
 
-Also see the example in [TypeScript path aliases in monorepos][15].
+Also see the example in [TypeScript path aliases in monorepos][14].
 
 ### What's up with that configurable `tsconfig.json` location?
 
 There's a difference between `--tsConfig [file]` as a CLI argument and the
 `typescript.config` option in Knip configuration.
 
-The [`--tsConfig [file]` option][16] is used to provide an alternative location
+The [`--tsConfig [file]` option][15] is used to provide an alternative location
 for the default root `tsconfig.json` file. Relevant `compilerOptions` include
 `paths` and `moduleResolution`. This setting is only available at the root
 level.
 
-On the other hand, the [`config` option of the plugin][17] can be set per
+On the other hand, the [`config` option of the plugin][16] can be set per
 workspace. The TypeScript plugin extracts referenced external dependencies such
 as those in `extends`, `compilerOptions.types` and JSX settings:
 
@@ -405,7 +394,7 @@ From this example, Knip can determine whether the `@tsconfig/node20` and
   for `tsconfig.json` can be set per workspace.
 - In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
   either use `--tsConfig [file]` to target a different `tsconfig.json`, or
-  manually add [paths][18] to the Knip configuration. The latter can be done per
+  manually add [paths][17] to the Knip configuration. The latter can be done per
   workspace.
 
 ## Compilers
@@ -418,17 +407,16 @@ than JavaScript and TypeScript modules should be included as well. For instance,
 dependencies.
 
 Knip includes basic "compilers" for a few common file types (Astro, MDX, Svelte,
-Vue). Knip does not include actual compilers for reasons of potential
-incompatibility with the existing compiler, and dependency size. Knip allows to
-override them with the compilers in your project, and add additional ones for
-other file types.
+Vue). These are lightweight regex-based extractors, not actual compilers. You
+can override the built-in compilers with your project's actual compiler, and add
+additional ones for other file types.
 
 ### Why are the exports of my `.vue` files not used?
 
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][19].
+project. Also see the answer to the previous question and [Compilers][18].
 
 ## Miscellaneous
 
@@ -464,12 +452,10 @@ Examples of features that have been requested include:
 - Analyze workspaces in parallel
 - Support Deno
 - Improve internal code structures and accessibility to support contributions
-- Replace dependencies for better performance and correctness, such as for shell
-  script parsing and globbing with "unignores".
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][20] currently don't cover - this can change though!
+[sponsorships][19] currently don't cover - this can change though!
 
 [1]: ../reference/integrations.md#mcp-server
 [2]: ../reference/integrations.md#vs-code-extension
@@ -484,10 +470,9 @@ require more development efforts and maintenance. Time is limited and
 [11]: ../features/script-parser.md
 [12]: ../guides/handling-issues.mdx#type-definition-packages
 [13]: https://oxc.rs/docs/guide/usage/resolver.html
-[14]: ../guides/performance.md#workspace-sharing
-[15]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
-[16]: ../reference/cli.md#--tsconfig-file
-[17]: ../explanations/plugins.md#configuration-files
-[18]: ../reference/configuration.md#paths
-[19]: ../features/compilers.md
-[20]: /sponsors
+[14]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
+[15]: ../reference/cli.md#--tsconfig-file
+[16]: ../explanations/plugins.md#configuration-files
+[17]: ../reference/configuration.md#paths
+[18]: ../features/compilers.md
+[19]: /sponsors

@@ -1,0 +1,27 @@
+diff --git a/knip.jsonc b/knip.jsonc
+--- a/knip.jsonc
++++ b/knip.jsonc
+@@ -1,5 +1,5 @@
+ {
+-  "$schema": "https://unpkg.com/knip@5/schema.json",
++  "$schema": "https://unpkg.com/knip@6/schema.json",
+   "ignoreWorkspaces": [
+     "e2e",
+     "dev/*",
+@@ -41,8 +41,6 @@
+         "sanity-tsdoc",
+         // Knip doesn't understand `cd perf/studio && pnpm preview`
+         "preview",
+-        // Knip doesn't understand `cd dev/efps && pnpm write:report`
+-        "write:report",
+       ],
+     },
+     "packages/sanity": {
+@@ -102,6 +100,7 @@
+     },
+     "packages/@repo/bundle-manager": {
+       "project": ["src/**/*.ts"],
++      "ignoreDependencies": ["@repo/utils"],
+     },
+     "packages/@repo/release-notes": {
+       "project": ["src/**/*.ts"],

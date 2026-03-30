@@ -8,7 +8,7 @@ import { resolve } from './helpers/resolve.ts';
 const cwd = resolve('fixtures/workspaces-module-resolution');
 
 test('Resolve modules properly across multiple workspaces', async () => {
-  const options = await createOptions({ cwd, isIsolateWorkspaces: true });
+  const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {

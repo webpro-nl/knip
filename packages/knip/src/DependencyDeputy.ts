@@ -10,7 +10,7 @@ import {
 } from './constants.ts';
 import { getDependencyMetaData } from './manifest/index.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
-import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.ts';
+import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type {
   DependencyArray,
@@ -323,13 +323,16 @@ export class DependencyDeputy {
         dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
-      for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
+      const manifest = this._manifests.get(workspace)!;
+
+      for (const symbol of this.getDevDependencies(workspace)) {
+        if (!manifest.dependencies.includes(symbol) && !isNotReferencedDependency(symbol)) continue;
         const position = peeker.getLocation('devDependencies', symbol);
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
-
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
         if (!isReferencedDependency(symbol)) continue;
+        if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({
           type: 'optionalPeerDependencies',
@@ -345,7 +348,7 @@ export class DependencyDeputy {
     return { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues };
   }
 
-  handleIgnoredDependencies(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredDependencies(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
@@ -353,6 +356,11 @@ export class DependencyDeputy {
         const packageName = getPackageNameFromModuleSpecifier(issue.symbol);
         if (!packageName) continue;
         if (IGNORED_DEPENDENCIES.has(packageName)) {
+          // Don't ignore a devDependency that duplicates a production dependency
+          if (type === 'devDependencies') {
+            const manifest = this.getWorkspaceManifest(issue.workspace);
+            if (manifest?.dependencies.includes(packageName)) continue;
+          }
           delete issueSet[issueKey];
           counters[type]--;
         } else {
@@ -380,7 +388,7 @@ export class DependencyDeputy {
     }
   }
 
-  handleIgnoredBinaries(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredBinaries(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {

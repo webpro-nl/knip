@@ -14,6 +14,7 @@ test('Find unused exports respecting ignoreExportsUsedInFile: true', async () =>
   assert.equal(issues.exports['imported.ts']['referencedNeverFunction'].symbol, 'referencedNeverFunction');
   assert.equal(issues.exports['imported.ts']['default'].symbol, 'default');
   assert.equal(issues.exports['imported.ts']['DeclaredThenExportedNamed'].symbol, 'DeclaredThenExportedNamed');
+  assert.equal(issues.exports['imported.ts']['Paladin'].symbol, 'Paladin');
 
   assert.equal(Object.values(issues.types).length, 1);
   assert.equal(Object.values(issues.types['imported.ts']).length, 1);
@@ -22,11 +23,11 @@ test('Find unused exports respecting ignoreExportsUsedInFile: true', async () =>
   assert.deepEqual(counters, {
     ...baseCounters,
     duplicates: 0,
-    exports: 3,
+    exports: 4,
     nsExports: 0,
     nsTypes: 0,
-    processed: 2,
-    total: 2,
+    processed: 10,
+    total: 10,
     types: 1,
   });
 });

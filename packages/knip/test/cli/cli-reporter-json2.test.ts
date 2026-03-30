@@ -7,24 +7,41 @@ const cwd = resolve('fixtures/module-resolution-non-std');
 
 test('knip --reporter json (files, unlisted & unresolved)', () => {
   const json = {
-    files: ['src/unused.ts'],
     issues: [
       {
-        file: 'src/index.ts',
+        file: 'src/unused.ts',
+        binaries: [],
+        catalog: [],
         dependencies: [],
         devDependencies: [],
-        optionalPeerDependencies: [],
-        unlisted: [
-          { name: 'unresolved', line: 9, col: 28, pos: 450 },
-          { name: '@org/unresolved', line: 10, col: 28, pos: 490 },
-        ],
-        binaries: [],
-        unresolved: [{ name: './unresolved', line: 8, col: 25, pos: 408 }],
-        exports: [],
-        types: [],
-        enumMembers: {},
         duplicates: [],
+        enumMembers: [],
+        exports: [],
+        files: [{ name: 'src/unused.ts' }],
+        namespaceMembers: [],
+        optionalPeerDependencies: [],
+        types: [],
+        unlisted: [],
+        unresolved: [],
+      },
+      {
+        file: 'src/index.ts',
+        binaries: [],
         catalog: [],
+        dependencies: [],
+        devDependencies: [],
+        duplicates: [],
+        enumMembers: [],
+        exports: [],
+        files: [],
+        namespaceMembers: [],
+        optionalPeerDependencies: [],
+        types: [],
+        unlisted: [
+          { name: 'unresolved', line: 9, col: 27, pos: 450 },
+          { name: '@org/unresolved', line: 10, col: 27, pos: 490 },
+        ],
+        unresolved: [{ name: './unresolved', line: 8, col: 24, pos: 408 }],
       },
     ],
   };

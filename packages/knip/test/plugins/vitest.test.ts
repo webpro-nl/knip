@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
-import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -38,7 +37,8 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(issues.files, new Set([join(cwd, 'src/setupTests.ts')]));
+  assert('src/setupTests.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
 
   assert.deepEqual(counters, {
     ...baseCounters,

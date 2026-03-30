@@ -95,8 +95,7 @@ dependencies.
 [7]: #vs-code-extension-screenshots
 [8]: https://plugins.jetbrains.com/plugin/29765-knip
 [9]: https://www.npmjs.com/package/@knip/mcp
-[10]:
-  https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
+[10]: https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
 [11]: /screenshots/editors-and-agents/diagnostics.webp
 [12]: /screenshots/editors-and-agents/imports-exports.webp
 [13]: /screenshots/editors-and-agents/circular-dependency.webp

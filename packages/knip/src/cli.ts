@@ -12,7 +12,7 @@ import {
   isLoaderError,
   isModuleNotFoundError,
 } from './util/errors.ts';
-import { logError, logWarning } from './util/log.ts';
+import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
 import { runPreprocessors, runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
@@ -98,14 +98,6 @@ const main = async () => {
       const duration = perfObserver.getCurrentDurationInMs();
       console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();
-    }
-
-    if (args['experimental-tags'] && args['experimental-tags'].length > 0) {
-      logWarning('DEPRECATION WARNING', '--experimental-tags is deprecated, please start using --tags instead');
-    }
-
-    if (options.isIsolateWorkspaces && options.includedIssueTypes.classMembers) {
-      logWarning('WARNING', 'Class members are not tracked when using the --isolate-workspaces flag');
     }
 
     if (

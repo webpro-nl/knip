@@ -173,7 +173,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     if (cfg.resolve?.extensions) {
       // Filter out default extensions from resolve.extensions
       const customExtensions = cfg.resolve.extensions.filter(
-        ext => ext.startsWith('.') && !DEFAULT_EXTENSIONS.includes(ext)
+        ext => ext.startsWith('.') && !DEFAULT_EXTENSIONS.has(ext)
       );
 
       for (const ext of customExtensions) {

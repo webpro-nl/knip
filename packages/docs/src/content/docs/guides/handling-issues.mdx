@@ -517,7 +517,7 @@ option][39] to tell Knip where to find the icon types:
 Where `[framework]` is the name of the framework you're using (see [available
 types][42]).
 
-**Solution**: try [--include-libs][43] or configure [paths][39].
+**Solution**: configure [paths][39].
 
 ## Unused exports
 
@@ -525,8 +525,8 @@ By default, Knip does not report unused exports of `entry` files.
 
 The most common causes for unused exports include:
 
-- [Namespace enumerations][44]
-- [External libraries][45]
+- [Namespace enumerations][43]
+- [External libraries][44]
 
 Use the `--exports` flag to [filter][17] and focus only on issues related to
 exports:
@@ -535,7 +535,7 @@ exports:
 knip --exports
 ```
 
-Use [includeEntryExports][46] to report unused exports of entry files as well.
+Use [includeEntryExports][45] to report unused exports of entry files as well.
 This can be set per workspace.
 
 ### Namespace enumerations
@@ -547,7 +547,7 @@ are then **not** reported.
 **Solution**: if all exports on imported namespaces should be considered
 individually, include the `nsExports` issue type to disable the heuristic.
 
-See [namespace imports][47] to see all related patterns.
+See [namespace imports][46] to see all related patterns.
 
 ### External libraries
 
@@ -578,27 +578,16 @@ non-standard consumption of your exports? Here's an example:
 </Tabs>
 
 Knip understands `Apple` is used, since it's standard usage. But `Orange` is
-referenced through a function of an external library. For performance reasons,
-Knip does not include external type definitions by default so it won't see the
-export being referenced.
-
-**Solution**: include the type definitions of external libraries with the
-[--include-libs][43] flag:
-
-```shell
-knip --include-libs
-```
-
-This comes at a performance and memory penalty, but should give better results
-if you need it. This flag is implied when [classMembers][48] are included (that
-feature comes with roughly the same performance penalty).
+referenced through a function of an external library. Knip includes external
+type definitions to trace such usage, but in some cases it may not be able to
+follow the reference through the library's API.
 
 ### Exclude exports from the report
 
 To exclude false positives from the report, there are a few options:
 
-- [Ignore exports used in file][49] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][50].
+- [Ignore exports used in file][47] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][48].
 - Have the export in an entry file:
 
   - Add the file to the `entry` file patterns array in the configuration.
@@ -609,30 +598,12 @@ To exclude false positives from the report, there are a few options:
 ### Missing unused exports?
 
 Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][46]
+be exported from an entry file. In that case, use [--include-entry-exports][45]
 to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
 `.svelte` are not available by default. See [compilers][21] for more details on
 how to include them.
-
-### Class members
-
-Unused members of exported classes are not reported by default, here's how to
-enable them:
-
-```sh
-knip --include classMembers
-```
-
-This option is also available in the Knip configuration file. Note that this
-feature comes at a cost: linting will take more time and more memory.
-
-Individual class members can be [tagged using JSDoc syntax][50].
-
-Classes exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][46] to make Knip also report members of unused exports
-in entry files.
 
 ### Enum members
 
@@ -643,16 +614,31 @@ Reporting such members can be disabled:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged using JSDoc syntax][50].
+Individual enum members can be [tagged using JSDoc syntax][48].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][46] to make Knip also report members of unused exports
+[--include-entry-exports][45] to make Knip also report members of unused exports
+in entry files.
+
+### Namespace members
+
+Unused members of exported TypeScript namespaces are reported by default.
+Reporting such members can be disabled:
+
+```sh
+knip --exclude namespaceMembers
+```
+
+Individual namespace members can be [tagged using JSDoc syntax][48].
+
+Namespaces exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][45] to make Knip also report members of unused exports
 in entry files.
 
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][51] and open an
+false positive), feel free to create a [minimal reproduction][49] and open an
 issue on GitHub. It'll make Knip better for everyone!
 
 [1]: #unused-files
@@ -697,12 +683,10 @@ issue on GitHub. It'll make Knip better for everyone!
 [40]: ../reference/configuration.md#ignoreunresolved
 [41]: https://www.npmjs.com/package/unplugin-icons
 [42]: https://github.com/unplugin/unplugin-icons/tree/main/types
-[43]: ../reference/cli.md#--include-libs
-[44]: #namespace-enumerations
-[45]: #external-libraries
-[46]: ../reference/configuration.md#includeentryexports
-[47]: ../guides/namespace-imports.md
-[48]: #class-members
-[49]: ../reference/configuration.md#ignoreexportsusedinfile
-[50]: ../reference/jsdoc-tsdoc-tags.md
-[51]: ../guides/issue-reproduction.md
+[43]: #namespace-enumerations
+[44]: #external-libraries
+[45]: ../reference/configuration.md#includeentryexports
+[46]: ../guides/namespace-imports.md
+[47]: ../reference/configuration.md#ignoreexportsusedinfile
+[48]: ../reference/jsdoc-tsdoc-tags.md
+[49]: ../guides/issue-reproduction.md

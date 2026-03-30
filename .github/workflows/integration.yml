@@ -19,8 +19,8 @@ jobs:
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
       - run: pnpm run build
@@ -30,7 +30,7 @@ jobs:
           pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'
       - name: Comment on referenced issues
         if: github.event_name == 'push'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const sha = '${{ steps.publish.outputs.sha }}';
@@ -79,9 +79,10 @@ jobs:
           - name: astro
             repo: withastro/astro
             commands: |
-              pnpm install
+              pnpm install --config.minimumReleaseAge=0
               pnpm build
-              pnpm add -D -w $PKG_URL
+              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
@@ -120,16 +121,16 @@ jobs:
               pnpm install
               pnpm add -D $PKG_URL
               bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --no-exit-code --allow-remove-files --format
+              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format
               bunx --bun knip --tags=-knipignore --production
 
-          # - name: npmx.dev
-          #   repo: npmx-dev/npmx.dev
-          #   commands: |
-          #     pnpm install
-          #     pnpm add -D -w $PKG_URL
-          #     pnpm knip --fix --allow-remove-files --no-exit-code
-          #     pnpm knip --production
+          - name: npmx.dev
+            repo: npmx-dev/npmx.dev
+            commands: |
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              pnpm knip
+              pnpm knip --production --exclude dependencies --fix
 
           - name: prettier
             repo: prettier/prettier
@@ -157,13 +158,20 @@ jobs:
               pnpm add -D -w knip@$PKG_URL
               pnpm knip
 
+          - name: sanity
+            repo: sanity-io/sanity
+            commands: |
+              pnpm install --no-frozen-lockfile --config.minimumReleaseAge=0
+              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm knip --exclude duplicates
+
           - name: sentry
             repo: getsentry/sentry
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
-              pnpm run knip --fix --no-exit-code
-              pnpm run knip
+              pnpm run knip --fix
+              pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
@@ -179,10 +187,10 @@ jobs:
               npm run knip
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check out ${{ matrix.project.repo }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ matrix.project.repo }}
           path: ${{ matrix.project.name }}
@@ -192,15 +200,15 @@ jobs:
         working-directory: ${{ matrix.project.name }}
         run: |
           PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
-          [ -f "$PATCH_FILE" ] && git apply --verbose "$PATCH_FILE" || true
+          [ -f "$PATCH_FILE" ] && git apply --verbose -C0 --ignore-whitespace "$PATCH_FILE" || true
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - uses: oven-sh/setup-bun@v2
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}

@@ -7,7 +7,7 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/peer-dependencies-optional-ignored');
 
-test('Find no issues/hints if optional peerDependencies are also ignored (dev)Dependencies', async () => {
+test('No issues for optional peerDependencies also listed in devDependencies', async () => {
   const options = await createOptions({ cwd });
   const { counters, configurationHints } = await main(options);
 

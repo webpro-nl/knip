@@ -5,11 +5,11 @@ import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
-import type { PrincipalFactory } from '../PrincipalFactory.ts';
 import traceReporter from '../reporters/trace.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
+import { perfObserver } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.ts';
 
@@ -20,7 +20,6 @@ interface AnalyzeOptions {
   collector: IssueCollector;
   deputy: DependencyDeputy;
   entryPaths: Set<string>;
-  factory: PrincipalFactory;
   graph: ModuleGraph;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
@@ -34,7 +33,6 @@ export const analyze = async ({
   collector,
   deputy,
   entryPaths,
-  factory,
   graph,
   streamer,
   unreferencedFiles,
@@ -45,15 +43,27 @@ export const analyze = async ({
 
   const explorer = createGraphExplorer(graph, entryPaths);
 
-  const isReferencedInUsedExport = (exportedItem: Export, filePath: string, includeEntryExports: boolean) => {
+  const isReferencedInUsedExport = (
+    exportedItem: Export,
+    filePath: string,
+    includeEntryExports: boolean,
+    visited?: Set<string>
+  ) => {
     if (!exportedItem.referencedIn) return false;
     const file = graph.get(filePath);
     if (!file) return false;
     for (const containingExport of exportedItem.referencedIn) {
       if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
       const inExport = file.exports.get(containingExport);
-      if (!inExport) return false;
+      if (!inExport) continue;
       if (inExport.hasRefsInFile && (inExport.type === 'type' || inExport.type === 'interface')) return true;
+      if (inExport.referencedIn) {
+        const v = visited ?? new Set();
+        if (!v.has(containingExport)) {
+          v.add(containingExport);
+          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, v)) return true;
+        }
+      }
     }
     return false;
   };
@@ -71,8 +81,6 @@ export const analyze = async ({
 
         if (workspace) {
           const { isIncludeEntryExports } = workspace.config;
-
-          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
 
           const isEntry = entryPaths.has(filePath);
 
@@ -99,7 +107,7 @@ export const analyze = async ({
                 (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
               ) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
+                  if (options.tags[1].includes(tagName)) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -117,9 +125,17 @@ export const analyze = async ({
               }
 
               if (isReferenced) {
-                if (options.includedIssueTypes.enumMembers && exportedItem.type === 'enum') {
+                const isEnumMembers = options.includedIssueTypes.enumMembers && exportedItem.type === 'enum';
+                const isNsMembers =
+                  options.includedIssueTypes.namespaceMembers &&
+                  exportedItem.members.length > 0 &&
+                  exportedItem.type !== 'enum';
+
+                if ((isEnumMembers || isNsMembers) && exportedItem.members.length > 0) {
                   if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
-                  if (hasStrictlyEnumReferences(importsForExport, identifier)) continue;
+                  if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) continue;
+
+                  const issueType = isEnumMembers ? 'enumMembers' : 'namespaceMembers';
 
                   for (const member of exportedItem.members) {
                     if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
@@ -136,7 +152,7 @@ export const analyze = async ({
                         if (isIgnored) continue;
 
                         collector.addIssue({
-                          type: 'enumMembers',
+                          type: issueType,
                           filePath,
                           workspace: workspace.name,
                           symbol: member.identifier,
@@ -148,41 +164,12 @@ export const analyze = async ({
                         });
                       } else if (isIgnored) {
                         for (const tagName of exportedItem.jsDocTags) {
-                          if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
+                          if (options.tags[1].includes(tagName)) {
                             collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
                           }
                         }
                       }
                     }
-                  }
-                }
-
-                if (principal && options.isReportClassMembers && exportedItem.type === 'class') {
-                  const members = exportedItem.members.filter(
-                    member => !(findMatch(workspace.ignoreMembers, member.identifier) || shouldIgnore(member.jsDocTags))
-                  );
-                  for (const member of principal.findUnusedMembers(filePath, members)) {
-                    if (shouldIgnoreTags(member.jsDocTags)) {
-                      const identifier = `${exportedItem.identifier}.${member.identifier}`;
-                      for (const tagName of exportedItem.jsDocTags) {
-                        if (options.tags[1].includes(tagName.replace(/^@/, ''))) {
-                          collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
-                        }
-                      }
-                      continue;
-                    }
-
-                    collector.addIssue({
-                      type: 'classMembers',
-                      filePath,
-                      workspace: workspace.name,
-                      symbol: member.identifier,
-                      parentSymbol: exportedItem.identifier,
-                      pos: member.pos,
-                      line: member.line,
-                      col: member.col,
-                      fixes: member.fix ? [member.fix] : [],
-                    });
                   }
                 }
 
@@ -200,9 +187,7 @@ export const analyze = async ({
               exportedItem.hasRefsInFile ||
               isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports) ||
               (hasStrictlyNsRefs &&
-                ((!options.includedIssueTypes.nsTypes && isType) ||
-                  !(options.includedIssueTypes.nsExports || isType))) ||
-              (!options.isSkipLibs && principal?.hasExternalReferences(filePath, exportedItem))
+                ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))
             ) {
               continue;
             }
@@ -311,6 +296,8 @@ export const analyze = async ({
   };
 
   await analyzeGraph();
+
+  perfObserver.addMemoryMark('analyze');
 
   if (options.isTrace) {
     traceReporter({ graph, explorer, options, workspaceFilePathFilter: chief.workspaceFilePathFilter });

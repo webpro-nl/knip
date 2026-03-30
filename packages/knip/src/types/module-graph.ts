@@ -54,18 +54,18 @@ export interface Export extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
-  readonly jsDocTags: Tags;
+  jsDocTags: Tags;
   hasRefsInFile: boolean;
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
-  readonly isReExport: boolean;
+  isReExport: boolean;
 }
 
 export interface ExportMember extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
   readonly fix: Fix;
-  readonly jsDocTags: Tags;
+  jsDocTags: Tags;
   readonly flags: number;
   hasRefsInFile: boolean;
 }

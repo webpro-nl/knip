@@ -11,7 +11,7 @@ test('Find unused exports in zero-config mode', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.equal(issues.files.size, 1);
+  assert.equal(Object.keys(issues.files).length, 1);
 
   assert.equal(Object.values(issues.exports).length, 2);
   assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');

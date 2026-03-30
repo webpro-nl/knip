@@ -19,14 +19,8 @@ test('Handle special characters in named exports and members', async () => {
 
   assert(issues.types['exports.ts']['$DollarType']);
 
-  assert(issues.classMembers['exports.ts']['DollarMembers.$member']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.member$']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.$method']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.method$']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 4,
     exports: 5,
     types: 1,
     processed: 2,
@@ -45,11 +39,6 @@ test('Handle special characters in named exports and members (nsTypes)', async (
   assert(issues.exports['exports.ts']['$Dollar']);
 
   assert(issues.types['exports.ts']['$DollarType']);
-
-  assert(issues.classMembers['exports.ts']['DollarMembers.$member']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.member$']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.$method']);
-  assert(issues.classMembers['exports.ts']['DollarMembers.method$']);
 
   assert(issues.enumMembers['exports.ts']['Characters.-']);
   assert(issues.enumMembers['exports.ts']['Characters.,']);
@@ -75,7 +64,6 @@ test('Handle special characters in named exports and members (nsTypes)', async (
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 4,
     enumMembers: 21,
     exports: 5,
     types: 1,

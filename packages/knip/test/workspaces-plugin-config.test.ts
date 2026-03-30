@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.ts';
-import { join } from '../src/util/path.ts';
 import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
@@ -23,14 +22,10 @@ test('Use root plugin config in workspaces (strict production)', async () => {
   const options = await createOptions({ cwd, isStrict: true });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(
-    issues.files,
-    new Set([
-      join(cwd, 'packages/frontend/components/component.js'),
-      join(cwd, 'packages/shared/components/component.js'),
-      join(cwd, 'packages/shared/jest-setup.ts'),
-    ])
-  );
+  assert('packages/frontend/components/component.js' in issues.files);
+  assert('packages/shared/components/component.js' in issues.files);
+  assert('packages/shared/jest-setup.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 3);
 
   assert.deepEqual(counters, {
     ...baseCounters,

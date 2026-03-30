@@ -11,8 +11,8 @@ test('Support negated ignore patterns', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(resolve('fixtures/ignore-negated/src/modules/B/unusedFileB.js')));
-  assert(!issues.files.has(resolve('fixtures/ignore-negated/src/modules/A/unusedFileA.js')));
+  assert('src/modules/B/unusedFileB.js' in issues.files);
+  assert(!('src/modules/A/unusedFileA.js' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,

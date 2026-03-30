@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import ts from 'typescript';
+import { Visitor, type ParseResult } from 'oxc-parser';
 import { scriptBodies } from '../../compilers/compilers.ts';
+import { parseFile } from '../../typescript/visitors/helpers.ts';
 import { basename, dirname, isInNodeModules, join } from '../../util/path.ts';
 import type { TemplateAstNode, VueSfc } from './types.ts';
 
@@ -15,19 +17,24 @@ export const getVueSfc = (cwd: string): VueSfc => {
   };
 };
 
-export const createSourceFile = (filePath: string, contents?: string) => {
-  const c = contents ?? ts.sys.readFile(filePath, 'utf8') ?? '';
-  return ts.createSourceFile(filePath, c, ts.ScriptTarget.Latest);
+const readFile = (filePath: string): string => {
+  try {
+    return readFileSync(filePath, 'utf8');
+  } catch {
+    return '';
+  }
 };
+
+export const readAndParseFile = (filePath: string) => parseFile(filePath, readFile(filePath));
 
 export const collectIdentifiers = (source: string, fileName: string) => {
   const identifiers = new Set<string>();
-  const sourceFile = createSourceFile(fileName, source);
-  const visit = (node: ts.Node) => {
-    if (ts.isIdentifier(node)) identifiers.add(node.text);
-    ts.forEachChild(node, visit);
-  };
-  ts.forEachChild(sourceFile, visit);
+  const visitor = new Visitor({
+    Identifier(node) {
+      identifiers.add(node.name);
+    },
+  });
+  visitor.visit(parseFile(fileName, source).program);
   return identifiers;
 };
 
@@ -58,48 +65,43 @@ export const toKebabCase = (s: string) => s.replace(/[A-Z]/g, (m, i) => (i ? '-'
 
 const isLocalSpecifier = (specifier: string) => specifier.startsWith('.') && !isInNodeModules(specifier);
 
-export const collectLocalImportPaths = (sourceFile: ts.SourceFile) => {
-  const dir = dirname(sourceFile.fileName);
+export const collectLocalImportPaths = (filePath: string, result: ParseResult) => {
+  const dir = dirname(filePath);
   const paths = new Set<string>();
-  const visit = (node: ts.Node) => {
-    if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument) && ts.isStringLiteral(node.argument.literal)) {
-      const specifier = node.argument.literal.text;
+  const visitor = new Visitor({
+    TSImportType(node) {
+      const specifier = node.source.value;
       if (isLocalSpecifier(specifier)) paths.add(join(dir, specifier));
-    }
-    ts.forEachChild(node, visit);
-  };
-  ts.forEachChild(sourceFile, visit);
+    },
+  });
+  visitor.visit(result.program);
   return paths;
 };
 
-export function buildAutoImportMap(sourceFile: ts.SourceFile) {
-  const dir = dirname(sourceFile.fileName);
-  const isComponents = basename(sourceFile.fileName) === 'components.d.ts';
+export function buildAutoImportMap(filePath: string, result: ParseResult) {
+  const dir = dirname(filePath);
+  const isComponents = basename(filePath) === 'components.d.ts';
 
   const importMap = new Map<string, string>();
   const componentMap = new Map<string, string[]>();
 
-  function visit(node: ts.Node) {
-    if (ts.isVariableStatement(node)) {
-      if (node.declarationList.declarations.length === 0) return;
-      const decl = node.declarationList.declarations[0];
-      if (!ts.isIdentifier(decl.name)) return;
-      const name = decl.name.text;
+  const importTypes: { start: number; end: number; specifier: string }[] = [];
+  const collectVisitor = new Visitor({
+    TSImportType(node) {
+      importTypes.push({ start: node.start, end: node.end, specifier: node.source.value });
+    },
+  });
+  collectVisitor.visit(result.program);
+
+  const matchVisitor = new Visitor({
+    VariableDeclarator(node) {
+      if (node.id?.type !== 'Identifier') return;
+      const name = node.id.name;
       if (name.startsWith('Lazy')) return;
-      if (!decl.type) return;
-      const tNode = ts.isImportTypeNode(decl.type)
-        ? decl.type
-        : ts.isTypeQueryNode(decl.type)
-          ? ts.isImportTypeNode(decl.type.exprName)
-            ? decl.type.exprName
-            : ts.isQualifiedName(decl.type.exprName) &&
-              ts.isImportTypeNode(decl.type.exprName.left) &&
-              decl.type.exprName.left
-          : ts.isIndexedAccessTypeNode(decl.type) && ts.isImportTypeNode(decl.type.objectType) && decl.type.objectType;
-      if (!tNode || !ts.isLiteralTypeNode(tNode.argument) || !ts.isStringLiteral(tNode.argument.literal)) return;
-      const specifier = tNode.argument.literal.text;
-      if (!isLocalSpecifier(specifier)) return;
-      const absSpecifier = join(dir, specifier);
+      const importType = importTypes.find(it => it.start >= node.start && it.end <= node.end);
+      if (!importType) return;
+      if (!isLocalSpecifier(importType.specifier)) return;
+      const absSpecifier = join(dir, importType.specifier);
       if (isComponents) {
         const components = componentMap.get(name);
         if (components) components.push(absSpecifier);
@@ -107,18 +109,19 @@ export function buildAutoImportMap(sourceFile: ts.SourceFile) {
       } else {
         importMap.set(name, absSpecifier);
       }
-    } else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
-      const specifier = node.moduleSpecifier.text;
+    },
+    ExportNamedDeclaration(node) {
+      if (!node.source) return;
+      const specifier = node.source.value;
       if (!isLocalSpecifier(specifier)) return;
-      if (node.exportClause && ts.isNamedExports(node.exportClause)) {
-        for (const element of node.exportClause.elements) {
-          importMap.set(element.name.text, join(dir, specifier));
-        }
+      const absSpecifier = join(dir, specifier);
+      for (const s of node.specifiers) {
+        const name = s.exported.type === 'Identifier' ? s.exported.name : s.exported.value;
+        if (name) importMap.set(name, absSpecifier);
       }
-    }
-    ts.forEachChild(node, visit);
-  }
+    },
+  });
+  matchVisitor.visit(result.program);
 
-  ts.forEachChild(sourceFile, visit);
   return { importMap, componentMap };
 }

@@ -21,3 +21,10 @@ test('Find unused dependencies, exports and files in workspaces (loose)', async 
     total: 4,
   });
 });
+
+test('Find no false unused workspace dependencies when run from workspace dir', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/workspaces-pnpm/apps/app-a') });
+  const { counters } = await main(options);
+
+  assert.equal(counters.dependencies, 0);
+});

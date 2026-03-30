@@ -126,7 +126,7 @@ const main = () => {
   console.info('✓ Install Knip');
 
   const knipConfig = {
-    $schema: 'https://unpkg.com/knip@5/schema.json',
+    $schema: 'https://unpkg.com/knip@6/schema.json',
     tags: ['-lintignore'],
   };
 

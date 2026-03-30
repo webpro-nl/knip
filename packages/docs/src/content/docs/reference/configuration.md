@@ -16,7 +16,7 @@ In JSON, use the provided JSON schema:
 
 ```json title="knip.json"
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json"
+  "$schema": "https://unpkg.com/knip@6/schema.json"
 }
 ```
 
@@ -26,7 +26,7 @@ In JSONC, use the provided JSONC schema:
 
 ```json title="knip.jsonc"
 {
-  "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json"
 }
 ```
 
@@ -168,7 +168,7 @@ like so:
 ```
 
 This way, you can either focus on or ignore specific tagged exports with tags
-you define yourself. This also works for individual class or enum members.
+you define yourself. This also works for individual enum and namespace members.
 
 The default directive is `+` (include) and the `@` prefix is ignored, so the
 notation below is valid and will report only exports tagged `@lintignore` or
@@ -288,8 +288,8 @@ Also see [Unused dependencies][11].
 
 ### `ignoreMembers`
 
-Array of class and enum members to exclude from the report. Regular expressions
-allowed. Example:
+Array of enum and namespace members to exclude from the report. Regular
+expressions allowed. Example:
 
 ```json title="knip.json"
 {
@@ -347,7 +347,7 @@ reporting other issues in those same files.
 {
   "ignoreIssues": {
     "src/generated/**": ["exports", "types"],
-    "**/*.generated.ts": ["exports", "classMembers"]
+    "**/*.generated.ts": ["exports", "enumMembers", "namespaceMembers"]
   }
 }
 ```
@@ -394,7 +394,7 @@ If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
 or `src/routes/+page.svelte`.
 
-This will also enable reporting unused members of exported classes and enums.
+This will also enable reporting unused members of exported enums and namespaces.
 
 Set this option at root level to enable this globally, or within workspace
 configurations individually.

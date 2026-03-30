@@ -36,9 +36,7 @@ export default ({ report, issues, isShowProgress, options, cwd }: ReporterOption
     owner: calcFileOwnership(issue.filePath),
   });
 
-  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === 'files') reportType = '_files';
-
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 

@@ -71,7 +71,7 @@ ts-prune
 knip --include exports,types,nsExports,nsTypes
 ```
 
-Use `knip --exports` to also include class and enum members.
+Use `knip --exports` to also include enum and namespace members.
 
 **Project status**: The project is archived and recommends Knip.
 
@@ -87,7 +87,7 @@ ts-unused-exports
 knip --include exports,types,nsExports,nsTypes
 ```
 
-Use `knip --exports` to also include class and enum members.
+Use `knip --exports` to also include enum and namespace members.
 
 ### tsr
 

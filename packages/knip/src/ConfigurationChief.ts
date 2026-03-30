@@ -102,6 +102,7 @@ export class ConfigurationChief {
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
   workspaceGraph: WorkspaceGraph = new Map();
+  private workspaceByFileCache = new Map<string, Workspace | undefined>();
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
@@ -438,9 +439,11 @@ export class ConfigurationChief {
   }
 
   public findWorkspaceByFilePath(filePath: string) {
+    if (this.workspaceByFileCache.has(filePath)) return this.workspaceByFileCache.get(filePath);
     const workspaceDir = this.availableWorkspaceDirs.find(workspaceDir => filePath.startsWith(`${workspaceDir}/`));
-    if (!workspaceDir) return undefined;
-    return this.workspacesByDir.get(workspaceDir);
+    const workspace = workspaceDir ? this.workspacesByDir.get(workspaceDir) : undefined;
+    this.workspaceByFileCache.set(filePath, workspace);
+    return workspace;
   }
 
   public getUnusedIgnoredWorkspaces() {

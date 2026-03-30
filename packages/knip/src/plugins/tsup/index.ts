@@ -1,6 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getEntryFromAST } from './resolveFromAST.ts';
 import type { TsupConfig } from './types.ts';
 
 // https://paka.dev/npm/tsup/api
@@ -13,6 +14,9 @@ const enablers = ['tsup'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['tsup.config.{js,ts,cjs,mjs,json}', 'package.json'];
+
+const isLoadConfig: IsLoadConfig = ({ configFileName }) =>
+  configFileName === 'package.json' || configFileName.endsWith('.json');
 
 const resolveConfig: ResolveConfig<TsupConfig> = async config => {
   if (typeof config === 'function') config = await config({});
@@ -29,6 +33,11 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
   return entryPatterns;
 };
 
+const resolveFromAST: ResolveFromAST = program => {
+  const entries = getEntryFromAST(program);
+  return [...entries].map(id => toProductionEntry(id, { allowIncludeExports: true }));
+};
+
 const args = {
   config: true,
 };
@@ -38,7 +47,9 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
+  isLoadConfig,
   resolveConfig,
+  resolveFromAST,
   args,
 };
 

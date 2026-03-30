@@ -1,7 +1,7 @@
 {
   "name": "vscode-knip",
   "displayName": "Knip",
-  "version": "1.0.16",
+  "version": "2.1.0",
   "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "categories": [
@@ -60,7 +60,7 @@
     "@types/vscode": "^1.95.0",
     "@vscode/test-electron": "^2.5.2",
     "knip": "workspace:*",
-    "rolldown": "^1.0.0-rc.7"
+    "rolldown": "^1.0.0-rc.12"
   },
   "contributes": {
     "languageModelTools": [
@@ -181,6 +181,11 @@
             "type": "string",
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
+          },
+          "knip.nodeRuntimePath": {
+            "type": "string",
+            "default": "",
+            "description": "Absolute path to the Node.js binary (e.g. /usr/local/bin/node)"
           }
         }
       },
@@ -248,6 +253,21 @@
             "type": "boolean",
             "default": false,
             "description": "Dim unused types (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimEnumMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused enum members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimClassMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused class members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimDuplicates": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim duplicate exports (instead of warnings)"
           }
         }
       },

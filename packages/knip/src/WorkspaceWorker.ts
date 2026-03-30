@@ -8,11 +8,10 @@ import { PluginEntries, Plugins } from './plugins.ts';
 import type {
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
-  GetSourceFile,
   HandleInput,
   Plugin,
   RegisterCompiler,
-  RegisterVisitor,
+  RegisterVisitorsOptions,
   WorkspaceConfiguration,
 } from './types/config.ts';
 import type { ConfigurationHint } from './types/issues.ts';
@@ -20,6 +19,7 @@ import type { PluginName } from './types/PluginNames.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
 import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
+import { parseFile } from './typescript/visitors/helpers.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';
@@ -38,7 +38,7 @@ import {
 import { getPackageNameFromSpecifier } from './util/modules.ts';
 import { getKeysByValue } from './util/object.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, extname, isInternal, join } from './util/path.ts';
+import { basename, dirname, isInternal, join } from './util/path.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
 
@@ -51,7 +51,7 @@ type WorkspaceManagerOptions = {
   rootManifest: PackageJson | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -83,7 +83,7 @@ export class WorkspaceWorker {
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -109,7 +109,7 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     handleInput,
     findWorkspaceByFilePath,
-    getSourceFile,
+    readFile,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -126,7 +126,7 @@ export class WorkspaceWorker {
 
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
-    this.getSourceFile = getSourceFile;
+    this.readFile = readFile;
 
     this.options = options;
 
@@ -257,10 +257,14 @@ export class WorkspaceWorker {
     }
   }
 
-  public registerVisitors(registerVisitors: RegisterVisitor) {
+  public registerVisitors(options: RegisterVisitorsOptions) {
     for (const pluginName of this.enabledPlugins) {
+      if (options.registeredPlugins.has(pluginName)) continue;
       const plugin = Plugins[pluginName];
-      if (plugin.registerVisitors) plugin.registerVisitors({ registerVisitors });
+      if (plugin.registerVisitors) {
+        options.registeredPlugins.add(pluginName);
+        plugin.registerVisitors(options);
+      }
     }
   }
 
@@ -297,6 +301,7 @@ export class WorkspaceWorker {
     const configFilesMap = this.configFilesMap;
     const configFiles = this.configFilesMap.get(wsName);
     const seen = new Map<string, Set<string>>();
+    const parsedConfigCache = new Map<string, ReturnType<typeof parseFile> | undefined>();
 
     const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.handleInput(input);
@@ -374,6 +379,17 @@ export class WorkspaceWorker {
           continue;
         }
 
+        let parsed: ReturnType<typeof parseFile> | undefined;
+        if (!isManifest) {
+          if (parsedConfigCache.has(configFilePath)) {
+            parsed = parsedConfigCache.get(configFilePath);
+          } else {
+            const sourceText = this.readFile(configFilePath);
+            parsed = sourceText ? parseFile(configFilePath, sourceText) : undefined;
+            parsedConfigCache.set(configFilePath, parsed);
+          }
+        }
+
         const resolveOpts = {
           ...options,
           getInputsFromScripts: createGetInputsFromScripts(configFilePath),
@@ -386,11 +402,8 @@ export class WorkspaceWorker {
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
-          if (extname(configFilePath) !== '.json') {
-            const sourceFile = this.getSourceFile(configFilePath);
-            if (sourceFile && isExternalReExportsOnly(sourceFile)) {
-              cache.resolveConfig = [];
-            }
+          if (parsed && isExternalReExportsOnly(parsed)) {
+            cache.resolveConfig = [];
           }
 
           if (!cache.resolveConfig) {
@@ -408,14 +421,11 @@ export class WorkspaceWorker {
           }
         }
 
-        if (plugin.resolveFromAST) {
-          const sourceFile = this.getSourceFile(configFilePath);
-          const resolveASTOpts = { ...resolveOpts, getSourceFile: this.getSourceFile };
-          if (sourceFile) {
-            const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
-            for (const input of inputs) addInput(input, configFilePath);
-            cache.resolveFromAST = inputs;
-          }
+        if (plugin.resolveFromAST && parsed) {
+          const resolveASTOpts = { ...resolveOpts, readFile: this.readFile };
+          const inputs = plugin.resolveFromAST(parsed.program, resolveASTOpts);
+          for (const input of inputs) addInput(input, configFilePath);
+          cache.resolveFromAST = inputs;
         }
 
         if (!isManifest) {
@@ -479,9 +489,9 @@ export class WorkspaceWorker {
     const collect = (filePath: string) => {
       if (visited.has(filePath)) return;
       visited.add(filePath);
-      const sourceFile = this.getSourceFile(filePath);
-      if (!sourceFile) return;
-      for (const literal of collectStringLiterals(sourceFile)) {
+      const sourceText = this.readFile(filePath);
+      if (!sourceText) return;
+      for (const literal of collectStringLiterals(sourceText, filePath)) {
         literals.add(literal);
         if (isInternal(literal)) collect(join(dirname(filePath), literal));
       }

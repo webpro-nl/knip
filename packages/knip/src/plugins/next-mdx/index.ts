@@ -15,8 +15,8 @@ const config = ['next.config.{js,ts,cjs,mjs}'];
 
 const production = ['{src/,}mdx-components.{js,jsx,ts,tsx}'];
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const mdxPlugins = getMdxPlugins(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const mdxPlugins = getMdxPlugins(program);
   return [...production.map(id => toProductionEntry(id)), ...Array.from(mdxPlugins).map(id => toDependency(id))];
 };
 

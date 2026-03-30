@@ -7,11 +7,11 @@ import { extractBinary, isValidBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { truncate } from '../util/string.ts';
 import { resolve as fallbackResolve } from './fallback.ts';
-import PackageManagerResolvers from './package-manager/index.ts';
+import KnownResolvers from './resolvers/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
 import { parseNodeArgs } from './util.ts';
 
-type KnownResolver = keyof typeof PackageManagerResolvers;
+type KnownResolver = keyof typeof KnownResolvers;
 
 const spawningBinaries = ['cross-env', 'retry-cli'];
 
@@ -85,8 +85,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
           .flatMap(arg => arg.require)
           .map(id => toDeferResolve(id));
 
-        if (binary in PackageManagerResolvers) {
-          const resolver = PackageManagerResolvers[binary as KnownResolver];
+        if (binary in KnownResolvers) {
+          const resolver = KnownResolvers[binary as KnownResolver];
           return resolver(binary, args, { ...options, fromArgs });
         }
 

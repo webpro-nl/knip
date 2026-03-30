@@ -16,8 +16,9 @@ export const fix = async (issues: Issues, counters: Counters, options: MainOptio
   for (const type in issues) {
     const group = issues[type as IssueType];
     if (group instanceof Set) continue;
+    const counterType = (type === '_files' ? 'files' : type) as IssueType;
     for (const filePath in group)
-      for (const key in group[filePath]) if (group[filePath][key].isFixed) counters[type as IssueType]--;
+      for (const key in group[filePath]) if (group[filePath][key].isFixed) counters[counterType]--;
   }
 
   if (options.isFormat) {
@@ -49,7 +50,7 @@ class IssueFixer {
   private async removeUnusedFiles(issues: Issues) {
     if (!this.options.isFixFiles) return;
 
-    for (const issue of Object.values(issues._files).flatMap(Object.values)) {
+    for (const issue of Object.values(issues.files).flatMap(Object.values)) {
       await rm(issue.filePath);
       issue.isFixed = true;
     }
@@ -59,7 +60,7 @@ class IssueFixer {
     const touchedFiles = new Set<string>();
 
     const types = [
-      ...(this.options.isFixUnusedTypes ? (['types', 'nsTypes', 'classMembers', 'enumMembers'] as const) : []),
+      ...(this.options.isFixUnusedTypes ? (['types', 'nsTypes', 'enumMembers', 'namespaceMembers'] as const) : []),
       ...(this.options.isFixUnusedExports ? (['exports', 'nsExports'] as const) : []),
     ];
 
