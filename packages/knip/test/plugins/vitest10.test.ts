@@ -11,7 +11,7 @@ test('Find dependencies with the Vitest plugin (10)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(`${cwd}/src/unused.test.ts`));
+  assert('src/unused.test.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
