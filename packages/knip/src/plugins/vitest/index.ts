@@ -25,7 +25,7 @@ const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
-  const { configFileDir } = options;
+  const { configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
@@ -42,7 +42,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
   const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
-  const setupFilesDir = toAbsolute(testConfig.root ?? '.', configFileDir);
+  const setupFilesDir = toAbsolute(testConfig.root ?? '.', dir);
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
     .map(specifier => ({ ...toDeferResolve(specifier), dir: setupFilesDir }));
@@ -127,10 +127,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
             gitignore: false,
           });
           for (const projectFile of projectFiles) {
-            inputs.add(
-              toConfig('vitest', projectFile, {
-                containingFilePath: options.configFilePath,
-              })
+            inputs.add(toConfig('vitest', projectFile, { containingFilePath: options.configFilePath })
             );
           }
         }
@@ -178,6 +175,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
     if (cfg.resolve?.extensions) {
+      // Filter out default extensions from resolve.extensions
       const customExtensions = cfg.resolve.extensions.filter(
         ext => ext.startsWith('.') && !DEFAULT_EXTENSIONS.has(ext)
       );
