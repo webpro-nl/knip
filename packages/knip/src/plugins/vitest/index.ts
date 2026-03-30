@@ -1,39 +1,14 @@
 import type { ParsedArgs } from 'minimist';
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
-import type {
-  IsPluginEnabled,
-  Plugin,
-  PluginOptions,
-  ResolveConfig,
-} from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import {
-  type Input,
-  toAlias,
-  toConfig,
-  toDeferResolve,
-  toDependency,
-  toEntry,
-} from '../../util/input.ts';
-import {
-  isAbsolute,
-  isInternal,
-  join,
-  toAbsolute,
-  toPosix,
-} from '../../util/path.ts';
+import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getEnvSpecifier, getExternalReporters } from './helpers.ts';
-import type {
-  AliasOptions,
-  COMMAND,
-  MODE,
-  ViteConfig,
-  ViteConfigOrFn,
-  VitestWorkspaceConfig,
-} from './types.ts';
+import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
 
@@ -41,26 +16,15 @@ const title = 'Vitest';
 
 const enablers = ['vitest'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = [
-  'vitest.config.{js,mjs,ts,cjs,mts,cts}',
-  'vitest.{workspace,projects}.{js,mjs,ts,cjs,mts,cts,json}',
-];
+const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{js,mjs,ts,cjs,mts,cts,json}'];
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const entry = [
-  '**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)',
-  ...mocks,
-];
+const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
-const findConfigDependencies = (
-  localConfig: ViteConfig,
-  options: PluginOptions,
-  vitestRoot: string
-) => {
+const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const { configFileDir } = options;
   const testConfig = localConfig.test;
 
@@ -75,12 +39,8 @@ const findConfigDependencies = (
       : [];
   const reporters = getExternalReporters(testConfig.reporters);
 
-  const hasCoverage =
-    testConfig.coverage &&
-    (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
-  const coverage = hasCoverage
-    ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`]
-    : [];
+  const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
+  const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
 
   const setupFilesDir = toAbsolute(testConfig.root ?? '.', configFileDir);
   const setupFiles = [testConfig.setupFiles ?? []]
@@ -93,9 +53,7 @@ const findConfigDependencies = (
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {
     for (const workspaceConfig of testConfig.workspace) {
-      workspaceDependencies.push(
-        ...findConfigDependencies(workspaceConfig, options, vitestRoot)
-      );
+      workspaceDependencies.push(...findConfigDependencies(workspaceConfig, options, vitestRoot));
     }
   }
 
@@ -103,9 +61,7 @@ const findConfigDependencies = (
   if (testConfig.projects !== undefined) {
     for (const projectConfig of testConfig.projects) {
       if (typeof projectConfig !== 'string') {
-        projectsDependencies.push(
-          ...findConfigDependencies(projectConfig, options, vitestRoot)
-        );
+        projectsDependencies.push(...findConfigDependencies(projectConfig, options, vitestRoot));
       }
     }
   }
@@ -121,9 +77,7 @@ const findConfigDependencies = (
   ];
 };
 
-const getConfigs = async (
-  localConfig: ViteConfigOrFn | VitestWorkspaceConfig
-) => {
+const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
   const configs: ViteConfig[] = [];
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {
@@ -156,9 +110,7 @@ const getConfigs = async (
   return configs;
 };
 
-export const resolveConfig: ResolveConfig<
-  ViteConfigOrFn | VitestWorkspaceConfig
-> = async (localConfig, options) => {
+export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
   const inputs = new Set<Input>();
 
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
@@ -186,8 +138,7 @@ export const resolveConfig: ResolveConfig<
     }
   }
 
-  const addStar = (value: string) =>
-    value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*');
+  const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
   const addAliases = (aliasOptions: AliasOptions) => {
     for (const [alias, value] of Object.entries(aliasOptions)) {
       if (!value) continue;
@@ -209,22 +160,17 @@ export const resolveConfig: ResolveConfig<
     const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
     if (!seenRoots.has(viteRoot)) {
       seenRoots.add(viteRoot);
-      for (const entry of await getIndexHtmlEntries(viteRoot))
-        inputs.add(entry);
+      for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
     }
 
     const dir = toAbsolute(cfg.test?.root ?? '.', options.cwd);
 
     if (cfg.test) {
       if (cfg.test?.include) {
-        for (const dependency of cfg.test.include)
-          dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
-        if (!options.config.entry)
-          for (const dependency of mocks)
-            inputs.add(toEntry(join(dir, dependency)));
+        for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
+        if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(dir, dependency)));
       } else {
-        for (const dependency of options.config.entry ?? entry)
-          inputs.add(toEntry(join(dir, dependency)));
+        for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
       }
 
       if (cfg.test.alias) addAliases(cfg.test.alias);
@@ -240,8 +186,7 @@ export const resolveConfig: ResolveConfig<
         inputs.add(toEntry(`src/**/*${ext}`));
       }
     }
-    for (const dependency of findConfigDependencies(cfg, options, dir))
-      inputs.add(dependency);
+    for (const dependency of findConfigDependencies(cfg, options, dir)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
       .map(specifier => join(dir, specifier))
@@ -256,34 +201,20 @@ const args: Args = {
   config: true,
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
-    if (parsed['ui'])
-      inputs.push(toDependency('@vitest/ui', { optional: true }));
+    if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
     if (typeof parsed['coverage'] === 'object' && parsed['coverage'].provider) {
-      inputs.push(
-        toDependency(`@vitest/coverage-${parsed['coverage'].provider}`)
-      );
+      inputs.push(toDependency(`@vitest/coverage-${parsed['coverage'].provider}`));
     }
     if (parsed['reporter']) {
-      for (const reporter of getExternalReporters(
-        [parsed['reporter']].flat()
-      )) {
+      for (const reporter of getExternalReporters([parsed['reporter']].flat())) {
         inputs.push(toDependency(reporter));
       }
     }
     if (parsed['environment'] && parsed['environment'] !== 'node') {
       inputs.push(toDependency(getEnvSpecifier(parsed['environment'])));
     }
-    if (
-      typeof parsed['typecheck'] === 'object' &&
-      parsed['typecheck'].checker
-    ) {
-      inputs.push(
-        toDependency(
-          parsed['typecheck'].checker === 'tsc'
-            ? 'typescript'
-            : parsed['typecheck'].checker
-        )
-      );
+    if (typeof parsed['typecheck'] === 'object' && parsed['typecheck'].checker) {
+      inputs.push(toDependency(parsed['typecheck'].checker === 'tsc' ? 'typescript' : parsed['typecheck'].checker));
     }
     return inputs;
   },
