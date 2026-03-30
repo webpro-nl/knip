@@ -45,12 +45,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
     .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
-  const globalSetup = [testConfig.globalSetup ?? []]
-    .flat()
-    .map(specifier => ({
-      ...toDeferResolve(specifier),
-      dir: toAbsolute(testConfig.root ?? '.', dir),
-    }));
+  const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {
