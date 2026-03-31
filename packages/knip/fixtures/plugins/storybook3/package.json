@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/storybook3",
+  "devDependencies": {
+    "@storybook/addon-essentials": "*",
+    "@storybook/addon-vitest": "*",
+    "@storybook/react-vite": "*",
+    "@vitest/coverage-v8": "*",
+    "storybook": "*",
+    "vitest": "*"
+  }
+}
