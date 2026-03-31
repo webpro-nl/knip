@@ -54,6 +54,7 @@ export class ProjectPrincipal {
 
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
+  lastQueueLength = 0;
 
   constructor(options: MainOptions, toSourceFilePath: ToSourceFilePath) {
     this.cache = new CacheConsultant('root', options);
@@ -170,9 +171,11 @@ export class ProjectPrincipal {
   ) {
     this.resolvedFiles.clear();
     const queue = [...this.entryPaths, ...this.programPaths];
+    const queued = new Set(queue);
     const visited = new Set<string>();
     let lastEntrySize = this.entryPaths.size;
     let lastProgramSize = this.programPaths.size;
+    const enqueue = (p: string) => { if (!queued.has(p)) { queued.add(p); queue.push(p); } };
 
     for (let i = 0; i < queue.length; i++) {
       const filePath = queue[i];
@@ -195,24 +198,24 @@ export class ProjectPrincipal {
           const internalPaths = analyzeFile(filePath, result, sourceText);
           if (internalPaths) {
             for (const p of internalPaths) {
-              if (!visited.has(p)) queue.push(p);
+              enqueue(p);
             }
           }
         } else {
           for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
             const resolved = this.resolveSpecifier(specifier, filePath);
-            if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-              queue.push(resolved);
+            if (resolved && !isInNodeModules(resolved)) {
+              enqueue(resolved);
             }
           }
         }
 
         if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
           for (const p of this.entryPaths) {
-            if (!visited.has(p)) queue.push(p);
+            enqueue(p);
           }
           for (const p of this.programPaths) {
-            if (!visited.has(p)) queue.push(p);
+            enqueue(p);
           }
           lastEntrySize = this.entryPaths.size;
           lastProgramSize = this.programPaths.size;
@@ -222,13 +225,16 @@ export class ProjectPrincipal {
       }
     }
 
+    this.lastQueueLength = queue.length;
     this.resolvedFiles = visited;
   }
 
   getUsedResolvedFiles() {
     this.resolvedFiles.clear();
     const queue = [...this.entryPaths, ...this.programPaths];
+    const queued = new Set(queue);
     const visited = new Set<string>();
+    const enqueue = (p: string) => { if (!queued.has(p)) { queued.add(p); queue.push(p); } };
 
     for (let i = 0; i < queue.length; i++) {
       const filePath = queue[i];
@@ -242,8 +248,8 @@ export class ProjectPrincipal {
         const result = parseFile(filePath, sourceText);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
-          if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-            queue.push(resolved);
+          if (resolved && !isInNodeModules(resolved)) {
+            enqueue(resolved);
           }
         }
       } catch {
