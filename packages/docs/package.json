@@ -27,7 +27,7 @@
     "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "6.1.1",
+    "astro": "6.1.2",
     "hastscript": "9.0.1",
     "picocolors": "^1.1.1",
     "remark-directive": "4.0.0",
