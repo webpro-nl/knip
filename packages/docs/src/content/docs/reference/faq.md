@@ -171,7 +171,7 @@ dependencies to build up the graphs is also exactly what's meant by
 - Through scripts inside template strings in source files such as:
 
 ```ts
-await $({ stdio: "inherit" })`c8 node hydrate.js`; // execa
+await $({ stdio: 'inherit' })`c8 node hydrate.js`; // execa
 await $`node scripts/parse.js`; // bun/zx
 ```
 
@@ -289,8 +289,8 @@ webpack loaders or Vite asset imports. Knip strips off the prefixes and suffixes
 in import specifiers like this:
 
 ```ts title="component.ts"
-import Icon from "./icon.svg?raw";
-import Styles from "-!style-loader!css-loader?modules!./styles.css";
+import Icon from './icon.svg?raw';
+import Styles from '-!style-loader!css-loader?modules!./styles.css';
 ```
 
 In this example, the `style-loader` and `css-loader` dependencies should be

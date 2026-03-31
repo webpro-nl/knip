@@ -4,7 +4,7 @@ Development in this repository is using:
 
 - pnpm
 - TypeScript
-- Biome
+- oxc
 
 This document describes commands and tasks that might help during development.
 Use what fits your workflow best, but make sure [QA][1] passes.
@@ -53,6 +53,8 @@ essentials and plugins:
 pnpm test:smoke
 bun test:bun:smoke
 ```
+
+Note that Git `core.symlinks=true` is required for some tests.
 
 ## Agents
 
@@ -203,8 +205,7 @@ regular package. Every push is published to their registry. Look for the
 [7]: #tests
 [8]: #github-action
 [9]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[10]:
-  https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
+[10]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
 [11]: https://github.com/webpro-nl/knip
 [12]: https://cli.github.com/
 [13]: ../AGENTS.md
