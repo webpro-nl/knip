@@ -31,7 +31,7 @@ export const getPackageNameFromSpecifier = (specifier: string) =>
 const matchPackageNameStart = /^(@[a-z0-9._~]|[a-z0-9])/i;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
-  if (ch === 46 || ch === 47 || ch === 35 || ch === 36) return false; // . / # $
+  if (ch === 46 || ch === 47 || ch === 35 || ch === 126 || ch === 36) return false; // . / # ~ $
   return matchPackageNameStart.test(specifier);
 };
 
