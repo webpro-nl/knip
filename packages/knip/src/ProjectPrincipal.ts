@@ -169,16 +169,11 @@ export class ProjectPrincipal {
     ) => Iterable<string> | undefined
   ) {
     this.resolvedFiles.clear();
-    const queue = [...this.entryPaths, ...this.programPaths];
-    const visited = new Set<string>();
+    const visited = new Set([...this.entryPaths, ...this.programPaths]);
     let lastEntrySize = this.entryPaths.size;
     let lastProgramSize = this.programPaths.size;
 
-    for (let i = 0; i < queue.length; i++) {
-      const filePath = queue[i];
-      if (visited.has(filePath)) continue;
-      visited.add(filePath);
-
+    for (const filePath of visited) {
       const sourceText = this.fileManager.readFile(filePath);
 
       if (!sourceText) {
@@ -194,26 +189,18 @@ export class ProjectPrincipal {
         if (this.projectPaths.has(filePath)) {
           const internalPaths = analyzeFile(filePath, result, sourceText);
           if (internalPaths) {
-            for (const p of internalPaths) {
-              if (!visited.has(p)) queue.push(p);
-            }
+            for (const p of internalPaths) visited.add(p);
           }
         } else {
           for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
             const resolved = this.resolveSpecifier(specifier, filePath);
-            if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-              queue.push(resolved);
-            }
+            if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
           }
         }
 
         if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
-          for (const p of this.entryPaths) {
-            if (!visited.has(p)) queue.push(p);
-          }
-          for (const p of this.programPaths) {
-            if (!visited.has(p)) queue.push(p);
-          }
+          for (const p of this.entryPaths) visited.add(p);
+          for (const p of this.programPaths) visited.add(p);
           lastEntrySize = this.entryPaths.size;
           lastProgramSize = this.programPaths.size;
         }
@@ -227,14 +214,9 @@ export class ProjectPrincipal {
 
   getUsedResolvedFiles() {
     this.resolvedFiles.clear();
-    const queue = [...this.entryPaths, ...this.programPaths];
-    const visited = new Set<string>();
+    const visited = new Set([...this.entryPaths, ...this.programPaths]);
 
-    for (let i = 0; i < queue.length; i++) {
-      const filePath = queue[i];
-      if (visited.has(filePath)) continue;
-      visited.add(filePath);
-
+    for (const filePath of visited) {
       const sourceText = this.fileManager.readFile(filePath);
       if (!sourceText) continue;
 
@@ -242,9 +224,7 @@ export class ProjectPrincipal {
         const result = parseFile(filePath, sourceText);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
-          if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-            queue.push(resolved);
-          }
+          if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
         }
       } catch {
         // Parse error — skip this file
