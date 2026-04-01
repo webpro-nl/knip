@@ -1,5 +1,9 @@
 {
   "name": "@plugins/storybook3",
+  "scripts": {
+    "storybook": "storybook",
+    "test": "vitest"
+  },
   "devDependencies": {
     "@storybook/addon-essentials": "*",
     "@storybook/addon-vitest": "*",
