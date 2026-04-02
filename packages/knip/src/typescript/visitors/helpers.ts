@@ -72,6 +72,30 @@ export const getStringValue = (node: any): string | undefined => {
   return undefined;
 };
 
+export function getPathFromDirnameJoin(node: any): string | null {
+  if (
+    node?.type !== 'CallExpression' ||
+    node.callee.type !== 'MemberExpression' ||
+    node.callee.computed ||
+    node.callee.object.type !== 'Identifier' ||
+    node.callee.object.name !== 'path' ||
+    node.callee.property.type !== 'Identifier' ||
+    (node.callee.property.name !== 'join' && node.callee.property.name !== 'resolve') ||
+    node.arguments.length < 2 ||
+    node.arguments[0].type !== 'Identifier' ||
+    node.arguments[0].name !== '__dirname'
+  )
+    return null;
+
+  const parts: string[] = [];
+  for (let i = 1; i < node.arguments.length; i++) {
+    if (isStringLiteral(node.arguments[i])) parts.push(getStringValue(node.arguments[i])!);
+    else break;
+  }
+  if (parts.length === 0) return null;
+  return './' + parts.join('/').replace(/^\.\//, '');
+}
+
 export const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile, type: SymbolType) =>
   ignoreExportsUsedInFile === true ||
   (typeof ignoreExportsUsedInFile === 'object' && type !== 'unknown' && ignoreExportsUsedInFile[type]);

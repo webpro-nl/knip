@@ -1,8 +1,19 @@
-import type { CallExpression, NewExpression } from 'oxc-parser';
+import type { CallExpression, Expression, NewExpression } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getStringValue, isStringLiteral } from './helpers.ts';
+import { getPathFromDirnameJoin, getStringValue, isStringLiteral } from './helpers.ts';
 import type { WalkState } from './walk.ts';
+
+function resolveWorkerSpecifier(arg: Expression, s: WalkState): string | null {
+  if (isStringLiteral(arg)) {
+    const value = getStringValue(arg);
+    if (value?.startsWith('.')) return value;
+  }
+  const dirnameResult = getPathFromDirnameJoin(arg);
+  if (dirnameResult) return dirnameResult;
+  if (arg.type === 'Identifier') return s.dirnamePathVars.get(arg.name) ?? null;
+  return null;
+}
 
 export function handleCallExpression(node: CallExpression, s: WalkState) {
   if (
@@ -90,6 +101,19 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   }
 
   if (
+    ((node.callee.type === 'Identifier' && node.callee.name === 'fork') ||
+      (node.callee.type === 'MemberExpression' && !node.callee.computed && node.callee.property.name === 'fork')) &&
+    node.arguments.length >= 1 &&
+    node.arguments[0].type !== 'SpreadElement'
+  ) {
+    const specifier = resolveWorkerSpecifier(node.arguments[0], s);
+    if (specifier) {
+      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+      return;
+    }
+  }
+
+  if (
     node.callee.type === 'MemberExpression' &&
     !node.callee.computed &&
     node.callee.object.type === 'Identifier' &&
@@ -138,6 +162,19 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
 }
 
 export function handleNewExpression(node: NewExpression, s: WalkState) {
+  if (
+    node.callee.type === 'Identifier' &&
+    (node.callee.name === 'Worker' || node.callee.name === 'WorkerThread') &&
+    node.arguments.length >= 1 &&
+    node.arguments[0].type !== 'SpreadElement'
+  ) {
+    const specifier = resolveWorkerSpecifier(node.arguments[0], s);
+    if (specifier) {
+      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+      return;
+    }
+  }
+
   if (
     node.callee.type === 'Identifier' &&
     node.callee.name === 'URL' &&
