@@ -244,10 +244,8 @@ export async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
-          if (isDeferResolveProductionEntry(input)) {
-            addPattern(productionPatternsSkipExports, input, resolvedFilePath);
-          } else if (isDeferResolveEntry(input)) {
-            if (!options.isProduction || !input.optional) addPattern(entryPatternsSkipExports, input, resolvedFilePath);
+          if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
+            if (!input.optional) addPattern(entryPatternsSkipExports, input, resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
           }
