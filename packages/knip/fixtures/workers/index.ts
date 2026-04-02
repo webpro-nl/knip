@@ -1,9 +1,5 @@
-import path from 'node:path';
-
-const workerPath = path.join(__dirname, './indirect.js');
+import { fork } from 'node:child_process';
 
 new Worker('./worker.js');
-new WorkerThread(path.join(__dirname, './thread.js'));
+new WorkerThread('./worker-thread.js');
 fork('./forked.js');
-cluster.fork(path.resolve(__dirname, './cluster.js'));
-fork(workerPath);

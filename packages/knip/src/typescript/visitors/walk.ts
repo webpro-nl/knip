@@ -51,6 +51,7 @@ interface WalkContext {
   localRefs: Set<string> | undefined;
   destructuredExports: Set<string>;
   hasNodeModuleImport: boolean;
+  hasChildProcessImport: boolean;
   resolveModule: ResolveModule;
   programFiles: Set<string>;
   entryFiles: Set<string>;
@@ -67,7 +68,6 @@ export interface WalkState extends WalkContext {
   accessedAliases: Set<string>;
   shorthandNsContainers: Map<string, Set<string>>;
   accessedShorthandNs: Set<string>;
-  dirnamePathVars: Map<string, string>;
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
   nsRanges: [number, number][];
@@ -655,7 +655,6 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     accessedAliases: new Set(),
     shorthandNsContainers: new Map(),
     accessedShorthandNs: new Set(),
-    dirnamePathVars: new Map(),
     chainedMemberExprs: new WeakSet(),
     currentVarDeclStart: -1,
     nsRanges: [],

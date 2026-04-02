@@ -2,7 +2,7 @@ import type { Expression, ImportExpression, VariableDeclarator } from 'oxc-parse
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
-import { getPathFromDirnameJoin, getStringValue, isStringLiteral } from './helpers.ts';
+import { getStringValue, isStringLiteral } from './helpers.ts';
 import type { WalkState } from './walk.ts';
 
 export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
@@ -173,9 +173,6 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   }
 
   if (node.id.type === 'Identifier') {
-    const resolved = getPathFromDirnameJoin(init);
-    if (resolved) s.dirnamePathVars.set(node.id.name, resolved);
-
     const aliasName = node.id.name;
     const registerAlias = (expr: Expression) => {
       if (expr?.type === 'Identifier') {

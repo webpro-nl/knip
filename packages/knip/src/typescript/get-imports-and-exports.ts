@@ -219,10 +219,12 @@ const getImportsAndExports = (
   const getJSDocTags = buildJSDocTagLookup(result.comments, sourceText);
 
   let hasNodeModuleImport = false;
+  let hasChildProcessImport = false;
 
   for (const _imports of result.module.staticImports) {
     const specifier = _imports.moduleRequest.value;
     if (specifier === 'node:module' || specifier === 'module') hasNodeModuleImport = true;
+    if (specifier === 'node:child_process' || specifier === 'child_process') hasChildProcessImport = true;
     const pos = _imports.moduleRequest.start;
     const jsdocTags = getJSDocTags(_imports.start);
 
@@ -360,6 +362,7 @@ const getImportsAndExports = (
     localRefs: ignoreExportsUsedInFile ? new Set() : undefined,
     destructuredExports,
     hasNodeModuleImport,
+    hasChildProcessImport,
     resolveModule,
     programFiles,
     entryFiles,

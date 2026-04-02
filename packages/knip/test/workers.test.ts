@@ -17,7 +17,7 @@ test('Detect worker and fork entry files', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 7,
-    total: 7,
+    processed: 5,
+    total: 5,
   });
 });
