@@ -97,7 +97,14 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   ) {
     const specifier = getStringValue(node.arguments[0])!;
     if (specifier) {
-      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        node.arguments[0].start,
+        IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.OPTIONAL
+      );
       return;
     }
   }
@@ -159,7 +166,14 @@ export function handleNewExpression(node: NewExpression, s: WalkState) {
   ) {
     const specifier = getStringValue(node.arguments[0])!;
     if (specifier) {
-      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        node.arguments[0].start,
+        IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.OPTIONAL
+      );
       return;
     }
   }
