@@ -38,7 +38,7 @@ Example terminal commands on your machine to get started:
 
 ```shell
 git clone git@github.com:[username]/knip.git
-# Or using gh CLI: gh repo fork webpro-nl/knip --clone
+# Or using the GitHub CLI: gh repo fork webpro-nl/knip --clone
 cd knip
 pnpm install
 cd packages/knip
