@@ -3,6 +3,7 @@
   "extends": "../../.release-it.json",
   "hooks": {
     "before:init": [
+      "../../scripts/preflight.sh",
       "pnpm lint",
       "pnpm build",
       "pnpm knip",
