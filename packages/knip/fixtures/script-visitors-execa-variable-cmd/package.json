@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/script-visitors-execa-variable-cmd",
+  "scripts": {
+    "start": "node ./script.mjs"
+  },
+  "devDependencies": {
+    "execa": "*"
+  }
+}
