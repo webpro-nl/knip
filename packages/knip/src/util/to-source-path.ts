@@ -3,8 +3,8 @@ import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import { DEFAULT_EXTENSIONS } from '../constants.ts';
 import { debugLog, debugLogArray } from './debug.ts';
 import { findFileWithExtensions, isDirectory } from './fs.ts';
-import { _glob, prependDirToPattern } from './glob.ts';
-import { isAbsolute, isInternal, join, toRelative } from './path.ts';
+import { _glob } from './glob.ts';
+import { isAbsolute, isInternal, join, relative, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
@@ -45,13 +45,13 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
+      const absSpecifier = isAbsolute(specifier) ? specifier : join(dir, specifier);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       if (ws?.srcDir && ws.outDir && !absSpecifier.startsWith(ws.srcDir) && absSpecifier.startsWith(ws.outDir)) {
-        const pattern = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
-        patterns.add(pattern);
+        const srcPath = absSpecifier.replace(ws.outDir, ws.srcDir).replace(matchExt, extensions);
+        patterns.add(relative(dir, srcPath));
       } else {
-        patterns.add(absSpecifier);
+        patterns.add(specifier);
       }
     }
 
