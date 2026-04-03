@@ -54,7 +54,11 @@ pnpm test:smoke
 bun test:bun:smoke
 ```
 
-Note that Git `core.symlinks=true` is required for some tests.
+Note that if you are on Windows, you must enable symlinks for the tests to work properly:
+
+1) Enable [the special Git Bash for Windows configuration option](https://gitforwindows.org/symbolic-links.html): `git config --global core.symlinks true`
+2) Enable Settings --> System --> Advanced --> Developer Mode (which does [other things](https://learn.microsoft.com/en-us/windows/advanced-settings/developer-mode) than just enable symlinks, but is nonetheless necessary in order for Git to actually create the symlinks).
+3) Delete the repository and re-clone it. (When repositories are cloned without symlinks available, the symlinks become normal text files.)
 
 ## Agents
 
