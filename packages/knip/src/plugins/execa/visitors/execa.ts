@@ -15,8 +15,12 @@ export function createExecaVisitor(ctx: PluginVisitorContext): PluginVisitorObje
             ? tag.callee.name
             : undefined;
       if (tagName && tags.has(tagName)) {
-        for (const q of node.quasi.quasis) {
-          if (q.value.raw) ctx.addScript(q.value.raw);
+        const firstQuasiIsEmpty = !node.quasi.quasis[0]?.value.raw;
+        for (const [index, q] of node.quasi.quasis.entries()) {
+          const script = q.value.raw;
+          if (!script) continue;
+          if (index > 0 && firstQuasiIsEmpty && !/^\s*[;&|]/.test(script)) continue;
+          ctx.addScript(script);
         }
       }
     },

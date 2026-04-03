@@ -5,8 +5,12 @@ export function createZxVisitor(ctx: PluginVisitorContext): PluginVisitorObject 
     TaggedTemplateExpression(node) {
       if (!ctx.sourceText.startsWith('#!/usr/bin/env zx')) return;
       if (node.tag.type === 'Identifier' && node.tag.name === '$') {
-        for (const q of node.quasi.quasis) {
-          if (q.value.raw) ctx.addScript(q.value.raw);
+        const firstQuasiIsEmpty = !node.quasi.quasis[0]?.value.raw;
+        for (const [index, q] of node.quasi.quasis.entries()) {
+          const script = q.value.raw;
+          if (!script) continue;
+          if (index > 0 && firstQuasiIsEmpty && !/^\s*[;&|]/.test(script)) continue;
+          ctx.addScript(script);
         }
       }
     },
