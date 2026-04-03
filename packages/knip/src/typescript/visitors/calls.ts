@@ -54,23 +54,13 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   }
 
   if (
-    node.callee.type === 'MemberExpression' &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.object.name === 'module' &&
-    !node.callee.computed &&
-    node.callee.property.name === 'register' &&
-    node.arguments.length >= 1 &&
-    isStringLiteral(node.arguments[0])
-  ) {
-    const specifier = getStringValue(node.arguments[0])!;
-    if (specifier) s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
-    return;
-  }
-
-  if (
     s.hasNodeModuleImport &&
-    node.callee.type === 'Identifier' &&
-    node.callee.name === 'register' &&
+    ((node.callee.type === 'MemberExpression' &&
+      node.callee.object.type === 'Identifier' &&
+      node.callee.object.name === 'module' &&
+      !node.callee.computed &&
+      node.callee.property.name === 'register') ||
+      (node.callee.type === 'Identifier' && node.callee.name === 'register')) &&
     node.arguments.length >= 1 &&
     isStringLiteral(node.arguments[0])
   ) {
