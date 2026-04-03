@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import jsx from 'acorn-jsx';
 
 export default {
-  input: 'main.js',
+  input: 'src/app.js',
   external: [
     'some-externally-required-library',
     fileURLToPath(new URL('do-not-bundle.js', import.meta.url)),

@@ -1,6 +1,8 @@
 import type { Args } from '../../types/args.ts';
-import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getInputFromAST } from './resolveFromAST.ts';
 
 // https://rollupjs.org/guide/en/#configuration-files
 
@@ -10,7 +12,7 @@ const enablers = ['rollup'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['rollup.config.{js,cjs,mjs,ts}'];
+const config = ['rollup.config.{js,cjs,mjs,ts}'];
 
 const args: Args = {
   alias: { plugin: ['p'] },
@@ -20,12 +22,18 @@ const args: Args = {
   resolve: ['plugin', 'configPlugin'],
 };
 
+const resolveFromAST: ResolveFromAST = program => {
+  const inputs = getInputFromAST(program);
+  return [...inputs].map(id => toProductionEntry(id));
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  entry,
+  config,
   args,
+  resolveFromAST,
 };
 
 export default plugin;

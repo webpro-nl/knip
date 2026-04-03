@@ -616,20 +616,20 @@
           "title": "nyc plugin configuration (https://knip.dev/reference/plugins/nyc)",
           "$ref": "#/definitions/plugin"
         },
-        "openapi-ts": {
-          "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
-          "$ref": "#/definitions/plugin"
-        },
         "oclif": {
           "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
           "$ref": "#/definitions/plugin"
         },
-        "oxlint": {
-          "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
+        "openapi-ts": {
+          "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
           "$ref": "#/definitions/plugin"
         },
         "oxfmt": {
           "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
+          "$ref": "#/definitions/plugin"
+        },
+        "oxlint": {
+          "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
         "payload": {
