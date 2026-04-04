@@ -177,6 +177,11 @@
             "default": false,
             "description": "Require Knip configuration file"
           },
+          "knip.workspaceRoot": {
+            "type": "string",
+            "default": "",
+            "description": "Directory Knip uses as the project root. Relative to the VS Code workspace folder, or an absolute path. Empty uses the workspace folder."
+          },
           "knip.configFilePath": {
             "type": "string",
             "default": "",

@@ -34,6 +34,20 @@ const require = createRequire(import.meta.url);
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
+/**
+ * @param {import('vscode').WorkspaceFolder} folder
+ * @returns {string}
+ */
+function resolveKnipProjectRootPath(folder) {
+  const config = vscode.workspace.getConfiguration('knip', folder.uri);
+  const workspaceRoot = config.get('workspaceRoot', '');
+  const base = folder.uri.fsPath;
+  const trimmed = typeof workspaceRoot === 'string' ? workspaceRoot.trim() : '';
+  if (!trimmed) return base;
+  if (path.isAbsolute(trimmed)) return path.normalize(trimmed);
+  return path.resolve(base, trimmed);
+}
+
 export class Extension {
   /** @type {Extension | undefined} */
   static #instance;
@@ -162,12 +176,12 @@ export class Extension {
 
     /** @type {LanguageClientOptions} */
     const clientOptions = {
-      documentSelector: [{ scheme: 'file', pattern: `${folder.uri.fsPath}/**/*` }],
+      documentSelector: [new vscode.RelativePattern(folder, '**/*')],
       synchronize: {
         fileEvents: [vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'))],
       },
       workspaceFolder: folder,
-      initializationOptions: { config },
+      initializationOptions: { config, workspaceFolderUri: folder.uri.toString() },
       outputChannel: this.#outputChannel,
       outputChannelName: 'Knip',
     };
@@ -450,7 +464,7 @@ export class Extension {
 
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
     if (!folder) return null;
-    const root = toPosix(folder.uri.fsPath);
+    const root = toPosix(resolveKnipProjectRootPath(folder));
 
     if (path.basename(document.uri.fsPath) === 'package.json') {
       if (!config.get('editor.dependencies.hover.enabled', true)) return null;
@@ -603,12 +617,14 @@ export class Extension {
    * @returns {Promise<boolean>}
    */
   async #hasKnipConfig(folder) {
-    const config = vscode.workspace.getConfiguration('knip');
+    const config = vscode.workspace.getConfiguration('knip', folder.uri);
     const configFile = config.get('configFilePath', '');
     const locations = configFile ? [configFile] : KNIP_CONFIG_LOCATIONS;
 
+    const rootUri = vscode.Uri.file(resolveKnipProjectRootPath(folder));
+
     for (const location of locations) {
-      const candidate = vscode.Uri.joinPath(folder.uri, location);
+      const candidate = vscode.Uri.joinPath(rootUri, location);
       try {
         await vscode.workspace.fs.stat(candidate);
         return true;

@@ -2,6 +2,7 @@ import type { Issue, IssueType } from 'knip/session';
 
 export type Config = {
   deferSession: boolean;
+  workspaceRoot?: string;
   configFilePath?: string;
   editor: {
     exports: {
