@@ -39,7 +39,7 @@
     "icon-192x192.png",
     "license",
     "README.md"
-  ],  
+  ],
   "type": "module",
   "main": "./dist/extension.js",
   "scripts": {
@@ -53,7 +53,6 @@
     "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
-    "vsce": "^2.15.0",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
@@ -178,15 +177,15 @@
             "default": false,
             "description": "Require Knip configuration file"
           },
-          "knip.workspaceRoot": {
-            "type": "string",
-            "default": "",
-            "description": "Directory Knip uses as the project root (relative to the VS Code workspace folder)"
-          },
           "knip.configFilePath": {
             "type": "string",
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
+          },
+          "knip.workspaceRoot": {
+            "type": "string",
+            "default": "",
+            "description": "Directory Knip uses as the project root (relative to the VS Code workspace folder)"
           },
           "knip.nodeRuntimePath": {
             "type": "string",
