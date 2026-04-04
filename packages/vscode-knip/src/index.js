@@ -231,8 +231,18 @@ export class Extension {
   }
 
   #logManagedWorkspaces() {
-    const names = [...this.#clients.keys()].map(uri => fileURLToPath(uri));
-    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${names.join(', ')}`);
+    const parts = [];
+    for (const key of this.#clients.keys()) {
+      const folder = vscode.workspace.workspaceFolders?.find(f => f.uri.toString() === key);
+      if (folder) {
+        const knipRoot = resolveKnipProjectRootPath(folder);
+        const ws = folder.uri.fsPath;
+        parts.push(knipRoot === ws ? knipRoot : `${ws} (Knip root: ${knipRoot})`);
+      } else {
+        parts.push(vscode.Uri.parse(key).fsPath);
+      }
+    }
+    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${parts.join(', ')}`);
   }
 
   /**
