@@ -17,3 +17,14 @@ test('Find dependencies with the tsdown plugin', async () => {
     total: 8,
   });
 });
+
+test('tsdown plugin does not flag @tsdown/css optional peer deps as unused', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/tsdown2') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
+  });
+});
