@@ -632,6 +632,10 @@
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
+        "panda-css": {
+          "title": "panda-css plugin configuration (https://knip.dev/reference/plugins/panda-css)",
+          "$ref": "#/definitions/plugin"
+        },
         "payload": {
           "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
           "$ref": "#/definitions/plugin"
