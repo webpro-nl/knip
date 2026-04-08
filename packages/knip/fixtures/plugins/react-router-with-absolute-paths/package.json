@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/react-router-with-absolute-paths",
+  "dependencies": {
+    "@react-router/node": "*",
+    "isbot": "*"
+  },
+  "devDependencies": {
+    "@react-router/dev": "*"
+  }
+}
