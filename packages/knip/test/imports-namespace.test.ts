@@ -15,13 +15,15 @@ test('Ignore namespace re-export by entry file', async () => {
   assert(issues.exports['namespace5.ts']['NS5.identifier36']);
   assert(issues.exports['namespace6.ts']['NS6.identifier38']);
   assert(issues.exports['namespace9.ts']['NS9.identifier44']);
+  assert(issues.exports['namespace11.ts']['NS11.identifier48']);
   assert(!issues.exports['namespace10.ts'], 'NS10');
+  assert(!issues.exports['namespace11-opaque.ts'], 'NS11_OPAQUE');
 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 1,
-    exports: 4,
-    processed: 15,
-    total: 15,
+    exports: 5,
+    processed: 17,
+    total: 17,
   });
 });

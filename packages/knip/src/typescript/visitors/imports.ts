@@ -205,17 +205,23 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
             }
           }
         }
-        if (prop.type === 'Property' && prop.shorthand && prop.value?.type === 'Identifier') {
-          const _import = s.localImportMap.get(prop.value.name);
+        if (
+          prop.type === 'Property' &&
+          !prop.computed &&
+          prop.value?.type === 'Identifier' &&
+          prop.key?.type === 'Identifier'
+        ) {
+          const nsName = prop.value.name;
+          const _import = s.localImportMap.get(nsName);
           if (_import?.isNamespace) {
             const internalImport = s.internal.get(_import.filePath);
-            if (internalImport) internalImport.refs.add(prop.value.name);
-            let set = s.shorthandNsContainers.get(aliasName);
-            if (!set) {
-              set = new Set();
-              s.shorthandNsContainers.set(aliasName, set);
+            if (internalImport) internalImport.refs.add(nsName);
+            let map = s.nsContainers.get(aliasName);
+            if (!map) {
+              map = new Map();
+              s.nsContainers.set(aliasName, map);
             }
-            set.add(prop.value.name);
+            map.set(prop.key.name, nsName);
           }
         }
       }

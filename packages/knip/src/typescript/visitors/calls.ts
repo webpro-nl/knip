@@ -119,7 +119,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       }
     } else if (arg.type === 'ObjectExpression') {
       for (const prop of arg.properties ?? []) {
-        if (prop.type === 'Property' && prop.shorthand && prop.value?.type === 'Identifier')
+        if (prop.type === 'Property' && !prop.computed && prop.value?.type === 'Identifier')
           markRefIfNs(prop.value.name);
         if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') markRefIfNs(prop.argument.name);
       }

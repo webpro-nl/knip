@@ -65,8 +65,8 @@ export interface WalkState extends WalkContext {
   handledImportExpressions: Set<number>;
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
-  shorthandNsContainers: Map<string, Set<string>>;
-  accessedShorthandNs: Set<string>;
+  nsContainers: Map<string, Map<string, string>>;
+  accessedNsContainers: Set<string>;
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
   nsRanges: [number, number][];
@@ -652,8 +652,8 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     handledImportExpressions: new Set(),
     bareExprRefs: new Set(),
     accessedAliases: new Set(),
-    shorthandNsContainers: new Map(),
-    accessedShorthandNs: new Set(),
+    nsContainers: new Map(),
+    accessedNsContainers: new Set(),
     chainedMemberExprs: new WeakSet(),
     currentVarDeclStart: -1,
     nsRanges: [],
@@ -696,9 +696,9 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     }
   }
 
-  for (const [containerName, nsSet] of state.shorthandNsContainers) {
-    for (const nsName of nsSet) {
-      if (!state.accessedShorthandNs.has(`${containerName}.${nsName}`)) {
+  for (const [containerName, propMap] of state.nsContainers) {
+    for (const [propKey, nsName] of propMap) {
+      if (!state.accessedNsContainers.has(`${containerName}.${propKey}`)) {
         const _import = state.localImportMap.get(nsName);
         if (_import) {
           const internalImport = state.internal.get(_import.filePath);

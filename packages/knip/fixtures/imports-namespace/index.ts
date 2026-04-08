@@ -12,6 +12,8 @@ import * as NS7 from './namespace7';
 import * as NS8 from './namespace8';
 import * as NS9 from './namespace9';
 import * as NS10 from './namespace10';
+import * as NS11 from './namespace11';
+import * as NS11_OPAQUE from './namespace11-opaque';
 import fn from 'external';
 
 NS.identifier15;
@@ -52,3 +54,6 @@ const func = () => {
 const props: { values?: { identifier45: number; identifier46: number } } = {};
 const { values = NS10 } = props;
 values.identifier45;
+
+const map = { aliased: NS11, opaque: NS11_OPAQUE };
+map.aliased.identifier47;
