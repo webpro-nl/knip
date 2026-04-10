@@ -1,6 +1,6 @@
 import picomatch from 'picomatch';
 import type { SyncCompilers } from './compilers/types.ts';
-import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
   IgnorePatterns,
@@ -61,6 +61,7 @@ const defaultConfig: Configuration = {
   syncCompilers: new Map(),
   asyncCompilers: new Map(),
   rootPluginConfigs: {},
+  foreignFileExtensions: Array.from(FOREIGN_FILE_EXTENSIONS),
 };
 
 export type Workspace = {
@@ -145,6 +146,7 @@ export class ConfigurationChief {
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
+    const foreignFileExtensions = rawConfig.foreignFileExtensions ?? defaultConfig.foreignFileExtensions;
 
     const { syncCompilers, asyncCompilers } = rawConfig;
 
@@ -170,6 +172,7 @@ export class ConfigurationChief {
       syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
       asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
       rootPluginConfigs,
+      foreignFileExtensions,
     };
   }
 

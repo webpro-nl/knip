@@ -55,12 +55,13 @@ export class ProjectPrincipal {
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
 
-  constructor(options: MainOptions, toSourceFilePath: ToSourceFilePath) {
+  constructor(options: MainOptions, toSourceFilePath: ToSourceFilePath, foreignFileExtensions: string[]) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: [this.syncCompilers, this.asyncCompilers],
+      foreignFileExtensions,
     });
   }
 

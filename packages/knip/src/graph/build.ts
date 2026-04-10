@@ -3,7 +3,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, IS_DTS } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -381,7 +381,8 @@ export async function build({
         } else {
           if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
             const ext = extname(sanitizedSpecifier);
-            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
+            const foreignFileExtensions = new Set(chief.config.foreignFileExtensions);
+            if (!ext || (ext !== '.json' && !foreignFileExtensions.has(ext))) unresolvedImports.add(unresolvedImport);
           }
         }
       }

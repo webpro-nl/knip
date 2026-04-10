@@ -374,6 +374,21 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   treatConfigHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Array of file extensions that should be treated as foreign files (non-source files).
+   * Foreign files are treated as empty files during source analysis and don't trigger
+   * unresolved import warnings when they can't be parsed.
+   *
+   * @default [".avif", ".css", ".eot", ".gif", ".html", ".ico", ".jpeg", ".jpg", ".less", ".mp3", ".png", ".sass", ".scss", ".sh", ".svg", ".ttf", ".webp", ".woff", ".woff2", ".yaml", ".yml"]
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "foreignFileExtensions": [".css", ".scss", ".png", ".jpg", ".custom"]
+   * }
+   * ```
+   */
+  foreignFileExtensions: z.optional(z.array(z.string())),
 });
 
 const reportConfigSchema = z.object({

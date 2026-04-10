@@ -32,7 +32,7 @@ export const run = async (options: MainOptions) => {
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath);
+  const principal = new ProjectPrincipal(options, toSourceFilePath, chief.config.foreignFileExtensions);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);

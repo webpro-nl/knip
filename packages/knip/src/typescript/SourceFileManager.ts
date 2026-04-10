@@ -1,28 +1,30 @@
 import { readFileSync } from 'node:fs';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
-import { FOREIGN_FILE_EXTENSIONS } from '../constants.ts';
 import { debugLog } from '../util/debug.ts';
 import { extname, isInternal } from '../util/path.ts';
 
 interface SourceFileManagerOptions {
   compilers: [SyncCompilers, AsyncCompilers];
+  foreignFileExtensions: string[];
 }
 
 export class SourceFileManager {
   sourceTextCache = new Map<string, string>();
   syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
+  foreignFileExtensions: Set<string>;
 
-  constructor({ compilers }: SourceFileManagerOptions) {
+  constructor({ compilers, foreignFileExtensions }: SourceFileManagerOptions) {
     this.syncCompilers = compilers[0];
     this.asyncCompilers = compilers[1];
+    this.foreignFileExtensions = new Set(foreignFileExtensions);
   }
 
   readFile(filePath: string): string {
     if (this.sourceTextCache.has(filePath)) return this.sourceTextCache.get(filePath)!;
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
-    if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) {
+    if (this.foreignFileExtensions.has(ext) && !compiler) {
       this.sourceTextCache.set(filePath, '');
       return '';
     }
