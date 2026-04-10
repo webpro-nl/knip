@@ -34,6 +34,15 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   use.loader === 'babel-loader' &&
   typeof use.options === 'object';
 
+const hasLoaderOptions = (
+  use: RuleSetUseItem
+): use is Exclude<RuleSetUseItem, string> & { loader: string; options: object } =>
+  Boolean(use) &&
+  typeof use !== 'string' &&
+  'loader' in use &&
+  typeof use.loader === 'string' &&
+  typeof use.options === 'object';
+
 const info = {
   compiler: '',
   issuer: '',
@@ -65,10 +74,24 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   });
 };
 
+const isSwcLoader = (loader: string) =>
+  loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
+
+const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
+  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
+  const plugins = (use.options as { jsc?: { experimental?: { plugins?: unknown[] } } }).jsc?.experimental?.plugins;
+  if (!Array.isArray(plugins)) return [];
+  return plugins.flatMap(plugin => {
+    if (typeof plugin === 'string') return [plugin];
+    if (Array.isArray(plugin) && typeof plugin[0] === 'string') return [plugin[0]];
+    return [];
+  });
+};
+
 const resolveUseItem = (use: RuleSetUseItem) => {
   if (!use) return [];
   if (typeof use === 'string') return [use];
-  if ('loader' in use && typeof use.loader === 'string') return [use.loader];
+  if ('loader' in use && typeof use.loader === 'string') return [use.loader, ...resolveSwcPluginDependencies(use)];
   return [];
 };
 

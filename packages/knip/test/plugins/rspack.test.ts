@@ -9,7 +9,11 @@ const cwd = resolve('fixtures/plugins/rspack');
 
 test('Find dependencies with the rspack plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(!issues.devDependencies['package.json']['@swc/plugin-emotion']);
+  assert(!issues.devDependencies['package.json']['swc-plugin-component-annotate']);
+  assert(issues.devDependencies['package.json']['@rspack/core']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
