@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "6.1.0",
+  "version": "6.4.0",
   "description": "Find and fix unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "keywords": [
     "analysis",
@@ -84,13 +84,13 @@
     "test": "node scripts/run-test.ts",
     "test:node": "tsx --test test/*.test.ts test/**/*.test.ts",
     "test:bun": "bun test test/*.test.ts test/**/*.test.ts",
-    "test:smoke": "glob-bin -c \"tsx --test\" \"test/*.test.ts\" && glob-bin -c \"tsx --test\" \"test/{plugins,util}/*.test.ts\"",
+    "test:smoke": "glob-bin -c \"tsx --test\" \"test/*.test.ts\" && glob-bin -c \"tsx --test\" \"test/plugins/*.test.ts\" && glob-bin -c \"tsx --test\" \"test/util/*.test.ts\"",
     "test:bun:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
     "watch": "npm link && tsc --watch",
     "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
     "build": "tsc",
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm run test",
-    "release": "release-it",
+    "release": "NODE_OPTIONS=--no-deprecation release-it",
     "create-plugin": "node ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "pnpm run build && (oxfmt schema.json schema-jsonc.json src/schema/plugins.ts || true)",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts || true)"

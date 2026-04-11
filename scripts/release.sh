@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-curl -sf -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user > /dev/null || { echo 'No or invalid GITHUB_TOKEN'; exit 0; }
-vsce verify-pat webpro
-ovsx verify-pat webpro
-npm login
+source "$(dirname "$0")/preflight.sh"
 
 # Running the release cycle twice to ensure a single clean commit with multiple tags will be pushed,
 # with manual bump/skip for each package separately. One-off package publish can still be done from package dir.

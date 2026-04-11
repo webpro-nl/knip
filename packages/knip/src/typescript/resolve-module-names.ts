@@ -14,6 +14,12 @@ interface PathMapping {
   values: string[];
 }
 
+const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
+
+export function clearModuleResolutionCaches() {
+  for (const cache of moduleResolutionCaches) cache.clear();
+}
+
 function compilePathMappings(paths: Record<string, string[]> | undefined): PathMapping[] | undefined {
   if (!paths) return undefined;
   const mappings: PathMapping[] = [];
@@ -55,7 +61,24 @@ export function createCustomModuleResolver(
     };
   }
 
+  const cache = new Map<string, Map<string, ResolvedModule | undefined>>();
+  moduleResolutionCaches.push(cache);
+
   function resolveModuleName(name: string, containingFile: string): ResolvedModule | undefined {
+    const dir = dirname(containingFile);
+    let byName = cache.get(dir);
+    if (byName) {
+      if (byName.has(name)) return byName.get(name);
+    } else {
+      byName = new Map();
+      cache.set(dir, byName);
+    }
+    const result = resolveModuleNameUncached(name, containingFile);
+    byName.set(name, result);
+    return result;
+  }
+
+  function resolveModuleNameUncached(name: string, containingFile: string): ResolvedModule | undefined {
     const specifier = sanitizeSpecifier(name);
 
     if (isBuiltin(specifier)) return undefined;

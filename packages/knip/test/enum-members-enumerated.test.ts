@@ -17,3 +17,14 @@ test('Consider enum enumerated enum members used', async () => {
     total: 3,
   });
 });
+
+test('Consider enum enumerated enum members used (nsTypes)', async () => {
+  const options = await createOptions({ cwd, includedIssueTypes: ['nsTypes'] });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
+  });
+});

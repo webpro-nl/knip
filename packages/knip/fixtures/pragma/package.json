@@ -1,9 +1,10 @@
 {
   "name": "@fixtures/pragma",
   "devDependencies": {
+    "@types/oh-my-preserved-types": "*",
     "@types/oh-my-types": "*",
     "happy-dom": "*",
-    "jsdom": "*",
+    "jest-environment-jsdom": "*",
     "preact": "*",
     "vitest": "*"
   }

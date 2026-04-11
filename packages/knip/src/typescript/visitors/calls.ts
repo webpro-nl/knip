@@ -4,6 +4,41 @@ import { addValue } from '../../util/module-graph.ts';
 import { getStringValue, isStringLiteral } from './helpers.ts';
 import type { WalkState } from './walk.ts';
 
+function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
+  if (node?.type !== 'CallExpression') return undefined;
+  const callee = node.callee;
+  let isPathHelper = false;
+  if (
+    callee?.type === 'MemberExpression' &&
+    !callee.computed &&
+    callee.object?.type === 'Identifier' &&
+    callee.object.name === 'path' &&
+    callee.property?.type === 'Identifier' &&
+    (callee.property.name === 'join' || callee.property.name === 'resolve')
+  ) {
+    isPathHelper = true;
+  } else if (callee?.type === 'Identifier') {
+    if (callee.name === 'join' && s.hasPathJoinImport) isPathHelper = true;
+    else if (callee.name === 'resolve' && s.hasPathResolveImport) isPathHelper = true;
+  }
+  if (!isPathHelper) return undefined;
+  const args = node.arguments;
+  if (!args || args.length < 2) return undefined;
+  if (args[0]?.type !== 'Identifier' || args[0].name !== '__dirname') return undefined;
+  const parts: string[] = [];
+  for (let i = 1; i < args.length; i++) {
+    if (!isStringLiteral(args[i])) return undefined;
+    const value = getStringValue(args[i]);
+    if (value == null) return undefined;
+    parts.push(value);
+  }
+  if (parts.length === 0) return undefined;
+  const joined = parts.join('/').replace(/\/+/g, '/');
+  return joined.startsWith('.') || joined.startsWith('/') ? joined : `./${joined}`;
+}
+
+const CHILD_PROCESS_ENTRY_METHODS = new Set(['fork', 'spawn', 'execFile']);
+
 export function handleCallExpression(node: CallExpression, s: WalkState) {
   if (
     node.callee.type === 'Identifier' &&
@@ -54,23 +89,13 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   }
 
   if (
-    node.callee.type === 'MemberExpression' &&
-    node.callee.object.type === 'Identifier' &&
-    node.callee.object.name === 'module' &&
-    !node.callee.computed &&
-    node.callee.property.name === 'register' &&
-    node.arguments.length >= 1 &&
-    isStringLiteral(node.arguments[0])
-  ) {
-    const specifier = getStringValue(node.arguments[0])!;
-    if (specifier) s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
-    return;
-  }
-
-  if (
     s.hasNodeModuleImport &&
-    node.callee.type === 'Identifier' &&
-    node.callee.name === 'register' &&
+    ((node.callee.type === 'MemberExpression' &&
+      node.callee.object.type === 'Identifier' &&
+      node.callee.object.name === 'module' &&
+      !node.callee.computed &&
+      node.callee.property.name === 'register') ||
+      (node.callee.type === 'Identifier' && node.callee.name === 'register')) &&
     node.arguments.length >= 1 &&
     isStringLiteral(node.arguments[0])
   ) {
@@ -86,6 +111,27 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     ) {
       s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
       return;
+    }
+  }
+
+  if (s.hasChildProcessImport && node.arguments.length >= 1) {
+    let isChildProcessEntry = false;
+    if (node.callee.type === 'Identifier' && CHILD_PROCESS_ENTRY_METHODS.has(node.callee.name)) {
+      isChildProcessEntry = true;
+    } else if (
+      node.callee.type === 'MemberExpression' &&
+      !node.callee.computed &&
+      node.callee.property.type === 'Identifier' &&
+      CHILD_PROCESS_ENTRY_METHODS.has(node.callee.property.name)
+    ) {
+      isChildProcessEntry = true;
+    }
+    if (isChildProcessEntry) {
+      const specifier = extractInlineDirnamePath(node.arguments[0], s);
+      if (specifier) {
+        s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+        return;
+      }
     }
   }
 
@@ -107,11 +153,15 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
           const internalImport = s.internal.get(_import.filePath);
           if (internalImport) {
             if (_import.isNamespace) addValue(internalImport.import, OPAQUE, s.filePath);
-            else internalImport.refs.add(arg.name);
+            else {
+              internalImport.refs.add(arg.name);
+              (internalImport.enumerated ??= new Set()).add(arg.name);
+            }
           }
         }
       }
     }
+    return;
   }
 
   const markRefIfNs = (name: string) => {
@@ -129,7 +179,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       }
     } else if (arg.type === 'ObjectExpression') {
       for (const prop of arg.properties ?? []) {
-        if (prop.type === 'Property' && prop.shorthand && prop.value?.type === 'Identifier')
+        if (prop.type === 'Property' && !prop.computed && prop.value?.type === 'Identifier')
           markRefIfNs(prop.value.name);
         if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') markRefIfNs(prop.argument.name);
       }
@@ -158,5 +208,18 @@ export function handleNewExpression(node: NewExpression, s: WalkState) {
         node.arguments[0].start,
         IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.OPTIONAL
       );
+    return;
+  }
+
+  if (
+    s.hasWorkerThreadsImport &&
+    node.callee.type === 'Identifier' &&
+    node.callee.name === 'Worker' &&
+    node.arguments.length >= 1
+  ) {
+    const specifier = extractInlineDirnamePath(node.arguments[0], s);
+    if (specifier) {
+      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+    }
   }
 }

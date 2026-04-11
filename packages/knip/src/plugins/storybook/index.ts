@@ -57,11 +57,20 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
     ? [toConfig('vite', viteConfigPath, { dir: cwd, containingFilePath: configFilePath })]
     : [];
 
+  const hasVitestAddon = addons.some(addon => addon === '@storybook/addon-vitest');
+  const coverageDeps: Input[] = hasVitestAddon
+    ? [
+        toDependency('@vitest/coverage-v8', { optional: true }),
+        toDependency('@vitest/coverage-istanbul', { optional: true }),
+      ]
+    : [];
+
   return [
     ...patterns.map(id => toEntry(id)),
     ...addons.map(id => toDeferResolve(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
+    ...coverageDeps,
     ...configs,
   ];
 };

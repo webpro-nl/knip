@@ -9,7 +9,7 @@ import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
 import type { Issue } from '../types/issues.ts';
-import type { Import, ModuleGraph } from '../types/module-graph.ts';
+import type { FileNode, Import, ModuleGraph } from '../types/module-graph.ts';
 import type { PluginName } from '../types/PluginNames.ts';
 import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
@@ -244,10 +244,8 @@ export async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
-          if (isDeferResolveProductionEntry(input)) {
-            addPattern(productionPatternsSkipExports, input, resolvedFilePath);
-          } else if (isDeferResolveEntry(input)) {
-            if (!options.isProduction || !input.optional) addPattern(entryPatternsSkipExports, input, resolvedFilePath);
+          if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
+            if (!input.optional) addPattern(entryPatternsSkipExports, input, resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
           }
@@ -323,7 +321,13 @@ export async function build({
       const projectPaths = await _glob({ ...sharedGlobOptions, patterns, label: 'project paths' });
 
       if (!options.isProduction) {
-        const hints = worker.getConfigurationHints('project', config.project, projectPaths, principal.projectPaths);
+        const hints = worker.getConfigurationHints(
+          'project',
+          config.project,
+          projectPaths,
+          principal.projectPaths,
+          new Set(extensions)
+        );
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 
@@ -355,7 +359,8 @@ export async function build({
     filePath: string,
     pp: ProjectPrincipal,
     parseResult?: import('oxc-parser').ParseResult,
-    sourceText?: string
+    sourceText?: string,
+    cachedFile?: FileNode
   ) => {
     if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
@@ -368,7 +373,8 @@ export async function build({
         analyzeOpts,
         chief.config.ignoreExportsUsedInFile,
         parseResult,
-        sourceText
+        sourceText,
+        cachedFile
       );
 
       const unresolvedImports = new Set<Import>();
@@ -463,8 +469,8 @@ export async function build({
 
   streamer.cast('Analyzing source files');
 
-  principal.walkAndAnalyze((filePath, parseResult, sourceText) => {
-    analyzeSourceFile(filePath, principal, parseResult, sourceText);
+  principal.walkAndAnalyze((filePath, parseResult, sourceText, cachedFile) => {
+    analyzeSourceFile(filePath, principal, parseResult, sourceText, cachedFile);
     const node = graph.get(filePath);
     if (!node) return;
     const paths: string[] = [];

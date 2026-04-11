@@ -25,7 +25,7 @@
     "format": "oxfmt",
     "lint": "oxlint",
     "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
-    "release": "./release.sh"
+    "release": "./scripts/release.sh"
   },
   "devDependencies": {
     "@release-it/bumper": "^7.0.5",

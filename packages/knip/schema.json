@@ -616,20 +616,24 @@
           "title": "nyc plugin configuration (https://knip.dev/reference/plugins/nyc)",
           "$ref": "#/definitions/plugin"
         },
+        "oclif": {
+          "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
+          "$ref": "#/definitions/plugin"
+        },
         "openapi-ts": {
           "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
           "$ref": "#/definitions/plugin"
         },
-        "oclif": {
-          "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
+        "oxfmt": {
+          "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
           "$ref": "#/definitions/plugin"
         },
         "oxlint": {
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
-        "oxfmt": {
-          "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
+        "panda-css": {
+          "title": "panda-css plugin configuration (https://knip.dev/reference/plugins/panda-css)",
           "$ref": "#/definitions/plugin"
         },
         "payload": {
@@ -702,6 +706,10 @@
         },
         "remix": {
           "title": "Remix plugin configuration (https://knip.dev/reference/plugins/remix)",
+          "$ref": "#/definitions/plugin"
+        },
+        "rolldown": {
+          "title": "rolldown plugin configuration (https://knip.dev/reference/plugins/rolldown)",
           "$ref": "#/definitions/plugin"
         },
         "rollup": {

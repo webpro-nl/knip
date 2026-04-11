@@ -268,15 +268,13 @@ export class DependencyDeputy {
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
       const peeker = new PackagePeeker(manifestStr);
 
-      // Keeping track of peer dependencies to prevent infinite loops for circularly referenced peer deps
-      const peerDepCount: Record<string, number> = {};
-
-      const isReferencedDependency = (dependency: string, isPeerDep?: boolean): boolean => {
+      const isReferencedDependency = (dependency: string, visited = new Set<string>()): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return true;
 
-        // Returning peer dependency, ignore
-        if (isPeerDep && peerDepCount[dependency]) return false;
+        // Prevent infinite loops for circularly referenced peer deps
+        if (visited.has(dependency)) return false;
+        visited.add(dependency);
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
@@ -293,7 +291,8 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspace, dependency),
             ...this.getHostDependenciesFor(workspace, typedPackageName),
           ];
-          if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host.name, true));
+          if (hostDependencies.length)
+            return !!hostDependencies.find(host => isReferencedDependency(host.name, visited));
 
           if (!referencedDependencies?.has(dependency)) return false;
 
@@ -302,21 +301,12 @@ export class DependencyDeputy {
 
         // A dependency may not be referenced, but it may be a peer dep of another.
         // If that host is also not referenced we'll report this dependency as unused.
-        // Except if the host has this dependency as an optional peer dep itself.
         const hostDependencies = this.getHostDependenciesFor(workspace, dependency);
 
-        for (const { name } of hostDependencies) {
-          if (!peerDepCount[name]) peerDepCount[name] = 1;
-          else peerDepCount[name]++;
-        }
-
-        return hostDependencies.some(
-          hostDependency =>
-            (isPeerDep === false || !hostDependency.isPeerOptional) && isReferencedDependency(hostDependency.name, true)
-        );
+        return hostDependencies.some(hostDependency => isReferencedDependency(hostDependency.name, visited));
       };
 
-      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency, false);
+      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('dependencies', symbol);

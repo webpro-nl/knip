@@ -72,6 +72,7 @@ import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
+import { default as pandaCss } from './panda-css/index.ts';
 import { default as parcel } from './parcel/index.ts';
 import { default as payload } from './payload/index.ts';
 import { default as playwright } from './playwright/index.ts';
@@ -93,6 +94,7 @@ import { default as relay } from './relay/index.ts';
 import { default as releaseIt } from './release-it/index.ts';
 import { default as remark } from './remark/index.ts';
 import { default as remix } from './remix/index.ts';
+import { default as rolldown } from './rolldown/index.ts';
 import { default as rollup } from './rollup/index.ts';
 import { default as rsbuild } from './rsbuild/index.ts';
 import { default as rslib } from './rslib/index.ts';
@@ -216,6 +218,7 @@ export const Plugins = {
   'openapi-ts': openapiTs,
   oxfmt,
   oxlint,
+  'panda-css': pandaCss,
   parcel,
   payload,
   playwright,
@@ -237,6 +240,7 @@ export const Plugins = {
   'release-it': releaseIt,
   remark,
   remix,
+  rolldown,
   rollup,
   rsbuild,
   rslib,

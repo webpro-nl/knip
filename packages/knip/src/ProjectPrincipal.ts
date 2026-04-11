@@ -165,58 +165,62 @@ export class ProjectPrincipal {
     analyzeFile: (
       filePath: string,
       parseResult: ParseResult | undefined,
-      sourceText: string
+      sourceText: string,
+      cachedFile?: FileNode
     ) => Iterable<string> | undefined
   ) {
     this.resolvedFiles.clear();
-    const queue = [...this.entryPaths, ...this.programPaths];
-    const visited = new Set<string>();
+    const visited = new Set([...this.entryPaths, ...this.programPaths]);
     let lastEntrySize = this.entryPaths.size;
     let lastProgramSize = this.programPaths.size;
 
-    for (let i = 0; i < queue.length; i++) {
-      const filePath = queue[i];
-      if (visited.has(filePath)) continue;
-      visited.add(filePath);
+    const rescanFrontier = () => {
+      if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
+        for (const p of this.entryPaths) visited.add(p);
+        for (const p of this.programPaths) visited.add(p);
+        lastEntrySize = this.entryPaths.size;
+        lastProgramSize = this.programPaths.size;
+      }
+    };
+
+    for (const filePath of visited) {
+      const isProjectPath = this.projectPaths.has(filePath);
+
+      // Cached project files: skip read+parse and pass the cached FileNode through.
+      let cachedFile: FileNode | undefined;
+      if (isProjectPath) {
+        const fd = this.cache.getFileDescriptor(filePath);
+        if (!fd.changed && fd.meta?.data) cachedFile = fd.meta.data;
+      }
+
+      if (cachedFile) {
+        const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
+        if (internalPaths) for (const p of internalPaths) visited.add(p);
+        rescanFrontier();
+        continue;
+      }
 
       const sourceText = this.fileManager.readFile(filePath);
-
       if (!sourceText) {
-        if (this.projectPaths.has(filePath)) analyzeFile(filePath, undefined, '');
+        if (isProjectPath) analyzeFile(filePath, undefined, '');
         continue;
       }
 
       try {
         const result = parseFile(filePath, sourceText);
-
         this.fileManager.sourceTextCache.delete(filePath);
 
-        if (this.projectPaths.has(filePath)) {
+        if (isProjectPath) {
           const internalPaths = analyzeFile(filePath, result, sourceText);
-          if (internalPaths) {
-            for (const p of internalPaths) {
-              if (!visited.has(p)) queue.push(p);
-            }
-          }
+          if (internalPaths) for (const p of internalPaths) visited.add(p);
         } else {
           for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
             const resolved = this.resolveSpecifier(specifier, filePath);
-            if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-              queue.push(resolved);
-            }
+            if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
           }
         }
 
-        if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
-          for (const p of this.entryPaths) {
-            if (!visited.has(p)) queue.push(p);
-          }
-          for (const p of this.programPaths) {
-            if (!visited.has(p)) queue.push(p);
-          }
-          lastEntrySize = this.entryPaths.size;
-          lastProgramSize = this.programPaths.size;
-        }
+        rescanFrontier();
       } catch {
         // Parse error — skip this file
       }
@@ -227,14 +231,9 @@ export class ProjectPrincipal {
 
   getUsedResolvedFiles() {
     this.resolvedFiles.clear();
-    const queue = [...this.entryPaths, ...this.programPaths];
-    const visited = new Set<string>();
+    const visited = new Set([...this.entryPaths, ...this.programPaths]);
 
-    for (let i = 0; i < queue.length; i++) {
-      const filePath = queue[i];
-      if (visited.has(filePath)) continue;
-      visited.add(filePath);
-
+    for (const filePath of visited) {
       const sourceText = this.fileManager.readFile(filePath);
       if (!sourceText) continue;
 
@@ -242,9 +241,7 @@ export class ProjectPrincipal {
         const result = parseFile(filePath, sourceText);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
-          if (resolved && !isInNodeModules(resolved) && !visited.has(resolved)) {
-            queue.push(resolved);
-          }
+          if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
         }
       } catch {
         // Parse error — skip this file
@@ -268,8 +265,11 @@ export class ProjectPrincipal {
     options: GetImportsAndExportsOptions,
     ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
     parseResult?: ParseResult,
-    sourceText?: string
+    sourceText?: string,
+    cachedFile?: FileNode
   ) {
+    if (cachedFile) return cachedFile;
+
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return fd.meta.data;
 

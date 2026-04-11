@@ -73,6 +73,7 @@ export type PluginName =
   | 'openapi-ts'
   | 'oxfmt'
   | 'oxlint'
+  | 'panda-css'
   | 'parcel'
   | 'payload'
   | 'playwright'
@@ -94,6 +95,7 @@ export type PluginName =
   | 'release-it'
   | 'remark'
   | 'remix'
+  | 'rolldown'
   | 'rollup'
   | 'rsbuild'
   | 'rslib'
@@ -217,6 +219,7 @@ export const pluginNames = [
   'openapi-ts',
   'oxfmt',
   'oxlint',
+  'panda-css',
   'parcel',
   'payload',
   'playwright',
@@ -238,6 +241,7 @@ export const pluginNames = [
   'release-it',
   'remark',
   'remix',
+  'rolldown',
   'rollup',
   'rsbuild',
   'rslib',

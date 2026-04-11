@@ -98,6 +98,8 @@ export type ConfigurationHintType =
   | 'project-top-level'
   | 'entry-empty'
   | 'project-empty'
+  | 'project-extension-unregistered'
+  | 'project-extension-redundant'
   | 'package-entry'
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';

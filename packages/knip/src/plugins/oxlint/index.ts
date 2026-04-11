@@ -23,7 +23,7 @@ const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins']): Input[] => {
   for (const plugin of jsPlugins ?? []) {
     const specifier = typeof plugin === 'string' ? plugin : plugin.specifier;
     if (!isInternal(specifier)) inputs.push(toDependency(specifier));
-    else inputs.push(toEntry(specifier))
+    else inputs.push(toEntry(specifier));
   }
   return inputs;
 };

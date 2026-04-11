@@ -112,15 +112,20 @@ export class FileEntryCache<T> {
   }
 
   reconcile() {
-    this.removeNotFoundFiles();
-
     for (const [entryName, cacheEntry] of this.normalizedEntries) {
       try {
-        const meta = this._getMetaForFileUsingMtimeAndSize(cacheEntry);
+        const stat = fs.statSync(entryName);
+        const meta = Object.assign(cacheEntry.meta ?? {}, {
+          size: stat.size,
+          mtime: stat.mtime.getTime(),
+        });
         this.cache.set(entryName, meta);
       } catch (error) {
         // @ts-expect-error
-        if (error.code !== 'ENOENT') throw error;
+        if (error.code === 'ENOENT') {
+          this.normalizedEntries.delete(entryName);
+          this.cache.delete(entryName);
+        } else throw error;
       }
     }
 

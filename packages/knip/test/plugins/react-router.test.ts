@@ -23,6 +23,18 @@ test('Find dependencies with the react-router plugin', async () => {
   });
 });
 
+test('Find dependencies with the react-router plugin [with absolute paths]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-with-absolute-paths');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 6,
+    total: 6,
+  });
+});
+
 test('Find dependencies with the react-router plugin [with custom server entry]', async () => {
   const cwd = resolve('fixtures/plugins/react-router-with-server-entry');
   const options = await createOptions({ cwd });

@@ -7,14 +7,14 @@ import compiler from './compiler.ts';
 
 const title = 'Tailwind';
 
-const enablers = ['tailwindcss'];
+const enablers = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/postcss', '@tailwindcss/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('tailwindcss')) registerCompiler({ extension: '.css', compiler });
+  if (enablers.some(enabler => hasDependency(enabler))) registerCompiler({ extension: '.css', compiler });
 };
 
 const plugin: Plugin = {

@@ -156,7 +156,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
     }
 
-    const dir = join(options.cwd, cfg.test?.root ?? '.');
+    const dir = toAbsolute(cfg.test?.root ?? '.', options.cwd);
 
     if (cfg.test) {
       if (cfg.test?.include) {

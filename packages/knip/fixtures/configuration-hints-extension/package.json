@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/configuration-hints-extension",
+  "type": "module",
+  "dependencies": {
+    "astro": "*"
+  }
+}

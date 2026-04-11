@@ -20,7 +20,7 @@ test('Find dependencies with the Rollup plugin', async () => {
     ...baseCounters,
     devDependencies: 0,
     unlisted: 4,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

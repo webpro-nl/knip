@@ -37,7 +37,7 @@
   "files": [
     "dist/",
     "icon-192x192.png",
-    "license",
+    "LICENSE",
     "README.md"
   ],
   "type": "module",

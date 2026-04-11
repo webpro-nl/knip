@@ -41,7 +41,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   }
 
   const mapRoute = (route: RouteConfigEntry): string[] => {
-    return [join(appDir, route.file), ...(route.children ? route.children.flatMap(mapRoute) : [])];
+    return [toAbsolute(route.file, appDir), ...(route.children ? route.children.flatMap(mapRoute) : [])];
   };
 
   const routes = routeConfig

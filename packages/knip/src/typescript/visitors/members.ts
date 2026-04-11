@@ -136,8 +136,9 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.object.property.type === 'Identifier'
   ) {
     const containerName = node.object.object.name;
-    const nsName = node.object.property.name;
-    if (s.shorthandNsContainers.get(containerName)?.has(nsName)) {
+    const propKey = node.object.property.name;
+    const nsName = s.nsContainers.get(containerName)?.get(propKey);
+    if (nsName) {
       const _import = s.localImportMap.get(nsName);
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
@@ -147,7 +148,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
           else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
           if (memberName) {
             s.addNsMemberRefs(internalImport, nsName, memberName);
-            s.accessedShorthandNs.add(`${containerName}.${nsName}`);
+            s.accessedNsContainers.add(`${containerName}.${propKey}`);
           }
         }
       }
