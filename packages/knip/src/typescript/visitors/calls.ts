@@ -105,6 +105,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
         }
       }
     }
+    return;
   }
 
   const markRefIfNs = (name: string) => {
