@@ -9,23 +9,17 @@ import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier 
 import { timerify } from '../util/Performance.ts';
 import { dirname, isInNodeModules, resolve } from '../util/path.ts';
 import { shouldIgnore } from '../util/tag.ts';
+import { extractImportsFromComments } from './comments.ts';
 import {
   buildLineStarts,
   getLineAndCol,
   parseFile,
   shouldCountRefs,
-  stripQuotes,
   type ResolveModule,
   type ResolvedModule,
 } from './visitors/helpers.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
 import { walkAST } from './visitors/walk.ts';
-
-const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
-const jsDocImportTagRe = /@import\s+(?:\{[^}]*\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
-const jsxImportSourceRe = /@jsxImportSource\s+(\S+)/;
-const referenceTypesRe = /\s*<reference\s+types\s*=\s*"([^"]+)"[^/]*\/>/;
-const envRe = /@(?:vitest|jest)-environment\s+(\S+)/g;
 
 interface AddInternalImportOptions {
   specifier: string;
@@ -367,49 +361,8 @@ const getImportsAndExports = (
     getJSDocTags,
   });
 
-  for (const comment of result.comments) {
-    const text = comment.value;
-
-    let results: RegExpExecArray | null;
-    if (comment.type === 'Block') {
-      jsDocImportRe.lastIndex = 0;
-      while ((results = jsDocImportRe.exec(text)) !== null) {
-        const before = text.slice(0, results.index);
-        const lastOpen = before.lastIndexOf('{');
-        if (lastOpen === -1 || before.indexOf('}', lastOpen) !== -1) continue;
-        const specifier = results[1];
-        const member = results[2];
-        addImport(specifier, member, undefined, undefined, comment.start + results.index, IMPORT_FLAGS.TYPE_ONLY);
-      }
-
-      jsDocImportTagRe.lastIndex = 0;
-      while ((results = jsDocImportTagRe.exec(text)) !== null) {
-        const specifier = results[1];
-        addImport(specifier, undefined, undefined, undefined, comment.start + results.index, IMPORT_FLAGS.TYPE_ONLY);
-      }
-    }
-
-    const jsxMatch = text.match(jsxImportSourceRe);
-    if (jsxMatch) {
-      addImport(jsxMatch[1], undefined, undefined, undefined, comment.start, IMPORT_FLAGS.TYPE_ONLY);
-    }
-
-    envRe.lastIndex = 0;
-    while ((results = envRe.exec(text)) !== null) {
-      const id = stripQuotes(results[1]);
-      if (!id) continue;
-      const isLocal = id.startsWith('.') || id.startsWith('/');
-      const modifiers = isLocal ? IMPORT_FLAGS.ENTRY : IMPORT_FLAGS.NONE;
-      addImport(id, undefined, undefined, undefined, comment.start + results.index, modifiers);
-    }
-
-    if (comment.type === 'Line') {
-      const refMatch = comment.value.match(referenceTypesRe);
-      if (refMatch) {
-        addImport(refMatch[1], undefined, undefined, undefined, comment.start, IMPORT_FLAGS.TYPE_ONLY);
-      }
-    }
-  }
+  const firstStmtStart = result.program.body[0]?.start ?? Number.POSITIVE_INFINITY;
+  extractImportsFromComments(result.comments, firstStmtStart, addImport);
 
   for (const [id, item] of exports) {
     item.referencedIn = referencedInExport.get(id);
