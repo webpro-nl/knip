@@ -11,6 +11,7 @@ import { debugLog } from './debug.ts';
 import { isFile } from './fs.ts';
 import { updateImportMap } from './module-graph.ts';
 import { toAbsolute, toPosix, toRelative } from './path.ts';
+import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
 import { clearResolverCache } from './resolve.ts';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
@@ -108,6 +109,7 @@ export const getSessionHandler = async (
     if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
 
     clearResolverCache();
+    clearModuleResolutionCaches();
     invalidateCache(graph);
 
     unreferencedFiles.clear();
