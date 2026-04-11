@@ -5,7 +5,9 @@
     "build": "rspack build"
   },
   "devDependencies": {
+    "@swc/plugin-emotion": "*",
     "@rspack/core": "*",
-    "@rspack/cli": "*"
+    "@rspack/cli": "*",
+    "swc-plugin-component-annotate": "*"
   }
 }
