@@ -174,30 +174,33 @@ export class ProjectPrincipal {
     let lastEntrySize = this.entryPaths.size;
     let lastProgramSize = this.programPaths.size;
 
+    const rescanFrontier = () => {
+      if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
+        for (const p of this.entryPaths) visited.add(p);
+        for (const p of this.programPaths) visited.add(p);
+        lastEntrySize = this.entryPaths.size;
+        lastProgramSize = this.programPaths.size;
+      }
+    };
+
     for (const filePath of visited) {
       const isProjectPath = this.projectPaths.has(filePath);
 
-      // Skip read+parse for project files when the cache will hit downstream in analyzeSourceFile.
-      // Pass the cached FileNode through to skip a redundant cache lookup there too.
+      // Cached project files: skip read+parse and pass the cached FileNode through.
+      let cachedFile: FileNode | undefined;
       if (isProjectPath) {
         const fd = this.cache.getFileDescriptor(filePath);
-        if (!fd.changed && fd.meta?.data) {
-          const internalPaths = analyzeFile(filePath, undefined, '', fd.meta.data);
-          if (internalPaths) {
-            for (const p of internalPaths) visited.add(p);
-          }
-          if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
-            for (const p of this.entryPaths) visited.add(p);
-            for (const p of this.programPaths) visited.add(p);
-            lastEntrySize = this.entryPaths.size;
-            lastProgramSize = this.programPaths.size;
-          }
-          continue;
-        }
+        if (!fd.changed && fd.meta?.data) cachedFile = fd.meta.data;
+      }
+
+      if (cachedFile) {
+        const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
+        if (internalPaths) for (const p of internalPaths) visited.add(p);
+        rescanFrontier();
+        continue;
       }
 
       const sourceText = this.fileManager.readFile(filePath);
-
       if (!sourceText) {
         if (isProjectPath) analyzeFile(filePath, undefined, '');
         continue;
@@ -205,14 +208,11 @@ export class ProjectPrincipal {
 
       try {
         const result = parseFile(filePath, sourceText);
-
         this.fileManager.sourceTextCache.delete(filePath);
 
         if (isProjectPath) {
           const internalPaths = analyzeFile(filePath, result, sourceText);
-          if (internalPaths) {
-            for (const p of internalPaths) visited.add(p);
-          }
+          if (internalPaths) for (const p of internalPaths) visited.add(p);
         } else {
           for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
             const resolved = this.resolveSpecifier(specifier, filePath);
@@ -220,12 +220,7 @@ export class ProjectPrincipal {
           }
         }
 
-        if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
-          for (const p of this.entryPaths) visited.add(p);
-          for (const p of this.programPaths) visited.add(p);
-          lastEntrySize = this.entryPaths.size;
-          lastProgramSize = this.programPaths.size;
-        }
+        rescanFrontier();
       } catch {
         // Parse error — skip this file
       }
