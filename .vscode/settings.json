@@ -39,7 +39,8 @@
     "timerify",
     "tsup",
     "unimported",
-    "webp"
+    "webp",
+    "webpro"
   ],
   "editor.formatOnSave": true
 }
