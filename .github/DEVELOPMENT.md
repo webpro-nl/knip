@@ -197,7 +197,7 @@ regular package. Every push is published to their registry. Look for the
 `pkg-pr-new` bot in your pull request.
 
 [1]: #qa
-[2]: #attach-debugger-to-bun-from-a-test
+[2]: #attach-debugger-from-inside-a-test-file
 [3]: #getting-started
 [4]: #agents
 [5]: #contributing-a-plugin
