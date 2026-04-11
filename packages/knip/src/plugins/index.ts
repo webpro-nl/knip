@@ -72,6 +72,7 @@ import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
+import { default as pandaCss } from './panda-css/index.ts';
 import { default as parcel } from './parcel/index.ts';
 import { default as payload } from './payload/index.ts';
 import { default as playwright } from './playwright/index.ts';
@@ -217,6 +218,7 @@ export const Plugins = {
   'openapi-ts': openapiTs,
   oxfmt,
   oxlint,
+  'panda-css': pandaCss,
   parcel,
   payload,
   playwright,

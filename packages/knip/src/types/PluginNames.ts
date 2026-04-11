@@ -73,6 +73,7 @@ export type PluginName =
   | 'openapi-ts'
   | 'oxfmt'
   | 'oxlint'
+  | 'panda-css'
   | 'parcel'
   | 'payload'
   | 'playwright'
@@ -218,6 +219,7 @@ export const pluginNames = [
   'openapi-ts',
   'oxfmt',
   'oxlint',
+  'panda-css',
   'parcel',
   'payload',
   'playwright',

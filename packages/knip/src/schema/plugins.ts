@@ -86,6 +86,7 @@ export const pluginsSchema = z.object({
   'openapi-ts': pluginSchema,
   oxfmt: pluginSchema,
   oxlint: pluginSchema,
+  'panda-css': pluginSchema,
   parcel: pluginSchema,
   payload: pluginSchema,
   playwright: pluginSchema,
