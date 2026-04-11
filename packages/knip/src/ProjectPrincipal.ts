@@ -165,7 +165,8 @@ export class ProjectPrincipal {
     analyzeFile: (
       filePath: string,
       parseResult: ParseResult | undefined,
-      sourceText: string
+      sourceText: string,
+      cachedFile?: FileNode
     ) => Iterable<string> | undefined
   ) {
     this.resolvedFiles.clear();
@@ -174,10 +175,31 @@ export class ProjectPrincipal {
     let lastProgramSize = this.programPaths.size;
 
     for (const filePath of visited) {
+      const isProjectPath = this.projectPaths.has(filePath);
+
+      // Skip read+parse for project files when the cache will hit downstream in analyzeSourceFile.
+      // Pass the cached FileNode through to skip a redundant cache lookup there too.
+      if (isProjectPath) {
+        const fd = this.cache.getFileDescriptor(filePath);
+        if (!fd.changed && fd.meta?.data) {
+          const internalPaths = analyzeFile(filePath, undefined, '', fd.meta.data);
+          if (internalPaths) {
+            for (const p of internalPaths) visited.add(p);
+          }
+          if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
+            for (const p of this.entryPaths) visited.add(p);
+            for (const p of this.programPaths) visited.add(p);
+            lastEntrySize = this.entryPaths.size;
+            lastProgramSize = this.programPaths.size;
+          }
+          continue;
+        }
+      }
+
       const sourceText = this.fileManager.readFile(filePath);
 
       if (!sourceText) {
-        if (this.projectPaths.has(filePath)) analyzeFile(filePath, undefined, '');
+        if (isProjectPath) analyzeFile(filePath, undefined, '');
         continue;
       }
 
@@ -186,7 +208,7 @@ export class ProjectPrincipal {
 
         this.fileManager.sourceTextCache.delete(filePath);
 
-        if (this.projectPaths.has(filePath)) {
+        if (isProjectPath) {
           const internalPaths = analyzeFile(filePath, result, sourceText);
           if (internalPaths) {
             for (const p of internalPaths) visited.add(p);
@@ -248,8 +270,11 @@ export class ProjectPrincipal {
     options: GetImportsAndExportsOptions,
     ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
     parseResult?: ParseResult,
-    sourceText?: string
+    sourceText?: string,
+    cachedFile?: FileNode
   ) {
+    if (cachedFile) return cachedFile;
+
     const fd = this.cache.getFileDescriptor(filePath);
     if (!fd.changed && fd.meta?.data) return fd.meta.data;
 
