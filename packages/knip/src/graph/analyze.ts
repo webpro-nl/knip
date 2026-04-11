@@ -132,6 +132,7 @@ export const analyze = async ({
                   exportedItem.type !== 'enum';
 
                 if ((isEnumMembers || isNsMembers) && exportedItem.members.length > 0) {
+                  if (importsForExport.enumerated?.has(identifier)) continue;
                   if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
                   if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) continue;
 

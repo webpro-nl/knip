@@ -9,6 +9,10 @@ import type {
 
 const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
   for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);
+  if (fromImportMaps.enumerated) {
+    if (!toImportMaps.enumerated) toImportMaps.enumerated = new Set();
+    for (const id of fromImportMaps.enumerated) toImportMaps.enumerated.add(id);
+  }
   for (const [id, v] of fromImportMaps.import) addValues(toImportMaps.import, id, v);
   for (const [id, v] of fromImportMaps.importAs) addNsValues(toImportMaps.importAs, id, v);
   for (const [id, v] of fromImportMaps.importNs) addValues(toImportMaps.importNs, id, v);
@@ -50,6 +54,7 @@ export const createFileNode = (): FileNode => ({
 
 export const createImports = (): ImportMaps => ({
   refs: new Set(),
+  enumerated: undefined,
   import: new Map(),
   importAs: new Map(),
   importNs: new Map(),

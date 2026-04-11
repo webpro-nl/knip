@@ -22,6 +22,8 @@ export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath
 export type ImportMaps = {
   /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
+  /** Identifiers fully consumed via `Object.{keys,values,entries,getOwnPropertyNames}(id)` — provably uses all members. */
+  enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
   /** Identifiers imported with alias (id → alias → files) */
