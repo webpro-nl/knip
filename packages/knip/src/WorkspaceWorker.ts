@@ -2,7 +2,7 @@ import picomatch from 'picomatch';
 import { _getInputsFromScripts } from './binaries/index.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { isDefaultPattern, type Workspace } from './ConfigurationChief.ts';
-import { ROOT_WORKSPACE_NAME } from './constants.ts';
+import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import { getFilteredScripts } from './manifest/helpers.ts';
 import { PluginEntries, Plugins } from './plugins.ts';
 import type {
@@ -39,6 +39,7 @@ import { getPackageNameFromSpecifier } from './util/modules.ts';
 import { getKeysByValue } from './util/object.ts';
 import { timerify } from './util/Performance.ts';
 import { basename, dirname, isInternal, join } from './util/path.ts';
+import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
 
@@ -509,7 +510,8 @@ export class WorkspaceWorker {
     type: 'entry' | 'project',
     patterns: string[],
     filePaths: string[],
-    includedPaths: Set<string>
+    includedPaths: Set<string>,
+    compilerExtensions?: Set<string>
   ) {
     const hints: ConfigurationHint[] = [];
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
@@ -533,6 +535,21 @@ export class WorkspaceWorker {
         const matcher = picomatch(filePathOrPattern);
         if (!filePaths.some(filePath => matcher(filePath))) {
           hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
+        }
+      }
+    }
+
+    if (type === 'project' && compilerExtensions) {
+      const seen = new Set<string>();
+      for (const pattern of userDefinedPatterns) {
+        for (const ext of extractPatternExtensions(pattern)) {
+          if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext)) continue;
+          seen.add(ext);
+          if (compilerExtensions.has(ext)) {
+            hints.push({ type: 'project-extension-redundant', identifier: ext, workspaceName });
+          } else {
+            hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
+          }
         }
       }
     }

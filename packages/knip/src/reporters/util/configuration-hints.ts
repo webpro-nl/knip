@@ -61,6 +61,12 @@ const addWorkspace = (options: PrintHintOptions) =>
 
 const packageEntry = () => 'Package entry file not found';
 
+const extensionUnregistered = () =>
+  `Extension in ${bright('project')} not registered as a compiler — see https://knip.dev/features/compilers#tracking-non-source-files`;
+
+const extensionRedundant = () =>
+  `Extension already registered as a compiler — remove from ${bright('project')} pattern`;
+
 const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignore', { print: unused }],
   ['ignoreFiles', { print: unused }],
@@ -70,6 +76,8 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['ignoreWorkspaces', { print: unused }],
   ['entry-empty', { print: empty }],
   ['project-empty', { print: empty }],
+  ['project-extension-unregistered', { print: extensionUnregistered }],
+  ['project-extension-redundant', { print: extensionRedundant }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
   ['top-level-unconfigured', { print: add }],
@@ -90,6 +98,7 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['ignoreBinaries'],
   ['ignoreUnresolved'],
   ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
+  ['project-extension-unregistered', 'project-extension-redundant'],
   ['package-entry'],
 ];
 

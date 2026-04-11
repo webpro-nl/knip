@@ -166,6 +166,17 @@ const config = {
 export default config;
 ```
 
+## Tracking non-source files
+
+To track any file extension that's not meant to compile to JavaScript, register
+a no-op compiler:
+
+```ts title="knip.ts"
+export default {
+  compilers: { template: () => '' },
+};
+```
+
 [1]: #css
 [2]: #mdx
 [3]: #svelte

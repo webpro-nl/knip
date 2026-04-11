@@ -321,7 +321,13 @@ export async function build({
       const projectPaths = await _glob({ ...sharedGlobOptions, patterns, label: 'project paths' });
 
       if (!options.isProduction) {
-        const hints = worker.getConfigurationHints('project', config.project, projectPaths, principal.projectPaths);
+        const hints = worker.getConfigurationHints(
+          'project',
+          config.project,
+          projectPaths,
+          principal.projectPaths,
+          new Set(extensions)
+        );
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 

@@ -62,3 +62,23 @@ test('No hints when user overrides plugin entry config', async () => {
     total: 3,
   });
 });
+
+test('Hint when project pattern lists extensions that need a compiler or are already provided by one', async () => {
+  const cwd = resolve('fixtures/configuration-hints-extension');
+  const options = await createOptions({ cwd });
+  const { configurationHints } = await main(options);
+
+  const extHints = configurationHints.filter(
+    h => h.type === 'project-extension-unregistered' || h.type === 'project-extension-redundant'
+  );
+  assert.deepEqual(extHints, [
+    { type: 'project-extension-redundant', identifier: '.astro', workspaceName: '.' },
+    { type: 'project-extension-redundant', identifier: '.tpl', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.template', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.sql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.graphql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.gql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.toml', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.yaml', workspaceName: '.' },
+  ]);
+});
