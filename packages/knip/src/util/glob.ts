@@ -1,5 +1,6 @@
 import fg from 'fast-glob';
 import { compact } from './array.ts';
+import { computeGlobCacheKey, getCachedGlob, isGlobCacheEnabled, setCachedGlob } from './glob-cache.ts';
 import { glob } from './glob-core.ts';
 import { timerify } from './Performance.ts';
 import { isAbsolute, join, relative } from './path.ts';
@@ -43,7 +44,14 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   // Only negated patterns? Bail out.
   if (globPatterns[0].startsWith('!')) return [];
 
-  return glob(globPatterns, {
+  const cacheEnabled = isGlobCacheEnabled();
+  const cacheKey = cacheEnabled ? computeGlobCacheKey({ patterns: globPatterns, cwd, dir, gitignore }) : '';
+  if (cacheEnabled) {
+    const cached = getCachedGlob(cacheKey);
+    if (cached) return cached;
+  }
+
+  const paths = await glob(globPatterns, {
     cwd,
     dir,
     gitignore,
@@ -51,6 +59,10 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
     dot: true,
     label,
   });
+
+  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, dir);
+
+  return paths;
 };
 
 const syncGlob = ({ cwd, patterns }: { cwd?: string; patterns: string | string[] }) =>

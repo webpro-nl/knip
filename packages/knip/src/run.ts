@@ -10,6 +10,7 @@ import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
+import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
 import { getModuleSourcePathHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
@@ -19,6 +20,8 @@ export type Results = Awaited<ReturnType<typeof run>>['results'];
 export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
+
+  if (options.isCache) initGlobCache(options.cacheLocation);
 
   const chief = new ConfigurationChief(options);
   const deputy = new DependencyDeputy(options);
@@ -99,6 +102,8 @@ export const run = async (options: MainOptions) => {
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
   if (!options.isWatch) streamer.clear();
+
+  if (options.isCache) flushGlobCache();
 
   return {
     results: {
