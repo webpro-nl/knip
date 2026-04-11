@@ -7,6 +7,8 @@ module.register('@nodejs-loaders/css-module', import.meta.url);
 register('./loader.js', import.meta.url);
 module.register('./loader.js', import.meta.url);
 
+// Ignored
+
 register('./ignored-loader.js', new URL('.', import.meta.url).href);
 register('./ignored-loader.js', 'data:');
 register('./ignored-loader.js', '..');

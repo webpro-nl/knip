@@ -51,6 +51,10 @@ interface WalkContext {
   localRefs: Set<string> | undefined;
   destructuredExports: Set<string>;
   hasNodeModuleImport: boolean;
+  hasWorkerThreadsImport: boolean;
+  hasChildProcessImport: boolean;
+  hasPathJoinImport: boolean;
+  hasPathResolveImport: boolean;
   resolveModule: ResolveModule;
   programFiles: Set<string>;
   entryFiles: Set<string>;

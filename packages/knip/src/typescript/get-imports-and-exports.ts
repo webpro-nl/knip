@@ -213,10 +213,17 @@ const getImportsAndExports = (
   const getJSDocTags = buildJSDocTagLookup(result.comments, sourceText);
 
   let hasNodeModuleImport = false;
+  let hasWorkerThreadsImport = false;
+  let hasChildProcessImport = false;
+  let hasPathJoinImport = false;
+  let hasPathResolveImport = false;
 
   for (const _imports of result.module.staticImports) {
     const specifier = _imports.moduleRequest.value;
     if (specifier === 'node:module' || specifier === 'module') hasNodeModuleImport = true;
+    else if (specifier === 'node:worker_threads' || specifier === 'worker_threads') hasWorkerThreadsImport = true;
+    else if (specifier === 'node:child_process' || specifier === 'child_process') hasChildProcessImport = true;
+    const isPathImport = specifier === 'node:path' || specifier === 'path';
     const pos = _imports.moduleRequest.start;
     const jsdocTags = getJSDocTags(_imports.start);
 
@@ -259,6 +266,10 @@ const getImportsAndExports = (
         const importedName = entry.importName.name!;
         const localName = entry.localName.value;
         const alias = localName !== importedName ? localName : undefined;
+        if (isPathImport && !alias) {
+          if (importedName === 'join') hasPathJoinImport = true;
+          else if (importedName === 'resolve') hasPathResolveImport = true;
+        }
         addImport(
           specifier,
           importedName,
@@ -354,6 +365,10 @@ const getImportsAndExports = (
     localRefs: ignoreExportsUsedInFile ? new Set() : undefined,
     destructuredExports,
     hasNodeModuleImport,
+    hasWorkerThreadsImport,
+    hasChildProcessImport,
+    hasPathJoinImport,
+    hasPathResolveImport,
     resolveModule,
     programFiles,
     entryFiles,
