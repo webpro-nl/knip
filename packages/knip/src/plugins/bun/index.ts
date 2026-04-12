@@ -25,6 +25,7 @@ const resolveConfig: ResolveConfig<BunfigConfig> = localConfig => {
 
 const toPatterns = (arg: string) => {
   if (/[*{?]/.test(arg)) return [arg];
+  if (/\.\w+$/.test(arg)) return [arg];
   const dir = arg.replace(/\/+$/, '');
   return patterns.map(pattern => `${dir}/${pattern}`);
 };
