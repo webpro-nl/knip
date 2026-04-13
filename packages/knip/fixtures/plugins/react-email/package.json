@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/react-email",
+  "dependencies": {
+    "@react-email/components": "^1.0.12"
+  },
+  "devDependencies": {
+    "react-email": "^4.0.0",
+    "@react-email/preview-server": "^5.2.10"
+  },
+  "scripts": {
+    "build": "email build --dir ./build-dir",
+    "dev": "email dev --dir ./dev-dir",
+    "export": "email export --dir ./export-dir",
+    "start": "email start --dir ./start-dir"
+  }
+}
