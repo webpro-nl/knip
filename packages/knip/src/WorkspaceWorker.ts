@@ -543,13 +543,9 @@ export class WorkspaceWorker {
       const seen = new Set<string>();
       for (const pattern of userDefinedPatterns) {
         for (const ext of extractPatternExtensions(pattern)) {
-          if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext)) continue;
+          if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext) || compilerExtensions.has(ext)) continue;
           seen.add(ext);
-          if (compilerExtensions.has(ext)) {
-            hints.push({ type: 'project-extension-redundant', identifier: ext, workspaceName });
-          } else {
-            hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
-          }
+          hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
         }
       }
     }
