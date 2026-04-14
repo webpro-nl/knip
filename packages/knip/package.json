@@ -107,7 +107,7 @@
     "picomatch": "^4.0.1",
     "smol-toml": "^1.6.1",
     "strip-json-comments": "5.0.3",
-    "tinyglobby": "^0.2.15",
+    "tinyglobby": "^0.2.16",
     "unbash": "^2.2.0",
     "yaml": "^2.8.2",
     "zod": "^4.1.11"
