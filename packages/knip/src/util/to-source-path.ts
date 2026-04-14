@@ -1,7 +1,7 @@
 import type { CompilerOptions } from '../types/project.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import { DEFAULT_EXTENSIONS } from '../constants.ts';
-import { debugLogArray } from './debug.ts';
+import { debugLog, debugLogArray } from './debug.ts';
 import { findFileWithExtensions, isDirectory } from './fs.ts';
 import { _glob, prependDirToPattern } from './glob.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
@@ -30,7 +30,13 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
       if (filePath.startsWith(workspace.outDir) || workspace.srcDir === workspace.outDir) {
         const basePath = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, '');
         const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
-        if (srcFilePath) toSourceMapCache.set(filePath, srcFilePath);
+        if (srcFilePath) {
+          toSourceMapCache.set(filePath, srcFilePath);
+          if (srcFilePath !== filePath) {
+            debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
+            return srcFilePath;
+          }
+        }
       }
     }
   };
