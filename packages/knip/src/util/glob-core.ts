@@ -251,7 +251,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
 
-  const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
+  const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns, expandDirectories: false };
 
   const paths = await tinyGlob(patterns, fgOptions);
 
