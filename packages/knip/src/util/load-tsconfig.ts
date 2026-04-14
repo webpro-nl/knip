@@ -57,39 +57,48 @@ const expandFileNames = (
   return result;
 };
 
-const resolveConfig = (tsConfigFilePath: string) => {
-  try {
-    return parseTsconfig(tsConfigFilePath);
-  } catch {
-    return undefined;
-  }
-};
-
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   if (_isFile(tsConfigFilePath)) {
-    const config = resolveConfig(tsConfigFilePath);
-    if (!config) return { isFile: true, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+    try {
+      const config = parseTsconfig(tsConfigFilePath);
 
-    const dir = dirname(tsConfigFilePath);
-    const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
+      const dir = dirname(tsConfigFilePath);
+      const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.paths) {
-      compilerOptions.pathsBasePath ??= dir;
-    }
-    if (compilerOptions.rootDirs) {
-      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
-        isAbsolute(d) ? d : join(dir, d)
+      if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
+      if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
+      if (compilerOptions.paths) {
+        compilerOptions.pathsBasePath ??= dir;
+      }
+      if (compilerOptions.rootDirs) {
+        compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
+          isAbsolute(d) ? d : join(dir, d)
+        );
+      }
+
+      const include = resolvePatterns(config.include, dir, true);
+      const exclude = resolvePatterns(config.exclude, dir, true);
+      const files = resolvePatterns(config.files, dir);
+      const fileNames = expandFileNames(
+        dir,
+        compilerOptions,
+        include,
+        exclude,
+        files
       );
+
+      return { isFile: true, compilerOptions, fileNames };
+    } catch {
+      return {
+        isFile: true,
+        compilerOptions: {} as CompilerOptions,
+        fileNames: [] as string[],
+      };
     }
-
-    const include = resolvePatterns(config.include, dir, true);
-    const exclude = resolvePatterns(config.exclude, dir, true);
-    const files = resolvePatterns(config.files, dir);
-    const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
-
-    return { isFile: true, compilerOptions, fileNames };
   }
-  return { isFile: false, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+  return {
+    isFile: false,
+    compilerOptions: {} as CompilerOptions,
+    fileNames: [] as string[],
+  };
 };
