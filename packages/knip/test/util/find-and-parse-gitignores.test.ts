@@ -95,12 +95,7 @@ test('findAndParseGitignores (with .git file in ancestor)', async () => {
   const gitignore = await findAndParseGitignores(cwd);
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../.gitignore', '.gitignore'],
-    ignores: new Set([
-      '.git/!(hooks)',
-      '**/node_modules',
-      '**/worktree-ignored',
-      '**/subdir-ignored',
-    ]),
+    ignores: new Set(['.git/!(hooks)', '**/node_modules', '**/worktree-ignored', '**/subdir-ignored']),
     unignores: new Set(),
   });
 });

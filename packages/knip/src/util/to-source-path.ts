@@ -1,7 +1,7 @@
 import type { CompilerOptions } from '../types/project.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import { DEFAULT_EXTENSIONS } from '../constants.ts';
-import { debugLog, debugLogArray } from './debug.ts';
+import { debugLogArray } from './debug.ts';
 import { findFileWithExtensions, isDirectory } from './fs.ts';
 import { _glob, prependDirToPattern } from './glob.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
