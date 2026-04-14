@@ -1,6 +1,6 @@
 import { parseTsconfig } from 'get-tsconfig';
 import type { CompilerOptions } from '../types/project.ts';
-import { isFile as _isFile, loadJSONC } from './fs.ts';
+import { isFile as _isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
 import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
 
@@ -57,47 +57,18 @@ const expandFileNames = (
   return result;
 };
 
-const findRootDirsBase = async (
-  tsConfigFilePath: string
-): Promise<string | undefined> => {
-  try {
-    const raw = await loadJSONC(tsConfigFilePath);
-    if (raw.compilerOptions?.rootDirs) return dirname(tsConfigFilePath);
-    if (raw.extends) {
-      const extendsList = Array.isArray(raw.extends)
-        ? raw.extends
-        : [raw.extends];
-      for (const ext of extendsList) {
-        const extPath = join(dirname(tsConfigFilePath), ext);
-        const result = await findRootDirsBase(extPath);
-        if (result) return result;
-      }
-    }
-  } catch {}
-  return undefined;
-};
-
-const resolveConfig = async (tsConfigFilePath: string) => {
+const resolveConfig = (tsConfigFilePath: string) => {
   try {
     return parseTsconfig(tsConfigFilePath);
   } catch {
-    try {
-      return await loadJSONC(tsConfigFilePath);
-    } catch {
-      return undefined;
-    }
+    return undefined;
   }
 };
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   if (_isFile(tsConfigFilePath)) {
-    const config = await resolveConfig(tsConfigFilePath);
-    if (!config)
-      return {
-        isFile: true,
-        compilerOptions: {} as CompilerOptions,
-        fileNames: [] as string[],
-      };
+    const config = resolveConfig(tsConfigFilePath);
+    if (!config) return { isFile: true, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
 
     const dir = dirname(tsConfigFilePath);
     const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
@@ -108,9 +79,8 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
       compilerOptions.pathsBasePath ??= dir;
     }
     if (compilerOptions.rootDirs) {
-      const rootDirsBase = (await findRootDirsBase(tsConfigFilePath)) ?? dir;
       compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
-        isAbsolute(d) ? d : join(rootDirsBase, d)
+        isAbsolute(d) ? d : join(dir, d)
       );
     }
 
