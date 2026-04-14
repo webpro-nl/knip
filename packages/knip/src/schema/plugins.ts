@@ -102,6 +102,7 @@ export const pluginsSchema = z.object({
   qwik: pluginSchema,
   raycast: pluginSchema,
   'react-cosmos': pluginSchema,
+  'react-email': pluginSchema,
   'react-native': pluginSchema,
   'react-router': pluginSchema,
   relay: pluginSchema,

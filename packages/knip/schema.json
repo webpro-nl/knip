@@ -684,6 +684,10 @@
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"
         },
+        "react-email": {
+          "title": "react-email plugin configuration (https://knip.dev/reference/plugins/react-email)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-native": {
           "title": "react-native plugin configuration (https://knip.dev/reference/plugins/react-native)",
           "$ref": "#/definitions/plugin"

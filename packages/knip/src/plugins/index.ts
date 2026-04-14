@@ -88,6 +88,7 @@ import { default as prisma } from './prisma/index.ts';
 import { default as qwik } from './qwik/index.ts';
 import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
+import { default as reactEmail } from './react-email/index.ts';
 import { default as reactNative } from './react-native/index.ts';
 import { default as reactRouter } from './react-router/index.ts';
 import { default as relay } from './relay/index.ts';
@@ -234,6 +235,7 @@ export const Plugins = {
   qwik,
   raycast,
   'react-cosmos': reactCosmos,
+  'react-email': reactEmail,
   'react-native': reactNative,
   'react-router': reactRouter,
   relay,

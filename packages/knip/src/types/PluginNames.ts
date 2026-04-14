@@ -89,6 +89,7 @@ export type PluginName =
   | 'qwik'
   | 'raycast'
   | 'react-cosmos'
+  | 'react-email'
   | 'react-native'
   | 'react-router'
   | 'relay'
@@ -235,6 +236,7 @@ export const pluginNames = [
   'qwik',
   'raycast',
   'react-cosmos',
+  'react-email',
   'react-native',
   'react-router',
   'relay',
