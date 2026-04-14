@@ -13,10 +13,9 @@ test('findAndParseGitignores', async () => {
     ignores: new Set([
       '**/.DS_Store',
       '**/.cache',
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
       '**/packages/*/dist',
-      '.yarn',
       '**/a/b/c',
       '**/.npmrc',
       '**/bin/knip',
@@ -32,10 +31,9 @@ test('findAndParseGitignores (/a)', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../.gitignore', '../../../.gitignore', '../../../../../.gitignore', '.gitignore', 'b/.gitignore'],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
       '**/packages/*/dist',
-      '.yarn',
       '**/b/c',
       '**/.DS_Store',
       '**/.cache',
@@ -59,10 +57,9 @@ test('findAndParseGitignores (/a/b', async () => {
       '.gitignore',
     ],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
       '**/packages/*/dist',
-      '.yarn',
       '**/c',
       '**/.DS_Store',
       '**/.cache',
@@ -83,9 +80,8 @@ test('findAndParseGitignores (with .git file)', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../mock-git-dir/info/exclude', '.gitignore', 'subdir/.gitignore'],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
-      '.yarn',
       '**/worktree-exclude-ignored',
       '**/worktree-ignored',
       'subdir/**/subdir-ignored',
@@ -100,9 +96,8 @@ test('findAndParseGitignores (with .git file in ancestor)', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../.gitignore', '.gitignore'],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
-      '.yarn',
       '**/worktree-ignored',
       '**/subdir-ignored',
     ]),

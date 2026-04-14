@@ -187,6 +187,37 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     deepFilter,
   });
 
+  // tinyglobby's `ignore` can't express unignores (see tinyglobby/fast-glob #86). Drop cached
+  // ignore patterns shadowed by any unignore path (and its ancestor dirs) so glob() sees a
+  // safe-to-use flat list — the walk above already respects unignores via picomatch directly.
+  //
+  // Example: a yarn-berry `.gitignore` with `.yarn/*` + `!.yarn/plugins` yields ignore
+  // `**/.yarn/*` and unignore `**/.yarn/plugins`. Without this filter tinyglobby would prune
+  // `.yarn/plugins` during traversal; here we drop `**/.yarn/*` since it shadows the unignore.
+  if (unignores.size > 0) {
+    const unignorePaths = new Set<string>();
+    for (const u of unignores) {
+      let p = u.replace(/^\*\*\//, '');
+      while (p && p !== '.' && p !== '/') {
+        unignorePaths.add(p);
+        const parent = dirname(p);
+        if (parent === p) break;
+        p = parent;
+      }
+    }
+    for (const cacheForDir of cachedGitIgnores.values()) {
+      for (const pattern of cacheForDir.ignores) {
+        const match = picomatch(pattern);
+        for (const p of unignorePaths) {
+          if (match(p)) {
+            cacheForDir.ignores.delete(pattern);
+            break;
+          }
+        }
+      }
+    }
+  }
+
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
 
   return { gitignoreFiles, ignores, unignores };
@@ -209,10 +240,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
     let prev: string;
     while (dir) {
       const cacheForDir = cachedGitIgnores.get(dir);
-      if (cacheForDir) {
-        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
-        _ignore.push(...cacheForDir.ignores);
-      }
+      if (cacheForDir) _ignore.push(...cacheForDir.ignores);
       // oxlint-disable-next-line no-cond-assign
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
