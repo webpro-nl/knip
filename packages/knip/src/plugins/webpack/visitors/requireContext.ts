@@ -1,7 +1,7 @@
 import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 import { _syncGlob } from '../../../util/glob.ts';
-import { dirname, isAbsolute, join } from '../../../util/path.ts';
+import { dirname, join, toRelative } from '../../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
 
 export function createRequireContextVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
@@ -30,9 +30,8 @@ export function createRequireContextVisitor(ctx: PluginVisitorContext): PluginVi
         regexArg && 'regex' in regexArg ? new RegExp(regexArg.regex.pattern, regexArg.regex.flags) : undefined;
 
       for (const f of files) {
-        const relPath = `./${f}`;
-        if (!regex || regex.test(relPath)) {
-          ctx.addImport(isAbsolute(f) ? f : join(baseDir, f), node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+        if (!regex || regex.test(`./${toRelative(f, baseDir)}`)) {
+          ctx.addImport(f, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
         }
       }
     },
