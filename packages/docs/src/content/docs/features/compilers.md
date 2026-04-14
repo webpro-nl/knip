@@ -61,9 +61,9 @@ This may also be an `async` function.
 
 :::tip[Note]
 
-Compilers will automatically have their extension added as a default extension
-to Knip. This means you don't need to add something like `**/*.{ts,vue}` to the
-`entry` or `project` file patterns manually.
+When the default `project` patterns are used, compiler extensions are included
+automatically. If you override `project`, list the compiler extensions
+explicitly (e.g. `['src/**/*.{ts,vue}']`).
 
 :::
 

@@ -2,12 +2,14 @@
 
 ## General
 
-Read [Writing A Plugin][1] first to understand:
+Read the writing-a-plugin docs first:
 
-- Plugin responsibilities
-- Functions like `resolveConfig` and `Input` type definition
-- Consider `resolveFromAST` only for custom plugin-specific needs (core takes
-  care of module resolution, imports, exports, external dependencies)
+- [Writing A Plugin][1] — plugin responsibilities, lifecycle, `resolveConfig`
+- [Inputs][2] — the `Input` type and helpers like `toEntry` and `toDependency`
+- [Argument Parsing][3] — `Plugin.args` for binaries and arguments in scripts
+
+Consider implementing `resolve*` functions only for custom plugin-specific needs
+(core takes care of module resolution, imports, exports, external dependencies).
 
 ## Creating a new plugin
 
@@ -21,14 +23,11 @@ Read [Writing A Plugin][1] first to understand:
 
 ## `config` vs `entry`
 
-- `config` — patterns for config files the plugin reads/parses.
-  `resolveConfig` and `resolveFromAST` run on these files. They're also
-  automatically added as entry files.
-- `entry` — patterns for files that are entries but NOT parsed by the plugin
-  (e.g. `src/routes/**/*.tsx`). `resolveFromAST` does NOT run on these.
-
-If a tool has a config file that contains references to other files (like
-`input`, `entry`, `plugins`), use `config` + `resolveFromAST` — not `entry`.
+- `config` — files the plugin parses to extract references (inputs, entries,
+  plugins, etc.). `resolveConfig` / `resolveFromAST` run on these; they're
+  auto-added as entries.
+- `entry` — files to mark as entries but not parse (e.g. `src/routes/**/*.tsx`).
+  Core handles module graph; `resolveConfig` / `resolveFromAST` does not run.
 
 ## `resolveFromAST` vs `resolveConfig`
 
@@ -39,6 +38,12 @@ JSON or when execution is unavoidable (e.g. function configs).
 See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 `collectPropertyValues`. See `ast-helpers.ts` for available utilities.
 
+## Script parsing
+
+Don't walk and parse `manifest.scripts` manually. Use `Plugin.args` and find
+what core script parser handles. See [Argument Parsing][3] and other plugins
+like prisma, vitest, webpack.
+
 ## Fixtures
 
 - Use non-default file names in config fields (e.g. `input: 'src/app.ts'`, not
@@ -46,3 +51,5 @@ See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
   them — default entry patterns would pick those up regardless.
 
 [1]: ../packages/docs/src/content/docs/writing-a-plugin/index.md
+[2]: ../packages/docs/src/content/docs/writing-a-plugin/inputs.md
+[3]: ../packages/docs/src/content/docs/writing-a-plugin/argument-parsing.md
