@@ -12,25 +12,17 @@ test('findAndParseGitignores', async () => {
     gitignoreFiles: ['../../.gitignore', '../../../../.gitignore', '.gitignore', 'a/.gitignore', 'a/b/.gitignore'],
     ignores: new Set([
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
       '.git',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
       '.yarn',
       '**/a/b/c',
-      '**/a/b/c/**',
       '**/.npmrc',
-      '**/.npmrc/**',
       '**/bin/knip',
       '**/bin/knip-bun',
-      '**/bin/knip-bun/**',
-      '**/bin/knip/**',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -42,24 +34,16 @@ test('findAndParseGitignores (/a)', async () => {
     ignores: new Set([
       '.git',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
       '.yarn',
       '**/b/c',
-      '**/b/c/**',
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
       '**/.npmrc',
-      '**/.npmrc/**',
       '**/bin/knip',
       '**/bin/knip-bun',
-      '**/bin/knip-bun/**',
-      '**/bin/knip/**',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -77,24 +61,16 @@ test('findAndParseGitignores (/a/b', async () => {
     ignores: new Set([
       '.git',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
       '.yarn',
       '**/c',
-      '**/c/**',
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
       '**/.npmrc',
-      '**/.npmrc/**',
       '**/bin/knip',
       '**/bin/knip-bun',
-      '**/bin/knip-bun/**',
-      '**/bin/knip/**',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -108,16 +84,13 @@ test('findAndParseGitignores (with .git file)', async () => {
     gitignoreFiles: ['../mock-git-dir/info/exclude', '.gitignore', 'subdir/.gitignore'],
     ignores: new Set([
       '.git',
-      '**/node_modules/**',
+      '**/node_modules',
       '.yarn',
       '**/worktree-exclude-ignored',
-      '**/worktree-exclude-ignored/**',
       '**/worktree-ignored',
-      '**/worktree-ignored/**',
       'subdir/**/subdir-ignored',
-      'subdir/**/subdir-ignored/**',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -128,13 +101,11 @@ test('findAndParseGitignores (with .git file in ancestor)', async () => {
     gitignoreFiles: ['../.gitignore', '.gitignore'],
     ignores: new Set([
       '.git',
-      '**/node_modules/**',
+      '**/node_modules',
       '.yarn',
       '**/worktree-ignored',
-      '**/worktree-ignored/**',
       '**/subdir-ignored',
-      '**/subdir-ignored/**',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });

@@ -19,7 +19,7 @@ export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
-export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules/**', '.yarn', '.git'];
+export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules', '.yarn', '.git'];
 
 export const PUBLIC_TAG = '@public';
 export const INTERNAL_TAG = '@internal';
