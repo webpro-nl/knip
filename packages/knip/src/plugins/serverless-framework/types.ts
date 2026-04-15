@@ -1,14 +1,7 @@
 export type PluginConfig = {
-  service: string;
-  functions: FunctionsCollection;
-  plugins?: string[];
-  entryPathsOrPatterns?: string[];
+  functions?: Record<string, ServerlessFunction>;
 };
 
-type FunctionsCollection = {
-  [key: string | number]: Function;
-};
-
-type Function = {
+type ServerlessFunction = {
   handler: string;
 };

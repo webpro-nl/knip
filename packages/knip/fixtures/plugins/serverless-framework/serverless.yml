@@ -12,10 +12,19 @@ provider:
   environment:
     STAGE: ${opt:stage, "dev"}
     CLOUDFORMATION_VARIABLE: "!Sub 'arn:aws:iam::${AWS::AccountId}:role/role-name'"
+  iamRoleStatements:
+    - Effect: Allow
+      Action: s3:GetObject
+      Resource: !Sub 'arn:aws:s3:::${self:custom.bucket}/*'
 
 functions:
-  Function:
+  First:
     handler: function/handler.handler
-
-  Function2:
+    events:
+      - http:
+          path: /first
+          method: get
+  Second:
     handler: function-2/function2.handler
+    environment:
+      FOO: !Ref SomeResource

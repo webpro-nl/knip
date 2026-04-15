@@ -1,30 +1,26 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PluginConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PluginConfig } from './types.ts';
 
 // https://www.serverless.com/framework/docs
 
-const title = 'serverless-framework';
+const title = 'Serverless Framework';
 
-const enablers = ['serverless', 'sls'];
+const enablers = ['serverless'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['serverless.yml'];
+const config = ['serverless.{yml,yaml}'];
 
-const production: string[] = [];
-
-const resolveConfig: ResolveConfig<PluginConfig> = async config => {
-  const functions = Object.keys(config.functions);
-
-  return [...functions].map(id => convertHandlerToFileToProductionEntry(config.functions[id].handler));
+const handlerToEntry = (handler: string) => {
+  const dot = handler.lastIndexOf('.');
+  return toProductionEntry(`${handler.slice(0, dot)}.{js,ts}`);
 };
 
-const convertHandlerToFileToProductionEntry = (handler: string) => {
-  const lastIndexOfDot = handler.lastIndexOf('.');
-  const file = `${handler.substring(0, lastIndexOfDot)}.{js,ts}`;
-  return toProductionEntry(file)
+const resolveConfig: ResolveConfig<PluginConfig> = async config => {
+  if (!config.functions) return [];
+  return Object.values(config.functions).map(fn => handlerToEntry(fn.handler));
 };
 
 const plugin: Plugin = {
@@ -32,7 +28,6 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
-  production,
   resolveConfig,
 };
 
