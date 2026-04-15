@@ -1,29 +1,10 @@
-import ts from 'typescript';
-import { getPropertyValues } from '../../typescript/ast-helpers.js';
+import type { Program } from 'oxc-parser';
+import { collectPropertyValues, hasImportSpecifier } from '../../typescript/ast-helpers.ts';
 
-export const getSrcDir = (sourceFile: ts.SourceFile): string => {
-  const srcDir = 'src';
-
-  function visit(node: ts.Node) {
-    if (ts.isObjectLiteralExpression(node)) {
-      const values = getPropertyValues(node, 'srcDir');
-      if (values.size > 0) {
-        return Array.from(values)[0];
-      }
-    }
-
-    let result: string | undefined;
-    ts.forEachChild(node, innerNode => {
-      const innerValue = visit(innerNode);
-      if (innerValue) {
-        result = innerValue;
-        return true; // Break the iteration
-      }
-      return false;
-    });
-
-    return result;
-  }
-
-  return visit(sourceFile) ?? srcDir;
+export const getSrcDir = (program: Program): string => {
+  const values = collectPropertyValues(program, 'srcDir');
+  return values.size > 0 ? Array.from(values)[0] : 'src';
 };
+
+export const usesPassthroughImageService = (program: Program) =>
+  hasImportSpecifier(program, 'astro/config', 'passthroughImageService');

@@ -13,7 +13,11 @@ export class MyClass {}
 
 export class NotInExportedType {}
 
-export function fn(n: unknown) {}
+export interface FnOptions {
+  verbose: boolean;
+}
+
+export function fn(n: unknown, options?: FnOptions) {}
 
 export const myNumber = 1;
 

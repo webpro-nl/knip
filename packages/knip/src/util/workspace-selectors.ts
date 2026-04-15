@@ -1,9 +1,9 @@
 import picomatch from 'picomatch';
-import type { WorkspacePackage } from '../types/package-json.js';
-import { partition } from './array.js';
-import { ConfigurationError } from './errors.js';
-import { isDirectory, isFile } from './fs.js';
-import { join } from './path.js';
+import type { WorkspacePackage } from '../types/package-json.ts';
+import { partition } from './array.ts';
+import { ConfigurationError } from './errors.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { join } from './path.ts';
 
 type WorkspaceSelectorType = 'pkg-name' | 'dir-path' | 'dir-glob';
 

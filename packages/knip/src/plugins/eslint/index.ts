@@ -1,9 +1,10 @@
 import type { ParsedArgs } from 'minimist';
-import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getInputs, resolveFormatters } from './helpers.js';
-import type { ESLintConfigDeprecated } from './types.js';
+import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import { type Input, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getInputs, isFlatConfig, resolveFormatters } from './helpers.ts';
+import { getInputsFromFlatConfigAST } from './resolveFromAST.ts';
+import type { ESLintConfigDeprecated } from './types.ts';
 
 // https://eslint.org/docs/latest/use/configure/configuration-files
 // Deprecated: https://eslint.org/docs/latest/use/configure/configuration-files-deprecated
@@ -29,7 +30,10 @@ const config = [
   'package.json',
 ];
 
-const isLoadConfig: IsLoadConfig = ({ manifest }, dependencies) => {
+const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) => {
+  // Flat configs (eslint.config.*) are handled by resolveFromAST — skip loading
+  if (isFlatConfig(configFileName)) return false;
+
   const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
   if (version) {
     const major = version.match(/\d+/);
@@ -41,6 +45,11 @@ const isLoadConfig: IsLoadConfig = ({ manifest }, dependencies) => {
 };
 
 const resolveConfig: ResolveConfig<ESLintConfigDeprecated> = (localConfig, options) => getInputs(localConfig, options);
+
+const resolveFromAST: ResolveFromAST = (program, options) => {
+  if (isFlatConfig(options.configFileName)) return getInputsFromFlatConfigAST(program);
+  return [];
+};
 
 const note = `### ESLint v9
 
@@ -84,6 +93,7 @@ const plugin: Plugin = {
   args,
   isLoadConfig,
   resolveConfig,
+  resolveFromAST,
 };
 
 export default plugin;

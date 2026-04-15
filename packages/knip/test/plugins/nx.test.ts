@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/nx');
 
@@ -29,10 +29,11 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.binaries['libs/b/project.json']['webpack']);
   assert(issues.binaries['libs/b/project.json']['compodoc']);
   assert(issues.binaries['libs/b/project.json']['biome']);
+  assert(issues.binaries['libs/b/project.json']['tsc']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 5,
+    binaries: 6,
     devDependencies: 6,
     unlisted: 6,
     files: 3,

@@ -4,7 +4,7 @@ Development in this repository is using:
 
 - pnpm
 - TypeScript
-- Biome
+- oxc
 
 This document describes commands and tasks that might help during development.
 Use what fits your workflow best, but make sure [QA][1] passes.
@@ -38,7 +38,7 @@ Example terminal commands on your machine to get started:
 
 ```shell
 git clone git@github.com:[username]/knip.git
-# Or using gh CLI: gh repo fork webpro-nl/knip --clone
+# Or using the GitHub CLI: gh repo fork webpro-nl/knip --clone
 cd knip
 pnpm install
 cd packages/knip
@@ -53,6 +53,8 @@ essentials and plugins:
 pnpm test:smoke
 bun test:bun:smoke
 ```
+
+Note that Git `core.symlinks=true` is required for some tests.
 
 ## Agents
 
@@ -88,23 +90,23 @@ executable is available globally to run from any directory.
 
 ### Without compilation
 
-To run Knip without compilation, use e.g. `bun` or `tsx`:
+Run Knip without compilation:
 
 ```shell
-npx tsx path/to/knip/packages/knip/src/cli.ts
+node path/to/knip/packages/knip/src/cli.ts
 ```
 
 #### Alias
 
-Expanding on this idea, install `tsx` globally and set up an alias like so:
+Expanding on this idea, set up an alias like so:
 
 ```shell
-alias k="tsx --inspect ~/p/knip/packages/knip/src/cli.ts"
+alias k="node --inspect ~/p/knip/packages/knip/src/cli.ts"
 ```
 
 Invoke `k` to run Knip including any local changes. And if it's in the built-in
 terminal, it will stop at breakpoints. For the rest of this document, `knip` or
-`tsx --inspect` can be replaced with `k`.
+`node --inspect` can be replaced with `k`.
 
 ## Tests
 
@@ -120,7 +122,7 @@ with fixtures for you.
 ### Run single test file
 
 ```shell
-tsx --test test/my-feature.test.ts
+node --test test/my-feature.test.ts
 bun test test/plugins/my-plugin.test.ts
 ```
 
@@ -137,7 +139,7 @@ built-in terminal and allow the debugger to connect:
 
 ```shell
 cd fixtures/feature
-tsx --inspect ../../src/cli.ts
+node --inspect ../../src/cli.ts
 ```
 
 Make sure VS Code is set up to attach to the Node.js process ("Always" or "With
@@ -195,7 +197,7 @@ regular package. Every push is published to their registry. Look for the
 `pkg-pr-new` bot in your pull request.
 
 [1]: #qa
-[2]: #attach-debugger-to-bun-from-a-test
+[2]: #attach-debugger-from-inside-a-test-file
 [3]: #getting-started
 [4]: #agents
 [5]: #contributing-a-plugin
@@ -203,8 +205,7 @@ regular package. Every push is published to their registry. Look for the
 [7]: #tests
 [8]: #github-action
 [9]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[10]:
-  https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
+[10]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
 [11]: https://github.com/webpro-nl/knip
 [12]: https://cli.github.com/
 [13]: ../AGENTS.md

@@ -1,14 +1,12 @@
 import { existsSync } from 'node:fs';
-import os from 'node:os';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
-import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.js';
-import { join, toAbsolute } from '../../util/path.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import vite from '../vite/index.js';
-import type { PluginConfig, RouteConfigEntry } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
+import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
+import { hasDependency, load } from '../../util/plugin.ts';
+import vite from '../vite/index.ts';
+import type { PluginConfig, RouteConfigEntry } from './types.ts';
 
-const isWindows = os.platform() === 'win32';
 // https://reactrouter.com/start/framework/routing
 
 const title = 'React Router';
@@ -41,17 +39,10 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   }
 
   const mapRoute = (route: RouteConfigEntry): string[] => {
-    return [join(appDir, route.file), ...(route.children ? route.children.flatMap(mapRoute) : [])];
+    return [toAbsolute(route.file, appDir), ...(route.children ? route.children.flatMap(mapRoute) : [])];
   };
 
-  const routes = routeConfig
-    .flatMap(mapRoute)
-    // Since these are literal paths, we need to escape any special characters that might
-    // trip up micromatch/fast-glob.
-    // See:
-    //  - https://reactrouter.com/how-to/file-route-conventions#optional-segments
-    //  - https://www.npmjs.com/package/fast-glob#advanced-syntax
-    .map(route => (isWindows ? route : route.replace(/[\^*?()[\]]/g, '\\$&')));
+  const routes = routeConfig.flatMap(mapRoute);
 
   const resolved = [
     // routes.{ts,js} is only used as input to the bundler build system

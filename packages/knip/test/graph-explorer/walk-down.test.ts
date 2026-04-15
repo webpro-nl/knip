@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { IMPORT_STAR } from '../../src/constants.js';
-import { walkDown } from '../../src/graph-explorer/walk-down.js';
-import type { ModuleGraph } from '../../src/types/module-graph.js';
-import { baseExport, baseFileNode, baseImportMaps, getBaseImport } from '../helpers/baseNodeObjects.js';
-import { resolve } from '../helpers/resolve.js';
+import { IMPORT_STAR } from '../../src/constants.ts';
+import { walkDown } from '../../src/graph-explorer/walk-down.ts';
+import type { ModuleGraph } from '../../src/types/module-graph.ts';
+import { baseExport, baseFileNode, baseImportMaps, getBaseImport } from '../helpers/baseNodeObjects.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const createGraph = (): ModuleGraph => new Map();
 

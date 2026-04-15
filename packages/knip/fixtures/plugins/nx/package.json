@@ -16,6 +16,7 @@
     "@nrwl/web": "*",
     "@nrwl/workspace": "*",
     "@tsconfig/node20": "*",
+    "@tsconfig/strictest": "*",
     "rimraf": "*"
   },
   "nx": {

@@ -1,15 +1,15 @@
 import { existsSync } from 'node:fs';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { isInternal, join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import * as karma from '../karma/helpers.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { isInternal, join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import * as karma from '../karma/helpers.ts';
 import type {
   AngularCLIWorkspaceConfiguration,
   KarmaTarget,
   Project,
   WebpackBrowserSchemaForBuildFacade,
-} from './types.js';
+} from './types.ts';
 
 // https://angular.io/guide/workspace-config
 

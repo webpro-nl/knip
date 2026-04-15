@@ -1,7 +1,7 @@
-import type { RawConfiguration } from '../types/config.js';
-import type { DependencySet } from '../types/workspace.js';
-import MDX from './mdx.js';
-import SCSS from './scss.js';
+import type { RawConfiguration } from '../types/config.ts';
+import type { DependencySet } from '../types/workspace.ts';
+import MDX from './mdx.ts';
+import SCSS from './scss.ts';
 import type {
   AsyncCompilers,
   CompilerAsync,
@@ -9,7 +9,7 @@ import type {
   Compilers,
   RawSyncCompilers,
   SyncCompilers,
-} from './types.js';
+} from './types.ts';
 
 // TODO This does not detect functions returning a promise (just the async keyword)
 const isAsyncCompiler = (fn?: CompilerSync | CompilerAsync) => (fn ? fn.constructor.name === 'AsyncFunction' : false);

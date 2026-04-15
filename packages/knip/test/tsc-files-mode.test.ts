@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import { join } from '../src/util/path.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/tsc-files-mode');
 
@@ -12,7 +11,7 @@ test('Should use tsconfig files/include/exclude as project boundaries', async ()
   const options = await createOptions({ cwd, isUseTscFiles: true });
   const { issues, counters } = await main(options);
 
-  assert.equal(issues.files.size, 0);
+  assert.equal(Object.keys(issues.files).length, 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -26,10 +25,10 @@ test('Should report unimported files as unused', async () => {
   const options = await createOptions({ cwd, isUseTscFiles: false });
   const { issues, counters } = await main(options);
 
-  assert.equal(issues.files.size, 3);
-  assert(issues.files.has(join(cwd, 'src/excluded.ts')));
-  assert(issues.files.has(join(cwd, 'src/declare-module.ts')));
-  assert(issues.files.has(join(cwd, 'src/declare-global.ts')));
+  assert.equal(Object.keys(issues.files).length, 3);
+  assert('src/excluded.ts' in issues.files);
+  assert('src/declare-module.ts' in issues.files);
+  assert('src/declare-global.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,

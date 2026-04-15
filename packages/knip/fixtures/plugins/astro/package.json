@@ -13,7 +13,8 @@
     "@astrojs/mdx": "*",
     "@astrojs/rss": "*",
     "@astrojs/sitemap": "*",
-    "astro": "*"
+    "astro": "*",
+    "sharp": "*"
   },
   "devDependencies": {
     "@astrojs/check": "*"

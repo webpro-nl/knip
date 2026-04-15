@@ -13,8 +13,7 @@ export interface Options {
   isFix: boolean;
   isFormat: boolean;
   isIncludeEntryExports: boolean;
-  isIncludeLibs: boolean;
-  isIsolateWorkspaces: boolean;
+
   isProduction: boolean;
   isRemoveFiles: boolean;
   isSession: boolean;

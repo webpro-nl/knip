@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { _glob } from '../../util/glob.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { _glob } from '../../util/glob.ts';
 
 // https://docs.travis-ci.com/user/customizing-the-build/
 

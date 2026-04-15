@@ -147,12 +147,15 @@ export class Extension {
 
     this.#outputChannel.info(`Starting Knip Language Server for ${folder.name}`);
 
+    const runtime = config.get('nodeRuntimePath', '') || 'node';
+
     /** @type {ServerOptions} */
     const serverOptions = {
-      run: { module: Extension.#serverModule, transport: TransportKind.ipc },
+      run: { module: Extension.#serverModule, transport: TransportKind.ipc, runtime },
       debug: {
         module: Extension.#serverModule,
         transport: TransportKind.ipc,
+        runtime,
         options: { execArgv: ['--inspect=6009'] },
       },
     };
@@ -564,7 +567,7 @@ export class Extension {
         packageRegex.lastIndex = sectionStart;
 
         let match;
-        // biome-ignore lint: suspicious/noAssignInExpressions
+        // oxlint-disable-next-line no-cond-assign
         while ((match = packageRegex.exec(text)) !== null) {
           if (match.index > sectionEnd) break;
 

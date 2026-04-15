@@ -1,4 +1,4 @@
-// biome-ignore-all lint/suspicious/noConsole: what's in a name
+/* oxlint-disable no-console */
 import picocolors from 'picocolors';
 
 export const logWarning = (prefix: string, message: string) => {

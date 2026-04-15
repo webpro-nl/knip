@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/openapi-ts",
+  "devDependencies": {
+    "@hey-api/openapi-ts": "*"
+  },
+  "scripts": {
+    "generate": "openapi-ts"
+  }
+}

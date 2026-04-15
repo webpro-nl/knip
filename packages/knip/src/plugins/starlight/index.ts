@@ -1,9 +1,8 @@
-import type ts from 'typescript';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { config } from '../astro/index.js';
-import { getComponentPathsFromSourceFile } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { config } from '../astro/index.ts';
+import { getComponentPathsFromSourceFile } from './resolveFromAST.ts';
 
 // https://starlight.astro.build/reference/configuration/
 
@@ -13,8 +12,8 @@ const enablers = ['@astrojs/starlight'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const componentPaths = getComponentPathsFromSourceFile(program);
   return Array.from(componentPaths).map(id => toProductionEntry(id));
 };
 

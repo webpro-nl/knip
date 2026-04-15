@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import test from 'node:test';
-import { findAndParseGitignores } from '../../src/util/glob-core.js';
-import { join } from '../../src/util/path.js';
-import { resolve } from '../helpers/resolve.js';
+import { findAndParseGitignores } from '../../src/util/glob-core.ts';
+import { join } from '../../src/util/path.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 test('findAndParseGitignores', async () => {
   const cwd = resolve('fixtures/glob');
@@ -12,21 +12,16 @@ test('findAndParseGitignores', async () => {
     gitignoreFiles: ['../../.gitignore', '../../../../.gitignore', '.gitignore', 'a/.gitignore', 'a/b/.gitignore'],
     ignores: new Set([
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
-      '.yarn',
       '**/a/b/c',
-      '**/a/b/c/**',
       '**/.npmrc',
-      '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -36,22 +31,17 @@ test('findAndParseGitignores (/a)', async () => {
   assert.deepEqual(gitignore, {
     gitignoreFiles: ['../.gitignore', '../../../.gitignore', '../../../../../.gitignore', '.gitignore', 'b/.gitignore'],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
-      '.yarn',
       '**/b/c',
-      '**/b/c/**',
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
       '**/.npmrc',
-      '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
@@ -67,72 +57,45 @@ test('findAndParseGitignores (/a/b', async () => {
       '.gitignore',
     ],
     ignores: new Set([
-      '.git',
+      '.git/!(hooks)',
       '**/node_modules',
-      '**/node_modules/**',
       '**/packages/*/dist',
-      '**/packages/*/dist/**',
-      '.yarn',
       '**/c',
-      '**/c/**',
       '**/.DS_Store',
-      '**/.DS_Store/**',
       '**/.cache',
-      '**/.cache/**',
       '**/.npmrc',
-      '**/.npmrc/**',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
-    unignores: [],
+    unignores: new Set(),
   });
 });
 
-test.describe('git worktree', () => {
-  test.before(async () => {
-    // Create the .git file for worktree tests (git won't track files named .git)
-    const worktreeRoot = resolve('fixtures/glob-worktree/root');
-    await fs.copyFile(join(worktreeRoot, 'dot-git'), join(worktreeRoot, '.git')).catch(() => {});
-  });
+const worktreeRoot = resolve('fixtures/glob-worktree/root');
+await fs.copyFile(join(worktreeRoot, 'dot-git'), join(worktreeRoot, '.git')).catch(() => {});
 
-  test('findAndParseGitignores (with .git file)', async () => {
-    const cwd = resolve('fixtures/glob-worktree/root');
-    const gitignore = await findAndParseGitignores(cwd);
-    // With a .git file (worktree), should NOT traverse to ancestor directories
-    // (contrast with other tests that include ancestor gitignore files like '../../.gitignore')
-    // Should also correctly find info/exclude via the gitdir reference in the .git file
-    assert.deepEqual(gitignore, {
-      gitignoreFiles: ['../mock-git-dir/info/exclude', '.gitignore', 'subdir/.gitignore'],
-      ignores: new Set([
-        '.git',
-        '**/node_modules/**',
-        '.yarn',
-        '**/worktree-exclude-ignored',
-        '**/worktree-exclude-ignored/**',
-        '**/worktree-ignored',
-        '**/worktree-ignored/**',
-        'subdir/**/subdir-ignored',
-        'subdir/**/subdir-ignored/**',
-      ]),
-      unignores: [],
-    });
+test('findAndParseGitignores (with .git file)', async () => {
+  const cwd = resolve('fixtures/glob-worktree/root');
+  const gitignore = await findAndParseGitignores(cwd);
+  assert.deepEqual(gitignore, {
+    gitignoreFiles: ['../mock-git-dir/info/exclude', '.gitignore', 'subdir/.gitignore'],
+    ignores: new Set([
+      '.git/!(hooks)',
+      '**/node_modules',
+      '**/worktree-exclude-ignored',
+      '**/worktree-ignored',
+      'subdir/**/subdir-ignored',
+    ]),
+    unignores: new Set(),
   });
+});
 
-  test('findAndParseGitignores (with .git file in ancestor)', async () => {
-    const cwd = resolve('fixtures/glob-worktree/root/subdir');
-    const gitignore = await findAndParseGitignores(cwd);
-    // Running from subdirectory within worktree - should stop at ancestor .git file
-    // and NOT continue to real ancestor directories outside the worktree
-    assert.deepEqual(gitignore, {
-      gitignoreFiles: ['../.gitignore', '.gitignore'],
-      ignores: new Set([
-        '.git',
-        '**/node_modules/**',
-        '.yarn',
-        '**/worktree-ignored',
-        '**/worktree-ignored/**',
-        '**/subdir-ignored',
-        '**/subdir-ignored/**',
-      ]),
-      unignores: [],
-    });
+test('findAndParseGitignores (with .git file in ancestor)', async () => {
+  const cwd = resolve('fixtures/glob-worktree/root/subdir');
+  const gitignore = await findAndParseGitignores(cwd);
+  assert.deepEqual(gitignore, {
+    gitignoreFiles: ['../.gitignore', '.gitignore'],
+    ignores: new Set(['.git/!(hooks)', '**/node_modules', '**/worktree-ignored', '**/subdir-ignored']),
+    unignores: new Set(),
   });
 });

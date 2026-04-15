@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/ignore-members');
 
@@ -11,12 +11,10 @@ test('Respect ignored members, including string-to-regex, show config hints', as
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.classMembers['MyClass.ts']['MyClass.implemented']);
   assert(issues.enumMembers['enums.ts']['Direction.Down']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 1,
     enumMembers: 1,
     processed: 4,
     total: 4,
@@ -29,7 +27,6 @@ test('Respect ignored members, including string-to-regex, show config hints (pro
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    classMembers: 1,
     enumMembers: 1,
     processed: 4,
     total: 4,

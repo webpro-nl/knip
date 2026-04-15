@@ -1,5 +1,5 @@
 import { stripVTControlCharacters } from 'node:util';
-import { pad, truncate, truncateStart } from './string.js';
+import { pad, truncate, truncateStart } from './string.ts';
 
 type Value = string | number | undefined | false | null;
 type Align = 'left' | 'center' | 'right';
@@ -18,12 +18,7 @@ export class Table {
   private truncateStart: string[] = [];
   private noTruncate: string[] = [];
 
-  constructor(options?: {
-    maxWidth?: number;
-    header?: boolean;
-    truncateStart?: string[];
-    noTruncate?: string[];
-  }) {
+  constructor(options?: { maxWidth?: number; header?: boolean; truncateStart?: string[]; noTruncate?: string[] }) {
     this.header = options?.header ?? false;
     this.maxWidth = options?.maxWidth || DEFAULT_MAX_WIDTH;
     this.truncateStart = options?.truncateStart || [];

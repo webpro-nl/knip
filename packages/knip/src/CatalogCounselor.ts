@@ -1,13 +1,13 @@
 import { readFile } from 'node:fs/promises';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
-import { JsonCatalogPeeker } from './JsonCatalogPeeker.js';
-import type { Fixes } from './types/exports.js';
-import type { Issue } from './types/issues.js';
-import type { Catalog, Catalogs, PackageJson } from './types/package-json.js';
-import { extractCatalogReferences, parseCatalog } from './util/catalog.js';
-import type { MainOptions } from './util/create-options.js';
-import { extname } from './util/path.js';
-import { YamlCatalogPeeker } from './YamlCatalogPeeker.js';
+import { ROOT_WORKSPACE_NAME } from './constants.ts';
+import { JsonCatalogPeeker } from './JsonCatalogPeeker.ts';
+import type { Fixes } from './types/exports.ts';
+import type { Issue } from './types/issues.ts';
+import type { Catalog, Catalogs, PackageJson } from './types/package-json.ts';
+import { extractCatalogReferences, parseCatalog } from './util/catalog.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { extname } from './util/path.ts';
+import { YamlCatalogPeeker } from './YamlCatalogPeeker.ts';
 
 export type CatalogContainer = { filePath: string; catalog?: Catalog; catalogs?: Catalogs };
 

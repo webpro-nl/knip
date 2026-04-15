@@ -1,19 +1,23 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { MetroConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { MetroConfig } from './types.ts';
 
 // https://metrobundler.dev/docs/configuration
 
 const title = 'Metro';
 
-const enablers = ['metro', '@react-native/metro-config'];
+const enablers = ['metro', '@react-native/metro-config', 'expo'];
 
 const isEnabled: IsPluginEnabled = options => hasDependency(options.dependencies, enablers);
 
-const config = ['metro.config.{js,cjs,json}', 'package.json'];
+const config = [
+  'metro.config.{js,cjs,mjs,ts,cts,mts,json}',
+  '.config/metro.{js,cjs,mjs,ts,cts,mts,json}',
+  'package.json',
+];
 
 const DEFAULT_PLATFORMS = ['ios', 'android', 'windows', 'web'];
 const PLATFORMS = [...DEFAULT_PLATFORMS, 'native', 'default'];

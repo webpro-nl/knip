@@ -1,5 +1,5 @@
-import type { SYMBOL_TYPE } from '../constants.js';
-import type { Fixes } from './exports.js';
+import type { SYMBOL_TYPE } from '../constants.ts';
+import type { Fixes } from './exports.ts';
 
 export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
@@ -11,7 +11,7 @@ export interface IssueSymbol {
 }
 
 export interface Issue {
-  type: SymbolIssueType;
+  type: IssueType;
   filePath: string;
   workspace: string;
   symbol: string;
@@ -27,13 +27,10 @@ export interface Issue {
   isFixed?: boolean;
 }
 
-export type IssueSet = Set<string>;
-
 export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
-  files: IssueSet;
-  _files: IssueRecords;
+  files: IssueRecords;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;
@@ -46,13 +43,11 @@ export type Issues = {
   nsTypes: IssueRecords;
   duplicates: IssueRecords;
   enumMembers: IssueRecords;
-  classMembers: IssueRecords;
+  namespaceMembers: IssueRecords;
   catalog: IssueRecords;
 };
 
 export type IssueType = keyof Issues;
-
-export type SymbolIssueType = Exclude<IssueType, 'files'>;
 
 export type Report = {
   [key in keyof Issues]: boolean;
@@ -103,6 +98,7 @@ export type ConfigurationHintType =
   | 'project-top-level'
   | 'entry-empty'
   | 'project-empty'
+  | 'project-extension-unregistered'
   | 'package-entry'
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';

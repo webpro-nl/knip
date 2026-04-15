@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { entry as playwrightEntry, resolveConfig as playwrightResolveConfig } from '../playwright/index.js';
-import type { PlaywrightTestConfig } from '../playwright/types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { entry as playwrightEntry, resolveConfig as playwrightResolveConfig } from '../playwright/index.ts';
+import type { PlaywrightTestConfig } from '../playwright/types.ts';
 
 // https://playwright.dev/docs/test-components
 

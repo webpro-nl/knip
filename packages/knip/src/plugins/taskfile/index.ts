@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
-import type { Input } from '../../util/input.js';
-import { toConfig } from '../../util/input.js';
-import { join, relative } from '../../util/path.js';
-import type { TaskfileCommand, TaskfileConfig, TaskfileTask } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
+import type { Input } from '../../util/input.ts';
+import { toConfig } from '../../util/input.ts';
+import { join, relative } from '../../util/path.ts';
+import type { TaskfileCommand, TaskfileConfig, TaskfileTask } from './types.ts';
 
 // https://taskfile.dev/
 

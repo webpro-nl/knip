@@ -1,8 +1,8 @@
 import picocolors from 'picocolors';
-import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.js';
-import type { Issue, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.js';
-import { relative } from '../../util/path.js';
-import { Table } from '../../util/table.js';
+import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
+import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
+import { relative } from '../../util/path.ts';
+import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
 export const dim = picocolors.gray;
@@ -33,6 +33,7 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({
+  namespace: 'parentSymbol' in issue ? issue.parentSymbol : undefined,
   name: issue.symbol,
   line: issue.line,
   col: issue.col,
@@ -72,7 +73,6 @@ export const getTableForType = (
 
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
-    // @ts-expect-error TODO Fix up in next major
     const isFileIssue = issue.type === 'files';
     const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
     if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
@@ -89,5 +89,7 @@ export const getTableForType = (
 
   return table;
 };
+
+export const flattenIssues = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
 export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');

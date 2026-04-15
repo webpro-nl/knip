@@ -1,4 +1,4 @@
-import { frontmatterMatcher, scriptBodies } from '../../compilers/compilers.js';
+import { frontmatterMatcher, scriptBodies } from '../../compilers/compilers.ts';
 
 const compiler = (text: string, path: string) => {
   const scripts = [];

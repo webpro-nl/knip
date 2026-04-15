@@ -1,11 +1,11 @@
 import parseArgs from 'minimist';
-import { pluginArgsMap } from '../plugins.js';
-import type { BinaryResolver } from '../types/config.js';
-import { compact } from '../util/array.js';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.js';
-import { extractBinary } from '../util/modules.js';
-import { dirname } from '../util/path.js';
-import { resolve as fallbackResolve } from './fallback.js';
+import { pluginArgsMap } from '../plugins.ts';
+import type { BinaryResolver } from '../types/config.ts';
+import { compact } from '../util/array.ts';
+import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
+import { extractBinary } from '../util/modules.ts';
+import { dirname } from '../util/path.ts';
+import { resolve as fallbackResolve } from './fallback.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);

@@ -1,10 +1,10 @@
-import type { CollectorIssues } from '../IssueCollector.js';
-import { type Results, run } from '../run.js';
-import type { MainOptions } from '../util/create-options.js';
-import type { SessionHandler, WatchChange } from '../util/watch.js';
-import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.js';
-import { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.js';
-import type { File } from './types.js';
+import type { CollectorIssues } from '../IssueCollector.ts';
+import { type Results, run } from '../run.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import type { SessionHandler, WatchChange } from '../util/watch.ts';
+import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
+import { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
+import type { File } from './types.ts';
 
 type WatchUpdate = { duration: number; mem: number };
 

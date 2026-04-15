@@ -1,14 +1,16 @@
-import type { CompilerOptions } from 'typescript';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import { DEFAULT_EXTENSIONS } from '../constants.js';
-import { debugLog, debugLogArray } from './debug.js';
-import { isDirectory } from './fs.js';
-import { _glob, _syncGlob, prependDirToPattern } from './glob.js';
-import { isAbsolute, isInternal, join, toRelative } from './path.js';
+import type { CompilerOptions } from '../types/project.ts';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { DEFAULT_EXTENSIONS } from '../constants.ts';
+import { debugLog, debugLogArray } from './debug.ts';
+import { findFileWithExtensions, isDirectory } from './fs.ts';
+import { _glob, prependDirToPattern } from './glob.ts';
+import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
-const defaultExtensions = `.{${DEFAULT_EXTENSIONS.map(ext => ext.slice(1)).join(',')}}`;
+const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
+
+const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
 export const augmentWorkspace = (workspace: Workspace, dir: string, compilerOptions: CompilerOptions) => {
   const srcDir = join(dir, 'src');
@@ -26,12 +28,14 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
     const workspace = chief.findWorkspaceByFilePath(filePath);
     if (workspace?.srcDir && workspace.outDir) {
       if (filePath.startsWith(workspace.outDir) || workspace.srcDir === workspace.outDir) {
-        const pattern = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, defaultExtensions);
-        const srcFilePath = _syncGlob({ patterns: pattern })[0];
-        toSourceMapCache.set(filePath, srcFilePath);
-        if (srcFilePath && srcFilePath !== filePath) {
-          debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
-          return srcFilePath;
+        const basePath = filePath.replace(workspace.outDir, workspace.srcDir).replace(matchExt, '');
+        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        if (srcFilePath) {
+          toSourceMapCache.set(filePath, srcFilePath);
+          if (srcFilePath !== filePath) {
+            debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
+            return srcFilePath;
+          }
         }
       }
     }

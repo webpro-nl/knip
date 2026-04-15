@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/nuxt-config",
+  "scripts": {
+    "build": "nuxt build"
+  },
+  "dependencies": {
+    "nuxt": "*",
+    "a-module": "*",
+    "a-nuxt-theme": "*"
+  }
+}

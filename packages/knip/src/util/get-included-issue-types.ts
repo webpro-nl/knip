@@ -1,6 +1,6 @@
-import { ISSUE_TYPES } from '../constants.js';
-import type { Report } from '../types/issues.js';
-import { ConfigurationError } from './errors.js';
+import { ISSUE_TYPES } from '../constants.ts';
+import type { Report } from '../types/issues.ts';
+import { ConfigurationError } from './errors.ts';
 
 type GetIncludedIssueTypesOptions = {
   isProduction?: boolean;
@@ -11,13 +11,13 @@ type GetIncludedIssueTypesOptions = {
 };
 
 /** @internal */
-export const defaultExcludedIssueTypes = ['classMembers', 'nsExports', 'nsTypes'];
+export const defaultExcludedIssueTypes = ['nsExports', 'nsTypes'];
 const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
 
 export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved', 'catalog'];
-export const shorthandExports = ['exports', 'types', 'enumMembers', 'duplicates'];
+export const shorthandExports = ['exports', 'types', 'enumMembers', 'namespaceMembers', 'duplicates'];
 export const shorthandFiles = ['files'];
 
 export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => {

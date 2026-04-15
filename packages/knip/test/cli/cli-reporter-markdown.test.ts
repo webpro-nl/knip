@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { exec } from '../helpers/exec.js';
-import { resolve } from '../helpers/resolve.js';
+import { exec } from '../helpers/exec.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/module-resolution-non-std');
 
@@ -10,7 +10,9 @@ test('knip --reporter markdown', () => {
 
 ## Unused files (1)
 
-* src/unused.ts
+| Name          | Location      | Severity |
+| :------------ | :------------ | :------- |
+| src/unused.ts | src/unused.ts | error    |
 
 ## Unlisted dependencies (2)
 

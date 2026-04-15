@@ -11,4 +11,5 @@ import 'vitest';
 test('ehm comments & environments overload', () => {
   const element = document.createElement('div');
   expect(element).not.toBeNull();
+  // inline reference to @jest-environment ghost should be ignored (not at top of file)
 });

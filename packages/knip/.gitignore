@@ -5,3 +5,5 @@
 !/fixtures/**
 /fixtures/**/.DS_Store
 .cache
+bin/knip
+bin/knip-bun

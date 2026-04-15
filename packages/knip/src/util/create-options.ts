@@ -1,21 +1,22 @@
-import { partitionCompilers } from '../compilers/index.js';
-import { KNIP_CONFIG_LOCATIONS } from '../constants.js';
-import { knipConfigurationSchema } from '../schema/configuration.js';
-import type { RawConfiguration } from '../types/config.js';
-import type { IssueType } from '../types/issues.js';
-import type { Options } from '../types/options.js';
-import type { PackageJson } from '../types/package-json.js';
-import { getCatalogContainer } from './catalog.js';
-import type { ParsedCLIArgs } from './cli-arguments.js';
-import { ConfigurationError } from './errors.js';
-import { findFile, loadJSON } from './fs.js';
-import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.js';
-import { defaultRules } from './issue-initializers.js';
-import { loadResolvedConfigFile } from './load-config.js';
-import { _load } from './loader.js';
-import { getKeysByValue } from './object.js';
-import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.js';
-import { splitTags } from './tag.js';
+import { partitionCompilers } from '../compilers/index.ts';
+import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
+import { knipConfigurationSchema } from '../schema/configuration.ts';
+import type { RawConfiguration } from '../types/config.ts';
+import type { IssueType } from '../types/issues.ts';
+import type { Options } from '../types/options.ts';
+import type { PackageJson } from '../types/package-json.ts';
+import { getCatalogContainer } from './catalog.ts';
+import type { ParsedCLIArgs } from './cli-arguments.ts';
+import { ConfigurationError } from './errors.ts';
+import { findFile, loadJSON } from './fs.ts';
+import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.ts';
+import { defaultRules } from './issue-initializers.ts';
+import { loadResolvedConfigFile } from './load-config.ts';
+import { _load } from './loader.ts';
+import { logWarning } from './log.ts';
+import { getKeysByValue } from './object.ts';
+import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
   args?: ParsedCLIArgs;
@@ -56,6 +57,26 @@ export const createOptions = async (options: CreateOptions) => {
     manifest.knip,
     configFilePath ? await loadResolvedConfigFile(configFilePath, args) : {}
   );
+
+  const validIssueTypes = new Set<string>(ISSUE_TYPES);
+  for (const key of ['rules', 'include', 'exclude'] as const) {
+    const value = loadedConfig[key];
+    if (!value) continue;
+    if (Array.isArray(value)) {
+      const invalid = value.filter((v: string) => !validIssueTypes.has(v));
+      if (invalid.length > 0) {
+        loadedConfig[key] = value.filter((v: string) => validIssueTypes.has(v));
+        for (const name of invalid) logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+      }
+    } else if (typeof value === 'object') {
+      for (const name in value) {
+        if (!validIssueTypes.has(name)) {
+          delete value[name];
+          logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+        }
+      }
+    }
+  }
 
   const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
 
@@ -99,10 +120,7 @@ export const createOptions = async (options: CreateOptions) => {
 
   const fixTypes = options.fixTypes ?? args['fix-type'] ?? [];
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
-  const isIncludeLibs = args['include-libs'] ?? options.isIncludeLibs ?? false;
-
-  const isReportClassMembers = includedIssueTypes.classMembers;
-  const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? args['experimental-tags'] ?? []);
+  const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? []);
 
   const workspace = options.workspace ?? args.workspace;
 
@@ -130,9 +148,7 @@ export const createOptions = async (options: CreateOptions) => {
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
     isFormat: args.format ?? options.isFormat ?? false,
     isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
-    isIsolateWorkspaces: options.isIsolateWorkspaces ?? args['isolate-workspaces'] ?? false,
     isProduction,
-    isReportClassMembers,
     isReportDependencies:
       includedIssueTypes.dependencies ||
       includedIssueTypes.unlisted ||
@@ -144,11 +160,15 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.nsExports ||
       includedIssueTypes.nsTypes ||
       includedIssueTypes.enumMembers ||
-      includedIssueTypes.duplicates ||
-      isReportClassMembers,
+      includedIssueTypes.namespaceMembers ||
+      includedIssueTypes.duplicates,
     isReportFiles: includedIssueTypes.files,
-    isReportTypes: includedIssueTypes.types || includedIssueTypes.nsTypes || includedIssueTypes.enumMembers,
-    isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports || isReportClassMembers,
+    isReportTypes:
+      includedIssueTypes.types ||
+      includedIssueTypes.nsTypes ||
+      includedIssueTypes.enumMembers ||
+      includedIssueTypes.namespaceMembers,
+    isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports,
     isSession: options.isSession ?? false,
     isShowProgress:
       !isDebug &&
@@ -157,7 +177,7 @@ export const createOptions = async (options: CreateOptions) => {
       options.isShowProgress !== false &&
       process.stdout.isTTY &&
       typeof process.stdout.cursorTo === 'function',
-    isSkipLibs: !(isIncludeLibs || includedIssueTypes.classMembers),
+
     isStrict,
     isTrace,
     isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,

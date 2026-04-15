@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { CORE_CLIENT_API, resolveConfigItems } from './helpers.js';
-import type { DocusaurusConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
+import type { DocusaurusConfig } from './types.ts';
 
 // https://docusaurus.io/docs/configuration
 
@@ -18,6 +19,16 @@ const production = ['src/pages/**/*.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx', 'v
 
 const entry = ['babel.config.{js,cjs,mjs,cts}'];
 
+const resolveStaticAssets = (items: DocusaurusConfig['scripts'] | DocusaurusConfig['stylesheets'], cwd: string) => {
+  const entries: Input[] = [];
+  for (const item of items ?? []) {
+    const value = typeof item === 'string' ? item : (item.src ?? item.href);
+    if (typeof value === 'string' && !value.includes('://'))
+      entries.push(toProductionEntry(join(cwd, 'static', value)));
+  }
+  return entries;
+};
+
 const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) => {
   const themes = await resolveConfigItems(config.themes ?? [], 'theme', options);
   const plugins = await resolveConfigItems(config.plugins ?? [], 'plugin', options);
@@ -27,6 +38,9 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     options.manifest.dependencies?.['@docusaurus/theme-classic'] ||
     options.manifest.dependencies?.['@docusaurus/preset-classic'];
 
+  const scripts = resolveStaticAssets(config.scripts ?? [], options.cwd);
+  const stylesheets = resolveStaticAssets(config.stylesheets ?? [], options.cwd);
+
   return [
     toAlias('@site/*', './*'),
     toDependency('@docusaurus/module-type-aliases', { optional: true }),
@@ -34,11 +48,15 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     ...(hasClassicTheme ? [toIgnore('(@theme|@theme-init|@theme-original)/*', 'dependencies')] : []),
     // Ignore aliases for @docusaurus/core/lib/client/exports/ https://docusaurus.io/docs/docusaurus-core
     toIgnore(`@docusaurus/(${CORE_CLIENT_API.join('|')})`, 'dependencies'),
+    // https://docusaurus.io/blog/releases/3.8
+    ...(config.future?.experimental_faster ? [toDependency('@docusaurus/faster')] : []),
     ...production.map(id => toProductionEntry(id)),
     ...entry.map(id => toEntry(id)),
     ...themes,
     ...plugins,
     ...presets,
+    ...scripts,
+    ...stylesheets,
   ];
 };
 

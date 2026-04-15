@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["svgo.config.js", "yarn.config.cjs"],
   "create-typescript-app": {
     "entry": ["create-typescript-app.config.ts"]

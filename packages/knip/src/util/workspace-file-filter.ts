@@ -1,5 +1,5 @@
-import { ROOT_WORKSPACE_NAME } from '../constants.js';
-import { join } from './path.js';
+import { ROOT_WORKSPACE_NAME } from '../constants.ts';
+import { join } from './path.ts';
 
 export type WorkspaceFilePathFilter = (filePath: string) => boolean;
 

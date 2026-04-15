@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { ReactNativeConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDependency } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { ReactNativeConfig } from './types.ts';
 
 // https://github.com/react-native-community/cli/blob/main/docs/configuration.md
 

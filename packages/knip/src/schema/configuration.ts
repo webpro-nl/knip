@@ -1,6 +1,6 @@
 import { z } from 'zod/mini';
-import { SYMBOL_TYPE } from '../constants.js';
-import { globSchema, pluginsSchema } from './plugins.js';
+import { SYMBOL_TYPE } from '../constants.ts';
+import { globSchema, pluginsSchema } from './plugins.ts';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
@@ -28,7 +28,7 @@ const issueTypeSchema = z.union([
   z.literal('nsTypes'),
   z.literal('duplicates'),
   z.literal('enumMembers'),
-  z.literal('classMembers'),
+  z.literal('namespaceMembers'),
   z.literal('catalog'),
 ]);
 
@@ -57,7 +57,7 @@ const rootConfigurationSchema = z.object({
    *
    * ```json title="knip.json"
    * {
-   *   "$schema": "https://unpkg.com/knip@5/schema.json"
+   *   "$schema": "https://unpkg.com/knip@6/schema.json"
    * }
    * ```
    *
@@ -65,7 +65,7 @@ const rootConfigurationSchema = z.object({
    * In JSONC, use the provided JSONC schema:
    * ```jsonc title="knip.jsonc"
    * {
-   *   "$schema": "https://unpkg.com/knip@5/schema-jsonc.json"
+   *   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json"
    * }
    * ```
    *
@@ -197,7 +197,7 @@ const rootConfigurationSchema = z.object({
    */
   ignoreDependencies: z.optional(stringOrRegexSchema),
   /**
-   * Array of class and enum members to exclude from the report. Regular expressions
+   * Array of enum and namespace members to exclude from the report. Regular expressions
    * allowed.
    *
    * @example

@@ -6,6 +6,7 @@ export interface NxProjectConfiguration {
       options?: {
         command?: string;
         commands?: Array<string | { command: string }>;
+        cwd?: string;
         eslintConfig?: string;
         jestConfig?: string;
         tsConfig?: string;

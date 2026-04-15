@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces-pnpm');
 
@@ -20,4 +20,11 @@ test('Find unused dependencies, exports and files in workspaces (loose)', async 
     processed: 4,
     total: 4,
   });
+});
+
+test('Find no false unused workspace dependencies when run from workspace dir', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/workspaces-pnpm/apps/app-a') });
+  const { counters } = await main(options);
+
+  assert.equal(counters.dependencies, 0);
 });

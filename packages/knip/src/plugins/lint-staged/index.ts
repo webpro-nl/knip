@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import type { Input } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import { toLilconfig } from '../../util/plugin-config.js';
-import type { Entry, LintStagedConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { Input } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { toLilconfig } from '../../util/plugin-config.ts';
+import type { Entry, LintStagedConfig } from './types.ts';
 
 // https://github.com/okonet/lint-staged
 

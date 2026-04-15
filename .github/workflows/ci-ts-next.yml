@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Ubuntu/Node v24
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
       - name: Install dependencies
         run: pnpm install
       - name: Install latest peer dependencies

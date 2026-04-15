@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/sveltekit');
 
@@ -13,8 +13,8 @@ test('Find dependencies with the SvelteKit plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 16,
-    total: 16,
+    processed: 18,
+    total: 18,
   });
 });
 
@@ -27,8 +27,8 @@ test('Find dependencies with the SvelteKit plugin (development)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 18,
-    total: 18,
+    processed: 20,
+    total: 20,
   });
 });
 

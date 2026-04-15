@@ -1,52 +1,51 @@
-import ts from 'typescript';
-import type { ResolveFromAST } from '../../types/config.js';
-import { getImportMap, getPropertyValues } from '../../typescript/ast-helpers.js';
-import { toDeferResolveProductionEntry } from '../../util/input.js';
-import { dirname } from '../../util/path.js';
-import { _resolveSync } from '../../util/resolve.js';
+import { Visitor } from 'oxc-parser';
+import type { ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues, getImportMap } from '../../typescript/ast-helpers.ts';
+import { parseFile } from '../../typescript/visitors/helpers.ts';
+import { toDeferResolveProductionEntry } from '../../util/input.ts';
+import { dirname } from '../../util/path.ts';
+import { _resolveSync } from '../../util/resolve.ts';
 
-export const getInputsFromHandlers: ResolveFromAST = (sourceFile, options) => {
+export const getInputsFromHandlers: ResolveFromAST = (program, options) => {
   const entries = new Set<string>();
-  const importMap = getImportMap(sourceFile);
 
-  // Maybe too broad, returns string value of any `handler` property in file
-  function addHandlerSpecifiers(node: ts.Node) {
-    if (ts.isObjectLiteralExpression(node)) {
-      const specifiers = getPropertyValues(node, 'handler');
-      for (const specifier of specifiers) entries.add(specifier.substring(0, specifier.lastIndexOf('.')));
-    }
-    ts.forEachChild(node, addHandlerSpecifiers);
-  }
+  const addHandlers = (values: Set<string>) => {
+    for (const specifier of values) entries.add(specifier.substring(0, specifier.lastIndexOf('.')));
+  };
 
-  function visit(node: ts.Node) {
-    if (ts.isCallExpression(node)) {
-      if (ts.isPropertyAccessExpression(node.expression)) {
-        if (node.expression.name.text === 'stack') {
-          const arg = node.arguments[0];
-          if (ts.isIdentifier(arg)) {
-            const importPath = importMap.get(arg.text);
+  try {
+    const importMap = getImportMap(program);
+
+    addHandlers(collectPropertyValues(program, 'handler'));
+
+    const visitor = new Visitor({
+      CallExpression(node) {
+        if (node.callee?.type !== 'MemberExpression') return;
+        const propName = !node.callee.computed ? node.callee.property?.name : undefined;
+        if (propName === 'stack') {
+          const arg = node.arguments?.[0];
+          if (arg?.type === 'Identifier') {
+            const importPath = importMap.get(arg.name);
             if (importPath) {
               const resolvedPath = _resolveSync(importPath, dirname(options.configFilePath));
               if (resolvedPath) {
-                const stackFile = options.getSourceFile(resolvedPath);
-                if (stackFile) ts.forEachChild(stackFile, addHandlerSpecifiers);
+                const stackText = options.readFile(resolvedPath);
+                if (stackText) {
+                  const stackResult = parseFile('stack.ts', stackText);
+                  addHandlers(collectPropertyValues(stackResult.program, 'handler'));
+                }
               }
             }
           }
         }
-        if (node.expression.name.text === 'route' && node.arguments.length >= 2) {
+        if (propName === 'route' && node.arguments?.length >= 2) {
           const handlerArg = node.arguments[1];
-          if (ts.isStringLiteral(handlerArg)) {
-            entries.add(handlerArg.text);
-          }
+          if (handlerArg?.type === 'Literal' && typeof handlerArg.value === 'string') entries.add(handlerArg.value);
         }
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  ts.forEachChild(sourceFile, addHandlerSpecifiers); // Only for v3?
-  ts.forEachChild(sourceFile, visit);
+      },
+    });
+    visitor.visit(program);
+  } catch {}
 
   return Array.from(entries).map(specifier =>
     toDeferResolveProductionEntry(specifier, { containingFilePath: options.configFilePath })

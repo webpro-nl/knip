@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { getDefinitelyTypedFor, getPackageFromDefinitelyTyped, sanitizeSpecifier } from '../../src/util/modules.js';
+import {
+  getDefinitelyTypedFor,
+  getPackageFromDefinitelyTyped,
+  getPackageNameFromModuleSpecifier,
+  isStartsLikePackageName,
+  sanitizeSpecifier,
+} from '../../src/util/modules.ts';
 
 test('Should return definitely typed package for package name', () => {
   assert.equal(getDefinitelyTypedFor('node'), '@types/node');
@@ -11,6 +17,33 @@ test('Should return definitely typed package for package name', () => {
 test('Should return package name from definitely typed package name', () => {
   assert.equal(getPackageFromDefinitelyTyped('node'), 'node');
   assert.equal(getPackageFromDefinitelyTyped('npmcli__map-workspaces'), '@npmcli/map-workspaces');
+});
+
+test('Should detect specifiers that look like package names', () => {
+  assert.equal(isStartsLikePackageName('react'), true);
+  assert.equal(isStartsLikePackageName('@scope/pkg'), true);
+  assert.equal(isStartsLikePackageName('@~private/pkg'), true);
+  assert.equal(isStartsLikePackageName('@.internal/pkg'), true);
+  assert.equal(isStartsLikePackageName('@_private/pkg'), true);
+  assert.equal(isStartsLikePackageName('./relative'), false);
+  assert.equal(isStartsLikePackageName('../parent'), false);
+  assert.equal(isStartsLikePackageName('/absolute'), false);
+  assert.equal(isStartsLikePackageName('#subpath'), false);
+  assert.equal(isStartsLikePackageName('$dollar'), false);
+  assert.equal(isStartsLikePackageName('~/alias'), false);
+  assert.equal(isStartsLikePackageName('~bare'), false);
+});
+
+test('Should extract package name from module specifier', () => {
+  assert.equal(getPackageNameFromModuleSpecifier('@scope/pkg'), '@scope/pkg');
+  assert.equal(getPackageNameFromModuleSpecifier('@scope/pkg/deep'), '@scope/pkg');
+  assert.equal(getPackageNameFromModuleSpecifier('@~private/pkg'), '@~private/pkg');
+  assert.equal(getPackageNameFromModuleSpecifier('@~private/pkg/deep'), '@~private/pkg');
+  assert.equal(getPackageNameFromModuleSpecifier('react'), 'react');
+  assert.equal(getPackageNameFromModuleSpecifier('react/jsx-runtime'), 'react');
+  assert.equal(getPackageNameFromModuleSpecifier('~/something'), undefined);
+  assert.equal(getPackageNameFromModuleSpecifier('./relative'), undefined);
+  assert.equal(getPackageNameFromModuleSpecifier('#subpath'), undefined);
 });
 
 test('Should sanitize import specifier', () => {

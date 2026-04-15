@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { createJiti, type JitiOptions } from 'jiti';
-import { join } from './path.js';
+import { join } from './path.ts';
 
 const empty = join(fileURLToPath(import.meta.url), '../empty.js');
 

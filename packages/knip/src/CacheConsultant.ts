@@ -1,7 +1,7 @@
-import type { MainOptions } from './util/create-options.js';
-import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.js';
-import { timerify } from './util/Performance.js';
-import { version } from './version.js';
+import type { MainOptions } from './util/create-options.ts';
+import { type FileDescriptor, FileEntryCache } from './util/file-entry-cache.ts';
+import { timerify } from './util/Performance.ts';
+import { version } from './version.ts';
 
 const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };
 

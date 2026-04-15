@@ -48,7 +48,7 @@
     },
     "exclude": {
       "title": "Exclude issue types from the report",
-      "examples": ["classMembers", "enumMembers"],
+      "examples": ["enumMembers"],
       "$ref": "#/definitions/issueTypes"
     },
     "ignoreExportsUsedInFile": {
@@ -101,7 +101,7 @@
       "examples": [
         {
           "src/generated/**": ["exports", "types"],
-          "**/*.generated.ts": ["exports", "classMembers"]
+          "**/*.generated.ts": ["exports"]
         }
       ],
       "type": "object",
@@ -141,9 +141,6 @@
         "catalog": {
           "$ref": "#/definitions/ruleValue"
         },
-        "classMembers": {
-          "$ref": "#/definitions/ruleValue"
-        },
         "dependencies": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -157,6 +154,9 @@
           "$ref": "#/definitions/ruleValue"
         },
         "enumMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "namespaceMembers": {
           "$ref": "#/definitions/ruleValue"
         },
         "exports": {
@@ -221,7 +221,7 @@
       "type": "boolean"
     },
     "ignoreMembers": {
-      "title": "Class and enum members to exclude from the report (regex allowed)",
+      "title": "Enum and namespace members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
       "$ref": "#/definitions/list"
     },
@@ -243,13 +243,13 @@
           "nsTypes",
           "duplicates",
           "enumMembers",
-          "classMembers",
+          "namespaceMembers",
           "catalog"
         ]
       }
     },
     "globPatterns": {
-      "description": "Use file paths and glob patterns to match files. Knip uses fast-glob and picomatch (https://github.com/micromatch/picomatch)",
+      "description": "Use file paths and glob patterns to match files. Knip uses tinyglobby and picomatch (https://github.com/micromatch/picomatch)",
       "anyOf": [
         {
           "type": "string"
@@ -620,8 +620,24 @@
           "title": "oclif plugin configuration (https://knip.dev/reference/plugins/oclif)",
           "$ref": "#/definitions/plugin"
         },
+        "openapi-ts": {
+          "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
+          "$ref": "#/definitions/plugin"
+        },
+        "oxfmt": {
+          "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
+          "$ref": "#/definitions/plugin"
+        },
         "oxlint": {
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "panda-css": {
+          "title": "panda-css plugin configuration (https://knip.dev/reference/plugins/panda-css)",
+          "$ref": "#/definitions/plugin"
+        },
+        "payload": {
+          "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
           "$ref": "#/definitions/plugin"
         },
         "playwright": {
@@ -660,8 +676,16 @@
           "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
           "$ref": "#/definitions/plugin"
         },
+        "qwik": {
+          "title": "qwik plugin configuration (https://knip.dev/reference/plugins/qwik)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-email": {
+          "title": "react-email plugin configuration (https://knip.dev/reference/plugins/react-email)",
           "$ref": "#/definitions/plugin"
         },
         "react-native": {
@@ -688,6 +712,10 @@
           "title": "Remix plugin configuration (https://knip.dev/reference/plugins/remix)",
           "$ref": "#/definitions/plugin"
         },
+        "rolldown": {
+          "title": "rolldown plugin configuration (https://knip.dev/reference/plugins/rolldown)",
+          "$ref": "#/definitions/plugin"
+        },
         "rollup": {
           "title": "Rollup plugin configuration (https://knip.dev/reference/plugins/rollup)",
           "$ref": "#/definitions/plugin"
@@ -706,6 +734,10 @@
         },
         "rstest": {
           "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
+          "$ref": "#/definitions/plugin"
+        },
+        "sanity": {
+          "title": "sanity plugin configuration (https://knip.dev/reference/plugins/sanity)",
           "$ref": "#/definitions/plugin"
         },
         "semantic-release": {
@@ -734,6 +766,10 @@
         },
         "starlight": {
           "title": "starlight plugin configuration (https://knip.dev/reference/plugins/starlight)",
+          "$ref": "#/definitions/plugin"
+        },
+        "stencil": {
+          "title": "stencil plugin configuration (https://knip.dev/reference/plugins/stencil)",
           "$ref": "#/definitions/plugin"
         },
         "storybook": {

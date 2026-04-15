@@ -1,6 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "include": ["classMembers"],
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
       "project": ["!templates/**"]
@@ -11,7 +10,8 @@
         "test/**/*.ts",
         "!src/util/empty.ts",
         "!**/_template/**"
-      ]
+      ],
+      "ignoreDependencies": ["prettier"]
     },
     "packages/docs": {
       "entry": ["{remark,scripts}/*.ts"]

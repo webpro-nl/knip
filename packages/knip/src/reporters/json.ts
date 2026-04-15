@@ -1,9 +1,9 @@
-import type { Entries } from '../types/entries.js';
-import type { Issue, IssueRecords, Report, ReporterOptions } from '../types/issues.js';
-import { createOwnershipEngine } from '../util/codeowners.js';
-import { isFile } from '../util/fs.js';
-import { relative, resolve } from '../util/path.js';
-import { convert } from './util/util.js';
+import type { Entries } from '../types/entries.ts';
+import type { IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
+import { createOwnershipEngine } from '../util/codeowners.ts';
+import { isFile } from '../util/fs.ts';
+import { relative, resolve } from '../util/path.ts';
+import { convert, flattenIssues } from './util/util.ts';
 
 type ExtraReporterOptions = {
   codeowners?: string;
@@ -14,6 +14,7 @@ interface BaseItem {
 }
 
 interface Item extends BaseItem {
+  namespace?: string;
   pos?: number;
   line?: number;
   col?: number;
@@ -25,20 +26,21 @@ type Items = Array<Item>;
 type Row = {
   file: string;
   owners?: BaseItems;
+  binaries?: BaseItems;
+  catalog?: Items;
   dependencies?: Items;
   devDependencies?: Items;
-  optionalPeerDependencies?: Items;
-  unlisted?: BaseItems;
-  binaries?: BaseItems;
-  unresolved?: Items;
+  duplicates?: Array<Items>;
+  enumMembers?: Items;
   exports?: Items;
-  types?: Items;
+  files?: Items;
+  namespaceMembers?: Items;
   nsExports?: Items;
   nsTypes?: Items;
-  duplicates?: Array<Items>;
-  enumMembers?: Record<string, Items>;
-  classMembers?: Record<string, Items>;
-  catalog?: Items;
+  optionalPeerDependencies?: Items;
+  types?: Items;
+  unlisted?: BaseItems;
+  unresolved?: Items;
 };
 
 export default async ({ report, issues, options, cwd }: ReporterOptions) => {
@@ -53,61 +55,47 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const findOwners = isFile(codeownersFilePath) && createOwnershipEngine(codeownersFilePath);
 
-  const flatten = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
-
   const initRow = (filePath: string) => {
     const file = relative(cwd, filePath);
     const row: Row = {
       file,
       ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
+      ...(report.binaries && { binaries: [] }),
+      ...(report.catalog && { catalog: [] }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
-      ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
-      ...(report.unlisted && { unlisted: [] }),
-      ...(report.binaries && { binaries: [] }),
-      ...(report.unresolved && { unresolved: [] }),
-      ...(report.exports && { exports: [] }),
-      ...(report.nsExports && { nsExports: [] }),
-      ...(report.types && { types: [] }),
-      ...(report.nsTypes && { nsTypes: [] }),
-      ...(report.enumMembers && { enumMembers: {} }),
-      ...(report.classMembers && { classMembers: {} }),
       ...(report.duplicates && { duplicates: [] }),
-      ...(report.catalog && { catalog: [] }),
+      ...(report.enumMembers && { enumMembers: [] }),
+      ...(report.exports && { exports: [] }),
+      ...(report.files && { files: [] }),
+      ...(report.namespaceMembers && { namespaceMembers: [] }),
+      ...(report.nsExports && { nsExports: [] }),
+      ...(report.nsTypes && { nsTypes: [] }),
+      ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
+      ...(report.types && { types: [] }),
+      ...(report.unlisted && { unlisted: [] }),
+      ...(report.unresolved && { unresolved: [] }),
     };
     return row;
   };
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
     if (isReportType) {
-      if (type === 'files' || type === '_files') {
-        // Ignore, added below - we should probably deprecate and make all issue types consistent
-      } else {
-        for (const issue of flatten(issues[type] as IssueRecords)) {
-          const { filePath, symbol, symbols, parentSymbol } = issue;
-          json[filePath] = json[filePath] ?? initRow(filePath);
-          if (type === 'duplicates') {
-            symbols && json[filePath][type]?.push(symbols.map(convert));
-          } else if (type === 'enumMembers' || type === 'classMembers') {
-            const item = json[filePath][type];
-            if (parentSymbol && item) {
-              item[parentSymbol] = item[parentSymbol] ?? [];
-              item[parentSymbol].push(convert(issue));
-            }
-          } else {
-            if (type === 'binaries') {
-              json[filePath][type]?.push({ name: symbol });
-            } else {
-              json[filePath][type]?.push(convert(issue));
-            }
-          }
+      for (const issue of flattenIssues(issues[type] as IssueRecords)) {
+        const { filePath, symbol, symbols } = issue;
+        json[filePath] = json[filePath] ?? initRow(filePath);
+        if (type === 'duplicates') {
+          symbols && json[filePath][type]?.push(symbols.map(convert));
+        } else if (type === 'binaries') {
+          json[filePath][type]?.push({ name: symbol });
+        } else {
+          json[filePath][type]?.push(convert(issue));
         }
       }
     }
   }
 
   const output = JSON.stringify({
-    files: Array.from(issues.files).map(filePath => relative(cwd, filePath)),
     issues: Object.values(json),
   });
 

@@ -1,11 +1,11 @@
 import picocolors from 'picocolors';
-import type { ConsoleStreamer } from '../ConsoleStreamer.js';
-import type { Entries } from '../types/entries.js';
-import type { Issues } from '../types/issues.js';
-import type { MainOptions } from '../util/create-options.js';
-import { perfObserver } from '../util/Performance.js';
-import { prettyMilliseconds } from '../util/string.js';
-import { getIssueTypeTitle, getTableForType } from './util/util.js';
+import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
+import type { Entries } from '../types/entries.ts';
+import type { Issues } from '../types/issues.ts';
+import type { MainOptions } from '../util/create-options.ts';
+import { perfObserver } from '../util/Performance.ts';
+import { prettyMilliseconds } from '../util/string.ts';
+import { flattenIssues, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 interface WatchReporter {
   issues: Issues;
@@ -19,14 +19,12 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
   let totalIssues = 0;
   const lines: string[] = [];
 
-  for (let [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
+  for (const [reportType, isReportType] of Object.entries(options.includedIssueTypes) as Entries<
     typeof options.includedIssueTypes
   >) {
-    if (reportType === 'files') reportType = '_files';
-
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
-      const issuesForType = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
 
       if (issuesForType.length > 0) {
         if (title) {

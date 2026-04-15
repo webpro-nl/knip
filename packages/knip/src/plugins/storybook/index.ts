@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.js';
-import { join, relative } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { StorybookConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { join, relative } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { StorybookConfig } from './types.ts';
 
 // https://storybook.js.org/docs/react/configure/overview
 
@@ -57,11 +57,20 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
     ? [toConfig('vite', viteConfigPath, { dir: cwd, containingFilePath: configFilePath })]
     : [];
 
+  const hasVitestAddon = addons.some(addon => addon === '@storybook/addon-vitest');
+  const coverageDeps: Input[] = hasVitestAddon
+    ? [
+        toDependency('@vitest/coverage-v8', { optional: true }),
+        toDependency('@vitest/coverage-istanbul', { optional: true }),
+      ]
+    : [];
+
   return [
     ...patterns.map(id => toEntry(id)),
     ...addons.map(id => toDeferResolve(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
+    ...coverageDeps,
     ...configs,
   ];
 };

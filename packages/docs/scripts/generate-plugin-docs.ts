@@ -9,7 +9,7 @@ import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 import type { Node } from 'unist';
 import { u } from 'unist-builder';
-import type { Plugin } from '../../knip/src/types/config.js';
+import type { Plugin } from '../../knip/src/types/config.ts';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');

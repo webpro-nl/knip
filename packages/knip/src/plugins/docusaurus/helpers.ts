@@ -1,7 +1,7 @@
-import type { PluginOptions as Options } from '../../types/config.js';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.js';
-import { findWebpackDependenciesFromConfig } from '../webpack/index.js';
-import type { ConfigItem, ModuleType, PluginOptions, PresetOptions } from './types.js';
+import type { PluginOptions as Options } from '../../types/config.ts';
+import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
+import type { ConfigItem, ModuleType, PluginOptions, PresetOptions } from './types.ts';
 
 const FIRST_PARTY_MODULES = new Set([
   'content-docs',

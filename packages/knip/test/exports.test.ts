@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/exports');
 
@@ -40,7 +40,7 @@ test('Find unused exports', async () => {
 
   assert.equal(issues.types['my-module.ts']['MyAnyType'].line, 28);
   assert.equal(issues.types['my-module.ts']['MyAnyType'].col, 13);
-  assert.equal(issues.types['my-namespace.ts']['MyNamespace.MyNamespace'].line, 6);
+  assert.equal(issues.types['my-namespace.ts']['MyNamespace.MyNamespace'].line, 5);
   assert.equal(issues.types['my-namespace.ts']['MyNamespace.MyNamespace'].col, 18);
 
   assert.deepEqual(counters, {

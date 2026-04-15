@@ -1,9 +1,9 @@
-import type { Results } from '../../run.js';
-import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.js';
-import { relative, toRelative } from '../../util/path.js';
-import { Table } from '../../util/table.js';
-import { byPathDepth } from '../../util/workspace.js';
-import { bright, dim, getColoredTitle, getDimmedTitle } from './util.js';
+import type { Results } from '../../run.ts';
+import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.ts';
+import { relative, toRelative } from '../../util/path.ts';
+import { Table } from '../../util/table.ts';
+import { byPathDepth } from '../../util/workspace.ts';
+import { bright, dim, getColoredTitle, getDimmedTitle } from './util.ts';
 
 interface PrintHintOptions {
   type: ConfigurationHintType;
@@ -61,7 +61,9 @@ const addWorkspace = (options: PrintHintOptions) =>
 
 const packageEntry = () => 'Package entry file not found';
 
-const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
+const extensionUnregistered = () => `Extension in ${bright('project')} not registered as a compiler`;
+
+export const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignore', { print: unused }],
   ['ignoreFiles', { print: unused }],
   ['ignoreBinaries', { print: unused }],
@@ -70,6 +72,7 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['ignoreWorkspaces', { print: unused }],
   ['entry-empty', { print: empty }],
   ['project-empty', { print: empty }],
+  ['project-extension-unregistered', { print: extensionUnregistered }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
   ['top-level-unconfigured', { print: add }],
@@ -78,8 +81,6 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['project-top-level', { print: topLevel }],
   ['package-entry', { print: packageEntry }],
 ]);
-
-export { hintPrinters };
 
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['top-level-unconfigured', 'workspace-unconfigured'],
@@ -90,6 +91,7 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['ignoreBinaries'],
   ['ignoreUnresolved'],
   ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
+  ['project-extension-unregistered'],
   ['package-entry'],
 ];
 
@@ -107,9 +109,11 @@ export const finalizeConfigurationHints = (
       .reverse()
       .map(dir => ({ dir, size: 0 }));
 
-    for (const filePath of results.issues.files) {
-      const workspace = workspaces.find(ws => filePath.startsWith(ws.dir));
-      if (workspace) workspace.size++;
+    for (const issues of Object.values(results.issues.files)) {
+      for (const issue of Object.values(issues)) {
+        const workspace = workspaces.find(ws => issue.filePath.startsWith(ws.dir));
+        if (workspace) workspace.size++;
+      }
     }
 
     if (workspaces.length === 1) {
@@ -139,7 +143,7 @@ export const finalizeConfigurationHints = (
       const hints = hintsByType.get(hintType) ?? [];
       const topHints = hints.length > 10 ? Array.from(hints).slice(0, 10) : hints;
       const row = topHints.map(hint => {
-        hint.filePath = relative(options.cwd, hint.filePath ?? options.configFilePath ?? '');
+        hint.filePath = relative(options.cwd, hint.filePath || options.configFilePath || options.cwd);
         const hintPrinter = hintPrinters.get(hint.type);
         // @ts-expect-error
         const message = hintPrinter ? hintPrinter.print({ ...hint, configFilePath: options.configFilePath }) : '';

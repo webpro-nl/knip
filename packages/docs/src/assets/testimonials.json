@@ -2,6 +2,20 @@
   "data": [
     {
       "entities": {
+        "mentions": [
+          {
+            "username": "webpro.nl"
+          }
+        ],
+        "urls": []
+      },
+      "id": "3mgkwe4digs2l",
+      "author_id": "19",
+      "created_at": "2026-03-25T12:00:00.000Z",
+      "text": "Two things about knip.dev I don't get:\n- how did we live without it for so long\n- how did @webpro.nl NAIL the timing? Gave it to us right when AI started to produce left-overs in our codes faster than we ever could."
+    },
+    {
+      "entities": {
         "urls": [
           {
             "url": "cdn.bsky.app/img/dummy-02",
@@ -85,7 +99,7 @@
       "author_id": "17",
       "created_at": "2026-01-03T15:56:00.000Z",
       "attachments": { "media_keys": ["6"] },
-      "text": "This is both embarassing and satisfying after running @Knip https://t.co/6rcslWBqIV"
+      "text": "This is both embarrassing and satisfying after running @Knip https://t.co/6rcslWBqIV"
     },
     {
       "entities": {
@@ -776,6 +790,12 @@
     ],
     "users": [
       {
+        "id": "19",
+        "username": "janis.me",
+        "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:kmekwulhn26kgfwjzrry76d7/bafkreihtzvhhk7oz6cjbgnsbaravu46zhai3zwogkcg7hxv3dlhvecrqw4@jpeg",
+        "name": "Janis Jansen"
+      },
+      {
         "id": "11",
         "username": "julien.deniau.me",
         "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:4dsclu5hjmht3shxutxtge6h/bafkreiht3iqxcmelwe7oysawrdpynzevf4dt2ndzeln4f5c2izf62zm57q@jpeg",
@@ -802,7 +822,7 @@
       {
         "id": "15",
         "username": "patak.dev",
-        "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:2gkh62xvzokhlf6li4ol3b3d/bafkreifgzl4e5jqlakd77ajvnilsb5tufsv24h2sxfwmitkzxrh3sk6mhq@jpeg",
+        "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:2gkh62xvzokhlf6li4ol3b3d/bafkreibi7rw745tbcea7ljrpbkkkoragy2xa5a2lrxhdb3m23s7n3wkv3q@jpeg",
         "name": "patak"
       },
       {

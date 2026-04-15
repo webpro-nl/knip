@@ -2,8 +2,6 @@ export const ROOT_WORKSPACE_NAME = '.';
 
 export const IMPORT_STAR = '*';
 
-export const ANONYMOUS = '__anonymous';
-
 export const KNIP_CONFIG_LOCATIONS = [
   'knip.json',
   'knip.jsonc',
@@ -15,11 +13,13 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.config.js',
 ];
 
-export const DEFAULT_EXTENSIONS = ['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts'];
+export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
+
+export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
-export const GLOBAL_IGNORE_PATTERNS = ['**/node_modules/**', '.yarn'];
+export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules', '.git/!(hooks)'];
 
 export const PUBLIC_TAG = '@public';
 export const INTERNAL_TAG = '@internal';
@@ -196,14 +196,13 @@ export const ISSUE_TYPES = [
   'types',
   'nsTypes',
   'enumMembers',
-  'classMembers',
+  'namespaceMembers',
   'duplicates',
   'catalog',
 ] as const;
 
 export const ISSUE_TYPE_TITLE = {
   files: 'Unused files',
-  _files: 'Unused files',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',
@@ -215,7 +214,7 @@ export const ISSUE_TYPE_TITLE = {
   types: 'Unused exported types',
   nsTypes: 'Exported types in used namespace',
   enumMembers: 'Unused exported enum members',
-  classMembers: 'Unused exported class members',
+  namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
 } as const;
@@ -226,6 +225,7 @@ export const SYMBOL_TYPE = {
   FUNCTION: 'function',
   INTERFACE: 'interface',
   MEMBER: 'member',
+  NAMESPACE: 'namespace',
   TYPE: 'type',
   UNKNOWN: 'unknown',
   VARIABLE: 'variable',
@@ -236,11 +236,6 @@ export const FIX_FLAGS = {
   OBJECT_BINDING: 1 << 0, // remove next comma
   EMPTY_DECLARATION: 1 << 1, // remove declaration if empty
   WITH_NEWLINE: 1 << 2, // remove with newline
-} as const;
-
-export const MEMBER_FLAGS = {
-  NONE: 0,
-  SETTER: 1 << 0,
 } as const;
 
 export const SIDE_EFFECTS = '__side-effects';
@@ -257,5 +252,3 @@ export const IMPORT_FLAGS = {
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
 } as const;
-
-export const EMPTY_ARRAY: readonly never[] = [];

@@ -1,8 +1,8 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
-import { isInternal } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import type { PM2Application, PM2Config } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toEntry } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import type { PM2Application, PM2Config } from './types.ts';
 
 const title = 'pm2';
 

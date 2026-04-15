@@ -84,7 +84,7 @@ Example:
 
 ### Imports
 
-The file desciptor can be used to display an overview of imports of a document
+The file descriptor can be used to display an overview of imports of a document
 with direct links to their definition location.
 
 Optionally, the client can implement:
@@ -99,7 +99,7 @@ Example:
 
 ### Exports
 
-The file desciptor can be used to display an overview of exports of a document
+The file descriptor can be used to display an overview of exports of a document
 with direct links to their usage locations.
 
 Optionally, the client can implement:
@@ -134,6 +134,17 @@ Example:
 - [getDependencyHoverContent][21]
 - [Collect dependency snippets][26]
 - [Render dependency hover][27]
+
+## CLI
+
+To run the language server directly from CLI:
+
+```sh
+npx @knip/language-server
+```
+
+Add `--node-ipc`, `--stdio`, `--socket <port>` or `--pipe <name>` to set
+transport (default: `--stdio`).
 
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip

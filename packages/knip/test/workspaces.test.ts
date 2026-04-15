@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import { join } from '../src/util/path.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces');
 
@@ -12,7 +11,7 @@ test('Find unused dependencies, exports and files in workspaces (default)', asyn
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 2);
   assert.equal(Object.keys(issues.dependencies['apps/backend/package.json']).length, 2);
@@ -46,7 +45,7 @@ test('Find unused dependencies, exports and files in workspaces (production)', a
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'docs/dangling.ts')));
+  assert('docs/dangling.ts' in issues.files);
 
   assert.equal(Object.keys(issues.dependencies['package.json']).length, 3);
   assert.equal(Object.keys(issues.dependencies['apps/backend/package.json']).length, 2);

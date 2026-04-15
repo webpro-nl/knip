@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { CURATED_RESOURCES } from './curated-resources.js';
-import { CONFIG_REVIEW_HINT } from './texts.js';
+import { CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
 
 export { ERROR_HINT } from './texts.js';
 
@@ -30,15 +30,30 @@ const docsDir = join(__dirname, './docs');
  * @param {{ cwd: string, configFilePath: string | undefined }} options
  */
 export function buildResults(results, options) {
+  const configurationHints = finalizeConfigurationHints(results, options);
+
+  const isSuppressIssues =
+    results.counters.total >= 10 &&
+    configurationHints.some(hint => hint.type === 'top-level-unconfigured' || hint.type === 'workspace-unconfigured');
+
+  const configFile = options.configFilePath
+    ? { exists: true, filePath: options.configFilePath }
+    : { exists: false, locations: KNIP_CONFIG_LOCATIONS };
+
+  const reviewHint = isSuppressIssues ? UNCONFIGURED_HINT : options.configFilePath ? CONFIG_REVIEW_HINT : undefined;
+  const files = isSuppressIssues ? [] : Array.from(results.issues.files);
+  const issues = isSuppressIssues
+    ? []
+    : Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files'));
+
   return {
-    configFile: options.configFilePath
-      ? { exists: true, filePath: options.configFilePath, reviewHint: CONFIG_REVIEW_HINT }
-      : { exists: false, locations: KNIP_CONFIG_LOCATIONS },
-    configurationHints: finalizeConfigurationHints(results, options),
+    reviewHint,
+    configFile,
+    configurationHints,
     counters: results.counters,
     enabledPlugins: results.enabledPlugins,
-    files: Array.from(results.issues.files),
-    issues: Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files')),
+    files,
+    issues,
   };
 }
 

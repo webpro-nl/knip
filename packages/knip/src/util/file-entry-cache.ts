@@ -4,13 +4,13 @@
  * - https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
  */
 import fs from 'node:fs';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { deserialize, serialize } from 'node:v8';
-import { debugLog } from './debug.js';
-import { isDirectory, isFile } from './fs.js';
-import { timerify } from './Performance.js';
-import { dirname, isAbsolute, resolve } from './path.js';
+import { debugLog } from './debug.ts';
+import { isDirectory, isFile } from './fs.ts';
+import { timerify } from './Performance.ts';
+import { dirname, isAbsolute, resolve } from './path.ts';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
@@ -112,15 +112,20 @@ export class FileEntryCache<T> {
   }
 
   reconcile() {
-    this.removeNotFoundFiles();
-
     for (const [entryName, cacheEntry] of this.normalizedEntries) {
       try {
-        const meta = this._getMetaForFileUsingMtimeAndSize(cacheEntry);
+        const stat = fs.statSync(entryName);
+        const meta = Object.assign(cacheEntry.meta ?? {}, {
+          size: stat.size,
+          mtime: stat.mtime.getTime(),
+        });
         this.cache.set(entryName, meta);
       } catch (error) {
         // @ts-expect-error
-        if (error.code !== 'ENOENT') throw error;
+        if (error.code === 'ENOENT') {
+          this.normalizedEntries.delete(entryName);
+          this.cache.delete(entryName);
+        } else throw error;
       }
     }
 

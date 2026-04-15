@@ -1,5 +1,5 @@
-import type { Fix, Fixes } from './exports.js';
-import type { IssueSymbol, SymbolType } from './issues.js';
+import type { Fix, Fixes } from './exports.ts';
+import type { IssueSymbol, SymbolType } from './issues.ts';
 
 export type Identifier = string;
 type FilePath = string;
@@ -22,6 +22,8 @@ export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath
 export type ImportMaps = {
   /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
+  /** Identifiers fully consumed via `Object.{keys,values,entries,getOwnPropertyNames}(id)` — provably uses all members. */
+  enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
   /** Identifiers imported with alias (id → alias → files) */
@@ -54,18 +56,18 @@ export interface Export extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
-  readonly jsDocTags: Tags;
+  jsDocTags: Tags;
   hasRefsInFile: boolean;
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
-  readonly isReExport: boolean;
+  isReExport: boolean;
 }
 
 export interface ExportMember extends Position {
   readonly identifier: Identifier;
   readonly type: SymbolType;
   readonly fix: Fix;
-  readonly jsDocTags: Tags;
+  jsDocTags: Tags;
   readonly flags: number;
   hasRefsInFile: boolean;
 }

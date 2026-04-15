@@ -1,11 +1,19 @@
-import { isBuiltin } from 'node:module';
-import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.js';
-import { isAbsolute, isInNodeModules, toPosix } from './path.js';
+import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
+import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
 
-export const getPackageNameFromModuleSpecifier = (moduleSpecifier: string) => {
-  if (!isStartsLikePackageName(moduleSpecifier)) return;
-  const parts = moduleSpecifier.split('/').slice(0, 2);
-  return moduleSpecifier.startsWith('@') ? parts.join('/') : parts[0];
+export const getPackageNameFromModuleSpecifier = (specifier: string) => {
+  if (!isStartsLikePackageName(specifier)) return;
+  let start = 0;
+  if (specifier.charCodeAt(0) === 64) {
+    const slash = specifier.indexOf('/', 1);
+    if (slash === -1) return specifier;
+    start = slash + 1;
+  }
+  for (let i = start; i < specifier.length; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (ch === 47 || ch === 64) return specifier.slice(0, i);
+  }
+  return specifier;
 };
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
@@ -20,7 +28,7 @@ export const getPackageNameFromFilePath = (value: string) => {
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
-const matchPackageNameStart = /^(@[a-z0-9._]|[a-z0-9])/i;
+const matchPackageNameStart = /^(@[a-z0-9._~]|[a-z0-9])/i;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
   if (ch === 46 || ch === 47 || ch === 35 || ch === 126 || ch === 36) return false; // . / # ~ $
@@ -66,7 +74,7 @@ const CHAR_QUESTION = 63; // '?'
 // Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
 export const sanitizeSpecifier = (specifier: string) => {
   if (
-    isBuiltin(specifier) ||
+    specifier.startsWith('node:') ||
     isAbsolute(specifier) ||
     specifier.charCodeAt(0) === CHAR_COLON ||
     specifier.startsWith(PROTOCOL_VIRTUAL)

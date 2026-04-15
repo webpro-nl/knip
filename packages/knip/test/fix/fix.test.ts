@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import { join } from '../../src/util/path.js';
-import { copyFixture } from '../helpers/copy-fixture.js';
-import { createOptions } from '../helpers/create-options.js';
+import { main } from '../../src/index.ts';
+import { join } from '../../src/util/path.ts';
+import { copyFixture } from '../helpers/copy-fixture.ts';
+import { createOptions } from '../helpers/create-options.ts';
 
 test('Fix exports and dependencies', async () => {
   const cwd = await copyFixture('fixtures/fix');
   const options = await createOptions({ cwd, tags: ['-lintignore'], isFix: true });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
   assert(issues.exports['access.js']['UNUSED']);
   assert(issues.exports['access.js']['ACCESS']);
@@ -33,9 +33,7 @@ test('Fix exports and dependencies', async () => {
     `const x = 1;
 const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 
@@ -137,6 +135,11 @@ export const {  set: setter } = fn();
 }
 `
   );
+
+  assert.equal(counters.exports, 0);
+  assert.equal(counters.types, 0);
+  assert.equal(counters.dependencies, 0);
+  assert.equal(counters.devDependencies, 0);
 });
 
 test('Fix only exported types', async () => {
@@ -162,9 +165,7 @@ test('Fix only exported types', async () => {
     `export const x = 1;
 export const y = 2;
 
-// biome-ignore lint: suspicious/noEmptyInterface
 interface McInterFace {}
-// biome-ignore lint: complexity/noBannedTypes
 type McType = {};
 enum McEnum {}
 

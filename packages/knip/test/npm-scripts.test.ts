@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import { getDependencyMetaData } from '../src/manifest/index.js';
-import { join } from '../src/util/path.js';
-import { load } from '../src/util/plugin.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import { getDependencyMetaData } from '../src/manifest/index.ts';
+import { join } from '../src/util/path.ts';
+import { load } from '../src/util/plugin.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/npm-scripts');
 const manifest = await load(join(cwd, 'package.json'));
@@ -53,7 +53,8 @@ test('Unused dependencies in npm scripts', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters, configurationHints } = await main(options);
 
-  assert.deepEqual(issues.files, new Set([join(cwd, 'script.js')]));
+  assert('script.js' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
 
   assert(issues.dependencies['package.json']['express']);
 

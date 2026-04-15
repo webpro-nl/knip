@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/taskfile');
 
@@ -24,9 +24,8 @@ test('Find dependencies with the taskfile plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    // case-sensitivity: fast-glob returns two files (taskfile.yml and Taskfile.yml) while there's only one
-    binaries: process.platform === 'darwin' || process.platform === 'win32' ? 15 : 9,
-    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    binaries: 9,
+    unresolved: 1,
     processed: 7,
     total: 7,
   });

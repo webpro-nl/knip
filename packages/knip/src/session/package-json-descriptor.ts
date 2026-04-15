@@ -1,6 +1,6 @@
-import { createGraphExplorer } from '../graph-explorer/explorer.js';
-import type { DependencyNodes } from '../graph-explorer/operations/get-dependency-usage.js';
-import type { ModuleGraph } from '../types/module-graph.js';
+import { createGraphExplorer } from '../graph-explorer/explorer.ts';
+import type { DependencyNodes } from '../graph-explorer/operations/get-dependency-usage.ts';
+import type { ModuleGraph } from '../types/module-graph.ts';
 
 export interface PackageJsonFile {
   dependenciesUsage: Map<string, DependencyNodes>;

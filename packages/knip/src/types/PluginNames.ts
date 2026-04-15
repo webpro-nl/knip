@@ -70,8 +70,12 @@ export type PluginName =
   | 'nx'
   | 'nyc'
   | 'oclif'
+  | 'openapi-ts'
+  | 'oxfmt'
   | 'oxlint'
+  | 'panda-css'
   | 'parcel'
+  | 'payload'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -82,18 +86,23 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'qwik'
+  | 'raycast'
   | 'react-cosmos'
+  | 'react-email'
   | 'react-native'
   | 'react-router'
   | 'relay'
   | 'release-it'
   | 'remark'
   | 'remix'
+  | 'rolldown'
   | 'rollup'
   | 'rsbuild'
   | 'rslib'
   | 'rspack'
   | 'rstest'
+  | 'sanity'
   | 'semantic-release'
   | 'sentry'
   | 'serverless-framework'
@@ -101,6 +110,7 @@ export type PluginName =
   | 'size-limit'
   | 'sst'
   | 'starlight'
+  | 'stencil'
   | 'storybook'
   | 'stryker'
   | 'stylelint'
@@ -208,8 +218,12 @@ export const pluginNames = [
   'nx',
   'nyc',
   'oclif',
+  'openapi-ts',
+  'oxfmt',
   'oxlint',
+  'panda-css',
   'parcel',
+  'payload',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -220,18 +234,23 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'prisma',
+  'qwik',
+  'raycast',
   'react-cosmos',
+  'react-email',
   'react-native',
   'react-router',
   'relay',
   'release-it',
   'remark',
   'remix',
+  'rolldown',
   'rollup',
   'rsbuild',
   'rslib',
   'rspack',
   'rstest',
+  'sanity',
   'semantic-release',
   'sentry',
   'serverless-framework',
@@ -239,6 +258,7 @@ export const pluginNames = [
   'size-limit',
   'sst',
   'starlight',
+  'stencil',
   'storybook',
   'stryker',
   'stylelint',

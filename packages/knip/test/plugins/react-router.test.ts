@@ -1,12 +1,9 @@
 import assert from 'node:assert/strict';
-import os from 'node:os';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
-
-const isWindows = os.platform() === 'win32';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 test('Find dependencies with the react-router plugin', async () => {
   const cwd = resolve('fixtures/plugins/react-router');
@@ -17,9 +14,18 @@ test('Find dependencies with the react-router plugin', async () => {
     ...baseCounters,
     processed: 10,
     total: 10,
-    // There is a bug with routes that include () on Windows so they will not be found there, revert when
-    // the bug is fixed
-    files: isWindows ? 1 : 0,
+  });
+});
+
+test('Find dependencies with the react-router plugin [with absolute paths]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-with-absolute-paths');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 6,
+    total: 6,
   });
 });
 

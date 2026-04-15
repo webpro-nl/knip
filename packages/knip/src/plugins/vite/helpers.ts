@@ -1,124 +1,42 @@
-import ts from 'typescript';
-import { findDescendants, getDefaultImportName, getImportMap, stripQuotes } from '../../typescript/ast-helpers.js';
-import { isFile, loadFile } from '../../util/fs.js';
-import { type Input, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
+import type { Program } from 'oxc-parser';
+import { Visitor } from 'oxc-parser';
+import { findProperty, getDefaultImportName, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
+import { isFile, loadFile } from '../../util/fs.ts';
+import { type Input, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 
-/**
- * Traverses through Vite's configuration file to find Babel plugins passed to
- * @vitejs/plugin-react's configuration
- */
-export const getReactBabelPlugins = (sourceFile: ts.SourceFile): string[] => {
+export const getReactBabelPlugins = (program: Program): string[] => {
   const babelPlugins: string[] = [];
 
-  const importMap = getImportMap(sourceFile);
+  const importMap = getImportMap(program);
   const reactPluginNames = new Set<string>();
 
-  // Find the default import for @vitejs/plugin-react
   for (const [importName, importPath] of importMap) {
-    if (importPath.includes('@vitejs/plugin-react')) {
-      reactPluginNames.add(importName);
-    }
+    if (importPath.includes('@vitejs/plugin-react')) reactPluginNames.add(importName);
   }
 
-  // If no React plugin import found, look for the default import name
   if (reactPluginNames.size === 0) {
     const defaultImportName = getDefaultImportName(importMap, '@vitejs/plugin-react');
-    if (defaultImportName) {
-      reactPluginNames.add(defaultImportName);
-    } else {
-      reactPluginNames.add('react');
-    }
+    if (defaultImportName) reactPluginNames.add(defaultImportName);
+    else reactPluginNames.add('react');
   }
 
-  const callExpressions = findDescendants<ts.CallExpression>(sourceFile, node => ts.isCallExpression(node));
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (node.callee?.type !== 'Identifier' || node.callee.name !== 'defineConfig') return;
+      const plugins = findProperty(node.arguments?.[0], 'plugins');
+      if (plugins?.type !== 'ArrayExpression') return;
 
-  const defineConfigCall = callExpressions.find(
-    node => ts.isIdentifier(node.expression) && node.expression.text === 'defineConfig'
-  );
+      for (const el of plugins.elements ?? []) {
+        if (el?.type !== 'CallExpression' || el.callee?.type !== 'Identifier') continue;
+        if (!reactPluginNames.has(el.callee.name)) continue;
 
-  if (!defineConfigCall || defineConfigCall.arguments.length === 0) {
-    return babelPlugins;
-  }
-
-  const configObject = defineConfigCall.arguments[0];
-  if (!ts.isObjectLiteralExpression(configObject)) {
-    return babelPlugins;
-  }
-
-  const pluginsProperty = configObject.properties.find(
-    prop => ts.isPropertyAssignment(prop) && prop.name.getText() === 'plugins'
-  );
-
-  if (
-    !pluginsProperty ||
-    !ts.isPropertyAssignment(pluginsProperty) ||
-    !ts.isArrayLiteralExpression(pluginsProperty.initializer)
-  ) {
-    return babelPlugins;
-  }
-
-  const pluginsArray = pluginsProperty.initializer;
-
-  // Find the react plugin call using the detected import names
-  for (const pluginElement of pluginsArray.elements) {
-    let isReactPlugin = false;
-
-    // Check if this is a call to any of the identified React plugin imports
-    if (ts.isCallExpression(pluginElement)) {
-      if (ts.isIdentifier(pluginElement.expression)) {
-        isReactPlugin = reactPluginNames.has(pluginElement.expression.text);
+        const babelPluginsArray = findProperty(findProperty(el.arguments?.[0], 'babel'), 'plugins');
+        for (const v of getStringValues(babelPluginsArray)) babelPlugins.push(v);
       }
-
-      if (isReactPlugin) {
-        if (pluginElement.arguments.length === 0 || !ts.isObjectLiteralExpression(pluginElement.arguments[0])) {
-          continue;
-        }
-
-        const reactConfig = pluginElement.arguments[0] as ts.ObjectLiteralExpression;
-
-        const babelProperty = reactConfig.properties.find(
-          prop => ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === 'babel'
-        );
-
-        if (
-          !babelProperty ||
-          !ts.isPropertyAssignment(babelProperty) ||
-          !ts.isObjectLiteralExpression(babelProperty.initializer)
-        ) {
-          continue;
-        }
-
-        const babelObject = babelProperty.initializer;
-
-        const babelPluginsProperty = babelObject.properties.find(
-          prop => ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name) && prop.name.text === 'plugins'
-        );
-
-        if (
-          !babelPluginsProperty ||
-          !ts.isPropertyAssignment(babelPluginsProperty) ||
-          !ts.isArrayLiteralExpression(babelPluginsProperty.initializer)
-        ) {
-          continue;
-        }
-
-        const pluginsArray = babelPluginsProperty.initializer;
-
-        for (const element of pluginsArray.elements) {
-          if (ts.isStringLiteral(element)) {
-            babelPlugins.push(stripQuotes(element.text));
-          } else if (
-            ts.isArrayLiteralExpression(element) &&
-            element.elements.length > 0 &&
-            ts.isStringLiteral(element.elements[0])
-          ) {
-            babelPlugins.push(stripQuotes((element.elements[0] as ts.StringLiteral).text));
-          }
-        }
-      }
-    }
-  }
+    },
+  });
+  visitor.visit(program);
 
   return babelPlugins;
 };

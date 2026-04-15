@@ -251,20 +251,20 @@ This is why plugins can implement the `resolveFromAST` function.
 ### 8. resolveFromAST
 
 Let's take a look at the Astro plugin implementation. This example assumes some
-familiarity with Abstract Syntax Trees (AST) and the TypeScript compiler API.
-Knip will provide more and more AST helpers to make implementing plugins more
-fun and a little less tedious.
+familiarity with Abstract Syntax Trees (AST). Knip provides AST helpers to make
+implementing plugins more fun and a little less tedious.
 
 Anyway, let's dive in. Here's how we're adding the Starlight `components` paths
 to the default `production` file patterns:
 
 ```ts
-import ts from 'typescript';
+import type { Program } from 'oxc-parser';
 import {
+  findCallArg,
   getDefaultImportName,
   getImportMap,
   getPropertyValues,
-} from '../../typescript/ast-helpers.js';
+} from '../../typescript/ast-helpers.ts';
 
 const title = 'Astro';
 
@@ -275,44 +275,24 @@ const production = [
   'src/actions/index.{js,ts}',
 ];
 
-const getComponentPathsFromSourceFile = (sourceFile: ts.SourceFile) => {
-  const componentPaths: Set<string> = new Set();
-  const importMap = getImportMap(sourceFile);
+const getComponentPaths = (program: Program) => {
+  const importMap = getImportMap(program);
   const importName = getDefaultImportName(importMap, '@astrojs/starlight');
-
-  function visit(node: ts.Node) {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      node.expression.text === importName // match the starlight() function call
-    ) {
-      const starlightConfig = node.arguments[0];
-      if (ts.isObjectLiteralExpression(starlightConfig)) {
-        const values = getPropertyValues(starlightConfig, 'components');
-        for (const value of values) componentPaths.add(value);
-      }
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(sourceFile);
-
-  return componentPaths;
+  if (!importName) return new Set<string>();
+  const starlightConfig = findCallArg(program, importName);
+  return getPropertyValues(starlightConfig, 'components');
 };
 
-const resolveFromAST: ResolveFromAST = (sourceFile: ts.SourceFile) => {
-  // Include './src/components/Head.astro' and './src/components/Footer.astro'
-  // as production entry files so they're also part of the analysis
-  const componentPaths = getComponentPathsFromSourceFile(sourceFile);
+const resolveFromAST: ResolveFromAST = (program: Program) => {
+  const componentPaths = getComponentPaths(program);
   return [...production, ...componentPaths].map(id => toProductionEntry(id));
 };
 
-const plugin: Plugin {
+const plugin: Plugin = {
   title,
   production,
   resolveFromAST,
-}
+};
 
 export default plugin;
 ```
@@ -365,7 +345,7 @@ The script adds the plugin to the JSON Schema and type definitions.
 Run the test for your new plugin using one of the following commands:
 
 ```sh
-pnpm tsx --test test/plugins/tool.test.ts
+node --test test/plugins/tool.test.ts
 bun test test/plugins/tool.test.ts
 ```
 
@@ -385,8 +365,7 @@ plugin, this might be the right time to open a pull request!
 [1]: #create-a-new-plugin
 [2]: ../reference/plugins.md
 [3]: ../explanations/plugins.md#entry-files-from-config-files
-[4]:
-  https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
-[5]: ./inputs.md
+[4]: https://github.com/webpro-nl/knip/blob/6a6954386b33ee8a2919005230a4bc094e11bc03/knip.json#L12
+[5]: ../writing-a-plugin/inputs.md
 [6]: ../features/script-parser.md
-[7]: ./argument-parsing.md
+[7]: ../writing-a-plugin/argument-parsing.md

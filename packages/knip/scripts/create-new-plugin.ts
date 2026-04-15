@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-// biome-ignore lint: style/noRestrictedImports
+// oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -77,7 +77,7 @@ for (const filePath of [newPluginFile, pluginTestFilePath, pluginTestFixtureMani
 }
 
 // Add plugin to JSON Schema
-const { default: schema } = await import(schemaFilePath);
+const schema = JSON.parse(String(await fs.readFile(schemaFilePath)));
 const { plugins } = schema.definitions;
 const { properties } = plugins;
 
@@ -88,7 +88,6 @@ properties[name] = {
 
 plugins.properties = Object.keys(properties)
   .sort()
-  // biome-ignore lint: performance/noAccumulatingSpread
   .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));

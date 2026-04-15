@@ -1,9 +1,9 @@
-import { ISSUE_TYPE_TITLE } from '../constants.js';
-import type { Entries } from '../types/entries.js';
-import type { Issue, ReporterOptions } from '../types/issues.js';
-import { relative } from '../util/path.js';
-import { hintPrinters } from './util/configuration-hints.js';
-import { getIssueTypeTitle } from './util/util.js';
+import { ISSUE_TYPE_TITLE } from '../constants.ts';
+import type { Entries } from '../types/entries.ts';
+import type { ReporterOptions } from '../types/issues.ts';
+import { relative } from '../util/path.ts';
+import { hintPrinters } from './util/configuration-hints.ts';
+import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
 const createGitHubActionsLogger = () => {
   const formatAnnotation = (
@@ -79,13 +79,11 @@ export default ({
   const core = createGitHubActionsLogger();
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
-  for (let [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
-    if (reportType === 'files') reportType = '_files';
-
+  for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
-      const issuesForType: Issue[] = Object.values(issues[reportType]).flatMap(Object.values);
+      const issuesForType = flattenIssues(issues[reportType]);
       issuesForType.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       if (issuesForType.length > 0) {
         title && core.info(`${title} (${issuesForType.length})`);
@@ -96,7 +94,7 @@ export default ({
           const log = issue.severity === 'error' ? core.error : core.warning;
           const filePath = relative(cwd, issue.filePath);
 
-          const message = reportType === '_files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
+          const message = reportType === 'files' ? issue.symbol : `${issue.symbol} in ${filePath}`;
 
           log(message, {
             file: filePath,

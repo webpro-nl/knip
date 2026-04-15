@@ -1,16 +1,15 @@
-import type ts from 'typescript';
+import type { Program, VisitorObject } from 'oxc-parser';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.js';
-import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.js';
-import type { pluginSchema } from '../schema/plugins.js';
-import type { ImportVisitor, ScriptVisitor } from '../typescript/visitors/index.js';
-import type { ParsedCLIArgs } from '../util/cli-arguments.js';
-import type { Input } from '../util/input.js';
-import type { Args } from './args.js';
-import type { IssueType, SymbolType } from './issues.js';
-import type { Tags } from './options.js';
-import type { PluginName } from './PluginNames.js';
-import type { PackageJson } from './package-json.js';
+import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
+import type { pluginSchema } from '../schema/plugins.ts';
+import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
+import type { Input } from '../util/input.ts';
+import type { Args } from './args.ts';
+import type { IssueType, SymbolType } from './issues.ts';
+import type { Tags } from './options.ts';
+import type { PluginName } from './PluginNames.ts';
+import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
@@ -57,7 +56,6 @@ export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
   isFixTypes: boolean;
-  isReportClassMembers: boolean;
   isReportExports: boolean;
   tags: Tags;
 };
@@ -136,8 +134,6 @@ export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Prom
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
-export type GetSourceFile = (filePath: string) => ts.SourceFile | undefined;
-
 export type HandleInput = (input: Input) => string | undefined;
 
 export type RegisterCompilerInput = {
@@ -148,9 +144,9 @@ export type RegisterCompilerInput = {
 export type RegisterCompiler = (input: RegisterCompilerInput) => void;
 
 export type ResolveFromAST = (
-  sourceFile: ts.SourceFile,
+  program: Program,
   options: PluginOptions & {
-    getSourceFile: GetSourceFile;
+    readFile: (filePath: string) => string;
   }
 ) => Input[];
 
@@ -160,14 +156,22 @@ export type RegisterCompilersOptions = {
   registerCompiler: RegisterCompiler;
 };
 
+/** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
 export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
-export type Visitors = { dynamicImport: ImportVisitor[]; script: ScriptVisitor[] };
+export type PluginVisitorContext = {
+  filePath: string;
+  sourceText: string;
+  addScript: (script: string) => void;
+  addImport: (specifier: string, pos: number, modifiers: number) => void;
+};
 
-export type RegisterVisitor = (visitors: Partial<Visitors>) => void;
+export type PluginVisitorObject = VisitorObject;
 
 export type RegisterVisitorsOptions = {
-  registerVisitors: RegisterVisitor;
+  ctx: PluginVisitorContext;
+  registerVisitor: (visitor: PluginVisitorObject) => void;
+  registeredPlugins: Set<string>;
 };
 
 export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;

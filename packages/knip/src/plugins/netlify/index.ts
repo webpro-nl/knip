@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toDependency, toProductionEntry } from '../../util/input.js';
-import { join } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { extractFunctionsConfigProperty } from './helpers.js';
-import type { NetlifyConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { extractFunctionsConfigProperty } from './helpers.ts';
+import type { NetlifyConfig } from './types.ts';
 
 // https://docs.netlify.com
 // https://docs.netlify.com/functions/get-started/

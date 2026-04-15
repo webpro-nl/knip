@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { toEntry } from '../../util/input.js';
-import { toAbsolute } from '../../util/path.js';
-import { hasDependency, load } from '../../util/plugin.js';
-import { resolveConfig as resolveVitestConfig } from '../vitest/index.js';
-import type { LadleConfig } from './types.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { toEntry } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
+import { hasDependency, load } from '../../util/plugin.ts';
+import { resolveConfig as resolveVitestConfig } from '../vitest/index.ts';
+import type { LadleConfig } from './types.ts';
 
 // https://ladle.dev/docs/config
 

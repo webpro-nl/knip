@@ -56,13 +56,16 @@ export const ERROR_HINT = `For unexpected errors (exit code 2) such as "error lo
 - If no config file exists, create knip.json in the project root
 - Run knip again`;
 
+export const UNCONFIGURED_HINT =
+  'Issues are suppressed because the project is not yet configured. Reported issues might be false positives. Address configuration hints first, then re-run to get the actual issues.';
+
 export const CONFIG_REVIEW_HINT = `Review the existing configuration for potential improvements:
 
-- Never use "ignore" patterns (hides real issues!), always prefer specific solutions, other ignore* options are allowed
-- Many unused exported types? Add: ignoreExportsUsedInFile: { interface: true, type: true } (prefer this over other ignore* options)
+- Never use "ignore" patterns (hides real issues!), always prefer specific solutions; other ignore* options are allowed
+- Many unused exported types → try ignoreExportsUsedInFile: { interface: true, type: true }
 - Remove ignore patterns that don't match any files
-- Remove redundant ignore patterns: Knip respects .gitignore (node_modules, dist, build, .git)
+- Remove redundant ignore patterns — Knip respects .gitignore (node_modules, dist, build, .git)
 - Remove entry patterns covered by config defaults and auto-detected plugins
-- Config files (e.g. vite.config.ts) showing as unused? Enable/disable the plugin explicitly
+- Config files (e.g. vite.config.ts) showing as unused → try enable or disable the plugin explicitly (vite: true)
 - Dependencies matching Node.js builtins: add to ignoreDependencies (e.g. buffer, process)
 - Unresolved imports from path aliases: add paths to Knip config (tsconfig.json semantics)`;

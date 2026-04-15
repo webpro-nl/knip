@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/tsdown2",
+  "devDependencies": {
+    "@tsdown/css": "*",
+    "postcss": "*",
+    "postcss-import": "*",
+    "postcss-modules": "*",
+    "sass": "*",
+    "tsdown": "*"
+  }
+}

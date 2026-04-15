@@ -1,8 +1,8 @@
-import { IMPORT_STAR } from '../../constants.js';
-import type { ContentionDetails } from '../../session/types.js';
-import type { ModuleGraph } from '../../types/module-graph.js';
-import { getExportedIdentifiers } from '../utils.js';
-import { forEachAliasReExport, forEachPassThroughReExport, getStarReExportSources } from '../visitors.js';
+import { IMPORT_STAR } from '../../constants.ts';
+import type { ContentionDetails } from '../../session/types.ts';
+import type { ModuleGraph } from '../../types/module-graph.ts';
+import { getExportedIdentifiers } from '../utils.ts';
+import { forEachAliasReExport, forEachPassThroughReExport, getStarReExportSources } from '../visitors.ts';
 
 interface ReExportNetwork {
   files: Set<string>;

@@ -1,17 +1,19 @@
 import { watch } from 'node:fs';
-import { CatalogCounselor } from './CatalogCounselor.js';
-import { ConfigurationChief } from './ConfigurationChief.js';
-import { ConsoleStreamer } from './ConsoleStreamer.js';
-import { DependencyDeputy } from './DependencyDeputy.js';
-import { analyze } from './graph/analyze.js';
-import { build } from './graph/build.js';
-import { IssueCollector } from './IssueCollector.js';
-import { PrincipalFactory } from './PrincipalFactory.js';
-import watchReporter from './reporters/watch.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogObject } from './util/debug.js';
-import { getGitIgnoredHandler } from './util/glob-core.js';
-import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.js';
+import { CatalogCounselor } from './CatalogCounselor.ts';
+import { ConfigurationChief } from './ConfigurationChief.ts';
+import { ConsoleStreamer } from './ConsoleStreamer.ts';
+import { DependencyDeputy } from './DependencyDeputy.ts';
+import { analyze } from './graph/analyze.ts';
+import { build } from './graph/build.ts';
+import { IssueCollector } from './IssueCollector.ts';
+import { ProjectPrincipal } from './ProjectPrincipal.ts';
+import watchReporter from './reporters/watch.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogObject } from './util/debug.ts';
+import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
+import { getGitIgnoredHandler } from './util/glob-core.ts';
+import { getModuleSourcePathHandler } from './util/to-source-path.ts';
+import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
 
@@ -19,9 +21,10 @@ export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
 
+  if (options.isCache) initGlobCache(options.cacheLocation);
+
   const chief = new ConfigurationChief(options);
   const deputy = new DependencyDeputy(options);
-  const factory = new PrincipalFactory();
   const streamer = new ConsoleStreamer(options);
   const collector = new IssueCollector(options);
   const counselor = new CatalogCounselor(options);
@@ -29,7 +32,10 @@ export const run = async (options: MainOptions) => {
   streamer.cast('Reading workspace configuration');
 
   const workspaces = await chief.getWorkspaces();
-  const isGitIgnored = await getGitIgnoredHandler(options);
+  const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
+
+  const toSourceFilePath = getModuleSourcePathHandler(chief);
+  const principal = new ProjectPrincipal(options, toSourceFilePath);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setIgnoreIssues(chief.config.ignoreIssues);
@@ -44,7 +50,7 @@ export const run = async (options: MainOptions) => {
     collector,
     counselor,
     deputy,
-    factory,
+    principal,
     isGitIgnored,
     streamer,
     workspaces,
@@ -58,7 +64,6 @@ export const run = async (options: MainOptions) => {
     collector,
     deputy,
     entryPaths,
-    factory,
     graph,
     streamer,
     unreferencedFiles,
@@ -83,7 +88,7 @@ export const run = async (options: MainOptions) => {
       chief,
       collector,
       analyze: reAnalyze,
-      factory,
+      principal,
       graph,
       isIgnored,
       onFileChange,
@@ -97,6 +102,8 @@ export const run = async (options: MainOptions) => {
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
   if (!options.isWatch) streamer.clear();
+
+  if (options.isCache) flushGlobCache();
 
   return {
     results: {

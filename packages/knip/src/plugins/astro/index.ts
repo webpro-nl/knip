@@ -1,9 +1,9 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.js';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
-import compiler from './compiler.js';
-import mdxCompiler from './compiler-mdx.js';
-import { getSrcDir } from './resolveFromAST.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import compiler from './compiler.ts';
+import mdxCompiler from './compiler-mdx.ts';
+import { getSrcDir, usesPassthroughImageService } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -26,14 +26,17 @@ const production = [
   'src/actions/index.{js,ts}',
 ];
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const srcDir = getSrcDir(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const srcDir = getSrcDir(program);
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
-
-  return [
+  const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
     ...production.map(setSrcDir).map(path => toProductionEntry(path)),
   ];
+
+  if (!usesPassthroughImageService(program)) inputs.push(toDependency('sharp', { optional: true }));
+
+  return inputs;
 };
 
 // https://docs.astro.build/en/guides/integrations-guide/mdx/

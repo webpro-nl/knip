@@ -1,7 +1,7 @@
-import type { FileNode, Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.js';
-import { CONTINUE } from '../constants.js';
-import type { Via } from '../walk-down.js';
-import { walkDown } from '../walk-down.js';
+import type { FileNode, Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
+import { CONTINUE } from '../constants.ts';
+import type { Via } from '../walk-down.ts';
+import { walkDown } from '../walk-down.ts';
 
 /** @internal */
 export interface ExportsTreeNode {

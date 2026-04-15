@@ -40,7 +40,7 @@ const targets = {
 
 const currentTarget = `${process.platform}-${process.arch}`;
 
-const ext = ['vscode', /^@oxc-resolver\/binding-/, 'jiti', /jiti\/dist/];
+const ext = ['vscode', 'oxc-parser', /^@oxc-parser\/binding-/, /^@oxc-resolver\/binding-/, 'jiti', /jiti\/dist/];
 const extSession = [...ext, 'knip/session'];
 
 const flags = [args['pre-release'] && '--pre-release', '--no-dependencies'].filter(Boolean).join(' ');
@@ -56,6 +56,9 @@ const bundle = async (input, output, external = ext, paths) => {
 const paths = { 'knip/session': '../../knip/session.js' };
 
 await bundle('../knip/src/session/index.ts', 'node_modules/knip/session.js');
+
+const knipPkg = JSON.parse(readFileSync(join(root, '../knip/package.json'), 'utf8'));
+writeFileSync(join(nm, 'knip/package.json'), JSON.stringify({ name: 'knip', version: knipPkg.version }));
 await bundle('../mcp-server/src/tools.js', 'node_modules/@knip/mcp/tools.js', extSession, paths);
 await bundle('../language-server/src/index.js', 'node_modules/@knip/language-server/index.js', extSession, paths);
 await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-server', '@knip/mcp/tools'], {
@@ -64,9 +67,10 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-ser
   '@knip/language-server': './node_modules/@knip/language-server/index.js',
 });
 
-const jitiSrc = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules', 'jiti');
-const jitiDst = join(nm, 'jiti');
-cpSync(jitiSrc, jitiDst, { recursive: true, dereference: true });
+const knipNm = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules');
+
+cpSync(join(knipNm, 'jiti'), join(nm, 'jiti'), { recursive: true, dereference: true });
+cpSync(join(knipNm, 'oxc-parser'), join(nm, 'oxc-parser'), { recursive: true, dereference: true });
 
 cpSync(join(root, '../mcp-server/src/docs'), join(nm, '@knip/mcp/docs'), { recursive: true });
 
@@ -87,19 +91,23 @@ const selectedTargets = args.target
     ? Object.entries(targets)
     : [[currentTarget, targets[currentTarget]]];
 
-for (const [target, binding] of selectedTargets) {
-  rmSync(join(nm, '@oxc-resolver'), { recursive: true, force: true });
-  mkdirSync(join(nm, `@oxc-resolver/binding-${binding}`), { recursive: true });
-
+const packNativeBinding = (scope, name, binding) => {
+  rmSync(join(nm, scope), { recursive: true, force: true });
+  mkdirSync(join(nm, `${scope}/binding-${binding}`), { recursive: true });
   const tmp = mkdtempSync(join(tmpdir(), 'oxc-'));
-  execSync(`npm pack @oxc-resolver/binding-${binding}`, { cwd: tmp, stdio: 'pipe' });
+  execSync(`npm pack ${scope}/binding-${binding}`, { cwd: tmp, stdio: 'pipe' });
   execSync('tar -xzf *.tgz', { cwd: tmp, stdio: 'pipe' });
   cpSync(
     execSync(`find ${tmp}/package -name "*.node"`, { encoding: 'utf-8' }).trim(),
-    join(nm, `@oxc-resolver/binding-${binding}/resolver.${binding}.node`)
+    join(nm, `${scope}/binding-${binding}/${name}.${binding}.node`)
   );
-  cpSync(join(tmp, 'package/package.json'), join(nm, `@oxc-resolver/binding-${binding}/package.json`));
+  cpSync(join(tmp, 'package/package.json'), join(nm, `${scope}/binding-${binding}/package.json`));
   rmSync(tmp, { recursive: true });
+};
+
+for (const [target, binding] of selectedTargets) {
+  packNativeBinding('@oxc-parser', 'parser', binding);
+  packNativeBinding('@oxc-resolver', 'resolver', binding);
 
   execSync(`pnpm vsce package ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
 

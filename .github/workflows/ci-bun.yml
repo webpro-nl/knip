@@ -20,13 +20,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.22
       - name: Install dependencies
         run: bun install --ignore-scripts
-      - name: Run formatter, linter, import sorter
+      - name: Run linter and formatter
         run: bun ci
       - name: Build knip
         run: bun run build

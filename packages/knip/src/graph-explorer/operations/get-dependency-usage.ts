@@ -1,5 +1,5 @@
-import type { ModuleGraph } from '../../types/module-graph.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
+import type { ModuleGraph } from '../../types/module-graph.ts';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 
 export interface DependencyNode {
   filePath: string;

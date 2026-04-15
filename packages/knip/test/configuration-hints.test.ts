@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../src/index.js';
-import { join } from '../src/util/path.js';
-import baseCounters from './helpers/baseCounters.js';
-import { createOptions } from './helpers/create-options.js';
-import { resolve } from './helpers/resolve.js';
+import { main } from '../src/index.ts';
+import baseCounters from './helpers/baseCounters.ts';
+import { createOptions } from './helpers/create-options.ts';
+import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/configuration-hints');
 
@@ -12,7 +11,7 @@ test('Provide configuration hints', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters, configurationHints } = await main(options);
 
-  assert(issues.files.has(join(cwd, 'src/entry.js')));
+  assert('src/entry.js' in issues.files);
 
   assert.deepEqual(configurationHints, [
     { type: 'entry-top-level', identifier: '[src/entry.js]' },
@@ -62,4 +61,20 @@ test('No hints when user overrides plugin entry config', async () => {
     processed: 3,
     total: 3,
   });
+});
+
+test('Hint when project pattern lists extensions not registered as a compiler', async () => {
+  const cwd = resolve('fixtures/configuration-hints-extension');
+  const options = await createOptions({ cwd });
+  const { configurationHints } = await main(options);
+
+  const extHints = configurationHints.filter(h => h.type === 'project-extension-unregistered');
+  assert.deepEqual(extHints, [
+    { type: 'project-extension-unregistered', identifier: '.template', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.sql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.graphql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.gql', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.toml', workspaceName: '.' },
+    { type: 'project-extension-unregistered', identifier: '.yaml', workspaceName: '.' },
+  ]);
 });

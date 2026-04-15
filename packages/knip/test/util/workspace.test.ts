@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { byPathDepth } from '../../src/util/workspace.js';
+import { byPathDepth } from '../../src/util/workspace.ts';
 
 test('Sort workspaces by path depth', () => {
   assert.deepEqual(['first', 'sec/ond', 'th/i/rd'].sort(byPathDepth), ['first', 'sec/ond', 'th/i/rd']);

@@ -5,7 +5,7 @@ const compiler = (text: string) => {
   let match: RegExpExecArray | null;
   let index = 0;
 
-  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex loop pattern
+  // oxlint-disable-next-line no-cond-assign
   while ((match = directiveMatcher.exec(text))) if (match[1]) imports.push(`import _$${index++} from '${match[1]}';`);
 
   return imports.join('\n');

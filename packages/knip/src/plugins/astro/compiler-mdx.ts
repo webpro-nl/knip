@@ -3,7 +3,7 @@ import {
   importMatcher,
   importsWithinFrontmatter,
   inlineCodeMatcher,
-} from '../../compilers/compilers.js';
+} from '../../compilers/compilers.ts';
 
 // Fields in frontmatter that could contain imports
 const frontmatterImportFields = ['layout'];

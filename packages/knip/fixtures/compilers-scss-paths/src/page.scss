@@ -1,0 +1,7 @@
+@use "@/styles/colors" as *;
+@use "@/theme";
+
+.page {
+  color: $primary;
+  background: theme.$background;
+}

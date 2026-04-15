@@ -1,4 +1,4 @@
-name: Tests (against typescript@5.0.4)
+name: Tests (against typescript@5.0.4 in Node.js v20)
 
 on:
   workflow_dispatch:
@@ -18,7 +18,6 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node:
-          - 18
           - 20
           - 22
 
@@ -26,21 +25,23 @@ jobs:
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
       - name: Install dependencies
         run: pnpm install
-      - name: Install earliest supported peer dependencies
-        run: pnpm add typescript@5.0.4 @types/node@18
-        working-directory: packages/knip
-      - name: Remove erasableSyntaxOnly from tsconfig
-        run: node -e "const path = 'tsconfig.json'; const content = fs.readFileSync(path, 'utf8'); const updated = content.replace(/^.*erasableSyntaxOnly.*(\r?\n)?/gm, ''); fs.writeFileSync(path, updated);"
-        working-directory: packages/knip
       - name: Build knip
         run: pnpm run build
+        working-directory: packages/knip
+      - name: Install earliest supported peer dependencies
+        run: pnpm add typescript@5.0.4 @types/node@20
+        working-directory: packages/knip
+      - name: Type-check against TS 5.0.4
+        run: |
+          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:rewriteRelativeImportExtensions|erasableSyntaxOnly).*\n/g,''))"
+          pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip
         run: pnpm run test:smoke

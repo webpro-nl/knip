@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.js';
-import { join } from '../../src/util/path.js';
-import baseCounters from '../helpers/baseCounters.js';
-import { createOptions } from '../helpers/create-options.js';
-import { resolve } from '../helpers/resolve.js';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/astro');
 
@@ -14,18 +13,18 @@ test('Find dependencies with the Astro plugin', async () => {
 
   assert(issues.exports['src/consts.ts']['UNUSED']);
 
-  assert(issues.files.has(join(cwd, 'src/pages/_top-level-file-unused.ts')));
-  assert(issues.files.has(join(cwd, 'src/pages/_top-level-dir-unused/index.ts')));
+  assert('src/pages/_top-level-file-unused.ts' in issues.files);
+  assert('src/pages/_top-level-dir-unused/index.ts' in issues.files);
 
-  assert(issues.files.has(join(cwd, 'src/pages/blog/_nested-unused-file.ts')));
-  assert(issues.files.has(join(cwd, 'src/pages/blog/_util/unused-component.astro')));
-  assert(issues.files.has(join(cwd, 'src/pages/blog/_util/nested/deeply-nested-unused-file.ts')));
+  assert('src/pages/blog/_nested-unused-file.ts' in issues.files);
+  assert('src/pages/blog/_util/unused-component.astro' in issues.files);
+  assert('src/pages/blog/_util/nested/deeply-nested-unused-file.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 1,
     files: 5,
-    processed: 26,
+    processed: 25,
     total: 26,
   });
 });

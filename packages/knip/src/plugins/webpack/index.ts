@@ -1,7 +1,7 @@
 import type { ParsedArgs } from 'minimist';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
-import type { Args } from '../../types/args.js';
-import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.js';
+import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import {
   type Input,
   toAlias,
@@ -9,14 +9,13 @@ import {
   toDeferResolveEntry,
   toDeferResolveProductionEntry,
   toDependency,
-} from '../../util/input.js';
-import { isInternal, join, toAbsolute } from '../../util/path.js';
-import { hasDependency } from '../../util/plugin.js';
-import { getDependenciesFromConfig } from '../babel/index.js';
-import type { BabelConfigObj } from '../babel/types.js';
-import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.js';
-import { requireContextCall } from './visitors/requireContext.js';
-
+} from '../../util/input.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { BabelConfigObj } from '../babel/types.ts';
+import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
+import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
 
 const title = 'webpack';
@@ -33,6 +32,15 @@ const hasBabelOptions = (use: RuleSetUseItem) =>
   'loader' in use &&
   typeof use.loader === 'string' &&
   use.loader === 'babel-loader' &&
+  typeof use.options === 'object';
+
+const hasLoaderOptions = (
+  use: RuleSetUseItem
+): use is Exclude<RuleSetUseItem, string> & { loader: string; options: object } =>
+  Boolean(use) &&
+  typeof use !== 'string' &&
+  'loader' in use &&
+  typeof use.loader === 'string' &&
   typeof use.options === 'object';
 
 const info = {
@@ -66,10 +74,24 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   });
 };
 
+const isSwcLoader = (loader: string) =>
+  loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
+
+const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
+  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
+  const plugins = (use.options as { jsc?: { experimental?: { plugins?: unknown[] } } }).jsc?.experimental?.plugins;
+  if (!Array.isArray(plugins)) return [];
+  return plugins.flatMap(plugin => {
+    if (typeof plugin === 'string') return [plugin];
+    if (Array.isArray(plugin) && typeof plugin[0] === 'string') return [plugin[0]];
+    return [];
+  });
+};
+
 const resolveUseItem = (use: RuleSetUseItem) => {
   if (!use) return [];
   if (typeof use === 'string') return [use];
-  if ('loader' in use && typeof use.loader === 'string') return [use.loader];
+  if ('loader' in use && typeof use.loader === 'string') return [use.loader, ...resolveSwcPluginDependencies(use)];
   return [];
 };
 
@@ -166,8 +188,8 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return inputs;
 };
 
-const registerVisitors: RegisterVisitors = ({ registerVisitors }) => {
-  registerVisitors({ dynamicImport: [requireContextCall] });
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createRequireContextVisitor(ctx));
 };
 
 const isFilterTransitiveDependencies = true;

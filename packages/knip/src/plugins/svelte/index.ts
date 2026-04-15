@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.js';
-import { hasDependency } from '../../util/plugin.js';
-import { config as viteConfig } from '../vite/index.js';
-import compiler from './compiler.js';
+import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { config as viteConfig } from '../vite/index.ts';
+import compiler from './compiler.ts';
 
 // https://svelte.dev/docs
 

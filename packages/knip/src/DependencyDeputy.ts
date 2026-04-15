@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import type { Workspace } from './ConfigurationChief.js';
+import type { Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
@@ -7,26 +7,26 @@ import {
   IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
-} from './constants.js';
-import { getDependencyMetaData } from './manifest/index.js';
-import { PackagePeeker } from './PackagePeeker.js';
-import type { ConfigurationHint, Counters, Issue, Issues, SymbolIssueType } from './types/issues.js';
-import type { PackageJson } from './types/package-json.js';
+} from './constants.ts';
+import { getDependencyMetaData } from './manifest/index.ts';
+import { PackagePeeker } from './PackagePeeker.ts';
+import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
+import type { PackageJson } from './types/package-json.ts';
 import type {
   DependencyArray,
   DependencySet,
   HostDependencies,
   InstalledBinaries,
   WorkspaceManifests,
-} from './types/workspace.js';
-import type { MainOptions } from './util/create-options.js';
+} from './types/workspace.ts';
+import type { MainOptions } from './util/create-options.ts';
 import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
   getPackageNameFromModuleSpecifier,
   isDefinitelyTyped,
-} from './util/modules.js';
-import { findMatch, toRegexOrString } from './util/regex.js';
+} from './util/modules.ts';
+import { findMatch, toRegexOrString } from './util/regex.ts';
 
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
@@ -202,7 +202,7 @@ export class DependencyDeputy {
    * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
    * wants to mark the dependency as "unlisted".
    */
-  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string): boolean {
+  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string, isDevOnly?: boolean): boolean {
     if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
@@ -211,12 +211,12 @@ export class DependencyDeputy {
     if (packageName === workspace.pkgName) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName));
+    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
     const closestWorkspaceNameForTypes =
-      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName));
+      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOnly));
 
     if (closestWorkspaceName || closestWorkspaceNameForTypes) {
       if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
@@ -251,10 +251,10 @@ export class DependencyDeputy {
     return;
   }
 
-  private isInDependencies(workspaceName: string, packageName: string) {
+  private isInDependencies(workspaceName: string, packageName: string, isDevOnly?: boolean) {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return false;
-    if (this.isStrict) return this.getProductionDependencies(workspaceName).includes(packageName);
+    if (this.isStrict && !isDevOnly) return this.getProductionDependencies(workspaceName).includes(packageName);
     return manifest.allDependencies.has(packageName);
   }
 
@@ -268,15 +268,13 @@ export class DependencyDeputy {
       const hasTypesIncluded = this.getHasTypesIncluded(workspace);
       const peeker = new PackagePeeker(manifestStr);
 
-      // Keeping track of peer dependencies to prevent infinite loops for circularly referenced peer deps
-      const peerDepCount: Record<string, number> = {};
-
-      const isReferencedDependency = (dependency: string, isPeerDep?: boolean): boolean => {
+      const isReferencedDependency = (dependency: string, visited = new Set<string>()): boolean => {
         // Is referenced, ignore
         if (referencedDependencies?.has(dependency)) return true;
 
-        // Returning peer dependency, ignore
-        if (isPeerDep && peerDepCount[dependency]) return false;
+        // Prevent infinite loops for circularly referenced peer deps
+        if (visited.has(dependency)) return false;
+        visited.add(dependency);
 
         const [scope, typedDependency] = dependency.split('/');
         if (scope === DT_SCOPE) {
@@ -293,7 +291,8 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspace, dependency),
             ...this.getHostDependenciesFor(workspace, typedPackageName),
           ];
-          if (hostDependencies.length) return !!hostDependencies.find(host => isReferencedDependency(host.name, true));
+          if (hostDependencies.length)
+            return !!hostDependencies.find(host => isReferencedDependency(host.name, visited));
 
           if (!referencedDependencies?.has(dependency)) return false;
 
@@ -302,34 +301,28 @@ export class DependencyDeputy {
 
         // A dependency may not be referenced, but it may be a peer dep of another.
         // If that host is also not referenced we'll report this dependency as unused.
-        // Except if the host has this dependency as an optional peer dep itself.
         const hostDependencies = this.getHostDependenciesFor(workspace, dependency);
 
-        for (const { name } of hostDependencies) {
-          if (!peerDepCount[name]) peerDepCount[name] = 1;
-          else peerDepCount[name]++;
-        }
-
-        return hostDependencies.some(
-          hostDependency =>
-            (isPeerDep === false || !hostDependency.isPeerOptional) && isReferencedDependency(hostDependency.name, true)
-        );
+        return hostDependencies.some(hostDependency => isReferencedDependency(hostDependency.name, visited));
       };
 
-      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency, false);
+      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('dependencies', symbol);
         dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
-      for (const symbol of this.getDevDependencies(workspace).filter(isNotReferencedDependency)) {
+      const manifest = this._manifests.get(workspace)!;
+
+      for (const symbol of this.getDevDependencies(workspace)) {
+        if (!manifest.dependencies.includes(symbol) && !isNotReferencedDependency(symbol)) continue;
         const position = peeker.getLocation('devDependencies', symbol);
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
-
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
         if (!isReferencedDependency(symbol)) continue;
+        if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({
           type: 'optionalPeerDependencies',
@@ -345,7 +338,7 @@ export class DependencyDeputy {
     return { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues };
   }
 
-  handleIgnoredDependencies(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredDependencies(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
@@ -353,6 +346,11 @@ export class DependencyDeputy {
         const packageName = getPackageNameFromModuleSpecifier(issue.symbol);
         if (!packageName) continue;
         if (IGNORED_DEPENDENCIES.has(packageName)) {
+          // Don't ignore a devDependency that duplicates a production dependency
+          if (type === 'devDependencies') {
+            const manifest = this.getWorkspaceManifest(issue.workspace);
+            if (manifest?.dependencies.includes(packageName)) continue;
+          }
           delete issueSet[issueKey];
           counters[type]--;
         } else {
@@ -380,7 +378,7 @@ export class DependencyDeputy {
     }
   }
 
-  handleIgnoredBinaries(issues: Issues, counters: Counters, type: SymbolIssueType) {
+  handleIgnoredBinaries(issues: Issues, counters: Counters, type: IssueType) {
     for (const key in issues[type]) {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {

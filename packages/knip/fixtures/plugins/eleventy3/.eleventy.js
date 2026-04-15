@@ -1,4 +1,3 @@
-// biome-ignore lint: suspicious/noRedundantUseStrict
 'use strict';
 
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
@@ -8,7 +7,6 @@ const highlighter = require('./src/_plugins/syntax-highlighter');
 path;
 highlighter;
 
-// biome-ignore lint: complexity/useArrowFunction
 module.exports = function (eleventyConfig) {
   eleventyConfig.addGlobalData('site_name', 'example');
   eleventyConfig.addDataExtension('yml', () => {});

@@ -1,5 +1,5 @@
-import type { RE_EXPORT_KIND } from '../graph-explorer/constants.js';
-import type { Import, Position } from '../types/module-graph.js';
+import type { RE_EXPORT_KIND } from '../graph-explorer/constants.ts';
+import type { Import, Position } from '../types/module-graph.ts';
 
 export interface SourceLocation extends Position {
   filePath: string;

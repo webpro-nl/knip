@@ -1,10 +1,12 @@
-import type { PluginOptions } from '../../types/config.js';
-import { compact } from '../../util/array.js';
-import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.js';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { extname, isAbsolute, isInternal } from '../../util/path.js';
-import { getDependenciesFromConfig } from '../babel/index.js';
-import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.js';
+import type { PluginOptions } from '../../types/config.ts';
+import { compact } from '../../util/array.ts';
+import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
+import { extname, isAbsolute, isInternal } from '../../util/path.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.ts';
+
+export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName);
 
 export const getInputs = (
   config: ESLintConfigDeprecated | OverrideConfigDeprecated | ESLintConfig,
@@ -12,7 +14,7 @@ export const getInputs = (
 ): (Input | ConfigInput)[] => {
   const { configFileName } = options;
 
-  if (extname(configFileName) === '.json' || !/eslint\.config/.test(configFileName)) {
+  if (extname(configFileName) === '.json' || !isFlatConfig(configFileName)) {
     return getInputsDeprecated(config as ESLintConfigDeprecated | OverrideConfigDeprecated, options);
   }
 

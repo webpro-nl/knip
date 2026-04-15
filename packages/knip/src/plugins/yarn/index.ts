@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.js';
-import { isFile } from '../../util/fs.js';
-import type { Input } from '../../util/input.js';
-import { toEntry } from '../../util/input.js';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
+import type { Input } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 
 // https://yarnpkg.com/features/constraints
 
@@ -18,9 +18,7 @@ const config = ['.yarnrc.yml'];
 const entry = ['yarn.config.cjs'];
 
 type YarnConfig = {
-  plugins?: Array<{
-    path?: string;
-  }>;
+  plugins?: Array<string | { path?: string }>;
   yarnPath?: string;
 };
 
@@ -29,9 +27,8 @@ const resolveConfig: ResolveConfig<YarnConfig> = config => {
 
   if (Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
-      if (plugin.path) {
-        inputs.push(toEntry(plugin.path));
-      }
+      if (typeof plugin === 'string') inputs.push(toEntry(plugin));
+      else if (typeof plugin.path === 'string') inputs.push(toEntry(plugin.path));
     }
   }
 

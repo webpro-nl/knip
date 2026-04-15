@@ -1,25 +1,13 @@
 {
   "name": "vscode-knip",
-  "version": "1.0.14",
-  "private": true,
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/webpro-nl/knip.git",
-    "directory": "packages/vscode-knip"
-  },
   "displayName": "Knip",
+  "version": "2.1.0",
+  "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
-  "icon": "icon-192x192.png",
   "categories": [
     "Linters",
     "Programming Languages"
   ],
-  "qna": false,
-  "galleryBanner": {
-    "color": "#F56E0F",
-    "theme": "light"
-  },
   "keywords": [
     "analysis",
     "dead code",
@@ -35,20 +23,24 @@
     "typescript",
     "unused"
   ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webpro-nl/knip.git",
+    "directory": "packages/vscode-knip"
+  },
   "sponsor": {
     "url": "https://knip.dev/sponsors"
   },
+  "qna": false,
   "publisher": "webpro",
-  "type": "module",
-  "engines": {
-    "vscode": "^1.95.0"
-  },
   "files": [
     "dist/",
     "icon-192x192.png",
-    "license",
+    "LICENSE",
     "README.md"
   ],
+  "type": "module",
   "main": "./dist/extension.js",
   "scripts": {
     "package": "node scripts/publish.js",
@@ -68,13 +60,8 @@
     "@types/vscode": "^1.95.0",
     "@vscode/test-electron": "^2.5.2",
     "knip": "workspace:*",
-    "rolldown": "^1.0.0-rc.2"
+    "rolldown": "^1.0.0-rc.12"
   },
-  "activationEvents": [
-    "onStartupFinished",
-    "onCommand:knip.restart",
-    "onCommand:knip.showHover"
-  ],
   "contributes": {
     "languageModelTools": [
       {
@@ -101,7 +88,7 @@
         "toolReferenceName": "knip-docs",
         "icon": "$(book)",
         "userDescription": "Get Knip documentation",
-        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g., \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from knip.dev.",
+        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g. \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from https://knip.dev.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -194,6 +181,11 @@
             "type": "string",
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
+          },
+          "knip.nodeRuntimePath": {
+            "type": "string",
+            "default": "",
+            "description": "Absolute path to the Node.js binary (e.g. /usr/local/bin/node)"
           }
         }
       },
@@ -261,6 +253,21 @@
             "type": "boolean",
             "default": false,
             "description": "Dim unused types (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimEnumMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused enum members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimClassMembers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim unused class members (instead of warnings)"
+          },
+          "knip.editor.exports.highlight.dimDuplicates": {
+            "type": "boolean",
+            "default": false,
+            "description": "Dim duplicate exports (instead of warnings)"
           }
         }
       },
@@ -298,5 +305,18 @@
         }
       }
     ]
+  },
+  "activationEvents": [
+    "onCommand:knip.restart",
+    "onCommand:knip.showHover",
+    "onStartupFinished"
+  ],
+  "icon": "icon-192x192.png",
+  "galleryBanner": {
+    "color": "#F56E0F",
+    "theme": "light"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
   }
 }

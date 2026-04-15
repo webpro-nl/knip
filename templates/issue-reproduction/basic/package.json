@@ -1,8 +1,10 @@
 {
   "name": "@knip/templates-basic",
   "version": "1.0.0",
-  "description": "Knip case reproduction template - basic",
   "private": true,
+  "description": "Knip case reproduction template - basic",
+  "homepage": "https://knip.dev",
+  "bugs": "https://github.com/webpro-nl/knip/issues",
   "scripts": {
     "build": "tsc --build",
     "type-check": "tsc --build --noEmit",
@@ -12,7 +14,5 @@
     "@types/node": "*",
     "knip": "*",
     "typescript": "*"
-  },
-  "bugs": "https://github.com/webpro-nl/knip/issues",
-  "homepage": "https://knip.dev"
+  }
 }

@@ -1,10 +1,10 @@
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.js';
-import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.js';
-import type { DependencyDeputy } from '../DependencyDeputy.js';
-import type { Issue } from '../types/issues.js';
-import type { ExternalRef } from '../types/module-graph.js';
-import type { MainOptions } from './create-options.js';
-import { debugLog } from './debug.js';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
+import type { DependencyDeputy } from '../DependencyDeputy.ts';
+import type { Issue } from '../types/issues.ts';
+import type { ExternalRef } from '../types/module-graph.ts';
+import type { MainOptions } from './create-options.ts';
+import { debugLog } from './debug.ts';
 import {
   fromBinary,
   type Input,
@@ -14,10 +14,10 @@ import {
   isDeferResolveEntry,
   isDependency,
   toDebugString,
-} from './input.js';
-import { getPackageNameFromSpecifier } from './modules.js';
-import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.js';
-import { _resolveModuleSync, _resolveSync } from './resolve.js';
+} from './input.ts';
+import { getPackageNameFromSpecifier } from './modules.ts';
+import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
+import { _resolveModuleSync, _resolveSync } from './resolve.ts';
 
 export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
 
@@ -33,7 +33,7 @@ const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Wor
 
 const addExternalRef = (map: ExternalRefsFromInputs, containingFilePath: string, ref: ExternalRef) => {
   if (!map.has(containingFilePath)) map.set(containingFilePath, new Set());
-  // biome-ignore lint/style/noNonNullAssertion: srsly
+  // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
   map.get(containingFilePath)!.add(ref);
 };
 
@@ -93,7 +93,7 @@ export const createInputHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {
-        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName);
+        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, isConfig(input));
 
         if (externalRefs && !isWorkspace) {
           addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });

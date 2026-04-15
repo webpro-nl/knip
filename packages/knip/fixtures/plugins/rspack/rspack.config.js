@@ -10,6 +10,12 @@ module.exports = {
           loader: 'builtin:swc-loader',
           options: {
             jsc: {
+              experimental: {
+                plugins: [
+                  ['@swc/plugin-emotion', {}],
+                  ['swc-plugin-component-annotate', {}],
+                ],
+              },
               parser: {
                 syntax: 'ecmascript',
                 jsx: true,

@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/astro-sharp-image-service",
+  "type": "module",
+  "dependencies": {
+    "astro": "*",
+    "sharp": "*"
+  }
+}

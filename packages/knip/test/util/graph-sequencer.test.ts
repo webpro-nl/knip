@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { graphSequencer } from '../../src/util/graph-sequencer.js';
+import { graphSequencer } from '../../src/util/graph-sequencer.ts';
 
 test('Sort workspaces by dependencies', () => {
   const graph = new Map([

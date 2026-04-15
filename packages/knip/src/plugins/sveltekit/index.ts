@@ -1,8 +1,8 @@
-import ts from 'typescript';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.js';
-import { findDescendants, stripQuotes } from '../../typescript/ast-helpers.js';
-import { toAlias, toIgnore, toProductionEntry } from '../../util/input.js';
-import { hasDependency } from '../../util/plugin.js';
+import type { Program } from 'oxc-parser';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { hasDependency } from '../../util/plugin.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 
 // https://svelte.dev/docs/kit
 
@@ -23,20 +23,13 @@ const production = [
   'src/instrumentation.server.{js,ts}',
 ];
 
-const getLibPath = (sourceFile: ts.SourceFile): string => {
-  const assignments = findDescendants<ts.PropertyAssignment>(sourceFile, node => ts.isPropertyAssignment(node));
-
-  for (const assignment of assignments) {
-    if (assignment.name.getText() === 'lib' && ts.isStringLiteral(assignment.initializer)) {
-      return stripQuotes(assignment.initializer.getText());
-    }
-  }
-
-  return 'src/lib';
+const getLibPath = (program: Program): string => {
+  const values = collectPropertyValues(program, 'lib');
+  return values.size > 0 ? Array.from(values)[0] : 'src/lib';
 };
 
-const resolveFromAST: ResolveFromAST = sourceFile => {
-  const lib = getLibPath(sourceFile);
+const resolveFromAST: ResolveFromAST = program => {
+  const lib = getLibPath(program);
   return [
     ...production.map(pattern => toProductionEntry(pattern)),
     toAlias('$lib', [`./${lib}`]),

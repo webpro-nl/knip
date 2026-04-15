@@ -87,14 +87,10 @@ development][12].
 
 [1]: https://github.com/webpro-nl/knip/issues?q=is%3Aissue
 [2]: https://knip.dev/reference/known-issues
-[3]:
-  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/basic
-[4]:
-  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/basic
-[5]:
-  https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/monorepo
-[6]:
-  https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
+[3]: https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/basic
+[4]: https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/basic
+[5]: https://codesandbox.io/p/devbox/github/webpro-nl/knip/main/templates/issue-reproduction/monorepo
+[6]: https://stackblitz.com/github/webpro-nl/knip/tree/main/templates/issue-reproduction/monorepo
 [7]: https://codesandbox.io
 [8]: https://stackblitz.com
 [9]: https://github.com/webpro-nl/knip/blob/main/.github/DEVELOPMENT.md#tests

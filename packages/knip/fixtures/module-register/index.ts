@@ -1,16 +1,18 @@
 import { register } from 'node:module';
-// biome-ignore lint: style/useNodejsImportProtocol
 import module from 'module';
 
 register('@nodejs-loaders/tsx', import.meta.url);
 module.register('@nodejs-loaders/css-module', import.meta.url);
 
 register('./loader.js', import.meta.url);
+module.register('./loader.js', import.meta.url);
+
+// Ignored
 
 register('./ignored-loader.js', new URL('.', import.meta.url).href);
-
 register('./ignored-loader.js', 'data:');
-
 register('./ignored-loader.js', '..');
-
 register('./ignored-loader.js');
+
+module.register('./ignored-loader.js', 'data:');
+module.register('./ignored-loader.js');

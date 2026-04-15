@@ -1,11 +1,22 @@
-import { OPAQUE } from '../../constants.js';
-import type { Identifier, ModuleGraph } from '../../types/module-graph.js';
+import { OPAQUE } from '../../constants.ts';
+import type { Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
 import {
   getAliasReExportMap,
   getNamespaceReExportSources,
   getPassThroughReExportSources,
   getStarReExportSources,
-} from '../visitors.js';
+} from '../visitors.ts';
+
+const hasOnlyNsRefs = (file: ImportMaps): boolean => {
+  if (file.importNs.size === 0) return false;
+  for (const ns of file.importNs.keys()) {
+    if (!file.refs.has(ns)) return false;
+    for (const ref of file.refs) {
+      if (ref.startsWith(`${ns}.`)) return false;
+    }
+  }
+  return true;
+};
 
 export const isReferenced = (
   graph: ModuleGraph,
@@ -42,7 +53,7 @@ export const isReferenced = (
     };
 
     if (
-      file.import.get(OPAQUE) ||
+      (file.import.get(OPAQUE) && !hasOnlyNsRefs(file)) ||
       ((identifier === id || (identifier !== id && file.refs.has(id))) &&
         (file.import.has(identifier) || file.importAs.has(identifier)))
     ) {

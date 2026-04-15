@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { resolve } from '../../src/util/path.js';
-import { showDiff } from '../helpers/diff.js';
-import { exec } from '../helpers/exec.js';
+import { resolve } from '../../src/util/path.ts';
+import { showDiff } from '../helpers/diff.ts';
+import { exec } from '../helpers/exec.ts';
 
 const moduleCwd = resolve('fixtures/module-resolution-non-std');
 
@@ -45,8 +45,6 @@ Unused exported types (2)
 ::warning file=ns.ts,line=5,endLine=5,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedType in ns.ts
 Unused exported enum members (1)
 ::warning file=exports.ts,line=15,endLine=15,col=3,endColumn=3,title=✂️ Knip / Unused exported enum members::unused in exports.ts
-Unused exported class members (1)
-::warning file=exports.ts,line=10,endLine=10,col=3,endColumn=3,title=✂️ Knip / Unused exported class members::unused in exports.ts
 Duplicate exports (1)
 ::warning file=exports.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Duplicate exports::used|default in exports.ts`;
   if (actual !== expected) showDiff(actual, expected);
@@ -66,7 +64,7 @@ Unused dependencies (4)
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
 ::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
-::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=4,endLine=4,col=18,endColumn=18,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
 ::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
@@ -93,7 +91,7 @@ Unused dependencies (4)
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
 ::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
-::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=4,endLine=4,col=18,endColumn=18,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
 ::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)
@@ -115,7 +113,7 @@ Unused dependencies (4)
 ::error file=package.json,line=13,endLine=13,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::zod in package.json
 Unlisted dependencies (4)
 ::error file=apps/backend/index.ts,line=3,endLine=3,col=24,endColumn=24,title=✂️ Knip / Unlisted dependencies::globby in apps/backend/index.ts
-::error file=apps/backend/index.ts,line=4,endLine=4,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
+::error file=apps/backend/index.ts,line=4,endLine=4,col=18,endColumn=18,title=✂️ Knip / Unlisted dependencies::js-yaml in apps/backend/index.ts
 ::error file=apps/frontend/index.ts,line=3,endLine=3,col=19,endColumn=19,title=✂️ Knip / Unlisted dependencies::vanilla-js in apps/frontend/index.ts
 ::error file=packages/tools/tsconfig.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unlisted dependencies::@fixtures/workspaces__tsconfig in packages/tools/tsconfig.json
 Unused exports (1)

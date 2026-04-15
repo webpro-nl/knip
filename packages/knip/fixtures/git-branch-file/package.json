@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/git-branch-file",
+  "knip": {
+    "entry": "index.ts",
+    "project": "**/*.ts"
+  }
+}

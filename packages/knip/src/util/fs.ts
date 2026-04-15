@@ -1,10 +1,10 @@
-import { readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import yaml from 'js-yaml';
+import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
-import { LoaderError } from './errors.js';
-import { extname, join } from './path.js';
+import { LoaderError } from './errors.ts';
+import { extname, join, toPosix } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
@@ -25,6 +25,13 @@ export const isFile = (cwdOrPath: string, name?: string) => {
 export const findFile = (cwd: string, fileName: string) => {
   const filePath = join(cwd, fileName);
   return isFile(filePath) ? filePath : undefined;
+};
+
+export const findFileWithExtensions = (basePath: string, extensions: string[]): string | undefined => {
+  for (const ext of extensions) {
+    const candidate = basePath + ext;
+    if (existsSync(candidate)) return candidate;
+  }
 };
 
 export const loadFile = async (filePath: string) => {
@@ -81,5 +88,13 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 };
 
 export const parseYAML = (contents: string) => {
-  return yaml.load(contents);
+  return parseYAMLContents(contents, { logLevel: 'error' });
+};
+
+export const tryRealpath = (filePath: string) => {
+  try {
+    return toPosix(realpathSync.native(filePath));
+  } catch {
+    return filePath;
+  }
 };

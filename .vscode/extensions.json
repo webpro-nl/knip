@@ -1,6 +1,6 @@
 {
   "recommendations": [
-    "biomejs.biome",
+    "oxc.oxc-vscode",
     "remcohaszing.vscode-mdxlint",
     "unifiedjs.vscode-remark"
   ]

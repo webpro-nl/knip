@@ -1,8 +1,8 @@
-import type { PluginOptions, ResolveConfig } from '../../types/config.js';
-import { type Input, toDependency, toProductionDependency } from '../../util/input.js';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.js';
-import { join } from '../../util/path.js';
-import type { ExpoConfig } from './types.js';
+import type { PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { type Input, toDependency, toProductionDependency } from '../../util/input.ts';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
+import { join } from '../../util/path.ts';
+import type { ExpoConfig } from './types.ts';
 
 const getDummyConfigContext = (options: PluginOptions) => ({
   projectRoot: options.cwd,

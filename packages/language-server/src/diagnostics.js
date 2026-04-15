@@ -8,6 +8,14 @@ import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node.js
  * @import { Issue, Rules } from 'knip/session';
  */
 
+const dimmedIssueTypes = {
+  exports: 'dimExports',
+  types: 'dimTypes',
+  enumMembers: 'dimEnumMembers',
+  classMembers: 'dimClassMembers',
+  duplicates: 'dimDuplicates',
+};
+
 const SEVERITY = {
   error: DiagnosticSeverity.Error,
   warn: DiagnosticSeverity.Warning,
@@ -42,12 +50,7 @@ export const issueToDiagnostic = (issue, rules, config, document) => {
   /** @type {DiagnosticTag[]} */
   const tags = [];
 
-  if (issue.type === 'exports' && config.editor.exports.highlight.dimExports) {
-    severity = DiagnosticSeverity.Hint;
-    tags.push(DiagnosticTag.Unnecessary);
-  }
-
-  if (issue.type === 'types' && config.editor.exports.highlight.dimTypes) {
+  if (dimmedIssueTypes[issue.type] && config.editor.exports.highlight[dimmedIssueTypes[issue.type]]) {
     severity = DiagnosticSeverity.Hint;
     tags.push(DiagnosticTag.Unnecessary);
   }

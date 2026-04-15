@@ -1,17 +1,19 @@
 import type { WatchListener } from 'node:fs';
 import { readFileSync } from 'node:fs';
-import type { ConfigurationChief } from '../ConfigurationChief.js';
-import { invalidateCache } from '../graph-explorer/cache.js';
-import type { IssueCollector } from '../IssueCollector.js';
-import type { PrincipalFactory } from '../PrincipalFactory.js';
-import type { ProjectPrincipal } from '../ProjectPrincipal.js';
-import type { Issues } from '../types/issues.js';
-import type { ModuleGraph } from '../types/module-graph.js';
-import type { MainOptions } from './create-options.js';
-import { debugLog } from './debug.js';
-import { isFile } from './fs.js';
-import { updateImportMap } from './module-graph.js';
-import { toAbsolute, toRelative } from './path.js';
+import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import { invalidateCache } from '../graph-explorer/cache.ts';
+import type { IssueCollector } from '../IssueCollector.ts';
+import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { Issues } from '../types/issues.ts';
+import type { ModuleGraph } from '../types/module-graph.ts';
+import type { MainOptions } from './create-options.ts';
+import { debugLog } from './debug.ts';
+import { isFile } from './fs.ts';
+import { updateImportMap } from './module-graph.ts';
+import { toAbsolute, toPosix, toRelative } from './path.ts';
+import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
+import { clearGlobCache } from './glob-cache.ts';
+import { clearResolverCache } from './resolve.ts';
 
 export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
@@ -28,7 +30,7 @@ type WatchOptions = {
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
-  factory: PrincipalFactory;
+  principal: ProjectPrincipal;
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
   onFileChange?: OnFileChange;
@@ -50,7 +52,7 @@ export const getSessionHandler = async (
     chief,
     collector,
     analyze,
-    factory,
+    principal,
     graph,
     isIgnored,
     onFileChange,
@@ -77,14 +79,11 @@ export const getSessionHandler = async (
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (!workspace) continue;
 
-      const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-      if (!principal) continue;
-
       switch (change.type) {
         case 'added':
-          added.add(filePath);
           principal.addProjectPath(filePath);
           principal.deletedFiles.delete(filePath);
+          if (principal.projectPaths.has(filePath)) added.add(filePath);
           debugLog(workspace.name, `Watcher: + ${relativePath}`);
           break;
         case 'deleted':
@@ -94,8 +93,8 @@ export const getSessionHandler = async (
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
         default: {
-          const cached = principal.backend.fileManager.sourceFileCache.get(filePath);
-          if (cached && cached.text === readFileSync(filePath, 'utf8')) {
+          const cached = principal.fileManager.sourceTextCache.get(filePath);
+          if (cached !== undefined && cached === readFileSync(filePath, 'utf8')) {
             debugLog(workspace.name, `Watcher: = ${relativePath}`);
             continue;
           }
@@ -110,6 +109,9 @@ export const getSessionHandler = async (
 
     if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
 
+    clearResolverCache();
+    clearModuleResolutionCaches();
+    clearGlobCache();
     invalidateCache(graph);
 
     unreferencedFiles.clear();
@@ -118,15 +120,14 @@ export const getSessionHandler = async (
     for (const filePath of added) cachedUnusedFiles.add(filePath);
     for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
 
-    const filePaths = factory.getPrincipals().flatMap(p => p.getUsedResolvedFiles());
+    const filePaths = principal.getUsedResolvedFiles();
 
     if (added.size > 0 || deleted.size > 0) {
       graph.clear();
       for (const filePath of filePaths) {
         const workspace = chief.findWorkspaceByFilePath(filePath);
         if (workspace) {
-          const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-          if (principal) analyzeSourceFile(filePath, principal);
+          analyzeSourceFile(filePath, principal);
         }
       }
     } else {
@@ -137,10 +138,7 @@ export const getSessionHandler = async (
           graph.delete(filePath);
           analyzedFiles.delete(filePath);
           const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-            if (principal?.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
-          }
+          if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
         }
       }
 
@@ -148,8 +146,7 @@ export const getSessionHandler = async (
         if (!graph.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-            if (principal) analyzeSourceFile(filePath, principal);
+            analyzeSourceFile(filePath, principal);
           }
         }
       }
@@ -158,8 +155,9 @@ export const getSessionHandler = async (
         if (!cachedUnusedFiles.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            const principal = factory.getPrincipalByPackageName(workspace.pkgName);
-            if (principal) analyzeSourceFile(filePath, principal);
+            if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
+              analyzeSourceFile(filePath, principal);
+            }
           }
         }
       }
@@ -188,8 +186,11 @@ export const getSessionHandler = async (
   const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
     debugLog('*', `(raw) ${eventType} ${filePath}`);
     if (typeof filePath === 'string') {
-      const type = eventType === 'rename' ? (isFile(options.cwd, filePath) ? 'added' : 'deleted') : 'modified';
-      handleFileChanges([{ type, filePath }]);
+      // On Windows, fs.watch provides paths with backslash separators.
+      // Normalize to POSIX separators so downstream posix path utilities work correctly.
+      const normalizedPath = toPosix(filePath);
+      const type = eventType === 'rename' ? (isFile(options.cwd, normalizedPath) ? 'added' : 'deleted') : 'modified';
+      handleFileChanges([{ type, filePath: normalizedPath }]);
     }
   };
 

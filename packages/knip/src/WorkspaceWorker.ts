@@ -1,29 +1,29 @@
 import picomatch from 'picomatch';
-import { _getInputsFromScripts } from './binaries/index.js';
-import { CacheConsultant } from './CacheConsultant.js';
-import { isDefaultPattern, type Workspace } from './ConfigurationChief.js';
-import { ROOT_WORKSPACE_NAME } from './constants.js';
-import { getFilteredScripts } from './manifest/helpers.js';
-import { PluginEntries, Plugins } from './plugins.js';
+import { _getInputsFromScripts } from './binaries/index.ts';
+import { CacheConsultant } from './CacheConsultant.ts';
+import { isDefaultPattern, type Workspace } from './ConfigurationChief.ts';
+import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
+import { getFilteredScripts } from './manifest/helpers.ts';
+import { PluginEntries, Plugins } from './plugins.ts';
 import type {
   EnsuredPluginConfiguration,
   GetInputsFromScriptsPartial,
-  GetSourceFile,
   HandleInput,
   Plugin,
   RegisterCompiler,
-  RegisterVisitor,
+  RegisterVisitorsOptions,
   WorkspaceConfiguration,
-} from './types/config.js';
-import type { ConfigurationHint } from './types/issues.js';
-import type { PluginName } from './types/PluginNames.js';
-import type { PackageJson } from './types/package-json.js';
-import type { DependencySet } from './types/workspace.js';
-import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.js';
-import { compact } from './util/array.js';
-import type { MainOptions } from './util/create-options.js';
-import { debugLogArray, debugLogObject } from './util/debug.js';
-import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.js';
+} from './types/config.ts';
+import type { ConfigurationHint } from './types/issues.ts';
+import type { PluginName } from './types/PluginNames.ts';
+import type { PackageJson } from './types/package-json.ts';
+import type { DependencySet } from './types/workspace.ts';
+import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
+import { parseFile } from './typescript/visitors/helpers.ts';
+import { compact } from './util/array.ts';
+import type { MainOptions } from './util/create-options.ts';
+import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
 import {
   type ConfigInput,
   type Input,
@@ -34,13 +34,14 @@ import {
   toDebugString,
   toEntry,
   toProductionEntry,
-} from './util/input.js';
-import { getPackageNameFromSpecifier } from './util/modules.js';
-import { getKeysByValue } from './util/object.js';
-import { timerify } from './util/Performance.js';
-import { basename, dirname, extname, isInternal, join } from './util/path.js';
-import { loadConfigForPlugin } from './util/plugin.js';
-import { ELLIPSIS } from './util/string.js';
+} from './util/input.ts';
+import { getPackageNameFromSpecifier } from './util/modules.ts';
+import { getKeysByValue } from './util/object.ts';
+import { timerify } from './util/Performance.ts';
+import { basename, dirname, isInternal, join } from './util/path.ts';
+import { extractPatternExtensions } from './util/pattern-extensions.ts';
+import { loadConfigForPlugin } from './util/plugin.ts';
+import { ELLIPSIS } from './util/string.ts';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -51,7 +52,7 @@ type WorkspaceManagerOptions = {
   rootManifest: PackageJson | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -65,7 +66,6 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 
 const initEnabledPluginsMap = () =>
   Object.keys(Plugins).reduce(
-    // biome-ignore lint: performance/noAccumulatingSpread
     (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
     {} as Record<PluginName, boolean>
   );
@@ -84,7 +84,7 @@ export class WorkspaceWorker {
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
-  getSourceFile: GetSourceFile;
+  readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -110,7 +110,7 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     handleInput,
     findWorkspaceByFilePath,
-    getSourceFile,
+    readFile,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -127,7 +127,7 @@ export class WorkspaceWorker {
 
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
-    this.getSourceFile = getSourceFile;
+    this.readFile = readFile;
 
     this.options = options;
 
@@ -258,10 +258,14 @@ export class WorkspaceWorker {
     }
   }
 
-  public registerVisitors(registerVisitors: RegisterVisitor) {
+  public registerVisitors(options: RegisterVisitorsOptions) {
     for (const pluginName of this.enabledPlugins) {
+      if (options.registeredPlugins.has(pluginName)) continue;
       const plugin = Plugins[pluginName];
-      if (plugin.registerVisitors) plugin.registerVisitors({ registerVisitors });
+      if (plugin.registerVisitors) {
+        options.registeredPlugins.add(pluginName);
+        plugin.registerVisitors(options);
+      }
     }
   }
 
@@ -298,6 +302,7 @@ export class WorkspaceWorker {
     const configFilesMap = this.configFilesMap;
     const configFiles = this.configFilesMap.get(wsName);
     const seen = new Map<string, Set<string>>();
+    const parsedConfigCache = new Map<string, ReturnType<typeof parseFile> | undefined>();
 
     const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.handleInput(input);
@@ -375,6 +380,17 @@ export class WorkspaceWorker {
           continue;
         }
 
+        let parsed: ReturnType<typeof parseFile> | undefined;
+        if (!isManifest) {
+          if (parsedConfigCache.has(configFilePath)) {
+            parsed = parsedConfigCache.get(configFilePath);
+          } else {
+            const sourceText = this.readFile(configFilePath);
+            parsed = sourceText ? parseFile(configFilePath, sourceText) : undefined;
+            parsedConfigCache.set(configFilePath, parsed);
+          }
+        }
+
         const resolveOpts = {
           ...options,
           getInputsFromScripts: createGetInputsFromScripts(configFilePath),
@@ -387,11 +403,8 @@ export class WorkspaceWorker {
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
-          if (extname(configFilePath) !== '.json') {
-            const sourceFile = this.getSourceFile(configFilePath);
-            if (sourceFile && isExternalReExportsOnly(sourceFile)) {
-              cache.resolveConfig = [];
-            }
+          if (parsed && isExternalReExportsOnly(parsed)) {
+            cache.resolveConfig = [];
           }
 
           if (!cache.resolveConfig) {
@@ -409,14 +422,11 @@ export class WorkspaceWorker {
           }
         }
 
-        if (plugin.resolveFromAST) {
-          const sourceFile = this.getSourceFile(configFilePath);
-          const resolveASTOpts = { ...resolveOpts, getSourceFile: this.getSourceFile };
-          if (sourceFile) {
-            const inputs = plugin.resolveFromAST(sourceFile, resolveASTOpts);
-            for (const input of inputs) addInput(input, configFilePath);
-            cache.resolveFromAST = inputs;
-          }
+        if (plugin.resolveFromAST && parsed) {
+          const resolveASTOpts = { ...resolveOpts, readFile: this.readFile };
+          const inputs = plugin.resolveFromAST(parsed.program, resolveASTOpts);
+          for (const input of inputs) addInput(input, configFilePath);
+          cache.resolveFromAST = inputs;
         }
 
         if (!isManifest) {
@@ -480,9 +490,9 @@ export class WorkspaceWorker {
     const collect = (filePath: string) => {
       if (visited.has(filePath)) return;
       visited.add(filePath);
-      const sourceFile = this.getSourceFile(filePath);
-      if (!sourceFile) return;
-      for (const literal of collectStringLiterals(sourceFile)) {
+      const sourceText = this.readFile(filePath);
+      if (!sourceText) return;
+      for (const literal of collectStringLiterals(sourceText, filePath)) {
         literals.add(literal);
         if (isInternal(literal)) collect(join(dirname(filePath), literal));
       }
@@ -500,7 +510,8 @@ export class WorkspaceWorker {
     type: 'entry' | 'project',
     patterns: string[],
     filePaths: string[],
-    includedPaths: Set<string>
+    includedPaths: Set<string>,
+    compilerExtensions?: Set<string>
   ) {
     const hints: ConfigurationHint[] = [];
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
@@ -524,6 +535,17 @@ export class WorkspaceWorker {
         const matcher = picomatch(filePathOrPattern);
         if (!filePaths.some(filePath => matcher(filePath))) {
           hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
+        }
+      }
+    }
+
+    if (type === 'project' && compilerExtensions) {
+      const seen = new Set<string>();
+      for (const pattern of userDefinedPatterns) {
+        for (const ext of extractPatternExtensions(pattern)) {
+          if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext) || compilerExtensions.has(ext)) continue;
+          seen.add(ext);
+          hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
         }
       }
     }
