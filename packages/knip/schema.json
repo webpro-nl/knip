@@ -249,7 +249,7 @@
       }
     },
     "globPatterns": {
-      "description": "Use file paths and glob patterns to match files. Knip uses fast-glob and picomatch (https://github.com/micromatch/picomatch)",
+      "description": "Use file paths and glob patterns to match files. Knip uses tinyglobby and picomatch (https://github.com/micromatch/picomatch)",
       "anyOf": [
         {
           "type": "string"

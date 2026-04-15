@@ -199,7 +199,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   for (const ext of localConfig.extends ?? []) {
     const resolved = resolveAlias(ext, srcDir, cwd);
     const configs = _syncGlob({ cwd: resolved, patterns: config });
-    if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', join(resolved, cfg)));
+    if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
     else inputs.push(toDependency(ext));
   }
 
@@ -210,9 +210,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   if (cwd !== options.cwd) return inputs;
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
-    const fp = join(cwd, file);
-    const result = readAndParseFile(fp);
-    for (const p of collectLocalImportPaths(fp, result)) inputs.push(toProductionEntry(p));
+    const result = readAndParseFile(file);
+    for (const p of collectLocalImportPaths(file, result)) inputs.push(toProductionEntry(p));
   }
 
   // In case typescript isn't listed
