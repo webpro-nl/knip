@@ -108,8 +108,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       get-tsconfig:
-        specifier: 4.13.7
-        version: 4.13.7
+        specifier: 4.13.8
+        version: 4.13.8
       jiti:
         specifier: ^2.6.0
         version: 2.6.1
@@ -2692,8 +2692,8 @@ packages:
     resolution: {integrity: sha512-VaUJspBffn/LMCJVoMvSAdmscJyS1auj5Zulnn5UoYcY531UWmdwhRWkcGKnGU93m5HSXP9LP2usOryrBtQowA==}
     engines: {node: '>=16'}
 
-  get-tsconfig@4.13.7:
-    resolution: {integrity: sha512-7tN6rFgBlMgpBML5j8typ92BKFi2sFQvIdpAqLA2beia5avZDrMs0FLZiM5etShWq5irVyGcGMEA1jcDaK7A/Q==}
+  get-tsconfig@4.13.8:
+    resolution: {integrity: sha512-J87BxkLXykmisLQ+KA4x2+O6rVf+PJrtFUO8lGyiRg4lyxJLJ8/v0sRAKdVZQOy6tR6lMRAF1NqzCf9BQijm0w==}
 
   get-uri@6.0.5:
     resolution: {integrity: sha512-b1O07XYq8eRuVzBNgJLstU6FYc1tS6wnMtF1I1D9lE8LxZSOGZ7LhxN54yPP6mGw5f2CkXY2BQUL9Fx41qvcIg==}
@@ -7248,7 +7248,7 @@ snapshots:
 
   get-stream@8.0.1: {}
 
-  get-tsconfig@4.13.7:
+  get-tsconfig@4.13.8:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -9603,7 +9603,7 @@ snapshots:
   tsx@4.21.0:
     dependencies:
       esbuild: 0.27.3
-      get-tsconfig: 4.13.7
+      get-tsconfig: 4.13.8
     optionalDependencies:
       fsevents: 2.3.3
 
