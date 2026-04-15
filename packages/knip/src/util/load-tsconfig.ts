@@ -66,26 +66,19 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
       const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
       if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-      if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
+      if (compilerOptions.rootDir)
+        compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
       if (compilerOptions.paths) {
         compilerOptions.pathsBasePath ??= dir;
       }
       if (compilerOptions.rootDirs) {
-        compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
-          isAbsolute(d) ? d : join(dir, d)
-        );
+        compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
       }
 
       const include = resolvePatterns(config.include, dir, true);
       const exclude = resolvePatterns(config.exclude, dir, true);
       const files = resolvePatterns(config.files, dir);
-      const fileNames = expandFileNames(
-        dir,
-        compilerOptions,
-        include,
-        exclude,
-        files
-      );
+      const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
 
       return { isFile: true, compilerOptions, fileNames };
     } catch {

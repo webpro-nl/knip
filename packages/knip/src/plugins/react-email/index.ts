@@ -9,8 +9,7 @@ const title = 'React Email';
 
 const enablers = ['react-email'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const entry = ['emails/**/*.tsx'];
 
@@ -20,8 +19,7 @@ const args: Args = {
   binaries: ['email'],
   resolveInputs: parsed => {
     const inputs = [];
-    if (previewCommands.has(parsed._[0]))
-      inputs.push(toDependency('@react-email/preview-server'));
+    if (previewCommands.has(parsed._[0])) inputs.push(toDependency('@react-email/preview-server'));
     if (parsed.dir) inputs.push(toEntry(`${parsed.dir}/**/*.tsx`));
     return inputs;
   },
