@@ -1,6 +1,4 @@
-import { readFileSync } from 'node:fs';
 import { parseTsconfig } from 'get-tsconfig';
-import stripJsonComments from 'strip-json-comments';
 import type { CompilerOptions } from '../types/project.ts';
 import { isFile as _isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
@@ -59,57 +57,48 @@ const expandFileNames = (
   return result;
 };
 
-const findRootDirsBase = (tsConfigFilePath: string): string | undefined => {
-  try {
-    const raw = JSON.parse(stripJsonComments(readFileSync(tsConfigFilePath, 'utf8')));
-    if (raw.compilerOptions?.rootDirs) return dirname(tsConfigFilePath);
-    if (raw.extends) {
-      const extPath = join(dirname(tsConfigFilePath), raw.extends);
-      return findRootDirsBase(extPath);
-    }
-  } catch {}
-  return undefined;
-};
-
-const resolveConfig = (tsConfigFilePath: string) => {
-  try {
-    return parseTsconfig(tsConfigFilePath);
-  } catch {
-    try {
-      const raw = readFileSync(tsConfigFilePath, 'utf8');
-      return JSON.parse(stripJsonComments(raw));
-    } catch {
-      return undefined;
-    }
-  }
-};
-
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   if (_isFile(tsConfigFilePath)) {
-    const config = resolveConfig(tsConfigFilePath);
-    if (!config) return { isFile: true, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+    try {
+      const config = parseTsconfig(tsConfigFilePath);
 
-    const dir = dirname(tsConfigFilePath);
-    const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
+      const dir = dirname(tsConfigFilePath);
+      const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.paths) {
-      compilerOptions.pathsBasePath ??= dir;
-    }
-    if (compilerOptions.rootDirs) {
-      const rootDirsBase = findRootDirsBase(tsConfigFilePath) ?? dir;
-      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
-        isAbsolute(d) ? d : join(rootDirsBase, d)
+      if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
+      if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
+      if (compilerOptions.paths) {
+        compilerOptions.pathsBasePath ??= dir;
+      }
+      if (compilerOptions.rootDirs) {
+        compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
+          isAbsolute(d) ? d : join(dir, d)
+        );
+      }
+
+      const include = resolvePatterns(config.include, dir, true);
+      const exclude = resolvePatterns(config.exclude, dir, true);
+      const files = resolvePatterns(config.files, dir);
+      const fileNames = expandFileNames(
+        dir,
+        compilerOptions,
+        include,
+        exclude,
+        files
       );
+
+      return { isFile: true, compilerOptions, fileNames };
+    } catch {
+      return {
+        isFile: true,
+        compilerOptions: {} as CompilerOptions,
+        fileNames: [] as string[],
+      };
     }
-
-    const include = resolvePatterns(config.include, dir, true);
-    const exclude = resolvePatterns(config.exclude, dir, true);
-    const files = resolvePatterns(config.files, dir);
-    const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
-
-    return { isFile: true, compilerOptions, fileNames };
   }
-  return { isFile: false, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+  return {
+    isFile: false,
+    compilerOptions: {} as CompilerOptions,
+    fileNames: [] as string[],
+  };
 };
