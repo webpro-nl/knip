@@ -1,0 +1,30 @@
+---
+service: TestService
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  logRetentionInDays: 1
+  stage: '${opt:stage, "dev"}'
+  environment:
+    STAGE: ${opt:stage, "dev"}
+    CLOUDFORMATION_VARIABLE: "!Sub 'arn:aws:iam::${AWS::AccountId}:role/role-name'"
+  iamRoleStatements:
+    - Effect: Allow
+      Action: s3:GetObject
+      Resource: !Sub 'arn:aws:s3:::${self:custom.bucket}/*'
+
+functions:
+  First:
+    handler: function/handler.handler
+    events:
+      - http:
+          path: /first
+          method: get
+  Second:
+    handler: function-2/function2.handler
+    environment:
+      FOO: !Ref SomeResource

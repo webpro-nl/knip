@@ -118,6 +118,7 @@ export const pluginsSchema = z.object({
   sanity: pluginSchema,
   'semantic-release': pluginSchema,
   sentry: pluginSchema,
+  'serverless-framework': pluginSchema,
   'simple-git-hooks': pluginSchema,
   'size-limit': pluginSchema,
   sst: pluginSchema,

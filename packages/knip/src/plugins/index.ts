@@ -104,6 +104,7 @@ import { default as rstest } from './rstest/index.ts';
 import { default as sanity } from './sanity/index.ts';
 import { default as semanticRelease } from './semantic-release/index.ts';
 import { default as sentry } from './sentry/index.ts';
+import { default as serverlessFramework } from './serverless-framework/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
 import { default as sst } from './sst/index.ts';
@@ -251,6 +252,7 @@ export const Plugins = {
   sanity,
   'semantic-release': semanticRelease,
   sentry,
+  'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
   sst,

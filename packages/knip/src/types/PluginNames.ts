@@ -105,6 +105,7 @@ export type PluginName =
   | 'sanity'
   | 'semantic-release'
   | 'sentry'
+  | 'serverless-framework'
   | 'simple-git-hooks'
   | 'size-limit'
   | 'sst'
@@ -252,6 +253,7 @@ export const pluginNames = [
   'sanity',
   'semantic-release',
   'sentry',
+  'serverless-framework',
   'simple-git-hooks',
   'size-limit',
   'sst',
