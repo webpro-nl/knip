@@ -25,6 +25,14 @@ test('Find dependencies with the Prettier plugin', async () => {
   });
 });
 
+test('Find dependencies with the Prettier plugin (--config arg)', async () => {
+  const cwd = resolve('fixtures/plugins/prettier-args');
+  const options = await createOptions({ cwd });
+  const { issues } = await main(options);
+
+  assert(issues.unlisted['my-prettier-settings.js']['my-custom-prettier-plugin']);
+});
+
 test('Find dependencies with the Prettier plugin (.json5 config)', async () => {
   const cwd = resolve('fixtures/plugins/prettier-json5');
   const options = await createOptions({ cwd });

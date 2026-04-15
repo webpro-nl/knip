@@ -1,3 +1,4 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDeferResolve, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -27,6 +28,10 @@ const resolveConfig: ResolveConfig<PrettierConfig> = config => {
     : [];
 };
 
+const args: Args = {
+  config: true,
+};
+
 const isFilterTransitiveDependencies = true;
 
 const plugin: Plugin = {
@@ -34,6 +39,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
+  args,
   resolveConfig,
   isFilterTransitiveDependencies,
 };
