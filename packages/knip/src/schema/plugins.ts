@@ -89,6 +89,7 @@ export const pluginsSchema = z.object({
   'panda-css': pluginSchema,
   parcel: pluginSchema,
   payload: pluginSchema,
+  pino: pluginSchema,
   playwright: pluginSchema,
   'playwright-ct': pluginSchema,
   'playwright-test': pluginSchema,

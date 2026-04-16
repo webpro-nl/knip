@@ -75,6 +75,7 @@ import { default as oxlint } from './oxlint/index.ts';
 import { default as pandaCss } from './panda-css/index.ts';
 import { default as parcel } from './parcel/index.ts';
 import { default as payload } from './payload/index.ts';
+import { default as pino } from './pino/index.ts';
 import { default as playwright } from './playwright/index.ts';
 import { default as playwrightCt } from './playwright-ct/index.ts';
 import { default as playwrightTest } from './playwright-test/index.ts';
@@ -223,6 +224,7 @@ export const Plugins = {
   'panda-css': pandaCss,
   parcel,
   payload,
+  pino,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,

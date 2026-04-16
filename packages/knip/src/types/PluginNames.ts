@@ -76,6 +76,7 @@ export type PluginName =
   | 'panda-css'
   | 'parcel'
   | 'payload'
+  | 'pino'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -224,6 +225,7 @@ export const pluginNames = [
   'panda-css',
   'parcel',
   'payload',
+  'pino',
   'playwright',
   'playwright-ct',
   'playwright-test',
