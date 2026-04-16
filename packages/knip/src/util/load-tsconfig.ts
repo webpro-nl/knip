@@ -1,4 +1,4 @@
-import { parseTsconfig } from 'get-tsconfig';
+import { parseTsconfig, type TsConfigJsonResolved } from 'get-tsconfig';
 import type { CompilerOptions } from '../types/project.ts';
 import { isFile as _isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
@@ -57,6 +57,34 @@ const expandFileNames = (
   return result;
 };
 
+const resolveReference = (refPath: string, dir: string): string | undefined => {
+  const abs = isAbsolute(refPath) ? refPath : join(dir, refPath);
+  if (_isFile(abs)) return abs;
+  const withTsconfig = join(abs, 'tsconfig.json');
+  return _isFile(withTsconfig) ? withTsconfig : undefined;
+};
+
+const fillFromReferences = (
+  target: CompilerOptions,
+  references: TsConfigJsonResolved['references'],
+  dir: string,
+  visited: Set<string>
+) => {
+  if (!references?.length) return;
+  for (const ref of references) {
+    if (target.outDir && target.rootDir) return;
+    const refPath = resolveReference(ref.path, dir);
+    if (!refPath || visited.has(refPath)) continue;
+    visited.add(refPath);
+    const refConfig = parseTsconfig(refPath);
+    const refDir = dirname(refPath);
+    const refOpts = refConfig.compilerOptions;
+    if (refOpts?.outDir && !target.outDir) target.outDir = toAbsolute(refOpts.outDir, refDir).replace(/\/+$/, '');
+    if (refOpts?.rootDir && !target.rootDir) target.rootDir = toAbsolute(refOpts.rootDir, refDir).replace(/\/+$/, '');
+    if (!refOpts?.outDir || !refOpts?.rootDir) fillFromReferences(target, refConfig.references, refDir, visited);
+  }
+};
+
 export const loadTSConfig = async (tsConfigFilePath: string) => {
   if (_isFile(tsConfigFilePath)) {
     try {
@@ -73,6 +101,10 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
       }
       if (compilerOptions.rootDirs) {
         compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
+      }
+
+      if ((!compilerOptions.outDir || !compilerOptions.rootDir) && config.references?.length) {
+        fillFromReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]));
       }
 
       const include = resolvePatterns(config.include, dir, true);
