@@ -29,12 +29,12 @@
   },
   "devDependencies": {
     "@release-it/bumper": "^7.0.5",
-    "installed-check": "^9.3.0",
+    "installed-check": "^10.0.1",
     "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.1.1",
-    "oxfmt": "^0.35.0",
-    "oxlint": "^1.50.0",
-    "release-it": "^19.2.4",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
+    "release-it": "^20.0.0",
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.1.1"
   },
@@ -51,7 +51,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.33.0",
   "mdxlint": {
     "plugins": [
       "mdxlint-preset-webpro"
