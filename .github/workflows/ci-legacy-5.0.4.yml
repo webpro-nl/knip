@@ -46,7 +46,7 @@ jobs:
           pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip
-        run: pnpm run test:smoke
+        run: pnpm test --runtime node --smoke
         working-directory: packages/knip
       - name: Run knip
         run: ./packages/knip/bin/knip.js --reporter github-actions

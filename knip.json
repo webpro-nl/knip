@@ -6,12 +6,8 @@
       "ignoreBinaries": ["tsc"]
     },
     "packages/knip": {
-      "project": [
-        "src/**/*.ts!",
-        "test/**/*.ts",
-        "!src/util/empty.ts",
-        "!**/_template"
-      ],
+      "entry": ["test/**/*.ts"],
+      "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template"],
       "ignoreDependencies": ["prettier"]
     },
     "packages/docs": {

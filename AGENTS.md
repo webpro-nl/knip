@@ -123,7 +123,7 @@ To run all relevant tests without having to build `knip`:
 
 ```sh
 cd packages/knip
-pnpm run test:bun:smoke
+pnpm test --runtime bun --smoke
 ```
 
 Use `node` if Bun is not available:
@@ -131,7 +131,7 @@ Use `node` if Bun is not available:
 ```sh
 cd packages/knip
 node --test test/commonjs.test.ts
-pnpm test:smoke
+pnpm test --smoke
 ```
 
 Build core package and run all tests only if there are changes in auto-fix,

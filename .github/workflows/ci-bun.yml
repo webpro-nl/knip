@@ -36,5 +36,5 @@ jobs:
       - name: Run knip (production/strict)
         run: ./packages/knip/bin/knip-bun.js --production --strict
       - name: Test knip
-        run: bun run test:bun
+        run: bun run test
         working-directory: packages/knip

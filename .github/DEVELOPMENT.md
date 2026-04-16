@@ -50,8 +50,7 @@ To skip slower tests related to CLI and `--fix`, while still covering all the
 essentials and plugins:
 
 ```shell
-pnpm test:smoke
-bun test:bun:smoke
+pnpm test --smoke
 ```
 
 Note that Git `core.symlinks=true` is required for some tests.
@@ -167,7 +166,7 @@ test file to run and debug.
 In case you're wondering if or why some code is ever hit, attach the debugger to
 each test. Set a breakpoint and run all tests in one of the following ways:
 
-- From built-in terminal: `tsx --inspect --test test/**/*.test.ts`
+- From built-in terminal: `node --inspect --test test/**/*.test.ts`
 - Use the "Debug all tests with Bun" launch config.
 
 ## QA
