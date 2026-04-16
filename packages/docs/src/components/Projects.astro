@@ -60,7 +60,7 @@ import Vercel from '../assets/projects/vercel.svg';
     filter: brightness(0.6) grayscale(100%)
   }
 
-  [data-theme=light] svg {
+  :global([data-theme=light]) svg {
     opacity: 0.7;
   }
 
@@ -88,13 +88,27 @@ import Vercel from '../assets/projects/vercel.svg';
   }
 
 
-  a:hover svg,
-  a:hover img {
+  #projects a:hover,
+  #projects.show-all a {
+    color: #fff;
+  }
+
+  #projects a:hover svg,
+  #projects a:hover img,
+  #projects.show-all svg,
+  #projects.show-all img {
     filter: none;
   }
 
-  [data-theme=light] a:hover svg,
-  [data-theme=light] a:hover img {
+  :global([data-theme=light]) #projects a:hover,
+  :global([data-theme=light]) #projects.show-all a {
+    color: #111;
+  }
+
+  :global([data-theme=light]) #projects a:hover svg,
+  :global([data-theme=light]) #projects a:hover img,
+  :global([data-theme=light]) #projects.show-all svg,
+  :global([data-theme=light]) #projects.show-all img {
     opacity: 1;
     filter: none;
   }
@@ -128,8 +142,20 @@ import Vercel from '../assets/projects/vercel.svg';
     <a href="https://github.com/search?type=code&q=org:sourcegraph knip"><SourceGraph /></a>
     <a href="https://github.com/search?type=code&q=org:statelyai knip"><Stately /></a>
     <a href="https://github.com/search?type=code&q=org:storybookjs knip"><Storybook  /></a>
-    <a href="https://github.com/search?type=code&q=org:sveltejs knip" class="contrast"><Svelte /></a>
+    <a href="https://github.com/search?type=code&q=org:sveltejs knip"><Svelte /></a>
     <a href="https://github.com/search?type=code&q=org:tanstack knip" class="contrast"><img src={TanStack.src}/></a>
     <a href="https://github.com/search?type=code&q=org:typescript-eslint knip" class="contrast grow"><TypeScriptESLint/></a>
     <a href="https://github.com/search?type=pullrequests&q=org:vercel knip" class="shrink"><Vercel/></a>
 </div>
+
+<script>
+  const projects = document.getElementById('projects');
+  const heading = projects?.closest('.projects')?.previousElementSibling;
+  if (heading instanceof HTMLElement) {
+    heading.style.cursor = 'pointer';
+    heading.addEventListener('click', (e) => {
+      e.preventDefault();
+      projects.classList.toggle('show-all');
+    });
+  }
+</script>
