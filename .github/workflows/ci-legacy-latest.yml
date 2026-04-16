@@ -1,3 +1,5 @@
+# Legacy pipeline: knip v5 has typescript and @types/node as peer dependencies
+
 name: Tests (against typescript@latest in Node.js v22)
 
 on:

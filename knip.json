@@ -2,14 +2,15 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "project": ["!templates/**"]
+      "project": ["!templates"],
+      "ignoreBinaries": ["tsc"]
     },
     "packages/knip": {
       "project": [
         "src/**/*.ts!",
         "test/**/*.ts",
         "!src/util/empty.ts",
-        "!**/_template/**"
+        "!**/_template"
       ],
       "ignoreDependencies": ["prettier"]
     },

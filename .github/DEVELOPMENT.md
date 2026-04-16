@@ -176,7 +176,7 @@ Knip has a few tools set up to verify code quality and to format code and
 documentation:
 
 ```shell
-pnpm format
+pnpm fmt
 pnpm lint
 pnpm knip
 pnpm knip --strict

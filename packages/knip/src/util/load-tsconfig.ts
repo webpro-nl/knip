@@ -1,6 +1,6 @@
 import { parseTsconfig, type TsConfigJsonResolved } from 'get-tsconfig';
 import type { CompilerOptions } from '../types/project.ts';
-import { isFile as _isFile } from './fs.ts';
+import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
 import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
 
@@ -59,9 +59,9 @@ const expandFileNames = (
 
 const resolveReference = (refPath: string, dir: string): string | undefined => {
   const abs = isAbsolute(refPath) ? refPath : join(dir, refPath);
-  if (_isFile(abs)) return abs;
+  if (isFile(abs)) return abs;
   const withTsconfig = join(abs, 'tsconfig.json');
-  return _isFile(withTsconfig) ? withTsconfig : undefined;
+  return isFile(withTsconfig) ? withTsconfig : undefined;
 };
 
 const fillFromReferences = (
@@ -86,7 +86,7 @@ const fillFromReferences = (
 };
 
 export const loadTSConfig = async (tsConfigFilePath: string) => {
-  if (_isFile(tsConfigFilePath)) {
+  if (isFile(tsConfigFilePath)) {
     try {
       const config = parseTsconfig(tsConfigFilePath);
 

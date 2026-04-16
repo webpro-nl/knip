@@ -22,7 +22,7 @@
     "watch": "pnpm run --dir packages/knip watch",
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
-    "format": "oxfmt",
+    "fmt": "oxfmt",
     "lint": "oxlint",
     "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
     "release": "./scripts/release.sh"

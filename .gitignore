@@ -1,6 +1,8 @@
 node_modules
 /.idea/*
 !/.idea/runConfigurations
+.agents
+.claude
 .DS_Store
 .npmrc
 packages/*/dist
