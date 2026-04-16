@@ -88,7 +88,7 @@
     "test:bun:smoke": "bun test test/*.test.ts test/{plugins,util}/*.test.ts",
     "watch": "npm link && tsc --watch",
     "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
-    "build": "tsc",
+    "build": "tsgo",
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm run test",
     "release": "NODE_OPTIONS=--no-deprecation release-it",
     "create-plugin": "node ./scripts/create-new-plugin.ts",
@@ -118,12 +118,12 @@
     "@types/minimist": "^1.2.5",
     "@types/picomatch": "^4.0.1",
     "@types/webpack": "^5.28.5",
+    "@typescript/native-preview": "7.0.0-dev.20260415.1",
     "@wdio/types": "^9.20.0",
     "codeclimate-types": "^0.3.1",
     "glob-bin": "^1.0.0",
     "prettier": "^3.8.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.8.3"
+    "tsx": "^4.21.0"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
