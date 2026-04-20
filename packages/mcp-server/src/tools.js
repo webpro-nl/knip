@@ -60,9 +60,10 @@ export function buildResults(results, options) {
 
 /**
  * @param {string} cwd
+ * @param {string[]} [workspace] Scope run to array of workspaces
  */
-export async function getResults(cwd) {
-  const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
+export async function getResults(cwd, workspace) {
+  const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false, workspace });
   const session = await createSession(options);
   return buildResults(session.getResults(), options);
 }

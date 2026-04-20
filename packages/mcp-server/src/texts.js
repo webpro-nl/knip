@@ -31,6 +31,10 @@ Returns:
 - issues: Detailed issues by type (dependencies, exports, types, etc.)
 - configFile: Current config file status
 
+Options:
+- cwd: Working directory (defaults to the process cwd)
+- workspace: Scope run to array of workspaces
+
 Iterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.`;
 
 // pkg.contributes.languageModelTools[1].modelDescription
