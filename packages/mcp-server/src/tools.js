@@ -41,16 +41,17 @@ export function buildResults(results, options) {
     : { exists: false, locations: KNIP_CONFIG_LOCATIONS };
 
   const reviewHint = isSuppressIssues ? UNCONFIGURED_HINT : options.configFilePath ? CONFIG_REVIEW_HINT : undefined;
-  const files = isSuppressIssues ? [] : Array.from(results.issues.files);
+  const files = isSuppressIssues ? null : Array.from(results.issues.files);
   const issues = isSuppressIssues
-    ? []
+    ? null
     : Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files'));
 
   return {
     reviewHint,
-    configFile,
+    issuesSuppressed: isSuppressIssues,
     configurationHints,
     counters: results.counters,
+    configFile,
     enabledPlugins: results.enabledPlugins,
     files,
     issues,

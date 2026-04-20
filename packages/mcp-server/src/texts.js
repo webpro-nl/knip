@@ -50,11 +50,11 @@ Use this instead of fetching from https://knip.dev.`;
 export const DOC_TOOL_TOPIC_DESCRIPTION =
   'Topic key (e.g. "configuring-project-files") for curated resources, or path (e.g. "explanations/plugins") for all available docs';
 
-export const ERROR_HINT = `For unexpected errors (exit code 2) such as "error loading file":
+export const ERROR_HINT = `For unexpected errors (exit code 2) such as "Error loading ...":
 
-- Consult docs: known-issues and configuration-reference
-- If no config file exists, create knip.json in the project root
-- Run knip again`;
+- Call knip-docs with topic "known-issues" and "configuration-reference"
+- If no knip config file exists yet, create knip.json in the project root first
+- Apply a workaround, then run knip-run again`;
 
 export const UNCONFIGURED_HINT =
   'Issues are suppressed because the project is not yet configured. Reported issues might be false positives. Address configuration hints first, then re-run to get the actual issues.';
