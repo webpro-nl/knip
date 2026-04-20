@@ -1,14 +1,12 @@
 import { z } from 'zod/mini';
+import type { CompilerAsync, CompilerSync } from '../compilers/types.ts';
 import { SYMBOL_TYPE } from '../constants.ts';
 import { globSchema, pluginsSchema } from './plugins.ts';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-type SyncCompiler = (filename: string, contents: string) => string;
-type AsyncCompiler = (filename: string, contents: string) => Promise<string>;
-
-const syncCompilerSchema = z.union([z.literal(true), z.custom<SyncCompiler>()]);
-const asyncCompilerSchema = z.custom<AsyncCompiler>();
+const syncCompilerSchema = z.union([z.literal(true), z.custom<CompilerSync>()]);
+const asyncCompilerSchema = z.custom<CompilerAsync>();
 const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
 const compilersSchema = z.record(z.string(), compilerSchema);
 
