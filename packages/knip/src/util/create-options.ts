@@ -131,7 +131,6 @@ export const createOptions = async (options: CreateOptions) => {
     configFilePath,
     cwd,
     dependencies: args.dependencies ?? false,
-    experimentalTags: tags,
     exports: args.exports ?? false,
     files: args.files ?? false,
     fixTypes,
