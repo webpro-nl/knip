@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/rslib2",
+  "devDependencies": {
+    "@rslib/core": "*"
+  }
+}
