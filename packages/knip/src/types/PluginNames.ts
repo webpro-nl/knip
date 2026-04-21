@@ -116,6 +116,7 @@ export type PluginName =
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'sveltejs-package'
   | 'sveltekit'
   | 'svgo'
   | 'svgr'
@@ -265,6 +266,7 @@ export const pluginNames = [
   'stryker',
   'stylelint',
   'svelte',
+  'sveltejs-package',
   'sveltekit',
   'svgo',
   'svgr',

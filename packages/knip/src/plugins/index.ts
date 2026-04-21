@@ -115,6 +115,7 @@ import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
 import { default as stylelint } from './stylelint/index.ts';
 import { default as svelte } from './svelte/index.ts';
+import { default as sveltejsPackage } from './sveltejs-package/index.ts';
 import { default as sveltekit } from './sveltekit/index.ts';
 import { default as svgo } from './svgo/index.ts';
 import { default as svgr } from './svgr/index.ts';
@@ -264,6 +265,7 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  'sveltejs-package': sveltejsPackage,
   sveltekit,
   svgo,
   svgr,

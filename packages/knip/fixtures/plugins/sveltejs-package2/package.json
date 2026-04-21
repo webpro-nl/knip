@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/sveltejs-package2",
+  "type": "module",
+  "main": "./build/index.js",
+  "scripts": {
+    "build": "svelte-package -i src/components -o build"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "*"
+  }
+}

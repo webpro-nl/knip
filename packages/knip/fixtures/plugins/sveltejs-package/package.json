@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/sveltejs-package",
+  "type": "module",
+  "exports": {
+    ".": { "svelte": "./dist/index.js" },
+    "./lib/*": { "svelte": "./dist/*.js" },
+    "./ui/*": { "svelte": "./dist/ui/*/index.js" }
+  },
+  "scripts": {
+    "build": "svelte-package"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "*",
+    "typescript": "*"
+  }
+}
