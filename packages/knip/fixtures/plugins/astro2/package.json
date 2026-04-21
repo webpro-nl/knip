@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/astro2",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  },
+  "dependencies": {
+    "astro": "*"
+  }
+}

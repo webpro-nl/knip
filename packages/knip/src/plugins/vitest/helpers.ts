@@ -1,4 +1,6 @@
-import type { ViteConfig } from './types.ts';
+import { type Input, toAlias } from '../../util/input.ts';
+import { join, toPosix } from '../../util/path.ts';
+import type { AliasOptions, ViteConfig } from './types.ts';
 
 /**
  * Sources:
@@ -44,6 +46,22 @@ const builtInReporters = [
   'tree',
   'verbose',
 ];
+
+const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
+
+export const getAliasInputs = (aliasOptions: AliasOptions, cwd: string): Input[] => {
+  const inputs: Input[] = [];
+  for (const [alias, value] of Object.entries(aliasOptions)) {
+    if (!value) continue;
+    const prefixes = [value]
+      .flat()
+      .filter((value): value is string => typeof value === 'string')
+      .map(prefix => (toPosix(prefix).startsWith(cwd) ? prefix : join(cwd, prefix)));
+    if (alias.length > 1) inputs.push(toAlias(alias, prefixes));
+    inputs.push(toAlias(addStar(alias), prefixes.map(addStar)));
+  }
+  return inputs;
+};
 
 export const getExternalReporters = (reporters?: ViteConfig['test']['reporters']) =>
   reporters

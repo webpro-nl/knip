@@ -3,11 +3,11 @@ import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
-import { getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
@@ -131,20 +131,8 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
   }
 
-  const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
   const addAliases = (aliasOptions: AliasOptions) => {
-    for (const [alias, value] of Object.entries(aliasOptions)) {
-      if (!value) continue;
-      const prefixes = [value]
-        .flat()
-        .filter(value => typeof value === 'string')
-        .map(prefix => {
-          if (toPosix(prefix).startsWith(options.cwd)) return prefix;
-          return join(options.cwd, prefix);
-        });
-      if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
-      inputs.add(toAlias(addStar(alias), prefixes.map(addStar)));
-    }
+    for (const input of getAliasInputs(aliasOptions, options.cwd)) inputs.add(input);
   };
 
   const seenRoots = new Set<string>();

@@ -1,9 +1,10 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
 import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getAliasInputs } from '../vitest/helpers.ts';
 import compiler from './compiler.ts';
 import mdxCompiler from './compiler-mdx.ts';
-import { getSrcDir, usesPassthroughImageService } from './resolveFromAST.ts';
+import { getSrcDir, getViteAliases, usesPassthroughImageService } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -26,12 +27,13 @@ const production = [
   'src/actions/index.{js,ts}',
 ];
 
-const resolveFromAST: ResolveFromAST = program => {
+const resolveFromAST: ResolveFromAST = (program, options) => {
   const srcDir = getSrcDir(program);
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
   const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
     ...production.map(setSrcDir).map(path => toProductionEntry(path)),
+    ...getAliasInputs(getViteAliases(program), options.cwd),
   ];
 
   if (!usesPassthroughImageService(program)) inputs.push(toDependency('sharp', { optional: true }));

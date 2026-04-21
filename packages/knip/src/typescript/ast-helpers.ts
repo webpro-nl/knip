@@ -7,7 +7,10 @@ import { parseFile } from './visitors/helpers.ts';
 const isStringLiteral = (node: any): boolean =>
   node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string');
 
-const getStringValue = (node: any): string | undefined => (isStringLiteral(node) ? node.value : undefined);
+export const getStringValue = (node: any): string | undefined => (isStringLiteral(node) ? node.value : undefined);
+
+export const getPropertyKey = (prop: any): string | undefined =>
+  prop?.key?.type === 'Identifier' ? prop.key.name : getStringValue(prop?.key);
 
 export const getImportMap = (program: Program) => {
   const importMap = new Map<string, string>();
@@ -103,9 +106,7 @@ export const findCallArg = (program: Program, fnName: string): any | undefined =
 export const findProperty = (node: any, name: string): any | undefined => {
   if (node?.type !== 'ObjectExpression') return;
   for (const prop of node.properties ?? []) {
-    if (prop.type === 'Property' && (prop.key?.name === name || prop.key?.value === name)) {
-      return prop.value;
-    }
+    if (prop.type === 'Property' && getPropertyKey(prop) === name) return prop.value;
   }
 };
 
