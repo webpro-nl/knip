@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/react-email-v6",
+  "dependencies": {
+    "react-email": "^6.0.0"
+  },
+  "devDependencies": {
+    "@react-email/ui": "^6.0.0"
+  },
+  "scripts": {
+    "dev": "email dev --dir ./dev-dir"
+  }
+}
