@@ -175,13 +175,16 @@ export async function build({
     }
 
     for (const identifier of entrySpecifiersFromManifest) {
-      if (!identifier.startsWith('!') && !isGitIgnored(join(dir, identifier))) {
-        const exists = identifier.includes('*')
-          ? _syncGlob({ patterns: [identifier], cwd: dir }).length > 0
-          : existsSync(join(dir, identifier));
-        if (!exists) {
-          collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
-        }
+      if (identifier.startsWith('!') || isGitIgnored(join(dir, identifier))) continue;
+      if (!identifier.startsWith('.') && !identifier.startsWith('/')) {
+        const packageName = getPackageNameFromModuleSpecifier(identifier);
+        if (packageName && dependencies.has(packageName)) continue;
+      }
+      const exists = identifier.includes('*')
+        ? _syncGlob({ patterns: [identifier], cwd: dir }).length > 0
+        : existsSync(join(dir, identifier));
+      if (!exists) {
+        collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
       }
     }
 

@@ -1,0 +1,7 @@
+{
+  "name": "@fixture/package-entry-bare",
+  "main": "bare-dep/entry",
+  "dependencies": {
+    "bare-dep": "*"
+  }
+}
