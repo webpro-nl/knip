@@ -1,6 +1,6 @@
 /* oxlint-disable no-console */
 import util, { parseArgs } from 'node:util';
-import picocolors from 'picocolors';
+import st from './colors.ts';
 
 const { values } = parseArgs({ strict: false, options: { debug: { type: 'boolean' } } });
 
@@ -16,9 +16,7 @@ const inspectOptions = { maxArrayLength: null, depth: null, colors: IS_COLORS };
 export const inspect = (obj: unknown) => console.log(util.inspect(obj, inspectOptions));
 
 const ctx = (text: string | [string, string]) =>
-  typeof text === 'string'
-    ? picocolors.yellow(`[${text}]`)
-    : `${picocolors.yellow(`[${text[0]}]`)} ${picocolors.cyan(text[1])}`;
+  typeof text === 'string' ? st.yellow(`[${text}]`) : `${st.yellow(`[${text[0]}]`)} ${st.cyan(text[1])}`;
 
 // Inspect arrays, otherwise Node [will, knip, ...n-100 more items]
 const logArray = (collection: string[]) => {

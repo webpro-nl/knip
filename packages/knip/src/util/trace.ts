@@ -1,4 +1,4 @@
-import pc from 'picocolors';
+import st from './colors.ts';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
 
 export interface TraceMemberStatus {
@@ -14,13 +14,13 @@ export const formatTrace = (
 ): string => {
   const lines: string[] = [];
 
-  const file = pc.white;
-  const id = pc.cyanBright;
-  const ref = pc.cyanBright;
-  const via = pc.dim;
-  const ok = pc.green;
-  const fail = pc.red;
-  const dim = pc.dim;
+  const file = st.white;
+  const id = st.cyanBright;
+  const ref = st.cyanBright;
+  const via = st.dim;
+  const ok = st.green;
+  const fail = st.red;
+  const dim = st.dim;
 
   const entryMarker = node.isEntry ? dim(' ⎆') : '';
   lines.push(`${file(toRelative(node.filePath))}${dim(':')}${id(node.identifier)}${entryMarker}`);

@@ -1,7 +1,7 @@
-import pc from 'picocolors';
 import type { GraphExplorer } from '../graph-explorer/explorer.ts';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
+import st from '../util/colors.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { toRelative } from '../util/path.ts';
 import { toRegexOrString } from '../util/regex.ts';
@@ -31,8 +31,8 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
         if (seen.has(key)) continue;
         seen.add(key);
         table.row();
-        table.cell('filePath', pc.whiteBright(`${toRel(_import.filePath)}${pos}`));
-        table.cell('package', pc.cyanBright(packageName));
+        table.cell('filePath', st.whiteBright(`${toRel(_import.filePath)}${pos}`));
+        table.cell('package', st.cyanBright(packageName));
       }
     }
     for (const line of table.toRows()) console.log(line);

@@ -1,10 +1,10 @@
 /* oxlint-disable no-console */
-import picocolors from 'picocolors';
+import st from './colors.ts';
 
 export const logWarning = (prefix: string, message: string) => {
-  console.warn(`${picocolors.yellow(prefix)}: ${message}`);
+  console.warn(`${st.yellow(prefix)}: ${message}`);
 };
 
 export const logError = (prefix: string, message: string) => {
-  console.error(`${picocolors.red(prefix)}: ${message}`);
+  console.error(`${st.red(prefix)}: ${message}`);
 };

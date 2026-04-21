@@ -1,21 +1,19 @@
-import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
+import st from '../../util/colors.ts';
 import { relative } from '../../util/path.ts';
 import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
-export const dim = picocolors.gray;
-export const bright = picocolors.whiteBright;
-const yellow = picocolors.yellow;
+export const dim = st.gray;
+export const bright = st.whiteBright;
 
 export const getIssueTypeTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => ISSUE_TYPE_TITLE[reportType];
 
 export const getColoredTitle = (title: string, count: number) =>
-  `${picocolors.yellowBright(picocolors.underline(title))} (${count})`;
+  `${st.style(['yellowBright', 'underline'], title)} (${count})`;
 
-export const getDimmedTitle = (title: string, count: number) =>
-  `${yellow(`${picocolors.underline(title)} (${count})`)}`;
+export const getDimmedTitle = (title: string, count: number) => `${st.yellow(`${st.underline(title)} (${count})`)}`;
 
 type LogIssueLine = {
   owner?: string;
@@ -29,7 +27,7 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
   const symbol = symbols ? `: ${symbols.map(s => s.symbol).join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
   const print = severity === 'warn' ? dim : plain;
-  return `${owner ? `${picocolors.cyan(owner)} ` : ''}${print(`${relative(cwd, filePath)}${symbol}${parent}`)}`;
+  return `${owner ? `${st.cyan(owner)} ` : ''}${print(`${relative(cwd, filePath)}${symbol}${parent}`)}`;
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({
