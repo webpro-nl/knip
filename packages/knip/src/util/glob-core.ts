@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+// oxlint-disable-next-line no-restricted-imports
+import { basename } from 'node:path';
 import { fdir } from 'fdir';
 import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
@@ -176,7 +178,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
         return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(absPath.slice(cwdPrefixLen));
       })
       .filter((filePath: string, isDir: boolean) => {
-        if (isDir || !filePath.endsWith('/.gitignore')) return false;
+        if (isDir || basename(filePath) !== '.gitignore') return false;
         addFile(filePath);
         return true;
       })
