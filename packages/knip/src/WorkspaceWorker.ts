@@ -12,6 +12,7 @@ import type {
   Plugin,
   RegisterCompiler,
   RegisterVisitorsOptions,
+  SourceMap,
   WorkspaceConfiguration,
 } from './types/config.ts';
 import type { ConfigurationHint } from './types/issues.ts';
@@ -256,6 +257,23 @@ export class WorkspaceWorker {
       if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
       await plugin.registerCompilers({ cwd, hasDependency, registerCompiler });
     }
+  }
+
+  public async resolveSourceMaps() {
+    const options = {
+      cwd: this.dir,
+      rootCwd: this.options.cwd,
+      manifest: this.manifest,
+      rootManifest: this.rootManifest,
+      dependencies: this.dependencies,
+    };
+    const pairs: SourceMap[] = [];
+    for (const pluginName of this.enabledPlugins) {
+      const plugin = Plugins[pluginName];
+      if (!plugin.resolveSourceMap) continue;
+      for (const pair of await plugin.resolveSourceMap(options)) pairs.push(pair);
+    }
+    return pairs;
   }
 
   public registerVisitors(options: RegisterVisitorsOptions) {

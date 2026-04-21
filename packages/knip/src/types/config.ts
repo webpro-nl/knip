@@ -134,6 +134,18 @@ export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Prom
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
+export type SourceMap = { srcDir: string; outDir: string };
+
+export interface ResolveSourceMapOptions {
+  cwd: string;
+  manifest: PackageJson;
+  dependencies: Set<string>;
+  rootCwd: string;
+  rootManifest: PackageJson | undefined;
+}
+
+export type ResolveSourceMap = (options: ResolveSourceMapOptions) => Promise<SourceMap[]> | SourceMap[];
+
 export type HandleInput = (input: Input) => string | undefined;
 
 export type RegisterCompilerInput = {
@@ -191,6 +203,13 @@ export interface Plugin {
   isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
+  /**
+   * Contributes src↔out mappings so knip can rewire files in the emitted output tree back to
+   * their source counterparts (e.g. `package.json#exports` pointing into `dist/`). Runs per
+   * workspace, before any other plugin hook, so it cannot depend on state populated by
+   * `resolveConfig`/`resolveFromAST`/`resolve`.
+   */
+  resolveSourceMap?: ResolveSourceMap;
   resolveFromAST?: ResolveFromAST;
   isFilterTransitiveDependencies?: boolean;
   registerCompilers?: RegisterCompilers;

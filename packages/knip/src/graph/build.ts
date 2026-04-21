@@ -36,7 +36,7 @@ import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpe
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
-import { augmentWorkspace, getToSourcePathsHandler } from '../util/to-source-path.ts';
+import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
 interface BuildOptions {
@@ -117,8 +117,6 @@ export async function build({
     const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
-    if (isFile) augmentWorkspace(workspace, dir, compilerOptions);
-
     const worker = new WorkspaceWorker({
       name,
       dir,
@@ -154,6 +152,9 @@ export async function build({
     const config = chief.getConfigForWorkspace(name, extensions);
     worker.config = config;
 
+    const pluginSourceMaps = await worker.resolveSourceMaps();
+    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, pluginSourceMaps);
+
     const inputs = new Set<Input>();
 
     if (definitionPaths.length > 0) {
@@ -180,9 +181,12 @@ export async function build({
         const packageName = getPackageNameFromModuleSpecifier(identifier);
         if (packageName && dependencies.has(packageName)) continue;
       }
-      const exists = identifier.includes('*')
-        ? _syncGlob({ patterns: [identifier], cwd: dir }).length > 0
-        : existsSync(join(dir, identifier));
+      const abs = prependDir(dir, identifier);
+      const mapped = toSourceMappedSpecifiers(workspace, abs, extensionGlobStr);
+      const hasWildcard = identifier.includes('*');
+      const exists = hasWildcard
+        ? _syncGlob({ patterns: [identifier, ...mapped], cwd: dir }).length > 0
+        : existsSync(abs) || mapped.some(pattern => _syncGlob({ patterns: [pattern], cwd: dir }).length > 0);
       if (!exists) {
         collector.addConfigurationHint({ type: 'package-entry', filePath, identifier, workspaceName: name });
       }

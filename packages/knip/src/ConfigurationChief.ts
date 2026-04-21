@@ -7,6 +7,7 @@ import type {
   PluginsConfiguration,
   RawConfiguration,
   RawPluginConfiguration,
+  SourceMap,
   WorkspaceConfiguration,
 } from './types/config.ts';
 import type { ConfigurationHint } from './types/issues.ts';
@@ -72,8 +73,7 @@ export type Workspace = {
   manifestPath: string;
   manifestStr: string;
   ignoreMembers: IgnorePatterns;
-  srcDir?: string;
-  outDir?: string;
+  sourceMaps?: SourceMap[];
 };
 
 /**
