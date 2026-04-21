@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { promisify } from 'node:util';
-import { walk as _walk, type Entry } from '@nodelib/fs.walk';
+import { fdir } from 'fdir';
 import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
@@ -9,9 +8,7 @@ import { debugLogObject } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, join, relative, toPosix } from './path.ts';
-
-const walk = promisify(_walk);
+import { basename, dirname, join, relative, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -170,22 +167,23 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     }
   }
 
-  const entryFilter = (entry: Entry) => {
-    if (entry.dirent.isFile() && entry.name === '.gitignore') {
-      addFile(entry.path);
-      return true;
-    }
-    return false;
+  const walkGitignores = async () => {
+    await new fdir()
+      .withFullPaths()
+      .exclude((_dirName: string, dirPath: string) => {
+        const absPath = toPosix(dirPath.endsWith('/') ? dirPath.slice(0, -1) : dirPath);
+        return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(relative(cwd, absPath));
+      })
+      .filter((filePath: string, isDir: boolean) => {
+        if (isDir || basename(filePath) !== '.gitignore') return false;
+        addFile(filePath);
+        return true;
+      })
+      .crawl(cwd)
+      .withPromise();
   };
 
-  const deepFilter = (entry: Entry) =>
-    (!isRelevantDir || isRelevantDir(toPosix(entry.path))) && !getMatcher()(relative(cwd, entry.path));
-
-  await walk(cwd, {
-    concurrency: 16,
-    entryFilter,
-    deepFilter,
-  });
+  await timerify(walkGitignores)();
 
   // tinyglobby's `ignore` can't express unignores (see tinyglobby/fast-glob #86). Drop cached
   // ignore patterns shadowed by any unignore path (and its ancestor dirs) so glob() sees a
