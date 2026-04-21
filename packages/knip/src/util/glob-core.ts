@@ -8,7 +8,7 @@ import { debugLogObject } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { basename, dirname, join, relative, toPosix } from './path.ts';
+import { dirname, join, relative, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -167,15 +167,16 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     }
   }
 
+  const cwdPrefixLen = cwd.length + 1;
   const walkGitignores = async () => {
     await new fdir()
       .withFullPaths()
       .exclude((_dirName: string, dirPath: string) => {
-        const absPath = toPosix(dirPath.endsWith('/') ? dirPath.slice(0, -1) : dirPath);
-        return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(relative(cwd, absPath));
+        const absPath = toPosix(dirPath.slice(0, -1));
+        return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(absPath.slice(cwdPrefixLen));
       })
       .filter((filePath: string, isDir: boolean) => {
-        if (isDir || basename(filePath) !== '.gitignore') return false;
+        if (isDir || !filePath.endsWith('/.gitignore')) return false;
         addFile(filePath);
         return true;
       })

@@ -51,12 +51,14 @@ const sortByPos = (a: Issue, b: Issue) => {
 const highlightSymbol =
   (issue: Issue) =>
   (_: unknown): string => {
-    if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
-      const parts = issue.specifier.split(issue.symbol);
-      const rest = parts.slice(1).join('');
-      return [dim(parts[0]), bright(issue.symbol), dim(rest)].join('');
+    const { specifier, symbol } = issue;
+    if (specifier && specifier !== symbol) {
+      const idx = specifier.indexOf(symbol);
+      if (idx !== -1) {
+        return `${dim(specifier.slice(0, idx))}${bright(symbol)}${dim(specifier.slice(idx + symbol.length))}`;
+      }
     }
-    return issue.symbol;
+    return symbol;
   };
 
 export const getTableForType = (
