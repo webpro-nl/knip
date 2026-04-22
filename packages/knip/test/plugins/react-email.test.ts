@@ -17,3 +17,14 @@ test('Find dependencies with the react-email plugin', async () => {
     total: 4,
   });
 });
+
+test('Find dependencies with the react-email plugin (v6)', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/react-email-v6') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});
