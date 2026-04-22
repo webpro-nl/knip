@@ -8,12 +8,23 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/plugins/rslib');
 
 test('Find dependencies with the rslib plugin', async () => {
-  const options = await createOptions({ cwd, isStrict: true });
+  const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    processed: 3,
+    total: 3,
+  });
+});
+
+test('rslib plugin handles array config form', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/rslib2') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
   });
 });
