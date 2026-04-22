@@ -17,6 +17,7 @@ import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import { tryRealpath } from '../util/fs.ts';
+import { createManifest } from '../util/package-json.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -75,7 +76,8 @@ export async function build({
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
 
-  const rootManifest = chief.getManifestForWorkspace('.');
+  const rawRootManifest = chief.getManifestForWorkspace('.');
+  const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -425,16 +427,16 @@ export async function build({
         }
       }
 
-      if (file.scripts && file.scripts.size > 0) {
+      const manifest = chief.getManifestForWorkspace(workspace.name);
+      if (manifest && file.scripts && file.scripts.size > 0) {
         const dependencies = deputy.getDependencies(workspace.name);
-        const manifestScriptNames = new Set(Object.keys(chief.getManifestForWorkspace(workspace.name)?.scripts ?? {}));
         const dir = dirname(filePath);
         const opts = {
           cwd: dir,
           rootCwd: options.cwd,
           containingFilePath: filePath,
           dependencies,
-          manifestScriptNames,
+          manifest: createManifest(manifest),
           rootManifest,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);

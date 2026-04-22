@@ -80,7 +80,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return resolveDlx(argsForDlx, options);
   }
 
-  const { manifestScriptNames, fromArgs } = options;
+  const { manifest, fromArgs } = options;
 
   if (parsed.filter && !parsed.recursive) return [];
 
@@ -90,7 +90,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));
   }
 
-  const isScript = manifestScriptNames.has(command);
+  const isScript = manifest.scriptNames.has(command);
   if (isScript || commands.includes(command)) return childInputs;
 
   return command && isValidBinary(command) ? [toBinary(command)] : [];

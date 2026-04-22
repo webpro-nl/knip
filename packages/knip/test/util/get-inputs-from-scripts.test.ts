@@ -4,12 +4,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
-const pkgScripts = { cwd, manifestScriptNames: new Set(['program', 'spl:t']) };
+const toManifest = (scriptNames: string[] = []) =>
+  createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
+const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const knownOnly = { cwd, knownBinsOnly: true };
 const opt = { optional: true };
 
@@ -17,12 +20,12 @@ const js = toDeferResolveEntry('./script.js', opt);
 const ts = toDeferResolveEntry('./main.ts', opt);
 const req = toDeferResolve('./require.js');
 
-type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifestScriptNames?: Set<string> }) => void;
+type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifest?: ReturnType<typeof toManifest> }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getInputsFromScripts(script, {
       rootCwd: cwd,
-      manifestScriptNames: new Set(),
+      manifest: toManifest(),
       containingFilePath,
       ...options,
     }),
@@ -227,7 +230,7 @@ test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --recursive --parallel exec program', [toBinary('program')]);
-  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifestScriptNames: new Set(['program']) });
+  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifest: toManifest(['program']) });
 });
 
 test('getInputsFromScripts (yarn)', () => {

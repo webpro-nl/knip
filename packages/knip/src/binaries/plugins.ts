@@ -13,7 +13,7 @@ const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
 export const resolve: BinaryResolver = (binary, _args, options) => {
-  const { cwd, fromArgs, containingFilePath } = options;
+  const { cwd, fromArgs, containingFilePath, manifest } = options;
   const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
 
   if (!pluginArgs) return fallbackResolve(binary, _args, options);
@@ -69,7 +69,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
-  const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd }) ?? [];
+  const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd, manifest }) ?? [];
 
   return [
     toBinary(binary, inputOpts),

@@ -5,6 +5,7 @@ import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../s
 import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
 import type { Input } from '../util/input.ts';
+import type { Manifest } from '../util/package-json.ts';
 import type { Args } from './args.ts';
 import type { IssueType, SymbolType } from './issues.ts';
 import type { Tags } from './options.ts';
@@ -102,13 +103,13 @@ export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Part
 interface BaseOptions {
   rootCwd: string;
   cwd: string;
-  manifestScriptNames: Set<string>;
-  rootManifest: PackageJson | undefined;
+  manifest: Manifest;
+  rootManifest: Manifest | undefined;
 }
 
 type IsPluginEnabledOptions = {
   cwd: string;
-  manifest: PackageJson;
+  manifest: Manifest;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
 };
@@ -116,7 +117,6 @@ type IsPluginEnabledOptions = {
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
 
 export interface PluginOptions extends BaseOptions {
-  manifest: PackageJson;
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
@@ -138,10 +138,10 @@ export type SourceMap = { srcDir: string; outDir: string };
 
 export interface ResolveSourceMapOptions {
   cwd: string;
-  manifest: PackageJson;
+  manifest: Manifest;
   dependencies: Set<string>;
   rootCwd: string;
-  rootManifest: PackageJson | undefined;
+  rootManifest: Manifest | undefined;
 }
 
 export type ResolveSourceMap = (options: ResolveSourceMapOptions) => Promise<SourceMap[]> | SourceMap[];

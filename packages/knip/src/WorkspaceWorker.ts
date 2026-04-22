@@ -19,6 +19,7 @@ import type { ConfigurationHint } from './types/issues.ts';
 import type { PluginName } from './types/PluginNames.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
+import { createManifest, type Manifest } from './util/package-json.ts';
 import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
 import { parseFile } from './typescript/visitors/helpers.ts';
 import { compact } from './util/array.ts';
@@ -50,7 +51,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
-  rootManifest: PackageJson | undefined;
+  rootManifest: Manifest | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   readFile: (filePath: string) => string;
@@ -80,8 +81,8 @@ export class WorkspaceWorker {
   name: string;
   dir: string;
   config: WorkspaceConfiguration;
-  manifest: PackageJson;
-  rootManifest: PackageJson | undefined;
+  manifest: Manifest;
+  rootManifest: Manifest | undefined;
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
@@ -118,7 +119,7 @@ export class WorkspaceWorker {
     this.name = name;
     this.dir = dir;
     this.config = config;
-    this.manifest = manifest;
+    this.manifest = createManifest(manifest);
     this.rootManifest = rootManifest;
     this.dependencies = dependencies;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
@@ -296,12 +297,11 @@ export class WorkspaceWorker {
     const isProduction = this.options.isProduction;
     const knownBinsOnly = false;
 
-    const manifestScriptNames = new Set(Object.keys(manifest.scripts ?? {}));
     const rootManifest = this.rootManifest;
-    const baseOptions = { manifestScriptNames, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly };
+    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly };
 
     // Get dependencies from package.json#scripts
-    const baseScriptOptions = { ...baseOptions, manifest, isProduction, enabledPlugins: this.enabledPlugins };
+    const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
     const inputsFromManifest = _getInputsFromScripts(Object.values(developmentScripts), baseOptions);
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);

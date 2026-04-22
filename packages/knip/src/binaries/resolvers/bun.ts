@@ -62,10 +62,10 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return resolveX(argsForX, options);
   }
 
-  const { manifestScriptNames, cwd, fromArgs } = options;
+  const { manifest, cwd, fromArgs } = options;
 
-  if (command === 'run' && manifestScriptNames.has(script)) return [];
-  if (manifestScriptNames.has(command)) return [];
+  if (command === 'run' && manifest.scriptNames.has(script)) return [];
+  if (manifest.scriptNames.has(command)) return [];
   if (command !== 'run' && commands.has(command)) return [];
 
   const filePath = command === 'run' ? script : command;

@@ -92,6 +92,22 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   return entryPaths;
 };
 
+export type Manifest = PackageJson & {
+  scriptNames: Set<string>;
+  getMajor: (name: string) => number | undefined;
+};
+
+export const createManifest = (raw: PackageJson): Manifest =>
+  Object.assign(raw, {
+    ...raw,
+    scriptNames: new Set(Object.keys(raw.scripts ?? {})),
+    getMajor(name: string) {
+      const range = raw.dependencies?.[name] ?? raw.devDependencies?.[name];
+      const match = range?.match(/\d+/)?.[0];
+      return match ? Number.parseInt(match, 10) : undefined;
+    },
+  });
+
 export const getManifestImportDependencies = (manifest: PackageJson) => {
   const dependencies = new Set<string>();
   if (!manifest.imports) return dependencies;

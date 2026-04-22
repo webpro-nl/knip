@@ -33,14 +33,7 @@ const config = [
 const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) => {
   // Flat configs (eslint.config.*) are handled by resolveFromAST — skip loading
   if (isFlatConfig(configFileName)) return false;
-
-  const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
-  if (version) {
-    const major = version.match(/\d+/);
-    if (major && Number.parseInt(major[0], 10) === 9 && dependencies.has('eslint-config-next')) {
-      return false;
-    }
-  }
+  if (manifest.getMajor('eslint') === 9 && dependencies.has('eslint-config-next')) return false;
   return true;
 };
 
