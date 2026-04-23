@@ -90,7 +90,7 @@ export interface WalkState extends WalkContext {
   ) => void;
   getFix: (start: number, end: number, flags?: number) => Fix;
   getTypeFix: (start: number, end: number) => Fix;
-  collectRefsInType: (node: any, exportName: string, signatureOnly: boolean) => void;
+  collectRefsInType: (node: any, exportName: string, signatureOnly: boolean, inMember?: boolean) => void;
   addRefInExport: (name: string, exportName: string) => void;
   isInNamespace: (node: Span) => boolean;
 }
@@ -142,14 +142,24 @@ const _addExport = (
   }
 };
 
-const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean): void => {
+const MEMBER_CONTAINERS = new Set([
+  'TSPropertySignature',
+  'TSMethodSignature',
+  'TSIndexSignature',
+  'TSCallSignatureDeclaration',
+  'TSConstructSignatureDeclaration',
+]);
+
+const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean, inMember = false): void => {
   if (!node || typeof node !== 'object') return;
   if (node.type === 'TSTypeQuery') {
-    const name = node.exprName.type === 'Identifier' ? node.exprName.name : undefined;
-    if (name) {
-      const refs = state.referencedInExport.get(name);
-      if (refs) refs.add(exportName);
-      else state.referencedInExport.set(name, new Set([exportName]));
+    if (inMember) {
+      const name = node.exprName.type === 'Identifier' ? node.exprName.name : undefined;
+      if (name) {
+        const refs = state.referencedInExport.get(name);
+        if (refs) refs.add(exportName);
+        else state.referencedInExport.set(name, new Set([exportName]));
+      }
     }
     return;
   }
@@ -160,15 +170,17 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
     if (refs) refs.add(exportName);
     else state.referencedInExport.set(name, new Set([exportName]));
   }
+  const nextInMember = inMember || MEMBER_CONTAINERS.has(node.type);
   for (const key in node) {
     if (key === 'type' || key === 'parent') continue;
     const val = node[key];
     if (Array.isArray(val)) {
       for (const item of val) {
-        if (item && typeof item === 'object' && item.type) _collectRefsInType(item, exportName, signatureOnly);
+        if (item && typeof item === 'object' && item.type)
+          _collectRefsInType(item, exportName, signatureOnly, nextInMember);
       }
     } else if (val && typeof val === 'object' && val.type) {
-      _collectRefsInType(val, exportName, signatureOnly);
+      _collectRefsInType(val, exportName, signatureOnly, nextInMember);
     }
   }
 };
