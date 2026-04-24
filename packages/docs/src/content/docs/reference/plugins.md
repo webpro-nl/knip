@@ -1,5 +1,5 @@
 ---
-title: Plugins (144)
+title: Plugins (148)
 tableOfContents: false
 ---
 
@@ -80,6 +80,7 @@ tableOfContents: false
 - [Panda CSS](/reference/plugins/panda-css "Panda CSS")
 - [Parcel](/reference/plugins/parcel "Parcel")
 - [Payload CMS](/reference/plugins/payload "Payload CMS")
+- [pino](/reference/plugins/pino "pino")
 - [Playwright](/reference/plugins/playwright "Playwright")
 - [Playwright for components](/reference/plugins/playwright-ct "Playwright for components")
 - [playwright-test](/reference/plugins/playwright-test "playwright-test")
@@ -93,6 +94,7 @@ tableOfContents: false
 - [Qwik](/reference/plugins/qwik "Qwik")
 - [Raycast](/reference/plugins/raycast "Raycast")
 - [React Cosmos](/reference/plugins/react-cosmos "React Cosmos")
+- [React Email](/reference/plugins/react-email "React Email")
 - [React Native](/reference/plugins/react-native "React Native")
 - [React Router](/reference/plugins/react-router "React Router")
 - [Relay](/reference/plugins/relay "Relay")
@@ -108,6 +110,7 @@ tableOfContents: false
 - [Sanity](/reference/plugins/sanity "Sanity")
 - [Semantic Release](/reference/plugins/semantic-release "Semantic Release")
 - [Sentry](/reference/plugins/sentry "Sentry")
+- [Serverless Framework](/reference/plugins/serverless-framework "Serverless Framework")
 - [simple-git-hooks](/reference/plugins/simple-git-hooks "simple-git-hooks")
 - [size-limit](/reference/plugins/size-limit "size-limit")
 - [SST](/reference/plugins/sst "SST")
@@ -117,6 +120,7 @@ tableOfContents: false
 - [Stryker](/reference/plugins/stryker "Stryker")
 - [Stylelint](/reference/plugins/stylelint "Stylelint")
 - [Svelte](/reference/plugins/svelte "Svelte")
+- [@sveltejs/package](/reference/plugins/sveltejs-package "@sveltejs/package")
 - [SvelteKit](/reference/plugins/sveltekit "SvelteKit")
 - [SVGO](/reference/plugins/svgo "SVGO")
 - [SVGR](/reference/plugins/svgr "SVGR")
