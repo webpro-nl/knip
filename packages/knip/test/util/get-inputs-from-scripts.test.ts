@@ -10,8 +10,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
-const toManifest = (scriptNames: string[] = []) =>
-  createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
+const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const knownOnly = { cwd, knownBinsOnly: true };
 const opt = { optional: true };
