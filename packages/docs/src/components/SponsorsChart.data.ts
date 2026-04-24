@@ -2,7 +2,7 @@ export const SPONSORS_CHART = {
   series: [
     {
       label: 'GitHub Sponsors',
-      color: '#fbfbfb',
+      color: 'currentColor',
     },
     {
       label: 'Open Collective',
