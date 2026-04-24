@@ -13,14 +13,17 @@ test('Find unused exports in exported types (default)', async () => {
 
   assert(issues.exports['refs.ts']['logger']);
   assert(issues.exports['refs.ts']['UnusedClass']);
+  assert(issues.exports['refs.ts']['Reptile']);
+  assert(issues.exports['refs.ts']['SkinColor']);
+  assert(issues.types['refs.ts']['Lizard']);
   assert(issues.types['refs.ts']['UnusedTypeInUnusedExport']);
   assert(issues.types['refs.ts']['UnusedInterface']);
   assert(issues.types['refs.ts']['UnusedTypeWithClass']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
-    types: 3,
+    exports: 4,
+    types: 4,
     processed: 2,
     total: 2,
   });

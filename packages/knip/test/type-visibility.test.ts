@@ -7,7 +7,7 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/type-visibility');
 
-test('Report types only visible through function signatures, keep types visible through type exports', async () => {
+test('Report types only externally unused (per tsc: structural inlining does not keep inner exports alive)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -19,11 +19,13 @@ test('Report types only visible through function signatures, keep types visible 
   assert(issues.exports['src/lib.ts']['Connection']);
   assert(issues.exports['src/lib.ts']['defaultHandler']);
 
-  // Type → type (imported): kept
-  assert(!issues.types['src/lib.ts']?.['SuccessResult']);
-  assert(!issues.types['src/lib.ts']?.['ErrorResult']);
-  assert(!issues.types['src/lib.ts']?.['BaseEntity']);
-  assert(!issues.types['src/lib.ts']?.['Metadata']);
+  // Type → type (imported): inner type is structurally inlined — flagged
+  assert(issues.types['src/lib.ts']['SuccessResult']);
+  assert(issues.types['src/lib.ts']['ErrorResult']);
+  assert(issues.types['src/lib.ts']['BaseEntity']);
+  assert(issues.types['src/lib.ts']['Metadata']);
+
+  // Directly imported: kept
   assert(!issues.types['src/lib.ts']?.['DirectlyUsed']);
 
   // Type → type → function chain: reported (chain ends at function)
@@ -38,7 +40,7 @@ test('Report types only visible through function signatures, keep types visible 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 2,
-    types: 9,
+    types: 13,
     processed: 2,
     total: 2,
   });

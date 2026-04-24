@@ -32,9 +32,16 @@ clauses captured via `addRefInExport`.
 
 ## `isReferencedInUsedExport`
 
-Called in `analyze.ts` for exports NOT directly imported. Returns true if alive
-through type→type chains (containing export referenced, or has `hasRefsInFile`
-and is type/interface, checked recursively).
+Called in `analyze.ts` for exports NOT directly imported. Returns true only
+through the `ignoreExportsUsedInFile` chain: a containing export has
+`hasRefsInFile` and is a type/interface (checked recursively).
+
+Does *not* keep inner exports alive just because the containing export is
+imported externally. Per tsc semantics, types are structurally inlined — a
+consumer importing `UserInfo = { address: Address }` does not require `Address`
+to be exported (tsc will emit a `declare`-private decl in the `.d.ts`). So
+`Address` is correctly flagged as an unused export. Same applies to `typeof X`
+references inside type aliases.
 
 ## `ignoreExportsUsedInFile`
 

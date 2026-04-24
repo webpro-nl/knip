@@ -7,6 +7,7 @@ import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils
 import type { IssueCollector } from '../IssueCollector.ts';
 import traceReporter from '../reporters/trace.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
+import { shouldCountRefs } from '../typescript/visitors/helpers.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
@@ -43,6 +44,8 @@ export const analyze = async ({
 
   const explorer = createGraphExplorer(graph, entryPaths);
 
+  const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
+
   const isReferencedInUsedExport = (
     exportedItem: Export,
     filePath: string,
@@ -53,10 +56,12 @@ export const analyze = async ({
     const file = graph.get(filePath);
     if (!file) return false;
     for (const containingExport of exportedItem.referencedIn) {
-      if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
       const inExport = file.exports.get(containingExport);
       if (!inExport) continue;
-      if (inExport.hasRefsInFile && (inExport.type === 'type' || inExport.type === 'interface')) return true;
+      if (shouldCountRefs(ignoreExportsUsedInFile, inExport.type)) {
+        if (inExport.hasRefsInFile) return true;
+        if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
+      }
       if (inExport.referencedIn) {
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {

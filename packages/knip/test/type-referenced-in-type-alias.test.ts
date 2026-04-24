@@ -5,19 +5,21 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/typeof-in-type-alias');
+const cwd = resolve('fixtures/type-referenced-in-type-alias');
 
-test('Flag values referenced only via typeof inside an exported type alias', async () => {
+test('Flag types referenced only inside other exported types/interfaces', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.exports['schema.ts']['PRESETS']);
-  assert(issues.exports['schema.ts']['DAYS']);
-  assert(issues.exports['schema.ts']['SHAPE']);
+  assert(issues.types['utils.ts']['Address']);
+  assert(issues.types['utils.ts']['Contact']);
+
+  assert(!issues.types['utils.ts']?.['UserInfo']);
+  assert(!issues.types['utils.ts']?.['Employee']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    types: 2,
     processed: 2,
     total: 2,
   });
