@@ -3,7 +3,7 @@ import test from 'node:test';
 import { Table } from '../../src/util/table.ts';
 
 test('Render table with column gaps and truncated values', () => {
-  const table = new Table({ maxWidth: 72, truncateStart: ['col-2'] });
+  const table = new Table({ maxWidth: 72, truncate: { 'col-2': 'start' } });
   table.row();
   table.cell('col-1', '../../runtime/client/idle.prebuilt.js');
   table.cell('col-2', 'packages/astro/src/core/client-directive/default.ts:1:25');
@@ -21,7 +21,7 @@ test('Render table with column gaps and truncated values', () => {
 });
 
 test('Render single column table with start-truncated values', () => {
-  const table = new Table({ maxWidth: 40, truncateStart: ['filePath'] });
+  const table = new Table({ maxWidth: 40, truncate: { filePath: 'start' } });
   table.row();
   table.cell('filePath', 'packages/astro/src/core/client-directive/default.ts');
   table.row();
@@ -35,7 +35,7 @@ packages/astro/src/integrations/hooks.ts`;
 });
 
 test('Render table with no- and start-truncated values', () => {
-  const table = new Table({ maxWidth: 72, noTruncate: ['col-3'], truncateStart: ['col-4'] });
+  const table = new Table({ maxWidth: 72, truncate: { 'col-3': 'none', 'col-4': 'start' } });
   table.row();
   table.cell('col-1', 'renderFontFace');
   table.cell('col-2', undefined);
@@ -83,4 +83,58 @@ A2  B2  2`;
 
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
+});
+
+test('Render table is idempotent when called twice', () => {
+  const table = new Table({ header: true });
+  table.row();
+  table.cell('A', 'A1');
+  table.cell('B', 1);
+  table.row();
+  table.cell('A', 'A2');
+  table.cell('B', 2);
+
+  assert.equal(table.toString(), table.toString());
+});
+
+test('Render zero value as "0" (not empty string)', () => {
+  const table = new Table({ header: true });
+  table.row();
+  table.cell('name', 'fast');
+  table.cell('count', 0);
+  table.row();
+  table.cell('name', 'slow');
+  table.cell('count', 42);
+
+  const expected = `
+name  count
+----  -----
+fast      0
+slow     42`;
+
+  assert.equal(expected.trimStart(), table.toString());
+});
+
+test('sort accepts order as a second argument', () => {
+  const table = new Table();
+  table.row();
+  table.cell('n', 1);
+  table.row();
+  table.cell('n', 3);
+  table.row();
+  table.cell('n', 2);
+
+  assert.equal(table.sort('n').toString(), '1\n2\n3');
+  assert.equal(table.sort('n', 'desc').toString(), '3\n2\n1');
+  assert.equal(table.sort('n', 'asc').toString(), '1\n2\n3');
+});
+
+test('Column with truncate "none" is never truncated even when oversized', () => {
+  const table = new Table({ maxWidth: 20, truncate: { kept: 'none', other: 'end' } });
+  table.row();
+  table.cell('kept', 'this-long-value-must-stay');
+  table.cell('other', 'also-quite-long');
+
+  const output = table.toString();
+  assert.ok(output.includes('this-long-value-must-stay'), `kept column was truncated: ${output}`);
 });

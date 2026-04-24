@@ -20,7 +20,7 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
   if (options.traceDependency) {
     const pattern = toRegexOrString(options.traceDependency);
     const toRel = (path: string) => toRelative(path, options.cwd);
-    const table = new Table({ truncateStart: ['filePath'] });
+    const table = new Table({ truncate: { filePath: 'start' } });
     const seen = new Set<string>();
     for (const [packageName, { imports }] of explorer.getDependencyUsage(pattern)) {
       const filtered = imports.filter(i => workspaceFilePathFilter(i.filePath));

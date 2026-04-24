@@ -143,7 +143,7 @@ class Performance {
       table.cell('sum', stats.sum, twoFixed);
       table.cell('%', (stats.sum / totalDuration) * 100, v => (typeof v === 'number' ? `${v.toFixed(0)}%` : ''));
     }
-    table.sort('sum|desc');
+    table.sort('sum', 'desc');
     return table.toString();
   }
 

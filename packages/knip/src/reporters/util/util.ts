@@ -66,7 +66,7 @@ export const getTableForType = (
   cwd: string,
   options: { isUseColors?: boolean } = { isUseColors: true }
 ) => {
-  const table = new Table({ truncateStart: ['filePath'], noTruncate: ['symbolType'] });
+  const table = new Table({ truncate: { filePath: 'start', symbolType: 'none' } });
 
   for (const issue of issues.sort(sortByPos)) {
     table.row();

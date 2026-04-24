@@ -3,26 +3,31 @@ import { pad, truncate, truncateStart } from './string.ts';
 
 type Value = string | number | undefined | false | null;
 type Align = 'left' | 'center' | 'right';
+type TruncateMode = 'start' | 'end' | 'none';
+type SortOrder = 'asc' | 'desc';
+type Cell = { value: Value; formatted?: string; width: number; fill?: string; align?: Align };
 type Row = Record<string, Cell>;
-type Cell = { value: Value; formatted?: string; fill?: string; align?: Align };
 
-const DEFAULT_MAX_WIDTH = process.stdout.columns || 120;
 const MIN_TRUNCATED_WIDTH = 4;
 const COLUMN_SEPARATOR = '  ';
+
+const visibleLength = (text: string) => stripVTControlCharacters(text).length;
+
+const isPrintable = (value: Value) => typeof value === 'string' || typeof value === 'number';
+
+const toDisplay = (value: Value) => (isPrintable(value) ? String(value) : '');
 
 export class Table {
   private columns: string[] = [];
   private rows: Row[] = [];
   private header: boolean;
   private maxWidth: number;
-  private truncateStart: string[] = [];
-  private noTruncate: string[] = [];
+  private truncateModes: Record<string, TruncateMode>;
 
-  constructor(options?: { maxWidth?: number; header?: boolean; truncateStart?: string[]; noTruncate?: string[] }) {
+  constructor(options?: { maxWidth?: number; header?: boolean; truncate?: Record<string, TruncateMode> }) {
     this.header = options?.header ?? false;
-    this.maxWidth = options?.maxWidth || DEFAULT_MAX_WIDTH;
-    this.truncateStart = options?.truncateStart || [];
-    this.noTruncate = options?.noTruncate || [];
+    this.maxWidth = options?.maxWidth || process.stdout.columns || 120;
+    this.truncateModes = options?.truncate ?? {};
   }
 
   row() {
@@ -33,85 +38,113 @@ export class Table {
   cell(column: string, value: Value, formatter?: (value: Value) => string) {
     if (!this.columns.includes(column)) this.columns.push(column);
     const row = this.rows[this.rows.length - 1];
-    const align = typeof value === 'number' ? 'right' : 'left';
-    const formatted = formatter ? formatter(value) : undefined;
-    row[column] = { value, formatted, align };
+    const align: Align = typeof value === 'number' ? 'right' : 'left';
+    const formatted = formatter?.(value);
+    const display = formatted ?? toDisplay(value);
+    row[column] = { value, formatted, align, width: visibleLength(display) };
     return this;
   }
 
-  sort(column: string) {
+  sort(column: string, order: SortOrder = 'asc') {
+    const dir = order === 'desc' ? -1 : 1;
     this.rows.sort((a, b) => {
-      const [columnName, order] = column.split('|');
-      const vA = a[columnName].value;
-      const vB = b[columnName].value;
-      if (typeof vA === 'string' && typeof vB === 'string') return (order === 'desc' ? -1 : 1) * vA.localeCompare(vB);
-      if (typeof vA === 'number' && typeof vB === 'number') return order === 'desc' ? vB - vA : vA - vB;
-      return !vA ? 1 : !vB ? -1 : 0;
+      const vA = a[column]?.value;
+      const vB = b[column]?.value;
+      if (typeof vA === 'string' && typeof vB === 'string') return dir * vA.localeCompare(vB);
+      if (typeof vA === 'number' && typeof vB === 'number') return dir * (vA - vB);
+      return !isPrintable(vA) ? 1 : !isPrintable(vB) ? -1 : 0;
     });
     return this;
   }
 
-  toCells() {
-    const columns = this.columns.filter(col =>
-      this.rows.some(row => typeof row[col].value === 'string' || typeof row[col].value === 'number')
-    );
+  private modeFor(column: string): TruncateMode {
+    return this.truncateModes[column] ?? 'end';
+  }
 
-    if (this.header) {
+  private distributeWidths(columns: string[], widths: Record<string, number>, separatorWidth: number) {
+    const truncatable = columns.filter(col => this.modeFor(col) !== 'none');
+    if (truncatable.length === 0) return;
+
+    const reserved = columns.filter(col => this.modeFor(col) === 'none').reduce((sum, col) => sum + widths[col], 0);
+
+    const budget = Math.max(0, this.maxWidth - separatorWidth - reserved);
+    const original: Record<string, number> = {};
+    for (const col of truncatable) original[col] = widths[col];
+
+    const unresolved = new Set(truncatable);
+    let remainingBudget = budget;
+    let changed = true;
+    while (changed && unresolved.size > 0) {
+      changed = false;
+      const share = Math.floor(remainingBudget / unresolved.size);
+      for (const col of unresolved) {
+        if (original[col] <= share) {
+          widths[col] = original[col];
+          remainingBudget -= original[col];
+          unresolved.delete(col);
+          changed = true;
+        }
+      }
+    }
+
+    if (unresolved.size === 0) return;
+
+    const overMin = [...unresolved].reduce((sum, col) => sum + (original[col] - MIN_TRUNCATED_WIDTH), 0);
+    const excess = Math.max(0, remainingBudget - unresolved.size * MIN_TRUNCATED_WIDTH);
+    let distributed = 0;
+    for (const col of unresolved) {
+      const share = overMin > 0 ? Math.floor(((original[col] - MIN_TRUNCATED_WIDTH) * excess) / overMin) : 0;
+      widths[col] = MIN_TRUNCATED_WIDTH + share;
+      distributed += share;
+    }
+    const leftover = excess - distributed;
+    if (leftover > 0) widths[[...unresolved][0]] += leftover;
+  }
+
+  toCells() {
+    const columns = this.columns.filter(col => this.rows.some(row => isPrintable(row[col]?.value)));
+
+    const rows: Row[] = [];
+    if (this.header && this.rows.length > 0) {
       const headerRow: Row = {};
       const linesRow: Row = {};
       for (const col of columns) {
-        headerRow[col] = { value: col, align: this.rows[0][col].align === 'right' ? 'center' : 'left' };
-        linesRow[col] = { value: '', fill: '-' };
+        const align: Align = this.rows[0][col]?.align === 'right' ? 'center' : 'left';
+        headerRow[col] = { value: col, align, width: col.length };
+        linesRow[col] = { value: '', fill: '-', width: 0 };
       }
-      this.rows.unshift(linesRow);
-      this.rows.unshift(headerRow);
+      rows.push(headerRow, linesRow);
+    }
+    rows.push(...this.rows);
+
+    const columnWidths: Record<string, number> = {};
+    for (const col of columns) {
+      let max = 0;
+      for (const row of rows) {
+        const w = row[col]?.width ?? 0;
+        if (w > max) max = w;
+      }
+      columnWidths[col] = max;
     }
 
-    const columnWidths = columns.reduce(
-      (acc, col) => {
-        acc[col] = Math.max(
-          ...this.rows.map(row => stripVTControlCharacters(row[col]?.formatted ?? String(row[col].value || '')).length)
-        );
-        return acc;
-      },
-      {} as Record<string, number>
-    );
-
-    const separatorWidth = (columns.length - 1) * COLUMN_SEPARATOR.length;
-    const totalWidth = Object.values(columnWidths).reduce((sum, width) => sum + width, 0) + separatorWidth;
+    const separatorWidth = columns.length > 1 ? (columns.length - 1) * COLUMN_SEPARATOR.length : 0;
+    const totalWidth = columns.reduce((sum, col) => sum + columnWidths[col], 0) + separatorWidth;
 
     if (totalWidth > this.maxWidth) {
-      const reservedWidth = columns
-        .filter(col => this.noTruncate.includes(col))
-        .reduce((sum, col) => sum + columnWidths[col], 0);
-
-      const truncatableColumns = columns.filter(col => !this.noTruncate.includes(col));
-      const minWidth = truncatableColumns.length * 4;
-      const availableWidth = this.maxWidth - separatorWidth - reservedWidth - minWidth;
-      const truncatableWidth = truncatableColumns.reduce((sum, col) => sum + columnWidths[col], 0) - minWidth;
-
-      const reduction = availableWidth / truncatableWidth;
-      let roundingDiff = availableWidth;
-
-      for (const col of truncatableColumns) {
-        const reducedWidth = MIN_TRUNCATED_WIDTH + Math.floor((columnWidths[col] - MIN_TRUNCATED_WIDTH) * reduction);
-        columnWidths[col] = reducedWidth;
-        roundingDiff -= reducedWidth - MIN_TRUNCATED_WIDTH;
-      }
-
-      if (roundingDiff > 0) {
-        columnWidths[truncatableColumns.length > 0 ? truncatableColumns[0] : columns[0]] += roundingDiff;
-      }
+      this.distributeWidths(columns, columnWidths, separatorWidth);
     }
 
-    return this.rows.map(row =>
+    return rows.map(row =>
       columns.map((col, index) => {
         const cell = row[col];
         const width = columnWidths[col];
-        const fill = cell.fill || ' ';
-        const padded = pad(String(cell.formatted || cell.value || ''), width, fill, cell.align);
-        const truncated = this.truncateStart.includes(col) ? truncateStart(padded, width) : truncate(padded, width);
-        return index === 0 ? truncated : COLUMN_SEPARATOR + truncated;
+        const fill = cell?.fill || ' ';
+        const display = cell?.formatted ?? toDisplay(cell?.value);
+        const padded = pad(display, width, fill, cell?.align);
+        const mode = this.modeFor(col);
+        const rendered =
+          mode === 'none' ? padded : mode === 'start' ? truncateStart(padded, width) : truncate(padded, width);
+        return index === 0 ? rendered : COLUMN_SEPARATOR + rendered;
       })
     );
   }

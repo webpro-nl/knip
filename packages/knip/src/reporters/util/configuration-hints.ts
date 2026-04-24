@@ -32,7 +32,7 @@ const getIdentifier = (hint: ConfigurationHint) => {
 };
 
 const getTableForHints = (hints: TableRow[]) => {
-  const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
+  const table = new Table({ truncate: { identifier: 'start', workspace: 'start', filePath: 'start' } });
   for (const hint of hints) {
     table.row();
     table.cell('identifier', getIdentifier(hint));
