@@ -1,0 +1,2 @@
+export type A = string;
+export type B = number;
