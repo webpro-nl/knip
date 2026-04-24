@@ -72,7 +72,7 @@ export interface ExportMember extends Position {
   hasRefsInFile: boolean;
 }
 
-export type ExportMap = Map<Identifier, Export>;
+type ExportMap = Map<Identifier, Export>;
 
 export type Imports = Set<Import>;
 

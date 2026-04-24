@@ -1,8 +1,8 @@
-export type RaycastManifestCommand = {
+type RaycastManifestCommand = {
   name?: unknown;
 };
 
-export type RaycastManifestTool = {
+type RaycastManifestTool = {
   name?: unknown;
 };
 

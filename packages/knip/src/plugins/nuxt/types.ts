@@ -20,12 +20,12 @@ export interface NuxtConfig {
   alias?: Record<string, string>;
 }
 
-export interface TemplateExpressionNode {
+interface TemplateExpressionNode {
   content: string;
   isStatic: boolean;
 }
 
-export interface TemplateAstProp {
+interface TemplateAstProp {
   type: number;
   exp?: TemplateExpressionNode;
   arg?: TemplateExpressionNode;
@@ -39,7 +39,7 @@ export interface TemplateAstNode {
   children?: TemplateAstNode[];
 }
 
-export interface Descriptor {
+interface Descriptor {
   script: { content: string } | null;
   scriptSetup: { content: string } | null;
   template: { content: string; ast?: TemplateAstNode } | null;

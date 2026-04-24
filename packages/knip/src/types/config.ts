@@ -136,7 +136,7 @@ export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type SourceMap = { srcDir: string; outDir: string };
 
-export interface ResolveSourceMapOptions {
+interface ResolveSourceMapOptions {
   cwd: string;
   manifest: Manifest;
   dependencies: Set<string>;
@@ -148,7 +148,7 @@ export type ResolveSourceMap = (options: ResolveSourceMapOptions) => Promise<Sou
 
 export type HandleInput = (input: Input) => string | undefined;
 
-export type RegisterCompilerInput = {
+type RegisterCompilerInput = {
   extension: string;
   compiler: CompilerSync;
 };
@@ -162,7 +162,7 @@ export type ResolveFromAST = (
   }
 ) => Input[];
 
-export type RegisterCompilersOptions = {
+type RegisterCompilersOptions = {
   cwd: string;
   hasDependency: HasDependency;
   registerCompiler: RegisterCompiler;
