@@ -1,3 +1,6 @@
+import { writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { buildParams, type ChartData } from '../src/components/SponsorsChart.params.ts';
 import { Table } from '../../knip/src/util/table.ts';
 import { getGitHubTotals } from './get-monthly-sponsorships-github.ts';
 import { getOpenCollectiveTotals } from './get-monthly-sponsorships-opencollective.ts';
@@ -45,24 +48,23 @@ const main = async () => {
 
   console.log(table.toString());
 
-  const url = new URL('/', 'https://try.venz.dev');
-  url.searchParams.set('type', 'pivot');
-  url.searchParams.set('lp', 'tr');
-  url.searchParams.set('br', '0');
-  url.searchParams.set('labelX', 'month');
-  url.searchParams.set('labelY', 'amount ($)');
-  url.searchParams.append('l', 'GitHub Sponsors');
-  url.searchParams.append('color', '#fbfbfb');
-  url.searchParams.append('l', 'Open Collective');
-  url.searchParams.append('color', '#2487ff');
-  for (const [month, amount] of monthly) {
-    url.searchParams.append('label', month);
-    url.searchParams.append('data', amount.join(','));
-  }
+  const chart: ChartData = {
+    series: [
+      { label: 'GitHub Sponsors', color: '#fbfbfb' },
+      { label: 'Open Collective', color: '#2487ff' },
+    ],
+    monthly: Array.from(monthly.entries()),
+  };
+
+  const params = buildParams(chart);
 
   console.log('\nVenz link');
-  const text = `${url.origin}?${decodeURIComponent(url.searchParams.toString()).replaceAll('#', '%23')}`;
+  const text = `https://try.venz.dev/?${decodeURIComponent(params.toString()).replaceAll('#', '%23')}`;
   console.log(text);
+
+  const dataPath = fileURLToPath(new URL('../src/components/SponsorsChart.data.ts', import.meta.url));
+  writeFileSync(dataPath, `export const SPONSORS_CHART = ${JSON.stringify(chart, null, 2)} as const;\n`);
+  console.log(`\nWrote ${dataPath}`);
 };
 
 main().catch(console.error);
