@@ -104,7 +104,8 @@ const main = async () => {
       (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
       (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
     ) {
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
   } catch (error: unknown) {
     process.exitCode = 2;
@@ -119,13 +120,14 @@ const main = async () => {
           console.log('Configuration file load error? Visit https://knip.dev/reference/known-issues');
       }
       if (isConfigurationError(knownErrors[0])) console.log('\nRun `knip --help` or visit https://knip.dev for help');
-      process.exit(2);
+      process.exitCode = 2;
+      return;
     }
     // We shouldn't arrive here, but not swallow either, so re-throw
     throw error;
   }
 
-  process.exit(0);
+  process.exitCode = 0;
 };
 
 await main();
