@@ -9,6 +9,8 @@ import { load, save } from './util/package-json.ts';
 import { extname, join } from './util/path.ts';
 import { removeExport } from './util/remove-export.ts';
 
+const MODULE_MARKER = /^[ \t]*(import|export)\b/m;
+
 export const fix = async (issues: Issues, counters: Counters, options: MainOptions) => {
   const fixer = new IssueFixer(options);
   const touchedFiles = await fixer.fixIssues(issues);
@@ -79,12 +81,14 @@ class IssueFixer {
     for (const [filePath, fixes] of allFixes) {
       if (fixes.length === 0) continue;
       const absFilePath = join(this.options.cwd, filePath);
-      const sourceFileText = fixes
+      const originalSource = await readFile(absFilePath, 'utf-8');
+      let sourceFileText = fixes
         .sort((a, b) => b[0] - a[0])
-        .reduce(
-          (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
-          await readFile(absFilePath, 'utf-8')
-        );
+        .reduce((text, [start, end, flags]) => removeExport({ text, start, end, flags }), originalSource);
+
+      if (MODULE_MARKER.test(originalSource) && !MODULE_MARKER.test(sourceFileText)) {
+        sourceFileText = `${sourceFileText.trimEnd()}\n\nexport {};\n`;
+      }
 
       await writeFile(absFilePath, sourceFileText);
 

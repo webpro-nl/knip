@@ -27,6 +27,7 @@ const fixtures = [
   'fix-members',
   'ns-spread-reexport',
   'package-entry-bare',
+  're-exports-aliased-ns',
   're-exports-destructure-spread',
   're-exports-recursive',
   're-exports-spread',
