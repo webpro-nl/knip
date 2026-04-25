@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/workspaces",
+  "name": "@fixtures/workspaces-root",
   "workspaces": [
     "app"
   ],

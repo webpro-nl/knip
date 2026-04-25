@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/sveltekit",
+  "name": "@plugins/sveltekit",
   "type": "module",
   "devDependencies": {
     "@sveltejs/adapter-auto": "*",

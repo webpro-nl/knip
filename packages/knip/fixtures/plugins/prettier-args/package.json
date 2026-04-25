@@ -1,5 +1,5 @@
 {
-  "name": "prettier-args-fixture",
+  "name": "@plugins/prettier-args",
   "devDependencies": {
     "prettier": "*"
   },

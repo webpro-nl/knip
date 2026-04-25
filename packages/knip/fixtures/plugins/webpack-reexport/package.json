@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/webpack-reexport",
+  "name": "@plugins/webpack-reexport",
   "scripts": {
     "build": "webpack"
   },

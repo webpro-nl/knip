@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/prettier-reexport",
+  "name": "@plugins/prettier-reexport",
   "type": "module",
   "scripts": {
     "format": "prettier"

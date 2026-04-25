@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/raycast",
+  "name": "@plugins/raycast",
   "dependencies": {
     "@raycast/api": "^1.0.0"
   },

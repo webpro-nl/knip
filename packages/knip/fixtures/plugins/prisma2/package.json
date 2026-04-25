@@ -1,5 +1,5 @@
 {
-  "name": "@plugins/prisma-2",
+  "name": "@plugins/prisma2",
   "scripts": {
     "generate": "prisma generate"
   },

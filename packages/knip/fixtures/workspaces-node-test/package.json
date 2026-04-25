@@ -1,5 +1,5 @@
 {
-  "name": "@knip/workspaces-node-test",
+  "name": "@fixtures/workspaces-node-test",
   "scripts": {
     "test": "node --test"
   },

@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "@fixtures/catalog-pnpm__app",
   "dependencies": {
     "react": "catalog:"
   },

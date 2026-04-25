@@ -1,4 +1,4 @@
 {
-  "name": "@fixtures/workspaces__frontend",
+  "name": "@fixtures/workspaces-root__app",
   "main": "./index.js"
 }

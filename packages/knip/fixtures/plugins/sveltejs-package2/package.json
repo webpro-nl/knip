@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/sveltejs-package2",
+  "name": "@plugins/sveltejs-package2",
   "type": "module",
   "main": "./build/index.js",
   "scripts": {

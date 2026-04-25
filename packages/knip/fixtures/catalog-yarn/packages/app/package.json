@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "@fixtures/catalog-yarn__app",
   "dependencies": {
     "solid-js": "catalog:"
   },

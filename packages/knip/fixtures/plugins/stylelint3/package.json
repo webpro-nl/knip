@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/stylelint3",
+  "name": "@plugins/stylelint3",
   "devDependencies": {
     "stylelint": "*",
     "stylelint-config-recommended": "*",

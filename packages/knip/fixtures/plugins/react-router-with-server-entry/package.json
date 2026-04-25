@@ -1,5 +1,5 @@
 {
-  "name": "@plugins/react-router",
+  "name": "@plugins/react-router-with-server-entry",
   "devDependencies": {
     "@react-router/dev": "*"
   }

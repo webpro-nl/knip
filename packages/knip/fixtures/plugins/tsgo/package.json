@@ -1,5 +1,5 @@
 {
-  "name": "tsgo",
+  "name": "@plugins/tsgo",
   "scripts": {
     "build": "tsgo"
   },

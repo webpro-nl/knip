@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/plugin-entry-globs",
+  "name": "@fixtures/plugin-negated-entry-globs",
   "type": "module",
   "dependencies": {
     "astro": "*"

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/lib-b",
+  "name": "@fixtures/workspaces-circular-symlinks__lib-b",
   "version": "1.0.0",
   "main": "./index.ts",
   "exports": {

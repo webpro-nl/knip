@@ -1,5 +1,5 @@
 {
-  "name": "@knip/workspaces-bun-test",
+  "name": "@fixtures/workspaces-bun-test",
   "scripts": {
     "test": "bun test"
   },

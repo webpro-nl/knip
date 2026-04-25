@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/prettier-json5",
+  "name": "@plugins/prettier-json5",
   "devDependencies": {
     "prettier": "*"
   }

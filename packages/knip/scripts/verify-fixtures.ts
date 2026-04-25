@@ -40,7 +40,12 @@ async function main(isFix = false) {
       else tree[parts.at(0)] = {};
     }
 
-    const pkg = JSON.parse(readFileSync(absPath, 'utf8'));
+    let pkg: { name?: string };
+    try {
+      pkg = JSON.parse(readFileSync(absPath, 'utf8').replace(/^﻿/, ''));
+    } catch {
+      continue;
+    }
     const name = pkg.name;
 
     if (name && !name.startsWith('x-') && !name.includes('/x-') && !name.includes('-x-') && name !== expectedName) {
