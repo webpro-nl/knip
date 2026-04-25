@@ -30,8 +30,9 @@ export const getEnvSpecifier = (env: string) => {
 
 // See full list here:
 // https://github.com/vitest-dev/vitest/blob/v3.2.4/packages/vitest/src/node/reporters/index.ts#L46-L58
-// https://github.com/vitest-dev/vitest/blob/v4.0.3/packages/vitest/src/node/reporters/index.ts#L47-L59
+// https://github.com/vitest-dev/vitest/blob/v4.1.5/packages/vitest/src/node/reporters/index.ts#L50-L64
 const builtInReporters = [
+  'agent',
   'basic',
   'blob',
   'default',
@@ -41,6 +42,7 @@ const builtInReporters = [
   'html',
   'json',
   'junit',
+  'minimal',
   'tap',
   'tap-flat',
   'tree',
