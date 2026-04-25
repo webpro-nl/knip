@@ -12,7 +12,9 @@ export default defineConfig(configEnv =>
         setupFiles: ['./src/setupTests.tsx'],
         reporters: [
           'basic',
+          'agent',
           'verbose',
+          'minimal',
           'dot',
           'junit',
           'json',
