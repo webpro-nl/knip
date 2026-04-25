@@ -28,7 +28,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
     const dir = join(cwd, name);
     const manifestPath = join(cwd, match);
     try {
-      const manifestStr = await readFile(manifestPath, 'utf8');
+      const manifestStr = (await readFile(manifestPath, 'utf8')).replace(/^﻿/, '');
       const manifest: PackageJson = JSON.parse(manifestStr);
       const pkgName = getPackageName(manifest, dir);
       const pkg: WorkspacePackage = { dir, name, pkgName, manifestPath, manifestStr, manifest };

@@ -55,7 +55,7 @@ export const hasFileWithExtension = (cwd: string, dirName: string, extensions: s
 };
 
 export const loadJSON = async (filePath: string) => {
-  const contents = await loadFile(filePath);
+  const contents = (await loadFile(filePath)).replace(/^﻿/, '');
   try {
     return JSON.parse(contents);
   } catch {

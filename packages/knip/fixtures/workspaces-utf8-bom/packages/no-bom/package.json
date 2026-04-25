@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/workspaces-utf8-bom__no-bom",
+  "main": "./index.ts"
+}
