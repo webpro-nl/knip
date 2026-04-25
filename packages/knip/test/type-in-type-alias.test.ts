@@ -5,7 +5,7 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/type-referenced-in-type-alias');
+const cwd = resolve('fixtures/type-in-type-alias');
 
 test('Flag types referenced only inside other exported types/interfaces', async () => {
   const options = await createOptions({ cwd });

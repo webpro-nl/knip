@@ -1,5 +1,5 @@
 import { Bird } from './refs.js';
 
-const bird: Bird = {
+const bird = {
   ref1: () => ({ skin: 'green' }),
-};
+} as Bird;

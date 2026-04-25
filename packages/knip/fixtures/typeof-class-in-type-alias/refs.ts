@@ -3,7 +3,7 @@ export interface Lizard {
 }
 
 export class Reptile {
-  skin: string;
+  skin = ""
 }
 
 export const SkinColor = 'green';

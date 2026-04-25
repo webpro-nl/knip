@@ -10,15 +10,18 @@ const { values } = parseArgs({
   options: {
     runtime: { type: 'string', default: 'bun' },
     smoke: { type: 'boolean', default: false },
+    e2e: { type: 'boolean', default: false },
   },
 });
 
 const useBun =
   values.runtime === 'bun' && spawnSync('bun', ['--version'], { stdio: 'ignore', shell: true }).status === 0;
 
-const patterns = values.smoke
-  ? ['test/*.test.ts', 'test/{plugins,util}/*.test.ts']
-  : ['test/*.test.ts', 'test/**/*.test.ts'];
+const patterns = values.e2e
+  ? ['test/e2e/**/*.test.ts']
+  : values.smoke
+    ? ['test/*.test.ts', 'test/{plugins,util}/*.test.ts']
+    : ['test/*.test.ts', 'test/**/*.test.ts'];
 
 const files = globSync(patterns);
 

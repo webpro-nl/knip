@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/exports-value-refs",
+  "name": "@fixtures/ignore-exports-used-in-file-types-and-interfaces-typeof",
   "knip": {
     "ignoreExportsUsedInFile": {
       "interface": true,

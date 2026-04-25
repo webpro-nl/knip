@@ -5,7 +5,7 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/exports-value-refs-default');
+const cwd = resolve('fixtures/typeof-class-in-type-alias');
 
 test('Find unused exports in exported types (default)', async () => {
   const options = await createOptions({ cwd });

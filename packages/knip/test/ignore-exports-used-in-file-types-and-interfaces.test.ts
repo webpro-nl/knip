@@ -5,7 +5,7 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/ignore-exports-used-in-file-some');
+const cwd = resolve('fixtures/ignore-exports-used-in-file-types-and-interfaces');
 
 test('Find unused exports respecting an ignoreExportsUsedInFile object', async () => {
   const options = await createOptions({ cwd });
