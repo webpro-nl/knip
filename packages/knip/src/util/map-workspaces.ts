@@ -2,7 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import type { PackageJson, WorkspacePackage } from '../types/package-json.ts';
 import { partition } from './array.ts';
+import { debugLog } from './debug.ts';
 import { ConfigurationError } from './errors.ts';
+import { logWarning } from './log.ts';
 import { getPackageName } from './package-name.ts';
 import { join } from './path.ts';
 
@@ -36,9 +38,11 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
       if (pkgName) wsPkgNames.add(pkgName);
       else throw new ConfigurationError(`Missing package name in ${manifestPath}`);
     } catch (error) {
-      // @ts-expect-error
-      if (error?.code === 'ENOENT') debugLog('*', `Unable to load package.json for ${name}`);
-      else throw error;
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        debugLog('*', `Unable to load package.json for ${name}`);
+      } else if (error instanceof SyntaxError) {
+        logWarning('WARNING', `Skipping workspace ${name}: invalid JSON in ${manifestPath} (${error.message})`);
+      } else throw error;
     }
   }
 
