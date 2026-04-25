@@ -8,12 +8,12 @@ See [handling issues][1] to learn more about dealing with lint issues.
 
 ## Exceptions from config files
 
-An exception may be thrown when a Knip plugin loads a JavaScript or TypeScript
-configuration file such as `webpack.config.js` or `vite.config.ts`:
+Knip plugins may fail to load a JavaScript or TypeScript configuration file
+such as `webpack.config.js` or `vite.config.ts`:
 
 ```sh
 $ knip
-Error loading .../vite.config.ts
+ERROR: Error loading vite.config.ts
 ```
 
 Knip may load such files differently, in a different environment, with missing
@@ -27,6 +27,7 @@ Potential workarounds:
   - Use a helper package like [dotenvx][3]
   - `KEY=VAL knip`
   - `node --env-file .env $(which knip)`
+- Run the build script to generate required files.
 - Disable loading the file by overriding the default `config` for that plugin.
   - Example: `vite: { config: [] }`
   - In a monorepo, be more specific like so:

@@ -22,6 +22,12 @@ export const isModuleNotFoundError = (error: Error): boolean => 'code' in error 
 
 export const isLoaderError = (error: Error): error is LoaderError => error instanceof LoaderError;
 
+export const formatCauseMessage = (error: Error, cwd: string) => {
+  let root: Error = error;
+  while (root.cause instanceof Error) root = root.cause;
+  return root.message.split('\n', 1)[0].replace(`${cwd}/`, '');
+};
+
 export const getKnownErrors = (error: Error) => {
   if (isZodErrorLike(error))
     return [...error.issues].map(error => {

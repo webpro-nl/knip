@@ -40,8 +40,10 @@ import {
 import { getPackageNameFromSpecifier } from './util/modules.ts';
 import { getKeysByValue } from './util/object.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, isInternal, join } from './util/path.ts';
+import { basename, dirname, isInternal, join, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
+import { formatCauseMessage } from './util/errors.ts';
+import { logError } from './util/log.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
 
@@ -428,14 +430,24 @@ export class WorkspaceWorker {
           if (!cache.resolveConfig) {
             const isLoad =
               typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
-            const localConfig = isLoad && (await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName));
-            if (localConfig) {
-              const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
-              if (plugin.isFilterTransitiveDependencies && !isManifest) {
-                this.filterTransitiveDependencies(inputs, configFilePath);
+            if (isLoad) {
+              try {
+                const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+                if (localConfig) {
+                  const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
+                  if (plugin.isFilterTransitiveDependencies && !isManifest) {
+                    this.filterTransitiveDependencies(inputs, configFilePath);
+                  }
+                  for (const input of inputs) addInput(input, configFilePath);
+                  cache.resolveConfig = inputs;
+                }
+              } catch (error) {
+                if (!(error instanceof Error)) throw error;
+                const relPath = toRelative(configFilePath, this.options.cwd);
+                const cause = formatCauseMessage(error, this.options.cwd);
+                logError(`Error loading ${relPath} (${cause})`);
+                logError('Please fix or visit https://knip.dev/reference/known-issues');
               }
-              for (const input of inputs) addInput(input, configFilePath);
-              cache.resolveConfig = inputs;
             }
           }
         }
