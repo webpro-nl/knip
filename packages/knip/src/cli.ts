@@ -111,7 +111,7 @@ const main = async () => {
     process.exitCode = 2;
     if (!args.debug && error instanceof Error && isKnownError(error)) {
       const knownErrors = getKnownErrors(error);
-      for (const knownError of knownErrors) logError('ERROR', knownError.message);
+      for (const knownError of knownErrors) logError(knownError.message);
       if (hasErrorCause(knownErrors[0])) {
         console.error('Reason:', knownErrors[0].cause.message);
         if (isModuleNotFoundError(knownErrors[0].cause))

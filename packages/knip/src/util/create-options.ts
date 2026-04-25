@@ -66,13 +66,13 @@ export const createOptions = async (options: CreateOptions) => {
       const invalid = value.filter((v: string) => !validIssueTypes.has(v));
       if (invalid.length > 0) {
         loadedConfig[key] = value.filter((v: string) => validIssueTypes.has(v));
-        for (const name of invalid) logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+        for (const name of invalid) logWarning(`Ignored unknown issue type "${name}" in ${key}`);
       }
     } else if (typeof value === 'object') {
       for (const name in value) {
         if (!validIssueTypes.has(name)) {
           delete value[name];
-          logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+          logWarning(`Ignored unknown issue type "${name}" in ${key}`);
         }
       }
     }

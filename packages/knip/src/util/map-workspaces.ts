@@ -41,7 +41,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
       if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
         debugLog('*', `Unable to load package.json for ${name}`);
       } else if (error instanceof SyntaxError) {
-        logWarning('WARNING', `Skipping workspace ${name}: invalid JSON in ${manifestPath} (${error.message})`);
+        logWarning(`Skipping workspace ${name}: invalid JSON in ${manifestPath} (${error.message})`);
       } else throw error;
     }
   }
