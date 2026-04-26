@@ -4,7 +4,7 @@ import { toDependency, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { WxtConfig } from './types.ts';
 
-// https://wxt.dev/guide/essentials/config.html
+// https://wxt.dev/guide/essentials/entrypoints.html
 
 const title = 'WXT';
 
