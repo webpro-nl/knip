@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/wxt",
+  "dependencies": {
+    "wxt": "*",
+    "@wxt-dev/module-react": "*",
+    "wxt-module-console-forward": "*",
+    "unused-module": "*"
+  }
+}
