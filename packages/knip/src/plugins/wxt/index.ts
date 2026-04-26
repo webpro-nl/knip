@@ -16,16 +16,6 @@ const config = ['wxt.config.{js,mjs,ts}'];
 
 const production = ['entrypoints/**/*'];
 
-const setup = async () => {
-  if (globalThis && !('defineConfig' in globalThis)) {
-    Object.defineProperty(globalThis, 'defineConfig', {
-      value: (id: unknown) => id,
-      writable: true,
-      configurable: true,
-    });
-  }
-};
-
 const resolveConfig: ResolveConfig<WxtConfig> = async localConfig => {
   const inputs: Input[] = [];
 
@@ -46,7 +36,6 @@ const plugin: Plugin = {
   isEnabled,
   config,
   production,
-  setup,
   resolveConfig,
 };
 
