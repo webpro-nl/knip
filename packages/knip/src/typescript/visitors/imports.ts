@@ -250,7 +250,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
         if (internalImport) {
-          if (_import.isDynamicImport) {
+          if (_import.isDynamicImport && memberPath.length === 0) {
             for (const prop of node.id.properties) {
               if (prop.type === 'Property' && prop.key?.type === 'Identifier') {
                 addValue(internalImport.import, prop.key.name, s.filePath);
@@ -258,13 +258,14 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                 addValue(internalImport.import, OPAQUE, s.filePath);
               }
             }
-          } else {
+          } else if (!_import.isDynamicImport) {
             const ns = _import.isNamespace ? rootName : _import.importedName;
             const prefix = [ns, ...memberPath].join('.');
+            const isNsRoot = _import.isNamespace && memberPath.length === 0;
             for (const prop of node.id.properties) {
               if (prop.type === 'Property' && prop.key?.type === 'Identifier') {
                 internalImport.refs.add(`${prefix}.${prop.key.name}`);
-              } else if (prop.type === 'RestElement') {
+              } else if (prop.type === 'RestElement' && isNsRoot) {
                 addValue(internalImport.import, OPAQUE, s.filePath);
               }
             }

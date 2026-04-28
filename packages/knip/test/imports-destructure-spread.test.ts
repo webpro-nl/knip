@@ -9,11 +9,14 @@ const cwd = resolve('fixtures/imports-destructure-spread');
 
 test('Ignore namespace re-export by entry file', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(issues.exports['fruits.js']['fruits.cherry']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    exports: 1,
+    processed: 3,
+    total: 3,
   });
 });
