@@ -105,10 +105,10 @@ function createLocation(filePath: string, cwd: string, line?: number, col?: numb
 }
 
 function createFingerprint(filePath: string, cwd: string, message: string): string {
-  const md5 = createHash('md5');
+  const hash = createHash('sha256');
 
-  md5.update(toRelative(filePath, cwd));
-  md5.update(message);
+  hash.update(toRelative(filePath, cwd));
+  hash.update(message);
 
-  return md5.digest('hex');
+  return hash.digest('hex');
 }
