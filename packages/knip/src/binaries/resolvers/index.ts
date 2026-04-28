@@ -14,6 +14,8 @@ export default {
   npm: npm.resolve,
   npx: npx.resolve,
   pnpm: pnpm.resolve,
+  pn: pnpm.resolve,
   pnpx: pnpx.resolve,
+  pnx: pnpx.resolve,
   yarn: yarn.resolve,
 };
