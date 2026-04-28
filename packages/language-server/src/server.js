@@ -42,6 +42,7 @@ function readKnipVersion(resolvedPath) {
 /** @type {Config} */
 const DEFAULT_CONFIG = {
   deferSession: false,
+  workspaceRoot: '',
   editor: {
     exports: {
       codelens: { enabled: true },
@@ -62,6 +63,17 @@ const DEFAULT_CONFIG = {
 
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
+
+/**
+ * @param {string} workspaceFolderPath
+ * @param {string | undefined} workspaceRoot
+ */
+function resolveKnipProjectRoot(workspaceFolderPath, workspaceRoot) {
+  const trimmed = typeof workspaceRoot === 'string' ? workspaceRoot.trim() : '';
+  if (!trimmed) return workspaceFolderPath;
+  if (path.isAbsolute(trimmed)) return path.normalize(trimmed);
+  return path.resolve(workspaceFolderPath, trimmed);
+}
 
 /**
  * @import { Issues, Rules } from 'knip/session';
@@ -92,6 +104,9 @@ export class LanguageServer {
 
   /** @type {undefined | string} */
   cwd;
+
+  /** @type {undefined | string} */
+  workspaceFolderPath;
 
   /** @type Set<string> */
   published = new Set();
@@ -128,11 +143,12 @@ export class LanguageServer {
 
   setupHandlers() {
     this.connection.onInitialize(params => {
-      const uri = params.workspaceFolders?.[0]?.uri;
+      const uri =
+        params.initializationOptions?.workspaceFolderUri ?? params.workspaceFolders?.[0]?.uri;
 
       if (!uri) return { capabilities: {} };
 
-      this.cwd = fileURLToPath(uri);
+      this.workspaceFolderPath = fileURLToPath(uri);
 
       this.initConfig = params.initializationOptions?.config;
 
@@ -247,12 +263,15 @@ export class LanguageServer {
 
     try {
       const config = await this.getConfig();
+      const baseFolder = this.workspaceFolderPath ?? process.cwd();
+      this.cwd = resolveKnipProjectRoot(baseFolder, config.workspaceRoot);
+
       const knip = await this.#resolveKnipSession();
 
       const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
           ? config.configFilePath
-          : path.resolve(this.cwd ?? process.cwd(), config.configFilePath)
+          : path.resolve(this.cwd, config.configFilePath)
         : undefined;
 
       this.connection.console.log('Creating options');
