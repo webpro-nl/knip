@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "6.7.0",
+  "version": "6.8.0",
   "description": "Find and fix unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "keywords": [
     "analysis",
