@@ -9,38 +9,39 @@ type ExtraReporterOptions = {
   codeowners?: string;
 };
 
-interface BaseItem {
+export interface JSONReportNamedItem {
   name: string;
 }
 
-interface Item extends BaseItem {
+export interface JSONReportItem extends JSONReportNamedItem {
   namespace?: string;
   pos?: number;
   line?: number;
   col?: number;
 }
 
-type BaseItems = Array<BaseItem>;
-type Items = Array<Item>;
-
-type Row = {
+export type JSONReportEntry = {
   file: string;
-  owners?: BaseItems;
-  binaries?: BaseItems;
-  catalog?: Items;
-  dependencies?: Items;
-  devDependencies?: Items;
-  duplicates?: Array<Items>;
-  enumMembers?: Items;
-  exports?: Items;
-  files?: Items;
-  namespaceMembers?: Items;
-  nsExports?: Items;
-  nsTypes?: Items;
-  optionalPeerDependencies?: Items;
-  types?: Items;
-  unlisted?: BaseItems;
-  unresolved?: Items;
+  owners?: Array<JSONReportNamedItem>;
+  binaries?: Array<JSONReportNamedItem>;
+  catalog?: Array<JSONReportItem>;
+  dependencies?: Array<JSONReportItem>;
+  devDependencies?: Array<JSONReportItem>;
+  duplicates?: Array<Array<JSONReportItem>>;
+  enumMembers?: Array<JSONReportItem>;
+  exports?: Array<JSONReportItem>;
+  files?: Array<JSONReportItem>;
+  namespaceMembers?: Array<JSONReportItem>;
+  nsExports?: Array<JSONReportItem>;
+  nsTypes?: Array<JSONReportItem>;
+  optionalPeerDependencies?: Array<JSONReportItem>;
+  types?: Array<JSONReportItem>;
+  unlisted?: Array<JSONReportNamedItem>;
+  unresolved?: Array<JSONReportItem>;
+};
+
+export type JSONReport = {
+  issues: Array<JSONReportEntry>;
 };
 
 export default async ({ report, issues, options, cwd }: ReporterOptions) => {
@@ -51,13 +52,13 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
     console.error(error);
   }
 
-  const json: Record<string, Row> = {};
+  const json: Record<string, JSONReportEntry> = {};
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const findOwners = isFile(codeownersFilePath) && createOwnershipEngine(codeownersFilePath);
 
   const initRow = (filePath: string) => {
     const file = relative(cwd, filePath);
-    const row: Row = {
+    const row: JSONReportEntry = {
       file,
       ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
       ...(report.binaries && { binaries: [] }),
@@ -95,9 +96,8 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
     }
   }
 
-  const output = JSON.stringify({
-    issues: Object.values(json),
-  });
+  const jsonReport: JSONReport = { issues: Object.values(json) };
+  const output = JSON.stringify(jsonReport);
 
   // See: https://github.com/nodejs/node/issues/6379
   // @ts-expect-error _handle is private
