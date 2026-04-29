@@ -221,6 +221,25 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('pnpm write:report', []);
   t('pnpm perf:test:ci', []);
+  t('pnpm clean', []);
+  t('pnpm purge', []);
+  t('pnpm ci', []);
+  t('pnpm ic', []);
+  t('pnpm clean-install', []);
+  t('pnpm install-clean', []);
+  t('pnpm pm install', [], { cwd, manifest: toManifest(['install']) });
+  t('pnpm pm clean', [], { cwd, manifest: toManifest(['clean']) });
+  t('pnpm with 10 install', []);
+  t('pnpm runtime set node 22 -g', []);
+  t('pnpm rt set node lts -g', []);
+  t('pnpm sbom --sbom-format cyclonedx', []);
+  t('pnpm pack-app --entry dist/index.cjs --target linux-x64', []);
+  t('pnpm peers check', []);
+  t('pnpm ping --registry https://registry.npmjs.org', []);
+  t('pnpm docs lodash', []);
+  t('pnpm home lodash', []);
+  t('pnpm la', []);
+  t('pnpm ll', []);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -230,6 +249,21 @@ test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --recursive --parallel exec program', [toBinary('program')]);
   t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifest: toManifest(['program']) });
+});
+
+test('getInputsFromScripts (pn/pnx aliases)', () => {
+  t('pn exec program', [toBinary('program')]);
+  t('pn dlx pkg', [toDependency('pkg', opt)]);
+  t('pnx pkg', [toDependency('pkg', opt)]);
+  t('pn program', [toBinary('program')]);
+  t('pn program', [], pkgScripts);
+  t('pn run program', [], pkgScripts);
+  t('pn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pn run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pn exec program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)]);
+  const dlxInputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
+  t('pnx --package cowsay --package lolcatjs -c \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
+  t('pn --package cowsay --package lolcatjs -c dlx \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
 });
 
 test('getInputsFromScripts (yarn)', () => {
