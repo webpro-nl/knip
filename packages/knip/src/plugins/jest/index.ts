@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { _glob, _dirGlob } from '../../util/glob.ts';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -20,7 +21,9 @@ const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
 const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
 
-const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
+const rootDirRe = /<rootDir>/;
+
+const resolveDependencies = async (config: JestInitialOptions, rootDir: string, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
 
   if (config?.preset) {
@@ -36,12 +39,22 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
 
-  const projects = [];
+  const projects: (string | Input)[] = [];
   for (const project of config.projects ?? []) {
     if (typeof project === 'string') {
-      projects.push(project);
+      // Special case: Most Jest config settings can resolve <rootDir> later,
+      // but projects support wildcard expansion so should be expanded now.
+      //
+      // Jest projects may be directories or Jest config paths.
+      //
+      // Jest uses glob's `{ windowsPathsNoEscape: true }`, which we don't
+      // currently implement.
+      const patterns = [project.replace(rootDirRe, rootDir)];
+      const files = await _glob({ patterns, cwd: options.cwd });
+      const dirs = await _dirGlob({ patterns, cwd: options.cwd });
+      projects.push(...files, ...dirs);
     } else {
-      const dependencies = await resolveDependencies(project, options);
+      const dependencies = await resolveDependencies(project, rootDir, options);
       for (const dependency of dependencies) projects.push(dependency);
     }
   }
@@ -103,9 +116,9 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
   const rootDir = localConfig.rootDir ?? configFileDir;
-  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
+  const replaceRootDir = (name: string) => name.replace(rootDirRe, rootDir);
 
-  const inputs = await resolveDependencies(localConfig, options);
+  const inputs = await resolveDependencies(localConfig, rootDir, options);
 
   const entries = localConfig.testMatch
     ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
