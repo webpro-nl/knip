@@ -85,45 +85,50 @@ const fillFromReferences = (
   }
 };
 
-export const loadTSConfig = async (tsConfigFilePath: string) => {
-  if (isFile(tsConfigFilePath)) {
-    try {
-      const config = parseTsconfig(tsConfigFilePath);
+interface TSConfigInfo {
+  isFile: boolean;
+  compilerOptions: CompilerOptions;
+  fileNames: string[];
+  include: string[] | undefined;
+  exclude: string[] | undefined;
+}
 
-      const dir = dirname(tsConfigFilePath);
-      const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
+const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
+  compilerOptions: {},
+  fileNames: [],
+  include: undefined,
+  exclude: undefined,
+};
 
-      if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-      if (compilerOptions.rootDir)
-        compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
-      if (compilerOptions.paths) {
-        compilerOptions.pathsBasePath ??= dir;
-      }
-      if (compilerOptions.rootDirs) {
-        compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
-      }
+export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigInfo> => {
+  if (!isFile(tsConfigFilePath)) return { isFile: false, ...EMPTY };
 
-      if ((!compilerOptions.outDir || !compilerOptions.rootDir) && config.references?.length) {
-        fillFromReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]));
-      }
+  try {
+    const config = parseTsconfig(tsConfigFilePath);
 
-      const include = resolvePatterns(config.include, dir, true);
-      const exclude = resolvePatterns(config.exclude, dir, true);
-      const files = resolvePatterns(config.files, dir);
-      const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+    const dir = dirname(tsConfigFilePath);
+    const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-      return { isFile: true, compilerOptions, fileNames };
-    } catch {
-      return {
-        isFile: true,
-        compilerOptions: {} as CompilerOptions,
-        fileNames: [] as string[],
-      };
+    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
+    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
+    if (compilerOptions.paths) {
+      compilerOptions.pathsBasePath ??= dir;
     }
+    if (compilerOptions.rootDirs) {
+      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
+    }
+
+    if ((!compilerOptions.outDir || !compilerOptions.rootDir) && config.references?.length) {
+      fillFromReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]));
+    }
+
+    const include = resolvePatterns(config.include, dir, true);
+    const exclude = resolvePatterns(config.exclude, dir, true);
+    const files = resolvePatterns(config.files, dir);
+    const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+
+    return { isFile: true, compilerOptions, fileNames, include, exclude };
+  } catch {
+    return { isFile: true, ...EMPTY };
   }
-  return {
-    isFile: false,
-    compilerOptions: {} as CompilerOptions,
-    fileNames: [] as string[],
-  };
 };
