@@ -53,6 +53,7 @@ export type PackageJson = {
   catalog?: Catalog;
   catalogs?: Catalogs;
   packageManager?: string;
+  engines?: Record<string, string>;
   pnpm?: {
     overrides?: Dependencies;
   };

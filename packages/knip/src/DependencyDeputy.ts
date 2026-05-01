@@ -132,6 +132,7 @@ export class DependencyDeputy {
       optionalPeerDependencies,
       requiredPeerDependencies,
       allDependencies: new Set(allDependencies),
+      engines: manifest.engines ?? {},
     });
   }
 
@@ -231,6 +232,8 @@ export class DependencyDeputy {
       return true;
     }
     if (closestWorkspaceNameForTypes && isTypeOnly) return true;
+
+    if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
 
     this.addReferencedDependency(workspace.name, packageName);
 

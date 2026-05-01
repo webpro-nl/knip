@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/host-provided-vscode",
+  "main": "extension.ts",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "*"
+  }
+}
