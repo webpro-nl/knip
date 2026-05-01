@@ -1,0 +1,4 @@
+
+> @argos/root@ knip /home/runner/work/knip/knip/argos
+> knip --reporter compact --no-exit-code
+

@@ -1,0 +1,25 @@
+Unused exports (1)
+.flue/workflows/issue-triage/github.ts: issueDetailsSchema, repoLabelSchema
+Unused exported types (22)
+packages/astro/src/content/content-layer.ts: ContentLayerOptions
+packages/astro/src/core/build/generate.ts: RenderPathResult
+packages/astro/src/core/cache/types.ts: RouteRule
+packages/astro/src/core/compile/style.ts: PreprocessStyleFn
+packages/astro/src/core/head-propagation/graph.ts: ModuleId
+packages/astro/src/core/routing/create-manifest.ts: RouteEntry
+packages/astro/src/core/routing/router.ts: RouterOptions, RouterMatch
+packages/astro/src/i18n/fallback.ts: ComputeFallbackRouteOptions
+packages/astro/src/i18n/router.ts: I18nRouterOptions
+packages/astro/src/vite-plugin-astro-server/base.ts: BaseRewriteDecision
+packages/astro/src/vite-plugin-astro-server/trailing-slash.ts: TrailingSlashDecision
+packages/astro/src/vite-plugin-astro/compile-rs.ts: CompileAstroResult
+packages/create-astro/test/test-utils.ts: Context
+packages/integrations/cloudflare/src/utils/image-config.ts: ImageServiceMode
+packages/integrations/cloudflare/src/vite-plugin-config.ts: Config
+packages/integrations/cloudflare/test/test-utils.ts: AstroInlineConfig
+packages/integrations/netlify/src/vite-plugin-config.ts: Config
+packages/integrations/netlify/test/test-utils.ts: AstroInlineConfig
+packages/integrations/node/test/test-utils.ts: AstroInlineConfig
+packages/integrations/sitemap/test/test-utils.ts: AstroInlineConfig
+packages/integrations/vercel/src/vite-plugin-config.ts: Config
+packages/integrations/vercel/test/test-utils.ts: VercelOutputConfig

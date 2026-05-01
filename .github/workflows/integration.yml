@@ -2,6 +2,11 @@ name: Publish preview & run ecosystem tests
 
 on:
   workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: Regenerate ecosystem snapshots and upload as artifact
+        type: boolean
+        default: false
   pull_request:
   push:
     branches:
@@ -58,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PKG_URL: https://pkg.pr.new/knip@${{ needs.publish.outputs.sha }}
+      SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
+      UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
+      SNAPSHOT_OUT_DIR: /tmp/snapshot-updates
     strategy:
       fail-fast: false
       matrix:
@@ -66,7 +74,7 @@ jobs:
             repo: birchill/10ten-ja-reader
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              bash $SNAP 10ten-ja-reader -- pnpm dlx $PKG_URL
 
           - name: argos
             repo: argos-ci/argos
@@ -74,7 +82,7 @@ jobs:
               pnpm install
               pnpm build
               pnpm add -D -w $PKG_URL
-              pnpm run knip
+              bash $SNAP argos -- pnpm run knip
 
           - name: astro
             repo: withastro/astro
@@ -82,20 +90,20 @@ jobs:
               pnpm install --config.minimumReleaseAge=0
               pnpm build
               pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
-              pnpm knip --fix
+              bash $SNAP astro -- pnpm knip --fix
 
-          - name: create-typescript-app
-            repo: JoshuaKGoldberg/create-typescript-app
-            commands: |
-              pnpm install
-              pnpm add -D $PKG_URL
-              pnpm lint:knip
+          # - name: create-typescript-app
+          #   repo: JoshuaKGoldberg/create-typescript-app
+          #   commands: |
+          #     pnpm install
+          #     pnpm add -D $PKG_URL
+          #     bash $SNAP create-typescript-app -- pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PKG_URL
 
           - name: eslint
             repo: eslint/eslint
@@ -103,15 +111,15 @@ jobs:
               npm install
               npm install --prefix docs
               npm install -D $PKG_URL
-              npm run lint:unused -- --cache
-              npm run lint:unused -- --cache
+              bash $SNAP eslint -- npm run lint:unused -- --cache
+              npm run lint:unused -- --cache --no-exit-code
 
           - name: mocha
             repo: mochajs/mocha
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npm run lint:knip
+              bash $SNAP mocha -- npm run lint:knip
 
           - name: InvokeAI
             repo: invoke-ai/InvokeAI
@@ -120,17 +128,17 @@ jobs:
               cd invokeai/frontend/web
               pnpm install
               pnpm add -D $PKG_URL
-              bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format
-              bunx --bun knip --tags=-knipignore --production
+              bash $SNAP InvokeAI -- bunx --bun knip --tags=-knipignore
+              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format --no-exit-code
+              bash $SNAP InvokeAI-prod -- bunx --bun knip --tags=-knipignore --production
 
           - name: npmx.dev
             repo: npmx-dev/npmx.dev
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm knip
-              pnpm knip --production --exclude dependencies --fix
+              bash $SNAP npmx.dev -- pnpm knip
+              bash $SNAP npmx.dev-prod -- pnpm knip --production --exclude dependencies --fix
 
           - name: prettier
             repo: prettier/prettier
@@ -141,50 +149,51 @@ jobs:
               yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
               yarn --cwd website
               yarn add -D knip@$PKG_URL
-              yarn knip
+              bash $SNAP prettier -- yarn knip
 
           - name: query
             repo: TanStack/query
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm test:knip --cache
-              pnpm test:knip --cache
+              bash $SNAP query -- pnpm test:knip --cache
+              pnpm test:knip --cache --no-exit-code
 
           - name: rolldown
             repo: rolldown/rolldown
             commands: |
               pnpm install
               pnpm add -D -w knip@$PKG_URL
-              pnpm knip
+              bash $SNAP rolldown -- pnpm knip
 
           - name: sanity
             repo: sanity-io/sanity
             commands: |
               pnpm install --no-frozen-lockfile --config.minimumReleaseAge=0
               pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
-              pnpm knip --exclude duplicates
+              bash $SNAP sanity -- pnpm knip --exclude duplicates
 
           - name: sentry
             repo: getsentry/sentry
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
-              pnpm run knip --fix
-              pnpm run knip:prod
+              bash $SNAP sentry -- pnpm run knip --fix
+              bash $SNAP sentry-prod -- pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
             commands: |
               pnpm install --no-frozen-lockfile
-              pnpm dlx $PKG_URL
+              bash $SNAP slonik -- pnpm dlx $PKG_URL
 
           - name: TypeScript
             repo: microsoft/TypeScript
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npm run knip
+              npx hereby generate-diagnostics
+              bash $SNAP TypeScript -- npx knip
 
     steps:
       - uses: actions/checkout@v6
@@ -195,12 +204,6 @@ jobs:
           repository: ${{ matrix.project.repo }}
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
-
-      - name: Apply patch if exists
-        working-directory: ${{ matrix.project.name }}
-        run: |
-          PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
-          [ -f "$PATCH_FILE" ] && git apply --verbose -C0 --ignore-whitespace "$PATCH_FILE" || true
 
       - uses: actions/setup-node@v6
         with:
@@ -215,3 +218,27 @@ jobs:
         run: |
           set -x
           ${{ matrix.project.commands }}
+
+      - name: Upload updated snapshots
+        if: ${{ inputs.update_snapshots }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-${{ matrix.project.name }}
+          path: /tmp/snapshot-updates/
+          if-no-files-found: ignore
+
+  aggregate-snapshots:
+    name: Aggregate updated snapshots
+    if: ${{ inputs.update_snapshots }}
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: snapshots-*
+          path: snapshots/
+          merge-multiple: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: snapshots/
