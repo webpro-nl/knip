@@ -93,7 +93,12 @@ export const createInputHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {
-        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, isConfig(input));
+        const isHandled = deputy.maybeAddReferencedExternalDependency(
+          inputWorkspace,
+          packageName,
+          isConfig(input),
+          input.isTypeOnly
+        );
 
         if (externalRefs && !isWorkspace) {
           addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });

@@ -18,6 +18,7 @@ export interface Input {
   specifier: string;
   production?: boolean;
   optional?: boolean;
+  isTypeOnly?: boolean;
   dir?: string;
   containingFilePath?: string;
   allowIncludeExports?: boolean;
@@ -43,6 +44,7 @@ interface IgnoreInput extends Input {
 
 type Options = {
   optional?: boolean;
+  isTypeOnly?: boolean;
   dir?: string;
   containingFilePath?: string;
   allowIncludeExports?: boolean;
