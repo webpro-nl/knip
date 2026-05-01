@@ -16,6 +16,7 @@ import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
+import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
@@ -116,7 +117,7 @@ export async function build({
     const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
-    const { isFile, compilerOptions, fileNames } = await loadTSConfig(tsConfigFilePath);
+    const { isFile, compilerOptions, fileNames, include, exclude } = await loadTSConfig(tsConfigFilePath);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     const worker = new WorkspaceWorker({
@@ -317,6 +318,19 @@ export async function build({
         if (!isGitIgnored(filePath) && !isIgnoredWorkspace(filePath)) {
           principal.addProgramPath(filePath);
           principal.addProjectPath(filePath);
+        }
+      }
+      if (extensions.length > 0) {
+        const extPart =
+          extensions.length === 1 ? extensions[0] : `.{${extensions.map(ext => ext.slice(1)).join(',')}}`;
+        const bases = include ? new Set(include.map(p => picomatch.scan(p).base || dir)) : new Set([dir]);
+        const patterns = [
+          ...Array.from(bases, base => `${base}/**/*${extPart}`),
+          ...(exclude?.map(p => `!${p}`) ?? []),
+        ];
+        const compilerPaths = await _glob({ ...sharedGlobOptions, patterns, label: 'compiler extension paths' });
+        for (const compilerPath of compilerPaths) {
+          if (!isIgnoredWorkspace(compilerPath)) principal.addProjectPath(compilerPath);
         }
       }
     } else {

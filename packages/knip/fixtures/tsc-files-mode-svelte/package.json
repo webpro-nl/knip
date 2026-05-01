@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tsc-files-mode-svelte",
+  "type": "module",
+  "dependencies": {
+    "svelte": "*"
+  }
+}
