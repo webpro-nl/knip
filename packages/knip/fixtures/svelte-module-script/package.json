@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/svelte-module-script",
+  "type": "module",
+  "dependencies": {
+    "svelte": "*"
+  }
+}
