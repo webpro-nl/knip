@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/jest-projects-monorepo-users",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*"
+  }
+}

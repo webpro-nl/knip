@@ -20,6 +20,8 @@ const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
 const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
 
+const isPathLikeProject = (value: string) => /[*?/\\]/.test(value) || value.startsWith('<rootDir>') || value.startsWith('.');
+
 const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
   const { configFileDir } = options;
 
@@ -39,6 +41,7 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const projects = [];
   for (const project of config.projects ?? []) {
     if (typeof project === 'string') {
+      if (isPathLikeProject(project)) continue;
       projects.push(project);
     } else {
       const dependencies = await resolveDependencies(project, options);
