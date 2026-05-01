@@ -45,6 +45,7 @@ const getImportsAndExports = (
   cachedParseResult?: ParseResult
 ): FileNode => {
   const skipExports = skipExportsForFile || !options.isReportExports;
+  const isDts = filePath.endsWith('.d.ts') || filePath.endsWith('.d.cts') || filePath.endsWith('.d.mts');
   const internal: ImportMap = new Map();
   const external: Imports = new Set();
   const unresolved: Imports = new Set();
@@ -91,7 +92,7 @@ const getImportsAndExports = (
       pos: opts.pos,
       line: opts.line,
       col: opts.col,
-      isTypeOnly: !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+      isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
     });
 
     const file = internal.get(importFilePath);
@@ -179,7 +180,7 @@ const getImportsAndExports = (
             pos: ePos,
             line,
             col,
-            isTypeOnly: !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+            isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
           });
         }
       }
@@ -202,7 +203,7 @@ const getImportsAndExports = (
           pos: uPos,
           line,
           col,
-          isTypeOnly: !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+          isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
         });
       }
     }

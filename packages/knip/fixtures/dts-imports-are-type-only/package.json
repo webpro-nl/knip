@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/dts-imports-are-type-only",
+  "main": "lib/index.d.ts",
+  "devDependencies": {
+    "@types/peach": "*"
+  }
+}
