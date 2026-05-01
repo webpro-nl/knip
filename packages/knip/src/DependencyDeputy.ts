@@ -202,7 +202,12 @@ export class DependencyDeputy {
    * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
    * wants to mark the dependency as "unlisted".
    */
-  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string, isDevOnly?: boolean): boolean {
+  public maybeAddReferencedExternalDependency(
+    workspace: Workspace,
+    packageName: string,
+    isDevOnly?: boolean,
+    isTypeOnly?: boolean
+  ): boolean {
     if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
@@ -218,12 +223,15 @@ export class DependencyDeputy {
     const closestWorkspaceNameForTypes =
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOnly));
 
-    if (closestWorkspaceName || closestWorkspaceNameForTypes) {
-      if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
-      if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
-        this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+    if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
+      this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+
+    if (closestWorkspaceName) {
+      this.addReferencedDependency(closestWorkspaceName, packageName);
       return true;
     }
+    if (closestWorkspaceNameForTypes && isTypeOnly) return true;
+
     this.addReferencedDependency(workspace.name, packageName);
 
     return false;

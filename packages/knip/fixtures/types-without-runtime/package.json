@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/types-without-runtime",
+  "devDependencies": {
+    "@types/orange": "*",
+    "@types/banana": "*"
+  }
+}
