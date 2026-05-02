@@ -180,7 +180,9 @@ export const printConfigurationHints = ({
     console.log(getTitle('Configuration hints', configurationHints.length));
     console.warn(getTableForHints(rows).toString());
   }
+};
 
+export const printTagHints = ({ cwd, tagHints }: ReporterOptions) => {
   if (tagHints.size > 0) {
     console.log(getDimmedTitle('Tag hints', tagHints.size));
     for (const hint of tagHints) {

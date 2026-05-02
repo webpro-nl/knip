@@ -63,6 +63,7 @@ export type ReporterOptions = {
   configurationHints: ConfigurationHint[];
   enabledPlugins: Record<string, string[]>;
   isDisableConfigHints: boolean;
+  isDisableTagHints: boolean;
   isTreatConfigHintsAsErrors: boolean;
   cwd: string;
   isProduction: boolean;

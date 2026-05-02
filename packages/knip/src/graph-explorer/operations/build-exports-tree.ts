@@ -3,7 +3,6 @@ import { CONTINUE } from '../constants.ts';
 import type { Via } from '../walk-down.ts';
 import { walkDown } from '../walk-down.ts';
 
-/** @internal */
 export interface ExportsTreeNode {
   filePath: string;
   identifier: string;

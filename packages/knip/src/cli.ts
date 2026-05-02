@@ -70,6 +70,7 @@ const main = async () => {
       cwd: options.cwd,
       configFilePath: options.configFilePath,
       isDisableConfigHints: options.isDisableConfigHints,
+      isDisableTagHints: options.isDisableTagHints,
       isProduction: options.isProduction,
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,

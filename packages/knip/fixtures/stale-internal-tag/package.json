@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/stale-internal-tag",
+  "scripts": {
+    "test": "node --test"
+  }
+}

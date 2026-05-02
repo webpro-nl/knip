@@ -12,7 +12,8 @@ import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
-import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.ts';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, isAlwaysIgnored } from '../util/tag.ts';
+import { INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -97,10 +98,11 @@ export const analyze = async ({
           const importsForExport = file.importedBy;
 
           for (const [identifier, exportedItem] of exportItems) {
-            // Skip tagged exports
-            if (shouldIgnore(exportedItem.jsDocTags)) continue;
+            // Skip exports tagged @public/@beta/@alias entirely (no refs check)
+            if (isAlwaysIgnored(exportedItem.jsDocTags)) continue;
 
-            const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
+            const isInternalProd = options.isProduction && exportedItem.jsDocTags.has(INTERNAL_TAG);
+            const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags) || isInternalProd;
 
             if (importsForExport) {
               const [isReferenced, reExportingEntryFile] = explorer.isReferenced(filePath, identifier, {
@@ -112,7 +114,7 @@ export const analyze = async ({
                 (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
               ) {
                 for (const tagName of exportedItem.jsDocTags) {
-                  if (options.tags[1].includes(tagName)) {
+                  if (options.tags[1].includes(tagName) || (isInternalProd && tagName === INTERNAL_TAG)) {
                     collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
                   }
                 }
@@ -233,7 +235,8 @@ export const analyze = async ({
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
             const isHandled =
-              packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName, undefined, extImport.isTypeOnly);
+              packageName &&
+              deputy.maybeAddReferencedExternalDependency(ws, packageName, undefined, extImport.isTypeOnly);
             if (!isHandled)
               collector.addIssue({
                 type: 'unlisted',

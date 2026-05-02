@@ -5,7 +5,6 @@ export const toExtendedIgnorePattern = (pattern: string): string => {
   return `${pattern}/**`;
 };
 
-/** @internal */
 export const expandIgnorePatterns = (patterns: Iterable<string>): string[] => {
   const result: string[] = [];
   for (const p of patterns) {
@@ -16,7 +15,6 @@ export const expandIgnorePatterns = (patterns: Iterable<string>): string[] => {
   return result;
 };
 
-/** @internal */
 export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
   const negated = pattern[0] === '!';
   if (negated) pattern = pattern.slice(1);

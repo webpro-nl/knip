@@ -22,10 +22,10 @@ export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   return false;
 };
 
+export const isAlwaysIgnored = (jsDocTags: Set<string>) =>
+  jsDocTags.has(PUBLIC_TAG) || jsDocTags.has(BETA_TAG) || jsDocTags.has(ALIAS_TAG);
+
 export const getShouldIgnoreHandler = (isProduction: boolean) => (jsDocTags: Set<string>) =>
-  jsDocTags.has(PUBLIC_TAG) ||
-  jsDocTags.has(BETA_TAG) ||
-  jsDocTags.has(ALIAS_TAG) ||
-  (isProduction && jsDocTags.has(INTERNAL_TAG));
+  isAlwaysIgnored(jsDocTags) || (isProduction && jsDocTags.has(INTERNAL_TAG));
 
 export const getShouldIgnoreTagHandler = (tags: Tags) => (jsDocTags: Set<string>) => shouldIgnore(jsDocTags, tags);

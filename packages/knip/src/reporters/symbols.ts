@@ -1,10 +1,10 @@
 import type { Entries } from '../types/entries.ts';
 import type { ReporterOptions } from '../types/issues.ts';
-import { printConfigurationHints } from './util/configuration-hints.ts';
+import { printConfigurationHints, printTagHints } from './util/configuration-hints.ts';
 import { dim, flattenIssues, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
 export default (options: ReporterOptions) => {
-  const { report, issues, isDisableConfigHints, isShowProgress } = options;
+  const { report, issues, isDisableConfigHints, isDisableTagHints, isShowProgress } = options;
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
@@ -29,6 +29,10 @@ export default (options: ReporterOptions) => {
 
   if (!isDisableConfigHints) {
     printConfigurationHints(options);
+  }
+
+  if (!isDisableTagHints) {
+    printTagHints(options);
   }
 
   if (

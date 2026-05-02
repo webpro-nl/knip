@@ -139,6 +139,7 @@ export const createOptions = async (options: CreateOptions) => {
     isCache: args.cache ?? false,
     isDebug,
     isDisableConfigHints: args['no-config-hints'] || isProduction || Boolean(workspace),
+    isDisableTagHints: Boolean(args['no-config-hints']),
     isFix: args.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
