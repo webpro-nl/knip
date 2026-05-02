@@ -17,6 +17,10 @@ fi
 
 NO_COLOR=1 "$@" "${EXTRA[@]}" >"$OUT" || { echo "::error::knip crashed for $NAME"; cat "$OUT"; exit 1; }
 
+CLEAN="$(mktemp)"
+grep -Ev '^(> |$)' "$OUT" >"$CLEAN" || true
+OUT="$CLEAN"
+
 if [ "${UPDATE_SNAPSHOTS:-}" = "1" ]; then
   mkdir -p "$OUT_DIR"
   cp "$OUT" "$OUT_DIR/$NAME.txt"

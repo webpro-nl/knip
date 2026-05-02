@@ -1,4 +1,0 @@
-
-> sentry@0.0.0 knip /home/runner/work/knip/knip/sentry
-> knip --treat-config-hints-as-errors --fix --reporter compact --no-exit-code
-

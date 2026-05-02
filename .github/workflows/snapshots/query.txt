@@ -1,6 +1,2 @@
-
-> root@ test:knip /home/runner/work/knip/knip/query
-> knip --treat-config-hints-as-errors --cache --reporter compact --no-exit-code
-
 Unused exported types (1)
 packages/preact-query/src/__tests__/ErrorBoundary/types.ts: ErrorBoundaryPropsWithComponent, ErrorBoundaryPropsWithRender, ErrorBoundaryPropsWithFallback

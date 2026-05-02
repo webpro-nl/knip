@@ -1,8 +1,0 @@
-
-> sentry@0.0.0 knip:prod /home/runner/work/knip/knip/sentry
-> pnpm run knip --production --exclude dependencies --reporter compact --no-exit-code
-
-
-> sentry@0.0.0 knip /home/runner/work/knip/knip/sentry
-> knip --treat-config-hints-as-errors --production --exclude dependencies --reporter compact --no-exit-code
-

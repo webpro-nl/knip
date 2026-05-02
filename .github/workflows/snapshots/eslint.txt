@@ -1,4 +1,0 @@
-
-> eslint@10.2.1 lint:unused
-> knip --cache --reporter compact --no-exit-code
-
