@@ -130,7 +130,7 @@ Remember, Knip it before you ship it! Have a great day ☀️
 [5]: https://github.com/Boshen
 [6]: https://oxc.rs
 [7]: https://try.venz.dev/?type=bar&labelX=Knip&labelY=duration+(s)&label=astro&label=query&label=rolldown&label=sentry&label=typescript&l=v5.88.0&l=v6.0.0&data=4*2&data=3.8*1.7&data=3.7*1.7&data=11*4&data=3.7*0.9
-[8]: https://cdn.venz.dev/i/chart.svg?pad=0&type=bar&labelX=Knip&labelY=duration+(s)&label=astro&label=query&label=rolldown&label=sentry&label=typescript&l=v5.88.0&l=v6.0.0&data=4*2&data=3.8*1.7&data=3.7*1.7&data=11*4&data=3.7*0.9&theme=dark
+[8]: https://cdn.venz.dev/i/chart.svg?pad=0&type=bar&labelX=Projects%20using%20Knip&labelY=duration+(s)&label=astro&label=query&label=rolldown&label=sentry&label=typescript&l=v5.88.0&l=v6.0.0&data=4*2&data=3.8*1.7&data=3.7*1.7&data=11*4&data=3.7*0.9
 [9]: https://github.com/withastro/astro
 [10]: https://github.com/TanStack/query
 [11]: https://github.com/rolldown/rolldown
