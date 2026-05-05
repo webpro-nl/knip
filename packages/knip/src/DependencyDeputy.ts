@@ -8,7 +8,7 @@ import {
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
-import { getDependencyMetaData } from './manifest/index.ts';
+import { getDependencyMetaData, getTransitivePeerDependencies, type ManifestCache } from './manifest/index.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
 import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
@@ -48,6 +48,9 @@ export class DependencyDeputy {
   hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
+  expandedTransitivePeers: Set<string>;
+  manifestCache: ManifestCache;
+  cwd?: string;
 
   constructor({ isProduction, isStrict, isReportDependencies }: MainOptions) {
     this.isProduction = isProduction;
@@ -58,6 +61,8 @@ export class DependencyDeputy {
     this.hostDependencies = new Map();
     this.installedBinaries = new Map();
     this.hasTypesIncluded = new Map();
+    this.expandedTransitivePeers = new Set();
+    this.manifestCache = new Map();
   }
 
   public addWorkspace({
@@ -110,6 +115,7 @@ export class DependencyDeputy {
       this.setHostDependencies(name, hostDependencies);
       this.setInstalledBinaries(name, installedBinaries);
       this.setHasTypesIncluded(name, hasTypesIncluded);
+      this.cwd = cwd;
     }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
@@ -193,6 +199,20 @@ export class DependencyDeputy {
 
   getHostDependenciesFor(workspaceName: string, dependency: string) {
     return this.hostDependencies.get(workspaceName)?.get(dependency) ?? [];
+  }
+
+  expandTransitivePeers(workspaceName: string) {
+    if (this.expandedTransitivePeers.has(workspaceName)) return;
+    this.expandedTransitivePeers.add(workspaceName);
+    const wm = this._manifests.get(workspaceName);
+    const hostDependencies = this.hostDependencies.get(workspaceName);
+    if (!wm || !hostDependencies || !this.cwd) return;
+    const packageNames = [
+      ...wm.dependencies,
+      ...(this.isStrict ? wm.peerDependencies : []),
+      ...(this.isProduction ? [] : wm.devDependencies),
+    ];
+    getTransitivePeerDependencies({ cwd: this.cwd, dir: wm.workspaceDir, packageNames }, hostDependencies, this.manifestCache);
   }
 
   getOptionalPeerDependencies(workspaceName: string): DependencySet {
@@ -317,7 +337,14 @@ export class DependencyDeputy {
         return hostDependencies.some(hostDependency => isReferencedDependency(hostDependency.name, visited));
       };
 
-      const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
+      const isReferenced = (dependency: string): boolean => {
+        if (isReferencedDependency(dependency)) return true;
+        if (this.expandedTransitivePeers.has(workspace)) return false;
+        this.expandTransitivePeers(workspace);
+        return isReferencedDependency(dependency);
+      };
+
+      const isNotReferencedDependency = (dependency: string): boolean => !isReferenced(dependency);
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
         const position = peeker.getLocation('dependencies', symbol);
@@ -332,7 +359,7 @@ export class DependencyDeputy {
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
-        if (!isReferencedDependency(symbol)) continue;
+        if (!isReferenced(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({

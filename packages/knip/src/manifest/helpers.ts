@@ -47,6 +47,17 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   }
 };
 
+export const findPackageManifestPath = (fromDir: string, packageName: string) => {
+  let cur = fromDir;
+  while (true) {
+    const candidate = join(cur, 'node_modules', packageName, 'package.json');
+    if (existsSync(candidate)) return candidate;
+    const parent = dirname(cur);
+    if (parent === cur) return undefined;
+    cur = parent;
+  }
+};
+
 export const getFilteredScripts = (scripts: Scripts) => {
   if (!scripts) return [{}, {}];
 
