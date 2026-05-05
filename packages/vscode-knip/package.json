@@ -182,6 +182,11 @@
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
           },
+          "knip.workspaceRoot": {
+            "type": "string",
+            "default": "",
+            "description": "Directory Knip uses as the project root (relative to the VS Code workspace folder)"
+          },
           "knip.nodeRuntimePath": {
             "type": "string",
             "default": "",
