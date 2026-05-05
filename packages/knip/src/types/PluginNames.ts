@@ -134,6 +134,7 @@ export type PluginName =
   | 'typescript'
   | 'unbuild'
   | 'unocss'
+  | 'vercel'
   | 'vercel-og'
   | 'vike'
   | 'vite'
@@ -285,6 +286,7 @@ export const pluginNames = [
   'typescript',
   'unbuild',
   'unocss',
+  'vercel',
   'vercel-og',
   'vike',
   'vite',
