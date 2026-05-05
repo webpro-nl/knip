@@ -9,7 +9,7 @@ import type { PostCSSConfig } from './types.ts';
 
 const title = 'PostCSS';
 
-const enablers = ['postcss', 'postcss-cli', 'next'];
+const enablers = ['postcss', 'postcss-cli', 'next', '@tailwindcss/postcss'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -30,10 +30,12 @@ const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
 
   const inputs = plugins.map(id => toDeferResolve(id));
 
-  // Because postcss is not included in peerDependencies of tailwindcss
-  return ['tailwindcss', '@tailwindcss/postcss'].some(tailwindPlugin => plugins.includes(tailwindPlugin))
-    ? [...inputs, toDependency('postcss')]
-    : inputs;
+  if (plugins.includes('tailwindcss')) {
+    // Because postcss is not included in peerDependencies of tailwindcss
+    return [...inputs, toDependency('postcss')];
+  }
+
+  return plugins.includes('@tailwindcss/postcss') ? [...inputs, toDependency('postcss', { optional: true })] : inputs;
 };
 
 const plugin: Plugin = {
