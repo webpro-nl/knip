@@ -147,6 +147,7 @@ export const pluginsSchema = z.object({
   typescript: pluginSchema,
   unbuild: pluginSchema,
   unocss: pluginSchema,
+  vercel: pluginSchema,
   'vercel-og': pluginSchema,
   vike: pluginSchema,
   vite: pluginSchema,
