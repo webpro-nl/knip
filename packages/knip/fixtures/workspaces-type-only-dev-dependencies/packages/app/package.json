@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/workspaces-type-only-dev-dependencies__app",
+  "private": true,
+  "type": "module",
+  "exports": "./index.ts",
+  "devDependencies": {
+    "@fixtures/workspaces-type-only-dev-dependencies__runtime": "workspace:*",
+    "@fixtures/workspaces-type-only-dev-dependencies__types": "workspace:*"
+  }
+}
