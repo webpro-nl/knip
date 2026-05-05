@@ -432,6 +432,7 @@ export async function build({
         if (!_import.filePath) continue;
         const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
         if (!packageName) continue;
+        if (analyzeOpts.skipTypeOnly && _import.isTypeOnly) continue;
         const isWorkspace = isInternalWorkspace(packageName);
         if (isWorkspace || wsDependencies.has(packageName)) {
           file.imports.external.add({ ..._import, specifier: packageName });
