@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/peer-dependencies-transitive",
+  "dependencies": {
+    "host-error": "*",
+    "peer-graphql": "*"
+  }
+}
