@@ -102,8 +102,9 @@ const main = async () => {
     }
 
     if (
-      (!args['no-exit-code'] && totalErrorCount > Number(args['max-issues'] ?? 0)) ||
-      (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0)
+      !args['no-exit-code'] &&
+      (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+        (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0))
     ) {
       process.exitCode = 1;
       return;
