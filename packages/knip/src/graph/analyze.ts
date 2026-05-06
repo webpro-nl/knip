@@ -59,10 +59,14 @@ export const analyze = async ({
     for (const containingExport of exportedItem.referencedIn) {
       const inExport = file.exports.get(containingExport);
       if (!inExport) continue;
-      if (shouldCountRefs(ignoreExportsUsedInFile, inExport.type)) {
-        if (inExport.hasRefsInFile) return true;
-        if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
+      if (
+        (inExport.type === 'type' || inExport.type === 'interface' || inExport.type === 'enum') &&
+        !shouldCountRefs(ignoreExportsUsedInFile, inExport.type)
+      ) {
+        continue;
       }
+      if (inExport.hasRefsInFile) return true;
+      if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
       if (inExport.referencedIn) {
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {

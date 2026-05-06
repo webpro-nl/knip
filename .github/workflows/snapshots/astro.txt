@@ -1,9 +1,2 @@
 Unused exports (1)
 .flue/lib/github.ts: issueDetailsSchema, repoLabelSchema
-Unused exported types (6)
-packages/create-astro/test/test-utils.ts: Context
-packages/integrations/cloudflare/test/test-utils.ts: AstroInlineConfig
-packages/integrations/netlify/test/test-utils.ts: AstroInlineConfig
-packages/integrations/node/test/test-utils.ts: AstroInlineConfig
-packages/integrations/sitemap/test/test-utils.ts: AstroInlineConfig
-packages/integrations/vercel/test/test-utils.ts: VercelOutputConfig
