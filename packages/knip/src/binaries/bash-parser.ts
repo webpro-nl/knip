@@ -103,7 +103,9 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
         }
 
         if (binary in Plugins) {
-          return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+          const inputs = fallbackResolve(binary, args, { ...options, fromArgs });
+          if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
+          return [...inputs, ...fromNodeOptions];
         }
 
         // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
