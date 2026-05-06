@@ -1,17 +1,15 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
-import { isFile } from '../../util/fs.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://vercel.com/docs/project-configuration
 
 const title = 'Vercel';
 
-const enablers = 'This plugin is enabled when a Vercel project configuration file is found in the workspace root.';
+const enablers = ['@vercel/config'];
 
-const entry = ['vercel.{json,js,mjs,cjs,ts,mts}'];
+const entry = ['vercel.{js,mjs,cjs,ts,mts}'];
 
-const configFiles = ['vercel.json', 'vercel.js', 'vercel.mjs', 'vercel.cjs', 'vercel.ts', 'vercel.mts'];
-
-const isEnabled: IsPluginEnabled = ({ cwd }) => configFiles.some(file => isFile(cwd, file));
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const plugin: Plugin = {
   title,
