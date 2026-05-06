@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/postcss-tailwindcss3",
+  "devDependencies": {
+    "@tailwindcss/postcss": "*"
+  }
+}
