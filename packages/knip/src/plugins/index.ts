@@ -133,6 +133,7 @@ import { default as typedoc } from './typedoc/index.ts';
 import { default as typescript } from './typescript/index.ts';
 import { default as unbuild } from './unbuild/index.ts';
 import { default as unocss } from './unocss/index.ts';
+import { default as vercel } from './vercel/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
 import { default as vite } from './vite/index.ts';
@@ -284,6 +285,7 @@ export const Plugins = {
   typescript,
   unbuild,
   unocss,
+  vercel,
   'vercel-og': vercelOg,
   vike,
   vite,
