@@ -6,8 +6,9 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "*",
+    "@babel/preset-typescript": "*",
     "@emotion/babel-plugin": "*",
+    "@vitejs/plugin-react": "*",
     "vite": "*"
   }
 }
