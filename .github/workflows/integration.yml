@@ -96,12 +96,12 @@ jobs:
               pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP astro -- pnpm knip --fix
 
-          # - name: create-typescript-app
-          #   repo: JoshuaKGoldberg/create-typescript-app
-          #   commands: |
-          #     pnpm install $PNPM_INSTALL_ARGS
-          #     pnpm add -D $PKG_URL $PNPM_INSTALL_ARGS
-          #     bash $SNAP create-typescript-app -- pnpm lint:knip
+          - name: create-typescript-app
+            repo: JoshuaKGoldberg/create-typescript-app
+            commands: |
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D $PKG_URL $PNPM_INSTALL_ARGS
+              bash $SNAP create-typescript-app -- pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
