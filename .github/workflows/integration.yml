@@ -25,6 +25,9 @@ jobs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - uses: pnpm/action-setup@v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip

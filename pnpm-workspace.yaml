@@ -1,3 +1,6 @@
 packages:
   - packages/*
   - '!packages/knip/fixtures'
+allowBuilds:
+  esbuild: false
+  sharp: false
