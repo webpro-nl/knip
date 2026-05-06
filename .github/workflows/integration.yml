@@ -69,6 +69,7 @@ jobs:
       SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
       UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
       SNAPSHOT_OUT_DIR: /tmp/snapshot-updates
+      PNPM_INSTALL_ARGS: --config.minimumReleaseAgeExclude=knip --config.trustPolicy=off
     strategy:
       fail-fast: false
       matrix:
@@ -76,36 +77,36 @@ jobs:
           - name: 10ten-ja-reader
             repo: birchill/10ten-ja-reader
             commands: |
-              pnpm install
+              pnpm install $PNPM_INSTALL_ARGS
               bash $SNAP 10ten-ja-reader -- pnpm dlx $PKG_URL
 
           - name: argos
             repo: argos-ci/argos
             commands: |
-              pnpm install
+              pnpm install $PNPM_INSTALL_ARGS
               pnpm build
-              pnpm add -D -w $PKG_URL
+              pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP argos -- pnpm run knip
 
           - name: astro
             repo: withastro/astro
             commands: |
-              pnpm install --config.minimumReleaseAge=0
+              pnpm install $PNPM_INSTALL_ARGS
               pnpm build
-              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP astro -- pnpm knip --fix
 
           # - name: create-typescript-app
           #   repo: JoshuaKGoldberg/create-typescript-app
           #   commands: |
-          #     pnpm install
-          #     pnpm add -D $PKG_URL
+          #     pnpm install $PNPM_INSTALL_ARGS
+          #     pnpm add -D $PKG_URL $PNPM_INSTALL_ARGS
           #     bash $SNAP create-typescript-app -- pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
             commands: |
-              pnpm install
+              pnpm install $PNPM_INSTALL_ARGS
               bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PKG_URL
 
           - name: eslint
@@ -129,8 +130,8 @@ jobs:
             sparse-checkout: invokeai/frontend/web
             commands: |
               cd invokeai/frontend/web
-              pnpm install
-              pnpm add -D $PKG_URL
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP InvokeAI -- bunx --bun knip --tags=-knipignore
               bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format --no-exit-code
               bash $SNAP InvokeAI-prod -- bunx --bun knip --tags=-knipignore --production
@@ -138,8 +139,8 @@ jobs:
           - name: npmx.dev
             repo: npmx-dev/npmx.dev
             commands: |
-              pnpm install
-              pnpm add -D -w $PKG_URL
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP npmx.dev -- pnpm knip
               bash $SNAP npmx.dev-prod -- pnpm knip --production --exclude dependencies --fix
 
@@ -157,37 +158,37 @@ jobs:
           - name: query
             repo: TanStack/query
             commands: |
-              pnpm install
-              pnpm add -D -w $PKG_URL
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP query -- pnpm test:knip --cache
               pnpm test:knip --cache --no-exit-code
 
           - name: rolldown
             repo: rolldown/rolldown
             commands: |
-              pnpm install
-              pnpm add -D -w knip@$PKG_URL
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D -w knip@$PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP rolldown -- pnpm knip
 
           - name: sanity
             repo: sanity-io/sanity
             commands: |
-              pnpm install --no-frozen-lockfile --config.minimumReleaseAge=0
-              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
+              pnpm install --no-frozen-lockfile $PNPM_INSTALL_ARGS
+              pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP sanity -- pnpm knip --exclude duplicates
 
           - name: sentry
             repo: getsentry/sentry
             commands: |
-              pnpm install
-              pnpm add -D $PKG_URL
+              pnpm install $PNPM_INSTALL_ARGS
+              pnpm add -D $PKG_URL $PNPM_INSTALL_ARGS
               bash $SNAP sentry -- pnpm run knip --fix
               bash $SNAP sentry-prod -- pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
             commands: |
-              pnpm install --no-frozen-lockfile
+              pnpm install --no-frozen-lockfile --ignore-scripts $PNPM_INSTALL_ARGS
               bash $SNAP slonik -- pnpm dlx $PKG_URL
 
           - name: TypeScript
