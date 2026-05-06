@@ -15,7 +15,7 @@ if [ "${1:-}" = "npm" ] && [ "${2:-}" = "run" ] && ! printf '%s\n' "$@" | grep -
   EXTRA=(-- "${EXTRA[@]}")
 fi
 
-NO_COLOR=1 "$@" "${EXTRA[@]}" >"$OUT" || { echo "::error::knip crashed for $NAME"; cat "$OUT"; exit 1; }
+NO_COLOR=1 "$@" "${EXTRA[@]}" >"$OUT" || { echo "::error::knip finished with non-zero exit code for $NAME"; cat "$OUT"; exit 1; }
 
 CLEAN="$(mktemp)"
 grep -Ev '^(> |$)' "$OUT" >"$CLEAN" || true
