@@ -217,12 +217,13 @@ export class DependencyDeputy {
     if (packageName === workspace.pkgName) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOnly));
+    const isDevOrTypeOnly = isDevOnly || isTypeOnly;
+    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
     const closestWorkspaceNameForTypes =
-      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOnly));
+      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOrTypeOnly));
 
     if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
       this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
