@@ -47,13 +47,21 @@ export const loadPackageManifest = ({ dir, packageName, cwd }: LoadPackageManife
   }
 };
 
-export const findPackageManifestPath = (fromDir: string, packageName: string) => {
+export const findManifestPath = (fromDir: string, packageName: string, cache?: Map<string, string | undefined>) => {
+  const cacheKey = cache && `${fromDir}\0${packageName}`;
+  if (cacheKey && cache!.has(cacheKey)) return cache!.get(cacheKey);
   let cur = fromDir;
   while (true) {
     const candidate = join(cur, 'node_modules', packageName, 'package.json');
-    if (existsSync(candidate)) return candidate;
+    if (existsSync(candidate)) {
+      if (cacheKey) cache!.set(cacheKey, candidate);
+      return candidate;
+    }
     const parent = dirname(cur);
-    if (parent === cur) return undefined;
+    if (parent === cur) {
+      if (cacheKey) cache!.set(cacheKey, undefined);
+      return undefined;
+    }
     cur = parent;
   }
 };

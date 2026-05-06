@@ -8,7 +8,12 @@ import {
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
-import { getDependencyMetaData, getTransitivePeerDependencies, type ManifestCache } from './manifest/index.ts';
+import {
+  getDependencyMetaData,
+  getTransitivePeerDependencies,
+  type ManifestCache,
+  type PathCache,
+} from './manifest/index.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
 import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
@@ -50,6 +55,7 @@ export class DependencyDeputy {
   hasTypesIncluded: Map<string, Set<string>>;
   expandedTransitivePeers: Set<string>;
   manifestCache: ManifestCache;
+  pathCache: PathCache;
   cwd?: string;
 
   constructor({ isProduction, isStrict, isReportDependencies }: MainOptions) {
@@ -63,6 +69,7 @@ export class DependencyDeputy {
     this.hasTypesIncluded = new Map();
     this.expandedTransitivePeers = new Set();
     this.manifestCache = new Map();
+    this.pathCache = new Map();
   }
 
   public addWorkspace({
@@ -212,7 +219,12 @@ export class DependencyDeputy {
       ...(this.isStrict ? wm.peerDependencies : []),
       ...(this.isProduction ? [] : wm.devDependencies),
     ];
-    getTransitivePeerDependencies({ cwd: this.cwd, dir: wm.workspaceDir, packageNames }, hostDependencies, this.manifestCache);
+    getTransitivePeerDependencies(
+      { cwd: this.cwd, dir: wm.workspaceDir, packageNames },
+      hostDependencies,
+      this.manifestCache,
+      this.pathCache
+    );
   }
 
   getOptionalPeerDependencies(workspaceName: string): DependencySet {

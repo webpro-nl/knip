@@ -4,9 +4,10 @@ import { isDefinitelyTyped } from '../util/modules.ts';
 import { dirname, join } from '../util/path.ts';
 import { timerify } from '../util/Performance.ts';
 import { _require } from '../util/require.ts';
-import { findPackageManifestPath, loadPackageManifest } from './helpers.ts';
+import { findManifestPath, loadPackageManifest } from './helpers.ts';
 
 export type ManifestCache = Map<string, PackageJson | null>;
+export type PathCache = Map<string, string | undefined>;
 
 type Options = {
   packageNames: string[];
@@ -69,22 +70,26 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
 const expandTransitivePeers = (
   { cwd, dir, packageNames }: Options,
   hostDependencies: HostDependencies,
-  cache: ManifestCache
+  manifestCache: ManifestCache,
+  pathCache: PathCache
 ) => {
+  const loadManifest = (pkgDir: string): PackageJson | null => {
+    const cached = manifestCache.get(pkgDir);
+    if (cached !== undefined) return cached;
+    let manifest: PackageJson | null = null;
+    try {
+      manifest = _require(join(pkgDir, 'package.json'));
+    } catch {}
+    manifestCache.set(pkgDir, manifest);
+    return manifest;
+  };
+
   const visit = (rootName: string, rootDir: string) => {
     const visited = new Set<string>([rootDir]);
     const stack = [rootDir];
     while (stack.length) {
       const pkgDir = stack.pop()!;
-      let manifest = cache.get(pkgDir);
-      if (manifest === undefined) {
-        try {
-          manifest = _require(join(pkgDir, 'package.json')) as PackageJson;
-        } catch {
-          manifest = null;
-        }
-        cache.set(pkgDir, manifest);
-      }
+      const manifest = loadManifest(pkgDir);
       if (!manifest) continue;
 
       if (pkgDir !== rootDir && manifest.peerDependencies) {
@@ -100,7 +105,7 @@ const expandTransitivePeers = (
       if (manifest.dependencies) for (const sub in manifest.dependencies) subs.push(sub);
       if (manifest.optionalDependencies) for (const sub in manifest.optionalDependencies) subs.push(sub);
       for (const sub of subs) {
-        const subPath = findPackageManifestPath(pkgDir, sub);
+        const subPath = findManifestPath(pkgDir, sub, pathCache);
         if (!subPath) continue;
         const subDir = dirname(subPath);
         if (visited.has(subDir)) continue;
@@ -111,7 +116,7 @@ const expandTransitivePeers = (
   };
 
   for (const packageName of packageNames) {
-    const directPath = findPackageManifestPath(dir, packageName) ?? findPackageManifestPath(cwd, packageName);
+    const directPath = findManifestPath(dir, packageName, pathCache) ?? findManifestPath(cwd, packageName, pathCache);
     if (directPath) visit(packageName, dirname(directPath));
   }
 };
