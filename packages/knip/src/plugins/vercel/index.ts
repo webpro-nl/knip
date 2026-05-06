@@ -13,6 +13,8 @@ const configFiles = ['vercel.json', 'vercel.js', 'vercel.mjs', 'vercel.cjs', 've
 
 const isEnabled: IsPluginEnabled = ({ cwd }) => configFiles.some(file => isFile(cwd, file));
 
+const isRootOnly = true;
+
 const plugin: Plugin = {
   title,
   enablers,
