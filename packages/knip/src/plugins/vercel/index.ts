@@ -20,6 +20,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   entry,
+  isRootOnly,
 };
 
 export default plugin;

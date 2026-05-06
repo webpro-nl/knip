@@ -18,10 +18,8 @@ const prepend = (pattern: string, relativePath: string) =>
   isAbsolute(pattern.replace(/^!/, '')) ? pattern : prependDirToPattern(relativePath, pattern);
 
 // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
-const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
-  const relativePath = relative(cwd, dir);
-  return compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, relativePath)))).sort(negatedLast);
-};
+const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) =>
+  compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, relative(cwd, dir))))).sort(negatedLast);
 
 export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 

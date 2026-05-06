@@ -14,7 +14,7 @@ const enablers =
 
 const isRootOnly = true;
 
-const taskFiles = [
+const config = [
   'Taskfile.yml',
   'taskfile.yml',
   'Taskfile.yaml',
@@ -25,9 +25,9 @@ const taskFiles = [
   'taskfile.dist.yaml',
 ];
 
-const isEnabled: IsPluginEnabled = async ({ cwd, config }) => {
-  if (config.taskfile) return true;
-  return taskFiles.some(file => isFile(cwd, file));
+const isEnabled: IsPluginEnabled = ({ cwd, config: wsConfig }) => {
+  if (wsConfig.taskfile) return true;
+  return config.some(file => isFile(cwd, file));
 };
 
 const extractScriptsFromCommand = (command: TaskfileCommand): string[] => {
@@ -129,7 +129,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config: taskFiles,
+  config,
   resolveConfig,
   isRootOnly,
 };
