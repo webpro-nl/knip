@@ -177,7 +177,7 @@ export const printConfigurationHints = ({
 
   if (rows.length > 0) {
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
-    console.log(getTitle('Configuration hints', configurationHints.length));
+    console.warn(getTitle('Configuration hints', configurationHints.length));
     console.warn(getTableForHints(rows).toString());
   }
 };
