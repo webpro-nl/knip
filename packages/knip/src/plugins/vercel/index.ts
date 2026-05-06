@@ -17,7 +17,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;
