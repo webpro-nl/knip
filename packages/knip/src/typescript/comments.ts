@@ -4,7 +4,7 @@ import { IMPORT_FLAGS } from '../constants.ts';
 const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
 const jsDocImportTagRe = /@import\s+(?:\{[^}]*\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
 const jsxImportSourceRe = /@jsxImportSource\s+(\S+)/;
-const referenceTypesRe = /\s*<reference\s+types\s*=\s*"([^"]+)"[^/]*\/>/;
+const referenceRe = /\s*<reference\s+(types|path)\s*=\s*"([^"]+)"[^/]*\/>/;
 const envPragmaRe = /@(vitest|jest)-environment\s+([@\w./-]+)/g;
 
 const resolveEnvironmentPragma = (tool: string, value: string): string | undefined => {
@@ -71,9 +71,10 @@ export const extractImportsFromComments = (
     }
 
     if (comment.type === 'Line') {
-      const refMatch = comment.value.match(referenceTypesRe);
+      const refMatch = comment.value.match(referenceRe);
       if (refMatch) {
-        addImport(refMatch[1], undefined, undefined, undefined, comment.start, IMPORT_FLAGS.TYPE_ONLY);
+        const flags = IMPORT_FLAGS.TYPE_ONLY | (refMatch[1] === 'path' ? IMPORT_FLAGS.OPTIONAL : 0);
+        addImport(refMatch[2], undefined, undefined, undefined, comment.start, flags);
       }
     }
   }
