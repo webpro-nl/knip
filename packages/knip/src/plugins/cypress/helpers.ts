@@ -8,26 +8,24 @@ interface ReporterConfig {
 }
 
 export const resolveDependencies = async (config: CypressConfig, options: PluginOptions) => {
-  const { reporter } = config;
   const { configFileDir } = options;
+  const reporters = new Set<string>();
 
-  // Initialize the array of reporters with the initial reporter if present.
-  const reporters: Set<string> = reporter ? new Set([reporter]) : new Set();
+  // Reporter can be set at the top level or per testing type (e2e, component).
+  // https://docs.cypress.io/app/references/configuration#Reporter
+  for (const scope of [config, config.e2e, config.component]) {
+    const reporter = scope?.reporter;
+    if (!reporter) continue;
+    reporters.add(reporter);
 
-  // https://github.com/YOU54F/cypress-plugins/tree/master/cypress-multi-reporters#configuring-reporters
-  if (reporter === 'cypress-multi-reporters' && config.reporterOptions?.configFile) {
-    // Try to resolve the config file if present and attach the reporters listed in it.
-    const { configFile } = config.reporterOptions;
-    const configFilePath = toAbsolute(configFile, configFileDir);
-    if (isInternal(configFilePath)) {
-      const reporterConfig: ReporterConfig = await load(configFilePath);
-      if (typeof reporterConfig === 'object' && reporterConfig.reporterEnabled) {
-        const { reporterEnabled: reporterConcatenatedNames } = reporterConfig;
-        // Pulled from the reporter source code, https://github.com/YOU54F/cypress-plugins/blob/master/cypress-multi-reporters/lib/MultiReporters.js#L50-L58
-        // Not sure why they allow for extra whitespace characters, but let's handle it the same as them.
-        const reporterNames = reporterConcatenatedNames.split(',');
-        for (const reporterName of reporterNames) {
-          reporters.add(reporterName.trim());
+    // https://github.com/YOU54F/cypress-plugins/tree/master/cypress-multi-reporters#configuring-reporters
+    if (reporter === 'cypress-multi-reporters' && scope?.reporterOptions?.configFile) {
+      const configFilePath = toAbsolute(scope.reporterOptions.configFile, configFileDir);
+      if (isInternal(configFilePath)) {
+        const reporterConfig: ReporterConfig = await load(configFilePath);
+        if (typeof reporterConfig === 'object' && reporterConfig.reporterEnabled) {
+          // https://github.com/YOU54F/cypress-plugins/blob/master/cypress-multi-reporters/lib/MultiReporters.js#L50-L58
+          for (const name of reporterConfig.reporterEnabled.split(',')) reporters.add(name.trim());
         }
       }
     }

@@ -3,8 +3,9 @@ import type { CompilerSync } from './types.ts';
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
 export const inlineCodeMatcher = /`[^`]+`/g;
 
-// Extract imports from body of <script> nodes
-const scriptExtractor = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
+// Extract imports from body of <script> nodes.
+// Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
+const scriptExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>([\s\S]*?)<\/script>/gm;
 export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
@@ -18,8 +19,9 @@ export const importsWithinScripts: CompilerSync = (text: string) => {
   return scripts.join(';\n');
 };
 
-// Extract body of <script>、<script lang="ts">、<script setup>、<script lang="ts" setup> etc. nodes
-const scriptBodyExtractor = /<script\b[^>]*>(?<body>[\s\S]*?)<\/script>/gm;
+// Extract body of <script>、<script lang="ts">、<script setup>、<script lang="ts" setup> etc. nodes.
+// Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
+const scriptBodyExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>(?<body>[\s\S]*?)<\/script>/gm;
 export const scriptBodies: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;

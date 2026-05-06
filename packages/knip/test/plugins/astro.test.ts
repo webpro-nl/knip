@@ -24,7 +24,7 @@ test('Find dependencies with the Astro plugin', async () => {
     ...baseCounters,
     exports: 1,
     files: 5,
-    processed: 25,
+    processed: 26,
     total: 26,
   });
 });

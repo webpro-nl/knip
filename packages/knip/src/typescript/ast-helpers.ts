@@ -86,6 +86,31 @@ export const collectPropertyValues = (program: Program, propertyName: string): S
   return values;
 };
 
+const unwrapParens = (node: any): any =>
+  node?.type === 'ParenthesizedExpression' ? unwrapParens(node.expression) : node;
+
+/**
+ * Resolve a `defineConfig`-style argument to its ObjectExpression. Handles:
+ * object form `defineConfig({...})`, implicit-return arrow `defineConfig(() => ({...}))`,
+ * and `defineConfig(() => { return {...}; })` (single inline return). Unwraps
+ * `ParenthesizedExpression` at every step.
+ */
+export const resolveObjectArg = (arg: any): any | undefined => {
+  const node = unwrapParens(arg);
+  if (!node) return;
+  if (node.type === 'ObjectExpression') return node;
+  if (node.type !== 'ArrowFunctionExpression' && node.type !== 'FunctionExpression') return;
+  const body = unwrapParens(node.body);
+  if (body?.type === 'ObjectExpression') return body;
+  if (body?.type !== 'BlockStatement') return;
+  for (const stmt of body.body ?? []) {
+    if (stmt.type === 'ReturnStatement') {
+      const ret = unwrapParens(stmt.argument);
+      if (ret?.type === 'ObjectExpression') return ret;
+    }
+  }
+};
+
 /** Find the first ObjectExpression argument of a named function call */
 export const findCallArg = (program: Program, fnName: string): any | undefined => {
   let result: any;
@@ -93,8 +118,8 @@ export const findCallArg = (program: Program, fnName: string): any | undefined =
     CallExpression(node) {
       if (result) return;
       if (node.callee?.type === 'Identifier' && node.callee.name === fnName) {
-        const arg = node.arguments?.[0];
-        if (arg?.type === 'ObjectExpression') result = arg;
+        const obj = resolveObjectArg(node.arguments?.[0]);
+        if (obj) result = obj;
       }
     },
   });

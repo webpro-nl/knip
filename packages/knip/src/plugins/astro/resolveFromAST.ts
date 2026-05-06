@@ -5,6 +5,7 @@ import {
   getPropertyKey,
   getStringValue,
   hasImportSpecifier,
+  resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 
 export const getSrcDir = (program: Program): string => {
@@ -30,18 +31,14 @@ const findFirstStringArg = (node: any): string | undefined => {
 };
 
 // Extract `vite.resolve.alias` from the default-exported config object.
-// Supports `export default { ... }` and `export default defineConfig({ ... })`.
+// Supports `export default { ... }`, `export default defineConfig({ ... })`,
+// and `export default defineConfig(() => ({ ... }))`.
 export const getViteAliases = (program: Program): Record<string, string> => {
   const aliases: Record<string, string> = {};
   for (const node of (program as unknown as { body: any[] }).body ?? []) {
     if (node.type !== 'ExportDefaultDeclaration') continue;
     const decl = node.declaration;
-    const root =
-      decl?.type === 'ObjectExpression'
-        ? decl
-        : decl?.type === 'CallExpression' && decl.arguments?.[0]?.type === 'ObjectExpression'
-          ? decl.arguments[0]
-          : undefined;
+    const root = decl?.type === 'CallExpression' ? resolveObjectArg(decl.arguments?.[0]) : resolveObjectArg(decl);
     const aliasNode = findProperty(findProperty(findProperty(root, 'vite'), 'resolve'), 'alias');
     if (aliasNode?.type !== 'ObjectExpression') continue;
     for (const prop of aliasNode.properties ?? []) {

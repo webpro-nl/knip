@@ -140,6 +140,11 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
 
           s.addExport(name, SYMBOL_TYPE.UNKNOWN, declarator.id.start, [], fix, isReExport, jsDocTags);
 
+          if (declarator.id.typeAnnotation) s.collectRefsInType(declarator.id.typeAnnotation, name, true);
+          if (declarator.init?.type === 'ArrowFunctionExpression' || declarator.init?.type === 'FunctionExpression') {
+            s.collectRefsInType(declarator.init, name, true);
+          }
+
           if (!jsDocTags.has(ALIAS_TAG) && declarator.init?.type === 'Identifier') {
             const initName = declarator.init.name;
             const existingExport = s.exports.get(initName);
@@ -161,6 +166,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
     } else if ((decl.type === 'FunctionDeclaration' || decl.type === 'TSDeclareFunction') && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.FUNCTION, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
+      s.collectRefsInType(decl, decl.id.name, true);
     } else if (decl.type === 'ClassDeclaration' && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.CLASS, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
@@ -245,6 +251,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   if (decl.type === 'FunctionDeclaration') {
     type = SYMBOL_TYPE.FUNCTION;
     pos = decl.id?.start ?? decl.start;
+    s.collectRefsInType(decl, 'default', true);
   } else if (decl.type === 'ClassDeclaration') {
     type = SYMBOL_TYPE.CLASS;
     pos = decl.id?.start ?? decl.start;

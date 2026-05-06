@@ -7,19 +7,21 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/type-visibility');
 
-test('Report types only externally unused (per tsc: structural inlining does not keep inner exports alive)', async () => {
+test('Keep types referenced in exported value signatures alive (declaration emit / TS4023)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  // Type → function: reported (nobody imports the type)
-  assert(issues.types['src/lib.ts']['ParamConfig']);
-  assert(issues.types['src/lib.ts']['ResponseData']);
-  assert(issues.types['src/lib.ts']['InternalState']);
-  assert(issues.types['src/lib.ts']['LogLevel']);
-  assert(issues.exports['src/lib.ts']['Connection']);
-  assert(issues.exports['src/lib.ts']['defaultHandler']);
+  // Type → exported value signature: required for .d.ts emit
+  assert(!issues.types['src/lib.ts']?.['ParamConfig']);
+  assert(!issues.types['src/lib.ts']?.['ResponseData']);
+  assert(!issues.types['src/lib.ts']?.['LogLevel']);
+  assert(!issues.exports['src/lib.ts']?.['Connection']);
+  assert(!issues.exports['src/lib.ts']?.['defaultHandler']);
 
-  // Type → type (imported): inner type is structurally inlined — flagged
+  // Used only in function body (not signature): still flagged
+  assert(issues.types['src/lib.ts']['InternalState']);
+
+  // Type → type (structurally inlined): flagged
   assert(issues.types['src/lib.ts']['SuccessResult']);
   assert(issues.types['src/lib.ts']['ErrorResult']);
   assert(issues.types['src/lib.ts']['BaseEntity']);
@@ -28,19 +30,21 @@ test('Report types only externally unused (per tsc: structural inlining does not
   // Directly imported: kept
   assert(!issues.types['src/lib.ts']?.['DirectlyUsed']);
 
-  // Type → type → function chain: reported (chain ends at function)
+  // Chain: FilterRule → FilterSet (type) → applyFilters (function).
+  // FilterSet is in a value signature → kept; FilterRule structurally inlined into FilterSet → flagged.
+  assert(!issues.types['src/lib.ts']?.['FilterSet']);
   assert(issues.types['src/lib.ts']['FilterRule']);
-  assert(issues.types['src/lib.ts']['FilterSet']);
 
-  // Unused
-  assert(issues.types['src/lib.ts']['CompletelyUnused']);
-  assert(issues.types['src/lib.ts']['SharedConfig']);
+  // SharedConfig used in both function param and unused type alias → kept (via function path)
+  assert(!issues.types['src/lib.ts']?.['SharedConfig']);
   assert(issues.types['src/lib.ts']['AppConfig']);
+
+  // Genuinely unused
+  assert(issues.types['src/lib.ts']['CompletelyUnused']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
-    types: 13,
+    types: 8,
     processed: 2,
     total: 2,
   });

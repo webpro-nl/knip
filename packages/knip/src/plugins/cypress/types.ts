@@ -1,12 +1,11 @@
-export interface CypressConfig {
-  reporter: string;
+interface CypressTestingTypeConfig {
+  specPattern?: string[];
+  supportFile?: string;
+  reporter?: string;
   reporterOptions?: { configFile?: string };
-  component?: {
-    specPattern?: string[];
-    supportFile?: string;
-  };
-  e2e?: {
-    specPattern?: string[];
-    supportFile?: string;
-  };
+}
+
+export interface CypressConfig extends CypressTestingTypeConfig {
+  component?: CypressTestingTypeConfig;
+  e2e?: CypressTestingTypeConfig;
 }

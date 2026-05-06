@@ -32,6 +32,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - uses: pnpm/action-setup@v5
+        with:
+          version: 10
+          package_json_file: packages/knip/package.json
+      - run: echo "manage-package-manager-versions=false" >> .npmrc
       - name: Install dependencies
         run: pnpm install
       - name: Build knip

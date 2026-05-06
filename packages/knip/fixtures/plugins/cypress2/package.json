@@ -1,6 +1,8 @@
 {
   "name": "@plugins/cypress2",
   "devDependencies": {
-    "cypress": "*"
+    "cypress": "*",
+    "mocha-junit-reporter": "*",
+    "mochawesome": "*"
   }
 }

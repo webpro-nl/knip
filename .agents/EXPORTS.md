@@ -1,17 +1,15 @@
 # Identifiers, Symbols & Matching
 
-How knip resolves "is this export used?" across an AST. Matching is name-based;
-the sections below cover the cases that need extra care.
+How knip resolves "is this export used?" across an AST. Matching is name-based.
 
 ## Shadow detection
 
-Name-based matching produces false negatives when a local binding shadows an
-exported name of the same spelling. `isShadowed(name, pos)` returns true if the
-reference at `pos` falls inside a scope that shadows `name`. Shadows are
-registered via:
+A local binding can shadow an exported name, producing false negatives.
+`isShadowed(name, pos)` returns true if the reference at `pos` falls inside a
+scope that shadows `name`. Shadows registered via:
 
-- `_addShadow`: block-scoped variables and nested function declarations
-  (uses current `scopeDepth` range from `BlockStatement`)
+- `_addShadow`: block-scoped variables and nested function declarations (uses
+  current `scopeDepth` range from `BlockStatement`)
 - `_addParamShadows`: function/arrow/method parameters (uses function body
   range directly, since params are visited before the body's `BlockStatement`)
 - `CatchClause` handler: catch binding (uses catch body range)
@@ -19,19 +17,24 @@ registered via:
   range, since the `VariableDeclaration` fires before the body's `BlockStatement`)
 
 `_collectBindingNames` recurses into destructuring patterns (ObjectPattern,
-ArrayPattern, AssignmentPattern, RestElement) to extract all bound Identifiers.
+ArrayPattern, AssignmentPattern, RestElement) to extract bound Identifiers.
 
 ## `ignoreExportsUsedInFile`
 
 Opt-in config (default `false`).
 
 **Default semantics match tsc/tsgo.** An export only referenced in its own file
-is reported as unused, because removing the `export` keyword leaves the program
-and `.d.ts` valid. Types are structurally inlined: a consumer importing
+is reported as unused; removing the `export` keyword leaves the program and
+`.d.ts` valid. Type aliases inline structurally: a consumer importing
 `UserInfo = { address: Address }` does not require `Address` to be exported.
-Same for `typeof X` references inside type aliases. So `Address` is correctly
-flagged. Opting `true` is a code-organization preference, not a correctness
-concern.
+Same for `typeof X` references inside type aliases. Opting `true` is a
+code-organization preference, not a correctness concern.
+
+**Does not apply to types in value signatures.** Types referenced in exported
+value signatures (function params/returns, variable annotations, `typeof` of an
+exported value) stay alive unconditionally. `tsc --declaration` cannot inline
+an interface or class type into a `.d.ts` and errors TS4023 if the name is not
+exported. That path is intentionally not gated by `ignoreExportsUsedInFile`.
 
 **With the config on.** `localRefsVisitorObject` populates `localRefs` during
 AST traversal. Exports present in `localRefs` get `hasRefsInFile = true`.
@@ -39,17 +42,29 @@ AST traversal. Exports present in `localRefs` get `hasRefsInFile = true`.
 (`obj[EXPORTED_KEY]`) is handled.
 
 `analyze.ts` reads this via `isReferencedInUsedExport` for exports not directly
-imported: returns true only when a containing export has `hasRefsInFile` and is
-a type/interface (recursively checked). Alive-ness does not cascade through
-external imports; inner refs stay scoped to the in-file relationship.
+imported: returns true when a containing export has `hasRefsInFile` and is a
+type/interface (recursively checked). Alive-ness does not cascade through
+external imports; chains stay in-file.
 
-## `referencedInExport` (type-chain refs)
+## `referencedInExport` (chain refs)
 
-Maps exported identifier → set of export names whose type annotations reference
-it. Type-level only, not function signatures. Type→type chains are followed;
-type→function chains do not keep types alive. Interface `extends` clauses
-captured via `addRefInExport`. Feeds the recursive type/interface check in
-`isReferencedInUsedExport` above.
+Maps exported identifier to set of export names whose declarations reference
+it. Populated for type aliases, interfaces (body and `extends`), and the
+signature parts of exported values: variable type annotations, function/arrow
+expression params and return types, function/method declarations.
+Function/arrow bodies are skipped via `signatureOnly`.
+
+`isReferencedInUsedExport` walks the chain, classifying each hop:
+
+- **Type→type hop** (containing export is `type`/`interface`/`enum`):
+  propagates only when `ignoreExportsUsedInFile` is on. Otherwise the chain
+  breaks here, since tsc structurally inlines the inner type and its export is
+  removable.
+- **Type→value hop** (containing export is a function/class/variable):
+  propagates unconditionally. Needed for `tsc --declaration`; removing the
+  inner type's export would TS4023.
+
+Interface `extends` clauses captured via `addRefInExport`.
 
 ## Namespace/enum member `hasRefsInFile`
 
@@ -75,14 +90,20 @@ If neither, reported as unused.
 
 **Edge case:** when a namespace/enum has export-level `hasRefsInFile = true`
 but is NOT externally imported, `analyze.ts` skips the member check entirely.
-Unused members silently pass. By design (the export itself is considered
-"used").
+Unused members silently pass. By design: the export itself is considered "used".
 
 ## E2E
 
-`packages/knip/test/e2e/fix-tsgo.test.ts` is the safety net for the resolution
-paths above. Each fixture builds clean under tsgo, has `knip --fix` run on it,
-then must build clean under tsgo again. A failing post-fix build means knip
-removed something tsc/tsgo still needs: a false positive in one of these
-mechanisms. The `e2e-lib-*` variants extend the round-trip to a consumer so
-type-visibility regressions also fail.
+`packages/knip/test/e2e/fix-tsgo.test.ts` covers the resolution paths above.
+Each fixture builds clean under tsgo, has `knip --fix` run on it, then must
+build clean under tsgo again. A failing post-fix build means knip removed
+something tsc/tsgo still needs: a false positive in one of these mechanisms.
+The `e2e-lib-*` variants extend the round-trip to a consumer with
+`declaration: true` so type-visibility regressions (TS4023 etc.) also fail.
+
+When adding a fixture for a value-to-type-visibility scenario, do not also
+re-export the type explicitly from the public entry. That path masks
+type-chain bugs: the type stays alive via the re-export regardless of whether
+knip tracks the value's signature. Test the implicit case (type only
+referenced in a function signature, never named at the entry) so the chain is
+the only thing keeping the export alive.
