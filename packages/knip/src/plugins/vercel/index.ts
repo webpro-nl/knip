@@ -7,7 +7,7 @@ const title = 'Vercel';
 
 const enablers = 'This plugin is enabled when a Vercel project configuration file is found in the root folder.';
 
-const config = ['vercel.{json,js,mjs,cjs,ts,mts}'];
+const entry = ['vercel.{json,js,mjs,cjs,ts,mts}'];
 
 const configFiles = ['vercel.json', 'vercel.js', 'vercel.mjs', 'vercel.cjs', 'vercel.ts', 'vercel.mts'];
 
