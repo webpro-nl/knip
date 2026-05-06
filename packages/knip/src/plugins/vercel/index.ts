@@ -5,7 +5,7 @@ import { isFile } from '../../util/fs.ts';
 
 const title = 'Vercel';
 
-const enablers = 'This plugin is enabled when a Vercel project configuration file is found in the root folder.';
+const enablers = 'This plugin is enabled when a Vercel project configuration file is found in the workspace root.';
 
 const entry = ['vercel.{json,js,mjs,cjs,ts,mts}'];
 
@@ -13,14 +13,11 @@ const configFiles = ['vercel.json', 'vercel.js', 'vercel.mjs', 'vercel.cjs', 've
 
 const isEnabled: IsPluginEnabled = ({ cwd }) => configFiles.some(file => isFile(cwd, file));
 
-const isRootOnly = true;
-
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
-  isRootOnly,
 };
 
 export default plugin;

@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/vercel-workspaces",
+  "workspaces": ["apps/*"],
+  "knip": {
+    "workspaces": {
+      "apps/*": {
+        "entry": "src/index.ts",
+        "project": "**/*.ts"
+      }
+    }
+  }
+}
