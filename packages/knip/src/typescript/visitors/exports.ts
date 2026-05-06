@@ -23,6 +23,12 @@ import type { WalkState } from './walk.ts';
 
 const getName = (n: ModuleExportName | null | undefined) => (n?.type === 'Identifier' ? n.name : undefined);
 
+const hasExplicitFunctionReturnType = (node: any) =>
+  (node.type === 'ArrowFunctionExpression' ||
+    node.type === 'FunctionExpression' ||
+    node.type === 'FunctionDeclaration') &&
+  Boolean(node.returnType);
+
 export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
   if (s.skipExports || s.isInNamespace(node)) return;
 
@@ -57,16 +63,19 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
               const name = p.argument.name;
               const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.argument.start, [], fix, false, s.getJSDocTags(exportStart));
+              if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'Identifier') {
               const name = p.value.name;
               const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], fix, false, s.getJSDocTags(exportStart));
+              if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'AssignmentPattern' && p.value.left?.type === 'Identifier') {
               const name = p.value.left.name;
               const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.left.start, [], fix, false, s.getJSDocTags(exportStart));
+              if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             }
           }
@@ -75,6 +84,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
             if (el?.type === 'Identifier') {
               const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
               s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], fix, false, s.getJSDocTags(exportStart));
+              if (declarator.init) s.collectRefsInType(declarator.init, el.name, false);
               s.destructuredExports.add(el.name);
             } else if (el?.type === 'RestElement' && el.argument?.type === 'Identifier') {
               const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
@@ -87,6 +97,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
                 false,
                 s.getJSDocTags(exportStart)
               );
+              if (declarator.init) s.collectRefsInType(declarator.init, el.argument.name, false);
               s.destructuredExports.add(el.argument.name);
             }
           }
@@ -140,8 +151,16 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
 
           s.addExport(name, SYMBOL_TYPE.UNKNOWN, declarator.id.start, [], fix, isReExport, jsDocTags);
 
-          if (declarator.id.typeAnnotation) s.collectRefsInType(declarator.id.typeAnnotation, name, true);
-          if (declarator.init?.type === 'ArrowFunctionExpression' || declarator.init?.type === 'FunctionExpression') {
+          if (declarator.id.typeAnnotation) {
+            s.collectRefsInType(declarator.id.typeAnnotation, name, true);
+          } else if (declarator.init) {
+            s.collectRefsInType(declarator.init, name, hasExplicitFunctionReturnType(declarator.init));
+          }
+
+          if (
+            declarator.id.typeAnnotation &&
+            (declarator.init?.type === 'ArrowFunctionExpression' || declarator.init?.type === 'FunctionExpression')
+          ) {
             s.collectRefsInType(declarator.init, name, true);
           }
 
@@ -166,10 +185,11 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
     } else if ((decl.type === 'FunctionDeclaration' || decl.type === 'TSDeclareFunction') && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.FUNCTION, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
-      s.collectRefsInType(decl, decl.id.name, true);
+      s.collectRefsInType(decl, decl.id.name, hasExplicitFunctionReturnType(decl));
     } else if (decl.type === 'ClassDeclaration' && decl.id) {
       const fix = s.getFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.CLASS, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
+      s.collectRefsInType(decl, decl.id.name, true);
     } else if (decl.type === 'TSTypeAliasDeclaration') {
       const fix = s.getTypeFix(exportStart, exportStart + 7);
       s.addExport(decl.id.name, SYMBOL_TYPE.TYPE, decl.id.start, [], fix, false, s.getJSDocTags(exportStart));
@@ -251,11 +271,12 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   if (decl.type === 'FunctionDeclaration') {
     type = SYMBOL_TYPE.FUNCTION;
     pos = decl.id?.start ?? decl.start;
-    s.collectRefsInType(decl, 'default', true);
+    s.collectRefsInType(decl, 'default', hasExplicitFunctionReturnType(decl));
   } else if (decl.type === 'ClassDeclaration') {
     type = SYMBOL_TYPE.CLASS;
     pos = decl.id?.start ?? decl.start;
     members = [];
+    s.collectRefsInType(decl, 'default', true);
   } else if (decl.type === 'TSInterfaceDeclaration') {
     type = SYMBOL_TYPE.INTERFACE;
     pos = decl.id.start;

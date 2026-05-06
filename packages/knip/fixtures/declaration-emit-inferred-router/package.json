@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/declaration-emit-inferred-router",
+  "type": "module",
+  "exports": {
+    ".": "./src/router.ts"
+  }
+}

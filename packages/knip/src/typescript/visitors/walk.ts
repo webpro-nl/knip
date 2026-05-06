@@ -79,6 +79,7 @@ export interface WalkState extends WalkContext {
   scopeStarts: number[];
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
+  localDeclarations: Map<string, any>;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -142,7 +143,7 @@ const _addExport = (
   }
 };
 
-const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean): void => {
+const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean, seen = new Set<string>()): void => {
   if (!node || typeof node !== 'object') return;
   if (node.type === 'TSTypeQuery') {
     const name = node.exprName.type === 'Identifier' ? node.exprName.name : undefined;
@@ -152,6 +153,14 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
       else state.referencedInExport.set(name, new Set([exportName]));
     }
     return;
+  }
+  if (node.type === 'CallExpression' && node.callee?.type === 'Identifier') {
+    const name = node.callee.name;
+    const decl = state.localDeclarations.get(name);
+    if (decl && !seen.has(name)) {
+      seen.add(name);
+      _collectRefsInType(decl, exportName, true, seen);
+    }
   }
   if (signatureOnly && (node.type === 'FunctionBody' || node.type === 'BlockStatement')) return;
   if (node.type === 'TSTypeReference' && node.typeName.type === 'Identifier') {
@@ -165,10 +174,10 @@ const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolea
     const val = node[key];
     if (Array.isArray(val)) {
       for (const item of val) {
-        if (item && typeof item === 'object' && item.type) _collectRefsInType(item, exportName, signatureOnly);
+        if (item && typeof item === 'object' && item.type) _collectRefsInType(item, exportName, signatureOnly, seen);
       }
     } else if (val && typeof val === 'object' && val.type) {
-      _collectRefsInType(val, exportName, signatureOnly);
+      _collectRefsInType(val, exportName, signatureOnly, seen);
     }
   }
 };
@@ -247,11 +256,15 @@ const coreVisitorObject: VisitorObject = {
     state.nsRanges.push([node.start, node.end]);
   },
   ClassDeclaration(node) {
-    if (node.id?.name) state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
+    if (node.id?.name) {
+      state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
+      state.localDeclarations.set(node.id.name, node);
+    }
   },
   FunctionDeclaration(node) {
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
+      state.localDeclarations.set(node.id.name, node);
       if (state.scopeDepth > 0) _addShadow(node.id.name);
     }
     _addParamShadows(node.params, node.body);
@@ -278,7 +291,10 @@ const coreVisitorObject: VisitorObject = {
       }
     } else {
       for (const decl of node.declarations) {
-        if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+        if (decl.id.type === 'Identifier') {
+          state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+          state.localDeclarations.set(decl.id.name, decl);
+        }
       }
     }
   },
@@ -666,6 +682,7 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     scopeStarts: [],
     scopeEnds: [],
     shadowScopes: new Map(),
+    localDeclarations: new Map(),
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,
