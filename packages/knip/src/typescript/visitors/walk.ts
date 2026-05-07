@@ -1,4 +1,14 @@
-import { Visitor, type Program, type Span, type TSTypeName, type VisitorObject } from 'oxc-parser';
+import {
+  Visitor,
+  visitorKeys,
+  type Class,
+  type Function as FunctionNode,
+  type Program,
+  type Span,
+  type TSTypeName,
+  type VariableDeclarator,
+  type VisitorObject,
+} from 'oxc-parser';
 import type { PluginVisitorObject } from '../../types/config.ts';
 import { FIX_FLAGS, IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
 import type { GetImportsAndExportsOptions } from '../../types/config.ts';
@@ -79,7 +89,9 @@ export interface WalkState extends WalkContext {
   scopeStarts: number[];
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
-  localDeclarations: Map<string, any>;
+  localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
+  pendingCallRefs: Array<{ name: string; exportName: string; seen: Set<string> }>;
+  pendingMemberCallRefs: Array<{ objectName: string; propertyName: string; exportName: string; seen: Set<string> }>;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -143,41 +155,80 @@ const _addExport = (
   }
 };
 
-const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean, seen = new Set<string>()): void => {
-  if (!node || typeof node !== 'object') return;
-  if (node.type === 'TSTypeQuery') {
-    const name = node.exprName.type === 'Identifier' ? node.exprName.name : undefined;
-    if (name) {
-      const refs = state.referencedInExport.get(name);
-      if (refs) refs.add(exportName);
-      else state.referencedInExport.set(name, new Set([exportName]));
+const _collectRefsInType = (
+  node: any,
+  exportName: string,
+  signatureOnly: boolean,
+  seen = new Set<string>(),
+  inBody = false
+): void => {
+  if (!node) return;
+  const type = node.type;
+  if (!type) return;
+
+  switch (type) {
+    case 'TSTypeQuery':
+      if (node.exprName?.type === 'Identifier') _addRefInExport(node.exprName.name, exportName);
+      return;
+    case 'TSTypeReference':
+      if (node.typeName?.type === 'Identifier') _addRefInExport(node.typeName.name, exportName);
+      break;
+    case 'CallExpression': {
+      const callee = node.callee;
+      if (callee?.type === 'Identifier') {
+        state.pendingCallRefs.push({ name: callee.name, exportName, seen });
+      } else if (
+        callee?.type === 'MemberExpression' &&
+        !callee.computed &&
+        callee.object?.type === 'Identifier' &&
+        callee.property?.type === 'Identifier'
+      ) {
+        state.pendingMemberCallRefs.push({
+          objectName: callee.object.name,
+          propertyName: callee.property.name,
+          exportName,
+          seen,
+        });
+      }
+      // Only follow Identifier arguments at top level (e.g. `export const x = wrap(inner)`).
+      // Inside a function body the call result usually doesn't flow into the inferred return,
+      // and following would over-capture (e.g. `useReducer(reducer, …)` style).
+      if (!inBody) {
+        const args = node.arguments;
+        if (args) {
+          for (const arg of args) {
+            if (arg?.type === 'Identifier') state.pendingCallRefs.push({ name: arg.name, exportName, seen });
+          }
+        }
+      }
+      break;
     }
-    return;
+    case 'FunctionBody':
+    case 'BlockStatement':
+      if (signatureOnly) return;
+      break;
+    case 'TSAsExpression':
+    case 'TSTypeAssertion':
+    case 'TSSatisfiesExpression':
+      if (inBody) {
+        if (node.expression) _collectRefsInType(node.expression, exportName, signatureOnly, seen, inBody);
+        return;
+      }
+      break;
   }
-  if (node.type === 'CallExpression' && node.callee?.type === 'Identifier') {
-    const name = node.callee.name;
-    const decl = state.localDeclarations.get(name);
-    if (decl && !seen.has(name)) {
-      seen.add(name);
-      _collectRefsInType(decl, exportName, true, seen);
-    }
-  }
-  if (signatureOnly && (node.type === 'FunctionBody' || node.type === 'BlockStatement')) return;
-  if (node.type === 'TSTypeReference' && node.typeName.type === 'Identifier') {
-    const name = node.typeName.name;
-    const refs = state.referencedInExport.get(name);
-    if (refs) refs.add(exportName);
-    else state.referencedInExport.set(name, new Set([exportName]));
-  }
-  for (const key in node) {
-    if (key === 'type' || key === 'parent') continue;
+
+  const keys = visitorKeys[type];
+  if (!keys) return;
+  const childInBody = inBody || type === 'FunctionBody' || type === 'BlockStatement';
+  for (const key of keys) {
     const val = node[key];
+    if (!val) continue;
     if (Array.isArray(val)) {
       for (const item of val) {
-        if (item && typeof item === 'object' && item.type) _collectRefsInType(item, exportName, signatureOnly, seen);
+        if (item) _collectRefsInType(item, exportName, signatureOnly, seen, childInBody);
       }
-    } else if (val && typeof val === 'object' && val.type) {
-      _collectRefsInType(val, exportName, signatureOnly, seen);
+    } else {
+      _collectRefsInType(val, exportName, signatureOnly, seen, childInBody);
     }
   }
 };
@@ -683,6 +734,8 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     scopeEnds: [],
     shadowScopes: new Map(),
     localDeclarations: new Map(),
+    pendingCallRefs: [],
+    pendingMemberCallRefs: [],
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,
@@ -692,6 +745,32 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
   };
 
   ctx.visitor.visit(program);
+
+  while (state.pendingCallRefs.length > 0 || state.pendingMemberCallRefs.length > 0) {
+    while (state.pendingCallRefs.length > 0) {
+      const { name, exportName, seen } = state.pendingCallRefs.pop()!;
+      if (seen.has(name)) continue;
+      const decl = state.localDeclarations.get(name);
+      if (!decl) continue;
+      seen.add(name);
+      _collectRefsInType(decl, exportName, true, seen);
+    }
+    while (state.pendingMemberCallRefs.length > 0) {
+      const { objectName, propertyName, exportName, seen } = state.pendingMemberCallRefs.pop()!;
+      const key = `${objectName}.${propertyName}`;
+      if (seen.has(key)) continue;
+      const decl = state.localDeclarations.get(objectName);
+      if (decl?.type !== 'VariableDeclarator' || decl.init?.type !== 'ObjectExpression') continue;
+      const prop = decl.init.properties.find(
+        p => p.type === 'Property' && p.key?.type === 'Identifier' && p.key.name === propertyName
+      );
+      if (prop?.type !== 'Property') continue;
+      const fn = prop.value;
+      if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') continue;
+      seen.add(key);
+      _collectRefsInType(fn, exportName, true, seen);
+    }
+  }
 
   for (let i = 0; i < state.memberRefsInFile.length; i += 2) {
     const exp = state.exports.get(state.memberRefsInFile[i]);

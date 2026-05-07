@@ -23,7 +23,8 @@ import type { WalkState } from './walk.ts';
 
 const getName = (n: ModuleExportName | null | undefined) => (n?.type === 'Identifier' ? n.name : undefined);
 
-const hasExplicitFunctionReturnType = (node: any) =>
+const hasExplicitFunctionReturnType = (node: { type: string; returnType?: unknown } | null | undefined) =>
+  !!node &&
   (node.type === 'ArrowFunctionExpression' ||
     node.type === 'FunctionExpression' ||
     node.type === 'FunctionDeclaration') &&
@@ -155,13 +156,6 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
             s.collectRefsInType(declarator.id.typeAnnotation, name, true);
           } else if (declarator.init) {
             s.collectRefsInType(declarator.init, name, hasExplicitFunctionReturnType(declarator.init));
-          }
-
-          if (
-            declarator.id.typeAnnotation &&
-            (declarator.init?.type === 'ArrowFunctionExpression' || declarator.init?.type === 'FunctionExpression')
-          ) {
-            s.collectRefsInType(declarator.init, name, true);
           }
 
           if (!jsDocTags.has(ALIAS_TAG) && declarator.init?.type === 'Identifier') {
