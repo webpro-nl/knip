@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/e2e-lib-call-forward-decl",
+  "type": "module",
+  "main": "./dist/entry.js",
+  "types": "./dist/entry.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/entry.d.ts",
+      "default": "./dist/entry.js"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/e2e-lib-public-surface",
+  "name": "@fixtures/e2e-lib-export-star-as",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "default": "./dist/utils/index.js"
     }
   }
 }

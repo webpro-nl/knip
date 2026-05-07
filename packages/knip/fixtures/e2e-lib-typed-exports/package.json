@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/e2e-lib-namespace-subpaths",
+  "name": "@fixtures/e2e-lib-typed-exports",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -7,10 +7,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "default": "./dist/utils/index.js"
     }
   }
 }

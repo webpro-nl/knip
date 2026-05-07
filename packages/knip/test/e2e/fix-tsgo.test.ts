@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, realpath, rename, symlink, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, realpath, rename, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { join } from '../../src/util/path.ts';
@@ -56,7 +56,45 @@ for (const name of fixtures) {
   });
 }
 
-const libFixtures = ['e2e-lib-public-surface', 'e2e-lib-namespace-subpaths'];
+// FP-direction lib fixtures (knip must NOT strip names tsc/tsgo still needs).
+// The post-fix tsgo emit on pkg/ catches violations as a declaration-emit
+// error. The exact code depends on shape (TS4023 cross-module is the most
+// common; TS4081/4082 fire on same-module private names; TS4060/4063 on
+// return/param positions). Test asserts on tsgo exit status, not error code:
+//   typed-exports             — explicit return-type annotations on exported values
+//   export-star-as            — `export * as Ns from '…'` namespace re-export
+//   arrow-inferred-return     — arrow with block body, no return type
+//   call-forward-decl         — Identifier callee resolving to forward-declared local
+//   member-call               — `obj.method()` member-expression callee
+//   call-arg                  — Identifier as call argument at top level (`wrap(inner)`)
+//
+// FN-direction lib fixtures (knip must FLAG names tsc/tsgo doesn't strictly
+// need; post-fix file content must NOT contain the names in libFixtureRemovals):
+//   as-cast-in-body           — `as T` / `<T>x` / `satisfies T` inside a function body
+//   call-arg-in-body          — Identifier as call argument inside a function body
+const libFixtures = [
+  'e2e-lib-typed-exports',
+  'e2e-lib-export-star-as',
+  'e2e-lib-arrow-inferred-return',
+  'e2e-lib-call-forward-decl',
+  'e2e-lib-member-call',
+  'e2e-lib-call-arg',
+  'e2e-lib-as-cast-in-body',
+  'e2e-lib-call-arg-in-body',
+];
+
+const libFixtureRemovals: Record<string, RegExp[]> = {
+  'e2e-lib-arrow-inferred-return': [/export interface UnusedHandlerOptions/],
+  'e2e-lib-call-forward-decl': [/export interface UnusedHelperOptions/],
+  'e2e-lib-member-call': [/export interface UnusedHelperOptions/],
+  'e2e-lib-call-arg': [/export interface UnusedHelperOptions/],
+  'e2e-lib-as-cast-in-body': [/export interface InternalCast/, /export interface UnusedHelperOptions/],
+  'e2e-lib-call-arg-in-body': [
+    /export interface InternalActionA/,
+    /export interface InternalActionB/,
+    /export interface UnusedHelperOptions/,
+  ],
+};
 
 for (const name of libFixtures) {
   const pkgName = `@fixtures/${name}`;
@@ -84,6 +122,14 @@ for (const name of libFixtures) {
 
     const fix = exec('knip --fix --no-progress', { cwd: pkgDir });
     assert.match(fix.stdout, /\(removed\)/, `knip --fix removed nothing:\n${fix.stdout}\n${fix.stderr}`);
+
+    const removals = libFixtureRemovals[name];
+    if (removals) {
+      const contents = await readFile(join(pkgDir, 'src/handler.ts'), 'utf8');
+      for (const pattern of removals) {
+        assert.doesNotMatch(contents, pattern, `${name}: expected to remove ${pattern}`);
+      }
+    }
 
     const buildAfter = tsgo(pkgDir);
     assert.equal(buildAfter.status, 0, `post-fix build failed:\n${buildAfter.stdout}${buildAfter.stderr}`);
