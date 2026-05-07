@@ -69,7 +69,7 @@ jobs:
       SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
       UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
       SNAPSHOT_OUT_DIR: /tmp/snapshot-updates
-      PNPM_INSTALL_ARGS: --config.minimumReleaseAgeExclude=knip --config.trustPolicy=off
+      PNPM_INSTALL_ARGS: --config.minimumReleaseAgeExclude=knip --config.minimumReleaseAgeExclude=jiti --config.trustPolicy=off
     strategy:
       fail-fast: false
       matrix:
