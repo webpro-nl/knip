@@ -50,7 +50,7 @@ const main = async () => {
 
   const chart: ChartData = {
     series: [
-      { label: 'GitHub Sponsors', color: '#fbfbfb' },
+      { label: 'GitHub Sponsors', color: 'currentColor' },
       { label: 'Open Collective', color: '#2487ff' },
     ],
     monthly: Array.from(monthly.entries()),

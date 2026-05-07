@@ -25,6 +25,10 @@ interface GraphQLResponse {
   viewer: {
     sponsorsActivities: {
       nodes: SponsorActivity[];
+      pageInfo: {
+        hasNextPage: boolean;
+        endCursor: string | null;
+      };
     };
   };
 }
@@ -32,35 +36,44 @@ interface GraphQLResponse {
 const getMonthlyTotals = async (options: Options) => {
   const { token, startDate, recurringOnly } = options;
 
-  const { viewer } = await graphql<GraphQLResponse>({
-    query: `
-      query {
-        viewer {
-          sponsorsActivities(first: 100, period: ALL) {
-            nodes {
-              action
-              timestamp
-              sponsorsTier {
-                monthlyPriceInDollars
-                isOneTime
+  const all: SponsorActivity[] = [];
+  let cursor: string | null = null;
+  do {
+    const { viewer }: GraphQLResponse = await graphql<GraphQLResponse>({
+      query: `
+        query($after: String) {
+          viewer {
+            sponsorsActivities(first: 100, period: ALL, after: $after) {
+              nodes {
+                action
+                timestamp
+                sponsorsTier {
+                  monthlyPriceInDollars
+                  isOneTime
+                }
+                sponsor {
+                  ... on User { login }
+                  ... on Organization { login }
+                }
               }
-              sponsor {
-                ... on User { login }
-                ... on Organization { login }
+              pageInfo {
+                hasNextPage
+                endCursor
               }
             }
           }
         }
-      }
-    `,
-    headers: {
-      authorization: `token ${token}`,
-    },
-  });
+      `,
+      after: cursor,
+      headers: {
+        authorization: `token ${token}`,
+      },
+    });
+    for (const node of viewer.sponsorsActivities.nodes) if (node?.timestamp) all.push(node);
+    cursor = viewer.sponsorsActivities.pageInfo.hasNextPage ? viewer.sponsorsActivities.pageInfo.endCursor : null;
+  } while (cursor);
 
-  const activities = [...viewer.sponsorsActivities.nodes].sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  );
+  const activities = all.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   const activeRecurring = new Map<string, number>();
   const monthlyTotals = new Map<string, number>();
