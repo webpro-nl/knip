@@ -94,7 +94,7 @@
     "fdir": "^6.5.0",
     "formatly": "^0.3.0",
     "get-tsconfig": "4.14.0",
-    "jiti": "^2.6.0",
+    "jiti": "^2.7.0",
     "minimist": "^1.2.8",
     "oxc-parser": "^0.128.0",
     "oxc-resolver": "^11.19.1",
