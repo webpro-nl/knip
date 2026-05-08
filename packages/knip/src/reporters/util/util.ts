@@ -81,7 +81,8 @@ export const getTableForType = (
     table.cell('symbolType', issue.symbolType && issue.symbolType !== SYMBOL_TYPE.UNKNOWN && print(issue.symbolType));
 
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
-    const cell = isFileIssue ? relative(cwd, symbol) : `${relative(cwd, issue.filePath)}${pos}`;
+    const filePath = relative(cwd, issue.filePath);
+    const cell = isFileIssue ? filePath : `${filePath}${pos}`;
     table.cell('filePath', print(cell));
 
     table.cell('fixed', issue.isFixed && print('(removed)'));
