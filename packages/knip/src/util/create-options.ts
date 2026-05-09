@@ -29,8 +29,8 @@ interface CreateOptions extends Partial<Options> {
  */
 export const createOptions = async (options: CreateOptions) => {
   const { args = {} } = options;
-  const pcwd = process.cwd();
-  const cwd = normalize(toPosix(toAbsolute(options.cwd ?? args.directory ?? pcwd, pcwd)));
+  const pcwd = toPosix(process.cwd());
+  const cwd = normalize(toAbsolute(toPosix(options.cwd ?? args.directory ?? pcwd), pcwd));
 
   const manifestPath = findFile(cwd, 'package.json');
   const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
