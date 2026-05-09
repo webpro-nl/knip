@@ -10,7 +10,7 @@ import {
   toDeferResolveProductionEntry,
   toDependency,
 } from '../../util/input.ts';
-import { isInternal, join, toAbsolute } from '../../util/path.ts';
+import { extname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
@@ -25,6 +25,11 @@ const enablers = ['webpack', 'webpack-cli'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['webpack.config.{js,ts,mjs,cjs,mts,cts}'];
+
+const interpretLoaders: Record<string, string[]> = {
+  '.ts': ['ts-node', 'sucrase', '@babel/register', 'esbuild-register', '@swc/register'],
+  '.cts': ['ts-node'],
+};
 
 const hasBabelOptions = (use: RuleSetUseItem) =>
   Boolean(use) &&
@@ -185,6 +190,9 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
   inputs.push(toDependency('webpack-cli', { optional: true }));
+  for (const loader of interpretLoaders[extname(options.configFilePath)] ?? []) {
+    inputs.push(toDependency(loader, { optional: true }));
+  }
   return inputs;
 };
 

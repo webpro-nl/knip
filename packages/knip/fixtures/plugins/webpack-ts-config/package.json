@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/webpack-ts-config",
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "webpack-cli": "*",
+    "ts-node": "*",
+    "sucrase": "*"
+  }
+}
