@@ -1,2 +1,3 @@
-Unused exported types (1)
+Unused exported types (2)
+packages/lit-query/src/createQueriesController.ts: CreateQueriesOptions
 packages/preact-query/src/__tests__/ErrorBoundary/types.ts: ErrorBoundaryPropsWithComponent, ErrorBoundaryPropsWithRender, ErrorBoundaryPropsWithFallback
