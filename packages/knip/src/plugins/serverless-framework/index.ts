@@ -20,7 +20,7 @@ const handlerToEntry = (handler: string) => {
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   if (!config.functions) return [];
-  return Object.values(config.functions).map(fn => handlerToEntry(fn.handler));
+  return Object.values(config.functions).flatMap(fn => (fn.handler ? [handlerToEntry(fn.handler)] : []));
 };
 
 const plugin: Plugin = {

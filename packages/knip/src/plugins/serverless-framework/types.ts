@@ -3,5 +3,5 @@ export type PluginConfig = {
 };
 
 type ServerlessFunction = {
-  handler: string;
+  handler?: string;
 };

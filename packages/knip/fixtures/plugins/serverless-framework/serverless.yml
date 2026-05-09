@@ -28,3 +28,9 @@ functions:
     handler: function-2/function2.handler
     environment:
       FOO: !Ref SomeResource
+  Third:
+    timeout: 900
+    memorySize: 256
+    image:
+      name: sls-service
+      command: dist/functions/third.handler
