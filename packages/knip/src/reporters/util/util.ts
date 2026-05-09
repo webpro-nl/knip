@@ -39,13 +39,9 @@ export const convert = (issue: Issue | IssueSymbol) => ({
 });
 
 const sortByPos = (a: Issue, b: Issue) => {
-  const [filePathA, rowA, colA] = a.filePath.split(':');
-  const [filePathB, rowB, colB] = b.filePath.split(':');
-  return filePathA === filePathB
-    ? Number(rowA) === Number(rowB)
-      ? Number(colA) - Number(colB)
-      : Number(rowA) - Number(rowB)
-    : filePathA.localeCompare(filePathB);
+  if (a.filePath !== b.filePath) return a.filePath.localeCompare(b.filePath);
+  if (a.line !== b.line) return (a.line ?? 0) - (b.line ?? 0);
+  return (a.col ?? 0) - (b.col ?? 0);
 };
 
 const highlightSymbol =
