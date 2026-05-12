@@ -1,4 +1,3 @@
-/** @internal */
 export interface ChartData {
   readonly series: readonly { label: string; color: string }[];
   readonly monthly: readonly (readonly [string, readonly number[]])[];
