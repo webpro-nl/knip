@@ -62,6 +62,13 @@
         "command": "tsc -p tsconfig.build.json",
         "cwd": "libs/b"
       }
+    },
+    "build-with-template-vars": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx {projectRoot}/build.mts",
+        "cwd": "{projectRoot}"
+      }
     }
   }
 }

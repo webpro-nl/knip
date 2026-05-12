@@ -55,6 +55,17 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .filter(executor => executor && !executor.startsWith('.'))
     .map(executor => executor?.split(':')[0]);
 
+  const expand = (value: string) =>
+    value
+      .replaceAll('{projectRoot}', options.configFileDir)
+      .replaceAll('{workspaceRoot}', options.rootCwd);
+
+  const resolveTargetCwd = (targetCwd: string | undefined) => {
+    if (!targetCwd) return options.cwd;
+    const expanded = expand(targetCwd);
+    return expanded === targetCwd ? join(options.cwd, targetCwd) : expanded;
+  };
+
   const inputs = targets
     .filter(target => target.executor === 'nx:run-commands' || target.command)
     .flatMap(target => {
@@ -65,8 +76,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
         commands = target.options.commands.map(commandConfig =>
           typeof commandConfig === 'string' ? commandConfig : commandConfig.command
         );
-      const cwd = target.options?.cwd ? join(options.cwd, target.options.cwd) : options.cwd;
-      return options.getInputsFromScripts(commands, { cwd });
+      return options.getInputsFromScripts(commands.map(expand), { cwd: resolveTargetCwd(target.options?.cwd) });
     });
 
   const configInputs = targets.flatMap(target => {
