@@ -28,16 +28,28 @@ export const augmentWorkspace = (
 ) => {
   const all = compilerOptions ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions)] : pluginSourceMaps;
   if (all.length === 0) return;
-  workspace.sourceMaps = all.sort((a, b) => b.outDir.length - a.outDir.length);
+  const seen = new Set<string>();
+  const unique: SourceMap[] = [];
+  for (const sm of all) {
+    const key = `${sm.srcDir}\0${sm.outDir}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(sm);
+  }
+  workspace.sourceMaps = unique.sort((a, b) => b.outDir.length - a.outDir.length);
 };
 
 const isUnderOutDir = (absPath: string, outDir: string) => absPath === outDir || absPath.startsWith(`${outDir}/`);
 
+const rewriteOne = (pair: SourceMap, absSpecifier: string, extensions: string) => {
+  if (pair.srcDir === pair.outDir || !isUnderOutDir(absSpecifier, pair.outDir)) return;
+  return pair.srcDir + absSpecifier.slice(pair.outDir.length).replace(matchExt, extensions);
+};
+
 const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extensions: string) => {
-  for (const { srcDir, outDir } of sourceMaps) {
-    if (srcDir !== outDir && isUnderOutDir(absSpecifier, outDir)) {
-      return srcDir + absSpecifier.slice(outDir.length).replace(matchExt, extensions);
-    }
+  for (const sm of sourceMaps) {
+    const r = rewriteOne(sm, absSpecifier, extensions);
+    if (r) return r;
   }
 };
 
@@ -54,25 +66,27 @@ export const getWorkspaceManifestHandler = (chief: ConfigurationChief): Workspac
 };
 
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
-  const toSourceMapCache = new Map<string, string>();
+  const toSourceMapCache = new Map<string, string | undefined>();
 
   return (filePath: string) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
-    if (!workspace?.sourceMaps) return;
-    for (const { srcDir, outDir } of workspace.sourceMaps) {
-      if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
-      const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
-      const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
-      if (srcFilePath) {
-        toSourceMapCache.set(filePath, srcFilePath);
-        if (srcFilePath !== filePath) {
+    let result: string | undefined;
+    if (workspace?.sourceMaps) {
+      for (const { srcDir, outDir } of workspace.sourceMaps) {
+        if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
+        const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
+        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
-          return srcFilePath;
+          result = srcFilePath;
+          break;
         }
       }
     }
+    toSourceMapCache.set(filePath, result);
+    return result;
   };
 };
 
@@ -101,10 +115,10 @@ export const toSourceMappedSpecifiers = (
   extensions = defaultExtensions
 ) => {
   const out: string[] = [];
-  if (!ws?.sourceMaps) return out;
-  for (const { srcDir, outDir } of ws.sourceMaps) {
-    if (srcDir !== outDir && isUnderOutDir(absSpecifier, outDir)) {
-      out.push(srcDir + absSpecifier.slice(outDir.length).replace(matchExt, extensions));
+  if (ws?.sourceMaps) {
+    for (const sm of ws.sourceMaps) {
+      const r = rewriteOne(sm, absSpecifier, extensions);
+      if (r) out.push(r);
     }
   }
   return out;
