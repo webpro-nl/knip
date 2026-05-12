@@ -11,7 +11,7 @@ const enablers = ['nitropack', 'nitro'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['nitro.config.{js,mjs,ts}'];
+const config = ['nitro.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const production = [
   'server.{js,mjs,ts}',

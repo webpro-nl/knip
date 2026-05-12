@@ -31,7 +31,7 @@ const enablers = ['nuxt', 'nuxt-nightly'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['nuxt.config.{js,mjs,ts}'];
+const config = ['nuxt.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const entry = ['app.config.ts', '**/*.d.vue.ts'];
 

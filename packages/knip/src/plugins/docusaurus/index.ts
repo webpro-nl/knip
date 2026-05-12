@@ -13,7 +13,7 @@ const enablers = ['@docusaurus/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['docusaurus.config.{js,mjs,ts}'];
+const config = ['docusaurus.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const production = ['src/pages/**/*.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx', 'versioned_docs/**/*.{mdx,jsx,tsx}'];
 

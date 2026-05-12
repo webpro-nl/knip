@@ -11,7 +11,7 @@ const enablers = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/postcss', '@
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
+const entry = ['tailwind.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
   if (enablers.some(enabler => hasDependency(enabler))) registerCompiler({ extension: '.css', compiler });

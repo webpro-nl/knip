@@ -12,7 +12,7 @@ const enablers = ['wxt'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['wxt.config.{js,mjs,ts}'];
+const config = ['wxt.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const production = ['entrypoints/**/*'];
 
