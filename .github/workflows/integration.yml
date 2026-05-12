@@ -78,7 +78,7 @@ jobs:
             repo: birchill/10ten-ja-reader
             commands: |
               pnpm install $PNPM_INSTALL_ARGS
-              bash $SNAP 10ten-ja-reader -- pnpm dlx $PKG_URL
+              bash $SNAP 10ten-ja-reader -- pnpm dlx $PNPM_INSTALL_ARGS $PKG_URL
 
           - name: argos
             repo: argos-ci/argos
@@ -92,9 +92,8 @@ jobs:
             repo: withastro/astro
             commands: |
               pnpm install $PNPM_INSTALL_ARGS
-              pnpm build
               pnpm add -D -w $PKG_URL $PNPM_INSTALL_ARGS
-              bash $SNAP astro -- pnpm knip --fix
+              bash $SNAP astro -- pnpm knip --fix --exclude unresolved
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
@@ -107,7 +106,7 @@ jobs:
             repo: microsoft/DefinitelyTyped-tools
             commands: |
               pnpm install $PNPM_INSTALL_ARGS
-              bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PKG_URL
+              bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PNPM_INSTALL_ARGS $PKG_URL
 
           - name: eslint
             repo: eslint/eslint
@@ -189,7 +188,7 @@ jobs:
             repo: gajus/slonik
             commands: |
               pnpm install --no-frozen-lockfile --ignore-scripts $PNPM_INSTALL_ARGS
-              bash $SNAP slonik -- pnpm dlx $PKG_URL
+              bash $SNAP slonik -- pnpm dlx $PNPM_INSTALL_ARGS $PKG_URL
 
           - name: TypeScript
             repo: microsoft/TypeScript
