@@ -23,7 +23,7 @@ export const isReferenced = (
   entryPaths: Set<string>,
   filePath: string,
   id: Identifier,
-  options: { includeEntryExports: boolean }
+  options: { traverseEntries: boolean; treatStarAtEntryAsReferenced?: boolean }
 ) => {
   const seen = new Set<string>();
 
@@ -36,10 +36,15 @@ export const isReferenced = (
 
     const restIds = id.split('.');
     const identifier = restIds.shift();
+
+    if (options.treatStarAtEntryAsReferenced && isEntryFile && viaStar && restIds.length > 0) {
+      return [true, reExportingEntryFile];
+    }
+
     const file = graph.get(path)?.importedBy;
 
     if (!identifier || !file) {
-      return [isEntryFile && viaStar && restIds.length > 0, reExportingEntryFile];
+      return [false, reExportingEntryFile];
     }
 
     const follow = (sources: Set<string>, nextId: string, nextViaStar = viaStar): boolean => {
@@ -89,7 +94,7 @@ export const isReferenced = (
       }
     }
 
-    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
+    if (isEntryFile && !options.traverseEntries) return [false, reExportingEntryFile];
 
     const aliasMap = getAliasReExportMap(file, identifier);
     if (aliasMap) {
@@ -108,7 +113,7 @@ export const isReferenced = (
     }
 
     for (const [namespace, sources] of file.reExportNs) {
-      if (follow(sources, `${namespace}.${id}`)) {
+      if (follow(sources, `${namespace}.${id}`, true)) {
         return [true, reExportingEntryFile];
       }
     }

@@ -47,7 +47,7 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
     nodes.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.identifier.localeCompare(b.identifier));
     const toRel = (path: string) => toRelative(path, options.cwd);
     const isReferenced = (node: ExportsTreeNode) => {
-      if (explorer.isReferenced(node.filePath, node.identifier, { includeEntryExports: false })[0]) return true;
+      if (explorer.isReferenced(node.filePath, node.identifier, { traverseEntries: false })[0]) return true;
       if (explorer.hasStrictlyNsReferences(node.filePath, node.identifier)[0]) return true;
       return !!graph.get(node.filePath)?.exports.get(node.identifier)?.hasRefsInFile;
     };
@@ -59,7 +59,11 @@ export default ({ graph, explorer, options, workspaceFilePathFilter }: TraceRepo
         for (const m of exp.members) {
           const id = `${node.identifier}.${m.identifier}`;
           const referenced =
-            m.hasRefsInFile || explorer.isReferenced(node.filePath, id, { includeEntryExports: true })[0];
+            m.hasRefsInFile ||
+            explorer.isReferenced(node.filePath, id, {
+              traverseEntries: true,
+              treatStarAtEntryAsReferenced: true,
+            })[0];
           memberStatuses.push({ identifier: m.identifier, referenced });
         }
       }

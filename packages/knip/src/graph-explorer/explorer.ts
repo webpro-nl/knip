@@ -15,8 +15,11 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
      * Is exported `identifier` imported/referenced in the module graph?
      * @returns `[isReferenced, reExportingEntryFile]` → [is export used, entry path if traversing through re-exports]
      */
-    isReferenced: (filePath: string, identifier: string, options: { includeEntryExports: boolean }) =>
-      isReferenced(graph, entryPaths, filePath, identifier, options),
+    isReferenced: (
+      filePath: string,
+      identifier: string,
+      options: { traverseEntries: boolean; treatStarAtEntryAsReferenced?: boolean }
+    ) => isReferenced(graph, entryPaths, filePath, identifier, options),
     hasStrictlyNsReferences: (filePath: string, identifier: string) =>
       hasStrictlyNsReferences(graph, filePath, graph.get(filePath)?.importedBy, identifier),
     buildExportsTree: (options: { filePath?: string; identifier?: string }) =>

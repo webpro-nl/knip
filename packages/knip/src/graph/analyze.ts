@@ -66,7 +66,7 @@ export const analyze = async ({
         continue;
       }
       if (inExport.hasRefsInFile) return true;
-      if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
+      if (explorer.isReferenced(filePath, containingExport, { traverseEntries: includeEntryExports })[0]) return true;
       if (inExport.referencedIn) {
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {
@@ -110,7 +110,7 @@ export const analyze = async ({
 
             if (importsForExport) {
               const [isReferenced, reExportingEntryFile] = explorer.isReferenced(filePath, identifier, {
-                includeEntryExports: isIncludeEntryExports,
+                traverseEntries: isIncludeEntryExports,
               });
 
               if (
@@ -156,7 +156,8 @@ export const analyze = async ({
                     if (!member.hasRefsInFile) {
                       const id = `${identifier}.${member.identifier}`;
                       const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
-                        includeEntryExports: true,
+                        traverseEntries: true,
+                        treatStarAtEntryAsReferenced: true,
                       });
                       const isIgnored = shouldIgnoreTags(member.jsDocTags);
 
