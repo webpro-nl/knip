@@ -6,13 +6,16 @@ export const inlineCodeMatcher = /`[^`]+`/g;
 // Extract imports from body of <script> nodes.
 // Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
 const scriptExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>([\s\S]*?)<\/script>/gm;
+const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
+const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
 export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
   // oxlint-disable-next-line no-cond-assign
   while ((scriptMatch = scriptExtractor.exec(text))) {
-    for (const importMatch of scriptMatch[1].matchAll(importMatcher)) {
+    const body = scriptMatch[1].replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
+    for (const importMatch of body.matchAll(importMatcher)) {
       scripts.push(importMatch);
     }
   }
