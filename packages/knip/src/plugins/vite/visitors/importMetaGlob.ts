@@ -2,7 +2,7 @@ import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 import { _syncGlob } from '../../../util/glob.ts';
 import { dirname, isAbsolute, join } from '../../../util/path.ts';
-import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 
 export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   return {

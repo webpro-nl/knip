@@ -2,12 +2,7 @@ import type { ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
-import { parseFile } from './visitors/helpers.ts';
-
-const isStringLiteral = (node: any): boolean =>
-  node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string');
-
-export const getStringValue = (node: any): string | undefined => (isStringLiteral(node) ? node.value : undefined);
+import { getStringValue, isStringLiteral, parseFile } from './ast-nodes.ts';
 
 export const getPropertyKey = (prop: any): string | undefined =>
   prop?.key?.type === 'Identifier' ? prop.key.name : getStringValue(prop?.key);

@@ -1,7 +1,7 @@
 import { Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues, getImportMap } from '../../typescript/ast-helpers.ts';
-import { parseFile } from '../../typescript/visitors/helpers.ts';
+import { parseFile } from '../../typescript/ast-nodes.ts';
 import { toDeferResolveProductionEntry } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';

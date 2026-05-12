@@ -6,7 +6,7 @@ import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.ts';
 import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
 import type { ToSourceFilePath } from '../util/to-source-path.ts';
-import type { ResolveModule, ResolvedModule } from './visitors/helpers.ts';
+import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
 interface PathMapping {
   prefix: string;

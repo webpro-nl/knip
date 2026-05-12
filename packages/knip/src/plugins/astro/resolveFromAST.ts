@@ -1,9 +1,9 @@
 import type { Program } from 'oxc-parser';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
 import {
   collectPropertyValues,
   findProperty,
   getPropertyKey,
-  getStringValue,
   hasImportSpecifier,
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';

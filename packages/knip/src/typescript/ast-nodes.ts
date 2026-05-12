@@ -5,13 +5,13 @@ import {
   type TSEnumMember,
   type TSModuleDeclaration,
 } from 'oxc-parser';
-import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../../constants.ts';
-import { extname } from '../../util/path.ts';
-import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../../types/config.ts';
-import { EMPTY_TAGS } from './jsdoc.ts';
-import type { Fix } from '../../types/exports.ts';
-import type { SymbolType } from '../../types/issues.ts';
-import type { ExportMember } from '../../types/module-graph.ts';
+import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../constants.ts';
+import { extname } from '../util/path.ts';
+import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.ts';
+import { EMPTY_TAGS } from './visitors/jsdoc.ts';
+import type { Fix } from '../types/exports.ts';
+import type { SymbolType } from '../types/issues.ts';
+import type { ExportMember } from '../types/module-graph.ts';
 
 const defaultParseOptions = {
   sourceType: 'unambiguous' as const,

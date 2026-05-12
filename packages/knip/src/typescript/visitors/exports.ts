@@ -17,7 +17,7 @@ import {
   getLineAndCol,
   getStringValue,
   isStringLiteral,
-} from './helpers.ts';
+} from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import type { WalkState } from './walk.ts';
 

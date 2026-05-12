@@ -7,7 +7,7 @@ import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils
 import type { IssueCollector } from '../IssueCollector.ts';
 import traceReporter from '../reporters/trace.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
-import { shouldCountRefs } from '../typescript/visitors/helpers.ts';
+import { shouldCountRefs } from '../typescript/ast-nodes.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';

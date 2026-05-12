@@ -2,7 +2,7 @@ import type { Expression, ImportExpression, VariableDeclarator } from 'oxc-parse
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
-import { getStringValue, isStringLiteral } from './helpers.ts';
+import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
 
 export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {

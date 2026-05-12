@@ -1,7 +1,7 @@
 import type { CallExpression, NewExpression } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getStringValue, isStringLiteral } from './helpers.ts';
+import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
 
 function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {

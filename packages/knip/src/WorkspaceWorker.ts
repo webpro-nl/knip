@@ -21,7 +21,7 @@ import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
 import { createManifest, type Manifest } from './util/package-json.ts';
 import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
-import { parseFile } from './typescript/visitors/helpers.ts';
+import { parseFile } from './typescript/ast-nodes.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';

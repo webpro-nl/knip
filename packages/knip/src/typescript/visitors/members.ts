@@ -1,7 +1,7 @@
 import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
 import { OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getStringValue, isStringLiteral } from './helpers.ts';
+import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {

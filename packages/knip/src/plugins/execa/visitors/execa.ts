@@ -1,5 +1,5 @@
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 
 const tags = new Set(['$', '$sync']);
 const methods = new Set(['execa', 'execaSync', 'execaCommand', 'execaCommandSync', '$sync']);

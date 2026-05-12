@@ -1,7 +1,7 @@
 import type { ObjectExpression } from 'oxc-parser';
 import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 import { isInternal } from '../../../util/path.ts';
 
 const PINO = 'pino';

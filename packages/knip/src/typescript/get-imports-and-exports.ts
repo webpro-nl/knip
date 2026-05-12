@@ -17,7 +17,7 @@ import {
   shouldCountRefs,
   type ResolveModule,
   type ResolvedModule,
-} from './visitors/helpers.ts';
+} from './ast-nodes.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
 import { walkAST } from './visitors/walk.ts';
 

@@ -17,7 +17,7 @@ import type { IssueSymbol, SymbolType } from '../../types/issues.ts';
 import type { Export, ExportMember, ImportMap, ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
-import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from './helpers.ts';
+import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import { handleCallExpression, handleNewExpression } from './calls.ts';
 import {

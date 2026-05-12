@@ -1,6 +1,6 @@
 import { Visitor, type ParseResult } from 'oxc-parser';
 import { isInNodeModules } from '../util/path.ts';
-import { getStringValue, isStringLiteral, stripQuotes } from './visitors/helpers.ts';
+import { getStringValue, isStringLiteral, stripQuotes } from './ast-nodes.ts';
 
 const _requireSpecs: string[] = [];
 const _requireVisitor = new Visitor({

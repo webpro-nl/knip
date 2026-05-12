@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { Visitor, type ParseResult } from 'oxc-parser';
 import { scriptBodies } from '../../compilers/compilers.ts';
-import { parseFile } from '../../typescript/visitors/helpers.ts';
+import { parseFile } from '../../typescript/ast-nodes.ts';
 import { basename, dirname, isInNodeModules, join } from '../../util/path.ts';
 import type { TemplateAstNode, VueSfc } from './types.ts';
 
