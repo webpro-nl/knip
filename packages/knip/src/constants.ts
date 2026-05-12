@@ -80,6 +80,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'groups',
   'gzip',
   'head',
+  'hg',
   'id',
   'join',
   'kill',
