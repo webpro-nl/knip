@@ -1,8 +1,9 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { clientToPackages } from './helpers.ts';
 import type { KnexConfig } from './types.ts';
+import { createKnexClientVisitor } from './visitors/clientCall.ts';
 
 // https://knexjs.org
 
@@ -40,12 +41,17 @@ const resolveConfig: ResolveConfig<KnexConfig | Record<string, KnexConfig>> = co
   return configs.flatMap(cfg => (typeof cfg === 'object' && cfg !== null ? processKnexConfig(cfg) : []));
 };
 
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createKnexClientVisitor(ctx));
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
 };
 
 export default plugin;

@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/knex-inline",
+  "main": "src/db.ts",
+  "dependencies": {
+    "knex": "*",
+    "pg": "*",
+    "mysql2": "*",
+    "better-sqlite3": "*",
+    "tedious": "*"
+  }
+}
