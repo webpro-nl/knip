@@ -1,4 +1,5 @@
 import { parseTsconfig, type TsConfigJsonResolved } from 'get-tsconfig';
+import type { SourceMap } from '../types/config.ts';
 import type { CompilerOptions } from '../types/project.ts';
 import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
@@ -64,24 +65,29 @@ const resolveReference = (refPath: string, dir: string): string | undefined => {
   return isFile(withTsconfig) ? withTsconfig : undefined;
 };
 
-const fillFromReferences = (
+const absDir = (path: string, dir: string) => toAbsolute(path, dir).replace(/\/+$/, '');
+
+const walkReferences = (
   target: CompilerOptions,
   references: TsConfigJsonResolved['references'],
   dir: string,
-  visited: Set<string>
+  visited: Set<string>,
+  pairs: SourceMap[]
 ) => {
   if (!references?.length) return;
   for (const ref of references) {
-    if (target.outDir && target.rootDir) return;
     const refPath = resolveReference(ref.path, dir);
     if (!refPath || visited.has(refPath)) continue;
     visited.add(refPath);
     const refConfig = parseTsconfig(refPath);
     const refDir = dirname(refPath);
     const refOpts = refConfig.compilerOptions;
-    if (refOpts?.outDir && !target.outDir) target.outDir = toAbsolute(refOpts.outDir, refDir).replace(/\/+$/, '');
-    if (refOpts?.rootDir && !target.rootDir) target.rootDir = toAbsolute(refOpts.rootDir, refDir).replace(/\/+$/, '');
-    if (!refOpts?.outDir || !refOpts?.rootDir) fillFromReferences(target, refConfig.references, refDir, visited);
+    const refOutDir = refOpts?.outDir ? absDir(refOpts.outDir, refDir) : undefined;
+    const refRootDir = refOpts?.rootDir ? absDir(refOpts.rootDir, refDir) : undefined;
+    if (refOutDir && refRootDir && refOutDir !== refRootDir) pairs.push({ srcDir: refRootDir, outDir: refOutDir });
+    if (refOutDir && !target.outDir) target.outDir = refOutDir;
+    if (refRootDir && !target.rootDir) target.rootDir = refRootDir;
+    if (!refOutDir || !refRootDir) walkReferences(target, refConfig.references, refDir, visited, pairs);
   }
 };
 
@@ -91,6 +97,7 @@ interface TSConfigInfo {
   fileNames: string[];
   include: string[] | undefined;
   exclude: string[] | undefined;
+  sourceMapPairs: SourceMap[];
 }
 
 const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
@@ -98,6 +105,7 @@ const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
   fileNames: [],
   include: undefined,
   exclude: undefined,
+  sourceMapPairs: [],
 };
 
 export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigInfo> => {
@@ -109,8 +117,8 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     const dir = dirname(tsConfigFilePath);
     const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
+    if (compilerOptions.outDir) compilerOptions.outDir = absDir(compilerOptions.outDir, dir);
+    if (compilerOptions.rootDir) compilerOptions.rootDir = absDir(compilerOptions.rootDir, dir);
     if (compilerOptions.paths) {
       compilerOptions.pathsBasePath ??= dir;
     }
@@ -118,8 +126,9 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
       compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
     }
 
-    if ((!compilerOptions.outDir || !compilerOptions.rootDir) && config.references?.length) {
-      fillFromReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]));
+    const sourceMapPairs: SourceMap[] = [];
+    if (config.references?.length) {
+      walkReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]), sourceMapPairs);
     }
 
     const include = resolvePatterns(config.include, dir, true);
@@ -127,7 +136,7 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     const files = resolvePatterns(config.files, dir);
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
 
-    return { isFile: true, compilerOptions, fileNames, include, exclude };
+    return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs };
   } catch {
     return { isFile: true, ...EMPTY };
   }

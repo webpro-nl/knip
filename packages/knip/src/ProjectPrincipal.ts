@@ -23,7 +23,7 @@ import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
-import type { ToSourceFilePath } from './util/to-source-path.ts';
+import type { ToSourceFilePath, WorkspaceManifestHandler } from './util/to-source-path.ts';
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -48,6 +48,7 @@ export class ProjectPrincipal {
 
   cache: CacheConsultant<FileNode>;
   toSourceFilePath: ToSourceFilePath;
+  private findWorkspaceManifestImports: WorkspaceManifestHandler | undefined;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -55,9 +56,14 @@ export class ProjectPrincipal {
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
 
-  constructor(options: MainOptions, toSourceFilePath: ToSourceFilePath) {
+  constructor(
+    options: MainOptions,
+    toSourceFilePath: ToSourceFilePath,
+    findWorkspaceManifestImports?: WorkspaceManifestHandler
+  ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
+    this.findWorkspaceManifestImports = findWorkspaceManifestImports;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: [this.syncCompilers, this.asyncCompilers],
@@ -108,7 +114,8 @@ export class ProjectPrincipal {
     this.resolveModule = createCustomModuleResolver(
       { paths: pathsOrUndefined, rootDirs: rootDirsOrUndefined },
       customCompilerExtensions,
-      this.toSourceFilePath
+      this.toSourceFilePath,
+      this.findWorkspaceManifestImports
     );
   }
 

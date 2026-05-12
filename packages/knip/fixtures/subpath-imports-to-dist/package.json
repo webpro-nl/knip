@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/subpath-imports-to-dist",
+  "type": "module",
+  "imports": {
+    "#worker": "./dist/worker.mjs"
+  },
+  "main": "src/index.ts"
+}

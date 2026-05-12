@@ -117,7 +117,7 @@ export async function build({
     const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
-    const { isFile, compilerOptions, fileNames, include, exclude } = await loadTSConfig(tsConfigFilePath);
+    const { isFile, compilerOptions, fileNames, include, exclude, sourceMapPairs } = await loadTSConfig(tsConfigFilePath);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     const worker = new WorkspaceWorker({
@@ -156,7 +156,7 @@ export async function build({
     worker.config = config;
 
     const pluginSourceMaps = await worker.resolveSourceMaps();
-    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, pluginSourceMaps);
+    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
     const inputs = new Set<Input>();
 

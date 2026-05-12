@@ -41,6 +41,18 @@ const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extension
   }
 };
 
+export type WorkspaceManifestHandler = (filePath: string) => { dir: string; imports: unknown } | undefined;
+
+export const getWorkspaceManifestHandler = (chief: ConfigurationChief): WorkspaceManifestHandler => {
+  return (filePath: string) => {
+    const workspace = chief.findWorkspaceByFilePath(filePath);
+    if (!workspace) return;
+    const manifest = chief.workspacePackages.get(workspace.name)?.manifest;
+    if (!manifest?.imports) return;
+    return { dir: workspace.dir, imports: manifest.imports };
+  };
+};
+
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string>();
 

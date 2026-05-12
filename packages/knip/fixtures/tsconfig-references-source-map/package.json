@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/tsconfig-references-source-map",
+  "type": "module",
+  "imports": {
+    "#worker": "./dist/worker.mjs"
+  },
+  "main": "src/index.ts",
+  "devDependencies": {
+    "typescript": "*"
+  }
+}
