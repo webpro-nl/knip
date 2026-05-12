@@ -1,2 +1,2 @@
-Unused exported types (1)
-packages/rolldown/src/options/output-options.ts: BuiltinModuleTag
+Unresolved imports (1)
+packages/rolldown/src/utils/initialize-parallel-plugins.ts: #parallel-plugin-worker
