@@ -15,7 +15,7 @@ const enablers = ['jest'];
 const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
   hasDependency(dependencies, enablers) || Boolean(manifest.name?.startsWith('jest-presets'));
 
-const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
+const config = ['jest.config.{js,ts,mjs,cjs,mts,cts,json}', 'package.json'];
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
