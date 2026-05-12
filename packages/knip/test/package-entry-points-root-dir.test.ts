@@ -5,18 +5,18 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/subpath-imports-outdir');
+const cwd = resolve('fixtures/package-entry-points-root-dir');
 
-test('Resolve subpath imports to outDir with rootDir="."', async () => {
+test('Resolve package entry points with tsconfig rootDir: "."', async () => {
   const options = await createOptions({ cwd });
-  const { counters, configurationHints } = await main(options);
+  const { counters, issues, configurationHints } = await main(options);
 
-  assert.equal(configurationHints.length, 1);
-  assert.equal(configurationHints[0].type, 'entry-redundant');
+  assert.deepEqual(issues.files, {});
+  assert.deepEqual(configurationHints, []);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 2,
+    total: 2,
   });
 });

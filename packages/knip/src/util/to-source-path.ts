@@ -33,11 +33,9 @@ export const augmentWorkspace = (
 
 const isUnderOutDir = (absPath: string, outDir: string) => absPath === outDir || absPath.startsWith(`${outDir}/`);
 
-const isUnderSrcDir = (absPath: string, srcDir: string) => absPath === srcDir || absPath.startsWith(`${srcDir}/`);
-
 const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extensions: string) => {
   for (const { srcDir, outDir } of sourceMaps) {
-    if (!isUnderSrcDir(absSpecifier, srcDir) && isUnderOutDir(absSpecifier, outDir)) {
+    if (srcDir !== outDir && isUnderOutDir(absSpecifier, outDir)) {
       return srcDir + absSpecifier.slice(outDir.length).replace(matchExt, extensions);
     }
   }
@@ -93,7 +91,7 @@ export const toSourceMappedSpecifiers = (
   const out: string[] = [];
   if (!ws?.sourceMaps) return out;
   for (const { srcDir, outDir } of ws.sourceMaps) {
-    if (!isUnderSrcDir(absSpecifier, srcDir) && isUnderOutDir(absSpecifier, outDir)) {
+    if (srcDir !== outDir && isUnderOutDir(absSpecifier, outDir)) {
       out.push(srcDir + absSpecifier.slice(outDir.length).replace(matchExt, extensions));
     }
   }

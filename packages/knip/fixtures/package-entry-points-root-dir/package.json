@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/package-entry-points-root-dir",
+  "exports": {
+    "./entry": "./dist/entry.js",
+    "./types": { "types": "./dist/types.d.ts" }
+  }
+}
