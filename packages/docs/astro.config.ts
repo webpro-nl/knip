@@ -47,36 +47,36 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Overview',
-          autogenerate: { directory: 'overview' },
+          items: [{ autogenerate: { directory: 'overview' } }],
         },
         {
           label: 'Understanding Knip',
-          autogenerate: { directory: 'explanations' },
+          items: [{ autogenerate: { directory: 'explanations' } }],
         },
         {
           label: 'Features',
-          autogenerate: { directory: 'features' },
+          items: [{ autogenerate: { directory: 'features' } }],
         },
         {
           label: 'Guides',
-          autogenerate: { directory: 'guides' },
+          items: [{ autogenerate: { directory: 'guides' } }],
         },
         {
           label: 'Writing a Plugin',
-          autogenerate: { directory: 'writing-a-plugin' },
+          items: [{ autogenerate: { directory: 'writing-a-plugin' } }],
         },
         {
           label: 'Reference',
-          autogenerate: { directory: 'reference' },
+          items: [{ autogenerate: { directory: 'reference' } }],
         },
         {
           label: 'Blog',
-          autogenerate: { directory: 'blog' },
+          items: [{ autogenerate: { directory: 'blog' } }],
         },
         {
           label: 'Read more',
           collapsed: true,
-          autogenerate: { directory: 'typescript' },
+          items: [{ autogenerate: { directory: 'typescript' } }],
         },
       ],
       expressiveCode: {
