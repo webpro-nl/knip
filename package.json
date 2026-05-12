@@ -31,9 +31,9 @@
     "installed-check": "^10.0.1",
     "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.1.1",
-    "oxfmt": "^0.46.0",
-    "oxlint": "^1.61.0",
-    "release-it": "^20.0.0",
+    "oxfmt": "^0.49.0",
+    "oxlint": "^1.64.0",
+    "release-it": "^20.0.1",
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.1.1"
   },
@@ -50,7 +50,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "pnpm@11.0.6",
+  "packageManager": "pnpm@11.1.0",
   "mdxlint": {
     "plugins": [
       "mdxlint-preset-webpro"
