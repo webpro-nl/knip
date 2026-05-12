@@ -27,7 +27,7 @@ export const isReferenced = (
 ) => {
   const seen = new Set<string>();
 
-  const walkDown = (path: string, id: string): [boolean, string | undefined] => {
+  const walkDown = (path: string, id: string, viaStar = false): [boolean, string | undefined] => {
     const isEntryFile = entryPaths.has(path);
     let reExportingEntryFile: string | undefined = isEntryFile ? path : undefined;
 
@@ -39,13 +39,13 @@ export const isReferenced = (
     const file = graph.get(path)?.importedBy;
 
     if (!identifier || !file) {
-      return [false, reExportingEntryFile];
+      return [isEntryFile && viaStar && restIds.length > 0, reExportingEntryFile];
     }
 
-    const follow = (sources: Set<string>, nextId: string): boolean => {
+    const follow = (sources: Set<string>, nextId: string, nextViaStar = viaStar): boolean => {
       for (const byFilePath of sources) {
         if (seen.has(byFilePath)) continue;
-        const result = walkDown(byFilePath, nextId);
+        const result = walkDown(byFilePath, nextId, nextViaStar);
         if (result[1]) reExportingEntryFile = result[1];
         if (result[0]) return true;
       }
@@ -104,7 +104,7 @@ export const isReferenced = (
     if (directSources) {
       if (follow(directSources, id)) return [true, reExportingEntryFile];
     } else if (starSources) {
-      if (follow(starSources, id)) return [true, reExportingEntryFile];
+      if (follow(starSources, id, true)) return [true, reExportingEntryFile];
     }
 
     for (const [namespace, sources] of file.reExportNs) {
