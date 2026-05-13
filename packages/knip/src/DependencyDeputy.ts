@@ -96,7 +96,7 @@ export class DependencyDeputy {
 
     const packageNames = [
       ...dependencies,
-      ...(this.isStrict ? peerDependencies : []),
+      ...peerDependencies,
       ...(this.isProduction ? [] : devDependencies),
     ];
 
@@ -235,6 +235,18 @@ export class DependencyDeputy {
     if (closestWorkspaceNameForTypes && isTypeOnly) return true;
 
     if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
+
+    if (!this.isStrict) {
+      for (const name of workspaceNames) {
+        const hosts = this.getHostDependenciesFor(name, packageName);
+        if (hosts.length === 0) continue;
+        const m = this._manifests.get(name);
+        if (m && hosts.some(h => m.allDependencies.has(h.name))) {
+          this.addReferencedDependency(name, packageName);
+          return true;
+        }
+      }
+    }
 
     this.addReferencedDependency(workspace.name, packageName);
 

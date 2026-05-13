@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/peer-transitive",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
