@@ -55,6 +55,7 @@ Troubleshooting
   --memory-realtime        Log memory usage in realtime
   --performance            Measure count and running time of key functions and display stats table
   --performance-fn [name]  Measure only function [name]
+  --duration               Print total running time (zero overhead, no instrumentation)
   --trace                  Show trace output
   --trace-dependency [name] Show files that import the named dependency
   --trace-export [name]    Show trace output for named export(s)
@@ -115,6 +116,7 @@ export default function parseCLIArgs() {
       'preprocessor-options': { type: 'string' },
       reporter: { type: 'string', multiple: true },
       'reporter-options': { type: 'string' },
+      duration: { type: 'boolean' },
       strict: { type: 'boolean' },
       trace: { type: 'boolean' },
       'trace-dependency': { type: 'string' },

@@ -95,7 +95,7 @@ const main = async () => {
     if (perfObserver.isMemoryUsageEnabled && !args['memory-realtime'])
       console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
-    if (perfObserver.isEnabled) {
+    if (perfObserver.isEnabled || perfObserver.isDurationEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();
       console.log('\nTotal running time:', prettyMilliseconds(duration));
       perfObserver.reset();

@@ -11,6 +11,7 @@ const { values } = parseArgs({
     'performance-fn': { type: 'string', multiple: true },
     memory: { type: 'boolean' },
     'memory-realtime': { type: 'boolean' },
+    duration: { type: 'boolean' },
   },
 });
 
@@ -18,6 +19,7 @@ const timerifyOnlyFnName = values['performance-fn'];
 const isMemoryRealtime = !!values['memory-realtime'];
 const isTimerifyFunctions = !!values.performance || !!timerifyOnlyFnName;
 const isMemoryUsageEnabled = !!values.memory || isMemoryRealtime;
+const isDurationEnabled = !!values.duration;
 
 export const timerify = <T extends (...params: any[]) => any>(fn: T, name: string = fn.name): T => {
   if (!isTimerifyFunctions) return fn;
@@ -56,6 +58,7 @@ class Performance {
   isEnabled: boolean;
   isTimerifyFunctions: boolean;
   isMemoryUsageEnabled: boolean;
+  isDurationEnabled: boolean;
   startTime = 0;
   endTime = 0;
   perfEntries: PerformanceEntry[] = [];
@@ -65,10 +68,11 @@ class Performance {
   fnObserver?: PerformanceObserver;
   memObserver?: PerformanceObserver;
 
-  constructor({ isTimerifyFunctions = false, isMemoryUsageEnabled = false }) {
+  constructor({ isTimerifyFunctions = false, isMemoryUsageEnabled = false, isDurationEnabled = false }) {
     this.isEnabled = isTimerifyFunctions || isMemoryUsageEnabled;
     this.isTimerifyFunctions = isTimerifyFunctions;
     this.isMemoryUsageEnabled = isMemoryUsageEnabled;
+    this.isDurationEnabled = isDurationEnabled;
 
     this.startTime = performance.now();
     const instanceId = Math.floor(performance.now() * 100);
@@ -206,4 +210,4 @@ class Performance {
   }
 }
 
-export const perfObserver = new Performance({ isTimerifyFunctions, isMemoryUsageEnabled });
+export const perfObserver = new Performance({ isTimerifyFunctions, isMemoryUsageEnabled, isDurationEnabled });
