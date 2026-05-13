@@ -64,26 +64,30 @@ export const createImports = (): ImportMaps => ({
 });
 
 export const addValue = (map: IdToFileMap, id: string, value: string) => {
-  if (map.has(id)) map.get(id)?.add(value);
+  const existing = map.get(id);
+  if (existing) existing.add(value);
   else map.set(id, new Set([value]));
 };
 
 export const addNsValue = (map: IdToNsToFileMap, id: string, ns: string, value: string) => {
-  if (map.has(id)) {
-    if (map.get(id)?.has(ns)) map.get(id)?.get(ns)?.add(value);
-    else map.get(id)?.set(ns, new Set([value]));
-  } else {
+  const inner = map.get(id);
+  if (!inner) {
     map.set(id, new Map([[ns, new Set([value])]]));
+    return;
   }
+  const set = inner.get(ns);
+  if (set) set.add(value);
+  else inner.set(ns, new Set([value]));
 };
 
 const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
-  if (map.has(id)) for (const v of values) map.get(id)?.add(v);
+  const existing = map.get(id);
+  if (existing) for (const v of values) existing.add(v);
   else map.set(id, values);
 };
 
 const addNsValues = (map: IdToNsToFileMap, id: string, value: IdToFileMap) => {
-  // @ts-expect-error come on
-  if (map.has(id)) for (const [ns, v] of value) addValues(map.get(id), ns, v);
+  const existing = map.get(id);
+  if (existing) for (const [ns, v] of value) addValues(existing, ns, v);
   else map.set(id, value);
 };
