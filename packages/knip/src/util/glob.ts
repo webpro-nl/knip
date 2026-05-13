@@ -64,12 +64,18 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 };
 
 const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] }) => {
-  return globSync(patterns, {
-    cwd,
-    absolute: true,
-    followSymbolicLinks: false,
-    expandDirectories: false,
-  });
+  const cacheEnabled = isGlobCacheEnabled();
+  const patternList = Array.isArray(patterns) ? patterns : [patterns];
+  const cacheKey = cacheEnabled
+    ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false })
+    : '';
+  if (cacheEnabled) {
+    const cached = getCachedGlob(cacheKey);
+    if (cached) return cached;
+  }
+  const paths = globSync(patterns, { cwd, absolute: true, followSymbolicLinks: false, expandDirectories: false });
+  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, cwd);
+  return paths;
 };
 
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
