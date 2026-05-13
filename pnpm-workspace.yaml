@@ -4,3 +4,5 @@ packages:
 allowBuilds:
   esbuild: false
   sharp: false
+minimumReleaseAge: 4320
+trustPolicy: no-downgrade
