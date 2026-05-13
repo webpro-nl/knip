@@ -8,6 +8,7 @@ import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
 import { compact, partition } from './array.ts';
 import { debugLogObject } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
+import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
 import { dirname, join, relative, toPosix } from './path.ts';
@@ -61,6 +62,15 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
 
 /** @internal */
 export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<string>) => {
+  if (isGitignoreCacheEnabled()) {
+    const cached = getCachedGitignore(cwd, workspaceDirs);
+    if (cached) {
+      for (const [dir, data] of cached.perDirIgnores) cachedGitIgnores.set(dir, data);
+      debugLogObject('*', 'Parsed gitignore files (cached)', { gitignoreFiles: cached.gitignoreFiles });
+      return { gitignoreFiles: cached.gitignoreFiles, ignores: cached.ignores, unignores: cached.unignores };
+    }
+  }
+
   const ignores: Set<string> = new Set(GLOBAL_IGNORE_PATTERNS);
   const unignores: Set<string> = new Set();
   const gitignoreFiles: string[] = [];
@@ -220,6 +230,10 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   }
 
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
+
+  if (isGitignoreCacheEnabled()) {
+    setCachedGitignore(cwd, workspaceDirs, gitignoreFiles, ignores, unignores, cachedGitIgnores);
+  }
 
   return { gitignoreFiles, ignores, unignores };
 };

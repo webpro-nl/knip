@@ -82,6 +82,9 @@ Consecutive runs are 10-40% faster as the results of file analysis (AST
 traversal) are cached. Conservative. Cache strategy based on file meta data
 (modification time + file size).
 
+Newly-added `.gitignore` files are not detected automatically — delete the cache
+to pick them up.
+
 ### `--cache-location`
 
 Provide alternative cache location.
