@@ -2,7 +2,7 @@ import type { ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
-import { getStringValue, isStringLiteral, parseFile } from './ast-nodes.ts';
+import { _parseFile, getStringValue, isStringLiteral } from './ast-nodes.ts';
 
 export const getPropertyKey = (prop: any): string | undefined =>
   prop?.key?.type === 'Identifier' ? prop.key.name : getStringValue(prop?.key);
@@ -189,7 +189,7 @@ export const collectStringLiterals = (sourceText: string, filePath: string): Set
       collectJsonStringLiterals(JSON.parse(stripJsonComments(sourceText, { trailingCommas: true })), literals);
       return literals;
     }
-    const result = parseFile(filePath, sourceText);
+    const result = _parseFile(filePath, sourceText);
     const visitor = new Visitor({
       Literal(node: any) {
         if (typeof node.value === 'string') literals.add(node.value);

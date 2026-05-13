@@ -196,7 +196,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       .withPromise();
   };
 
-  await timerify(walkGitignores)();
+  await walkGitignores();
 
   // tinyglobby's `ignore` can't express unignores (see tinyglobby/fast-glob #86). Drop cached
   // ignore patterns shadowed by any unignore path (and its ancestor dirs) so glob() sees a

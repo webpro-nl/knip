@@ -17,6 +17,7 @@ import type { IssueSymbol, SymbolType } from '../../types/issues.ts';
 import type { Export, ExportMember, ImportMap, ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
+import { timerify } from '../../util/Performance.ts';
 import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import { handleCallExpression, handleNewExpression } from './calls.ts';
@@ -711,7 +712,7 @@ export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[], includ
   return new Visitor(merged as VisitorObject);
 }
 
-export function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
+function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
   const isJS =
     filePath.endsWith('.js') || filePath.endsWith('.mjs') || filePath.endsWith('.cjs') || filePath.endsWith('.jsx');
 
@@ -821,3 +822,5 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
   state = undefined!;
   return localRefs;
 }
+
+export const _walkAST = timerify(walkAST);

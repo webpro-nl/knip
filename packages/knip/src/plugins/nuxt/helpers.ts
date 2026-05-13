@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { Visitor, type ParseResult } from 'oxc-parser';
 import { scriptBodies } from '../../compilers/compilers.ts';
-import { parseFile } from '../../typescript/ast-nodes.ts';
+import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { basename, dirname, isInNodeModules, join } from '../../util/path.ts';
 import type { TemplateAstNode, VueSfc } from './types.ts';
 
@@ -25,7 +25,7 @@ const readFile = (filePath: string): string => {
   }
 };
 
-export const readAndParseFile = (filePath: string) => parseFile(filePath, readFile(filePath));
+export const readAndParseFile = (filePath: string) => _parseFile(filePath, readFile(filePath));
 
 export const collectIdentifiers = (source: string, fileName: string) => {
   const identifiers = new Set<string>();
@@ -34,7 +34,7 @@ export const collectIdentifiers = (source: string, fileName: string) => {
       identifiers.add(node.name);
     },
   });
-  visitor.visit(parseFile(fileName, source).program);
+  visitor.visit(_parseFile(fileName, source).program);
   return identifiers;
 };
 

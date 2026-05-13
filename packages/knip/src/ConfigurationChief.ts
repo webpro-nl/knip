@@ -21,6 +21,7 @@ import { _dirGlob, removeProductionSuffix } from './util/glob.ts';
 import { graphSequencer } from './util/graph-sequencer.ts';
 import mapWorkspaces from './util/map-workspaces.ts';
 import { join, relative } from './util/path.ts';
+import { timerify } from './util/Performance.ts';
 import { normalizePluginConfig } from './util/plugin.ts';
 import { toRegexOrString } from './util/regex.ts';
 import { ELLIPSIS } from './util/string.ts';
@@ -114,6 +115,7 @@ export class ConfigurationChief {
     this.workspaces = options.workspaces;
     this.rawConfig = options.parsedConfig;
     this.config = this.normalize(options.parsedConfig ?? {});
+    this.findWorkspaceByFilePath = timerify(this.findWorkspaceByFilePath.bind(this), 'findWorkspaceByFilePath');
   }
 
   public getConfigurationHints() {

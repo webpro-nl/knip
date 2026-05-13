@@ -21,7 +21,7 @@ import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
 import { createManifest, type Manifest } from './util/package-json.ts';
 import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
-import { parseFile } from './typescript/ast-nodes.ts';
+import { _parseFile } from './typescript/ast-nodes.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';
@@ -137,7 +137,7 @@ export class WorkspaceWorker {
 
     this.cache = new CacheConsultant(`plugins-${name}`, options);
 
-    this.getConfigurationHints = timerify(this.getConfigurationHints.bind(this), 'worker.getConfigurationHints');
+    this.getConfigurationHints = timerify(this.getConfigurationHints.bind(this), 'getConfigurationHints');
   }
 
   public async init() {
@@ -322,7 +322,7 @@ export class WorkspaceWorker {
     const configFilesMap = this.configFilesMap;
     const configFiles = this.configFilesMap.get(wsName);
     const seen = new Map<string, Set<string>>();
-    const parsedConfigCache = new Map<string, ReturnType<typeof parseFile> | undefined>();
+    const parsedConfigCache = new Map<string, ReturnType<typeof _parseFile> | undefined>();
 
     const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.handleInput(input);
@@ -400,13 +400,13 @@ export class WorkspaceWorker {
           continue;
         }
 
-        let parsed: ReturnType<typeof parseFile> | undefined;
+        let parsed: ReturnType<typeof _parseFile> | undefined;
         if (!isManifest) {
           if (parsedConfigCache.has(configFilePath)) {
             parsed = parsedConfigCache.get(configFilePath);
           } else {
             const sourceText = this.readFile(configFilePath);
-            parsed = sourceText ? parseFile(configFilePath, sourceText) : undefined;
+            parsed = sourceText ? _parseFile(configFilePath, sourceText) : undefined;
             parsedConfigCache.set(configFilePath, parsed);
           }
         }

@@ -8,6 +8,7 @@ import {
 import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../constants.ts';
 import { extname } from '../util/path.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.ts';
+import { timerify } from '../util/Performance.ts';
 import { EMPTY_TAGS } from './visitors/jsdoc.ts';
 import type { Fix } from '../types/exports.ts';
 import type { SymbolType } from '../types/issues.ts';
@@ -18,11 +19,13 @@ const defaultParseOptions = {
   experimentalRawTransfer: rawTransferSupported(),
 };
 
-export const parseFile = (filePath: string, sourceText: string) => {
+const parseFile = (filePath: string, sourceText: string) => {
   const ext = extname(filePath);
   const parseFileName = DEFAULT_EXTENSIONS.has(ext) ? filePath : `${filePath}.ts`;
   return parseSync(parseFileName, sourceText, defaultParseOptions);
 };
+
+export const _parseFile = timerify(parseFile);
 
 export type ResolveModule = (specifier: string, containingFile: string) => ResolvedModule | undefined;
 

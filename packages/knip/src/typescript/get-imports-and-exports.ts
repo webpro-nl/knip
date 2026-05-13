@@ -11,15 +11,15 @@ import { dirname, isInNodeModules, resolve } from '../util/path.ts';
 import { shouldIgnore } from '../util/tag.ts';
 import { extractImportsFromComments } from './comments.ts';
 import {
+  _parseFile,
   buildLineStarts,
   getLineAndCol,
-  parseFile,
   shouldCountRefs,
   type ResolveModule,
   type ResolvedModule,
 } from './ast-nodes.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
-import { walkAST } from './visitors/walk.ts';
+import { _walkAST } from './visitors/walk.ts';
 
 interface AddInternalImportOptions {
   specifier: string;
@@ -209,7 +209,7 @@ const getImportsAndExports = (
     }
   };
 
-  const result = cachedParseResult ?? parseFile(filePath, sourceText);
+  const result = cachedParseResult ?? _parseFile(filePath, sourceText);
   const lineStarts = buildLineStarts(sourceText);
   const getJSDocTags = buildJSDocTagLookup(result.comments, sourceText);
 
@@ -346,7 +346,7 @@ const getImportsAndExports = (
       addImport(spec, undefined, undefined, undefined, pos, mod);
   }
 
-  const localRefs = walkAST(result.program, sourceText, filePath, {
+  const localRefs = _walkAST(result.program, sourceText, filePath, {
     lineStarts,
     skipExports,
     options,

@@ -1,6 +1,6 @@
 import type { ParseResult, Visitor } from 'oxc-parser';
 import { extractSpecifiers } from './typescript/follow-imports.ts';
-import { parseFile } from './typescript/ast-nodes.ts';
+import { _parseFile } from './typescript/ast-nodes.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
 import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
@@ -69,6 +69,7 @@ export class ProjectPrincipal {
     this.fileManager = new SourceFileManager({
       compilers: [this.syncCompilers, this.asyncCompilers],
     });
+    this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
 
   addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
@@ -203,7 +204,7 @@ export class ProjectPrincipal {
         }
 
         try {
-          const result = parseFile(filePath, sourceText);
+          const result = _parseFile(filePath, sourceText);
           this.fileManager.sourceTextCache.delete(filePath);
 
           if (isProjectPath) {
@@ -235,7 +236,7 @@ export class ProjectPrincipal {
       if (!sourceText) continue;
 
       try {
-        const result = parseFile(filePath, sourceText);
+        const result = _parseFile(filePath, sourceText);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
           if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
