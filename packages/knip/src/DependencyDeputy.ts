@@ -156,10 +156,15 @@ export class DependencyDeputy {
     return this._manifests.get(workspaceName)?.devDependencies ?? [];
   }
 
+  private dependencyCache = new Map<string, DependencySet>();
+
   getDependencies(workspaceName: string): DependencySet {
+    let deps = this.dependencyCache.get(workspaceName);
+    if (deps) return deps;
     const manifest = this._manifests.get(workspaceName);
-    if (!manifest) return new Set();
-    return new Set([...manifest.dependencies, ...manifest.devDependencies]);
+    deps = manifest ? new Set([...manifest.dependencies, ...manifest.devDependencies]) : new Set();
+    this.dependencyCache.set(workspaceName, deps);
+    return deps;
   }
 
   setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, Set<string>>) {
