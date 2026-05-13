@@ -40,25 +40,15 @@ export class FileEntryCache<T> {
   constructor(cacheId: string, _path: string) {
     this.filePath = path.resolve(_path, cacheId);
     if (isFile(this.filePath)) this.cache = create(this.filePath);
-    this.removeNotFoundFiles();
-  }
-
-  removeNotFoundFiles() {
-    for (const filePath of this.normalizedEntries.keys()) {
-      try {
-        fs.statSync(filePath);
-      } catch (error) {
-        // @ts-expect-error
-        if (error.code === 'ENOENT') this.cache.delete(filePath);
-      }
-    }
   }
 
   getFileDescriptor(filePath: string): FileDescriptor<T> {
-    let fstat: fs.Stats;
+    if (!isAbsolute(filePath)) filePath = resolve(filePath);
+    const existing = this.normalizedEntries.get(filePath);
+    if (existing) return existing;
 
+    let fstat: fs.Stats;
     try {
-      if (!isAbsolute(filePath)) filePath = resolve(filePath);
       fstat = fs.statSync(filePath);
     } catch (error: unknown) {
       this.removeEntry(filePath);
@@ -70,29 +60,25 @@ export class FileEntryCache<T> {
 
   _getFileDescriptorUsingMtimeAndSize(filePath: string, fstat: fs.Stats) {
     let meta = this.cache.get(filePath);
-    const cacheExists = Boolean(meta);
-
     const cSize = fstat.size;
     const cTime = fstat.mtime.getTime();
 
-    let isDifferentDate: undefined | boolean;
-    let isDifferentSize: undefined | boolean;
-
+    let changed = false;
     if (meta) {
-      isDifferentDate = cTime !== meta.mtime;
-      isDifferentSize = cSize !== meta.size;
+      if (cTime !== meta.mtime || cSize !== meta.size) {
+        changed = true;
+        meta.data = undefined;
+      }
+      meta.mtime = cTime;
+      meta.size = cSize;
     } else {
+      changed = true;
       meta = { size: cSize, mtime: cTime };
+      this.cache.set(filePath, meta);
     }
 
-    const fd: FileDescriptor<T> = {
-      key: filePath,
-      changed: !cacheExists || isDifferentDate || isDifferentSize,
-      meta,
-    };
-
+    const fd: FileDescriptor<T> = { key: filePath, changed, meta };
     this.normalizedEntries.set(filePath, fd);
-
     return fd;
   }
 
@@ -102,33 +88,7 @@ export class FileEntryCache<T> {
     this.cache.delete(entryName);
   }
 
-  _getMetaForFileUsingMtimeAndSize(cacheEntry: FileDescriptor<T>) {
-    const stat = fs.statSync(cacheEntry.key);
-    const meta = Object.assign(cacheEntry.meta ?? {}, {
-      size: stat.size,
-      mtime: stat.mtime.getTime(),
-    });
-    return meta;
-  }
-
   reconcile() {
-    for (const [entryName, cacheEntry] of this.normalizedEntries) {
-      try {
-        const stat = fs.statSync(entryName);
-        const meta = Object.assign(cacheEntry.meta ?? {}, {
-          size: stat.size,
-          mtime: stat.mtime.getTime(),
-        });
-        this.cache.set(entryName, meta);
-      } catch (error) {
-        // @ts-expect-error
-        if (error.code === 'ENOENT') {
-          this.normalizedEntries.delete(entryName);
-          this.cache.delete(entryName);
-        } else throw error;
-      }
-    }
-
     try {
       const dir = dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
