@@ -6,28 +6,21 @@ import { version } from './version.ts';
 const dummyFileDescriptor: FileDescriptor<any> = { key: '', changed: true, notFound: true };
 
 export class CacheConsultant<T> {
-  private isEnabled: boolean;
-  private cache: undefined | FileEntryCache<T>;
+  private cache: FileEntryCache<T> | undefined;
+  getFileDescriptor: (filePath: string) => FileDescriptor<T> = () => dummyFileDescriptor;
+  reconcile: () => void = () => {};
 
   constructor(name: string, options: MainOptions) {
-    this.isEnabled = options.isCache;
-    if (this.isEnabled) {
-      const cacheName = `${name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${options.isProduction ? '-prod' : ''}-${version}`;
-      this.cache = new FileEntryCache(cacheName, options.cacheLocation);
-      this.reconcile = timerify(this.cache.reconcile).bind(this.cache);
-      this.getFileDescriptor = timerify(this.cache.getFileDescriptor).bind(this.cache);
-    }
+    if (!options.isCache) return;
+    const cacheName = `${name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${options.isProduction ? '-prod' : ''}-${version}`;
+    this.cache = new FileEntryCache(cacheName, options.cacheLocation);
+    this.getFileDescriptor = timerify(this.cache.getFileDescriptor.bind(this.cache));
+    this.reconcile = timerify(this.cache.reconcile.bind(this.cache));
   }
-  public getFileDescriptor(filePath: string): FileDescriptor<T> {
-    if (this.isEnabled && this.cache) return this.cache.getFileDescriptor(filePath);
-    return dummyFileDescriptor;
-  }
-  public getCachedFile(filePath: string): T | undefined {
-    if (!this.isEnabled || !this.cache) return undefined;
+
+  getCachedFile(filePath: string): T | undefined {
+    if (!this.cache) return undefined;
     const fd = this.cache.getFileDescriptor(filePath);
     return !fd.changed ? fd.meta?.data : undefined;
-  }
-  public reconcile() {
-    if (this.isEnabled && this.cache) this.cache.reconcile();
   }
 }
