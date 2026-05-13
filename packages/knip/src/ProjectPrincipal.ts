@@ -55,6 +55,7 @@ export class ProjectPrincipal {
 
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
+  private onPathAdded: ((filePath: string) => void) | undefined;
 
   constructor(
     options: MainOptions,
@@ -132,6 +133,7 @@ export class ProjectPrincipal {
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
       if (options?.skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
+      this.onPathAdded?.(filePath);
     }
   }
 
@@ -142,6 +144,7 @@ export class ProjectPrincipal {
   addProgramPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.programPaths.add(filePath);
+      this.onPathAdded?.(filePath);
     }
   }
 
@@ -178,55 +181,46 @@ export class ProjectPrincipal {
   ) {
     this.resolvedFiles.clear();
     const visited = new Set([...this.entryPaths, ...this.programPaths]);
-    let lastEntrySize = this.entryPaths.size;
-    let lastProgramSize = this.programPaths.size;
+    this.onPathAdded = p => visited.add(p);
 
-    const rescanFrontier = () => {
-      if (this.entryPaths.size > lastEntrySize || this.programPaths.size > lastProgramSize) {
-        for (const p of this.entryPaths) visited.add(p);
-        for (const p of this.programPaths) visited.add(p);
-        lastEntrySize = this.entryPaths.size;
-        lastProgramSize = this.programPaths.size;
-      }
-    };
+    try {
+      for (const filePath of visited) {
+        const isProjectPath = this.projectPaths.has(filePath);
 
-    for (const filePath of visited) {
-      const isProjectPath = this.projectPaths.has(filePath);
+        // Cached project files: skip read+parse and pass the cached FileNode through.
+        const cachedFile = isProjectPath ? this.cache.getCachedFile(filePath) : undefined;
 
-      // Cached project files: skip read+parse and pass the cached FileNode through.
-      const cachedFile = isProjectPath ? this.cache.getCachedFile(filePath) : undefined;
-
-      if (cachedFile) {
-        const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
-        if (internalPaths) for (const p of internalPaths) visited.add(p);
-        rescanFrontier();
-        continue;
-      }
-
-      const sourceText = this.fileManager.readFile(filePath);
-      if (!sourceText) {
-        if (isProjectPath) analyzeFile(filePath, undefined, '');
-        continue;
-      }
-
-      try {
-        const result = parseFile(filePath, sourceText);
-        this.fileManager.sourceTextCache.delete(filePath);
-
-        if (isProjectPath) {
-          const internalPaths = analyzeFile(filePath, result, sourceText);
+        if (cachedFile) {
+          const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
           if (internalPaths) for (const p of internalPaths) visited.add(p);
-        } else {
-          for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-            const resolved = this.resolveSpecifier(specifier, filePath);
-            if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
-          }
+          continue;
         }
 
-        rescanFrontier();
-      } catch {
-        // Parse error — skip this file
+        const sourceText = this.fileManager.readFile(filePath);
+        if (!sourceText) {
+          if (isProjectPath) analyzeFile(filePath, undefined, '');
+          continue;
+        }
+
+        try {
+          const result = parseFile(filePath, sourceText);
+          this.fileManager.sourceTextCache.delete(filePath);
+
+          if (isProjectPath) {
+            const internalPaths = analyzeFile(filePath, result, sourceText);
+            if (internalPaths) for (const p of internalPaths) visited.add(p);
+          } else {
+            for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+              const resolved = this.resolveSpecifier(specifier, filePath);
+              if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
+            }
+          }
+        } catch {
+          // Parse error — skip this file
+        }
       }
+    } finally {
+      this.onPathAdded = undefined;
     }
 
     this.resolvedFiles = visited;
