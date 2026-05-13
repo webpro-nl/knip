@@ -1,12 +1,8 @@
 import fs from 'node:fs';
 // oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
-import { deserialize, serialize } from 'node:v8';
-import { version } from '../version.ts';
-import { debugLog } from './debug.ts';
-import { isDirectory, isFile } from './fs.ts';
+import { createDiskCache } from './disk-cache.ts';
 import type { Gitignores } from './glob-core.ts';
-import { dirname } from './path.ts';
 
 interface SerializedGitignores {
   ignores: string[];
@@ -33,27 +29,11 @@ export interface CachedGitignoreResult {
   perDirIgnores: Map<string, Gitignores>;
 }
 
-const CACHE_FILENAME = `gitignore-${version}.cache`;
+const store = createDiskCache<GitignoreCacheEntry>('gitignore');
 
-let cacheFilePath: string | undefined;
-let cache: Map<string, GitignoreCacheEntry> | undefined;
-let isDirty = false;
-
-export const initGitignoreCache = (cacheLocation: string) => {
-  cacheFilePath = path.resolve(cacheLocation, CACHE_FILENAME);
-  if (isFile(cacheFilePath)) {
-    try {
-      cache = deserialize(fs.readFileSync(cacheFilePath));
-    } catch {
-      debugLog('*', `Error reading gitignore cache from ${cacheFilePath}`);
-      cache = new Map();
-    }
-  } else {
-    cache = new Map();
-  }
-};
-
-export const isGitignoreCacheEnabled = () => cache !== undefined;
+export const initGitignoreCache = store.init;
+export const isGitignoreCacheEnabled = store.isEnabled;
+export const flushGitignoreCache = store.flush;
 
 const workspaceDirsKey = (workspaceDirs?: Set<string>): string => {
   if (!workspaceDirs || workspaceDirs.size === 0) return '';
@@ -76,13 +56,11 @@ const validateEntry = (entry: GitignoreCacheEntry, wsKey: string, cwd: string): 
 };
 
 export const getCachedGitignore = (cwd: string, workspaceDirs?: Set<string>): CachedGitignoreResult | undefined => {
-  if (!cache) return undefined;
-  const entry = cache.get(cwd);
+  const entry = store.get(cwd);
   if (!entry) return undefined;
   const wsKey = workspaceDirsKey(workspaceDirs);
   if (!validateEntry(entry, wsKey, cwd)) {
-    cache.delete(cwd);
-    isDirty = true;
+    store.delete(cwd);
     return undefined;
   }
   const perDirIgnores = new Map<string, Gitignores>();
@@ -106,7 +84,7 @@ export const setCachedGitignore = (
   unignores: Set<string>,
   perDirIgnores: Map<string, Gitignores>
 ): void => {
-  if (!cache) return;
+  if (!store.isEnabled()) return;
   const mtimes: number[] = [];
   const validFiles: string[] = [];
   for (const file of gitignoreFiles) {
@@ -122,7 +100,7 @@ export const setCachedGitignore = (
   for (const [dir, data] of perDirIgnores) {
     perDir[dir] = { ignores: [...data.ignores], unignores: [...data.unignores] };
   }
-  cache.set(cwd, {
+  store.set(cwd, {
     gitignoreFiles: validFiles,
     mtimes,
     ignores: [...ignores],
@@ -130,17 +108,4 @@ export const setCachedGitignore = (
     perDirIgnores: perDir,
     workspaceDirsKey: workspaceDirsKey(workspaceDirs),
   });
-  isDirty = true;
-};
-
-export const flushGitignoreCache = (): void => {
-  if (!cache || !cacheFilePath || !isDirty) return;
-  try {
-    const dir = dirname(cacheFilePath);
-    if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(cacheFilePath, serialize(cache));
-    isDirty = false;
-  } catch {
-    debugLog('*', `Error writing gitignore cache to ${cacheFilePath}`);
-  }
 };

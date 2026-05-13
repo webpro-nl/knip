@@ -1,11 +1,6 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
-// oxlint-disable-next-line no-restricted-imports
-import path from 'node:path';
-import { deserialize, serialize } from 'node:v8';
-import { version } from '../version.ts';
-import { debugLog } from './debug.ts';
-import { isDirectory, isFile } from './fs.ts';
+import { createDiskCache } from './disk-cache.ts';
 import { dirname } from './path.ts';
 
 interface GlobCacheEntry {
@@ -14,27 +9,12 @@ interface GlobCacheEntry {
   dirMtimes: Record<string, number>;
 }
 
-const CACHE_FILENAME = `glob-${version}.cache`;
+const store = createDiskCache<GlobCacheEntry>('glob');
 
-let cacheFilePath: string | undefined;
-let cache: Map<string, GlobCacheEntry> | undefined;
-let isDirty = false;
-
-export const initGlobCache = (cacheLocation: string) => {
-  cacheFilePath = path.resolve(cacheLocation, CACHE_FILENAME);
-  if (isFile(cacheFilePath)) {
-    try {
-      cache = deserialize(fs.readFileSync(cacheFilePath));
-    } catch {
-      debugLog('*', `Error reading glob cache from ${cacheFilePath}`);
-      cache = new Map();
-    }
-  } else {
-    cache = new Map();
-  }
-};
-
-export const isGlobCacheEnabled = () => cache !== undefined;
+export const initGlobCache = store.init;
+export const isGlobCacheEnabled = store.isEnabled;
+export const flushGlobCache = store.flush;
+export const clearGlobCache = store.clear;
 
 export const computeGlobCacheKey = (input: {
   patterns: string[];
@@ -69,12 +49,10 @@ const validateEntry = (entry: GlobCacheEntry): boolean => {
 };
 
 export const getCachedGlob = (key: string): string[] | undefined => {
-  if (!cache) return undefined;
-  const entry = cache.get(key);
+  const entry = store.get(key);
   if (!entry) return undefined;
   if (!validateEntry(entry)) {
-    cache.delete(key);
-    isDirty = true;
+    store.delete(key);
     return undefined;
   }
   return entry.paths;
@@ -107,29 +85,5 @@ const captureDirMtimes = (paths: string[], baseDir: string): Record<string, numb
 };
 
 export const setCachedGlob = (key: string, paths: string[], baseDir: string): void => {
-  if (!cache) return;
-  cache.set(key, {
-    paths,
-    dirMtimes: captureDirMtimes(paths, baseDir),
-  });
-  isDirty = true;
-};
-
-export const clearGlobCache = (): void => {
-  if (cache) {
-    cache.clear();
-    isDirty = true;
-  }
-};
-
-export const flushGlobCache = (): void => {
-  if (!cache || !cacheFilePath || !isDirty) return;
-  try {
-    const dir = dirname(cacheFilePath);
-    if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(cacheFilePath, serialize(cache));
-    isDirty = false;
-  } catch {
-    debugLog('*', `Error writing glob cache to ${cacheFilePath}`);
-  }
+  store.set(key, { paths, dirMtimes: captureDirMtimes(paths, baseDir) });
 };
