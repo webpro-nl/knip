@@ -194,11 +194,7 @@ export class ProjectPrincipal {
       const isProjectPath = this.projectPaths.has(filePath);
 
       // Cached project files: skip read+parse and pass the cached FileNode through.
-      let cachedFile: FileNode | undefined;
-      if (isProjectPath) {
-        const fd = this.cache.getFileDescriptor(filePath);
-        if (!fd.changed && fd.meta?.data) cachedFile = fd.meta.data;
-      }
+      const cachedFile = isProjectPath ? this.cache.getCachedFile(filePath) : undefined;
 
       if (cachedFile) {
         const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
@@ -277,8 +273,8 @@ export class ProjectPrincipal {
   ) {
     if (cachedFile) return cachedFile;
 
-    const fd = this.cache.getFileDescriptor(filePath);
-    if (!fd.changed && fd.meta?.data) return fd.meta.data;
+    const cached = this.cache.getCachedFile(filePath);
+    if (cached) return cached;
 
     sourceText ??= this.fileManager.readFile(filePath);
 

@@ -5,9 +5,10 @@ import { deserialize, serialize } from 'node:v8';
 import { version } from '../version.ts';
 import { debugLog } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
+import type { Gitignores } from './glob-core.ts';
 import { dirname } from './path.ts';
 
-interface PerDirIgnores {
+interface SerializedGitignores {
   ignores: string[];
   unignores: string[];
 }
@@ -20,7 +21,7 @@ interface GitignoreCacheEntry {
   ignores: string[];
   unignores: string[];
   /** Absolute dir path → cached ignores/unignores for that dir */
-  perDirIgnores: Record<string, PerDirIgnores>;
+  perDirIgnores: Record<string, SerializedGitignores>;
   /** Sorted workspace dirs, joined with \0 — invalidates when workspace set changes */
   workspaceDirsKey: string;
 }
@@ -29,7 +30,7 @@ export interface CachedGitignoreResult {
   ignores: Set<string>;
   unignores: Set<string>;
   gitignoreFiles: string[];
-  perDirIgnores: Map<string, { ignores: Set<string>; unignores: Set<string> }>;
+  perDirIgnores: Map<string, Gitignores>;
 }
 
 const CACHE_FILENAME = `gitignore-${version}.cache`;
@@ -84,7 +85,7 @@ export const getCachedGitignore = (cwd: string, workspaceDirs?: Set<string>): Ca
     isDirty = true;
     return undefined;
   }
-  const perDirIgnores = new Map<string, { ignores: Set<string>; unignores: Set<string> }>();
+  const perDirIgnores = new Map<string, Gitignores>();
   for (const dir in entry.perDirIgnores) {
     const data = entry.perDirIgnores[dir];
     perDirIgnores.set(dir, { ignores: new Set(data.ignores), unignores: new Set(data.unignores) });
@@ -103,7 +104,7 @@ export const setCachedGitignore = (
   gitignoreFiles: string[],
   ignores: Set<string>,
   unignores: Set<string>,
-  perDirIgnores: Map<string, { ignores: Set<string>; unignores: Set<string> }>
+  perDirIgnores: Map<string, Gitignores>
 ): void => {
   if (!cache) return;
   const mtimes: number[] = [];
@@ -117,7 +118,7 @@ export const setCachedGitignore = (
       // File was removed between read and stat; skip rather than poison cache
     }
   }
-  const perDir: Record<string, PerDirIgnores> = {};
+  const perDir: Record<string, SerializedGitignores> = {};
   for (const [dir, data] of perDirIgnores) {
     perDir[dir] = { ignores: [...data.ignores], unignores: [...data.unignores] };
   }

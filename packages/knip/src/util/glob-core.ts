@@ -22,7 +22,7 @@ interface GlobOptions extends TinyGlobOptions {
   label?: string;
 }
 
-type Gitignores = { ignores: Set<string>; unignores: Set<string> };
+export type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 
 // ignore patterns are cached per gitignore file
 const cachedGitIgnores = new Map<string, Gitignores>();

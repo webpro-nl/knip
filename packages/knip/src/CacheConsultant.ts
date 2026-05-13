@@ -22,6 +22,11 @@ export class CacheConsultant<T> {
     if (this.isEnabled && this.cache) return this.cache.getFileDescriptor(filePath);
     return dummyFileDescriptor;
   }
+  public getCachedFile(filePath: string): T | undefined {
+    if (!this.isEnabled || !this.cache) return undefined;
+    const fd = this.cache.getFileDescriptor(filePath);
+    return !fd.changed ? fd.meta?.data : undefined;
+  }
   public reconcile() {
     if (this.isEnabled && this.cache) this.cache.reconcile();
   }

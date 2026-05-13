@@ -55,10 +55,6 @@ export class FileEntryCache<T> {
       return { key: filePath, notFound: true, err: error };
     }
 
-    return this._getFileDescriptorUsingMtimeAndSize(filePath, fstat);
-  }
-
-  _getFileDescriptorUsingMtimeAndSize(filePath: string, fstat: fs.Stats) {
     let meta = this.cache.get(filePath);
     const cSize = fstat.size;
     const cTime = fstat.mtime.getTime();
