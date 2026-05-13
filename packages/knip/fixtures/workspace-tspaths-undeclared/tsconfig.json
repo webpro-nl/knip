@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@scope/fruit": ["projects/lib-fruit/src/index"],
+      "@scope/fruit/*": ["projects/lib-fruit/src/*"]
+    }
+  }
+}

@@ -43,6 +43,7 @@ export class DependencyDeputy {
   isStrict;
   isReportDependencies;
   _manifests: WorkspaceManifests = new Map();
+  workspacePkgNames: Set<string> = new Set();
   referencedDependencies: Map<string, Set<string>>;
   referencedBinaries: Map<string, Set<string>>;
   hostDependencies: Map<string, HostDependencies>;
@@ -140,6 +141,10 @@ export class DependencyDeputy {
     return this._manifests.get(workspaceName);
   }
 
+  public setWorkspacePkgNames(pkgNames: Iterable<string>) {
+    this.workspacePkgNames = new Set(pkgNames);
+  }
+
   getProductionDependencies(workspaceName: string): DependencyArray {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return [];
@@ -235,6 +240,11 @@ export class DependencyDeputy {
     if (closestWorkspaceNameForTypes && isTypeOnly) return true;
 
     if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
+
+    if (!this.isStrict && this.workspacePkgNames.has(packageName)) {
+      this.addReferencedDependency(workspace.name, packageName);
+      return true;
+    }
 
     if (!this.isStrict) {
       for (const name of workspaceNames) {

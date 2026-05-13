@@ -98,6 +98,8 @@ export async function build({
     counselor.addWorkspace(manifest);
   }
 
+  deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
+
   collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
   collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 

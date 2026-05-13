@@ -5,24 +5,24 @@ import baseCounters from './helpers/baseCounters.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
-const cwd = resolve('fixtures/module-resolution-non-std-absolute');
-
-test('Resolve non-standard absolute specifiers', async () => {
+test('import of sibling workspace via tsconfig paths is not unlisted', async () => {
+  const cwd = resolve('fixtures/workspace-tspaths-undeclared');
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!issues.unlisted['x-self/index.ts']?.['x-other']);
+  assert(!issues.unlisted['projects/demo/src/index.ts']?.['@scope/fruit']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
 
-test('Resolve non-standard absolute specifiers (strict flags sibling workspace)', async () => {
+test('strict mode still flags undeclared sibling workspace as unlisted', async () => {
+  const cwd = resolve('fixtures/workspace-tspaths-undeclared');
   const options = await createOptions({ cwd, isStrict: true, isProduction: false });
   const { issues } = await main(options);
 
-  assert(issues.unlisted['x-self/index.ts']['x-other']);
+  assert(issues.unlisted['projects/demo/src/index.ts']?.['@scope/fruit']);
 });
