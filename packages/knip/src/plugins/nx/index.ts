@@ -56,9 +56,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     .map(executor => executor?.split(':')[0]);
 
   const expand = (value: string) =>
-    value
-      .replaceAll('{projectRoot}', options.configFileDir)
-      .replaceAll('{workspaceRoot}', options.rootCwd);
+    value.replaceAll('{projectRoot}', options.configFileDir).replaceAll('{workspaceRoot}', options.rootCwd);
 
   const resolveTargetCwd = (targetCwd: string | undefined) => {
     if (!targetCwd) return options.cwd;

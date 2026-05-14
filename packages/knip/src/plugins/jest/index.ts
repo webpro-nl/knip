@@ -23,7 +23,11 @@ const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', 
 
 const rootDirRe = /<rootDir>/;
 
-const resolveDependencies = async (config: JestInitialOptions, rootDir: string, options: PluginOptions): Promise<Input[]> => {
+const resolveDependencies = async (
+  config: JestInitialOptions,
+  rootDir: string,
+  options: PluginOptions
+): Promise<Input[]> => {
   const { configFileDir } = options;
 
   if (config?.preset) {

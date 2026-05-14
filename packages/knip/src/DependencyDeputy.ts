@@ -95,11 +95,7 @@ export class DependencyDeputy {
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
-    const packageNames = [
-      ...dependencies,
-      ...peerDependencies,
-      ...(this.isProduction ? [] : devDependencies),
-    ];
+    const packageNames = [...dependencies, ...peerDependencies, ...(this.isProduction ? [] : devDependencies)];
 
     if (this.isReportDependencies) {
       const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({

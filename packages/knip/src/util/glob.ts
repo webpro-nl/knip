@@ -66,9 +66,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] }) => {
   const cacheEnabled = isGlobCacheEnabled();
   const patternList = Array.isArray(patterns) ? patterns : [patterns];
-  const cacheKey = cacheEnabled
-    ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false })
-    : '';
+  const cacheKey = cacheEnabled ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false }) : '';
   if (cacheEnabled) {
     const cached = getCachedGlob(cacheKey);
     if (cached) return cached;

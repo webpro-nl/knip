@@ -17,7 +17,7 @@
   "workspaces": [
     "packages/*"
   ],
-  "type": "module", 
+  "type": "module",
   "scripts": {
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
