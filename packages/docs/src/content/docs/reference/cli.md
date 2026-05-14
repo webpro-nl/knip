@@ -108,6 +108,8 @@ Ignore `.gitignore` files.
 
 ### `--production`
 
+Shortcut: `-p`
+
 Lint only production source files. This excludes:
 
 - entry files defined by plugins:
@@ -120,12 +122,16 @@ Read more at [Production Mode][6].
 
 ### `--strict`
 
+Shortcut: `-s`
+
 Isolate workspaces and consider only direct dependencies. Implies [production
 mode][7].
 
 Read more at [Production Mode][6].
 
 ### `--watch`
+
+Shortcut: `-w`
 
 Watch current directory, and update reported issues when a file is modified,
 added or deleted.
@@ -145,6 +151,8 @@ Shortcut: `-W`
 See [filter workspaces][8] for more details and examples.
 
 ### `--directory [dir]`
+
+Shortcut: `-D`
 
 Default: `cwd` (current directory)
 
@@ -249,6 +257,8 @@ knip --tags @lintignore --tags @internal
 
 ### `--fix`
 
+Shortcut: `-f`
+
 Read more at [auto-fix][10].
 
 ### `--fix-type`
@@ -262,6 +272,8 @@ More info about fixable types at [issue types][9]
 Allow Knip to remove files (with `--fix`).
 
 ### `--format`
+
+Shortcut: `-F`
 
 Format modified files after `--fix` using the local formatter.
 
@@ -434,6 +446,13 @@ Total running time: 5s
 
 This is not yet available in Bun, since it does not support
 `performance.timerify` ([GitHub issue][14]).
+
+### `--duration`
+
+Shortcut: `-u`
+
+Print total running time. Zero overhead — no `timerify` instrumentation, unlike
+`--performance`.
 
 ### `--performance-fn`
 
