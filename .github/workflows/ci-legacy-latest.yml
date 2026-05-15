@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Install latest peer dependencies
-        run: pnpm add typescript@latest @types/node@22
+        run: pnpm add typescript@latest @types/node@22 --config.trustPolicy=allow
         working-directory: packages/knip
       - name: Build knip
         run: pnpm run build
