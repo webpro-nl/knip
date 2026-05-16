@@ -132,7 +132,7 @@ export class LanguageServer {
 
       if (!uri) return { capabilities: {} };
 
-      this.cwd = fileURLToPath(uri);
+      this.cwd = params.initializationOptions?.cwd ?? fileURLToPath(uri);
 
       this.initConfig = params.initializationOptions?.config;
 

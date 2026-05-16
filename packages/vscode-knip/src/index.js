@@ -34,6 +34,20 @@ const require = createRequire(import.meta.url);
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
+/**
+ * Directory Knip runs in (its cwd), from the `knip.cwd` setting. Absolute, or
+ * relative to the VS Code workspace folder; defaults to the folder itself.
+ * @param {import('vscode').WorkspaceFolder} folder
+ * @returns {string}
+ */
+function resolveKnipCwd(folder) {
+  const cwd = vscode.workspace.getConfiguration('knip', folder.uri).get('cwd', '');
+  const base = folder.uri.fsPath;
+  const trimmed = typeof cwd === 'string' ? cwd.trim() : '';
+  if (!trimmed) return base;
+  return path.isAbsolute(trimmed) ? path.normalize(trimmed) : path.resolve(base, trimmed);
+}
+
 export class Extension {
   /** @type {Extension | undefined} */
   static #instance;
@@ -145,7 +159,18 @@ export class Extension {
       }
     }
 
-    this.#outputChannel.info(`Starting Knip Language Server for ${folder.name}`);
+    const cwd = resolveKnipCwd(folder);
+    if (cwd !== folder.uri.fsPath && !existsSync(path.join(cwd, 'package.json'))) {
+      this.#outputChannel.warn(
+        `knip.cwd for ${folder.name} resolved to ${cwd}, but no package.json is there — Knip will fail. Check the "knip.cwd" setting.`
+      );
+    }
+
+    this.#outputChannel.info(
+      cwd === folder.uri.fsPath
+        ? `Starting Knip Language Server for ${folder.name}`
+        : `Starting Knip Language Server for ${folder.name} (cwd: ${cwd})`
+    );
 
     const runtime = config.get('nodeRuntimePath', '') || 'node';
 
@@ -167,7 +192,7 @@ export class Extension {
         fileEvents: [vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'))],
       },
       workspaceFolder: folder,
-      initializationOptions: { config },
+      initializationOptions: { config, cwd },
       outputChannel: this.#outputChannel,
       outputChannelName: 'Knip',
     };
@@ -217,8 +242,18 @@ export class Extension {
   }
 
   #logManagedWorkspaces() {
-    const names = [...this.#clients.keys()].map(uri => fileURLToPath(uri));
-    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${names.join(', ')}`);
+    const parts = [];
+    for (const key of this.#clients.keys()) {
+      const folder = vscode.workspace.workspaceFolders?.find(f => f.uri.toString() === key);
+      if (folder) {
+        const cwd = resolveKnipCwd(folder);
+        const ws = folder.uri.fsPath;
+        parts.push(cwd === ws ? cwd : `${ws} (Knip cwd: ${cwd})`);
+      } else {
+        parts.push(vscode.Uri.parse(key).fsPath);
+      }
+    }
+    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${parts.join(', ')}`);
   }
 
   /**
@@ -450,7 +485,7 @@ export class Extension {
 
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
     if (!folder) return null;
-    const root = toPosix(folder.uri.fsPath);
+    const root = toPosix(resolveKnipCwd(folder));
 
     if (path.basename(document.uri.fsPath) === 'package.json') {
       if (!config.get('editor.dependencies.hover.enabled', true)) return null;
@@ -603,12 +638,14 @@ export class Extension {
    * @returns {Promise<boolean>}
    */
   async #hasKnipConfig(folder) {
-    const config = vscode.workspace.getConfiguration('knip');
+    const config = vscode.workspace.getConfiguration('knip', folder.uri);
     const configFile = config.get('configFilePath', '');
     const locations = configFile ? [configFile] : KNIP_CONFIG_LOCATIONS;
 
+    const rootUri = vscode.Uri.file(resolveKnipCwd(folder));
+
     for (const location of locations) {
-      const candidate = vscode.Uri.joinPath(folder.uri, location);
+      const candidate = vscode.Uri.joinPath(rootUri, location);
       try {
         await vscode.workspace.fs.stat(candidate);
         return true;
