@@ -928,7 +928,7 @@
     },
     "paths": {
       "type": "object",
-      "additionalProperty": {
+      "additionalProperties": {
         "type": "array",
         "items": {
           "type": "string"

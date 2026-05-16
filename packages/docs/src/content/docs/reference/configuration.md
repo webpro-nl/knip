@@ -87,6 +87,30 @@ TypeScript semantics:
 
 ## Workspaces
 
+### `workspaces`
+
+Configure `entry`, `project`, plugins and most other options per workspace.
+Keys are workspace directories (globs allowed); the root workspace is `"."`.
+
+```json title="knip.json"
+{
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"],
+      "project": ["scripts/**/*.ts"]
+    },
+    "packages/*": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  }
+}
+```
+
+Workspaces configured here that aren't already defined in the root
+`package.json` (or `pnpm-workspace.yaml`) are added to the analysis. Also see
+[Monorepos & Workspaces][4].
+
 Individual workspace configurations may contain all other options listed on this
 page, except for the following root-only options:
 
@@ -314,7 +338,7 @@ Actual regular expressions can be used in dynamic configurations:
 
 ```ts title="knip.ts"
 export default {
-  ignoreUnresolved: [/^#/.+/],
+  ignoreUnresolved: [/^#virtual\/.+/],
 };
 ```
 
@@ -377,6 +401,9 @@ In a more fine-grained manner, to ignore only specific issue types:
   }
 }
 ```
+
+Valid keys are the symbol types Knip distinguishes: `class`, `enum`,
+`function`, `interface`, `member`, `namespace`, `type` and `variable`.
 
 ### `includeEntryExports`
 

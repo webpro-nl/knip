@@ -39,7 +39,12 @@ Shortcut: `-c`
 
 ### `--use-tsconfig-files`
 
-Use `tsconfig.json` to define project files (override `project` patterns).
+Per workspace, take project files from `tsconfig.json` (`files` + `include`,
+minus `exclude`, `node_modules` and `outDir`) instead of the `project` patterns.
+Workspaces without a `tsconfig.json` fall back to their `project` patterns.
+
+Implicitly enabled in the [editor extension, MCP server
+and language server][1] when there is no Knip configuration file.
 
 ### `--tsConfig [file]`
 
@@ -61,12 +66,12 @@ knip-bun
 
 This is equal to `bunx --bun knip`
 
-Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
+Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
 ### NO_COLOR
 
-The built-in reporters use the [NO_COLOR][3] friendly [picocolors][4]:
+The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
@@ -100,7 +105,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][5].
+Also see [includeEntryExports][6].
 
 ### `--no-gitignore`
 
@@ -118,16 +123,16 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][6].
+Read more at [Production Mode][7].
 
 ### `--strict`
 
 Shortcut: `-s`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][7].
+mode][8].
 
-Read more at [Production Mode][6].
+Read more at [Production Mode][7].
 
 ### `--watch`
 
@@ -148,7 +153,7 @@ workspaces). The default behavior is to lint all configured workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][8] for more details and examples.
+See [filter workspaces][9] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -179,7 +184,7 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-Available [issue types][9] when filtering output using `--include` or
+Available [issue types][10] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -259,13 +264,13 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][10].
+Read more at [auto-fix][11].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][9]
+More info about fixable types at [issue types][10]
 
 ### `--allow-remove-files`
 
@@ -281,7 +286,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][11].
+Preprocess the results before providing it to the [reporter(s)][12].
 
 Can be repeated. Examples:
 
@@ -293,7 +298,7 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
-Also see [Reporters & Preprocessors][12].
+Also see [Reporters & Preprocessors][13].
 
 ### `--preprocessor-options [json]`
 
@@ -322,7 +327,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][12].
+Also see [Reporters & Preprocessors][13].
 
 ### `--reporter-options [json]`
 
@@ -368,7 +373,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][13].
+Show [debug output][14].
 
 ### `--memory`
 
@@ -445,7 +450,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][14]).
+`performance.timerify` ([GitHub issue][15]).
 
 ### `--duration`
 
@@ -475,34 +480,35 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][15].
+Also see [Trace][16].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][16].
+[--trace][17].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][16].
+Trace export name to see where it's imported. Implies [--trace][17].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][16].
+Trace file to see where its exports are imported. Implies [--trace][17].
 
-[1]: https://bun.sh
-[2]: ../reference/known-issues.md
-[3]: https://no-color.org/
-[4]: https://www.npmjs.com/package/picocolors
-[5]: ./configuration.md#includeentryexports
-[6]: ../features/production-mode.md
-[7]: #--production
-[8]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[9]: ./issue-types.md
-[10]: ../features/auto-fix.mdx
-[11]: #--reporter-reporter
-[12]: ../features/reporters.md
-[13]: ../guides/troubleshooting.md#debug
-[14]: https://github.com/oven-sh/bun/issues/9271
-[15]: ../guides/troubleshooting.md#trace
-[16]: #--trace
+[1]: ./integrations.md
+[2]: https://bun.sh
+[3]: ../reference/known-issues.md
+[4]: https://no-color.org/
+[5]: https://www.npmjs.com/package/picocolors
+[6]: ./configuration.md#includeentryexports
+[7]: ../features/production-mode.md
+[8]: #--production
+[9]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[10]: ./issue-types.md
+[11]: ../features/auto-fix.mdx
+[12]: #--reporter-reporter
+[13]: ../features/reporters.md
+[14]: ../guides/troubleshooting.md#debug
+[15]: https://github.com/oven-sh/bun/issues/9271
+[16]: ../guides/troubleshooting.md#trace
+[17]: #--trace

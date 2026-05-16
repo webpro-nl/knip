@@ -42,7 +42,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
-const plugin: Plugin {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -117,7 +117,7 @@ const resolveConfig: ResolveConfig<NycConfig> = config => {
   return [extend, requires].flat().map(id => toDeferResolve(id));
 };
 
-const plugin: Plugin {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,

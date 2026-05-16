@@ -217,7 +217,7 @@ supports a local JavaScript or TypeScript file or an external dependency.
 The default export of the reporter should be a function with this interface:
 
 ```ts
-type Reporter = async (options: ReporterOptions): void;
+type Reporter = (options: ReporterOptions) => void;
 
 type ReporterOptions = {
   report: Report;
@@ -274,7 +274,7 @@ reporters. There are no built-in preprocessors. Just like reporters, use e.g.
 The default export of the preprocessor should be a function with this interface:
 
 ```ts
-type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
+type Preprocessor = (options: ReporterOptions) => ReporterOptions;
 ```
 
 Like reporters, you can use local JavaScript or TypeScript files and external

@@ -55,7 +55,7 @@ configuration like this:
 
 ```json
 {
-  "workspaces" {
+  "workspaces": {
     "packages/app": {
       "entry": ["src/App.tsx"],
       "project": ["src/**/*.ts"]

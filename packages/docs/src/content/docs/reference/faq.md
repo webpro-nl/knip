@@ -331,6 +331,9 @@ Note that any directory with a `package.json` not listed in the root
 `package.json#workspaces` can be added to the Knip configuration manually to
 have it handled as a separate workspace.
 
+If you do want Knip to take its project files from `tsconfig.json` rather than
+its own `project` patterns, see [`--use-tsconfig-files`][20] and the note below.
+
 ### Why doesn't Knip just use `ts.findReferences`?
 
 TypeScript has a very good "Find references" feature, that you might be using in
@@ -396,6 +399,17 @@ From this example, Knip can determine whether the `@tsconfig/node20` and
   either use `--tsConfig [file]` to target a different `tsconfig.json`, or
   manually add [paths][17] to the Knip configuration. The latter can be done per
   workspace.
+
+### What does `--use-tsconfig-files` do?
+
+By default Knip discovers project files with its own `project` patterns. The
+[`--use-tsconfig-files`][20] flag instead takes them from `tsconfig.json` per
+workspace. Those become TypeScript program files, so Knip analyzes their exports
+and dependencies but does not report them as unused files: delegating project
+definition to `tsconfig.json` declares them intentional, including empty files.
+This is by design — use the default `project` patterns (discovery mode) to flag
+dangling files. Implicitly enabled in the [editor extension, MCP server and
+language server][21] without a Knip configuration file.
 
 ## Compilers
 
@@ -476,3 +490,5 @@ require more development efforts and maintenance. Time is limited and
 [17]: ../reference/configuration.md#paths
 [18]: ../features/compilers.md
 [19]: /sponsors
+[20]: ../reference/cli.md#--use-tsconfig-files
+[21]: ../reference/integrations.md
