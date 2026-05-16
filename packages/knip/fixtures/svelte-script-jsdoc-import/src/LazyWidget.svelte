@@ -1,0 +1,1 @@
+<div>Lazy widget</div>
