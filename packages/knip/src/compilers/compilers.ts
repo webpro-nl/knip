@@ -9,13 +9,14 @@ const scriptExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>([\s\S]*?)<\/scrip
 const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
 export const importMatcher = /import[^'"]+['"][^'"]+['"]/g;
+const scriptImportMatcher = /import(?:\s*\(\s*['"][^'"]+['"]\s*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
   let scriptMatch: RegExpExecArray | null;
   // oxlint-disable-next-line no-cond-assign
   while ((scriptMatch = scriptExtractor.exec(text))) {
     const body = scriptMatch[1].replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
-    for (const importMatch of body.matchAll(importMatcher)) {
+    for (const importMatch of body.matchAll(scriptImportMatcher)) {
       scripts.push(importMatch);
     }
   }

@@ -7,13 +7,16 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/svelte-script-jsdoc-import');
 
-test('Svelte compiler ignores import-like text inside block and whole-line comments', async () => {
+test('Svelte compiler extracts type imports and dynamic imports from scripts', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(!('src/LazyWidget.svelte' in issues.files));
+  assert(!('src/types.ts' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 4,
+    total: 4,
   });
 });

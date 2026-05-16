@@ -6,7 +6,12 @@
    */
 
   // import Old from './does-not-exist.svelte';
+  import type { WidgetOptions } from './types';
   import Widget from './Widget.svelte';
+
+  const options: WidgetOptions = { eager: true };
+  const LazyWidget = options.eager ? Widget : await import('./LazyWidget.svelte');
 </script>
 
 <Widget />
+<svelte:component this={LazyWidget} />
