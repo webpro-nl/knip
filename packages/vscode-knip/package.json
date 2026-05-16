@@ -182,6 +182,11 @@
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
           },
+          "knip.cwd": {
+            "type": "string",
+            "default": "",
+            "description": "Directory to run Knip from (its cwd), relative to the VS Code workspace folder. Use when the folder isn't the Knip project root, e.g. \"./typescript\", or \"../..\" for a monorepo root."
+          },
           "knip.nodeRuntimePath": {
             "type": "string",
             "default": "",
