@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,6 +70,12 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-ser
 
 const knipNm = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules');
 
+const knipRequire = createRequire(join(knipNm, '..', 'package.json'));
+const bindingVersion = pkgName => JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
+const oxcParserVersion = bindingVersion('oxc-parser');
+const oxcResolverVersion = bindingVersion('oxc-resolver');
+console.log(`Pinning bindings: @oxc-parser@${oxcParserVersion}, @oxc-resolver@${oxcResolverVersion}`);
+
 cpSync(join(knipNm, 'jiti'), join(nm, 'jiti'), { recursive: true, dereference: true });
 cpSync(join(knipNm, 'oxc-parser'), join(nm, 'oxc-parser'), { recursive: true, dereference: true });
 
@@ -91,11 +98,11 @@ const selectedTargets = args.target
     ? Object.entries(targets)
     : [[currentTarget, targets[currentTarget]]];
 
-const packNativeBinding = (scope, name, binding) => {
+const packNativeBinding = (scope, name, binding, version) => {
   rmSync(join(nm, scope), { recursive: true, force: true });
   mkdirSync(join(nm, `${scope}/binding-${binding}`), { recursive: true });
   const tmp = mkdtempSync(join(tmpdir(), 'oxc-'));
-  execSync(`npm pack ${scope}/binding-${binding}`, { cwd: tmp, stdio: 'pipe' });
+  execSync(`npm pack ${scope}/binding-${binding}@${version}`, { cwd: tmp, stdio: 'pipe' });
   execSync('tar -xzf *.tgz', { cwd: tmp, stdio: 'pipe' });
   cpSync(
     execSync(`find ${tmp}/package -name "*.node"`, { encoding: 'utf-8' }).trim(),
@@ -106,8 +113,8 @@ const packNativeBinding = (scope, name, binding) => {
 };
 
 for (const [target, binding] of selectedTargets) {
-  packNativeBinding('@oxc-parser', 'parser', binding);
-  packNativeBinding('@oxc-resolver', 'resolver', binding);
+  packNativeBinding('@oxc-parser', 'parser', binding, oxcParserVersion);
+  packNativeBinding('@oxc-resolver', 'resolver', binding, oxcResolverVersion);
 
   execSync(`pnpm vsce package ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
 
