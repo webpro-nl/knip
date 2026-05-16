@@ -5,6 +5,9 @@
     "entry": ["src/App.svelte"],
     "ignoreDependencies": ["svelte"]
   },
+  "dependencies": {
+    "remote-config": "*"
+  },
   "devDependencies": {
     "svelte": "*"
   }

@@ -11,6 +11,7 @@
 
   const options: WidgetOptions = { eager: true };
   const LazyWidget = options.eager ? Widget : await import('./LazyWidget.svelte');
+  const settings = await import('remote-config/settings.json', { with: { type: 'json' } });
 </script>
 
 <Widget />

@@ -7,7 +7,7 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/svelte-script-jsdoc-import');
 
-test('Svelte compiler extracts type imports and dynamic imports from scripts', async () => {
+test('Svelte compiler extracts type and dynamic imports from scripts', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
