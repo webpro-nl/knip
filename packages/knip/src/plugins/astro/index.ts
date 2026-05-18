@@ -24,6 +24,7 @@ const production = [
   '!src/pages/**/_*/**', // negate folders prefixed with _. The pattern _** would be collapsed into _* so we have to use **/_*/**
   'src/content/**/*.mdx',
   'src/middleware.{js,ts}',
+  'src/middleware/index.{js,ts}',
   'src/actions/index.{js,ts}',
 ];
 
