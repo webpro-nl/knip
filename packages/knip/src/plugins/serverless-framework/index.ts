@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PluginConfig } from './types.ts';
 
@@ -11,16 +12,24 @@ const enablers = ['serverless'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['serverless.{yml,yaml}'];
+const config = ['serverless.{js,cjs,mjs,ts,cts,mts,yml,yaml}'];
 
 const handlerToEntry = (handler: string) => {
   const dot = handler.lastIndexOf('.');
   return toProductionEntry(`${handler.slice(0, dot)}.{js,ts}`);
 };
 
-const resolveConfig: ResolveConfig<PluginConfig> = async config => {
-  if (!config.functions) return [];
-  return Object.values(config.functions).flatMap(fn => (fn.handler ? [handlerToEntry(fn.handler)] : []));
+const pluginToInput = (plugin: string, dir: string) =>
+  isInternal(plugin) ? toProductionEntry(join(dir, plugin)) : toDependency(plugin);
+
+const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
+  const functions = config.functions
+    ? Object.values(config.functions).flatMap(fn => (fn.handler ? [handlerToEntry(fn.handler)] : []))
+    : [];
+  const plugins = config.plugins?.filter((plugin): plugin is string => typeof plugin === 'string') ?? [];
+  const esbuild = config.custom?.esbuild || config.build?.esbuild ? [toDependency('esbuild', { optional: true })] : [];
+
+  return [...functions, ...plugins.map(plugin => pluginToInput(plugin, options.configFileDir)), ...esbuild];
 };
 
 const plugin: Plugin = {
