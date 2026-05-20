@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/tsconfig-types-from-extends",
+  "workspaces": ["packages/*"]
+}

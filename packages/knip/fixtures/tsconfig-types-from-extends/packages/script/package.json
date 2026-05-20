@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/tsconfig-types-from-extends__script",
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/google-apps-script": "*",
+    "typescript": "*"
+  }
+}
