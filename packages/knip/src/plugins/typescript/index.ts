@@ -52,7 +52,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
   return compact([
     ...extend,
     ...references,
-    ...types.map(id => toDeferResolve(id, { isTypeOnly: true })),
+    ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),
     ...[...plugins, ...importHelpers].map(id => toDeferResolve(id)),
     ...jsx,
     ...aliases,
