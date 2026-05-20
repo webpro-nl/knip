@@ -25,6 +25,10 @@ const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const args = {
+  config: true,
+};
+
 const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
 
 const config = [
@@ -89,6 +93,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
 
 const plugin: Plugin = {
   title,
+  args,
   enablers,
   isEnabled,
   packageJsonPath,

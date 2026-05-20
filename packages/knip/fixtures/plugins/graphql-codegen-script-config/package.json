@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/graphql-codegen-script-config",
+  "scripts": {
+    "codegen": "graphql-codegen --config ./src/codegen.ts"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "*",
+    "@graphql-codegen/typescript": "*",
+    "@graphql-codegen/typescript-graphql-request": "*",
+    "@graphql-codegen/typescript-operations": "*"
+  }
+}
