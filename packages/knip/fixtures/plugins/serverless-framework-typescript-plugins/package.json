@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/serverless-framework-typescript-plugins",
+  "scripts": {
+    "serverless": "serverless print"
+  },
+  "devDependencies": {
+    "@serverless/typescript": "*",
+    "esbuild": "*",
+    "serverless": "*",
+    "serverless-esbuild": "*",
+    "serverless-offline": "*",
+    "serverless-offline-sns": "*",
+    "serverless-offline-sqs": "*"
+  }
+}
