@@ -266,7 +266,6 @@ export class DependencyDeputy {
 
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
     if (!this.isReportDependencies) return new Set();
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     this.addReferencedBinary(workspace.name, binaryName);
 
@@ -282,6 +281,8 @@ export class DependencyDeputy {
         }
       }
     }
+
+    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     return;
   }

@@ -49,7 +49,7 @@ export const createInputHandler =
   (input: Input, workspace: Workspace) => {
     const { specifier, containingFilePath } = input;
 
-    if (!containingFilePath || IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
+    if (!containingFilePath) return;
 
     if (isBinary(input)) {
       const binaryName = fromBinary(input);
@@ -78,6 +78,8 @@ export const createInputHandler =
 
       return;
     }
+
+    if (IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
 
     const packageName = getPackageNameFromSpecifier(specifier);
 
