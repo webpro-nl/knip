@@ -42,6 +42,18 @@ export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
   return { config, entry, project };
 };
 
+const loadWorkspaceConfigFile = async (configFilePath: string, cwd: string) => {
+  if (cwd === process.cwd()) return await load(configFilePath);
+
+  const originalCwd = process.cwd();
+  try {
+    process.chdir(cwd);
+    return await load(configFilePath);
+  } finally {
+    process.chdir(originalCwd);
+  }
+};
+
 export const loadConfigForPlugin = async (
   configFilePath: string,
   plugin: Plugin,
@@ -55,5 +67,5 @@ export const loadConfigForPlugin = async (
     ? typeof packageJsonPath === 'function'
       ? packageJsonPath(manifest)
       : get(manifest, packageJsonPath ?? pluginName)
-    : await load(configFilePath);
+    : await loadWorkspaceConfigFile(configFilePath, options.cwd);
 };
