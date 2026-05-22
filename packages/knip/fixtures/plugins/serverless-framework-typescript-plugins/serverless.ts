@@ -1,4 +1,5 @@
 import type { AWS } from '@serverless/typescript';
+import { FUNCTION_TIMEOUTS_IN_SECONDS } from '~/libs/constants';
 
 const config: AWS = {
   service: 'typescript-serverless-plugins',
@@ -17,6 +18,7 @@ const config: AWS = {
   functions: {
     hello: {
       handler: 'src/functions/hello/handler.main',
+      timeout: FUNCTION_TIMEOUTS_IN_SECONDS.hello,
     },
   },
 };

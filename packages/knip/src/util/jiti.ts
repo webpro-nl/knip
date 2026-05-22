@@ -14,3 +14,4 @@ const options = {
 const createLoader = (options: JitiOptions) => createJiti(process.cwd(), options);
 
 export const jiti = createLoader(options);
+export const createJitiLoader = (loaderOptions: JitiOptions) => createLoader({ ...options, ...loaderOptions });

@@ -1,10 +1,14 @@
 import { LoaderError } from './errors.ts';
-import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
-import { jiti } from './jiti.ts';
+import { isFile, loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
+import { createJitiLoader, jiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
 import { extname, isInternal } from './path.ts';
 
-const load = async (filePath: string) => {
+type LoadOptions = {
+  tsConfigFilePath?: string;
+};
+
+const load = async (filePath: string, options?: LoadOptions) => {
   try {
     const ext = extname(filePath);
     if (filePath.endsWith('rc')) {
@@ -41,7 +45,12 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
-    return await jiti.import(filePath, { default: true });
+    const loader =
+      options?.tsConfigFilePath && isFile(options.tsConfigFilePath)
+        ? createJitiLoader({ tsconfigPaths: options.tsConfigFilePath })
+        : jiti;
+
+    return await loader.import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }

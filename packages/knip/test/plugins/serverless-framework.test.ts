@@ -21,11 +21,12 @@ test('Find dependencies with the Serverless Framework plugin', async () => {
 
 test('Find dependencies from Serverless Framework TypeScript plugins', async () => {
   const options = await createOptions({ cwd: typescriptPluginsCwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
+  assert.deepEqual(issues.devDependencies, {});
 });
