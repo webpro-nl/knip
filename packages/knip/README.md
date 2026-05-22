@@ -63,7 +63,7 @@ following projects:
 [14]: https://knip.dev/sponsors
 [15]: https://knip.dev/#created-by-awesome-contributors
 [16]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
-[17]: ./license
+[17]: ./LICENSE
 [18]: https://github.com/npm/package-json
 [19]: https://github.com/npm/package-json/blob/main/LICENSE
 [20]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
