@@ -1,52 +1,38 @@
 import type { Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
-import {
-  findProperty,
-  getDefaultImportName,
-  getImportMap,
-  getStringValues,
-  resolveObjectArg,
-} from '../../typescript/ast-helpers.ts';
+import { findProperty, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
 
-export const getReactBabelInputs = (program: Program): string[] => {
-  const inputs: string[] = [];
+const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
 
-  const importMap = getImportMap(program);
-  const reactPluginNames = new Set<string>();
+const isBabelWrappingPlugin = (path: string) =>
+  babelPluginSources.some(source => path === source || path.startsWith(`${source}/`));
 
-  for (const [importName, importPath] of importMap) {
-    if (importPath.includes('@vitejs/plugin-react')) reactPluginNames.add(importName);
+export const getBabelInputs = (program: Program): Input[] => {
+  const pluginNames = new Set<string>();
+  for (const [name, path] of getImportMap(program)) {
+    if (isBabelWrappingPlugin(path)) pluginNames.add(name);
   }
+  if (pluginNames.size === 0) return [];
 
-  if (reactPluginNames.size === 0) {
-    const defaultImportName = getDefaultImportName(importMap, '@vitejs/plugin-react');
-    if (defaultImportName) reactPluginNames.add(defaultImportName);
-    else reactPluginNames.add('react');
-  }
-
+  const inputs: Input[] = [];
   const visitor = new Visitor({
     CallExpression(node) {
-      if (node.callee?.type !== 'Identifier' || node.callee.name !== 'defineConfig') return;
-      const config = resolveObjectArg(node.arguments?.[0]);
-      const plugins = findProperty(config, 'plugins');
-      if (plugins?.type !== 'ArrayExpression') return;
-
-      for (const el of plugins.elements ?? []) {
-        if (el?.type !== 'CallExpression' || el.callee?.type !== 'Identifier') continue;
-        if (!reactPluginNames.has(el.callee.name)) continue;
-
-        const babel = findProperty(el.arguments?.[0], 'babel');
-        for (const key of ['plugins', 'presets']) {
-          for (const v of getStringValues(findProperty(babel, key))) inputs.push(v);
-        }
+      if (node.callee?.type !== 'Identifier' || !pluginNames.has(node.callee.name)) return;
+      const options = node.arguments?.[0];
+      const plugins: string[] = [];
+      const presets: string[] = [];
+      for (const config of [options, findProperty(options, 'babel'), findProperty(options, 'babelConfig')]) {
+        plugins.push(...getStringValues(findProperty(config, 'plugins')));
+        presets.push(...getStringValues(findProperty(config, 'presets')));
       }
+      inputs.push(...getDependenciesFromConfig({ plugins, presets }));
     },
   });
   visitor.visit(program);
-
   return inputs;
 };
 
