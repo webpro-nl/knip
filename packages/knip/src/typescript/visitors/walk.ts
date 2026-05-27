@@ -216,6 +216,12 @@ const _collectRefsInType = (
         return;
       }
       break;
+    case 'VariableDeclarator':
+      if (inBody) {
+        if (node.init) _collectRefsInType(node.init, exportName, signatureOnly, seen, inBody);
+        return;
+      }
+      break;
   }
 
   const keys = visitorKeys[type];

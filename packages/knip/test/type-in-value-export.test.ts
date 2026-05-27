@@ -7,15 +7,16 @@ import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/type-in-value-export');
 
-test('Find unused types in value exports', async () => {
+test('Find unused types in value exports (explicit and inferred returns)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert(issues.types['src/api.ts']['GetPointsResponse']);
+  assert(issues.types['src/api.ts']['ScratchData']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    types: 1,
+    types: 2,
     processed: 2,
     total: 2,
   });
