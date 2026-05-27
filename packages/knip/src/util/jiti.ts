@@ -9,6 +9,7 @@ const options = {
     '@rushstack/eslint-config/patch/modern-module-resolution': empty,
     '@rushstack/eslint-patch/modern-module-resolution': empty,
   },
+  tsconfigPaths: true,
 };
 
 const createLoader = (options: JitiOptions) => createJiti(process.cwd(), options);
