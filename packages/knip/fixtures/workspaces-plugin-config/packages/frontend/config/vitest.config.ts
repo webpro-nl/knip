@@ -1,9 +1,10 @@
 import { defineProject } from 'vitest/config';
+import { include } from '@/vitest-include';
 
 export default defineProject({
   test: {
     root: '..',
-    include: ['**/*.vitest.ts'],
+    include,
     environment: 'jsdom',
   },
 });

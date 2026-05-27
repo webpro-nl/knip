@@ -4,7 +4,7 @@ import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/con
 import { arrayify } from './array.ts';
 import { _load as load } from './loader.ts';
 import { get } from './object.ts';
-import { basename, join } from './path.ts';
+import { basename } from './path.ts';
 
 export const hasDependency = (dependencies: Set<string>, values: (string | RegExp)[]) =>
   values.some(value => {
@@ -55,5 +55,5 @@ export const loadConfigForPlugin = async (
     ? typeof packageJsonPath === 'function'
       ? packageJsonPath(manifest)
       : get(manifest, packageJsonPath ?? pluginName)
-    : await load(configFilePath, { tsConfigFilePath: join(options.cwd, options.tsConfigFile ?? 'tsconfig.json') });
+    : await load(configFilePath);
 };

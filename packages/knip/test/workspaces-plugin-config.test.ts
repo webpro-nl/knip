@@ -13,8 +13,8 @@ test('Use root plugin config in workspaces', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    total: 26,
-    processed: 26,
+    total: 27,
+    processed: 27,
   });
 });
 
@@ -23,14 +23,14 @@ test('Use root plugin config in workspaces (strict production)', async () => {
   const { issues, counters } = await main(options);
 
   assert('packages/frontend/components/component.js' in issues.files);
+  assert('packages/frontend/vitest-include.ts' in issues.files);
   assert('packages/shared/components/component.js' in issues.files);
   assert('packages/shared/jest-setup.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 3);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 3,
-    total: 8,
-    processed: 8,
+    files: 4,
+    total: 9,
+    processed: 9,
   });
 });

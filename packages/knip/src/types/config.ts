@@ -124,7 +124,6 @@ export interface PluginOptions extends BaseOptions {
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
-  tsConfigFile: string | undefined;
 }
 
 type PluginSetup = () => Promise<void> | void;

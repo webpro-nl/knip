@@ -303,12 +303,7 @@ export class WorkspaceWorker {
     const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly };
 
     // Get dependencies from package.json#scripts
-    const baseScriptOptions = {
-      ...baseOptions,
-      isProduction,
-      enabledPlugins: this.enabledPlugins,
-      tsConfigFile: this.options.tsConfigFile,
-    };
+    const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
     const inputsFromManifest = _getInputsFromScripts(Object.values(developmentScripts), baseOptions);
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);
