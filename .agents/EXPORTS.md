@@ -1,27 +1,26 @@
-# Identifiers, Symbols & Matching
+# Resolving export usage
 
-How knip resolves "is this export used?" across an AST. Matching is name-based.
+How knip answers "is this export used?" across an AST. Matching is name-based, with no type checker.
 
 ## DTS correctness
 
 For libraries that emit `.d.ts` (`declaration: true`), removing an `export`
 keyword is only safe when tsc/tsgo can still produce a valid declaration.
-Knip's chain-ref machinery approximates the same rules `isolatedDeclarations`
-enforces (TS 5.5+) — types referenced from exported value signatures must be
-nameable in the emitted `.d.ts`, otherwise `tsc --declaration` errors. The
-specific diagnostic depends on shape: TS4023 for cross-module references
-(the common case), TS4081/TS4082 for same-module private names, TS4060/TS4063
-for return/parameter positions. They're all in the TS4xxx family and all
-trace to the same underlying problem: a type isn't nameable where it needs
-to be in the declaration. The difference vs `isolatedDeclarations`: that
-flag requires explicit annotations and rejects implicit forms; knip supports
-the implicit forms by walking the chain name-based, without a type checker.
+Knip's chain-ref machinery approximates the rules `isolatedDeclarations`
+enforces (TS 5.5+): types referenced from exported value signatures must be
+nameable in the emitted `.d.ts`, else `tsc --declaration` errors. The
+diagnostic varies by shape: TS4023 (cross-module, the common case),
+TS4081/TS4082 (same-module private names), TS4060/TS4063 (return/parameter
+positions). All trace to one problem: a type isn't nameable where the
+declaration needs it. Unlike `isolatedDeclarations`, which requires explicit
+annotations and rejects implicit forms, knip handles the implicit forms by
+walking the chain name-based, without a type checker.
 
 See:
 
 - [`isolatedDeclarations` TSConfig reference][1]
-- [TS 5.5 release notes — Isolated Declarations][2]
-- [microsoft/TypeScript#5711][3] — TS4023 origin
+- [TS 5.5 release notes: Isolated Declarations][2]
+- [microsoft/TypeScript#5711][3] (TS4023 origin)
 
 Operating model:
 
@@ -34,8 +33,7 @@ Operating model:
 - Escape hatch: when the heuristic is wrong, an explicit return type or value
   type annotation always wins.
 
-The rest of this document is the mechanical detail of how knip approximates
-this.
+The rest is the mechanical detail of how knip approximates this.
 
 ## Shadow detection
 
@@ -58,11 +56,11 @@ ArrayPattern, AssignmentPattern, RestElement) to extract bound Identifiers.
 
 Opt-in config (default `false`).
 
-By default, an export only referenced in its own file is reported as unused —
+By default, an export only referenced in its own file is reported as unused,
 matching what `tsc` would tolerate (structural inlining of type aliases,
 `typeof X` in type aliases). Opting `true` is a code-organization preference,
 not a correctness concern. Either way, types reachable from exported value
-signatures stay alive unconditionally regardless of this config — that's the
+signatures stay alive unconditionally regardless of this config. That's the
 DTS-correctness path covered above.
 
 With the config on: `localRefsVisitorObject` populates `localRefs` during AST
@@ -85,9 +83,9 @@ it. Walked by `_collectRefsInType(node, exportName, signatureOnly, seen, inBody)
 - **Type aliases** (`TSTypeAliasDeclaration.typeAnnotation`): full walk.
 - **Interfaces** (`TSInterfaceDeclaration.body` plus `extends`): full walk;
   `extends` clauses captured via `addRefInExport`.
-- **Variable export with type annotation**: walks `id.typeAnnotation` only —
-  the annotation already names everything visible to declaration emit; the
-  init's signature is dead work.
+- **Variable export with type annotation**: walks `id.typeAnnotation` only. The
+  annotation already names everything visible to declaration emit; the init's
+  signature is dead work.
 - **Variable export without type annotation**: walks the init.
   `signatureOnly = hasExplicitFunctionReturnType(init)`.
 - **Function declarations** (named, default, declare): walks the function node
@@ -117,10 +115,9 @@ references and are drained after the visitor pass:
 - `pendingCallRefs`: `callee` is an `Identifier` (always), or an argument is an
   `Identifier` _and_ `inBody` is false. The body restriction prevents the
   `useReducer(localReducer, …)` over-capture: a helper passed as an argument
-  inside a function body usually has its signature types consumed locally and
-  doesn't surface in the outer function's inferred return. Top-level
-  `wrap(inner)` and expression-body `() => wrap(inner)` still follow because
-  there `inBody` stays false.
+  inside a body usually has its signature types consumed locally, not surfaced
+  in the outer inferred return. Top-level `wrap(inner)` and expression-body
+  `() => wrap(inner)` still follow (`inBody` stays false).
 - `pendingMemberCallRefs`: `callee` is a non-computed `MemberExpression` whose
   object is an `Identifier` resolving to a local `const`-initialized
   `ObjectExpression` and whose property name maps to a function-typed value.
@@ -142,9 +139,12 @@ propagates to children.
 When `inBody` is true:
 
 - `TSAsExpression` / `TSTypeAssertion` / `TSSatisfiesExpression` are walked
-  through their `expression` only — the type annotation is treated as a local
+  through their `expression` only. The type annotation is treated as a local
   hint that doesn't flow into declaration emit. `JSON.parse('{}') as T` is the
   motivating case.
+- `VariableDeclarator` is walked through its `init` only. A body-local binding's
+  own annotation (`let x: T`) is a local hint that doesn't flow into the inferred
+  return.
 
 When `inBody` is false (signature mode, top-level inits, type alias targets):
 
@@ -199,38 +199,38 @@ Unused members silently pass. By design: the export itself is considered "used".
 ## E2E
 
 `packages/knip/test/e2e/fix-tsgo.test.ts` covers the resolution paths above.
-Each fixture builds clean under tsgo, has `knip --fix` run on it, then must
-build clean under tsgo again. A failing post-fix build means knip removed
-something tsc/tsgo still needs: a false positive in one of these mechanisms.
+Each fixture builds clean under tsgo, gets `knip --fix`, then must build clean
+again. A failing post-fix build means knip removed something tsc/tsgo still
+needs: a false positive in one of these mechanisms.
 
 `e2e-lib-*` fixtures extend the round-trip to a consumer with
 `declaration: true` so type-visibility regressions (any TS4xxx code) also fail.
 FP-direction (knip must NOT strip a name tsc still needs) is caught by the
 post-fix tsgo emit on `pkg/`. FN-direction (knip must FLAG a name tsc
 doesn't need) is caught by per-fixture `remove` regexes in
-`libFixtureRemovals`. The two checks are orthogonal — neither is redundant.
+`libFixtureRemovals`. The two checks are orthogonal; neither is redundant.
 
 FP-direction:
 
-- `e2e-lib-typed-exports` — explicit return-type annotations on exported values
-- `e2e-lib-export-star-as` — `export * as Ns from '…'` namespace re-export
-- `e2e-lib-arrow-inferred-return` — arrow with block body, no return type;
-  body walked for chain refs (the original #1727 / `createHandler` shape)
-- `e2e-lib-call-forward-decl` — Identifier callee resolving to a forward-declared
+- `e2e-lib-typed-exports`: explicit return-type annotations on exported values
+- `e2e-lib-export-star-as`: `export * as Ns from '…'` namespace re-export
+- `e2e-lib-arrow-inferred-return`: arrow with block body, no return type;
+  body walked for chain refs (the `createHandler` shape)
+- `e2e-lib-call-forward-decl`: Identifier callee resolving to a forward-declared
   local (deferred-resolution path)
-- `e2e-lib-member-call` — `obj.method()` MemberExpression callee
-- `e2e-lib-call-arg` — Identifier as call argument at top level (`wrap(inner)`)
+- `e2e-lib-member-call`: `obj.method()` MemberExpression callee
+- `e2e-lib-call-arg`: Identifier as call argument at top level (`wrap(inner)`)
 
 FN-direction:
 
-- `e2e-lib-as-cast-in-body` — `as T` cast inside a function body must NOT
+- `e2e-lib-as-cast-in-body`: `as T` cast inside a function body must NOT
   keep T alive (inBody cast-skip)
-- `e2e-lib-call-arg-in-body` — Identifier as call argument inside a body must
+- `e2e-lib-call-arg-in-body`: Identifier as call argument inside a body must
   NOT keep the helper's signature types alive (the `useReducer(reducer, …)`
   case; `pendingCallRefs` arg-follow is gated on `!inBody`)
 
 When adding a value-to-type-visibility fixture, don't also re-export the
-type explicitly from the public entry — that masks type-chain bugs because
+type explicitly from the public entry. That masks type-chain bugs because
 the type stays alive via the re-export regardless of whether knip tracks
 the value's signature. Test the implicit case so the chain is the only
 thing keeping the export alive.
