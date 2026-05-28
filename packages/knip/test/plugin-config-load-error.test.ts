@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { main } from '../src/index.ts';
@@ -29,19 +29,32 @@ test('Plugin config that throws on load exits zero with --no-exit-code', () => {
   assert.equal(result.status, 0);
 });
 
-test('Plugin config load errors are not cached as successful runs', () => {
+test('Plugin config load errors are not cached, and recovery is cached', () => {
   const cacheLocation = mkdtempSync(join(tmpdir(), 'knip-cache-'));
+  const fixtureCopy = mkdtempSync(join(tmpdir(), 'knip-fixture-'));
+  cpSync(cwd, fixtureCopy, { recursive: true });
 
   try {
     const command = `knip --no-progress --cache --cache-location ${cacheLocation}`;
-    const coldResult = exec(command, { cwd });
-    const warmResult = exec(command, { cwd });
 
-    assert.match(coldResult.stderr, /^ERROR: Error loading vite\.config\.ts /m);
-    assert.match(warmResult.stderr, /^ERROR: Error loading vite\.config\.ts /m);
-    assert.equal(coldResult.status, 1);
-    assert.equal(warmResult.status, 1);
+    const cold = exec(command, { cwd: fixtureCopy });
+    const warm = exec(command, { cwd: fixtureCopy });
+    assert.match(cold.stderr, /^ERROR: Error loading vite\.config\.ts /m);
+    assert.match(warm.stderr, /^ERROR: Error loading vite\.config\.ts /m);
+    assert.equal(cold.status, 1);
+    assert.equal(warm.status, 1);
+
+    writeFileSync(join(fixtureCopy, 'missing-bootstrap-output.js'), "process.stderr.write('bootstrap-loaded\\n');\n");
+
+    const recovered = exec(command, { cwd: fixtureCopy });
+    assert.match(recovered.stderr, /bootstrap-loaded/);
+    assert.doesNotMatch(recovered.stderr, /^ERROR: Error loading/m);
+
+    const cached = exec(command, { cwd: fixtureCopy });
+    assert.doesNotMatch(cached.stderr, /bootstrap-loaded/);
+    assert.doesNotMatch(cached.stderr, /^ERROR: Error loading/m);
   } finally {
     rmSync(cacheLocation, { recursive: true, force: true });
+    rmSync(fixtureCopy, { recursive: true, force: true });
   }
 });

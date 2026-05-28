@@ -466,7 +466,9 @@ export class WorkspaceWorker {
           storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
           cache.configFile = toEntry(configFilePath);
 
-          if (fd?.changed && fd.meta && !hasLoadConfigError && !seen.get(key)?.has(configFilePath)) {
+          if (hasLoadConfigError) {
+            this.cache.removeEntry(configFilePath);
+          } else if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
             fd.meta.data = cache;
           }
 
