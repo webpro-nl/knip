@@ -420,6 +420,7 @@ export class WorkspaceWorker {
         };
 
         const cache: CacheItem = {};
+        let hasLoadConfigError = false;
 
         const key = `${wsName}:${pluginName}`;
         if (plugin.resolveConfig && !seen.get(key)?.has(configFilePath)) {
@@ -443,6 +444,7 @@ export class WorkspaceWorker {
                 }
               } catch (error) {
                 if (!(error instanceof Error)) throw error;
+                hasLoadConfigError = true;
                 const relPath = toRelative(configFilePath, this.options.cwd);
                 const cause = formatCauseMessage(error, this.options.cwd);
                 logError(`Error loading ${relPath} (${cause})`);
@@ -464,7 +466,9 @@ export class WorkspaceWorker {
           storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
           cache.configFile = toEntry(configFilePath);
 
-          if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
+          if (hasLoadConfigError) {
+            this.cache.removeEntry(configFilePath);
+          } else if (fd?.changed && fd.meta && !seen.get(key)?.has(configFilePath)) {
             fd.meta.data = cache;
           }
 

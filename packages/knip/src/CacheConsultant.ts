@@ -9,6 +9,7 @@ export class CacheConsultant<T> {
   private cache: FileEntryCache<T> | undefined;
   getFileDescriptor: (filePath: string) => FileDescriptor<T> = () => dummyFileDescriptor;
   reconcile: () => void = () => {};
+  removeEntry: (filePath: string) => void = () => {};
 
   constructor(name: string, options: MainOptions) {
     if (!options.isCache) return;
@@ -16,6 +17,7 @@ export class CacheConsultant<T> {
     this.cache = new FileEntryCache(cacheName, options.cacheLocation);
     this.getFileDescriptor = timerify(this.cache.getFileDescriptor.bind(this.cache));
     this.reconcile = timerify(this.cache.reconcile.bind(this.cache));
+    this.removeEntry = timerify(this.cache.removeEntry.bind(this.cache));
   }
 
   getCachedFile(filePath: string): T | undefined {
