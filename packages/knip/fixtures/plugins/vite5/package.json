@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/vite5",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}
