@@ -36,18 +36,40 @@ export const getBabelInputs = (program: Program): Input[] => {
   return inputs;
 };
 
-const moduleScriptPattern =
-  /<script\b(?=[^>]*\btype\s*=\s*["']?module["']?)(?=[^>]*\bsrc\s*=\s*["']?([^"' >]+)["']?)[^>]*>/gi;
+const moduleScriptBlockPattern =
+  /<script\b([^>]*\btype\s*=\s*["']?module["']?[^>]*)>([\s\S]*?)<\/script>/gi;
+
+const srcAttrPattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
+
+const importSpecPattern = /\bimport\b[^'"]*['"']([^'"]+)['"']/g;
+
+const isFilePath = (specifier: string) =>
+  specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
 
 const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, '');
 
 const getModuleScriptSources = (html: string): string[] => {
-  const matches = html.matchAll(moduleScriptPattern);
-  const sources = [];
+  const sources: string[] = [];
 
-  for (const match of matches) {
-    const src = normalizeModuleScriptSrc(match[1]);
-    if (src) sources.push(src);
+  for (const match of html.matchAll(moduleScriptBlockPattern)) {
+    const attrs = match[1];
+    const body = match[2];
+
+    const srcMatch = attrs.match(srcAttrPattern);
+    if (srcMatch) {
+      const src = normalizeModuleScriptSrc(srcMatch[1]);
+      if (src) sources.push(src);
+      continue;
+    }
+
+    if (body) {
+      for (const importMatch of body.matchAll(importSpecPattern)) {
+        const specifier = importMatch[1];
+        if (isFilePath(specifier)) {
+          sources.push(normalizeModuleScriptSrc(specifier));
+        }
+      }
+    }
   }
 
   return sources;
