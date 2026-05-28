@@ -13,9 +13,14 @@ const candidates = (specifier: string): string[] => {
   const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
   const name = basename(spec);
   const dir = dirname(spec);
-  const base = name.endsWith('.scss') || name.endsWith('.sass') ? name : `${name}.scss`;
-  const plain = `${dir}/${base}`;
-  return name.startsWith('_') ? [plain] : [plain, `${dir}/_${base}`];
+  const hasExt = name.endsWith('.scss') || name.endsWith('.sass');
+  const bases = hasExt ? [name] : [`${name}.scss`, `${name}.sass`];
+  const out: string[] = [];
+  for (const base of bases) {
+    out.push(`${dir}/${base}`);
+    if (!name.startsWith('_')) out.push(`${dir}/_${base}`);
+  }
+  return out;
 };
 
 const compiler: CompilerSync = text => {

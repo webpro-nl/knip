@@ -17,7 +17,7 @@ test('Built-in compiler for SCSS', async () => {
     ...baseCounters,
     devDependencies: 1,
     files: 1,
-    processed: 14,
-    total: 14,
+    processed: 16,
+    total: 16,
   });
 });
