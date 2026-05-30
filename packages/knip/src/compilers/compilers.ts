@@ -3,34 +3,26 @@ import type { CompilerSync } from './types.ts';
 export const fencedCodeBlockMatcher = /```[\s\S]*?```/g;
 export const inlineCodeMatcher = /`[^`]+`/g;
 
-// Extract imports from body of <script> nodes.
+// Match <script> blocks, capturing attributes (1) and body (2).
 // Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
-const scriptExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>([\s\S]*?)<\/script>/gm;
-const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
-const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
+export const scriptExtractor = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script>/gi;
+export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
+export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
 export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
+
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
-  let scriptMatch: RegExpExecArray | null;
-  // oxlint-disable-next-line no-cond-assign
-  while ((scriptMatch = scriptExtractor.exec(text))) {
-    const body = scriptMatch[1].replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
-    for (const importMatch of body.matchAll(importMatcher)) {
-      scripts.push(importMatch);
-    }
+  for (const [, , scriptBody] of text.matchAll(scriptExtractor)) {
+    const body = scriptBody.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
+    for (const importMatch of body.matchAll(importMatcher)) scripts.push(importMatch);
   }
   return scripts.join(';\n');
 };
 
-// Extract body of <script>、<script lang="ts">、<script setup>、<script lang="ts" setup> etc. nodes.
-// Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
-const scriptBodyExtractor = /<script\b(?:[^>"']|"[^"]*"|'[^']*')*>(?<body>[\s\S]*?)<\/script>/gm;
 export const scriptBodies: CompilerSync = (text: string) => {
   const scripts = [];
-  let scriptMatch: RegExpExecArray | null;
-  // oxlint-disable-next-line no-cond-assign
-  while ((scriptMatch = scriptBodyExtractor.exec(text))) {
-    if (scriptMatch.groups?.body) scripts.push(scriptMatch.groups.body);
+  for (const [, , body] of text.matchAll(scriptExtractor)) {
+    if (body) scripts.push(body);
   }
   return scripts.join(';\n');
 };

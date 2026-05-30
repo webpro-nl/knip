@@ -1,5 +1,6 @@
 import type { Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
+import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../compilers/compilers.ts';
 import { findProperty, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
@@ -36,12 +37,11 @@ export const getBabelInputs = (program: Program): Input[] => {
   return inputs;
 };
 
-const moduleScriptBlockPattern =
-  /<script\b([^>]*\btype\s*=\s*["']?module["']?[^>]*)>([\s\S]*?)<\/script>/gi;
+const moduleTypePattern = /\btype\s*=\s*["']?module["']?/i;
 
 const srcAttrPattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 
-const importSpecPattern = /\bimport\b[^'"]*['"']([^'"]+)['"']/g;
+const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)(['"])([^'"]+)\1/g;
 
 const isFilePath = (specifier: string) =>
   specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
@@ -51,9 +51,8 @@ const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, 
 const getModuleScriptSources = (html: string): string[] => {
   const sources: string[] = [];
 
-  for (const match of html.matchAll(moduleScriptBlockPattern)) {
-    const attrs = match[1];
-    const body = match[2];
+  for (const [, attrs, body] of html.matchAll(scriptExtractor)) {
+    if (!moduleTypePattern.test(attrs)) continue;
 
     const srcMatch = attrs.match(srcAttrPattern);
     if (srcMatch) {
@@ -63,11 +62,10 @@ const getModuleScriptSources = (html: string): string[] => {
     }
 
     if (body) {
-      for (const importMatch of body.matchAll(importSpecPattern)) {
-        const specifier = importMatch[1];
-        if (isFilePath(specifier)) {
-          sources.push(normalizeModuleScriptSrc(specifier));
-        }
+      const code = body.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
+      for (const importMatch of code.matchAll(importSpecPattern)) {
+        const specifier = importMatch[2];
+        if (isFilePath(specifier)) sources.push(normalizeModuleScriptSrc(specifier));
       }
     }
   }

@@ -13,11 +13,13 @@ test('Find entry from Vite index.html inline module script', async () => {
 
   assert(!('src/main.tsx' in issues.files));
   assert('src/unused.ts' in issues.files);
+  assert('src/commented-out.ts' in issues.files);
+  assert('src/decoy.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 2,
-    total: 2,
+    files: 3,
+    processed: 4,
+    total: 4,
   });
 });
