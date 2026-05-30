@@ -49,7 +49,7 @@ function compilePathMappings(paths: Record<string, string[]> | undefined): PathM
 }
 
 export function createCustomModuleResolver(
-  compilerOptions: { paths?: Record<string, string[]>; rootDirs?: string[] },
+  compilerOptions: { paths?: Record<string, string[]> },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspaceManifestImports?: WorkspaceManifestHandler
@@ -59,7 +59,6 @@ export function createCustomModuleResolver(
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS];
   const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.paths as Record<string, string[]>);
-  const rootDirs = compilerOptions.rootDirs;
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -125,21 +124,6 @@ export function createCustomModuleResolver(
         if (target?.startsWith('.')) {
           const sourcePath = toSourceFilePath(join(ws.dir, target));
           if (sourcePath) return toResult(sourcePath);
-        }
-      }
-    }
-
-    // Fallback for https://github.com/oxc-project/oxc-resolver/issues/1075
-    if (rootDirs && !isAbsolute(specifier)) {
-      const containingDir = dirname(containingFile);
-      for (const srcRoot of rootDirs) {
-        if (!containingDir.startsWith(srcRoot)) continue;
-        const relPath = containingDir.slice(srcRoot.length);
-        for (const targetRoot of rootDirs) {
-          if (targetRoot === srcRoot) continue;
-          const mapped = join(targetRoot, relPath, specifier);
-          const resolved = resolveSync(mapped, containingFile);
-          if (resolved) return toResult(resolved);
         }
       }
     }

@@ -122,9 +122,6 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     if (compilerOptions.paths) {
       compilerOptions.pathsBasePath ??= dir;
     }
-    if (compilerOptions.rootDirs) {
-      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) => (isAbsolute(d) ? d : join(dir, d)));
-    }
 
     const sourceMapPairs: SourceMap[] = [];
     if (config.references?.length) {
