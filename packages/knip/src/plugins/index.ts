@@ -70,6 +70,7 @@ import { default as nx } from './nx/index.ts';
 import { default as nyc } from './nyc/index.ts';
 import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
+import { default as orval } from './orval/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
 import { default as pandaCss } from './panda-css/index.ts';
@@ -222,6 +223,7 @@ export const Plugins = {
   nyc,
   oclif,
   'openapi-ts': openapiTs,
+  orval,
   oxfmt,
   oxlint,
   'panda-css': pandaCss,

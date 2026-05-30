@@ -624,6 +624,10 @@
           "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
           "$ref": "#/definitions/plugin"
         },
+        "orval": {
+          "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
+          "$ref": "#/definitions/plugin"
+        },
         "oxfmt": {
           "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
           "$ref": "#/definitions/plugin"

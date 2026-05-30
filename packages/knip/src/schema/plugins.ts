@@ -84,6 +84,7 @@ export const pluginsSchema = z.object({
   nyc: pluginSchema,
   oclif: pluginSchema,
   'openapi-ts': pluginSchema,
+  orval: pluginSchema,
   oxfmt: pluginSchema,
   oxlint: pluginSchema,
   'panda-css': pluginSchema,
