@@ -113,23 +113,17 @@ class IssueFixer {
       const absFilePath = join(this.options.cwd, filePath);
       const pkg = await load(absFilePath);
 
-      if (filePath in issues.dependencies) {
-        for (const dependency of Object.keys(issues.dependencies[filePath])) {
-          if (pkg.dependencies) {
-            delete pkg.dependencies[dependency];
-            issues.dependencies[filePath][dependency].isFixed = true;
-          }
+      const removeDependencies = (key: 'dependencies' | 'devDependencies') => {
+        const deps = pkg[key];
+        if (!deps || !(filePath in issues[key])) return;
+        for (const dependency of Object.keys(issues[key][filePath])) {
+          delete deps[dependency];
+          issues[key][filePath][dependency].isFixed = true;
         }
-      }
+      };
 
-      if (filePath in issues.devDependencies) {
-        for (const dependency of Object.keys(issues.devDependencies[filePath])) {
-          if (pkg.devDependencies) {
-            delete pkg.devDependencies[dependency];
-            issues.devDependencies[filePath][dependency].isFixed = true;
-          }
-        }
-      }
+      removeDependencies('dependencies');
+      removeDependencies('devDependencies');
 
       await save(absFilePath, pkg);
 

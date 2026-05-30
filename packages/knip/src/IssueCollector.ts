@@ -55,32 +55,36 @@ export class IssueCollector {
     if (workspaceFilePathFilter) this.workspaceFilter = workspaceFilePathFilter;
   }
 
-  addIgnorePatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+  private collectIgnorePatterns(
+    entries: { pattern: string; id: string; workspaceName?: string }[],
+    patterns: Set<string>,
+    unused: typeof this.unusedIgnorePatterns,
+    type: 'ignore' | 'ignoreFiles'
+  ) {
     for (const entry of entries) {
-      this.ignorePatterns.add(entry.pattern);
+      patterns.add(entry.pattern);
       if (!this.isTrackUnusedIgnorePatterns) continue;
       if (entry.pattern.startsWith('!')) continue;
-      if (this.unusedIgnorePatterns.has(entry.pattern)) continue;
-      this.unusedIgnorePatterns.set(entry.pattern, {
-        hint: { type: 'ignore', identifier: entry.id, workspaceName: entry.workspaceName },
+      if (unused.has(entry.pattern)) continue;
+      unused.set(entry.pattern, {
+        hint: { type, identifier: entry.id, workspaceName: entry.workspaceName },
         isMatch: picomatch(entry.pattern, { dot: true }),
       });
     }
-    this.isMatch = createMatcher(this.ignorePatterns);
+    return createMatcher(patterns);
+  }
+
+  addIgnorePatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+    this.isMatch = this.collectIgnorePatterns(entries, this.ignorePatterns, this.unusedIgnorePatterns, 'ignore');
   }
 
   addIgnoreFilesPatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
-    for (const entry of entries) {
-      this.ignoreFilesPatterns.add(entry.pattern);
-      if (!this.isTrackUnusedIgnorePatterns) continue;
-      if (entry.pattern.startsWith('!')) continue;
-      if (this.unusedIgnoreFilesPatterns.has(entry.pattern)) continue;
-      this.unusedIgnoreFilesPatterns.set(entry.pattern, {
-        hint: { type: 'ignoreFiles', identifier: entry.id, workspaceName: entry.workspaceName },
-        isMatch: picomatch(entry.pattern, { dot: true }),
-      });
-    }
-    this.isFileMatch = createMatcher(this.ignoreFilesPatterns);
+    this.isFileMatch = this.collectIgnorePatterns(
+      entries,
+      this.ignoreFilesPatterns,
+      this.unusedIgnoreFilesPatterns,
+      'ignoreFiles'
+    );
   }
 
   private markUsedPatterns(filePath: string, unused: typeof this.unusedIgnorePatterns) {
