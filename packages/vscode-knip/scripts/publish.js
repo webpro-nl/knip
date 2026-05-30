@@ -71,7 +71,8 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-ser
 const knipNm = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules');
 
 const knipRequire = createRequire(join(knipNm, '..', 'package.json'));
-const bindingVersion = pkgName => JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
+const bindingVersion = pkgName =>
+  JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
 const oxcParserVersion = bindingVersion('oxc-parser');
 const oxcResolverVersion = bindingVersion('oxc-resolver');
 console.log(`Pinning bindings: @oxc-parser@${oxcParserVersion}, @oxc-resolver@${oxcResolverVersion}`);

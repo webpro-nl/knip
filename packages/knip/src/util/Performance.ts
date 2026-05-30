@@ -1,4 +1,10 @@
-import { type PerformanceEntry, PerformanceObserver, type RecordableHistogram, createHistogram, performance } from 'node:perf_hooks';
+import {
+  type PerformanceEntry,
+  PerformanceObserver,
+  type RecordableHistogram,
+  createHistogram,
+  performance,
+} from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import { parseArgs } from 'node:util';
 import { Table } from './table.ts';
