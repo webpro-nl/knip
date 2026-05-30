@@ -17,23 +17,21 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
 
   const hasTypesIncluded = new Set<string>();
 
+  const addBinary = (key: string, value: string) => {
+    const set = installedBinaries.get(key);
+    if (set) set.add(value);
+    else installedBinaries.set(key, new Set([value]));
+  };
+
   for (const packageName of packageNames) {
     const manifest = loadPackageManifest({ cwd, dir, packageName });
     if (manifest) {
       // Read and store installed binaries
-      const binaryName = packageName.replace(/^@[^/]+\//, '');
-      const binaries = typeof manifest.bin === 'string' ? [binaryName] : Object.keys(manifest.bin ?? {});
+      const defaultBinaryName = packageName.replace(/^@[^/]+\//, '');
+      const binaries = typeof manifest.bin === 'string' ? [defaultBinaryName] : Object.keys(manifest.bin ?? {});
       for (const binaryName of binaries) {
-        if (installedBinaries.has(binaryName)) {
-          installedBinaries.get(binaryName)?.add(packageName);
-        } else {
-          installedBinaries.set(binaryName, new Set([packageName]));
-        }
-        if (installedBinaries.has(packageName)) {
-          installedBinaries.get(packageName)?.add(binaryName);
-        } else {
-          installedBinaries.set(packageName, new Set([binaryName]));
-        }
+        addBinary(binaryName, packageName);
+        addBinary(packageName, binaryName);
       }
 
       // Read and store peer dependencies
