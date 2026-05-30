@@ -343,9 +343,17 @@ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 Suppress configuration hints.
 
+### `--no-tag-hints`
+
+Suppress tag hints.
+
 ### `--treat-config-hints-as-errors`
 
 Exit with non-zero exit code (`1`) if there are any configuration hints.
+
+### `--treat-tag-hints-as-errors`
+
+Exit with non-zero exit code (`1`) if there are any tag hints.
 
 ### `--max-issues`
 

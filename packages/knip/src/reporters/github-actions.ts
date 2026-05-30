@@ -72,8 +72,11 @@ export default ({
   issues,
   cwd,
   configurationHints,
+  tagHints,
   isDisableConfigHints,
+  isDisableTagHints,
   isTreatConfigHintsAsErrors,
+  isTreatTagHintsAsErrors,
   configFilePath,
 }: ReporterOptions) => {
   const core = createGitHubActionsLogger();
@@ -150,6 +153,26 @@ export default ({
           title: CONFIG_HINTS_TITLE,
         });
       }
+    }
+  }
+
+  if (!isDisableTagHints && tagHints.size > 0) {
+    const TAG_HINTS_TITLE = 'Tag hints';
+    core.info(`${TAG_HINTS_TITLE} (${tagHints.size})`);
+
+    const sortedHints = [...tagHints].sort((a, b) => a.filePath.localeCompare(b.filePath));
+    for (const hint of sortedHints) {
+      const file = relative(cwd, hint.filePath);
+      const hintMessage = `Unused tag in ${file}: ${hint.identifier} → ${hint.tagName}`;
+      const log = isTreatTagHintsAsErrors ? core.error : core.notice;
+      log(hintMessage, {
+        file,
+        startLine: 1,
+        endLine: 1,
+        startColumn: 1,
+        endColumn: 1,
+        title: TAG_HINTS_TITLE,
+      });
     }
   }
 };

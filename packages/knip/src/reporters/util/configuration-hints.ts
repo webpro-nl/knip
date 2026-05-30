@@ -182,9 +182,10 @@ export const printConfigurationHints = ({
   }
 };
 
-export const printTagHints = ({ cwd, tagHints }: ReporterOptions) => {
+export const printTagHints = ({ cwd, tagHints, isTreatTagHintsAsErrors }: ReporterOptions) => {
   if (tagHints.size > 0) {
-    console.log(getDimmedTitle('Tag hints', tagHints.size));
+    const getTitle = isTreatTagHintsAsErrors ? getColoredTitle : getDimmedTitle;
+    console.warn(getTitle('Tag hints', tagHints.size));
     for (const hint of tagHints) {
       const { filePath, identifier, tagName } = hint;
       const message = `Unused tag in ${toRelative(filePath, cwd)}:`;

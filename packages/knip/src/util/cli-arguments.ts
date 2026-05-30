@@ -44,7 +44,9 @@ Output
       --reporter               Select reporter (default: symbols), can be repeated (3)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
       --no-config-hints        Suppress configuration hints
+      --no-tag-hints           Suppress tag hints
       --treat-config-hints-as-errors   Exit with non-zero code (1) if there are any configuration hints
+      --treat-tag-hints-as-errors      Exit with non-zero code (1) if there are any tag hints
       --max-issues             Maximum number of total issues before non-zero exit code (default: 0)
       --max-show-issues        Maximum number of issues to display per type
       --no-exit-code           Always exit with code zero (0)
@@ -108,6 +110,7 @@ export default function parseCLIArgs() {
       'no-exit-code': { type: 'boolean' },
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
+      'no-tag-hints': { type: 'boolean' },
       performance: { type: 'boolean' },
       'performance-fn': { type: 'string' },
       production: { type: 'boolean', short: 'p' },
@@ -122,6 +125,7 @@ export default function parseCLIArgs() {
       'trace-export': { type: 'string' },
       'trace-file': { type: 'string' },
       'treat-config-hints-as-errors': { type: 'boolean' },
+      'treat-tag-hints-as-errors': { type: 'boolean' },
       tsConfig: { type: 'string', short: 't' },
       'use-tsconfig-files': { type: 'boolean' },
       version: { type: 'boolean', short: 'V' },

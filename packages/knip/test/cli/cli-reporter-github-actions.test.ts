@@ -193,3 +193,25 @@ test('knip --reporter github-actions (treatConfigHintsAsErrors: true)', () => {
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
+
+const treatTagHintsAsErrorsCwd = resolve('fixtures/treat-tag-hints-as-errors');
+
+test('knip --reporter github-actions --treat-tag-hints-as-errors', () => {
+  const actual = exec('knip --reporter github-actions --treat-tag-hints-as-errors', {
+    cwd: treatTagHintsAsErrorsCwd,
+  }).stdout;
+  const expected = `Tag hints (1)
+::error file=module.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Tag hints::Unused tag in module.ts: greeting → @internal`;
+  if (actual !== expected) showDiff(actual, expected);
+  assert.equal(actual, expected);
+});
+
+const treatTagHintsAsErrors2Cwd = resolve('fixtures/treat-tag-hints-as-errors2');
+
+test('knip --reporter github-actions (treatTagHintsAsErrors: true)', () => {
+  const actual = exec('knip --reporter github-actions', { cwd: treatTagHintsAsErrors2Cwd }).stdout;
+  const expected = `Tag hints (1)
+::error file=module.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Tag hints::Unused tag in module.ts: greeting → @internal`;
+  if (actual !== expected) showDiff(actual, expected);
+  assert.equal(actual, expected);
+});

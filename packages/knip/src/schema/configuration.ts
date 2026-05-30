@@ -372,6 +372,19 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   treatConfigHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Exit with non-zero code (1) if there are any tag hints.
+   *
+   * @default false
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "treatTagHintsAsErrors": true
+   * }
+   * ```
+   */
+  treatTagHintsAsErrors: z.optional(z.boolean()),
 });
 
 const reportConfigSchema = z.object({

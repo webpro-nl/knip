@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/treat-tag-hints-as-errors",
+  "knip": {
+    "tags": ["-internal"]
+  }
+}

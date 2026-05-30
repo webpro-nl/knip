@@ -223,6 +223,16 @@ Exit with non-zero code (1) if there are any configuration hints.
 }
 ```
 
+### `treatTagHintsAsErrors`
+
+Exit with non-zero code (1) if there are any tag hints.
+
+```json title="knip.json"
+{
+  "treatTagHintsAsErrors": true
+}
+```
+
 ## Ignore Issues
 
 ### `ignore`

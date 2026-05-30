@@ -74,6 +74,7 @@ const main = async () => {
       isProduction: options.isProduction,
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
+      isTreatTagHintsAsErrors: options.isTreatTagHintsAsErrors,
       maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
@@ -104,7 +105,8 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > Number(args['max-issues'] ?? 0) ||
-        (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0))
+        (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
+        (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {
       process.exitCode = 1;
       return;

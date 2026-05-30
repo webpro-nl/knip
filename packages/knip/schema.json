@@ -185,6 +185,10 @@
     "treatConfigHintsAsErrors": {
       "title": "Exit with non-zero code (1) if there are any configuration hints",
       "type": "boolean"
+    },
+    "treatTagHintsAsErrors": {
+      "title": "Exit with non-zero code (1) if there are any tag hints",
+      "type": "boolean"
     }
   },
   "unevaluatedProperties": false,
