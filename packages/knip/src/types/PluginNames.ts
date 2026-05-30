@@ -55,6 +55,7 @@ export type PluginName =
   | 'mocha'
   | 'moonrepo'
   | 'msw'
+  | 'nano-spawn'
   | 'nano-staged'
   | 'nest'
   | 'netlify'
@@ -208,6 +209,7 @@ export const pluginNames = [
   'mocha',
   'moonrepo',
   'msw',
+  'nano-spawn',
   'nano-staged',
   'nest',
   'netlify',

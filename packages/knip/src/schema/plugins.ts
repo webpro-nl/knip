@@ -68,6 +68,7 @@ export const pluginsSchema = z.object({
   mocha: pluginSchema,
   moonrepo: pluginSchema,
   msw: pluginSchema,
+  'nano-spawn': pluginSchema,
   'nano-staged': pluginSchema,
   nest: pluginSchema,
   netlify: pluginSchema,

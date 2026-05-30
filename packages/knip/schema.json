@@ -560,6 +560,10 @@
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/msw)",
           "$ref": "#/definitions/plugin"
         },
+        "nano-spawn": {
+          "title": "nano-spawn plugin configuration (https://knip.dev/reference/plugins/nano-spawn)",
+          "$ref": "#/definitions/plugin"
+        },
         "nano-staged": {
           "title": "nano-staged plugin configuration (https://knip.dev/reference/plugins/nano-staged)",
           "$ref": "#/definitions/plugin"

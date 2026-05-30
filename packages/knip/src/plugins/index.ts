@@ -54,6 +54,7 @@ import { default as metro } from './metro/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
 import { default as msw } from './msw/index.ts';
+import { default as nanoSpawn } from './nano-spawn/index.ts';
 import { default as nanoStaged } from './nano-staged/index.ts';
 import { default as nest } from './nest/index.ts';
 import { default as netlify } from './netlify/index.ts';
@@ -207,6 +208,7 @@ export const Plugins = {
   mocha,
   moonrepo,
   msw,
+  'nano-spawn': nanoSpawn,
   'nano-staged': nanoStaged,
   nest,
   netlify,
