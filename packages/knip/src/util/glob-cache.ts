@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
-import { createDiskCache } from './disk-cache.ts';
+import { createDiskCache, mtimeMatches } from './disk-cache.ts';
 import { dirname } from './path.ts';
 
 interface GlobCacheEntry {
@@ -38,12 +38,7 @@ export const computeGlobCacheKey = (input: {
 
 const validateEntry = (entry: GlobCacheEntry): boolean => {
   for (const dir in entry.dirMtimes) {
-    try {
-      const stat = fs.statSync(dir);
-      if (stat.mtimeMs !== entry.dirMtimes[dir]) return false;
-    } catch {
-      return false;
-    }
+    if (!mtimeMatches(dir, entry.dirMtimes[dir])) return false;
   }
   return true;
 };

@@ -243,14 +243,12 @@ const _parseFindGitignores = timerify(findAndParseGitignores);
 export async function glob(_patterns: string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(_patterns) && _patterns.length === 0) return [];
 
-  const hasCache = cachedGlobIgnores.has(options.dir);
-  const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
   const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
-  if (options.gitignore && willCache) {
+  if (!cachedIgnores && options.gitignore && options.label) {
     let dir = options.dir;
     let prev: string;
     while (dir) {
@@ -260,11 +258,10 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
     }
+    cachedGlobIgnores.set(options.dir, compact(_ignore));
   }
 
-  if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
-
-  const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
+  const ignorePatterns = (cachedIgnores ?? _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
 
   const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns, expandDirectories: false };
 
@@ -274,7 +271,7 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
     patterns,
     ...fgOptions,
     ignore:
-      hasCache && ignorePatterns.length === (cachedIgnores || _ignore).length
+      cachedIgnores && negatedPatterns.length === 0
         ? `// using cache from previous glob cwd: ${fgOptions.cwd}`
         : ignorePatterns,
     paths,

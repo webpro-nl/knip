@@ -7,6 +7,14 @@ import { debugLog } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
 import { dirname } from './path.ts';
 
+export const mtimeMatches = (filePath: string, mtimeMs: number): boolean => {
+  try {
+    return fs.statSync(filePath).mtimeMs === mtimeMs;
+  } catch {
+    return false;
+  }
+};
+
 export interface DiskCache<V> {
   init: (cacheLocation: string) => void;
   isEnabled: () => boolean;

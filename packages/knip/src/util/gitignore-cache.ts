@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 // oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
-import { createDiskCache } from './disk-cache.ts';
+import { createDiskCache, mtimeMatches } from './disk-cache.ts';
 import type { Gitignores } from './glob-core.ts';
 
 interface SerializedGitignores {
@@ -42,15 +42,10 @@ const workspaceDirsKey = (workspaceDirs?: Set<string>): string => {
 
 const validateEntry = (entry: GitignoreCacheEntry, wsKey: string, cwd: string): boolean => {
   if (entry.workspaceDirsKey !== wsKey) return false;
-  const files = entry.gitignoreFiles;
-  const mtimes = entry.mtimes;
-  for (let i = 0; i < files.length; i++) {
-    const abs = path.isAbsolute(files[i]) ? files[i] : path.resolve(cwd, files[i]);
-    try {
-      if (fs.statSync(abs).mtimeMs !== mtimes[i]) return false;
-    } catch {
-      return false;
-    }
+  const { gitignoreFiles, mtimes } = entry;
+  for (let i = 0; i < gitignoreFiles.length; i++) {
+    const abs = path.isAbsolute(gitignoreFiles[i]) ? gitignoreFiles[i] : path.resolve(cwd, gitignoreFiles[i]);
+    if (!mtimeMatches(abs, mtimes[i])) return false;
   }
   return true;
 };
