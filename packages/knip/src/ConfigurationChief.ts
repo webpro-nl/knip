@@ -346,9 +346,9 @@ export class ConfigurationChief {
   }
 
   public getIgnoredWorkspacesFor(name: string) {
-    return this.ignoredWorkspacePatterns
-      .filter(workspaceName => workspaceName !== name)
-      .filter(workspaceName => name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name));
+    return this.ignoredWorkspacePatterns.filter(
+      workspaceName => workspaceName !== name && (name === ROOT_WORKSPACE_NAME || workspaceName.startsWith(name))
+    );
   }
 
   public createIgnoredWorkspaceMatcher(name: string, dir: string) {
@@ -385,14 +385,10 @@ export class ConfigurationChief {
 
   public getWorkspaceConfig(workspaceName: string) {
     const key = this.getConfigKeyForWorkspace(workspaceName);
+    if (!key) return {};
     const workspaces = this.rawConfig?.workspaces ?? {};
-    return (
-      (key
-        ? key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)
-          ? this.rawConfig
-          : workspaces[key]
-        : {}) ?? {}
-    );
+    if (key === ROOT_WORKSPACE_NAME && !(ROOT_WORKSPACE_NAME in workspaces)) return this.rawConfig ?? {};
+    return workspaces[key] ?? {};
   }
 
   public getIgnores(workspaceName: string) {
