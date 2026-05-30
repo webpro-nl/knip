@@ -105,8 +105,8 @@ export class DependencyDeputy {
       });
 
       this.setHostDependencies(name, hostDependencies);
-      this.setInstalledBinaries(name, installedBinaries);
-      this.setHasTypesIncluded(name, hasTypesIncluded);
+      this.installedBinaries.set(name, installedBinaries);
+      this.hasTypesIncluded.set(name, hasTypesIncluded);
     }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
@@ -161,22 +161,6 @@ export class DependencyDeputy {
     deps = manifest ? new Set([...manifest.dependencies, ...manifest.devDependencies]) : new Set();
     this.dependencyCache.set(workspaceName, deps);
     return deps;
-  }
-
-  setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, Set<string>>) {
-    this.installedBinaries.set(workspaceName, installedBinaries);
-  }
-
-  getInstalledBinaries(workspaceName: string) {
-    return this.installedBinaries.get(workspaceName);
-  }
-
-  setHasTypesIncluded(workspaceName: string, hasTypesIncluded: Set<string>) {
-    this.hasTypesIncluded.set(workspaceName, hasTypesIncluded);
-  }
-
-  getHasTypesIncluded(workspaceName: string) {
-    return this.hasTypesIncluded.get(workspaceName);
   }
 
   addReferencedDependency(workspaceName: string, packageName: string) {
@@ -272,7 +256,7 @@ export class DependencyDeputy {
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
 
     for (const name of workspaceNames) {
-      const binaries = this.getInstalledBinaries(name);
+      const binaries = this.installedBinaries.get(name);
       if (binaries?.has(binaryName)) {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
@@ -301,7 +285,7 @@ export class DependencyDeputy {
 
     for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
-      const hasTypesIncluded = this.getHasTypesIncluded(workspace);
+      const hasTypesIncluded = this.hasTypesIncluded.get(workspace);
       const peeker = new PackagePeeker(manifestStr);
 
       const isReferencedDependency = (dependency: string, visited = new Set<string>()): boolean => {
