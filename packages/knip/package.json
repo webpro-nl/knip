@@ -113,7 +113,6 @@
     "@types/picomatch": "^4.0.1",
     "@types/webpack": "^5.28.5",
     "@typescript/native-preview": "7.0.0-dev.20260512.1",
-    "@wdio/types": "^9.20.0",
     "codeclimate-types": "^0.3.1",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0"

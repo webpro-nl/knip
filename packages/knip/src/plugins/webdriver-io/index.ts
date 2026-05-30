@@ -17,14 +17,14 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
   const cfg = config?.config;
   if (!cfg) return [];
 
-  const frameworks = cfg?.framework ? [`@wdio/${cfg.framework}-framework`] : [];
+  const frameworks = cfg.framework ? [`@wdio/${cfg.framework}-framework`] : [];
 
   const runners =
-    cfg?.runner && cfg.runner !== 'local'
+    cfg.runner && cfg.runner !== 'local'
       ? [`@wdio/${Array.isArray(cfg.runner) ? cfg.runner[0] : cfg.runner}-runner`]
       : [];
 
-  const reporters = cfg?.reporters
+  const reporters = cfg.reporters
     ? cfg.reporters
         .flatMap(reporter => {
           if (typeof reporter === 'string') return [reporter];
