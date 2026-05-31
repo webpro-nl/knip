@@ -15,7 +15,7 @@ require.ts:resolve
 └── barrel.ts:reExportStar[resolve]
     ├── module.ts:importNS[NS.resolve] ✓
     │     refs: [NS.resolve]
-    └── shared.ts:reExport[resolve]
+    └── shared.ts:reExport[resolve] ✓
 shared.ts:CONTAINER
 └── module.ts:importAs[CONTAINER → ROOT] ✓
       refs: [ROOT.NS, ROOT.NS.resolve]
@@ -30,7 +30,7 @@ string.ts:leftPad
 string.ts:truncate
 ├── module.ts:import[truncate] ✓
 ├── module.ts:importAs[truncate → trunc] ✓
-├── shared.ts:reExportAs[truncate → shorten]
+├── shared.ts:reExportAs[truncate → shorten] ✓
 └── barrel.ts:reExportNS[STR.truncate]
     └── module.ts:importNS[NS.STR.truncate] ✓
           refs: [NS.STR, NS.STR.truncate]`;

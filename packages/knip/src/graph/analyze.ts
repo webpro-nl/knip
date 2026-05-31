@@ -315,7 +315,13 @@ export const analyze = async ({
   perfObserver.addMemoryMark('analyze');
 
   if (options.isTrace) {
-    traceReporter({ graph, explorer, options, workspaceFilePathFilter: chief.workspaceFilePathFilter });
+    traceReporter({
+      graph,
+      explorer,
+      options,
+      workspaceFilePathFilter: chief.workspaceFilePathFilter,
+      issues: collector.getIssues().issues,
+    });
   }
 
   return analyzeGraph;

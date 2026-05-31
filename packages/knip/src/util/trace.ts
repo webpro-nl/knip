@@ -39,7 +39,7 @@ export const formatTrace = (
     const childPrefix = isLast ? '    ' : '│   ';
     const entryMarker = child.isEntry ? dim(' ⎆') : '';
     const isLeaf = child.children.length === 0;
-    const leafMarker = isLeaf && !child.via?.startsWith('reExport') ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
+    const leafMarker = isLeaf ? (isReferenced ? ok(' ✓') : fail(' ✗')) : '';
 
     lines.push(
       `${dim(prefix)}${dim(connector)}${file(toRelative(child.filePath))}${dim(':')}${formatVia(child)}${entryMarker}${leafMarker}`

@@ -94,11 +94,17 @@ Use [--workspace \[filter\]][8] to filter accordingly.
 
 #### Legend
 
-|     | Description                                 |
-| --- | :------------------------------------------ |
-| `✓` | Contains import and reference to the export |
-| `x` | Is not imported                             |
-| `◯` | Entry file                                  |
+| Marker | Description                          |
+| ------ | :----------------------------------- |
+| `✓`    | Referenced (not reported as unused)  |
+| `✗`    | Reported as unused                   |
+| `⎆`    | Entry file                           |
+
+Each child node is prefixed with how the export is consumed: `import`, `importAs`
+(shown as `original → alias`), `importNS`, or a re-export (`reExport`,
+`reExportAs`, `reExportNS`, `reExportStar`). A `refs:` line lists the references
+found in that file; a `members:` line shows per-member status for namespaces and
+enums.
 
 ## Opening an issue
 
