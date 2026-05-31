@@ -1,5 +1,5 @@
 ---
-title: Plugins (148)
+title: Plugins (152)
 tableOfContents: false
 ---
 
@@ -59,6 +59,7 @@ tableOfContents: false
 - [Mocha](/reference/plugins/mocha "Mocha")
 - [moonrepo](/reference/plugins/moonrepo "moonrepo")
 - [Mock Service Worker](/reference/plugins/msw "Mock Service Worker")
+- [nano-spawn](/reference/plugins/nano-spawn "nano-spawn")
 - [Nano Staged](/reference/plugins/nano-staged "Nano Staged")
 - [Nest](/reference/plugins/nest "Nest")
 - [Netlify](/reference/plugins/netlify "Netlify")
@@ -75,6 +76,7 @@ tableOfContents: false
 - [nyc](/reference/plugins/nyc "nyc")
 - [oclif](/reference/plugins/oclif "oclif")
 - [openapi-ts](/reference/plugins/openapi-ts "openapi-ts")
+- [orval](/reference/plugins/orval "orval")
 - [Oxfmt](/reference/plugins/oxfmt "Oxfmt")
 - [Oxlint](/reference/plugins/oxlint "Oxlint")
 - [Panda CSS](/reference/plugins/panda-css "Panda CSS")
@@ -138,6 +140,7 @@ tableOfContents: false
 - [TypeScript](/reference/plugins/typescript "TypeScript")
 - [unbuild](/reference/plugins/unbuild "unbuild")
 - [UnoCSS](/reference/plugins/unocss "UnoCSS")
+- [Vercel](/reference/plugins/vercel "Vercel")
 - [Vercel OG](/reference/plugins/vercel-og "Vercel OG")
 - [Vike](/reference/plugins/vike "Vike")
 - [Vite](/reference/plugins/vite "Vite")
@@ -148,6 +151,7 @@ tableOfContents: false
 - [webpack](/reference/plugins/webpack "webpack")
 - [Wireit](/reference/plugins/wireit "Wireit")
 - [Wrangler](/reference/plugins/wrangler "Wrangler")
+- [WXT](/reference/plugins/wxt "WXT")
 - [xo](/reference/plugins/xo "xo")
 - [Yarn](/reference/plugins/yarn "Yarn")
 - [yorkie](/reference/plugins/yorkie "yorkie")
