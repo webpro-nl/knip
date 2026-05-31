@@ -17,6 +17,26 @@ article.prose {
 
 .sponsors {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
+}
+
+.sponsors .platinum {
+  display: flex;
+  justify-content: center;
+}
+
+.sponsors .gold {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1rem;
+}
+
+.sponsors .silver {
+  display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
@@ -25,9 +45,6 @@ article.prose {
 
 .sponsors.front {
   margin-bottom: 8rem;
-  gap: 1rem;
-  flex-direction: row;
-  flex-wrap: nowrap;
 }
 
 .sponsors a {
