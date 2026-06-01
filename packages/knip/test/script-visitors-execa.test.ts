@@ -9,10 +9,9 @@ const cwd = resolve('fixtures/script-visitors-execa');
 
 test('Find dependencies with custom script visitors (execa)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
-  // Let's start out conservatively
-  // assert(issues.unresolved['options.mjs']['hydrate.js']);
+  assert(!issues.binaries['methods.mjs']?.phantomexeca);
 
   assert.deepEqual(counters, {
     ...baseCounters,

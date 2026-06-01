@@ -150,6 +150,22 @@ await $`node scripts/parse.js`;
 
 This will add `scripts/parse.js` as an entry file.
 
+### child_process
+
+If `node:child_process` is imported in source code, Knip parses the command in
+`exec`/`execSync` calls and the executable (with its arguments) in
+`spawn`/`spawnSync`/`execFile`/`execFileSync` calls:
+
+```ts
+import { execSync, execFile } from 'node:child_process';
+execSync('eslint --cache');
+execFile('boxen', ['I ❤ unicorns']);
+```
+
+This marks the `eslint` and `boxen` binaries as referenced. An inline
+`path.join(__dirname, …)` argument to `spawn`, `execFile` or `fork` is added as
+an entry file instead.
+
 [1]: #packagejson
 [2]: #cli-arguments
 [3]: #scripts

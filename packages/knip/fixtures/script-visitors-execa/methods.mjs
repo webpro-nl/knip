@@ -2,10 +2,12 @@ import { execa, execaSync, execaCommand, execaCommandSync, execaNode, $sync } fr
 
 $sync`pnpm dlx executable4`;
 
-await execa('bun x', ['executable5']);
+await execa('bun', ['x', 'executable5']);
 
 execaSync('npx', ['executable6']);
 
 await execaCommand('bunx executable7');
 
 execaCommandSync('pnpx executable8');
+
+await execa('node', ['build && phantomexeca']);

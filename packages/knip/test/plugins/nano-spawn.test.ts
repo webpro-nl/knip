@@ -9,7 +9,9 @@ const cwd = resolve('fixtures/plugins/nano-spawn');
 
 test('Find binaries with the nano-spawn plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(!issues.binaries['main.js']?.phantomnano);
 
   assert.deepEqual(counters, {
     ...baseCounters,
