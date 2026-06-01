@@ -75,6 +75,24 @@ export const getStringValue = (node: any): string | undefined => {
   return undefined;
 };
 
+const SAFE_SCRIPT_ARG = /^[\w@.,:/=+~-]+$/;
+
+export const getSafeScriptFromArgs = (executable: any, argsArray: any): string | undefined => {
+  if (!isStringLiteral(executable)) return undefined;
+  const value = getStringValue(executable);
+  if (!value || !SAFE_SCRIPT_ARG.test(value)) return undefined;
+  const parts = [value];
+  if (argsArray?.type === 'ArrayExpression') {
+    for (const element of argsArray.elements) {
+      if (element && isStringLiteral(element)) {
+        const arg = getStringValue(element);
+        if (arg && SAFE_SCRIPT_ARG.test(arg)) parts.push(arg);
+      }
+    }
+  }
+  return parts.join(' ');
+};
+
 export const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile, type: SymbolType) =>
   ignoreExportsUsedInFile === true ||
   (typeof ignoreExportsUsedInFile === 'object' && type !== 'unknown' && ignoreExportsUsedInFile[type]);

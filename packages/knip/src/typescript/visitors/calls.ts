@@ -1,7 +1,7 @@
 import type { CallExpression, NewExpression } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { getSafeScriptFromArgs, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
 
 function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
@@ -37,7 +37,22 @@ function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
   return joined.startsWith('.') || joined.startsWith('/') ? joined : `./${joined}`;
 }
 
-const CHILD_PROCESS_ENTRY_METHODS = new Set(['fork', 'spawn', 'execFile']);
+const CHILD_PROCESS_FILE_METHODS = new Set(['fork', 'spawn', 'spawnSync', 'execFile', 'execFileSync']);
+const CHILD_PROCESS_COMMAND_METHODS = new Set(['exec', 'execSync']);
+
+function getChildProcessMethod(node: CallExpression, s: WalkState): string | undefined {
+  const callee = node.callee;
+  if (callee.type === 'Identifier') return s.childProcessMethods.get(callee.name);
+  if (
+    callee.type === 'MemberExpression' &&
+    !callee.computed &&
+    callee.object.type === 'Identifier' &&
+    callee.property.type === 'Identifier' &&
+    s.childProcessNamespaces.has(callee.object.name)
+  )
+    return callee.property.name;
+  return undefined;
+}
 
 export function handleCallExpression(node: CallExpression, s: WalkState) {
   if (
@@ -115,22 +130,29 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   }
 
   if (s.hasChildProcessImport && node.arguments.length >= 1) {
-    let isChildProcessEntry = false;
-    if (node.callee.type === 'Identifier' && CHILD_PROCESS_ENTRY_METHODS.has(node.callee.name)) {
-      isChildProcessEntry = true;
-    } else if (
-      node.callee.type === 'MemberExpression' &&
-      !node.callee.computed &&
-      node.callee.property.type === 'Identifier' &&
-      CHILD_PROCESS_ENTRY_METHODS.has(node.callee.property.name)
-    ) {
-      isChildProcessEntry = true;
-    }
-    if (isChildProcessEntry) {
-      const specifier = extractInlineDirnamePath(node.arguments[0], s);
-      if (specifier) {
-        s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+    const method = getChildProcessMethod(node, s);
+    if (method) {
+      const arg = node.arguments[0];
+      if (CHILD_PROCESS_COMMAND_METHODS.has(method)) {
+        if (isStringLiteral(arg)) {
+          const command = getStringValue(arg);
+          if (command) s.scripts.add(command);
+        }
         return;
+      }
+      if (CHILD_PROCESS_FILE_METHODS.has(method)) {
+        const specifier = extractInlineDirnamePath(arg, s);
+        if (specifier) {
+          s.addImport(specifier, undefined, undefined, undefined, arg.start, IMPORT_FLAGS.ENTRY);
+          return;
+        }
+        if (method !== 'fork') {
+          const script = getSafeScriptFromArgs(arg, node.arguments[1]);
+          if (script) {
+            s.scripts.add(script);
+            return;
+          }
+        }
       }
     }
   }

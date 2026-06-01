@@ -33,6 +33,9 @@ interface AddInternalImportOptions {
   modifiers: number;
 }
 
+const EMPTY_CHILD_PROCESS_NAMES: ReadonlySet<string> = new Set();
+const EMPTY_CHILD_PROCESS_METHODS: ReadonlyMap<string, string> = new Map();
+
 const getImportsAndExports = (
   filePath: string,
   sourceText: string,
@@ -218,13 +221,16 @@ const getImportsAndExports = (
   let hasChildProcessImport = false;
   let hasPathJoinImport = false;
   let hasPathResolveImport = false;
+  let childProcessNamespaces: Set<string> | undefined;
+  let childProcessMethods: Map<string, string> | undefined;
 
   for (const _imports of result.module.staticImports) {
     const specifier = _imports.moduleRequest.value;
+    const isPathImport = specifier === 'node:path' || specifier === 'path';
+    const isChildProcessImport = specifier === 'node:child_process' || specifier === 'child_process';
     if (specifier === 'node:module' || specifier === 'module') hasNodeModuleImport = true;
     else if (specifier === 'node:worker_threads' || specifier === 'worker_threads') hasWorkerThreadsImport = true;
-    else if (specifier === 'node:child_process' || specifier === 'child_process') hasChildProcessImport = true;
-    const isPathImport = specifier === 'node:path' || specifier === 'path';
+    else if (isChildProcessImport) hasChildProcessImport = true;
     const pos = _imports.moduleRequest.start;
     const jsdocTags = getJSDocTags(_imports.start);
 
@@ -244,6 +250,7 @@ const getImportsAndExports = (
 
       if (entry.importName.kind === 'NamespaceObject') {
         const localName = entry.localName.value;
+        if (isChildProcessImport) (childProcessNamespaces ??= new Set()).add(localName);
         addImport(
           specifier,
           IMPORT_STAR,
@@ -259,6 +266,7 @@ const getImportsAndExports = (
           localImportMap.set(localName, { importedName: IMPORT_STAR, filePath: internalPath, isNamespace: true });
       } else if (entry.importName.kind === 'Default') {
         const localName = entry.localName.value;
+        if (isChildProcessImport) (childProcessNamespaces ??= new Set()).add(localName);
         const alias = localName !== 'default' ? localName : undefined;
         addImport(specifier, 'default', alias, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
         if (internalPath)
@@ -267,6 +275,7 @@ const getImportsAndExports = (
         const importedName = entry.importName.name!;
         const localName = entry.localName.value;
         const alias = localName !== importedName ? localName : undefined;
+        if (isChildProcessImport) (childProcessMethods ??= new Map()).set(localName, importedName);
         if (isPathImport && !alias) {
           if (importedName === 'join') hasPathJoinImport = true;
           else if (importedName === 'resolve') hasPathResolveImport = true;
@@ -368,6 +377,8 @@ const getImportsAndExports = (
     hasNodeModuleImport,
     hasWorkerThreadsImport,
     hasChildProcessImport,
+    childProcessNamespaces: childProcessNamespaces ?? EMPTY_CHILD_PROCESS_NAMES,
+    childProcessMethods: childProcessMethods ?? EMPTY_CHILD_PROCESS_METHODS,
     hasPathJoinImport,
     hasPathResolveImport,
     resolveModule,

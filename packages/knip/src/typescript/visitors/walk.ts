@@ -64,6 +64,8 @@ interface WalkContext {
   hasNodeModuleImport: boolean;
   hasWorkerThreadsImport: boolean;
   hasChildProcessImport: boolean;
+  childProcessNamespaces: ReadonlySet<string>;
+  childProcessMethods: ReadonlyMap<string, string>;
   hasPathJoinImport: boolean;
   hasPathResolveImport: boolean;
   resolveModule: ResolveModule;
