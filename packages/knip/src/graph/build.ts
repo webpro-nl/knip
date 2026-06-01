@@ -3,7 +3,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, DEFAULT_IGNORE_PATTERNS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -100,7 +100,14 @@ export async function build({
 
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
 
-  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
+  collector.addIgnorePatterns(
+    DEFAULT_IGNORE_PATTERNS.map(id => ({ pattern: prependDir(options.cwd, id), id, isTrackUnused: false }))
+  );
+  collector.addIgnorePatterns(
+    chief.config.ignore
+      .filter(id => !DEFAULT_IGNORE_PATTERNS.includes(id))
+      .map(id => ({ pattern: prependDir(options.cwd, id), id }))
+  );
   collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
 
   if (options.configFilePath) {

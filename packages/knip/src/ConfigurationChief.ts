@@ -1,6 +1,6 @@
 import picomatch from 'picomatch';
 import type { SyncCompilers } from './compilers/types.ts';
-import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
+import { DEFAULT_EXTENSIONS, DEFAULT_IGNORE_PATTERNS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
   IgnorePatterns,
@@ -49,7 +49,7 @@ const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
 const isPluginName = (name: string): name is PluginName => pluginNames.includes(name as PluginName);
 
 const defaultConfig: Configuration = {
-  ignore: [],
+  ignore: DEFAULT_IGNORE_PATTERNS,
   ignoreBinaries: [],
   ignoreDependencies: [],
   ignoreFiles: [],
@@ -137,7 +137,7 @@ export class ConfigurationChief {
   }
 
   private normalize(rawConfig: RawConfiguration): Configuration {
-    const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
+    const ignore = [...defaultConfig.ignore, ...arrayify(rawConfig.ignore)];
     const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];

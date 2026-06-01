@@ -14,6 +14,7 @@ export const KNIP_CONFIG_LOCATIONS = [
 ];
 
 export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
+export const DEFAULT_IGNORE_PATTERNS = ['.context/**'];
 
 export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
 

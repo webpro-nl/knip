@@ -18,6 +18,7 @@ const createMatcher = (patterns: Set<string>) => {
 
 export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
 
+type IgnorePatternEntry = { pattern: string; id: string; workspaceName?: string; isTrackUnused?: boolean };
 type TrackedPattern = { hint: ConfigurationHint; isMatch: (path: string) => boolean };
 
 /**
@@ -33,8 +34,10 @@ export class IssueCollector {
   private referencedFiles = new Set<string>();
   private configurationHints: ConfigurationHints = new Map();
   private tagHints = new Set<TagHint>();
+  private defaultIgnorePatterns = new Set<string>();
   private ignorePatterns = new Set<string>();
   private ignoreFilesPatterns = new Set<string>();
+  private isDefaultMatch: (filePath: string) => boolean;
   private isMatch: (filePath: string) => boolean;
   private isFileMatch: (filePath: string) => boolean;
   private issueMatchers: Map<IssueType, (filePath: string) => boolean> = new Map();
@@ -46,6 +49,7 @@ export class IssueCollector {
     this.cwd = options.cwd;
     this.rules = options.rules;
     this.workspaceFilter = () => true;
+    this.isDefaultMatch = () => false;
     this.isMatch = () => false;
     this.isFileMatch = () => false;
     this.isTrackUnusedIgnorePatterns = !options.isDisableConfigHints;
@@ -56,7 +60,7 @@ export class IssueCollector {
   }
 
   private collectIgnorePatterns(
-    entries: { pattern: string; id: string; workspaceName?: string }[],
+    entries: IgnorePatternEntry[],
     patterns: Set<string>,
     unused: typeof this.unusedIgnorePatterns,
     type: 'ignore' | 'ignoreFiles'
@@ -64,6 +68,7 @@ export class IssueCollector {
     for (const entry of entries) {
       patterns.add(entry.pattern);
       if (!this.isTrackUnusedIgnorePatterns) continue;
+      if (entry.isTrackUnused === false) continue;
       if (entry.pattern.startsWith('!')) continue;
       if (unused.has(entry.pattern)) continue;
       unused.set(entry.pattern, {
@@ -74,11 +79,22 @@ export class IssueCollector {
     return createMatcher(patterns);
   }
 
-  addIgnorePatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
-    this.isMatch = this.collectIgnorePatterns(entries, this.ignorePatterns, this.unusedIgnorePatterns, 'ignore');
+  addIgnorePatterns(entries: IgnorePatternEntry[]) {
+    const [defaultEntries, userEntries] = partition(entries, entry => entry.isTrackUnused === false);
+    if (defaultEntries.length > 0) {
+      this.isDefaultMatch = this.collectIgnorePatterns(
+        defaultEntries,
+        this.defaultIgnorePatterns,
+        this.unusedIgnorePatterns,
+        'ignore'
+      );
+    }
+    if (userEntries.length > 0) {
+      this.isMatch = this.collectIgnorePatterns(userEntries, this.ignorePatterns, this.unusedIgnorePatterns, 'ignore');
+    }
   }
 
-  addIgnoreFilesPatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+  addIgnoreFilesPatterns(entries: IgnorePatternEntry[]) {
     this.isFileMatch = this.collectIgnorePatterns(
       entries,
       this.ignoreFilesPatterns,
@@ -119,6 +135,10 @@ export class IssueCollector {
     return matcher(relative(this.cwd, filePath));
   }
 
+  private shouldIgnore(filePath: string) {
+    return this.isDefaultMatch(filePath) || this.isMatch(filePath);
+  }
+
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
     this.counters.processed += processed;
     this.counters.total += processed + unused;
@@ -128,7 +148,7 @@ export class IssueCollector {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
-      if (this.isMatch(filePath)) {
+      if (this.shouldIgnore(filePath)) {
         this.markUsedPatterns(filePath, this.unusedIgnorePatterns);
         continue;
       }
@@ -150,7 +170,7 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     if (!this.workspaceFilter(issue.filePath)) return;
-    if (this.isMatch(issue.filePath)) {
+    if (this.shouldIgnore(issue.filePath)) {
       this.markUsedPatterns(issue.filePath, this.unusedIgnorePatterns);
       return;
     }

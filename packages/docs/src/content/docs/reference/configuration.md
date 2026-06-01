@@ -250,6 +250,9 @@ Avoid `ignore` patterns. There is almost always a better solution:
 - Use [production mode][10].
 - Other `ignore*` options.
 
+Knip ignores `.context/**` by default. This excludes AI worktree artifacts
+created by tools such as Conductor.
+
 **NOTE**: An exception to the rule: to _temporarily_ report only issues in files
 that match the negated `ignore` pattern:
 
