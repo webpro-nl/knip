@@ -1,4 +1,4 @@
-import parseArgs from 'minimist';
+import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';

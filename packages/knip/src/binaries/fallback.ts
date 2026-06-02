@@ -1,4 +1,4 @@
-import parseArgs from 'minimist';
+import parseArgs from '../util/parse-args.ts';
 import type { BinaryResolver } from '../types/config.ts';
 import { compact } from '../util/array.ts';
 import { toBinary, toDeferResolve, toEntry } from '../util/input.ts';

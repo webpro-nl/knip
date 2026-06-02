@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';

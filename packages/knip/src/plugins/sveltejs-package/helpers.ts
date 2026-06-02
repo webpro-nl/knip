@@ -1,4 +1,4 @@
-import parseArgs from 'minimist';
+import parseArgs from '../../util/parse-args.ts';
 import { type Node, parse, type Statement } from 'unbash';
 
 const BIN = 'svelte-package';

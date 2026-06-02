@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';

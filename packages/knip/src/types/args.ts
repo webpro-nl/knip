@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../util/parse-args.ts';
 import type { Input } from '../util/input.ts';
 import type { Manifest } from '../util/package-json.ts';
 

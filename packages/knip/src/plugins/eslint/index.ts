@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';

@@ -1,4 +1,4 @@
-import parseArgs from 'minimist';
+import parseArgs from '../util/parse-args.ts';
 
 export const argsFrom = (args: string[], from: string) => args.slice(args.indexOf(from));
 

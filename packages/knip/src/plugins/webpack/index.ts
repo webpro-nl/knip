@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';

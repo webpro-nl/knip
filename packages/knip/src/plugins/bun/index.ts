@@ -1,4 +1,4 @@
-import parseArgs from 'minimist';
+import parseArgs from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { toDeferResolve, toEntry } from '../../util/input.ts';
 import type { BunfigConfig } from './types.ts';
