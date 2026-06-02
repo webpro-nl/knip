@@ -6,6 +6,8 @@
     }
   ],
   "settings": {
-    "knip.cwd": "./frontend"
+    "knip.cwd": "./frontend",
+    "knip.requireConfig": false,
+    "knip.configFilePath": "./knip.json"
   }
 }
