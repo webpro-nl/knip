@@ -58,7 +58,7 @@ test('parseArgs (dotted options nest into objects)', () => {
   assert.deepEqual(parseArgs(['--coverage.provider=v8']), { _: [], coverage: { provider: 'v8' } });
   assert.deepEqual(parseArgs(['--typecheck.checker', 'tsc']), { _: [], typecheck: { checker: 'tsc' } });
   assert.deepEqual(parseArgs(['--a.b=1', '--a.c=2'])._, []);
-  assert.deepEqual(parseArgs(['--a.b=1', '--a.c=2']).a, { b: '1', c: '2' });
+  assert.deepEqual(parseArgs(['--a.b=1', '--a.c=2']).a, { b: 1, c: 2 });
 });
 
 test('parseArgs (double-dash capture with "--": true)', () => {
@@ -75,6 +75,30 @@ test('parseArgs (double-dash without "--" folds into positionals)', () => {
     _: ['pkg', '--edit'],
     no: true,
   });
+});
+
+test('parseArgs (numeric coercion of positionals and undeclared values)', () => {
+  assert.deepEqual(parseArgs(['8080', 'foo']), { _: [8080, 'foo'] });
+  assert.deepEqual(parseArgs(['0x10', '1e3', '007', '.5']), { _: [16, 1000, 7, 0.5] });
+  assert.deepEqual(parseArgs(['--port', '8080']), { _: [], port: 8080 });
+  assert.deepEqual(parseArgs(['--port', '8080'], { string: ['port'] }), { _: [], port: '8080' });
+  assert.deepEqual(parseArgs(['pkg@1.2.3', '1.2.3']), { _: ['pkg@1.2.3', '1.2.3'] });
+});
+
+test('parseArgs ("--" array is not numeric-coerced)', () => {
+  assert.deepEqual(parseArgs(['--', '8080'], { '--': true }), { _: [], '--': ['8080'] });
+});
+
+test('parseArgs (--no-x negation sets x to false without consuming next)', () => {
+  assert.deepEqual(parseArgs(['--no-install']), { _: [], install: false });
+  assert.deepEqual(parseArgs(['--no-foo', '8080']), { _: [8080], foo: false });
+  assert.deepEqual(parseArgs(['--no-install', 'pkg'], { boolean: ['no'], alias: { no: 'no-install' } }), {
+    _: ['pkg'],
+    no: false,
+    'no-install': false,
+    install: false,
+  });
+  assert.deepEqual(parseArgs(['--no']), { _: [], no: true });
 });
 
 test('parseArgs (tolerates non-string args like minimist)', () => {

@@ -2,6 +2,10 @@ import { parseArgs as nodeParseArgs } from 'node:util';
 
 type ParsedValue = any;
 
+const isHex = /^0x[0-9a-f]+$/i;
+const isDecimal = /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/;
+const coerce = (value: string): string | number => (isHex.test(value) || isDecimal.test(value) ? Number(value) : value);
+
 export interface ParsedArgs {
   _: string[];
   '--'?: string[];
@@ -58,7 +62,7 @@ const parseArgs = (argv: string[], opts: Opts = {}): ParsedArgs => {
 
   const { tokens } = nodeParseArgs({ args, strict: false, allowPositionals: true, tokens: true });
 
-  const positionals: string[] = [];
+  const positionals: ParsedValue[] = [];
   const dd: string[] = [];
   const store = new Map<string, ParsedValue>();
   const consumed = new Set<number>();
@@ -85,23 +89,31 @@ const parseArgs = (argv: string[], opts: Opts = {}): ParsedArgs => {
       continue;
     }
     if (afterTerminator) {
-      if (token.kind === 'positional') (opts['--'] ? dd : positionals).push(token.value);
+      if (token.kind === 'positional') {
+        if (opts['--']) dd.push(token.value);
+        else positionals.push(coerce(token.value));
+      }
       continue;
     }
     if (token.kind === 'positional') {
-      if (!consumed.has(i)) positionals.push(token.value);
+      if (!consumed.has(i)) positionals.push(coerce(token.value));
       continue;
     }
     const name = token.name;
+    if (token.rawName.startsWith('--no-') && token.inlineValue === undefined) {
+      set(name.slice(3), false);
+      continue;
+    }
+    const toValue = (raw: string) => (stringSet.has(name) ? raw : coerce(raw));
     let value: ParsedValue;
     if (token.inlineValue !== undefined && token.value !== undefined) {
-      value = isBoolean(name) ? token.value !== 'false' : token.value;
+      value = isBoolean(name) ? token.value !== 'false' : toValue(token.value);
     } else if (isBoolean(name)) {
       value = true;
     } else {
       const next = tokens[i + 1];
       if (next?.kind === 'positional' && !consumed.has(i + 1)) {
-        value = next.value;
+        value = toValue(next.value);
         consumed.add(i + 1);
       } else {
         value = stringSet.has(name) ? '' : true;
