@@ -420,6 +420,7 @@ export class ConfigurationChief {
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
+    const ignoreExportsUsedInFile = workspaceConfig.ignoreExportsUsedInFile ?? this.config.ignoreExportsUsedInFile;
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
     const plugins: Partial<PluginsConfiguration> = {};
@@ -434,7 +435,7 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, ignoreFiles, isIncludeEntryExports, ...plugins };
+    return { entry, project, paths, ignore, ignoreFiles, ignoreExportsUsedInFile, isIncludeEntryExports, ...plugins };
   }
 
   public findWorkspaceByFilePath(filePath: string) {

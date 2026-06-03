@@ -395,7 +395,7 @@ export async function build({
       const file = pp.analyzeSourceFile(
         filePath,
         analyzeOpts,
-        chief.config.ignoreExportsUsedInFile,
+        workspace.config.ignoreExportsUsedInFile,
         parseResult,
         sourceText,
         cachedFile

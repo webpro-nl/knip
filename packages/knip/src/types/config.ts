@@ -91,6 +91,7 @@ interface BaseWorkspaceConfiguration {
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
   ignoreFiles: NormalizedGlob;
+  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   isIncludeEntryExports: boolean;
 }
 

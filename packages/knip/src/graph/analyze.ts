@@ -6,6 +6,7 @@ import { createGraphExplorer } from '../graph-explorer/explorer.ts';
 import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import traceReporter from '../reporters/trace.ts';
+import type { IgnoreExportsUsedInFile } from '../types/config.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
 import { shouldCountRefs } from '../typescript/ast-nodes.ts';
 import type { MainOptions } from '../util/create-options.ts';
@@ -45,12 +46,11 @@ export const analyze = async ({
 
   const explorer = createGraphExplorer(graph, entryPaths);
 
-  const ignoreExportsUsedInFile = chief.config.ignoreExportsUsedInFile;
-
   const isReferencedInUsedExport = (
     exportedItem: Export,
     filePath: string,
     includeEntryExports: boolean,
+    ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
     visited?: Set<string>
   ) => {
     if (!exportedItem.referencedIn) return false;
@@ -71,7 +71,8 @@ export const analyze = async ({
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {
           v.add(containingExport);
-          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, v)) return true;
+          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, ignoreExportsUsedInFile, v))
+            return true;
         }
       }
     }
@@ -90,7 +91,7 @@ export const analyze = async ({
         const workspace = chief.findWorkspaceByFilePath(filePath);
 
         if (workspace) {
-          const { isIncludeEntryExports } = workspace.config;
+          const { isIncludeEntryExports, ignoreExportsUsedInFile } = workspace.config;
 
           const isEntry = entryPaths.has(filePath);
 
@@ -115,7 +116,8 @@ export const analyze = async ({
 
               if (
                 isIgnored &&
-                (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
+                (isReferenced ||
+                  isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile))
               ) {
                 for (const tagName of exportedItem.jsDocTags) {
                   if (options.tags[1].includes(tagName) || (isInternalProd && tagName === INTERNAL_TAG)) {
@@ -198,7 +200,7 @@ export const analyze = async ({
             if (
               isIgnored ||
               exportedItem.hasRefsInFile ||
-              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports) ||
+              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile) ||
               (hasStrictlyNsRefs &&
                 ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))
             ) {

@@ -39,6 +39,7 @@ export class ProjectPrincipal {
   };
   pluginVisitorObjects: PluginVisitorObject[] = [];
   private _visitor: Visitor | undefined;
+  private _localRefsVisitor: Visitor | undefined;
 
   syncCompilers: SyncCompilers = new Map();
   asyncCompilers: AsyncCompilers = new Map();
@@ -274,7 +275,9 @@ export class ProjectPrincipal {
       }
     }
 
-    if (!this._visitor) this._visitor = buildVisitor(this.pluginVisitorObjects, !!ignoreExportsUsedInFile);
+    const visitor = ignoreExportsUsedInFile
+      ? (this._localRefsVisitor ??= buildVisitor(this.pluginVisitorObjects, true))
+      : (this._visitor ??= buildVisitor(this.pluginVisitorObjects, false));
 
     return _getImportsAndExports(
       filePath,
@@ -283,7 +286,7 @@ export class ProjectPrincipal {
       options,
       ignoreExportsUsedInFile,
       skipExports,
-      this._visitor,
+      visitor,
       this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
       parseResult
     );

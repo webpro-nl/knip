@@ -253,6 +253,10 @@ const rootConfigurationSchema = z.object({
    *   }
    * }
    * ```
+   *
+   * @remarks
+   * Set this option at root level to enable this globally, or within workspace
+   * configurations individually.
    */
   ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
   /**
@@ -412,6 +416,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignoreDependencies: z.optional(stringOrRegexSchema),
   ignoreMembers: z.optional(stringOrRegexSchema),
   ignoreUnresolved: z.optional(stringOrRegexSchema),
+  ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
   includeEntryExports: z.optional(z.boolean()),
 });
 

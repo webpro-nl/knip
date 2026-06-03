@@ -115,7 +115,6 @@ Individual workspace configurations may contain all other options listed on this
 page, except for the following root-only options:
 
 - `exclude` / `include`
-- `ignoreExportsUsedInFile`
 - `ignoreWorkspaces`
 - `workspaces`
 
@@ -414,6 +413,9 @@ In a more fine-grained manner, to ignore only specific issue types:
 
 Valid keys are the symbol types Knip distinguishes: `class`, `enum`,
 `function`, `interface`, `member`, `namespace`, `type` and `variable`.
+
+Set this option at root level to enable this globally, or within workspace
+configurations individually.
 
 ### `includeEntryExports`
 

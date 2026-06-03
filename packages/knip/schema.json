@@ -52,49 +52,7 @@
       "$ref": "#/definitions/issueTypes"
     },
     "ignoreExportsUsedInFile": {
-      "title": "Ignore exports used in file",
-      "examples": [
-        {
-          "ignoreExportsUsedInFile": true
-        },
-        {
-          "ignoreExportsUsedInFile": {
-            "interface": true,
-            "type": true
-          }
-        }
-      ],
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "object",
-          "properties": {
-            "class": {
-              "type": "boolean"
-            },
-            "enum": {
-              "type": "boolean"
-            },
-            "function": {
-              "type": "boolean"
-            },
-            "interface": {
-              "type": "boolean"
-            },
-            "member": {
-              "type": "boolean"
-            },
-            "type": {
-              "type": "boolean"
-            },
-            "variable": {
-              "type": "boolean"
-            }
-          }
-        }
-      ]
+      "$ref": "#/definitions/ignoreExportsUsedInFile"
     },
     "ignoreIssues": {
       "title": " Ignore specific issue types for specific file patterns",
@@ -224,6 +182,51 @@
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
+    "ignoreExportsUsedInFile": {
+      "title": "Ignore exports used in file",
+      "examples": [
+        {
+          "ignoreExportsUsedInFile": true
+        },
+        {
+          "ignoreExportsUsedInFile": {
+            "interface": true,
+            "type": true
+          }
+        }
+      ],
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "class": {
+              "type": "boolean"
+            },
+            "enum": {
+              "type": "boolean"
+            },
+            "function": {
+              "type": "boolean"
+            },
+            "interface": {
+              "type": "boolean"
+            },
+            "member": {
+              "type": "boolean"
+            },
+            "type": {
+              "type": "boolean"
+            },
+            "variable": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
     "ignoreMembers": {
       "title": "Enum and namespace members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
@@ -309,6 +312,9 @@
         },
         "ignoreUnresolved": {
           "$ref": "#/definitions/ignoreUnresolved"
+        },
+        "ignoreExportsUsedInFile": {
+          "$ref": "#/definitions/ignoreExportsUsedInFile"
         },
         "includeEntryExports": {
           "$ref": "#/definitions/includeEntryExports"
