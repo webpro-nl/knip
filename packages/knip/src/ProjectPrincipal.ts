@@ -36,6 +36,7 @@ export class ProjectPrincipal {
     sourceText: '',
     addScript: () => {},
     addImport: () => {},
+    markExportRegistered: () => {},
   };
   pluginVisitorObjects: PluginVisitorObject[] = [];
   private _visitor: Visitor | undefined;

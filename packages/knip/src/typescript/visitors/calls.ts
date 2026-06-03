@@ -1,8 +1,85 @@
-import type { CallExpression, NewExpression } from 'oxc-parser';
-import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
+import type { CallExpression, Expression, NewExpression } from 'oxc-parser';
+import { IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { getSafeScriptFromArgs, getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import type { WalkState } from './walk.ts';
+import { isShadowed, type WalkState } from './walk.ts';
+
+const GLOBAL_THIS_NAMES = new Set(['window', 'globalThis', 'self']);
+
+/**
+ * For the native `customElements.define('tag', ClassRef)` registration (also
+ * `window`/`globalThis`/`self`-prefixed), returns the registered class binding
+ * name. Returns `undefined` when `customElements` or the class binding is locally
+ * shadowed, so a same-named non-global object's `.define()` doesn't credit a class.
+ */
+function getRegisteredCustomElement(node: CallExpression): string | undefined {
+  const callee = node.callee;
+  if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
+  if (callee.property.type !== 'Identifier' || callee.property.name !== 'define') return undefined;
+
+  const object = callee.object;
+  let rootName: string;
+  let rootStart: number;
+  if (object.type === 'Identifier' && object.name === 'customElements') {
+    rootName = object.name;
+    rootStart = object.start;
+  } else if (
+    object.type === 'MemberExpression' &&
+    !object.computed &&
+    object.object.type === 'Identifier' &&
+    GLOBAL_THIS_NAMES.has(object.object.name) &&
+    object.property.type === 'Identifier' &&
+    object.property.name === 'customElements'
+  ) {
+    rootName = object.object.name;
+    rootStart = object.object.start;
+  } else {
+    return undefined;
+  }
+  if (isShadowed(rootName, rootStart)) return undefined;
+
+  const arg = node.arguments[1];
+  if (arg?.type !== 'Identifier' || isShadowed(arg.name, arg.start)) return undefined;
+  return arg.name;
+}
+
+/** A custom-element tag from a `.define` argument: a string, or `{ name: '…' }` (FAST's form). */
+function getCustomElementTag(arg: Expression | undefined): string | undefined {
+  if (isStringLiteral(arg)) return getStringValue(arg);
+  if (arg?.type === 'ObjectExpression') {
+    for (const prop of arg.properties) {
+      if (
+        prop.type === 'Property' &&
+        !prop.computed &&
+        prop.key.type === 'Identifier' &&
+        prop.key.name === 'name' &&
+        isStringLiteral(prop.value)
+      )
+        return getStringValue(prop.value);
+    }
+  }
+  return undefined;
+}
+
+/**
+ * The cross-library `<LocalClass>.define('tag')` / `.define({ name: 'tag' })` convention (Shoelace /
+ * Web Awesome base classes, FAST 2.x, custom bases). Heuristic, so it's guarded: the callee object
+ * must be a local class binding (not shadowed) and the tag must be a custom-element name — which the
+ * spec requires to contain a hyphen — keeping a non-WC `obj.define('a-b')` from crediting a class.
+ */
+function getStaticDefineRegistration(node: CallExpression, s: WalkState): string | undefined {
+  const callee = node.callee;
+  if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
+  if (callee.property.type !== 'Identifier' || callee.property.name !== 'define') return undefined;
+  if (callee.object.type !== 'Identifier') return undefined;
+
+  const name = callee.object.name;
+  if (s.localDeclarationTypes.get(name) !== SYMBOL_TYPE.CLASS || isShadowed(name, callee.object.start))
+    return undefined;
+
+  const tag = getCustomElementTag(node.arguments[0] as Expression | undefined);
+  return tag?.includes('-') ? name : undefined;
+}
 
 function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
   if (node?.type !== 'CallExpression') return undefined;
@@ -55,6 +132,22 @@ function getChildProcessMethod(node: CallExpression, s: WalkState): string | und
 }
 
 export function handleCallExpression(node: CallExpression, s: WalkState) {
+  if (node.arguments.length >= 2) {
+    const registered = getRegisteredCustomElement(node);
+    if (registered) {
+      s.registeredCustomElements.add(registered);
+      return;
+    }
+  }
+
+  if (node.arguments.length >= 1) {
+    const staticRegistered = getStaticDefineRegistration(node, s);
+    if (staticRegistered) {
+      s.registeredCustomElements.add(staticRegistered);
+      return;
+    }
+  }
+
   if (
     node.callee.type === 'Identifier' &&
     node.callee.name === 'require' &&

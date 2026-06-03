@@ -23,6 +23,14 @@ import type { WalkState } from './walk.ts';
 
 const getName = (n: ModuleExportName | null | undefined) => (n?.type === 'Identifier' ? n.name : undefined);
 
+/** Record that local binding `local` is exported as `exported` (incl. `'default'`), so a registered
+ * class is credited when exported under an alias. */
+const addLocalToExport = (s: WalkState, local: string, exported: string) => {
+  const set = s.localToExports.get(local);
+  if (set) set.add(exported);
+  else s.localToExports.set(local, new Set([exported]));
+};
+
 const hasExplicitFunctionReturnType = (node: { type: string; returnType?: unknown } | null | undefined) =>
   !!node &&
   (node.type === 'ArrowFunctionExpression' ||
@@ -243,6 +251,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         s.getJSDocTags(node.start)
       );
       if (exportedName) s.specifierExportNames.add(exportedName);
+      if (localName && exportedName) addLocalToExport(s, localName, exportedName);
     }
   }
 }
@@ -271,6 +280,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
     pos = decl.id?.start ?? decl.start;
     members = [];
     s.collectRefsInType(decl, 'default', true);
+    if (decl.id) addLocalToExport(s, decl.id.name, 'default');
   } else if (decl.type === 'TSInterfaceDeclaration') {
     type = SYMBOL_TYPE.INTERFACE;
     pos = decl.id.start;
@@ -278,6 +288,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   } else if (decl.type === 'Identifier') {
     type = s.localDeclarationTypes.get(decl.name) ?? SYMBOL_TYPE.UNKNOWN;
     pos = decl.start;
+    addLocalToExport(s, decl.name, 'default');
     const _import = s.localImportMap.get(decl.name);
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);

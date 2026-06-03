@@ -65,7 +65,7 @@ export const analyze = async ({
       ) {
         continue;
       }
-      if (inExport.hasRefsInFile) return true;
+      if (inExport.hasRefsInFile || inExport.isRegistered) return true;
       if (explorer.isReferenced(filePath, containingExport, { traverseEntries: includeEntryExports })[0]) return true;
       if (inExport.referencedIn) {
         const v = visited ?? new Set();
@@ -200,6 +200,7 @@ export const analyze = async ({
             if (
               isIgnored ||
               exportedItem.hasRefsInFile ||
+              exportedItem.isRegistered ||
               isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile) ||
               (hasStrictlyNsRefs &&
                 ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))

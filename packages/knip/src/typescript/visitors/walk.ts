@@ -66,6 +66,8 @@ interface WalkContext {
   hasChildProcessImport: boolean;
   childProcessNamespaces: ReadonlySet<string>;
   childProcessMethods: ReadonlyMap<string, string>;
+  /** Local class names kept alive by a runtime registration (`customElements.define`, plugin-contributed `@customElement`). */
+  registeredCustomElements: Set<string>;
   hasPathJoinImport: boolean;
   hasPathResolveImport: boolean;
   resolveModule: ResolveModule;
@@ -95,6 +97,9 @@ export interface WalkState extends WalkContext {
   localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
   pendingCallRefs: Array<{ name: string; exportName: string; seen: Set<string> }>;
   pendingMemberCallRefs: Array<{ objectName: string; propertyName: string; exportName: string; seen: Set<string> }>;
+  /** Maps a local binding to the export name(s) it surfaces as, so a registered class is credited
+   * even when exported under an alias (`export { X as Y }`, `export { X as default }`, `export default X`). */
+  localToExports: Map<string, Set<string>>;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -151,6 +156,7 @@ const _addExport = (
       line,
       col,
       hasRefsInFile: false,
+      isRegistered: false,
       referencedIn: undefined,
       fixes: fix ? [fix] : [],
       isReExport,
@@ -745,6 +751,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     localDeclarations: new Map(),
     pendingCallRefs: [],
     pendingMemberCallRefs: [],
+    localToExports: new Map(),
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,
@@ -823,6 +830,18 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     for (const name of state.bareExprRefs) {
       const item = state.exports.get(name);
       if (item) item.hasRefsInFile = true;
+    }
+  }
+
+  for (const name of state.registeredCustomElements) {
+    const item = state.exports.get(name);
+    if (item) item.isRegistered = true;
+    const aliases = state.localToExports.get(name);
+    if (aliases) {
+      for (const exportName of aliases) {
+        const aliased = state.exports.get(exportName);
+        if (aliased) aliased.isRegistered = true;
+      }
     }
   }
 

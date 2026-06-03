@@ -58,6 +58,8 @@ export interface Export extends Position {
   readonly members: ExportMember[];
   jsDocTags: Tags;
   hasRefsInFile: boolean;
+  /** Kept alive by an in-module runtime registration (custom element `@customElement`/`customElements.define`), not by an import. */
+  isRegistered: boolean;
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
   isReExport: boolean;

@@ -74,6 +74,10 @@ const getImportsAndExports = (
   const localDeclarationTypes = new Map<string, SymbolType>();
   const referencedInExport = new Map<string, Set<string>>();
   const destructuredExports = new Set<string>();
+  // Local class names kept alive by an in-module runtime registration: the native
+  // `customElements.define` (handled in core) and framework decorators like Lit's
+  // `@customElement` (contributed by plugins via `pluginCtx.markExportRegistered`).
+  const registeredCustomElements = new Set<string>();
 
   const addNsMemberRefs = (internalImport: ImportMaps, namespace: string, member: string | string[]) => {
     if (typeof member === 'string') {
@@ -353,6 +357,7 @@ const getImportsAndExports = (
     pluginCtx.addScript = (s: string) => scripts.add(s);
     pluginCtx.addImport = (spec: string, pos: number, mod: number) =>
       addImport(spec, undefined, undefined, undefined, pos, mod);
+    pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 
   const localRefs = _walkAST(result.program, sourceText, filePath, {
@@ -379,6 +384,7 @@ const getImportsAndExports = (
     hasChildProcessImport,
     childProcessNamespaces: childProcessNamespaces ?? EMPTY_CHILD_PROCESS_NAMES,
     childProcessMethods: childProcessMethods ?? EMPTY_CHILD_PROCESS_METHODS,
+    registeredCustomElements,
     hasPathJoinImport,
     hasPathResolveImport,
     resolveModule,

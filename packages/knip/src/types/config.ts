@@ -177,6 +177,12 @@ export type PluginVisitorContext = {
   sourceText: string;
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
+  /**
+   * Credit a local export as used by an in-module runtime registration (e.g. a custom element
+   * registered through a framework decorator), so it isn't reported as an unused export even
+   * when no other file imports it by name. Pass the local binding name (or `'default'`).
+   */
+  markExportRegistered: (name: string) => void;
 };
 
 export type PluginVisitorObject = VisitorObject;
