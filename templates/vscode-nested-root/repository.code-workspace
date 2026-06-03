@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "name": "repository",
+      "path": "./repository",
+    },
+  ],
+  "settings": {
+    "knip.cwd": "./frontend",
+  },
+}
