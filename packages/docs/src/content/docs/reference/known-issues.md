@@ -22,7 +22,9 @@ the cause of the issue with more details.
 
 Potential workarounds:
 
-- [Set path aliases][2] for "Cannot find module" errors
+- For "Cannot find module" and "ENOENT: no such file/dir, open './file'" errors:
+  - Use absolute paths, e.g. with `path.join()` or `path.resolve()`
+  - [Set path aliases][2]
 - Set missing environment variable(s), potential solutions:
   - Use a helper package like [dotenvx][3]
   - `KEY=VAL knip`
