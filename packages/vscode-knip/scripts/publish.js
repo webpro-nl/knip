@@ -70,12 +70,9 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-ser
 
 const knipNm = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules');
 
-// Pin native bindings to the exact version of the bundled JS wrapper. `oxc-parser`
-// is copied as-is and `oxc-resolver` is bundled by rolldown, both at the version
-// resolved from knip's deps. `npm pack` without a version pulls the *latest*
-// binding, which silently mismatches the JS wrapper and corrupts parsing.
 const knipRequire = createRequire(join(knipNm, '..', 'package.json'));
-const bindingVersion = pkgName => JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
+const bindingVersion = pkgName =>
+  JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
 const oxcParserVersion = bindingVersion('oxc-parser');
 const oxcResolverVersion = bindingVersion('oxc-resolver');
 console.log(`Pinning bindings: @oxc-parser@${oxcParserVersion}, @oxc-resolver@${oxcResolverVersion}`);
