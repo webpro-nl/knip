@@ -1,5 +1,5 @@
 ---
-title: Plugins (152)
+title: Plugins (154)
 tableOfContents: false
 ---
 
@@ -35,6 +35,7 @@ tableOfContents: false
 - [execa](/reference/plugins/execa "execa")
 - [Expo](/reference/plugins/expo "Expo")
 - [Expressive Code](/reference/plugins/expressive-code "Expressive Code")
+- [FAST](/reference/plugins/fast "FAST")
 - [Gatsby](/reference/plugins/gatsby "Gatsby")
 - [GitHub Action](/reference/plugins/github-action "GitHub Action")
 - [GitHub Actions](/reference/plugins/github-actions "GitHub Actions")
@@ -50,6 +51,7 @@ tableOfContents: false
 - [Lefthook](/reference/plugins/lefthook "Lefthook")
 - [lint-staged](/reference/plugins/lint-staged "lint-staged")
 - [LintHTML](/reference/plugins/linthtml "LintHTML")
+- [Lit](/reference/plugins/lit "Lit")
 - [lockfile-lint](/reference/plugins/lockfile-lint "lockfile-lint")
 - [Lost Pixel](/reference/plugins/lost-pixel "Lost Pixel")
 - [markdownlint](/reference/plugins/markdownlint "markdownlint")

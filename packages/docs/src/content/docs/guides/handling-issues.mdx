@@ -527,6 +527,7 @@ The most common causes for unused exports include:
 
 - [Namespace enumerations][43]
 - [External libraries][44]
+- [Custom elements](#custom-elements)
 
 Use the `--exports` flag to [filter][17] and focus only on issues related to
 exports:
@@ -581,6 +582,25 @@ Knip understands `Apple` is used, since it's standard usage. But `Orange` is
 referenced through a function of an external library. Knip includes external
 type definitions to trace such usage, but in some cases it may not be able to
 follow the reference through the library's API.
+
+### Custom elements
+
+Web component classes are registered under a tag name instead of being imported
+by their class name. Knip considers such a class used when it's registered in the
+same module, through either Lit's `@customElement('tag')` decorator or a native
+`customElements.define('tag', MyElement)` call:
+
+```ts
+import { LitElement } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('my-element')
+export class MyElement extends LitElement {}
+```
+
+The decorator counts only when `customElement` is imported from `lit/decorators`
+(or `@lit/reactive-element`/`lit-element`); a locally defined `customElement` is
+ignored.
 
 ### Exclude exports from the report
 

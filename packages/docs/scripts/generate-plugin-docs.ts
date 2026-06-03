@@ -42,7 +42,7 @@ const writeTree = async (tree: Node, filePath: string) => {
 };
 
 for await (const dir of directories) {
-  if (dir.isDirectory() && dir.name !== '_template') {
+  if (dir.isDirectory() && !dir.name.startsWith('_')) {
     const pluginName = dir.name;
     const pluginDir = path.join(pluginsDir, pluginName);
     const mod = await import(path.join(pluginDir, 'index.ts'));

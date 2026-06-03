@@ -31,6 +31,7 @@ export type PluginName =
   | 'execa'
   | 'expo'
   | 'expressive-code'
+  | 'fast'
   | 'gatsby'
   | 'github-action'
   | 'github-actions'
@@ -46,6 +47,7 @@ export type PluginName =
   | 'lefthook'
   | 'lint-staged'
   | 'linthtml'
+  | 'lit'
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'markdownlint'
@@ -185,6 +187,7 @@ export const pluginNames = [
   'execa',
   'expo',
   'expressive-code',
+  'fast',
   'gatsby',
   'github-action',
   'github-actions',
@@ -200,6 +203,7 @@ export const pluginNames = [
   'lefthook',
   'lint-staged',
   'linthtml',
+  'lit',
   'lockfile-lint',
   'lost-pixel',
   'markdownlint',

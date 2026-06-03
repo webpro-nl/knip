@@ -30,6 +30,7 @@ import { default as eslint } from './eslint/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
+import { default as fast } from './fast/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
 import { default as githubAction } from './github-action/index.ts';
 import { default as githubActions } from './github-actions/index.ts';
@@ -45,6 +46,7 @@ import { default as ladle } from './ladle/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
 import { default as lintStaged } from './lint-staged/index.ts';
 import { default as linthtml } from './linthtml/index.ts';
+import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
@@ -184,6 +186,7 @@ export const Plugins = {
   execa,
   expo,
   'expressive-code': expressiveCode,
+  fast,
   gatsby,
   'github-action': githubAction,
   'github-actions': githubActions,
@@ -199,6 +202,7 @@ export const Plugins = {
   lefthook,
   'lint-staged': lintStaged,
   linthtml,
+  lit,
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   markdownlint,
