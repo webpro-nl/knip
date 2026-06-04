@@ -44,7 +44,7 @@ export class ProjectPrincipal {
 
   syncCompilers: SyncCompilers = new Map();
   asyncCompilers: AsyncCompilers = new Map();
-  private paths: Record<string, string[]> = {};
+  private paths = new Map<string, Record<string, string[]>>();
   private extensions = new Set(DEFAULT_EXTENSIONS);
 
   cache: CacheConsultant<FileNode>;
@@ -88,16 +88,14 @@ export class ProjectPrincipal {
     }
   }
 
-  addPaths(paths: Paths, basePath: string) {
+  addPaths(paths: Paths, basePath: string, scope: string) {
     if (!paths) return;
+    const scoped = this.paths.get(scope) ?? {};
     for (const key in paths) {
       const prefixes = paths[key].map(prefix => toAbsolute(prefix, basePath));
-      if (key in this.paths) {
-        this.paths[key] = compact([...this.paths[key], ...prefixes]);
-      } else {
-        this.paths[key] = prefixes;
-      }
+      scoped[key] = key in scoped ? compact([...scoped[key], ...prefixes]) : prefixes;
     }
+    this.paths.set(scope, scoped);
   }
 
   init() {
@@ -106,9 +104,9 @@ export class ProjectPrincipal {
       ...getCompilerExtensions([this.syncCompilers, this.asyncCompilers]),
     ]);
     const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
-    const pathsOrUndefined = Object.keys(this.paths).length > 0 ? this.paths : undefined;
+    const scopedPaths = this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
     this.resolveModule = createCustomModuleResolver(
-      { paths: pathsOrUndefined },
+      { scopedPaths },
       customCompilerExtensions,
       this.toSourceFilePath,
       this.findWorkspaceManifestImports

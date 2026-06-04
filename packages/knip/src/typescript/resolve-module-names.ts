@@ -22,10 +22,13 @@ function pickStringTarget(value: unknown): string | undefined {
   }
 }
 
+type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
+
 interface PathMapping {
   prefix: string;
   wildcard: boolean;
   values: string[];
+  scope: string;
 }
 
 const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
@@ -34,22 +37,26 @@ export function clearModuleResolutionCaches() {
   for (const cache of moduleResolutionCaches) cache.clear();
 }
 
-function compilePathMappings(paths: Record<string, string[]> | undefined): PathMapping[] | undefined {
-  if (!paths) return undefined;
+function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[] | undefined {
+  if (!scopedPaths) return undefined;
   const mappings: PathMapping[] = [];
-  for (const key in paths) {
-    const starIdx = key.indexOf('*');
-    if (starIdx >= 0) {
-      mappings.push({ prefix: key.slice(0, starIdx), wildcard: true, values: paths[key] });
-    } else {
-      mappings.push({ prefix: key, wildcard: false, values: paths[key] });
+  for (const { scope, paths } of scopedPaths) {
+    for (const key in paths) {
+      const starIndex = key.indexOf('*');
+      if (starIndex >= 0) {
+        mappings.push({ prefix: key.slice(0, starIndex), wildcard: true, values: paths[key], scope });
+      } else {
+        mappings.push({ prefix: key, wildcard: false, values: paths[key], scope });
+      }
     }
   }
-  return mappings.length > 0 ? mappings : undefined;
+  if (mappings.length === 0) return undefined;
+  mappings.sort((a, b) => b.scope.length - a.scope.length);
+  return mappings;
 }
 
 export function createCustomModuleResolver(
-  compilerOptions: { paths?: Record<string, string[]> },
+  compilerOptions: { scopedPaths?: ScopedPaths },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspaceManifestImports?: WorkspaceManifestHandler
@@ -58,7 +65,7 @@ export function createCustomModuleResolver(
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS];
   const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
-  const pathMappings = compilePathMappings(compilerOptions.paths as Record<string, string[]>);
+  const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -100,9 +107,11 @@ export function createCustomModuleResolver(
     const resolvedFileName = resolveSync(specifier, containingFile);
     if (resolvedFileName) return toResult(resolvedFileName);
 
-    // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths
+    // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths, scoped per workspace
     if (pathMappings) {
-      for (const { prefix, wildcard, values } of pathMappings) {
+      const dir = dirname(containingFile);
+      for (const { prefix, wildcard, values, scope } of pathMappings) {
+        if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
         if (wildcard ? specifier.startsWith(prefix) : specifier === prefix) {
           const captured = wildcard ? specifier.slice(prefix.length) : '';
           for (const value of values) {

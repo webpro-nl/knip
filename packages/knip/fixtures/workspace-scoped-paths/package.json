@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspace-scoped-paths",
+  "workspaces": [
+    "packages/*"
+  ]
+}

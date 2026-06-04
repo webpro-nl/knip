@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    "packages/app-a": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "paths": {
+        "$lib/*": ["src/lib/*"],
+        "@shared/*": ["../shared/src/*"]
+      }
+    },
+    "packages/app-b": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "paths": {
+        "$lib/*": ["src/lib/*"]
+      }
+    },
+    "packages/shared": {
+      "project": ["src/**/*.ts"]
+    }
+  }
+}

@@ -200,7 +200,7 @@ export async function build({
 
     for (const dep of getManifestImportDependencies(manifest)) deputy.addReferencedDependency(name, dep);
 
-    principal.addPaths(config.paths, dir);
+    principal.addPaths(config.paths, dir, dir);
 
     const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
@@ -243,7 +243,7 @@ export async function build({
       } else if (isProject(input)) {
         projectFilePatterns.add(toWorkspaceRelative(specifier));
       } else if (isAlias(input)) {
-        principal.addPaths({ [input.specifier]: input.prefixes }, input.dir ?? dir);
+        principal.addPaths({ [input.specifier]: input.prefixes }, input.dir ?? dir, dir);
       } else if (isIgnore(input)) {
         if (input.issueType === 'dependencies' || input.issueType === 'unlisted') {
           deputy.addIgnoredDependencies(name, input.specifier);
