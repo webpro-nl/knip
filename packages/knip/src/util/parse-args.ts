@@ -89,7 +89,7 @@ const parseArgs = (argv: string[], opts: Opts = {}): ParsedArgs => {
     } else {
       const name = token.name;
       if (booleans.has(name)) {
-        set(name, token.value === undefined || token.value !== 'false');
+        set(name, token.value !== 'false');
       } else if (token.value !== undefined) {
         set(name, strings.has(name) ? token.value : coerce(token.value));
       } else {
