@@ -5,7 +5,7 @@ import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/trace');
-const nsCwd = resolve('fixtures/ts-namespace');
+const nsCwd = resolve('fixtures/namespaces/ts-namespace');
 
 test('knip --trace', () => {
   const actual = exec('knip --trace', { cwd }).stdout;

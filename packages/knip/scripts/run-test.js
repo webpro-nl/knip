@@ -20,8 +20,8 @@ const useBun =
 const patterns = values.e2e
   ? ['test/e2e/**/*.test.ts']
   : values.smoke
-    ? ['test/*.test.ts', 'test/{plugins,util}/*.test.ts']
-    : ['test/*.test.ts', 'test/**/*.test.ts'];
+    ? ['test/*.test.ts', 'test/!(cli|e2e|fix)/**/*.test.ts']
+    : ['test/**/*.test.ts'];
 
 const files = globSync(patterns);
 

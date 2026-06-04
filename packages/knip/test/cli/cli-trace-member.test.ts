@@ -3,7 +3,7 @@ import test from 'node:test';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/ts-namespace');
+const cwd = resolve('fixtures/namespaces/ts-namespace');
 
 const fruits = `members.ts:Fruits
 └── index.ts:import[Fruits] ⎆ ✓

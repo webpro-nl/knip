@@ -7,7 +7,7 @@ import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
-  const cwd = await copyFixture('fixtures/catalog-named');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-named');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
@@ -33,7 +33,7 @@ catalogs:
 });
 
 test('Fix catalog entries (.yarnrc.yml)', async () => {
-  const cwd = await copyFixture('fixtures/catalog-yarn');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-yarn');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 

@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const cwd = resolve('fixtures/infra/zero-config');
+
+test('Find unused exports in zero-config mode', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.equal(Object.keys(issues.files).length, 1);
+
+  assert.equal(Object.values(issues.exports).length, 2);
+  assert.equal(issues.exports['my-module.ts']['unused'].symbol, 'unused');
+  assert.equal(issues.exports['my-module.ts']['default'].symbol, 'default');
+  assert.equal(issues.exports['my-namespace.ts']['MyNamespace.z'].symbol, 'z');
+  assert(!issues.exports['index.ts']);
+
+  assert.equal(Object.values(issues.types).length, 2);
+  assert.equal(issues.types['my-module.ts']['AnyType'].symbolType, 'type');
+  assert.equal(issues.types['my-namespace.ts']['MyNamespace.NS'].symbol, 'NS');
+
+  assert.equal(Object.values(issues.duplicates).length, 1);
+  assert.equal(issues.duplicates['my-module.ts']['myExport|default'].symbols?.length, 2);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    exports: 3,
+    types: 2,
+    duplicates: 1,
+    processed: 4,
+    total: 4,
+  });
+});

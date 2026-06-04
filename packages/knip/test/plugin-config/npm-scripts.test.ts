@@ -1,0 +1,104 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import { getDependencyMetaData } from '../../src/manifest/index.ts';
+import { join } from '../../src/util/path.ts';
+import { load } from '../../src/util/plugin.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const cwd = resolve('fixtures/plugin-config/npm-scripts');
+const manifest = await load(join(cwd, 'package.json'));
+
+test('Get metadata from dependencies (getDependencyMetaData)', async () => {
+  const config = {
+    dir: cwd,
+    cwd,
+    packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
+  };
+
+  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
+
+  const expectedHostDependencies = new Map();
+  expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);
+
+  assert.deepEqual(hostDependencies, expectedHostDependencies);
+
+  assert.deepEqual(
+    installedBinaries,
+    new Map([
+      ['pm2', new Set(['pm2', 'pm2-dev', 'pm2-docker', 'pm2-runtime'])],
+      ['pm2-dev', new Set(['pm2'])],
+      ['pm2-docker', new Set(['pm2'])],
+      ['pm2-runtime', new Set(['pm2'])],
+      ['runnable', new Set(['@org/runnable'])],
+      ['nx', new Set(['nx'])],
+      ['package', new Set(['package-cli'])],
+      ['package-cli', new Set(['package'])],
+      ['unused', new Set(['unused'])],
+      ['eslint', new Set(['eslint', 'eslint-v6', 'eslint-v7', 'eslint-v8'])],
+      ['eslint-v6', new Set(['eslint'])],
+      ['eslint-v7', new Set(['eslint'])],
+      ['eslint-v8', new Set(['eslint'])],
+      ['@commitlint/cli', new Set(['commitlint'])],
+      ['@org/runnable', new Set(['runnable'])],
+      ['tsup', new Set(['tsup'])],
+      ['commitlint', new Set(['@commitlint/cli'])],
+    ])
+  );
+});
+
+test('Unused dependencies in npm scripts', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters, configurationHints } = await main(options);
+
+  assert('script.js' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 1);
+
+  assert(issues.dependencies['package.json']['express']);
+
+  assert(issues.devDependencies['package.json']['unused']);
+  assert(!issues.devDependencies['package.json']['eslint-v6']);
+  assert(!issues.devDependencies['package.json']['eslint-v7']);
+  assert(!issues.devDependencies['package.json']['eslint-v8']);
+
+  assert(issues.binaries['package.json']['nodemon']);
+  assert(issues.binaries['package.json']['dotenv']);
+  assert(issues.binaries['package.json']['http-server']);
+  assert(!issues.binaries['package.json']['rm']);
+  assert(!issues.binaries['package.json']['bash']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    devDependencies: 1,
+    binaries: 3,
+    files: 1,
+    processed: 3,
+    total: 3,
+  });
+
+  assert.deepEqual(configurationHints, [
+    { workspaceName: '.', identifier: 'rm', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'bash', type: 'ignoreBinaries' },
+    { workspaceName: '.', identifier: 'eslint', type: 'ignoreBinaries' },
+    { workspaceName: undefined, identifier: 'ignore.js', type: 'ignore' },
+  ]);
+});
+
+test('Unused dependencies in npm scripts (strict)', async () => {
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { issues, counters } = await main(options);
+  assert(issues.dependencies['package.json']['express']);
+  assert(issues.dependencies['package.json']['unused-peer-dep']);
+  assert(issues.dependencies['package.json']['@sap/approuter']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    dependencies: 3,
+    processed: 2,
+    total: 3,
+  });
+});

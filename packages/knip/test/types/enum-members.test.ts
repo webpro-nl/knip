@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const cwd = resolve('fixtures/types/enum-members');
+
+test('Find unused enum members', async () => {
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
+  assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D-Key']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    enumMembers: 2,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Find unused enum members (isIncludeEntryExports)', async () => {
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
+
+  assert.equal(Object.keys(issues.enumMembers['members.ts']).length, 2);
+  assert(issues.enumMembers['members.ts']['MyEnum.B_Unused']);
+  assert(issues.enumMembers['members.ts']['MyEnum.D-Key']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    enumMembers: 2,
+    processed: 2,
+    total: 2,
+  });
+});

@@ -1,9 +1,0 @@
-{
-  "name": "@fixtures/workspaces-node-test",
-  "scripts": {
-    "test": "node --test"
-  },
-  "workspaces": [
-    "packages/*"
-  ]
-}

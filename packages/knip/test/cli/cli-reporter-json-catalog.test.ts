@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/catalog-pnpm');
+const cwd = resolve('fixtures/dependencies/catalog-pnpm');
 
 test('knip --reporter json (catalog)', () => {
   const json = {

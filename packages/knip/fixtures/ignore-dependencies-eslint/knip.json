@@ -1,4 +1,0 @@
-{
-  "eslint": true,
-  "ignoreDependencies": ["^eslint-.*"]
-}

@@ -32,6 +32,7 @@ JavaScript and TypeScript projects.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE-GRAPH.md][4] first.
 - For issues re. exported identifiers (following refs, shadowing, `ignoreExportsUsedInFile`), see [EXPORTS.md][5].
 - Before any significant performance tuning, consult [PERFORMANCE.md][6].
+- For test/fixture structure, conventions, and where a new test goes, see [TESTS.md][7].
 
 ## Issues and Pull Requests
 
@@ -49,8 +50,8 @@ commands for consistency. Replace it with `node (path/to/)src/cli.ts` or
 
 - Run `knip` directly in a fixture or temp directory (over creating test scripts that import the `main` function).
 - Knip requires `package.json` in root dir.
-- Enable [debug & helpers][7] with `--debug` (not `DEBUG=`). Warning: noisy.
-- Use [trace][8] to debug
+- Enable [debug & helpers][8] with `--debug` (not `DEBUG=`). Warning: noisy.
+- Use [trace][9] to debug
   - exported identifiers (`knip --trace-export [name] --trace-file [file]`)
   - external dependencies (`knip --trace-dependency [name] --workspace [dir]`)
 
@@ -91,6 +92,8 @@ pnpm build
 pnpm test
 ```
 
+See [TESTS.md][7] for conventions and placements.
+
 ## Fixtures
 
 There are plenty of directories with fixtures in `packages/knip/fixtures`.
@@ -125,5 +128,6 @@ pnpm build
 [4]: ./.agents/MODULE-GRAPH.md
 [5]: ./.agents/EXPORTS.md
 [6]: ./.agents/PERFORMANCE.md
-[7]: ./packages/knip/src/util/debug.ts
-[8]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[7]: ./.agents/TESTS.md
+[8]: ./packages/knip/src/util/debug.ts
+[9]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
