@@ -2,6 +2,42 @@
   "data": [
     {
       "entities": {
+        "urls": []
+      },
+      "id": "2061954856638967917",
+      "author_id": "5",
+      "created_at": "2026-06-02T23:35:21.000Z",
+      "text": "Knip is still my all time favorite piece of software."
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "2061775207518343569",
+      "author_id": "20",
+      "created_at": "2026-06-02T11:41:30.000Z",
+      "text": "adding knip to our CI after deleting like 100k LOC of dead code was a game changer"
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "3mn5ccucpvk2z",
+      "author_id": "13",
+      "created_at": "2026-05-31T09:54:50.000Z",
+      "text": "Knip is essential tooling."
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "2059921462891622770",
+      "author_id": "21",
+      "created_at": "2026-05-28T08:55:22.000Z",
+      "text": "Please dont ask your ai agent to find unused, dead code and remove them. Instead for js/ts projects install knip and see the magic it does. Save tokens🙏😂"
+    },
+    {
+      "entities": {
         "mentions": [
           {
             "username": "webpro.nl"
@@ -124,6 +160,15 @@
       "author_id": "14",
       "created_at": "2026-01-02T08:05:50.000Z",
       "text": "Knip is amazing and you should be using it."
+    },
+    {
+      "entities": {
+        "urls": []
+      },
+      "id": "3lvwax6bemc22",
+      "author_id": "22",
+      "created_at": "2025-08-08T22:02:18.000Z",
+      "text": "Just used `npx knip` to find my unused files, components, and packages and 😱! So cool. \n\nHow have I not come across it before?"
     },
     {
       "entities": {
@@ -790,6 +835,24 @@
     ],
     "users": [
       {
+        "id": "22",
+        "username": "molliboyle.bsky.social",
+        "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:uwwm2qtpni4gvzzhujhh56ps/bafkreib5w76mmc6lxazhkymadd3oj5skped63b6ugvswiikrss7ljgcfi4@jpeg",
+        "name": "Molly Boyle"
+      },
+      {
+        "id": "20",
+        "username": "RozenMD",
+        "profile_image_url": "https://unavatar.io/x/RozenMD",
+        "name": "Max Rozen"
+      },
+      {
+        "id": "21",
+        "username": "06_Shreehari",
+        "profile_image_url": "https://unavatar.io/x/06_Shreehari",
+        "name": "Shreehari"
+      },
+      {
         "id": "19",
         "username": "janis.me",
         "profile_image_url": "https://cdn.bsky.app/img/avatar/plain/did:plc:kmekwulhn26kgfwjzrry76d7/bafkreihtzvhhk7oz6cjbgnsbaravu46zhai3zwogkcg7hxv3dlhvecrqw4@jpeg",
@@ -846,19 +909,19 @@
       {
         "id": "1",
         "username": "sqs",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1519180377604034560/NxI03WYE_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/sqs",
         "name": "Quinn Slack"
       },
       {
         "id": "2",
         "username": "jokull",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1943338796122083328/NsFCJwMd_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/jokull",
         "name": "Jökull Solberg"
       },
       {
         "id": "3",
         "username": "Hicksyfern",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1559181703352094720/NFL2PBbK_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/Hicksyfern",
         "name": "Tom Hicks"
       },
       {
@@ -870,13 +933,13 @@
       {
         "id": "5",
         "username": "gary__tyr",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1947080916045631488/m42HwWiy_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/gary__tyr",
         "name": "Gary Tyr"
       },
       {
         "id": "6",
         "username": "KevinVanCott",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1419785698887012357/V533Pwsr_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/KevinVanCott",
         "name": "Kevin Thomas Van Cott"
       },
       {
@@ -901,90 +964,90 @@
         "id": "10",
         "username": "stephaneledorze",
         "name": "stephane le dorze",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1587561006317899777/y8cgxyI7_400x400.jpg"
+        "profile_image_url": "https://unavatar.io/x/stephaneledorze"
       },
       {
         "id": "22918124",
         "username": "gregberge_",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1722358890807861248/75S7CB3G_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/gregberge_",
         "name": "Greg Bergé"
       },
       {
         "id": "19268321",
         "username": "housecor",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1963593369306750976/7gPWqEa8_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/housecor",
         "name": "Cory House"
       },
       {
         "id": "3126044440",
         "username": "pkgacek",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/585047168899244033/kpQ-Reb7_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/pkgacek",
         "name": "Piotr Gacek 🐟"
       },
       {
         "id": "95668959",
         "username": "kuizinas",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1978959812172894209/yQXTNMuJ_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/kuizinas",
         "name": "Gajus"
       },
       {
         "id": "1632752318994153472",
         "username": "imabhiprasad",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1917768224612962304/7RHnN131_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/imabhiprasad",
         "name": "Abhijeet Prasad"
       },
       {
         "id": "1513218780167655427",
         "username": "fernandoeeu_dev",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1513219705317822473/9CR0LjqB_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/fernandoeeu_dev",
         "name": "Fernando"
       },
       {
         "id": "44217212",
         "username": "TkDodo",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1803004614372937728/OSIQ4AGx_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/TkDodo",
         "name": "Dominik 🔮"
       },
       {
         "id": "481186762",
         "username": "Mokkapps",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1825498937911889920/FtBqvqgK_400x400.jpg",
+        "profile_image_url": "https://unavatar.io/x/Mokkapps",
         "name": "Michael Hoffmann"
       },
       {
         "id": "416394303",
         "username": "nicoespeon",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1649018862527041536/9s6Nlwyj_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/nicoespeon",
         "name": "Nicolas Carlo"
       },
       {
         "id": "15736190",
         "username": "smashingmag",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1669591955653685248/mTxJyTGY_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/smashingmag",
         "name": "Smashing Magazine 🇺🇦 🏳️‍🌈"
       },
       {
         "id": "21046936",
         "username": "danvdk",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/485135064557035520/zATSd81r_normal.jpeg",
+        "profile_image_url": "https://unavatar.io/x/danvdk",
         "name": "Dan Vanderkam"
       },
       {
         "id": "380616577",
         "username": "stefanjudis",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1465780299380502537/pptBYF44_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/stefanjudis",
         "name": "Stefan Judis"
       },
       {
         "id": "827145937030148097",
         "username": "BKailaash",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/839048279442718720/SiC-Q2Nc_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/BKailaash",
         "name": "Kailaash"
       },
       {
         "id": "18191376",
         "username": "waldekm",
-        "profile_image_url": "https://pbs.twimg.com/profile_images/1670040743006617602/N5VnH4YU_normal.jpg",
+        "profile_image_url": "https://unavatar.io/x/waldekm",
         "name": "Waldek Mastykarz"
       }
     ]
