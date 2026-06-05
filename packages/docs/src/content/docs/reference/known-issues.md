@@ -23,6 +23,7 @@ the cause of the issue with more details.
 Potential workarounds:
 
 - For "Cannot find module" and "ENOENT: no such file/dir, open './file'" errors:
+  - Install dependencies
   - Use absolute paths, e.g. with `path.join()` or `path.resolve()`
   - [Set path aliases][2]
 - Set missing environment variable(s), potential solutions:
