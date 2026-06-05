@@ -19,22 +19,36 @@ export class MyCard extends HTMLElement {}
 customElements.define('my-card', MyCard);
 ```
 
-The `window`, `globalThis` and `self` prefixes are recognized too:
+The registry can be the global `customElements` — directly, through a `window`,
+`globalThis` or `self` prefix, or a local alias — a `CustomElementRegistry`
+instance, or a shadow root's scoped registry:
 
 ```ts
-window.customElements.define('my-card', MyCard);
+const registry = new CustomElementRegistry();
+registry.define('my-card', MyCard);
 ```
 
-## Framework decorators
+A class can also register itself from a `static` block using `this`:
 
-| Framework | Plugin    | `customElement` imported from                            |
-| --------- | --------- | -------------------------------------------------------- |
-| [Lit][1]  | [lit][2]  | `lit/decorators`, `lit-element`, `@lit/reactive-element` |
-| [FAST][3] | [fast][4] | `@microsoft/fast-element`                                |
+```ts
+export class MyCard extends HTMLElement {
+  static {
+    customElements.define('my-card', this);
+  }
+}
+```
 
-The decorator counts only when `customElement` is imported from the framework.
-A locally defined `customElement`, or one imported from another module, is
-ignored.
+## Framework registration
+
+| Framework     | Plugin        | Registration                    | Imported from                                            |
+| ------------- | ------------- | ------------------------------- | -------------------------------------------------------- |
+| [Lit][1]      | [lit][2]      | `@customElement('tag')`         | `lit/decorators`, `lit-element`, `@lit/reactive-element` |
+| [FAST][3]     | [fast][4]     | `@customElement` or `.define()` | `@microsoft/fast-element`                                |
+| [Stencil][5]  | [stencil][6]  | `@Component({ tag })`           | `@stencil/core`                                          |
+| [Catalyst][7] | [catalyst][8] | `@controller`                   | `@github/catalyst`                                       |
+
+The decorator counts only when imported from the framework. A locally defined or
+differently-imported decorator is ignored.
 
 ### Lit
 
@@ -49,11 +63,11 @@ import { customElement } from 'lit/decorators.js';
 export class MyCard extends LitElement {}
 ```
 
-## FAST
+### FAST
 
 [FAST][3] also registers elements through a static `define()` or `defineAsync()`
-method. A class extending `FASTElement`, directly or
-through a mixin, is credited when registered this way:
+method. A class extending `FASTElement`, directly or through a mixin, is credited
+when registered this way:
 
 ```ts
 import { FASTElement } from '@microsoft/fast-element';
@@ -63,7 +77,34 @@ export class MyCard extends FASTElement {}
 MyCard.define('my-card');
 ```
 
+### Stencil
+
+A `@Component` decorator credits the class:
+
+```ts
+import { Component } from '@stencil/core';
+
+@Component({ tag: 'my-card' })
+export class MyCard {}
+```
+
+### Catalyst
+
+The bare `@controller` decorator registers the element under a tag derived from
+the class name:
+
+```ts
+import { controller } from '@github/catalyst';
+
+@controller
+export class MyCardElement extends HTMLElement {}
+```
+
 [1]: https://lit.dev
 [2]: ../reference/plugins/lit.md
 [3]: https://fast.design
 [4]: ../reference/plugins/fast.md
+[5]: https://stenciljs.com
+[6]: ../reference/plugins/stencil.md
+[7]: https://catalyst.rocks
+[8]: ../reference/plugins/catalyst.md
