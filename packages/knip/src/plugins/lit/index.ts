@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { createCustomElementDecoratorVisitor } from '../_custom-elements/decorator-visitor.ts';
+import { createCustomElementVisitor } from '../_custom-elements/custom-element-visitor.ts';
 
 // https://lit.dev
 
@@ -24,7 +24,7 @@ const isLitDecoratorsSpecifier = (specifier: string): boolean =>
   specifier.startsWith('lit-element/decorators/');
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
-  registerVisitor(createCustomElementDecoratorVisitor(ctx, isLitDecoratorsSpecifier));
+  registerVisitor(createCustomElementVisitor(ctx, isLitDecoratorsSpecifier));
 };
 
 const plugin: Plugin = {

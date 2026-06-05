@@ -1,9 +1,7 @@
 import './native-element.js';
 import './window-element.js';
-import './static-widget.js';
-import './static-card.js';
-import './static-config.js';
-import './no-hyphen.js';
+import './global-element.js';
+import './self-element.js';
 import './aliased-define-element.js';
 import './default-alias-element.js';
 import './dts-chain-element.js';
