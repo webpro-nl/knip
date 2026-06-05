@@ -20,7 +20,7 @@ import { isInNodeModules } from '../../util/path.ts';
 import { timerify } from '../../util/Performance.ts';
 import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
-import { handleCallExpression, handleNewExpression } from './calls.ts';
+import { handleCallExpression, handleNewExpression, trackCustomElementRegistry } from './calls.ts';
 import {
   handleExportAssignment,
   handleExportDefault,
@@ -100,6 +100,13 @@ export interface WalkState extends WalkContext {
   /** Maps a local binding to the export name(s) it surfaces as, so a registered class is credited
    * even when exported under an alias (`export { X as Y }`, `export { X as default }`, `export default X`). */
   localToExports: Map<string, Set<string>>;
+  /** Local identifiers bound to a custom-element registry (a `customElements` alias or a
+   * `new CustomElementRegistry()` instance), so `<id>.define('tag', Class)` credits the class. */
+  customElementRegistries: Set<string>;
+  /** Enclosing class names (innermost last) and static-block nesting, to resolve `this` in a
+   * `static { customElements.define('tag', this) }` self-registration. */
+  classNameStack: string[];
+  staticBlockDepth: number;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -322,10 +329,26 @@ const coreVisitorObject: VisitorObject = {
     state.nsRanges.push([node.start, node.end]);
   },
   ClassDeclaration(node) {
+    state.classNameStack.push(node.id?.name ?? '');
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
       state.localDeclarations.set(node.id.name, node);
     }
+  },
+  'ClassDeclaration:exit'() {
+    state.classNameStack.pop();
+  },
+  ClassExpression(node) {
+    state.classNameStack.push(node.id?.name ?? '');
+  },
+  'ClassExpression:exit'() {
+    state.classNameStack.pop();
+  },
+  StaticBlock() {
+    state.staticBlockDepth++;
+  },
+  'StaticBlock:exit'() {
+    state.staticBlockDepth--;
   },
   FunctionDeclaration(node) {
     if (node.id?.name) {
@@ -381,6 +404,7 @@ const coreVisitorObject: VisitorObject = {
   },
   VariableDeclarator(node) {
     handleVariableDeclarator(node, state);
+    trackCustomElementRegistry(node, state);
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
@@ -752,6 +776,9 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     pendingCallRefs: [],
     pendingMemberCallRefs: [],
     localToExports: new Map(),
+    customElementRegistries: new Set(),
+    classNameStack: [],
+    staticBlockDepth: 0,
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,

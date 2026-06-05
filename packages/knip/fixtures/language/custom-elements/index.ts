@@ -5,3 +5,7 @@ import './self-element.js';
 import './aliased-define-element.js';
 import './default-alias-element.js';
 import './dts-chain-element.js';
+import './static-block-element.js';
+import './scoped-registry-element.js';
+import './shadowroot-element.js';
+import './aliased-registry-element.js';

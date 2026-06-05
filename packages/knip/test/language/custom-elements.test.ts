@@ -19,6 +19,12 @@ test('Credit custom elements registered via customElements.define', async () => 
   assert(!flagged.has('GlobalElement')); // globalThis.customElements.define(…)
   assert(!flagged.has('SelfElement')); // self.customElements.define(…)
 
+  // Registries beyond the bare global — static-block self-register, scoped instance, shadow-root, alias:
+  assert(!flagged.has('StaticBlockElement')); // static { customElements.define('x', this) }
+  assert(!flagged.has('ScopedRegistryElement')); // new CustomElementRegistry().define('x', El)
+  assert(!flagged.has('ShadowRootElement')); // root.customElements.define('x', El)
+  assert(!flagged.has('AliasedRegistryElement')); // const ce = customElements; ce.define('x', El)
+
   // A registered class exported under an alias is credited (export { X as Y } / as default):
   assert(!flagged.has('AliasedDefineElement'));
   assert(!issues.exports['default-alias-element.ts']?.default);
@@ -33,7 +39,7 @@ test('Credit custom elements registered via customElements.define', async () => 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 1,
-    processed: 8,
-    total: 8,
+    processed: 12,
+    total: 12,
   });
 });

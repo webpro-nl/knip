@@ -1,46 +1,61 @@
-import type { CallExpression, NewExpression } from 'oxc-parser';
+import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { getSafeScriptFromArgs, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
-const GLOBAL_THIS_NAMES = new Set(['window', 'globalThis', 'self']);
-
 /**
- * For the native `customElements.define('tag', ClassRef)` registration (also
- * `window`/`globalThis`/`self`-prefixed), returns the registered class binding
- * name. Returns `undefined` when `customElements` or the class binding is locally
- * shadowed, so a same-named non-global object's `.define()` doesn't credit a class.
+ * Credits the class registered by a native custom-element call `<registry>.define('tag', Class)`. The
+ * registry is the global `customElements`, a `<host>.customElements` (window/globalThis/self or a
+ * shadow-root scoped registry), or a local alias / `new CustomElementRegistry()` instance. The class is
+ * an Identifier, or `this` self-registered in a `static {}` block. Returns undefined when the registry or
+ * class binding is locally shadowed.
  */
-function getRegisteredCustomElement(node: CallExpression): string | undefined {
+function getRegisteredCustomElement(node: CallExpression, s: WalkState): string | undefined {
   const callee = node.callee;
   if (callee.type !== 'MemberExpression' || callee.computed) return undefined;
   if (callee.property.type !== 'Identifier' || callee.property.name !== 'define') return undefined;
 
   const object = callee.object;
-  let rootName: string;
-  let rootStart: number;
-  if (object.type === 'Identifier' && object.name === 'customElements') {
-    rootName = object.name;
-    rootStart = object.start;
-  } else if (
-    object.type === 'MemberExpression' &&
-    !object.computed &&
-    object.object.type === 'Identifier' &&
-    GLOBAL_THIS_NAMES.has(object.object.name) &&
-    object.property.type === 'Identifier' &&
-    object.property.name === 'customElements'
-  ) {
-    rootName = object.object.name;
-    rootStart = object.object.start;
+  let isRegistry: boolean;
+  if (object.type === 'Identifier') {
+    isRegistry =
+      (object.name === 'customElements' || s.customElementRegistries.has(object.name)) &&
+      !isShadowed(object.name, object.start);
   } else {
-    return undefined;
+    isRegistry =
+      object.type === 'MemberExpression' &&
+      !object.computed &&
+      object.property.type === 'Identifier' &&
+      object.property.name === 'customElements';
   }
-  if (isShadowed(rootName, rootStart)) return undefined;
+  if (!isRegistry) return undefined;
 
   const arg = node.arguments[1];
-  if (arg?.type !== 'Identifier' || isShadowed(arg.name, arg.start)) return undefined;
-  return arg.name;
+  if (arg?.type === 'Identifier') return isShadowed(arg.name, arg.start) ? undefined : arg.name;
+  if (arg?.type === 'ThisExpression' && s.staticBlockDepth > 0)
+    return s.classNameStack[s.classNameStack.length - 1] || undefined;
+  return undefined;
+}
+
+/**
+ * Tracks locals bound to a custom-element registry — `const r = customElements` (or
+ * `<host>.customElements`) and `const r = new CustomElementRegistry()` — so a later
+ * `r.define('tag', Class)` credits the class.
+ */
+export function trackCustomElementRegistry(node: VariableDeclarator, s: WalkState) {
+  if (node.id.type !== 'Identifier' || !node.init) return;
+  const init = node.init;
+  if (
+    (init.type === 'Identifier' && init.name === 'customElements' && !isShadowed('customElements', init.start)) ||
+    (init.type === 'MemberExpression' &&
+      !init.computed &&
+      init.property.type === 'Identifier' &&
+      init.property.name === 'customElements') ||
+    (init.type === 'NewExpression' && init.callee.type === 'Identifier' && init.callee.name === 'CustomElementRegistry')
+  ) {
+    s.customElementRegistries.add(node.id.name);
+  }
 }
 
 function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
@@ -95,7 +110,7 @@ function getChildProcessMethod(node: CallExpression, s: WalkState): string | und
 
 export function handleCallExpression(node: CallExpression, s: WalkState) {
   if (node.arguments.length >= 2) {
-    const registered = getRegisteredCustomElement(node);
+    const registered = getRegisteredCustomElement(node, s);
     if (registered) {
       s.registeredCustomElements.add(registered);
       return;
