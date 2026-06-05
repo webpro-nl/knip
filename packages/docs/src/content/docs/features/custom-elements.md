@@ -3,8 +3,8 @@ title: Custom Elements
 ---
 
 Custom elements are registered under a tag name. When such a class isn't
-referenced by name elsewhere, Knip would report the export as unused. Instead,
-Knip recognizes the registration and considers the class used.
+referenced elsewhere, Knip would report the export as unused. Instead, Knip
+recognizes the registration and considers the class used.
 
 Native registration needs no configuration. Framework registrations are credited
 through their plugin, which is enabled when the framework is a dependency.
@@ -66,8 +66,8 @@ export class MyCard extends LitElement {}
 ### FAST
 
 [FAST][3] also registers elements through a static `define()` or `defineAsync()`
-method. A class extending `FASTElement`, directly or through a mixin, is credited
-when registered this way:
+method. A class extending `FASTElement`, directly or through a mixin, is
+credited when registered this way:
 
 ```ts
 import { FASTElement } from '@microsoft/fast-element';

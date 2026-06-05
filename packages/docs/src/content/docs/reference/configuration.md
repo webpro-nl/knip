@@ -89,8 +89,8 @@ TypeScript semantics:
 
 ### `workspaces`
 
-Configure `entry`, `project`, plugins and most other options per workspace.
-Keys are workspace directories (globs allowed); the root workspace is `"."`.
+Configure `entry`, `project`, plugins and most other options per workspace. Keys
+are workspace directories (globs allowed); the root workspace is `"."`.
 
 ```json title="knip.json"
 {
@@ -411,8 +411,8 @@ In a more fine-grained manner, to ignore only specific issue types:
 }
 ```
 
-Valid keys are the symbol types Knip distinguishes: `class`, `enum`,
-`function`, `interface`, `member`, `namespace`, `type` and `variable`.
+Valid keys are the symbol types Knip distinguishes: `class`, `enum`, `function`,
+`interface`, `member`, `namespace`, `type` and `variable`.
 
 Set this option at root level to enable this globally, or within workspace
 configurations individually.

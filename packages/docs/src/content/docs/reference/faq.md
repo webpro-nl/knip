@@ -135,9 +135,9 @@ Vitest configuration.
 
 Configuration files may also contain references to entry files. For instance,
 Jest has `setupFilesAfterEnv: "<rootDir>/jest.setup.js"` or a reference may
-point to a file in another workspace in the same monorepo, e.g.
-`setupFiles: ['@org/shared/jest-setup.ts']`. Those entry files may also contain
-imports of internal modules or external dependencies, and so on.
+point to a file in another workspace in the same monorepo, e.g. `setupFiles:
+['@org/shared/jest-setup.ts']`. Those entry files may also contain imports of
+internal modules or external dependencies, and so on.
 
 ### Why is Knip so heavily engineered?
 

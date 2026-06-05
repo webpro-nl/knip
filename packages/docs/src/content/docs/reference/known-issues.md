@@ -8,8 +8,8 @@ See [handling issues][1] to learn more about dealing with lint issues.
 
 ## Exceptions from config files
 
-Knip plugins may fail to load a JavaScript or TypeScript configuration file
-such as `webpack.config.js` or `vite.config.ts`:
+Knip plugins may fail to load a JavaScript or TypeScript configuration file such
+as `webpack.config.js` or `vite.config.ts`:
 
 ```sh
 $ knip
@@ -33,13 +33,13 @@ Potential workarounds:
 - Run the build script to generate required files.
 - Disable loading the file by overriding the default `config` for that plugin.
   - Example: `vite: { config: [] }`
-  - In a monorepo, be more specific like so:
-    `workspaces: { "packages/lib": { vite: { config: [] } } }`
+  - In a monorepo, be more specific like so: `workspaces: { "packages/lib": {
+vite: { config: [] } } }`
   - If this helps, add the file as an `entry` file for static analysis.
 - Disable the related plugin.
   - Example: `eslint: false`
-  - In a monorepo, be more specific like so:
-    `workspaces: { "packages/lib": { eslint: false } }`
+  - In a monorepo, be more specific like so: `workspaces: { "packages/lib": {
+eslint: false } }`
   - If this helps, add the file as an `entry` file for static analysis.
 - As a last resort, ignore the workspace: `ignoreWorkspaces: ["packages/lib"]`.
 

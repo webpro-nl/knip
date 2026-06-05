@@ -14,7 +14,7 @@ When coming from v1, there are no breaking changes in terms of configuration.
 
 There are some changes regarding CLI arguments and output:
 
-- Knip now runs on every \[workspace]\[1] automatically (except for the ones in
+- Knip now runs on every workspace automatically (except for the ones in
   `ignoreWorkspaces: []`).
 - The "Unlisted or unresolved dependencies" is split in "Unlisted dependencies"
   and "Unresolved imports".

@@ -27,17 +27,17 @@ more than just a parser swap for the sake of using the latest 'n greatest.
 Knip has always been designed to parse each file only once, but the TypeScript
 backend carried the overhead of wiring up an entire program along with the
 typechecker. That's useful for IDEs keeping symbols connected, but much less so
-when you only need to traverse an AST once to collect imports and exports.
-The TypeScript backend made the setup as a whole harder and slower than it
-needed to be, especially to keep large monorepos in check.
+when you only need to traverse an AST once to collect imports and exports. The
+TypeScript backend made the setup as a whole harder and slower than it needed to
+be, especially to keep large monorepos in check.
 
 Now with TypeScript itself Go-ing places, replacing that backend was only a
 matter of time.
 
 Unsurprisingly, the search didn't take long: `oxc-parser` offers everything we
 need and its (experimental) raw transfer is crazy fast. Massive props to
-[overlookmotel][4], [Boshen][5] and all contributors for all the work on
-[the oxc suite][6]!
+[overlookmotel][4], [Boshen][5] and all contributors for all the work on [the
+oxc suite][6]!
 
 ## Performance tuning
 
@@ -49,7 +49,8 @@ the ESLint ("flat config"), tsdown and tsup plugins.
 
 ## The numbers
 
-Comparing v5 and v6 in some projects using Knip, all boosts are in the **2-4x** range:
+Comparing v5 and v6 in some projects using Knip, all boosts are in the **2-4x**
+range:
 
 [![venz-chart][8]][7]
 
@@ -84,30 +85,32 @@ Granted, most of you won't even notice. Here's the list:
 - Dropped `--include-libs` → this is now the default and only behavior
 - Dropped `--isolate-workspaces` → this is now the default and only behavior
 - Dropped `--experimental-tags` → use [`--tags`][14]
-- In [reporter functions][15], `issues.files` is consistent with other issue shapes. Removed `issues._files`.
-- In the [JSON reporter][16], issues are consistently arrays for any issue type. Removed root `files`.
+- In [reporter functions][15], `issues.files` is consistent with other issue
+  shapes. Removed `issues._files`.
+- In the [JSON reporter][16], issues are consistently arrays for any issue type.
+  Removed root `files`.
 
 ## Editor Extensions
 
-[Editor extensions][17] benefit from the core upgrades, for being faster and more
-memory-efficient. Regardless of new extension releases, the local version of
-Knip will be detected and used. Upgrade `knip` in your dependencies when you're
-ready.
+[Editor extensions][17] benefit from the core upgrades, for being faster and
+more memory-efficient. Regardless of new extension releases, the local version
+of Knip will be detected and used. Upgrade `knip` in your dependencies when
+you're ready.
 
 ## What about classMembers?
 
 I feel you. Even Knip itself was using it. Until today.
 
-The problem is that the implementation relies on the JS-based `ts.LanguageService`
-API that exposes the `findReferences` method. TypeScript v6 is the last JS-based
-release, and TypeScript v7 is a full rewrite in Go. I am left wondering if it
-ever will be feasible and practical to build such features using primitives
-(i.e. not via LSP) in a JS-based CLI (references: [microsoft/typescript-go#455][18],
-[@typescript/api][19]). Knip was already pretty unique for even trying this in
-a CLI tool.
+The problem is that the implementation relies on the JS-based
+`ts.LanguageService` API that exposes the `findReferences` method. TypeScript v6
+is the last JS-based release, and TypeScript v7 is a full rewrite in Go. I am
+left wondering if it ever will be feasible and practical to build such features
+using primitives (i.e. not via LSP) in a JS-based CLI (references:
+[microsoft/typescript-go#455][18], [@typescript/api][19]). Knip was already
+pretty unique for even trying this in a CLI tool.
 
-Not that many projects seem to be using it either:
-[github.com search for "classMembers path\:knip.json"][20].
+Not that many projects seem to be using it either: [github.com search for
+"classMembers path\:knip.json"][20].
 
 If your project relies on it, feel free to open an issue on GitHub or contact me
 and maybe we can work something out. Maybe a separate dedicated tool could work,

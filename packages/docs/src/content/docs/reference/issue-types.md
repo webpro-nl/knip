@@ -33,9 +33,9 @@ Knip reports the following types of issues:
 ## Notes
 
 1. When an issue type has zero issues, it is not shown.
-2. Including or excluding `dependencies` (via CLI or configuration) automatically
-   includes or excludes `devDependencies` and `optionalPeerDependencies`. In
-   [rules][3], each key can be set individually.
+2. Including or excluding `dependencies` (via CLI or configuration)
+   automatically includes or excludes `devDependencies` and
+   `optionalPeerDependencies`. In [rules][3], each key can be set individually.
 3. In [strict production mode][4], `devDependencies` are not included.
 4. The `types` issue type includes `enum`, `interface` and `type` exports.
 

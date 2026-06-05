@@ -34,8 +34,8 @@ references the named `validation` catalog. References are resolved from
 `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`,
 `resolutions` and `pnpm.overrides`.
 
-Entries defined in a catalog but not referenced anywhere are reported as
-[unused catalog entries][2].
+Entries defined in a catalog but not referenced anywhere are reported as [unused
+catalog entries][2].
 
 ## Filter and fix
 
