@@ -11,6 +11,10 @@ function isCustomElementDecorated(
   if (!decorators || decorators.length === 0) return false;
   for (const decorator of decorators) {
     const expression = decorator.expression;
+    if (expression?.type === 'Identifier') {
+      if (names.has(expression.name)) return true;
+      continue;
+    }
     if (expression?.type !== 'CallExpression') continue;
     const callee = expression.callee;
     if (callee.type === 'Identifier') {
@@ -41,11 +45,15 @@ function extendsBaseClass(node: Class, baseNames: ReadonlySet<string>): boolean 
   return false;
 }
 
+interface CustomElementVisitorOptions {
+  decoratorName?: string;
+  baseClassName?: string;
+}
+
 export function createCustomElementVisitor(
   ctx: PluginVisitorContext,
   isRegistrationSpecifier: (specifier: string) => boolean,
-  baseClassName?: string,
-  decoratorName = 'customElement'
+  { decoratorName = 'customElement', baseClassName }: CustomElementVisitorOptions = {}
 ): PluginVisitorObject {
   const decoratorNames = new Set<string>();
   const namespaces = new Set<string>();

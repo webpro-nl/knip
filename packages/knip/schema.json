@@ -394,6 +394,10 @@
           "title": "Capacitor plugin configuration (https://knip.dev/reference/plugins/capacitor)",
           "$ref": "#/definitions/plugin"
         },
+        "catalyst": {
+          "title": "catalyst plugin configuration (https://knip.dev/reference/plugins/catalyst)",
+          "$ref": "#/definitions/plugin"
+        },
         "changelogen": {
           "title": "changelogen plugin configuration (https://knip.dev/reference/plugins/changelogen)",
           "$ref": "#/definitions/plugin"

@@ -2,18 +2,18 @@ import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/conf
 import { hasDependency } from '../../util/plugin.ts';
 import { createCustomElementVisitor } from '../_custom-elements/custom-element-visitor.ts';
 
-// https://fast.design
+// https://catalyst.rocks
 
-const title = 'FAST';
+const title = 'Catalyst';
 
-const enablers = ['@microsoft/fast-element'];
+const enablers = ['@github/catalyst'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const isFastSpecifier = (specifier: string): boolean => specifier === '@microsoft/fast-element';
+const isCatalystSpecifier = (specifier: string): boolean => specifier === '@github/catalyst';
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
-  registerVisitor(createCustomElementVisitor(ctx, isFastSpecifier, { baseClassName: 'FASTElement' }));
+  registerVisitor(createCustomElementVisitor(ctx, isCatalystSpecifier, { decoratorName: 'controller' }));
 };
 
 const plugin: Plugin = {

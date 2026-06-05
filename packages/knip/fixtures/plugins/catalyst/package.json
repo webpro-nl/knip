@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/catalyst",
+  "dependencies": {
+    "@github/catalyst": "*"
+  }
+}

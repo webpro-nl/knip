@@ -10,6 +10,7 @@ import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
 import { default as capacitor } from './capacitor/index.ts';
+import { default as catalyst } from './catalyst/index.ts';
 import { default as changelogen } from './changelogen/index.ts';
 import { default as changelogithub } from './changelogithub/index.ts';
 import { default as changesets } from './changesets/index.ts';
@@ -166,6 +167,7 @@ export const Plugins = {
   bun,
   c8,
   capacitor,
+  catalyst,
   changelogen,
   changelogithub,
   changesets,

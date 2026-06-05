@@ -21,7 +21,7 @@ const entry = ['**/*.spec.{ts,tsx}', '**/*.e2e.{ts,tsx}'];
 const isStencilSpecifier = (specifier: string): boolean => specifier === '@stencil/core';
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
-  registerVisitor(createCustomElementVisitor(ctx, isStencilSpecifier, undefined, 'Component'));
+  registerVisitor(createCustomElementVisitor(ctx, isStencilSpecifier, { decoratorName: 'Component' }));
 };
 
 const resolveFromAST: ResolveFromAST = program => {

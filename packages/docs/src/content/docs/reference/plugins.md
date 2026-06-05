@@ -1,5 +1,5 @@
 ---
-title: Plugins (154)
+title: Plugins (155)
 tableOfContents: false
 ---
 
@@ -15,6 +15,7 @@ tableOfContents: false
 - [Bun](/reference/plugins/bun "Bun")
 - [c8](/reference/plugins/c8 "c8")
 - [Capacitor](/reference/plugins/capacitor "Capacitor")
+- [Catalyst](/reference/plugins/catalyst "Catalyst")
 - [Changelogen](/reference/plugins/changelogen "Changelogen")
 - [Changelogithub](/reference/plugins/changelogithub "Changelogithub")
 - [Changesets](/reference/plugins/changesets "Changesets")
