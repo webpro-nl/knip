@@ -527,7 +527,7 @@ The most common causes for unused exports include:
 
 - [Namespace enumerations][43]
 - [External libraries][44]
-- [Custom elements](#custom-elements)
+- [Custom elements][45]
 
 Use the `--exports` flag to [filter][17] and focus only on issues related to
 exports:
@@ -536,7 +536,7 @@ exports:
 knip --exports
 ```
 
-Use [includeEntryExports][45] to report unused exports of entry files as well.
+Use [includeEntryExports][46] to report unused exports of entry files as well.
 This can be set per workspace.
 
 ### Namespace enumerations
@@ -548,7 +548,7 @@ are then **not** reported.
 **Solution**: if all exports on imported namespaces should be considered
 individually, include the `nsExports` issue type to disable the heuristic.
 
-See [namespace imports][46] to see all related patterns.
+See [namespace imports][47] to see all related patterns.
 
 ### External libraries
 
@@ -585,29 +585,16 @@ follow the reference through the library's API.
 
 ### Custom elements
 
-Web component classes are registered under a tag name instead of being imported
-by their class name. Knip considers such a class used when it's registered in the
-same module, through either Lit's `@customElement('tag')` decorator or a native
-`customElements.define('tag', MyElement)` call:
-
-```ts
-import { LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
-
-@customElement('my-element')
-export class MyElement extends LitElement {}
-```
-
-The decorator counts only when `customElement` is imported from `lit/decorators`
-(or `@lit/reactive-element`/`lit-element`); a locally defined `customElement` is
-ignored.
+A custom element is registered under a tag name rather than imported by its
+class name. Knip recognizes the registration and considers the class used. See
+[Custom Elements][48] for all recognized patterns.
 
 ### Exclude exports from the report
 
 To exclude false positives from the report, there are a few options:
 
-- [Ignore exports used in file][47] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][48].
+- [Ignore exports used in file][49] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][50].
 - Have the export in an entry file:
 
   - Add the file to the `entry` file patterns array in the configuration.
@@ -618,7 +605,7 @@ To exclude false positives from the report, there are a few options:
 ### Missing unused exports?
 
 Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][45]
+be exported from an entry file. In that case, use [--include-entry-exports][46]
 to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
@@ -634,10 +621,10 @@ Reporting such members can be disabled:
 knip --exclude enumMembers
 ```
 
-Individual enum members can be [tagged using JSDoc syntax][48].
+Individual enum members can be [tagged using JSDoc syntax][50].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][45] to make Knip also report members of unused exports
+[--include-entry-exports][46] to make Knip also report members of unused exports
 in entry files.
 
 ### Namespace members
@@ -649,16 +636,16 @@ Reporting such members can be disabled:
 knip --exclude namespaceMembers
 ```
 
-Individual namespace members can be [tagged using JSDoc syntax][48].
+Individual namespace members can be [tagged using JSDoc syntax][50].
 
 Namespaces exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][45] to make Knip also report members of unused exports
+[--include-entry-exports][46] to make Knip also report members of unused exports
 in entry files.
 
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][49] and open an
+false positive), feel free to create a [minimal reproduction][51] and open an
 issue on GitHub. It'll make Knip better for everyone!
 
 [1]: #unused-files
@@ -705,8 +692,10 @@ issue on GitHub. It'll make Knip better for everyone!
 [42]: https://github.com/unplugin/unplugin-icons/tree/main/types
 [43]: #namespace-enumerations
 [44]: #external-libraries
-[45]: ../reference/configuration.md#includeentryexports
-[46]: ../guides/namespace-imports.md
-[47]: ../reference/configuration.md#ignoreexportsusedinfile
-[48]: ../reference/jsdoc-tsdoc-tags.md
-[49]: ../guides/issue-reproduction.md
+[45]: #custom-elements
+[46]: ../reference/configuration.md#includeentryexports
+[47]: ../guides/namespace-imports.md
+[48]: ../features/custom-elements.md
+[49]: ../reference/configuration.md#ignoreexportsusedinfile
+[50]: ../reference/jsdoc-tsdoc-tags.md
+[51]: ../guides/issue-reproduction.md
