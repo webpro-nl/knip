@@ -44,6 +44,11 @@ export const getDefaultImportName = (importMap: Map<string, string>, specifier: 
   }
 };
 
+const addStringValue = (values: Set<string>, node: any) => {
+  const value = getStringValue(node);
+  if (value != null) values.add(value);
+};
+
 export const getPropertyValues = (node: any, propertyName: string) => {
   const values = new Set<string>();
   if (node?.type !== 'ObjectExpression') return values;
@@ -52,18 +57,14 @@ export const getPropertyValues = (node: any, propertyName: string) => {
     const name = prop.key?.name ?? prop.key?.value;
     if (name !== propertyName) continue;
     const init = prop.value;
-    if (isStringLiteral(init)) {
-      values.add(init.value);
-    } else if (init?.type === 'ArrayExpression') {
-      for (const el of init.elements ?? []) {
-        if (isStringLiteral(el)) values.add(el.value);
-      }
+    if (init?.type === 'ArrayExpression') {
+      for (const el of init.elements ?? []) addStringValue(values, el);
     } else if (init?.type === 'ObjectExpression') {
       for (const p of init.properties ?? []) {
-        if (p.type === 'Property' && isStringLiteral(p.value)) {
-          values.add(p.value.value);
-        }
+        if (p.type === 'Property') addStringValue(values, p.value);
       }
+    } else {
+      addStringValue(values, init);
     }
   }
   return values;
