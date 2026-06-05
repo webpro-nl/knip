@@ -332,7 +332,7 @@ Note that any directory with a `package.json` not listed in the root
 have it handled as a separate workspace.
 
 If you do want Knip to take its project files from `tsconfig.json` rather than
-its own `project` patterns, see [`--use-tsconfig-files`][20] and the note below.
+its own `project` patterns, see [`--use-tsconfig-files`][14] and the note below.
 
 ### Why doesn't Knip just use `ts.findReferences`?
 
@@ -361,19 +361,19 @@ The recommendation and best practice is to list such workspaces/dependencies in
 `package.json`, and import them as such. Other tooling should not have any
 issues with this standard approach either.
 
-Also see the example in [TypeScript path aliases in monorepos][14].
+Also see the example in [TypeScript path aliases in monorepos][15].
 
 ### What's up with that configurable `tsconfig.json` location?
 
 There's a difference between `--tsConfig [file]` as a CLI argument and the
 `typescript.config` option in Knip configuration.
 
-The [`--tsConfig [file]` option][15] is used to provide an alternative location
+The [`--tsConfig [file]` option][16] is used to provide an alternative location
 for the default root `tsconfig.json` file. Relevant `compilerOptions` include
 `paths` and `moduleResolution`. This setting is only available at the root
 level.
 
-On the other hand, the [`config` option of the plugin][16] can be set per
+On the other hand, the [`config` option of the plugin][17] can be set per
 workspace. The TypeScript plugin extracts referenced external dependencies such
 as those in `extends`, `compilerOptions.types` and JSX settings:
 
@@ -397,19 +397,19 @@ From this example, Knip can determine whether the `@tsconfig/node20` and
   for `tsconfig.json` can be set per workspace.
 - In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
   either use `--tsConfig [file]` to target a different `tsconfig.json`, or
-  manually add [paths][17] to the Knip configuration. The latter can be done per
+  manually add [paths][18] to the Knip configuration. The latter can be done per
   workspace.
 
 ### What does `--use-tsconfig-files` do?
 
 By default Knip discovers project files with its own `project` patterns. The
-[`--use-tsconfig-files`][20] flag instead takes them from `tsconfig.json` per
+[`--use-tsconfig-files`][14] flag instead takes them from `tsconfig.json` per
 workspace. Those become TypeScript program files, so Knip analyzes their exports
 and dependencies but does not report them as unused files: delegating project
 definition to `tsconfig.json` declares them intentional, including empty files.
 This is by design — use the default `project` patterns (discovery mode) to flag
 dangling files. Implicitly enabled in the [editor extension, MCP server and
-language server][21] without a Knip configuration file.
+language server][19] without a Knip configuration file.
 
 ## Compilers
 
@@ -430,7 +430,7 @@ additional ones for other file types.
 Knip comes with basic "compilers" for a few common non-standard file types.
 They're not actual compilers, they're regular expressions only to extract import
 statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][18].
+project. Also see the answer to the previous question and [Compilers][20].
 
 ## Miscellaneous
 
@@ -469,7 +469,7 @@ Examples of features that have been requested include:
 
 These are all interesting ideas, but most increase the API surface area, and all
 require more development efforts and maintenance. Time is limited and
-[sponsorships][19] currently don't cover - this can change though!
+[sponsorships][21] currently don't cover - this can change though!
 
 [1]: ../reference/integrations.md#mcp-server
 [2]: ../reference/integrations.md#vs-code-extension
@@ -484,11 +484,11 @@ require more development efforts and maintenance. Time is limited and
 [11]: ../features/script-parser.md
 [12]: ../guides/handling-issues.mdx#type-definition-packages
 [13]: https://oxc.rs/docs/guide/usage/resolver.html
-[14]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
-[15]: ../reference/cli.md#--tsconfig-file
-[16]: ../explanations/plugins.md#configuration-files
-[17]: ../reference/configuration.md#paths
-[18]: ../features/compilers.md
-[19]: /sponsors
-[20]: ../reference/cli.md#--use-tsconfig-files
-[21]: ../reference/integrations.md
+[14]: ../reference/cli.md#--use-tsconfig-files
+[15]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
+[16]: ../reference/cli.md#--tsconfig-file
+[17]: ../explanations/plugins.md#configuration-files
+[18]: ../reference/configuration.md#paths
+[19]: ../reference/integrations.md
+[20]: ../features/compilers.md
+[21]: /sponsors

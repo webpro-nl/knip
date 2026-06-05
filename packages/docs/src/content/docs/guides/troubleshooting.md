@@ -94,11 +94,11 @@ Use [--workspace \[filter\]][8] to filter accordingly.
 
 #### Legend
 
-| Marker | Description                          |
-| ------ | :----------------------------------- |
-| `✓`    | Referenced (not reported as unused)  |
-| `✗`    | Reported as unused                   |
-| `⎆`    | Entry file                           |
+| Marker | Description                         |
+| ------ | :---------------------------------- |
+| `✓`    | Referenced (not reported as unused) |
+| `✗`    | Reported as unused                  |
+| `⎆`    | Entry file                          |
 
 Each child node is prefixed with how the export is consumed: `import`, `importAs`
 (shown as `original → alias`), `importNS`, or a re-export (`reExport`,

@@ -122,7 +122,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
-  resolveConfig
+  resolveConfig,
 };
 
 export default plugin;
