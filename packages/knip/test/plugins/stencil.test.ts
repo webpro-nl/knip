@@ -7,13 +7,21 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/stencil');
 
-test('Find dependencies with the Stencil plugin', async () => {
+test('Find dependencies and credit @Component with the Stencil plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
+  const flagged = new Set(Object.values(issues.exports).flatMap(byId => Object.keys(byId)));
+  assert(!flagged.has('MyController')); // @Component({ tag }) class, used only by tag, is credited
+
+  // A genuinely unused sibling export is still flagged (proves the file is analyzed, not entry-exempt):
+  assert.equal(issues.exports['src/my-controller.ts'].unusedHelper.symbol, 'unusedHelper');
+
+  // `*.spec`/`*.e2e` test files and `testing.setupFilesAfterEnv` setup are entries, not unused files (files: 0):
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    exports: 1,
+    processed: 7,
+    total: 7,
   });
 });

@@ -4,7 +4,8 @@ import type { PluginVisitorContext, PluginVisitorObject } from '../../types/conf
 function isCustomElementDecorated(
   node: Class,
   names: ReadonlySet<string>,
-  namespaces: ReadonlySet<string>
+  namespaces: ReadonlySet<string>,
+  decoratorName: string
 ): boolean {
   const decorators = node.decorators;
   if (!decorators || decorators.length === 0) return false;
@@ -19,7 +20,7 @@ function isCustomElementDecorated(
       !callee.computed &&
       callee.object.type === 'Identifier' &&
       callee.property.type === 'Identifier' &&
-      callee.property.name === 'customElement' &&
+      callee.property.name === decoratorName &&
       namespaces.has(callee.object.name)
     ) {
       return true;
@@ -43,7 +44,8 @@ function extendsBaseClass(node: Class, baseNames: ReadonlySet<string>): boolean 
 export function createCustomElementVisitor(
   ctx: PluginVisitorContext,
   isRegistrationSpecifier: (specifier: string) => boolean,
-  baseClassName?: string
+  baseClassName?: string,
+  decoratorName = 'customElement'
 ): PluginVisitorObject {
   const decoratorNames = new Set<string>();
   const namespaces = new Set<string>();
@@ -69,7 +71,7 @@ export function createCustomElementVisitor(
       if (!node.source || !isRegistrationSpecifier(node.source.value)) return;
       for (const spec of node.specifiers ?? []) {
         if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
-          if (spec.imported.name === 'customElement') decoratorNames.add(spec.local.name);
+          if (spec.imported.name === decoratorName) decoratorNames.add(spec.local.name);
           else if (baseClassName && spec.imported.name === baseClassName) baseNames.add(spec.local.name);
         } else if (spec.type === 'ImportNamespaceSpecifier') {
           namespaces.add(spec.local.name);
@@ -78,11 +80,14 @@ export function createCustomElementVisitor(
     },
     ClassDeclaration(node) {
       if (depth !== 0 || !node.id?.name) return;
-      if (isCustomElementDecorated(node, decoratorNames, namespaces)) ctx.markExportRegistered(node.id.name);
+      if (isCustomElementDecorated(node, decoratorNames, namespaces, decoratorName)) ctx.markExportRegistered(node.id.name);
       else if (baseClassName && extendsBaseClass(node, baseNames)) definedClasses.add(node.id.name);
     },
     ExportDefaultDeclaration(node) {
-      if (node.declaration.type === 'ClassDeclaration' && isCustomElementDecorated(node.declaration, decoratorNames, namespaces))
+      if (
+        node.declaration.type === 'ClassDeclaration' &&
+        isCustomElementDecorated(node.declaration, decoratorNames, namespaces, decoratorName)
+      )
         ctx.markExportRegistered('default');
     },
   };
