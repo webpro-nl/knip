@@ -53,15 +53,15 @@ export const getPropertyValues = (node: any, propertyName: string) => {
     if (name !== propertyName) continue;
     const init = prop.value;
     if (isStringLiteral(init)) {
-      values.add(init.value);
+      values.add(getStringValue(init)!);
     } else if (init?.type === 'ArrayExpression') {
       for (const el of init.elements ?? []) {
-        if (isStringLiteral(el)) values.add(el.value);
+        if (isStringLiteral(el)) values.add(getStringValue(el)!);
       }
     } else if (init?.type === 'ObjectExpression') {
       for (const p of init.properties ?? []) {
         if (p.type === 'Property' && isStringLiteral(p.value)) {
-          values.add(p.value.value);
+          values.add(getStringValue(p.value)!);
         }
       }
     }
