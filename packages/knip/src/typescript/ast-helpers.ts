@@ -2,7 +2,7 @@ import type { ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
-import { _parseFile, getStringValue, isStringLiteral } from './ast-nodes.ts';
+import { _parseFile, getStringValue } from './ast-nodes.ts';
 
 export const getPropertyKey = (prop: any): string | undefined =>
   prop?.key?.type === 'Identifier' ? prop.key.name : getStringValue(prop?.key);
@@ -27,10 +27,10 @@ export const getImportMap = (program: Program) => {
           decl.init?.type === 'CallExpression' &&
           decl.init.callee?.type === 'Identifier' &&
           decl.init.callee.name === 'require' &&
-          isStringLiteral(decl.init.arguments?.[0]) &&
           decl.id?.type === 'Identifier'
         ) {
-          importMap.set(decl.id.name, decl.init.arguments[0].value);
+          const source = getStringValue(decl.init.arguments?.[0]);
+          if (source != null) importMap.set(decl.id.name, source);
         }
       }
     }
@@ -136,11 +136,8 @@ export const getStringValues = (node: any): Set<string> => {
   const values = new Set<string>();
   if (node?.type !== 'ArrayExpression') return values;
   for (const el of node.elements ?? []) {
-    if (isStringLiteral(el)) {
-      values.add(el.value);
-    } else if (el?.type === 'ArrayExpression' && isStringLiteral(el.elements?.[0])) {
-      values.add(el.elements[0].value);
-    }
+    if (el?.type === 'ArrayExpression') addStringValue(values, el.elements?.[0]);
+    else addStringValue(values, el);
   }
   return values;
 };
