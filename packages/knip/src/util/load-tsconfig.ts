@@ -119,7 +119,6 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
 
     if (compilerOptions.outDir) compilerOptions.outDir = absDir(compilerOptions.outDir, dir);
     if (compilerOptions.rootDir) compilerOptions.rootDir = absDir(compilerOptions.rootDir, dir);
-    if (compilerOptions.rootDirs) compilerOptions.rootDirs = compilerOptions.rootDirs.map(d => absDir(d, dir));
     if (compilerOptions.paths) {
       compilerOptions.pathsBasePath ??= dir;
     }

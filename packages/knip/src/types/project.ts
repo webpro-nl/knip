@@ -21,7 +21,6 @@ export interface CompilerOptions {
   pathsBasePath?: string;
   plugins?: Array<{ name: string } | string>;
   rootDir?: string;
-  rootDirs?: string[];
   skipDefaultLibCheck?: boolean;
   skipLibCheck?: boolean;
   sourceMap?: boolean;

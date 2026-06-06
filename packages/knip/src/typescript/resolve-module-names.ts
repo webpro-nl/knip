@@ -23,7 +23,6 @@ function pickStringTarget(value: unknown): string | undefined {
 }
 
 type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
-type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;
 
 interface PathMapping {
   prefix: string;
@@ -56,16 +55,8 @@ function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[
   return mappings;
 }
 
-function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRootDirs | undefined {
-  if (!scopedRootDirs) return undefined;
-  const scoped = scopedRootDirs.filter(({ rootDirs }) => rootDirs.length > 1);
-  if (scoped.length === 0) return undefined;
-  scoped.sort((a, b) => b.scope.length - a.scope.length);
-  return scoped;
-}
-
 export function createCustomModuleResolver(
-  compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
+  compilerOptions: { scopedPaths?: ScopedPaths },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspaceManifestImports?: WorkspaceManifestHandler
@@ -75,7 +66,6 @@ export function createCustomModuleResolver(
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS];
   const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
-  const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -128,24 +118,6 @@ export function createCustomModuleResolver(
             const starIdx = value.indexOf('*');
             const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value;
             const resolved = resolveSync(mapped, containingFile);
-            if (resolved) return toResult(resolved);
-          }
-        }
-      }
-    }
-
-    // Fallback for tsconfig#compilerOptions.rootDirs (e.g. SvelteKit `$types`), scoped per workspace.
-    // oxc-resolver doesn't apply a nested tsconfig's rootDirs when an ancestor tsconfig.json exists.
-    if (rootDirMappings && !isAbsolute(specifier)) {
-      const dir = dirname(containingFile);
-      for (const { scope, rootDirs } of rootDirMappings) {
-        if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
-        for (const rootDir of rootDirs) {
-          if (dir !== rootDir && !dir.startsWith(`${rootDir}/`)) continue;
-          const relPath = dir === rootDir ? '' : dir.slice(rootDir.length + 1);
-          for (const targetRoot of rootDirs) {
-            if (targetRoot === rootDir) continue;
-            const resolved = resolveSync(join(targetRoot, relPath, specifier), containingFile);
             if (resolved) return toResult(resolved);
           }
         }

@@ -22,17 +22,12 @@ const createSyncModuleResolver = (extensions: string[], alias?: Record<string, s
     ...aliasOpt,
   };
   const resolver = new ResolverFactory({ tsconfig: 'auto', ...baseOptions });
-  const fallbackResolver = new ResolverFactory(baseOptions);
 
-  resolverInstances.push(resolver, fallbackResolver);
+  resolverInstances.push(resolver);
 
   return function resolveSync(specifier: string, basePath: string) {
     const resolved = resolver.resolveFileSync(basePath, specifier);
     if (resolved.path) return toPosix(resolved.path);
-    if (resolved.error) {
-      const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
-      if (fallback.path) return toPosix(fallback.path);
-    }
   };
 };
 
