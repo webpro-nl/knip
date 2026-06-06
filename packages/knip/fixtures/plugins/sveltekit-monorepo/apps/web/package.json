@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/sveltekit-monorepo-app",
+  "devDependencies": { "@sveltejs/kit": "*" }
+}
