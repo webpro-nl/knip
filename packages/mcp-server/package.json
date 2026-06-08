@@ -14,6 +14,9 @@
     "url": "git+https://github.com/webpro-nl/knip.git",
     "directory": "packages/mcp-server"
   },
+  "bugs": {
+    "url": "https://github.com/webpro-nl/knip/issues"
+  },
   "bin": {
     "knip-mcp": "./src/cli.js"
   },
