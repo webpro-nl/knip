@@ -1,4 +1,5 @@
 import picomatch from 'picomatch';
+import { ROOT_WORKSPACE_NAME } from './constants.ts';
 import type { IgnoreIssues } from './types/config.ts';
 import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.ts';
 import { partition } from './util/array.ts';
@@ -41,6 +42,7 @@ export class IssueCollector {
   private isTrackUnusedIgnorePatterns: boolean;
   private unusedIgnorePatterns: Map<string, TrackedPattern> = new Map();
   private unusedIgnoreFilesPatterns: Map<string, TrackedPattern> = new Map();
+  private selectedWorkspaces: Set<string> | undefined;
 
   constructor(options: MainOptions) {
     this.cwd = options.cwd;
@@ -53,6 +55,10 @@ export class IssueCollector {
 
   setWorkspaceFilter(workspaceFilePathFilter: WorkspaceFilePathFilter | undefined) {
     if (workspaceFilePathFilter) this.workspaceFilter = workspaceFilePathFilter;
+  }
+
+  setSelectedWorkspaces(selectedWorkspaces: Set<string> | undefined) {
+    this.selectedWorkspaces = selectedWorkspaces;
   }
 
   private collectIgnorePatterns(
@@ -169,6 +175,8 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
+    if (this.selectedWorkspaces && !this.selectedWorkspaces.has(issue.workspaceName ?? ROOT_WORKSPACE_NAME)) return;
+    
     const key = `${issue.workspaceName}::${issue.type}::${issue.identifier}`;
     if (!this.configurationHints.has(key)) this.configurationHints.set(key, issue);
   }
