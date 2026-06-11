@@ -5,9 +5,16 @@ const condition = (hasDependency: HasDependency) =>
   hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
 
 const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
+const scopedPackageMatcher = /^@[^/]+\/[^/]+(?:\/.*)?$/;
+const tildePackageMatcher = /^~(?:@[^/]+\/[^/]+|[\w.-]+)(?:\/.*)?$/;
 
 const isAlias = (s: string) =>
   (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
+
+const getPackageSpecifier = (specifier: string) => {
+  if (scopedPackageMatcher.test(specifier)) return specifier;
+  if (tildePackageMatcher.test(specifier)) return specifier.slice(1);
+};
 
 const candidates = (specifier: string): string[] => {
   const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
@@ -29,7 +36,8 @@ const compiler: CompilerSync = text => {
   for (const match of text.matchAll(importMatcher)) {
     const spec = match[2];
     if (!spec || spec.startsWith('sass:')) continue;
-    const specs = match[1] ? [spec] : candidates(spec);
+    const packageSpecifier = match[1] ? spec : getPackageSpecifier(spec);
+    const specs = packageSpecifier ? [packageSpecifier] : candidates(spec);
     for (const s of specs) out.push(`import _$${i++} from '${s}';`);
   }
   return out.join('\n');
