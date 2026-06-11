@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/compilers-scss",
   "dependencies": {
+    "@fontsource/lato": "*",
     "@fortawesome/fontawesome-free": "*"
   },
   "devDependencies": {

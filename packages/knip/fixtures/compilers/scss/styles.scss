@@ -1,4 +1,5 @@
 @use "sass:math";
+@use "@fontsource/lato/scss/mixins" as Lato;
 @use "pkg:@fortawesome/fontawesome-free";
 @use "pkg:bootstrap/scss/bootstrap";
 @use "components";
