@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tsconfig-cli-paths",
+  "knip": {
+    "entry": ["src/main.ts"],
+    "project": ["src/**/*.ts"]
+  }
+}
