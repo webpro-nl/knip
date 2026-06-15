@@ -3,7 +3,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { CURATED_RESOURCES } from './curated-resources.js';
-import { CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
+import { CLEAN_HINT, CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
+import { transformForAgent } from './transform.js';
 
 export { ERROR_HINT } from './texts.js';
 
@@ -25,6 +26,9 @@ export function getErrorMessage(error) {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const docsDir = join(__dirname, './docs');
 
+const MAX_UNUSED_FILES = 50;
+const MAX_ISSUES_PER_TYPE = 50;
+
 /**
  * @param {import('knip/session').Results} results
  * @param {{ cwd: string, configFilePath: string | undefined }} options
@@ -32,25 +36,60 @@ const docsDir = join(__dirname, './docs');
 export function buildResults(results, options) {
   const configurationHints = finalizeConfigurationHints(results, options);
 
-  const isSuppressIssues =
-    results.counters.total >= 10 &&
-    configurationHints.some(hint => hint.type === 'top-level-unconfigured' || hint.type === 'workspace-unconfigured');
+  const maybeUnconfigured = configurationHints.some(
+    hint => hint.type === 'top-level-unconfigured' || hint.type === 'workspace-unconfigured'
+  );
 
   const configFile = options.configFilePath
     ? { exists: true, filePath: options.configFilePath }
     : { exists: false, locations: KNIP_CONFIG_LOCATIONS };
 
-  const reviewHint = isSuppressIssues ? UNCONFIGURED_HINT : options.configFilePath ? CONFIG_REVIEW_HINT : undefined;
-  const files = isSuppressIssues ? null : Array.from(results.issues.files);
-  const issues = isSuppressIssues
-    ? null
-    : Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files'));
+  const counters = Object.fromEntries(
+    Object.entries(results.counters).filter(([key]) => key !== 'processed' && key !== 'total')
+  );
+
+  const totalIssues = Object.values(counters).reduce((sum, count) => sum + count, 0);
+  const isClean = totalIssues === 0 && configurationHints.length === 0;
+  const reviewHint = maybeUnconfigured
+    ? UNCONFIGURED_HINT
+    : isClean
+      ? CLEAN_HINT
+      : options.configFilePath && totalIssues > 0
+        ? CONFIG_REVIEW_HINT
+        : undefined;
+
+  let truncated = false;
+
+  const unusedFiles = Object.keys(results.issues.files);
+  const files = unusedFiles.slice(0, MAX_UNUSED_FILES);
+  if (unusedFiles.length > files.length) truncated = true;
+
+  const issues = {};
+  for (const [type, byFile] of Object.entries(results.issues)) {
+    if (type === 'files' || type === '_files') continue;
+    const items = [];
+    for (const [file, symbols] of Object.entries(byFile)) {
+      for (const issue of Object.values(symbols)) {
+        items.push({
+          file,
+          symbol: issue.symbol,
+          line: issue.line ?? issue.symbols?.[0]?.line,
+          ...(issue.parentSymbol ? { parent: issue.parentSymbol } : {}),
+        });
+      }
+    }
+    if (items.length === 0) continue;
+    if (items.length > MAX_ISSUES_PER_TYPE) truncated = true;
+    issues[type] = items.slice(0, MAX_ISSUES_PER_TYPE);
+  }
 
   return {
     reviewHint,
-    issuesSuppressed: isSuppressIssues,
+    maybeUnconfigured,
+    truncated,
     configurationHints,
-    counters: results.counters,
+    counters,
+    totalIssues,
     configFile,
     enabledPlugins: results.enabledPlugins,
     files,
@@ -72,9 +111,9 @@ export async function getResults(cwd, workspace) {
 export function readContent(filePath) {
   try {
     const content = readFileSync(join(docsDir, filePath), 'utf-8');
-    return content.replace(/^---[\s\S]*?---\n/, '');
+    return transformForAgent(content, filePath);
   } catch (error) {
-    return `Error reading ${filePath}: ${error.message}`;
+    return `Error reading ${filePath}: ${error instanceof Error ? error.message : String(error)}`;
   }
 }
 

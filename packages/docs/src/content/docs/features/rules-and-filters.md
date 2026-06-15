@@ -1,7 +1,6 @@
 ---
 title: Rules & Filters
-sidebar:
-  order: 5
+description: Customize Knip's output with `--include`/`--exclude` filters, shorthand flags and `rules` to set issue types to error, warn or off.
 ---
 
 Use rules or filters to customize Knip's output. This has various use cases, a

@@ -1,5 +1,6 @@
 ---
 title: Features
+description: Table of Knip capabilities including auto-fix, cache, compilers, monorepos, plugins, reporters, production mode, trace and watch mode.
 ---
 
 Overview of capabilities in support of the core feature: find many [types of

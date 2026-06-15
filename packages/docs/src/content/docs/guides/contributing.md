@@ -1,5 +1,6 @@
 ---
 title: Contributing to Knip
+description: Ways to contribute to Knip, including filing reproductions, opening pull requests, and writing a plugin.
 ---
 
 Here are some ways to contribute to Knip:

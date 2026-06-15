@@ -1,7 +1,6 @@
 ---
 title: Production Mode
-sidebar:
-  order: 1
+description: Use `--production` and `--strict` with `!` entry patterns to lint only shipped code, ignoring tests, stories and config files.
 ---
 
 The default mode for Knip is comprehensive and targets all project code,

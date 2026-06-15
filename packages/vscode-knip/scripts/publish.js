@@ -30,6 +30,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
 const nm = join(dist, 'node_modules');
 
+/** @type {Record<string, string>} */
 const targets = {
   'darwin-arm64': 'darwin-arm64',
   'darwin-x64': 'darwin-x64',
@@ -49,6 +50,12 @@ const vsixFiles = [];
 
 rmSync(dist, { recursive: true, force: true });
 
+/**
+ * @param {string} input
+ * @param {string} output
+ * @param {(string | RegExp)[]} [external]
+ * @param {Record<string, string>} [paths]
+ */
 const bundle = async (input, output, external = ext, paths) => {
   const build = await rolldown({ input: join(root, input), external, platform: 'node' });
   await build.write({ format: 'cjs', minify: true, file: join(dist, output), paths });
@@ -71,6 +78,7 @@ await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-ser
 const knipNm = join(dirname(fileURLToPath(import.meta.resolve('knip'))), '..', 'node_modules');
 
 const knipRequire = createRequire(join(knipNm, '..', 'package.json'));
+/** @param {string} pkgName */
 const bindingVersion = pkgName =>
   JSON.parse(readFileSync(knipRequire.resolve(`${pkgName}/package.json`), 'utf8')).version;
 const oxcParserVersion = bindingVersion('oxc-parser');
@@ -99,6 +107,12 @@ const selectedTargets = args.target
     ? Object.entries(targets)
     : [[currentTarget, targets[currentTarget]]];
 
+/**
+ * @param {string} scope
+ * @param {string} name
+ * @param {string} binding
+ * @param {string} version
+ */
 const packNativeBinding = (scope, name, binding, version) => {
   rmSync(join(nm, scope), { recursive: true, force: true });
   mkdirSync(join(nm, `${scope}/binding-${binding}`), { recursive: true });

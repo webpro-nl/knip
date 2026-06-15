@@ -70,7 +70,7 @@
         "toolReferenceName": "knip-configure",
         "icon": "$(tools)",
         "userDescription": "Set up and optimize Knip configuration",
-        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- enabledPlugins: Auto-detected plugins per workspace\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
+        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- totalIssues: Total number of issues found (0 = clean)\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Per-issue-type counts, plus processed (files analyzed) and total (a size metric, not the issue count — use totalIssues)\n- enabledPlugins: Auto-detected plugins per workspace (no knip.json needed for these)\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Config file status; exists:false is normal when plugins auto-configure\n\nOptions:\n- cwd: Working directory (defaults to the process cwd)\n- workspace: Scope run to array of workspaces\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -88,7 +88,7 @@
         "toolReferenceName": "knip-docs",
         "icon": "$(book)",
         "userDescription": "Get Knip documentation",
-        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g. \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from https://knip.dev.",
+        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- first-cleanup: Guided first pass: read the report top-down and fix one unused file, export, and dependency\n- how-knip-works: The mental model: entry files, the module graph, reachability, and why findings cascade. Read to reason about any result\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to resolve each issue type: files, dependencies, exports, types, duplicates\n- issue-types: Decode knip-run output: every issue type, what it means and its key (files, dependencies, exports, …)\n- json-output: Shape of `knip --reporter json` for parsing results in scripts, CI, or tools\n- configuration-hints: Decode the configurationHints from knip-run: each hint type and how to resolve it\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- rules-and-filters: Focus or mute issue types with --include/--exclude and rules (the right alternative to \"ignore\")\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- auto-fix: Clean up with --fix: what it removes, related flags, and post-fix steps\n- jsdoc-tsdoc-tags: Keep an export but exclude it from the report with @public/@internal and custom tags\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- cli: All CLI flags, shortcuts, exit codes and environment variables\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g. \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from https://knip.dev.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -287,6 +287,11 @@
             "type": "boolean",
             "default": true,
             "description": "Enable imports view"
+          },
+          "knip.imports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the import matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
           }
         }
       },
@@ -301,6 +306,11 @@
             "type": "boolean",
             "default": true,
             "description": "Enable exports view"
+          },
+          "knip.exports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the export matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
           },
           "knip.exports.contention.enabled": {
             "type": "boolean",

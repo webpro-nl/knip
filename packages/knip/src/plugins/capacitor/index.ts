@@ -17,7 +17,8 @@ const config = ['capacitor.config.{json,ts}'];
 const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFileDir }) => {
   const plugins = config.includePlugins ?? [];
   const android = isFile(configFileDir, 'android/capacitor.settings.gradle') ? ['@capacitor/android'] : [];
-  const ios = isFile(configFileDir, 'ios/App/Podfile') ? ['@capacitor/ios'] : [];
+  const hasIOS = isFile(configFileDir, 'ios/App/Podfile') || isFile(configFileDir, 'ios/App/CapApp-SPM/Package.swift');
+  const ios = hasIOS ? ['@capacitor/ios'] : [];
 
   return [...plugins, ...android, ...ios].map(id => toDependency(id));
 };

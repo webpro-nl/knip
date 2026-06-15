@@ -16,6 +16,10 @@ const CONTENTION_TOOLTIPS = {
  * @extends {BaseTreeViewProvider}
  */
 export class ExportsTreeViewProvider extends BaseTreeViewProvider {
+  constructor() {
+    super('exports');
+  }
+
   /** @param {import('knip/session').File} fileNode */
   getFileItems(fileNode) {
     const isDeferChildren = fileNode.exports.length > 9;
@@ -93,7 +97,7 @@ export class ExportsTreeViewProvider extends BaseTreeViewProvider {
     }
     const nodes = [];
 
-    const stringFields = ['main', 'module', 'browser', 'types', 'typings'];
+    const stringFields = /** @type {const} */ (['main', 'module', 'browser', 'types', 'typings']);
     for (const field of stringFields) {
       if (typeof manifest[field] === 'string') {
         nodes.push(this.createTreeViewItems({ label: field, children: [{ filePath: manifest[field] }] }));

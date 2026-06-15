@@ -1,7 +1,6 @@
 ---
 title: Source Mapping
-sidebar:
-  order: 4
+description: How Knip maps build artifacts in `dist`/`outDir` back to their original source files using `tsconfig.json` to avoid false positives.
 ---
 
 Knip is mostly interested in source code. Analyzing build artifacts hurts

@@ -1,18 +1,19 @@
 ---
 title: Reporters & Preprocessors
+description: Knip's built-in reporters (including the shape of `knip --reporter json` for scripts, CI and coding agents), plus custom reporters and preprocessors.
 ---
 
 ## Built-in Reporters
 
 Knip provides the following built-in reporters:
 
-- `codeowners`
+- [`codeclimate`][1]
+- [`codeowners`][2]
 - `compact`
-- [`disclosure`][1]
-- [`github-actions`][2]
-- [`json`][3]
-- [`markdown`][4]
-- [`codeclimate`][5]
+- [`disclosure`][3]
+- [`github-actions`][4]
+- [`json`][5]
+- [`markdown`][6]
 - `symbols` (default)
 
 Example usage:
@@ -21,105 +22,47 @@ Example usage:
 knip --reporter compact
 ```
 
-### JSON
+### CodeClimate
 
-The built-in `json` reporter output is meant to be consumed by other tools. It
-reports in JSON format with unused `files` and `issues` as an array with one
-object per file structured like this:
+The built-in `codeclimate` reporter generates output in the Code Climate Report
+JSON format. Example usage:
 
-```json
-{
-  "issues": [
-    {
-      "file": "package.json",
-      "owners": ["@org/admin"],
-      "dependencies": [{ "name": "jquery", "line": 5, "col": 6, "pos": 71 }],
-      "devDependencies": [{ "name": "lodash", "line": 9, "col": 6, "pos": 99 }],
-      "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
-      "exports": [],
-      "types": [],
-      "duplicates": []
-    },
-    {
-      "file": "src/Registration.tsx",
-      "owners": ["@org/owner"],
-      "dependencies": [],
-      "devDependencies": [],
-      "binaries": [],
-      "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
-      ],
-      "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
-      "types": [
-        { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
-        { "name": "unusedType", "line": 8, "col": 14, "pos": 145 }
-      ],
-      "enumMembers": [
-        {
-          "namespace": "MyEnum",
-          "name": "unusedMember",
-          "line": 13,
-          "col": 3,
-          "pos": 167
-        },
-        {
-          "namespace": "MyEnum",
-          "name": "unusedKey",
-          "line": 15,
-          "col": 3,
-          "pos": 205
+```text
+$ knip --reporter codeclimate
+
+[
+  {
+    "type": "issue",
+    "check_name": "Unused exports",
+    "description": "isUnused",
+    "categories": ["Bug Risk"],
+    "location": {
+      "path": "path/to/file.ts",
+      "positions": {
+        "begin": {
+          "line": 6,
+          "column": 1
         }
-      ],
-      "duplicates": ["Registration", "default"]
-    }
-  ]
-}
+      }
+    },
+    "severity": "major",
+    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84"
+  }
+]
 ```
 
-The keys match the [reported issue types][6]. Example usage:
+### CODEOWNERS
+
+When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
+Point the reporter at a different path through [`--reporter-options`][7]:
 
 ```sh
-knip --reporter json
+knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 ```
 
-### GitHub Actions
-
-Use the GitHub Actions reporter in a workflow for annotations in pull requests.
-Example usage:
-
-```sh
-knip --reporter github-actions
-```
-
-Changed files in pull requests will now contain inline annotations for lint
-findings.
-
-### Markdown
-
-The built-in `markdown` reporter output is meant to be saved to a Markdown file.
-This allows following the changes in issues over time. It reports issues in
-Markdown tables separated by issue types as headings, for example:
-
-```md
-# Knip report
-
-## Unused files (1)
-
-- src/unused.ts
-
-## Unlisted dependencies (2)
-
-| Name            | Location          | Severity |
-| :-------------- | :---------------- | :------- |
-| unresolved      | src/index.ts:8:23 | error    |
-| @org/unresolved | src/index.ts:9:23 | error    |
-
-## Unresolved imports (1)
-
-| Name         | Location           | Severity |
-| :----------- | :----------------- | :------- |
-| ./unresolved | src/index.ts:10:12 | error    |
-```
+For a typed object instead of JSON to parse, write a [custom reporter][8].
+Coding agents can also call Knip through the [MCP server][9], which returns
+structured results and configuration hints directly.
 
 ### Disclosure
 
@@ -173,33 +116,100 @@ unused-dep     package.json:20:5
 
 </details>
 
-### CodeClimate
+### GitHub Actions
 
-The built-in `codeclimate` reporter generates output in the Code Climate Report
-JSON format. Example usage:
+Use the GitHub Actions reporter in a workflow for annotations in pull requests.
+Example usage:
 
-```text
-$ knip --reporter codeclimate
+```sh
+knip --reporter github-actions
+```
 
-[
-  {
-    "type": "issue",
-    "check_name": "Unused exports",
-    "description": "isUnused",
-    "categories": ["Bug Risk"],
-    "location": {
-      "path": "path/to/file.ts",
-      "positions": {
-        "begin": {
-          "line": 6,
-          "column": 1
-        }
-      }
+Changed files in pull requests will now contain inline annotations for lint
+findings.
+
+### JSON
+
+The `json` reporter prints machine-readable results for scripts, CI, and tools
+(including coding agents) to consume:
+
+```sh
+knip --reporter json
+```
+
+Output is one line of JSON. Formatted here for readability:
+
+```json
+{
+  "issues": [
+    {
+      "file": "src/legacy.ts",
+      "files": [{ "name": "src/legacy.ts" }]
+    },
+    {
+      "file": "src/math.ts",
+      "exports": [{ "name": "factorial", "line": 12, "col": 14, "pos": 256 }],
+      "types": [{ "name": "Radians", "line": 20, "col": 13, "pos": 410 }]
+    },
+    {
+      "file": "package.json",
+      "dependencies": [{ "name": "lodash" }],
+      "unlisted": [{ "name": "rimraf" }]
     }
-    "severity": "major",
-    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84",
-  }
-]
+  ]
+}
+```
+
+The top level is an object with a single `issues` array. Each element groups
+every issue found in one file:
+
+| Field        | Type         | Notes                                               |
+| :----------- | :----------- | :-------------------------------------------------- |
+| `file`       | `string`     | Path relative to the working directory              |
+| `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
+| _issue type_ | array        | One key per enabled issue type (see below)          |
+
+Each entry carries a key for **every enabled [issue type][10]**, so the keys are
+the same across entries. An array is empty when that file has no issues of that
+type. Drop a type's key by disabling it with [filters or rules][11].
+
+Issue-type items are objects with position info:
+
+| Field       | Type      | Notes                                          |
+| :---------- | :-------- | :--------------------------------------------- |
+| `name`      | `string`  | The unused symbol, dependency, file, or import |
+| `namespace` | `string?` | Set for namespace members                      |
+| `line`      | `number?` | 1-based line                                   |
+| `col`       | `number?` | 1-based column                                 |
+| `pos`       | `number?` | Character offset                               |
+
+See [Issue types][10] for the full set of issue-type keys.
+
+### Markdown
+
+The built-in `markdown` reporter output is meant to be saved to a Markdown file.
+This allows following the changes in issues over time. It reports issues in
+Markdown tables separated by issue types as headings, for example:
+
+```md
+# Knip report
+
+## Unused files (1)
+
+- src/unused.ts
+
+## Unlisted dependencies (2)
+
+| Name            | Location          | Severity |
+| :-------------- | :---------------- | :------- |
+| unresolved      | src/index.ts:8:23 | error    |
+| @org/unresolved | src/index.ts:9:23 | error    |
+
+## Unresolved imports (1)
+
+| Name         | Location           | Severity |
+| :----------- | :----------------- | :------- |
+| ./unresolved | src/index.ts:10:12 | error    |
 ```
 
 ## Custom Reporters
@@ -299,9 +309,14 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
-[1]: #disclosure
-[2]: #github-actions
-[3]: #json
-[4]: #markdown
-[5]: #codeclimate
-[6]: ../reference/issue-types.md
+[1]: #codeclimate
+[2]: #codeowners
+[3]: #disclosure
+[4]: #github-actions
+[5]: #json
+[6]: #markdown
+[7]: ../reference/cli.md#--reporter-options
+[8]: #custom-reporters
+[9]: ../reference/integrations.md
+[10]: ../reference/issue-types.md
+[11]: ./rules-and-filters.md

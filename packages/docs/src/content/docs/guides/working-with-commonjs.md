@@ -1,5 +1,6 @@
 ---
 title: Working with CommonJS
+description: Conventions for `module.exports` and `require()` so Knip detects CommonJS named and default exports correctly and avoids false positives.
 ---
 
 CommonJS is the JavaScript module system using `require()` and `module.exports`

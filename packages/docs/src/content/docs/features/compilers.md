@@ -1,5 +1,6 @@
 ---
 title: Compilers
+description: Built-in and custom compilers let Knip analyze non-standard files like `.astro`, `.mdx`, `.svelte` and `.vue` for imports and exports.
 ---
 
 Projects may have source files that are not JavaScript or TypeScript, and thus

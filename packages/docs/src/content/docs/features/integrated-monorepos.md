@@ -1,7 +1,6 @@
 ---
 title: Integrated Monorepos
-sidebar:
-  order: 3
+description: Configure Knip for repositories with a single `package.json` and many projects, like the Nx integrated monorepo style.
 ---
 
 Some repositories have a single `package.json`, but consist of multiple projects

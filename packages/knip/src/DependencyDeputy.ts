@@ -130,6 +130,7 @@ export class DependencyDeputy {
       requiredPeerDependencies,
       allDependencies: new Set(allDependencies),
       engines: manifest.engines ?? {},
+      isPrivate: Boolean(manifest.private),
     });
   }
 
@@ -226,7 +227,7 @@ export class DependencyDeputy {
 
     if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
 
-    if (!this.isStrict && this.workspacePkgNames.has(packageName)) {
+    if (!this.isStrict && this.workspacePkgNames.has(packageName) && this._manifests.get(workspace.name)?.isPrivate) {
       this.addReferencedDependency(workspace.name, packageName);
       return true;
     }

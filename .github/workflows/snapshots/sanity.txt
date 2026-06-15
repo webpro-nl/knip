@@ -1,2 +1,3 @@
-Unlisted binaries (1)
+Unlisted binaries (2)
+packages/@repo/debug-proxy/src/cli.ts: mkcert
 packages/sanity/test/setup/global.ts: tzutil

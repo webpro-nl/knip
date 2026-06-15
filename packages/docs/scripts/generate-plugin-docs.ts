@@ -53,7 +53,11 @@ for await (const dir of directories) {
 
     plugins.push([title, pluginName]);
 
-    const frontmatter = u('yaml', `title: ${JSON.stringify(title)}\nsidebar:\n  hidden: true`);
+    const description = `How Knip's ${title} plugin detects entry files, config files and dependencies.`;
+    const frontmatter = u(
+      'yaml',
+      `title: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(description)}\nsidebar:\n  hidden: true`
+    );
 
     const defaults: Record<string, string[]> = {};
     const configFiles = typeof config === 'function' ? config({ cwd: pluginDir }) : config;
@@ -152,7 +156,12 @@ for await (const dir of directories) {
 
 plugins.sort((a, b) => (a[1] < b[1] ? -1 : 1));
 
-const frontmatter = u('yaml', `title: Plugins (${plugins.length})\ntableOfContents: false`);
+const listDescription =
+  'The full list of Knip plugins for frameworks, build tools, test runners and linters, each linking to its reference page.';
+const frontmatter = u(
+  'yaml',
+  `title: Plugins (${plugins.length})\ndescription: ${JSON.stringify(listDescription)}\ntableOfContents: false`
+);
 
 const tree = u('root', [
   frontmatter,

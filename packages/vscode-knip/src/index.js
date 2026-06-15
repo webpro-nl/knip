@@ -262,6 +262,10 @@ export class Extension {
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
    * @throws {Error} If no package manager can be detected
    */
+  /**
+   * @param {string} startDir
+   * @returns {'npm' | 'pnpm' | 'yarn'}
+   */
   #detectPackageManager(startDir) {
     let dir = startDir;
     const root = path.parse(dir).root;
@@ -298,7 +302,7 @@ export class Extension {
         try {
           await client.sendRequest(REQUEST_START);
         } catch (error) {
-          vscode.window.showErrorMessage((error?.message || error).toString());
+          vscode.window.showErrorMessage(error instanceof Error ? error.message : String(error));
         }
       }
     });
@@ -310,7 +314,7 @@ export class Extension {
         this.#packageJsonCache = undefined;
         await client.sendRequest(REQUEST_RESTART);
       } catch (error) {
-        vscode.window.showErrorMessage((error?.message || error).toString());
+        vscode.window.showErrorMessage(error instanceof Error ? error.message : String(error));
       }
     });
 
@@ -679,7 +683,7 @@ export class Extension {
     });
 
     const showReferences = vscode.commands.registerCommand('knip.showReferences', (uri, position, importLocations) => {
-      const locations = importLocations.map(location => {
+      const locations = importLocations.map(/** @param {{ filePath: string; line?: number; col?: number }} location */ location => {
         const pos = new vscode.Position(location.line ? location.line - 1 : 0, location.col ? location.col - 1 : 0);
         return new vscode.Location(vscode.Uri.file(location.filePath), pos);
       });
@@ -688,10 +692,12 @@ export class Extension {
     });
 
     const expandAll = vscode.commands.registerCommand('knip.expandAll', () => {
+      /** @param {import('./tree-view-base.js').BaseTreeViewProvider | undefined} provider */
       const expand = async provider => {
         const treeViewLocal = provider?.treeView;
         if (!treeViewLocal) return;
 
+        /** @param {import('./tree-view-base.js').TreeViewItem} element */
         const expandNode = async element => {
           try {
             await treeViewLocal.reveal(element, { expand: true, focus: false, select: false });

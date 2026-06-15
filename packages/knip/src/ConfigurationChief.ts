@@ -3,6 +3,7 @@ import type { SyncCompilers } from './compilers/types.ts';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
+  IgnoreIssues,
   IgnorePatterns,
   PluginsConfiguration,
   RawConfiguration,
@@ -17,7 +18,7 @@ import { arrayify, compact, partition } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { createWorkspaceGraph, type WorkspaceGraph } from './util/create-workspace-graph.ts';
 import { isDirectory, isFile } from './util/fs.ts';
-import { _dirGlob, removeProductionSuffix } from './util/glob.ts';
+import { _dirGlob, prependDirToPattern, removeProductionSuffix } from './util/glob.ts';
 import { graphSequencer } from './util/graph-sequencer.ts';
 import mapWorkspaces from './util/map-workspaces.ts';
 import { join, relative } from './util/path.ts';
@@ -409,6 +410,20 @@ export class ConfigurationChief {
       };
     }
     return { ignoreBinaries, ignoreDependencies, ignoreUnresolved };
+  }
+
+  public getIgnoreIssues() {
+    const ignoreIssues: IgnoreIssues = { ...this.config.ignoreIssues };
+    for (const name of this.availableWorkspaceNames) {
+      if (name === ROOT_WORKSPACE_NAME) continue;
+      const workspaceIgnoreIssues = this.getWorkspaceConfig(name).ignoreIssues;
+      if (!workspaceIgnoreIssues) continue;
+      for (const [pattern, issueTypes] of Object.entries(workspaceIgnoreIssues)) {
+        const id = prependDirToPattern(name, pattern);
+        ignoreIssues[id] = ignoreIssues[id] ? [...ignoreIssues[id], ...issueTypes] : issueTypes;
+      }
+    }
+    return ignoreIssues;
   }
 
   public getConfigForWorkspace(workspaceName: string, extensions?: string[]) {

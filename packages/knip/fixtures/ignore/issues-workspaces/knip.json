@@ -1,0 +1,10 @@
+{
+  "$schema": "../../schema.json",
+  "workspaces": {
+    "packages/apple": {
+      "ignoreIssues": {
+        "helpers.ts": ["exports"]
+      }
+    }
+  }
+}

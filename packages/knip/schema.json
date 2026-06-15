@@ -316,6 +316,19 @@
         "ignoreExportsUsedInFile": {
           "$ref": "#/definitions/ignoreExportsUsedInFile"
         },
+        "ignoreIssues": {
+          "title": " Ignore specific issue types for specific file patterns (relative to the workspace root)",
+          "examples": [
+            {
+              "src/generated/**": ["exports", "types"],
+              "**/*.generated.ts": ["exports"]
+            }
+          ],
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/issueTypes"
+          }
+        },
         "includeEntryExports": {
           "$ref": "#/definitions/includeEntryExports"
         }

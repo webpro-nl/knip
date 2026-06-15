@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
-    "@astrojs/starlight": "0.39.2",
+    "@astrojs/starlight": "0.40.0",
     "sharp": "0.34.5"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
     "@octokit/graphql": "^9.0.3",
     "@types/mdast": "4.0.4",
     "@types/unist": "3.0.3",
-    "astro": "6.3.2",
+    "astro": "6.4.6",
     "hastscript": "9.0.1",
     "picocolors": "^1.1.1",
     "remark-directive": "4.0.0",

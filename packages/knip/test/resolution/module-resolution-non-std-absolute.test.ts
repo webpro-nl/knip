@@ -11,18 +11,12 @@ test('Resolve non-standard absolute specifiers', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!issues.unlisted['x-self/index.ts']?.['x-other']);
+  assert(issues.unlisted['x-self/index.ts']['x-other']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unlisted: 1,
     processed: 1,
     total: 1,
   });
-});
-
-test('Resolve non-standard absolute specifiers (strict flags sibling workspace)', async () => {
-  const options = await createOptions({ cwd, isStrict: true, isProduction: false });
-  const { issues } = await main(options);
-
-  assert(issues.unlisted['x-self/index.ts']['x-other']);
 });

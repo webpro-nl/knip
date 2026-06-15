@@ -1,5 +1,6 @@
 ---
 title: Comparison & Migration
+description: How Knip compares to depcheck, unimported, ts-prune, ts-unused-exports and tsr, and how to migrate from them.
 ---
 
 First of all, Knip owes a lot to the projects on this page and they've all been

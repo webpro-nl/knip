@@ -1,7 +1,6 @@
 ---
 title: Troubleshooting
-sidebar:
-  order: 2
+description: Troubleshoot Knip lint issues and exceptions using exit codes, `--debug`, and `--trace` to see where exports and dependencies are used.
 ---
 
 We can distinguish two types of issues:

@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
  *
  * @typedef {vscode.TreeItem & {
  *   _parent?: TreeViewItem;
- *   _children?: TreeViewItem[];
+ *   _children?: Array<TreeViewItem | Node>;
  *   _reveal?: { identifier: string; line: number; col: number; };
  * }} TreeViewItem
  *
@@ -25,7 +25,9 @@ const isGlobLike = specifier => specifier.includes('*');
 
 /** @implements {vscode.TreeDataProvider<TreeViewItem>} */
 export class BaseTreeViewProvider {
-  constructor() {
+  /** @param {string} configSection */
+  constructor(configSection) {
+    this.configSection = configSection;
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this.currentUri = undefined;
@@ -129,6 +131,7 @@ export class BaseTreeViewProvider {
   /** @param {vscode.Position} position */
   async revealItemAtCursor(position) {
     if (!this.file || !this.treeView) return;
+    if (!vscode.workspace.getConfiguration('knip').get(`${this.configSection}.followCursor`, true)) return;
 
     try {
       const items = this._rootItems ?? [];
@@ -153,8 +156,10 @@ export class BaseTreeViewProvider {
   getChildren(element) {
     if (element) {
       if (!element._children) return [];
-      if (element._children[0] instanceof vscode.TreeItem) return element._children;
-      return (element._children ?? []).map(child => this.createTreeViewItems(Object.assign(child, { lazy: true })));
+      if (element._children[0] instanceof vscode.TreeItem) return /** @type {TreeViewItem[]} */ (element._children);
+      return (element._children ?? []).map(child =>
+        this.createTreeViewItems(/** @type {Node} */ (Object.assign(child, { lazy: true })))
+      );
     }
 
     if (!this.currentUri) {
@@ -212,7 +217,7 @@ export class BaseTreeViewProvider {
    *  importCol?: number;
    *  icon?: string;
    *  lazy?: boolean
-   *  children?: Node[];
+   *  children?: Array<TreeViewItem | Node>;
    * }} Node;
    * @param {Node} options
    * @returns {TreeViewItem}
@@ -255,9 +260,16 @@ export class BaseTreeViewProvider {
       };
     }
 
-    const children = options.children?.[0]?.filePath
-      ? options.children.toSorted((a, b) => (a.filePath && b.filePath ? a.filePath.localeCompare(b.filePath) : 0))
-      : (options.children ?? []);
+    const childList = options.children ?? [];
+    const firstChild = childList[0];
+    const children =
+      firstChild && 'filePath' in firstChild && firstChild.filePath
+        ? childList.toSorted((a, b) => {
+            const af = 'filePath' in a ? a.filePath : undefined;
+            const bf = 'filePath' in b ? b.filePath : undefined;
+            return af && bf ? af.localeCompare(bf) : 0;
+          })
+        : childList;
 
     const node = this.createTreeViewItem({
       label: filePath ? (options.icon ?? '→') : (options.label ?? ''),
@@ -269,10 +281,12 @@ export class BaseTreeViewProvider {
 
     if (!options.lazy) {
       for (let i = 0; i < children.length; i++) {
-        if (children[i] instanceof vscode.TreeItem) continue;
-        children[i].tooltip = children[i].tooltip ?? options.tooltipChildren;
-        children[i] = this.createTreeViewItems(children[i]);
-        children[i]._parent = node;
+        const child = children[i];
+        if (child instanceof vscode.TreeItem) continue;
+        child.tooltip = child.tooltip ?? options.tooltipChildren;
+        const built = this.createTreeViewItems(child);
+        built._parent = node;
+        children[i] = built;
       }
     }
 

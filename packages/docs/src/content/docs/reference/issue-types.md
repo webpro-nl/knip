@@ -1,5 +1,6 @@
 ---
 title: Issue Types
+description: Every issue type Knip reports, from unused files and dependencies to unused exports, enum and namespace members, with their filter keys.
 tableOfContents: false
 ---
 
