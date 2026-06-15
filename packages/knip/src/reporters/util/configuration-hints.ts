@@ -99,11 +99,16 @@ interface ProcessedHint extends ConfigurationHint {
   message: string;
 }
 
+const UNCONFIGURED_MIN_FILES = 20;
+const UNCONFIGURED_MIN_RATIO = 0.2;
+
 export const finalizeConfigurationHints = (
   results: Results,
   options: { cwd: string; configFilePath?: string }
 ): ProcessedHint[] => {
-  if (results.counters.files > 20) {
+  const { files, processed } = results.counters;
+  const unusedFileRatio = processed > 0 ? files / processed : 0;
+  if (files > UNCONFIGURED_MIN_FILES && unusedFileRatio > UNCONFIGURED_MIN_RATIO) {
     const workspaces = results.includedWorkspaceDirs
       .sort(byPathDepth)
       .reverse()
