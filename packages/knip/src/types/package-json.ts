@@ -36,6 +36,7 @@ export type PackageJson = {
   main?: string;
   bin?: string | Record<string, string>;
   version?: string;
+  private?: boolean;
   workspaces?: string[] | { packages?: string[]; catalog?: Catalog; catalogs?: Catalogs };
   exports?: Exports;
   imports?: Imports;

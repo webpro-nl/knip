@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspace-sibling-undeclared",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
