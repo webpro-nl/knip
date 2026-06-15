@@ -16,6 +16,10 @@ const CONTENTION_TOOLTIPS = {
  * @extends {BaseTreeViewProvider}
  */
 export class ExportsTreeViewProvider extends BaseTreeViewProvider {
+  constructor() {
+    super('exports');
+  }
+
   /** @param {import('knip/session').File} fileNode */
   getFileItems(fileNode) {
     const isDeferChildren = fileNode.exports.length > 9;

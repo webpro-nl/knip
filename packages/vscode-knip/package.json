@@ -287,6 +287,11 @@
             "type": "boolean",
             "default": true,
             "description": "Enable imports view"
+          },
+          "knip.imports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the import matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
           }
         }
       },
@@ -301,6 +306,11 @@
             "type": "boolean",
             "default": true,
             "description": "Enable exports view"
+          },
+          "knip.exports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the export matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
           },
           "knip.exports.contention.enabled": {
             "type": "boolean",

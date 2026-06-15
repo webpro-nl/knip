@@ -6,6 +6,10 @@ import { BaseTreeViewProvider, toTree } from './tree-view-base.js';
  * @extends {BaseTreeViewProvider}
  */
 export class ImportsTreeViewProvider extends BaseTreeViewProvider {
+  constructor() {
+    super('imports');
+  }
+
   /** @param {import('knip/session').File} fileNode */
   getFileItems(fileNode) {
     if (fileNode.internalImports.length === 0) return [this.createMessageItem('(none)')];

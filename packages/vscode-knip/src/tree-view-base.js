@@ -25,7 +25,9 @@ const isGlobLike = specifier => specifier.includes('*');
 
 /** @implements {vscode.TreeDataProvider<TreeViewItem>} */
 export class BaseTreeViewProvider {
-  constructor() {
+  /** @param {string} configSection */
+  constructor(configSection) {
+    this.configSection = configSection;
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this.currentUri = undefined;
@@ -129,6 +131,7 @@ export class BaseTreeViewProvider {
   /** @param {vscode.Position} position */
   async revealItemAtCursor(position) {
     if (!this.file || !this.treeView) return;
+    if (!vscode.workspace.getConfiguration('knip').get(`${this.configSection}.followCursor`, true)) return;
 
     try {
       const items = this._rootItems ?? [];
