@@ -41,7 +41,7 @@ export function buildResults(results, options) {
     : { exists: false, locations: KNIP_CONFIG_LOCATIONS };
 
   const reviewHint = isSuppressIssues ? UNCONFIGURED_HINT : options.configFilePath ? CONFIG_REVIEW_HINT : undefined;
-  const files = isSuppressIssues ? null : Array.from(results.issues.files);
+  const files = isSuppressIssues ? null : Object.keys(results.issues.files);
   const issues = isSuppressIssues
     ? null
     : Object.fromEntries(Object.entries(results.issues).filter(([key]) => key !== 'files' && key !== '_files'));
@@ -74,7 +74,7 @@ export function readContent(filePath) {
     const content = readFileSync(join(docsDir, filePath), 'utf-8');
     return content.replace(/^---[\s\S]*?---\n/, '');
   } catch (error) {
-    return `Error reading ${filePath}: ${error.message}`;
+    return `Error reading ${filePath}: ${error instanceof Error ? error.message : String(error)}`;
   }
 }
 
@@ -90,7 +90,9 @@ export function getDocs(topic) {
 
 /** @param {string} topic */
 function findDocPage(topic) {
-  if (CURATED_RESOURCES[topic]) return readContent(CURATED_RESOURCES[topic].path);
+  /** @type {Record<string, { name: string; description: string; path: string }>} */
+  const resources = CURATED_RESOURCES;
+  if (resources[topic]) return readContent(resources[topic].path);
 
   for (const ext of ['.md', '.mdx']) {
     const filePath = join(docsDir, `${topic}${ext}`);

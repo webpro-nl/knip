@@ -97,7 +97,7 @@ export class ExportsTreeViewProvider extends BaseTreeViewProvider {
     }
     const nodes = [];
 
-    const stringFields = ['main', 'module', 'browser', 'types', 'typings'];
+    const stringFields = /** @type {const} */ (['main', 'module', 'browser', 'types', 'typings']);
     for (const field of stringFields) {
       if (typeof manifest[field] === 'string') {
         nodes.push(this.createTreeViewItems({ label: field, children: [{ filePath: manifest[field] }] }));
