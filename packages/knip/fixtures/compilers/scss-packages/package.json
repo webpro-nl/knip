@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/compilers-scss-packages",
+  "dependencies": {
+    "@fontsource/lato": "*",
+    "@fontsource/roboto": "*",
+    "bootstrap": "*",
+    "bulma": "*",
+    "foundation-sites": "*"
+  },
+  "devDependencies": {
+    "sass": "*"
+  }
+}
