@@ -1,5 +1,6 @@
 ---
 title: Screenshots & videos
+description: Screenshots and videos showing Knip watch mode, auto-fix, export and file trace, and performance output in action.
 ---
 
 ## Watch & auto-fix

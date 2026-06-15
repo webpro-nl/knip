@@ -1,0 +1,146 @@
+---
+title: Your First Cleanup
+description: A guided first pass with Knip. Read the report from the top, then fix one unused file, export, and dependency.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+You installed Knip and ran it once. The first report can look like a lot. This
+page helps you sort it out.
+
+If the output is overwhelming, start with only a few issues:
+
+<Tabs syncKey="pm">
+  <TabItem label="npm">
+    ```shell
+    npm run knip -- --max-show-issues 5
+
+    # alternatively, include only a single type of issue:
+    npm run knip -- --include files
+    ```
+  </TabItem>
+
+  <TabItem label="pnpm">
+    ```shell
+    pnpm knip --max-show-issues 5
+
+    # alternatively, include only a single type of issue:
+    pnpm knip --include files
+    ```
+  </TabItem>
+
+  <TabItem label="bun">
+    ```shell
+    bun knip --max-show-issues 5
+
+    # alternatively, include only a single type of issue:
+    bun knip --include files
+    ```
+  </TabItem>
+
+  <TabItem label="yarn">
+    ```shell
+    yarn knip --max-show-issues 5
+
+    # alternatively, include only a single type of issue:
+    yarn knip --include files
+    ```
+  </TabItem>
+</Tabs>
+
+:::tip
+
+Address any configuration issues: they help you to help Knip!
+
+:::
+
+## Read the report from the top
+
+Knip groups issues by type, and **unused files** come first. Work the report
+top-down, because findings come in chains: one unused file also makes its
+exports and the dependencies it imports look unused. Fix the file and the rest
+disappears. [How Knip works][1] explains why.
+
+:::tip
+
+Resist the urge to fix everything at once. Start at the top.
+
+:::
+
+## Fix an unused file
+
+Take the first unused file and decide which kind it is:
+
+- Genuinely dead: nothing references it and no dependency loads it. Delete it.
+- A reachability gap: some tool or convention loads it that Knip doesn't know
+  about yet (a config file, a route, a generated entry). Don't delete it, but
+  instead teach Knip: add the file to `entry`. Or rather, add the first file in
+  its import chain.
+
+Not sure which? Search the codebase for the filename. And for dynamic patterns
+like `import()` or `require()` with a variable.
+
+Re-run Knip after you delete a file. Exports and dependencies used only by that
+chain of files are now gone from the report too.
+
+## Fix an unused export
+
+An unused export is a value or type nothing else imports. Either remove only the
+`export` keyword or delete the whole declaration if it has no use at all.
+
+Knip can do this for you:
+
+```sh
+knip --fix --exports
+```
+
+The `export` keyword is stripped from unused exports and types.
+
+This might reveal more unused variables and types, resulting in more code to
+delete. Then, Knip may find even more unused code. Rinse and repeat!
+
+## Fix a dependency
+
+Two findings, two different fixes:
+
+- **Unused** dependency: in `package.json`, but nothing imports it. Remove it,
+  unless a tool uses it that Knip has no plugin for (a reachability gap again).
+- **Unlisted** dependency: imported, but it's not in `package.json`. It resolves
+  today only because something else happens to install it (a phantom or
+  transitive dependency). Add it to `package.json` so it can't vanish from under
+  you and to control the version being used.
+
+## When a result looks wrong
+
+If Knip flags something you're sure is used, there might be a gap in what it can
+reach. The fix is usually to teach Knip (add an entry, customize a plugin, add a
+dependency), **not** to silence it with `ignore`.
+
+Often the issue is subtle. There could be a typo, a missing file or room for
+improvement in the configuration. Not filing it under `ignore` immediately will
+pay off in the long run.
+
+[Resolving reported issues][2] walks through every issue type. [Configuring
+project files][3] helps you tune and get the most out of Knip.
+
+## Keep it tidy
+
+Commit your cleanup, then add Knip to CI so unused code can't pile up again. See
+[Running Knip in CI][4].
+
+On a large or legacy codebase, [adopt Knip gradually][5] over chasing "inbox
+zero" in one pass.
+
+:::tip
+
+Let your coding agent handle it for you: there are [Knip Editor Extensions][2]
+and an MCP server using these docs to write the perfect `knip.json` for any
+project.
+
+:::
+
+[1]: ../explanations/how-knip-works.md
+[2]: ../guides/handling-issues.mdx
+[3]: ../guides/configuring-project-files.md
+[4]: ../guides/using-knip-in-ci.md
+[5]: ../guides/adopt-gradually.md

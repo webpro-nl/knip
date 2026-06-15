@@ -82,5 +82,5 @@ Also see [Why isn't Knip an ESLint plugin?][7]
 [3]: ../guides/working-with-commonjs.md
 [4]: ../features/auto-fix.mdx
 [5]: ../features/monorepos-and-workspaces.md
-[6]: ../reference/faq.md#whats-in-the-graphs
+[6]: ../reference/faq.md#whats-in-the-graph
 [7]: ../reference/faq.md#why-isnt-knip-an-eslint-plugin

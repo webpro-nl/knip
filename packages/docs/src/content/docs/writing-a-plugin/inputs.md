@@ -1,7 +1,6 @@
 ---
 title: Inputs
-sidebar:
-  order: 2
+description: Reference for Knip plugin input functions like toEntry, toDependency, toDeferResolve, toConfig, toBinary and toAlias, plus their options.
 ---
 
 You may have noticed functions like `toDeferResolve` and `toEntry`. They're a

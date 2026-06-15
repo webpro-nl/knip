@@ -1,5 +1,6 @@
 ---
 title: Catalogs
+description: How Knip finds unused pnpm, Yarn and Bun catalog entries referenced through the `catalog:` protocol, and removes them with auto-fix.
 ---
 
 Catalogs let you define dependency version ranges once and reference them across

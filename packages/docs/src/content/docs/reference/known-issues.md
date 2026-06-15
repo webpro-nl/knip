@@ -1,5 +1,6 @@
 ---
 title: Known Issues
+description: Workarounds for errors Knip may throw, such as failing config files, path aliases in config files, and the Nx daemon.
 ---
 
 List of known issues and workarounds for exceptions thrown during a Knip run.

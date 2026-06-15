@@ -1,5 +1,6 @@
 ---
 title: Integrations
+description: Knip's VS Code extension, JetBrains plugin, MCP server and language server for editor diagnostics and coding agents.
 ---
 
 - [VS Code/VSX Extension][1]

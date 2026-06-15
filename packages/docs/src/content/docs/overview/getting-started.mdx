@@ -1,7 +1,6 @@
 ---
 title: Getting Started
-sidebar:
-  order: 1
+description: Install and run Knip with npm, pnpm, bun or yarn to lint your project for unused files, exports and dependencies.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -14,7 +13,7 @@ Want to try Knip without installation? Visit [the playground][1].
 
 ## Installation
 
-This is the easiest and recommended way to install Knip:
+The easiest and recommended way to install Knip:
 
 <Tabs syncKey="pm">
   <TabItem label="npm">
@@ -41,6 +40,8 @@ This is the easiest and recommended way to install Knip:
     ```
   </TabItem>
 </Tabs>
+
+## Run
 
 Now you can run Knip to lint your project:
 
@@ -72,56 +73,13 @@ Now you can run Knip to lint your project:
 
 Knip will lint your project and report unused dependencies, exports and files.
 
-If the output makes sense to you, feel free to go to the next page:
-[configuration][2].
+The next step is to learn more about [how Knip works][2] or go straight to [your
+first cleanup][3].
 
 :::tip
 
-Try the [Knip Editor Extension][3]! Let your coding agent use the built-in MCP
+Try the [Knip Editor Extension][4]! Let your coding agent use the built-in MCP
 Server and create a custom `knip.json` for you.
-
-:::
-
-## Too Much?
-
-In large or complex codebases the output might be overwhelming.
-
-Start by limiting the number of shown issues per type:
-
-<Tabs syncKey="pm">
-  <TabItem label="npm">
-    ```shell
-    npm run knip -- --max-show-issues 5
-    ```
-  </TabItem>
-
-  <TabItem label="pnpm">
-    ```shell
-    pnpm knip --max-show-issues 5
-    ```
-  </TabItem>
-
-  <TabItem label="bun">
-    ```shell
-    bun knip --max-show-issues 5
-    ```
-  </TabItem>
-
-  <TabItem label="yarn">
-    ```shell
-    yarn knip --max-show-issues 5
-    ```
-  </TabItem>
-</Tabs>
-
-The output is easier to digest and may include some configuration hints to get
-an idea of what's left to configure. Many unused files? Go to [configuration][2]
-and follow up with [troubleshooting][4] if needed.
-
-:::tip
-
-Do not use the `ignore` option just to get rid of unwanted output. Read
-[Configuring Project Files][5] to get the most out of Knip.
 
 :::
 
@@ -198,7 +156,6 @@ In this scenario `typescript` and `@types/node` are expected to be installed
 already.
 
 [1]: /playground
-[2]: ./configuration.md
-[3]: ../reference/integrations.md
-[4]: ../guides/troubleshooting.md
-[5]: ../guides/configuring-project-files.md
+[2]: ../explanations/how-knip-works.md
+[3]: ./first-cleanup.mdx
+[4]: ../reference/integrations.md

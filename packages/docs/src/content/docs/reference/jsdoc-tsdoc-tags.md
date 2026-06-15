@@ -1,5 +1,6 @@
 ---
 title: JSDoc & TSDoc Tags
+description: Use JSDoc and TSDoc tags like `@public`, `@internal`, `@alias` and custom tags to include or exclude exports from Knip's report.
 ---
 
 JSDoc or TSDoc tags can be used to make exceptions for unused or duplicate

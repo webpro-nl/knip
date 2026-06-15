@@ -1,5 +1,6 @@
 ---
 title: Configuration
+description: Every knip.json option, including entry, project, paths, workspaces, plugins, rules, tags, ignores and compilers.
 ---
 
 This page lists all configuration file options.

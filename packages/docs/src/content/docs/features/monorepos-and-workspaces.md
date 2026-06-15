@@ -1,7 +1,6 @@
 ---
 title: Monorepos & Workspaces
-sidebar:
-  order: 2
+description: How Knip discovers and configures workspaces in package-based monorepos, with per-workspace options and the `--workspace` filter.
 ---
 
 Workspaces are handled out-of-the-box by Knip.
@@ -75,7 +74,7 @@ monorepos][2].
 
 ## Additional workspaces
 
-If a workspaces is not configured as such in `package.json#workspaces` (or
+If a workspace is not configured as such in `package.json#workspaces` (or
 `pnpm-workspace.yaml`) it can be added to the Knip configuration manually. Add
 their path to the `workspaces` configuration object the same way as
 `"packages/cli": {}` in the example above.

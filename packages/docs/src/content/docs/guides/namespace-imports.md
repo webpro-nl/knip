@@ -1,5 +1,6 @@
 ---
 title: Namespace Imports
+description: How Knip handles exports used through `import * as NS` namespace imports, its usage heuristic, and the `nsExports` and `nsTypes` issue types.
 ---
 
 The intention of exports used through namespace imports may not always be clear

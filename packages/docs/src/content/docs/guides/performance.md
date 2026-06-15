@@ -1,5 +1,6 @@
 ---
 title: Performance
+description: How to profile and speed up Knip using the `--cache`, `--performance`, and `--debug` flags, file patterns, and per-workspace linting.
 ---
 
 This page describes a few topics around Knip's performance, and how you might

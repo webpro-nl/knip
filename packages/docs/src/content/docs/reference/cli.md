@@ -1,5 +1,6 @@
 ---
 title: CLI Arguments
+description: Every Knip command-line flag, grouped by mode, scope, fix, output and troubleshooting, with shortcuts and exit codes.
 ---
 
 ## General
@@ -31,8 +32,10 @@ Use an alternative path for the configuration file. Default locations:
 - `knip.jsonc`
 - `.knip.json`
 - `.knip.jsonc`
-- `knip.js`
 - `knip.ts`
+- `knip.js`
+- `knip.config.ts`
+- `knip.config.js`
 - `package.json#knip`
 
 Shortcut: `-c`
@@ -190,6 +193,7 @@ Available [issue types][10] when filtering output using `--include` or
 - `files`
 - `dependencies`
 - `unlisted`
+- `binaries`
 - `unresolved`
 - `exports`
 - `nsExports`

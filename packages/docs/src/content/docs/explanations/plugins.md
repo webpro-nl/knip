@@ -1,7 +1,6 @@
 ---
 title: Plugins
-sidebar:
-  order: 2
+description: How Knip plugins work and the difference between `config` files (parsed for dependencies) and `entry` files (added to the module graph).
 ---
 
 This page describes why Knip uses plugins and the difference between `config`
@@ -108,7 +107,7 @@ configured.
 
 :::tip[Plugins result in less configuration]
 
-Plugins uses entry file patterns as defined in your configuration file of these
+Plugins use entry file patterns as defined in your configuration file of these
 tools. So you don't need to repeat this in your Knip configuration.
 
 :::
@@ -202,7 +201,7 @@ jobs:
       - run: node scripts/build.js
       - run: node --loader tsx scripts/deploy.ts
       - run: playwright test -c playwright.web.config.ts
-        working-dir: e2e
+        working-directory: e2e
 ```
 
 From these scripts, the `scripts/build.js` and `scripts/deploy.ts` files will be

@@ -1,7 +1,6 @@
 ---
 title: Argument Parsing
-sidebar:
-  order: 3
+description: Reference for a Knip plugin `arg` object to parse a tool's command-line arguments and find dependencies and entry files in scripts.
 ---
 
 Some plugins have an `arg` object in their implementation. It's a way for
@@ -9,22 +8,22 @@ plugins to customize how command-line arguments are parsed for their tool's
 executables. Argument parsing in plugins help Knip identify dependencies and
 entry files from scripts.
 
-Knip uses [minimist][1] for argument parsing and some options are identical
-([alias][2], [boolean][3], [string][4]).
+Knip parses these arguments with a built-in parser. The options below customize
+how a tool's scripts are parsed.
 
-Also see [type definitions][5] and [examples in existing plugins][6].
+Also see [type definitions][1] and [examples in existing plugins][2].
 
-- [alias][2]
-- [args][7]
-- [binaries][8]
-- [boolean][3]
-- [config][9]
-- [fromArgs][10]
-- [nodeImportArgs][11]
-- [positional][12]
-- [resolve][13]
-- [resolveInputs][14]
-- [string][4]
+- [alias][3]
+- [args][4]
+- [binaries][5]
+- [boolean][6]
+- [config][7]
+- [fromArgs][8]
+- [nodeImportArgs][9]
+- [positional][10]
+- [resolve][11]
+- [resolveInputs][12]
+- [string][13]
 
 ## alias
 
@@ -38,12 +37,12 @@ Example:
 }
 ```
 
-Also see [nodeImportArgs][11].
+Also see [nodeImportArgs][9].
 
 ## args
 
 Modify or filter arguments before parsing. For edge cases preprocessing is
-useful, e.g. if minimist has trouble parsing or to modify/discard arguments.
+useful, e.g. if the parser has trouble parsing or to modify/discard arguments.
 
 Example:
 
@@ -123,7 +122,7 @@ Will have `"node index.js"` being parsed as a new script.
 
 ## nodeImportArgs
 
-Set to `true` as a shorthand for this [alias][2]:
+Set to `true` as a shorthand for this [alias][3]:
 
 ```ts
 {
@@ -183,19 +182,18 @@ Return inputs from parsed arguments
 ## string
 
 Mark arguments as string. This is the default, but number-looking arguments are
-returned as numbers by minimist.
+returned as numbers.
 
-[1]: https://www.npmjs.com/package/minimist
-[2]: #alias
-[3]: #boolean
-[4]: #string
-[5]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
-[6]: https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
-[7]: #args
-[8]: #binaries
-[9]: #config
-[10]: #fromargs
-[11]: #nodeimportargs
-[12]: #positional
-[13]: #resolve
-[14]: #resolveinputs
+[1]: https://github.com/webpro-nl/knip/blob/main/packages/knip/src/types/args.ts
+[2]: https://github.com/search?q=repo%3Awebpro-nl%2Fknip++path%3Apackages%2Fknip%2Fsrc%2Fplugins+%22const+args+%3D%22&type=code
+[3]: #alias
+[4]: #args
+[5]: #binaries
+[6]: #boolean
+[7]: #config
+[8]: #fromargs
+[9]: #nodeimportargs
+[10]: #positional
+[11]: #resolve
+[12]: #resolveinputs
+[13]: #string

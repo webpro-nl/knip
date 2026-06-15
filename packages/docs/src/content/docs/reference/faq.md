@@ -1,13 +1,13 @@
 ---
 title: FAQ
+description: Design decisions behind Knip, common pitfalls, how it compares to ESLint and tree-shaking, and how the module graph works.
 date: 2024-08-20
 ---
 
 ## Introduction
 
 Knip finds and fixes unused dependencies, exports and files. As a "kitchen sink"
-in the npm ecosystem, it creates comprehensive module and dependency graphs of
-your project.
+in the npm ecosystem, it creates a comprehensive module graph of your project.
 
 :::note[Rationale]
 
@@ -18,18 +18,8 @@ tries harder than you think to cover it all.
 
 :::
 
-This FAQ is an attempt to provide some perspective on a few design decisions and
-why certain things work the way they do. Here and there it's intentionally a bit
-more in-depth than the rest of the docs.
-
-## Why should I even bother to do all this?
-
-Because the payoff is huge. While it might take a bit of effort to configure
-Knip correctly initially, a clean module graph gives you absolute confidence in
-your codebase. You can delete dead code, remove unused dependencies, and
-refactor with certainty. It prevents the slow accumulation of technical debt and
-keeps your project lean and fast. Once configured, Knip runs quickly in CI and
-keeps your codebase pristine automatically.
+This FAQ explains a few design decisions and why certain things work the way
+they do, here and there in more depth than the rest of the docs.
 
 :::tip
 
@@ -88,27 +78,24 @@ reported issues manually and ensure your configuration is solid before using the
 Linters like ESLint analyze files separately, while Knip lints projects as a
 whole.
 
-Knip requires full module and dependency graphs to find clutter across the
-project. Creating these comprehensive graphs is not a trivial task and it seems
-no such tool exists today, even more so when it comes to monorepos.
+Knip requires a full module and dependency graph to find clutter across the
+project. Building the graph is substantial work, especially in monorepos.
 
 File-oriented linters like ESLint are complementary to Knip.
 
 ### Isn't tree-shaking enough?
 
-In short: no. They share an important goal: improve UX by removing unused code.
-But tree-shaking and Knip are different and complementary tools.
+No. They share a goal: improving UX by removing unused code. But tree-shaking
+and Knip are different, complementary tools.
 
-Tree-shaking is a build or compile-time activity to reduce production bundle
-size. It typically operates on bundled production code, which might include
-external/third-party code. A build time optimization and "out of your hands".
+Tree-shaking is a build-time optimization to reduce production bundle size. It
+operates on bundled production code, which might include external code, and runs
+automatically (out of your hands).
 
-On the other hand, Knip is a project linter that should be part of the
-development and QA phase. It lints, reports and fixes only your own source code.
-Moreover, in contrast with other linters, focuses on inter-file dependencies, so
-dead code within a file may not be caught by Knip.
-
-Issues reported by the linter are for you to handle and review.
+On the other hand, Knip is a project linter for the development and QA phase. It
+reports and fixes only your own source code, and leaves the changes for you to
+review. It focuses on inter-file dependencies, so dead code within a single file
+may slip through.
 
 Besides those differences, Knip has a broader scope:
 
@@ -117,14 +104,17 @@ Besides those differences, Knip has a broader scope:
   scripts and Storybook stories.
 - Handle more [types of issues][7] (such as unlisted dependencies).
 
+For how Knip compares to other unused-code tools and how to migrate from them,
+see [Comparison & Migration][8].
+
 ## Synergy
 
 ### Why does Knip have plugins?
 
-Plugins are an essential part of Knip. They prevent you from a lot of
-configuration out of the box, by adding entry files as accurately as possible
-and only for the tools actually installed. Yet the real magic is in their custom
-parsers for configuration files and command-line argument definitions.
+Plugins are an essential part of Knip. They save you a lot of configuration out
+of the box, by adding entry files as accurately as possible and only for the
+tools actually installed. More powerful still are their custom parsers for
+configuration files and command-line argument definitions.
 
 For instance, Vitest has the `environment` configuration option. The Vitest
 plugin knows `"node"` is the default value for `environment` which does not
@@ -144,107 +134,35 @@ internal modules or external dependencies, and so on.
 Even though a modular approach has its merits, for Knip it makes sense to have
 all the pieces in a single tool.
 
-Building up the module and dependency graphs requires more than standard module
-resolution and not only static but also dynamic analysis (i.e. actually load and
-execute modules), such as for parsers of plugins to receive the exported value
-of dynamic tooling configuration files. Additionally, [exports consumed by
-external libraries][8] require type information. Last but not least, shell
-script parsing is required to find the right entry files, configuration files
-and dependencies accurately.
+Building up the module and dependency graph takes more than standard module
+resolution. It needs dynamic analysis, not just static: plugin parsers actually
+load and execute dynamic tooling configuration files to read their exported
+value. On top of that, [exports consumed by external libraries][9] require type
+information. And shell script parsing is needed to find the right entry files,
+configuration files and dependencies accurately.
 
-The rippling effect of plugins and recursively adding entry files and
-dependencies to build up the graphs is also exactly what's meant by
-["comprehensive" here][9].
+The rippling effect of plugins recursively pulling in more entry files and
+dependencies is exactly what ["comprehensive"][10] refers to.
 
-## Building the graphs
+## Design decisions
 
-### Where does Knip look for entry files?
+### Why isn't production mode the default?
 
-- In default locations such as `index.js` and `src/index.ts`
-- In `main`, `bin` and `exports` fields in `package.json`
-- In the entry files as configured by enabled plugins
-- In `config` files as configured and parsed by enabled plugins
-- The `config` files themselves are entry files
-- In dynamic imports (i.e. `require()` and `import()` calls)
-- In `require.resolve('./entry.js')`
-- In `import.meta.resolve('./entry.mjs')`
-- Through scripts inside template strings in source files such as:
+The default mode of Knip includes all source files, tests, dependencies, dev
+dependencies and tooling configuration.
 
-```ts
-await $({ stdio: 'inherit' })`c8 node hydrate.js`; // execa
-await $`node scripts/parse.js`; // bun/zx
-```
+On the other hand, production mode considers only source files and production
+dependencies. Plugins add only production entry files.
 
-- Through scripts in `package.json` such as:
+Which mode should've been the default? They both have their merits:
 
-```json
-{
-  "name": "my-lib",
-  "scripts": {
-    "start": "node --import tsx/esm run.ts",
-    "start": "vitest -c config/vitest.config.ts"
-  }
-}
-```
+- Production mode catches dead production code and dependencies. This mode has
+  the most impact on UX, since less code tends to be faster and safer.
+- Default mode potentially catches more issues, e.g. lots of unused plugins of
+  tooling, including most issues found in production mode. This mode has the
+  most impact on DX, for the same reason.
 
-- Through plugins handling CI workflow files like `.github/workflows/ci.yml`:
-
-```yaml
-jobs:
-  test:
-    steps:
-      run: playwright test e2e/**/*.spec.ts --config playwright.e2e.config.ts
-      run: node --import tsx/esm run.ts
-```
-
-Scripts like the ones shown here may also contain references to configuration
-files (`config/vitest.config.ts` and `playwright.e2e.config.ts` in the examples
-above). They're recognized as configuration files and passed to their respective
-plugins, and may contain additional entry files.
-
-Entry files are added to the module graph. [Module resolution][10] might result
-in additional entry files recursively until no more entry files are found.
-
-### What does Knip look for in source files?
-
-oxc-parser is powerful and fault-tolerant. Knip visits all nodes of the
-generated AST to find:
-
-- Imports and dynamic imports of internal modules and external dependencies
-- Exports
-- Accessed properties on namespace imports and re-exports to track individual
-  export usage
-- Calls to `require.resolve`, `import.meta.resolve` and more.
-- Scripts in template strings (passed to [script parser][11])
-
-### What's in the graphs?
-
-Once the module and dependency graphs are created, they contain the information
-required to create the report including all issue types:
-
-- Unused files
-- Unused dependencies
-- Unused devDependencies
-- Referenced optional peerDependencies
-- Unlisted dependencies
-- Unlisted binaries
-- Unresolved imports
-- Unused exports
-- Unused exported types
-- Unused exported enum members
-- Unused exported namespace members
-- Duplicate exports
-
-And optionally more issue types like individual exports and exported types in
-namespace imports.
-
-The graphs allows to report more interesting details, such as:
-
-- Circular references
-- Usage numbers per export
-- Export usage across workspaces in a monorepo
-- List of all binaries used
-- List of all used (OS) binaries not installed in `node_modules`
+Also see [production mode][5].
 
 ### Why doesn't Knip just read the lockfile?
 
@@ -254,33 +172,123 @@ lockfiles lack some data, including:
 
 - It requires lockfile parsing for each lockfile format and version of each
   package manager.
-- The lockfile doesn't contain whether the package [has types included][12].
+- The lockfile doesn't contain whether the package [has types included][11].
 - The lockfile doesn't contain entry point fields (`main`, `module`, `exports`)
   needed to resolve what a dependency actually exposes.
 - The lockfile doesn't contain `bin` entries to determine installed binaries.
 
-## Module Resolution
-
 ### Why doesn't Knip use an existing module resolver?
 
-Runtimes like Node.js provide `require.resolve` and `import.meta.resolve`.
-TypeScript comes with module resolution built-in. More module resolvers are out
-there and bundlers are known to use or come with module resolvers. None of them
-seem to meet all requirements to be usable on its own by Knip:
+It does: Knip uses [oxc-resolver][12]. A runtime or bundler resolver can't be
+used as-is, because Knip resolves imports to your source across every workspace
+in a (mono)repo. It has to:
 
-- Support non-standard extensions like `.css`, `.svelte` and `.png`
-- Support path aliases
-- Support `exports` map in `package.json`
-- Support self-referencing imports
-- Rewire `package.json#main` build artifacts like `dist/module.js` to its source
-  at `src/module.ts`
-- Don't resolve to type definition paths like `module.d.ts` but source code at
-  `module.js`
+- Resolve to source (`src/module.ts`), not type definitions (`module.d.ts`) or
+  the build artifact a `package.json#main` like `dist/module.js` points to
+- Resolve non-standard extensions like `.svelte`, `.astro` and `.css` so those
+  files enter the module graph
 
-A few strategies have been tried and tweaked, and Knip currently uses
-[oxc-resolver][13] with customizations for extension aliases, path aliases and
-TypeScript-style resolution. This covers module resolution across all
-workspaces, [script parsing][11] and references to files in other workspaces.
+oxc-resolver is configurable enough for this. Combined with a thin layer for
+Knip-configured `paths` and plugin aliases. This covers resolution across all
+workspaces and[script parsing][13] and references to files in other workspaces.
+
+### Why doesn't Knip match my TypeScript project structure?
+
+Repositories and workspaces in a monorepo aren't necessarily structured like
+TypeScript projects. Put simply, the location of `package.json` files isn't
+always adjacent to `tsconfig.json` files. Knip follows the structure of
+workspaces in a monorepo.
+
+An additional layering of TypeScript projects would complicate things. The
+downside is that a `tsconfig.json` file not used by Knip may have conflicting
+module resolution settings, potentially resulting in missed files.
+
+In practice, this is rarely an issue. Knip sticks to the workspaces structure
+and installs a single "kitchen sink" module resolver function per workspace.
+Different strategies might add more complexity and performance penalties, while
+the current strategy is simple, fast and good enough.
+
+Note that any directory with a `package.json` not listed in the root
+`package.json#workspaces` can be added to the Knip configuration manually to
+have it handled as a separate workspace.
+
+If you do want Knip to take its project files from `tsconfig.json` rather than
+its own `project` patterns, see [`--use-tsconfig-files`][14].
+
+### Why doesn't Knip just use `ts.findReferences`?
+
+TypeScript has a very good "Find references" feature, that you might be using in
+your IDE as well. There are a few reasons Knip doesn't use it:
+
+- It requires the full TypeScript language service, which is heavy to
+  initialize.
+- It must be called per symbol. A project with thousands of exports would need
+  thousands of calls, each scanning potentially all files. Knip parses each file
+  once and resolves all export usages from the resulting graph.
+- It operates within a single TypeScript program. Monorepos with multiple
+  `tsconfig.json` files would need separate language service instances.
+- It cannot see into non-standard files like `.vue`, `.svelte` and `.astro`.
+
+Knip's module graph is also serializable and cacheable, and usable for other
+tools to build upon.
+
+### Why doesn't Knip have...?
+
+Examples of features that have been requested include:
+
+- Expose programmatic API
+- Add local/custom plugins
+- Expose the module and dependency graph
+- Custom AST visitors, e.g. to find and return:
+  - Unused interface/type members
+  - Unused object members (and e.g. React component props)
+  - Unused object props in function return values
+- Analyze workspaces in parallel
+- Support Deno
+
+These are all interesting ideas, but most increase the API surface area, and all
+require more development efforts and maintenance. Time is limited and
+[sponsorships][15] currently don't cover - this can change though!
+
+## Under the hood
+
+### Where does Knip look for entry files?
+
+Knip discovers them from defaults, `package.json`, enabled plugins, source-code
+imports and resolution calls (`require.resolve`, `import.meta.resolve`,
+`new URL`, `new Worker`, `module.register`), and parsed scripts. See [Entry
+Files][22] for the complete list. Entry files are added to the module graph, and
+[module resolution][16] may result in more entry files recursively until none
+remain.
+
+### What does Knip look for in source files?
+
+Knip uses oxc-parser to parse source files, it's powerful and fault-tolerant.
+Knip visits all nodes of the generated AST to find:
+
+- Imports and dynamic imports of internal modules and external dependencies
+- Exports
+- Accessed properties on namespace imports and re-exports to track individual
+  export usage
+- Entry files from `require.resolve`, `import.meta.resolve`,
+  `new URL(specifier, import.meta.url)`, `new Worker(…)`, `child_process`
+  `fork`/`spawn`/`execFile`, and `module.register()`
+- Scripts passed to the [script parser][13]: tagged `$` templates (`bun`,
+  `execa`, `zx`) and `node:child_process`, `execa` and `nano-spawn` calls
+
+### What's in the graph?
+
+Once built, the graph holds everything needed to produce the report: every
+[issue type][7], from unused files and dependencies to unused exports, types and
+enum members.
+
+The graph also surfaces more interesting details, such as:
+
+- Circular references
+- Usage numbers per export
+- Export usage across workspaces in a monorepo
+- List of all binaries used
+- List of all used (OS) binaries not installed in `node_modules`
 
 ### How does Knip handle non-standard import syntax?
 
@@ -311,71 +319,16 @@ file. They're not a concept in Knip.
 Knip analyzes all workspaces using a single module graph with a shared module
 resolver.
 
-### Why doesn't Knip match my TypeScript project structure?
-
-Repositories and workspaces in a monorepo aren't necessarily structured like
-TypeScript projects. Put simply, the location of `package.json` files isn't
-always adjacent to `tsconfig.json` files. Knip follows the structure of
-workspaces in a monorepo.
-
-An additional layering of TypeScript projects would complicate things. The
-downside is that a `tsconfig.json` file not used by Knip may have conflicting
-module resolution settings, potentially resulting in missed files.
-
-In practice, this is rarely an issue. Knip sticks to the workspaces structure
-and installs a single "kitchen sink" module resolver function per workspace.
-Different strategies might add more complexity and performance penalties, while
-the current strategy is simple, fast and good enough.
-
-Note that any directory with a `package.json` not listed in the root
-`package.json#workspaces` can be added to the Knip configuration manually to
-have it handled as a separate workspace.
-
-If you do want Knip to take its project files from `tsconfig.json` rather than
-its own `project` patterns, see [`--use-tsconfig-files`][14] and the note below.
-
-### Why doesn't Knip just use `ts.findReferences`?
-
-TypeScript has a very good "Find references" feature, that you might be using in
-your IDE as well. There are a few reasons Knip doesn't use it:
-
-- It requires the full TypeScript language service, which is heavy to
-  initialize.
-- It must be called per symbol. A project with thousands of exports would need
-  thousands of calls, each scanning potentially all files. Knip parses each file
-  once and resolves all export usages from the resulting graph.
-- It operates within a single TypeScript program. Monorepos with multiple
-  `tsconfig.json` files would need separate language service instances.
-- It cannot see into non-standard files like `.vue`, `.svelte` and `.astro`.
-
-Knip's module graph is also serializable and cacheable, and usable for other
-tools to build upon.
-
-### Why can't I use path aliases to reference other workspaces?
-
-Projects can use `compilerOptions.paths` to alias paths in other workspaces in
-the same monorepo. Knip doesn't understand those paths might represent internal
-workspaces and might report false positives.
-
-The recommendation and best practice is to list such workspaces/dependencies in
-`package.json`, and import them as such. Other tooling should not have any
-issues with this standard approach either.
-
-Also see the example in [TypeScript path aliases in monorepos][15].
-
 ### What's up with that configurable `tsconfig.json` location?
 
-There's a difference between `--tsConfig [file]` as a CLI argument and the
-`typescript.config` option in Knip configuration.
+Two settings point Knip at a `tsconfig.json`, and they do different things:
 
-The [`--tsConfig [file]` option][16] is used to provide an alternative location
-for the default root `tsconfig.json` file. Relevant `compilerOptions` include
-`paths` and `moduleResolution`. This setting is only available at the root
-level.
-
-On the other hand, the [`config` option of the plugin][17] can be set per
-workspace. The TypeScript plugin extracts referenced external dependencies such
-as those in `extends`, `compilerOptions.types` and JSX settings:
+- [`--tsConfig [file]`][17] (CLI, root only) sets an alternative location for
+  the root `tsconfig.json`. Knip reads its `compilerOptions`, notably `paths`
+  and `moduleResolution`.
+- [`typescript.config`][18] (plugin, per workspace) sets the location the
+  TypeScript plugin reads to extract referenced dependencies from `extends`,
+  `compilerOptions.types` and JSX settings:
 
 ```json title="tsconfig.json"
 {
@@ -386,19 +339,14 @@ as those in `extends`, `compilerOptions.types` and JSX settings:
 }
 ```
 
-From this example, Knip can determine whether the `@tsconfig/node20` and
-`hastscript` dependencies are properly listed in `package.json`.
+From this example, Knip can tell whether `@tsconfig/node20` and `hastscript` are
+listed in `package.json`.
 
-#### Notes
-
-- The TypeScript plugin doesn't add support for TypeScript to Knip (that's
-  already built-in). Like other plugins, it extracts dependencies from
-  `tsconfig.json`. With the `typescript.config` option an alternative location
-  for `tsconfig.json` can be set per workspace.
-- In case path aliases from `compilerOptions.paths` aren't picked up by Knip,
-  either use `--tsConfig [file]` to target a different `tsconfig.json`, or
-  manually add [paths][18] to the Knip configuration. The latter can be done per
-  workspace.
+Note that the TypeScript plugin doesn't add TypeScript support to Knip (that's
+built-in); like other plugins, it extracts dependencies from `tsconfig.json`. If
+path aliases from `compilerOptions.paths` aren't picked up, either point
+`--tsConfig` at the right `tsconfig.json` or add [paths][19] to the Knip config
+(per workspace).
 
 ### What does `--use-tsconfig-files` do?
 
@@ -407,9 +355,9 @@ By default Knip discovers project files with its own `project` patterns. The
 workspace. Those become TypeScript program files, so Knip analyzes their exports
 and dependencies but does not report them as unused files: delegating project
 definition to `tsconfig.json` declares them intentional, including empty files.
-This is by design — use the default `project` patterns (discovery mode) to flag
+This is by design: use the default `project` patterns (discovery mode) to flag
 dangling files. Implicitly enabled in the [editor extension, MCP server and
-language server][19] without a Knip configuration file.
+language server][20] without a Knip configuration file.
 
 ## Compilers
 
@@ -427,49 +375,9 @@ additional ones for other file types.
 
 ### Why are the exports of my `.vue` files not used?
 
-Knip comes with basic "compilers" for a few common non-standard file types.
-They're not actual compilers, they're regular expressions only to extract import
-statements. Override the built-in Vue "compiler" with the real one in your
-project. Also see the answer to the previous question and [Compilers][20].
-
-## Miscellaneous
-
-### Why isn't production mode the default?
-
-The default mode of Knip includes all source files, tests, dependencies, dev
-dependencies and tooling configuration.
-
-On the other hand, production mode considers only source files and production
-dependencies. Plugins add only production entry files.
-
-Which mode should've been the default? They both have their merits:
-
-- Production mode catches dead production code and dependencies. This mode has
-  the most impact on UX, since less code tends to be faster and safer.
-- Default mode potentially catches more issues, e.g. lots of unused plugins of
-  tooling, including most issues found in production mode. This mode has the
-  most impact on DX, for the same reason.
-
-Also see [production mode][5].
-
-### Why doesn't Knip have...?
-
-Examples of features that have been requested include:
-
-- Expose programmatic API
-- Add local/custom plugins
-- Expose the module and dependency graphs
-- Custom AST visitors, e.g. to find and return:
-  - Unused interface/type members
-  - Unused object members (and e.g. React component props)
-  - Unused object props in function return values
-- Analyze workspaces in parallel
-- Support Deno
-- Improve internal code structures and accessibility to support contributions
-
-These are all interesting ideas, but most increase the API surface area, and all
-require more development efforts and maintenance. Time is limited and
-[sponsorships][21] currently don't cover - this can change though!
+The built-in compilers extract `import` statements only, so the exports declared
+in a `.vue` or `.svelte` file aren't analyzed and may be reported as unused.
+Override the built-in with a real compiler. See [Compilers][21].
 
 [1]: ../reference/integrations.md#mcp-server
 [2]: ../reference/integrations.md#vs-code-extension
@@ -478,17 +386,18 @@ require more development efforts and maintenance. Time is limited and
 [5]: ../features/production-mode.md
 [6]: ../explanations/why-use-knip.md#less-is-more
 [7]: ./issue-types.md
-[8]: ../guides/handling-issues.mdx#external-libraries
-[9]: ../explanations/why-use-knip.md#comprehensive
-[10]: #module-resolution
-[11]: ../features/script-parser.md
-[12]: ../guides/handling-issues.mdx#type-definition-packages
-[13]: https://oxc.rs/docs/guide/usage/resolver.html
+[8]: ../explanations/comparison-and-migration.md
+[9]: ../guides/handling-issues.mdx#external-libraries
+[10]: ../explanations/why-use-knip.md#comprehensive
+[11]: ../guides/handling-issues.mdx#type-definition-packages
+[12]: https://oxc.rs/docs/guide/usage/resolver.html
+[13]: ../features/script-parser.md
 [14]: ../reference/cli.md#--use-tsconfig-files
-[15]: ../guides/handling-issues.mdx#typescript-path-aliases-in-monorepos
-[16]: ../reference/cli.md#--tsconfig-file
-[17]: ../explanations/plugins.md#configuration-files
-[18]: ../reference/configuration.md#paths
-[19]: ../reference/integrations.md
-[20]: ../features/compilers.md
-[21]: /sponsors
+[15]: /sponsors
+[16]: #why-doesnt-knip-use-an-existing-module-resolver
+[17]: ../reference/cli.md#--tsconfig-file
+[18]: ../explanations/plugins.md#configuration-files
+[19]: ../reference/configuration.md#paths
+[20]: ../reference/integrations.md
+[21]: ../features/compilers.md
+[22]: ../explanations/entry-files.md#where-knip-looks-for-entry-files

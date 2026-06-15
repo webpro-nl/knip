@@ -1,7 +1,6 @@
 ---
 title: Writing A Plugin
-sidebar:
-  order: 1
+description: Tutorial for writing a Knip plugin with entry, config, resolveConfig, resolveFromAST and resolve to find entry files and dependencies.
 ---
 
 Plugins provide Knip with entry files and dependencies it would be unable to
@@ -210,7 +209,7 @@ default values.
 
 ## Example 4: Use the AST directly
 
-If the `resolveFromConfig` function is implemented, Knip loads the configuration
+If the `resolveConfig` function is implemented, Knip loads the configuration
 file and passes the default-exported object to this plugin function. However,
 that object might then not contain the information we need.
 

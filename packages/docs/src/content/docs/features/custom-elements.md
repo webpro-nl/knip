@@ -1,5 +1,6 @@
 ---
 title: Custom Elements
+description: How Knip credits custom element classes registered via `customElements.define()` or Lit, FAST, Stencil and Catalyst decorators.
 ---
 
 Custom elements are registered under a tag name. When such a class isn't
