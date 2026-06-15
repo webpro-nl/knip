@@ -23,6 +23,7 @@ JavaScript and TypeScript projects.
 - TypeScript
   - Avoid `any` and type casting (`as`).
   - Avoid runtime overhead just to get the types right.
+- Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links)
 
 ## Domain Knowledge
 
