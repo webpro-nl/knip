@@ -265,6 +265,11 @@ const rootConfigurationSchema = z.object({
    * This allows ignoring specific issues (like unused exports) in generated
    * files while still reporting other issues in those same files.
    *
+   * @remarks
+   * Set this option at root level to apply globally, or within workspace
+   * configurations individually. Workspace-level patterns are relative to the
+   * workspace root.
+   *
    * @see {@link https://knip.dev/reference/configuration#ignoreissues}
    */
   ignoreIssues: z.optional(ignoreIssuesSchema),
@@ -417,6 +422,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignoreMembers: z.optional(stringOrRegexSchema),
   ignoreUnresolved: z.optional(stringOrRegexSchema),
   ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
+  ignoreIssues: z.optional(ignoreIssuesSchema),
   includeEntryExports: z.optional(z.boolean()),
 });
 

@@ -3,6 +3,7 @@ import type { IgnoreIssues } from './types/config.ts';
 import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.ts';
 import { partition } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
+import { prependDirToPattern } from './util/glob.ts';
 import { initCounters, initIssues } from './util/issue-initializers.ts';
 import { relative } from './util/path.ts';
 import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.ts';
@@ -100,11 +101,12 @@ export class IssueCollector {
     // Pre-compile matchers for each issue type
     const issueTypePatterns = new Map<IssueType, string[]>();
     for (const [pattern, issueTypes] of Object.entries(ignoreIssues)) {
+      const id = prependDirToPattern(this.cwd, pattern);
       for (const issueType of issueTypes) {
         if (!issueTypePatterns.has(issueType)) {
           issueTypePatterns.set(issueType, []);
         }
-        issueTypePatterns.get(issueType)?.push(pattern);
+        issueTypePatterns.get(issueType)?.push(id);
       }
     }
 
@@ -116,7 +118,7 @@ export class IssueCollector {
   private shouldIgnoreIssue(filePath: string, issueType: IssueType): boolean {
     const matcher = this.issueMatchers.get(issueType);
     if (!matcher) return false;
-    return matcher(relative(this.cwd, filePath));
+    return matcher(filePath);
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
