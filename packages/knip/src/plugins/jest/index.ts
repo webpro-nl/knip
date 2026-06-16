@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { arrayify } from '../../util/array.ts';
 import { _glob, _dirGlob } from '../../util/glob.ts';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
@@ -63,7 +64,7 @@ const resolveDependencies = async (
     }
   }
 
-  const runner = config.runner ? [config.runner] : [];
+  const runner = config.runner ? [typeof config.runner === 'string' ? config.runner : config.runner[0]] : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
   const environments =
     config.testEnvironment === 'jsdom'
@@ -125,7 +126,7 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const inputs = await resolveDependencies(localConfig, rootDir, options);
 
   const entries = localConfig.testMatch
-    ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
+    ? arrayify(localConfig.testMatch).map(replaceRootDir).map(id => toEntry(id))
     : entry.map(id => toEntry(id));
 
   if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));
