@@ -315,7 +315,7 @@ knip --preprocessor ./preprocess.ts
 [4]: #github-actions
 [5]: #json
 [6]: #markdown
-[7]: ../reference/cli.md#--reporter-options
+[7]: ../reference/cli.md#--reporter-options-json
 [8]: #custom-reporters
 [9]: ../reference/integrations.md
 [10]: ../reference/issue-types.md

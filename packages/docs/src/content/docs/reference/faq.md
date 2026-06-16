@@ -255,10 +255,10 @@ require more development efforts and maintenance. Time is limited and
 ### Where does Knip look for entry files?
 
 Knip discovers them from defaults, `package.json`, enabled plugins, source-code
-imports and resolution calls (`require.resolve`, `import.meta.resolve`,
-`new URL`, `new Worker`, `module.register`), and parsed scripts. See [Entry
-Files][22] for the complete list. Entry files are added to the module graph, and
-[module resolution][16] may result in more entry files recursively until none
+imports and resolution calls (`require.resolve`, `import.meta.resolve`, `new
+URL`, `new Worker`, `module.register`), and parsed scripts. See [Entry
+Files][16] for the complete list. Entry files are added to the module graph, and
+[module resolution][17] may result in more entry files recursively until none
 remain.
 
 ### What does Knip look for in source files?
@@ -270,9 +270,9 @@ Knip visits all nodes of the generated AST to find:
 - Exports
 - Accessed properties on namespace imports and re-exports to track individual
   export usage
-- Entry files from `require.resolve`, `import.meta.resolve`,
-  `new URL(specifier, import.meta.url)`, `new Worker(…)`, `child_process`
-  `fork`/`spawn`/`execFile`, and `module.register()`
+- Entry files from `require.resolve`, `import.meta.resolve`, `new URL(specifier,
+import.meta.url)`, `new Worker(…)`, `child_process` `fork`/`spawn`/`execFile`,
+  and `module.register()`
 - Scripts passed to the [script parser][13]: tagged `$` templates (`bun`,
   `execa`, `zx`) and `node:child_process`, `execa` and `nano-spawn` calls
 
@@ -323,10 +323,10 @@ resolver.
 
 Two settings point Knip at a `tsconfig.json`, and they do different things:
 
-- [`--tsConfig [file]`][17] (CLI, root only) sets an alternative location for
+- [`--tsConfig [file]`][18] (CLI, root only) sets an alternative location for
   the root `tsconfig.json`. Knip reads its `compilerOptions`, notably `paths`
   and `moduleResolution`.
-- [`typescript.config`][18] (plugin, per workspace) sets the location the
+- [`typescript.config`][19] (plugin, per workspace) sets the location the
   TypeScript plugin reads to extract referenced dependencies from `extends`,
   `compilerOptions.types` and JSX settings:
 
@@ -345,7 +345,7 @@ listed in `package.json`.
 Note that the TypeScript plugin doesn't add TypeScript support to Knip (that's
 built-in); like other plugins, it extracts dependencies from `tsconfig.json`. If
 path aliases from `compilerOptions.paths` aren't picked up, either point
-`--tsConfig` at the right `tsconfig.json` or add [paths][19] to the Knip config
+`--tsConfig` at the right `tsconfig.json` or add [paths][20] to the Knip config
 (per workspace).
 
 ### What does `--use-tsconfig-files` do?
@@ -357,7 +357,7 @@ and dependencies but does not report them as unused files: delegating project
 definition to `tsconfig.json` declares them intentional, including empty files.
 This is by design: use the default `project` patterns (discovery mode) to flag
 dangling files. Implicitly enabled in the [editor extension, MCP server and
-language server][20] without a Knip configuration file.
+language server][21] without a Knip configuration file.
 
 ## Compilers
 
@@ -377,7 +377,7 @@ additional ones for other file types.
 
 The built-in compilers extract `import` statements only, so the exports declared
 in a `.vue` or `.svelte` file aren't analyzed and may be reported as unused.
-Override the built-in with a real compiler. See [Compilers][21].
+Override the built-in with a real compiler. See [Compilers][22].
 
 [1]: ../reference/integrations.md#mcp-server
 [2]: ../reference/integrations.md#vs-code-extension
@@ -394,10 +394,10 @@ Override the built-in with a real compiler. See [Compilers][21].
 [13]: ../features/script-parser.md
 [14]: ../reference/cli.md#--use-tsconfig-files
 [15]: /sponsors
-[16]: #why-doesnt-knip-use-an-existing-module-resolver
-[17]: ../reference/cli.md#--tsconfig-file
-[18]: ../explanations/plugins.md#configuration-files
-[19]: ../reference/configuration.md#paths
-[20]: ../reference/integrations.md
-[21]: ../features/compilers.md
-[22]: ../explanations/entry-files.md#where-knip-looks-for-entry-files
+[16]: ../explanations/entry-files.md#where-knip-looks-for-entry-files
+[17]: #why-doesnt-knip-use-an-existing-module-resolver
+[18]: ../reference/cli.md#--tsconfig-file
+[19]: ../explanations/plugins.md#configuration-files
+[20]: ../reference/configuration.md#paths
+[21]: ../reference/integrations.md
+[22]: ../features/compilers.md
