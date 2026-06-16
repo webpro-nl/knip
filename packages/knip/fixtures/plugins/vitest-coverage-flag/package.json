@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/vitest-coverage-flag",
+  "scripts": {
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0"
+  }
+}
