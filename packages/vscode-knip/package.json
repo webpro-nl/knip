@@ -53,14 +53,14 @@
     "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^10.0.0"
   },
   "devDependencies": {
     "@types/mdast": "4.0.4",
     "@types/vscode": "^1.95.0",
-    "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-electron": "^3.0.0",
     "knip": "workspace:*",
-    "rolldown": "^1.0.3"
+    "rolldown": "^1.1.1"
   },
   "contributes": {
     "languageModelTools": [
