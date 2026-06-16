@@ -13,7 +13,7 @@ import {
 import { getErrorMessage } from '@knip/mcp/tools';
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
-import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
+import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import { collectDependencySnippets } from './collect-dependency-hover-snippets.js';
 import { collectExportHoverSnippets } from './collect-export-hover-snippets.js';
 import { renderDependencyHover } from './render-dependency-hover.js';
@@ -26,7 +26,7 @@ const require = createRequire(import.meta.url);
 
 /**
  * @import { ExtensionContext, LogOutputChannel, WorkspaceFolder } from 'vscode';
- * @import { ServerOptions, LanguageClientOptions } from 'vscode-languageclient/node.js';
+ * @import { ServerOptions, LanguageClientOptions } from 'vscode-languageclient/node';
  * @import { PackageJson } from 'knip/session';
  * @import { TreeData } from './tree-view-base.js';
  */

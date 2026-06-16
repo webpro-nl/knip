@@ -1,4 +1,4 @@
-import { DeleteFile, TextEdit } from 'vscode-languageserver/node.js';
+import { DeleteFile, TextEdit } from 'vscode-languageserver/node';
 
 /**
  * @import { WorkspaceEdit } from 'vscode-languageserver';

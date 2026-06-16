@@ -1,5 +1,5 @@
 import { getIssuePrefix } from 'knip/session';
-import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node.js';
+import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node';
 
 /**
  * @import { Diagnostic } from 'vscode-languageserver';
