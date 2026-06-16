@@ -184,8 +184,9 @@ const args: Args = {
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
-    if (typeof parsed['coverage'] === 'object' && parsed['coverage'].provider) {
-      inputs.push(toDependency(`@vitest/coverage-${parsed['coverage'].provider}`));
+    if (parsed['coverage']) {
+      const provider = typeof parsed['coverage'] === 'object' ? (parsed['coverage'].provider ?? 'v8') : 'v8';
+      inputs.push(toDependency(`@vitest/coverage-${provider}`));
     }
     if (parsed['reporter']) {
       for (const reporter of getExternalReporters([parsed['reporter']].flat())) {
