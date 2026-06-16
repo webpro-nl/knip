@@ -126,6 +126,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'sudo',
   'sync',
   'tac',
+  'tar',
   'tee',
   'test', // exception (node built-in module)
   'time',
