@@ -46,6 +46,7 @@ export class ProjectPrincipal {
   asyncCompilers: AsyncCompilers = new Map();
   private paths = new Map<string, Record<string, string[]>>();
   private rootDirs = new Map<string, string[]>();
+  private tsConfigFile: string | undefined;
   private extensions = new Set(DEFAULT_EXTENSIONS);
 
   cache: CacheConsultant<FileNode>;
@@ -67,6 +68,7 @@ export class ProjectPrincipal {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspaceManifestImports = findWorkspaceManifestImports;
+    this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: [this.syncCompilers, this.asyncCompilers],
@@ -119,7 +121,8 @@ export class ProjectPrincipal {
       { scopedPaths, scopedRootDirs },
       customCompilerExtensions,
       this.toSourceFilePath,
-      this.findWorkspaceManifestImports
+      this.findWorkspaceManifestImports,
+      this.tsConfigFile
     );
   }
 

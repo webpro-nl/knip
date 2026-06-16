@@ -68,12 +68,14 @@ export function createCustomModuleResolver(
   compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
-  findWorkspaceManifestImports?: WorkspaceManifestHandler
+  findWorkspaceManifestImports?: WorkspaceManifestHandler,
+  tsConfigFile?: string
 ): ResolveModule {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
-  const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS];
-  const resolveSync = hasCustomExts ? _createSyncModuleResolver(extensions) : _resolveModuleSync;
+  const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
+  const resolveSync =
+    hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
   const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
 

@@ -12,16 +12,17 @@ const extensionAlias = {
 
 const resolverInstances: ResolverFactory[] = [];
 
-const createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) => {
-  const aliasOpt = alias && { alias };
+const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
   const baseOptions = {
     extensions,
     extensionAlias,
     conditionNames: ['require', 'import', 'node', 'default'],
     nodePath: false,
-    ...aliasOpt,
   };
-  const resolver = new ResolverFactory({ tsconfig: 'auto', ...baseOptions });
+  const resolver = new ResolverFactory({
+    tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
+    ...baseOptions,
+  });
   const fallbackResolver = new ResolverFactory(baseOptions);
 
   resolverInstances.push(resolver, fallbackResolver);
@@ -43,8 +44,8 @@ const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DT
  */
 export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
 
-export const _createSyncModuleResolver = (extensions: string[]) =>
-  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
+export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =>
+  timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({
