@@ -22,7 +22,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
 
   const matches = await glob(manifestPatterns, {
     cwd,
-    ignore: ['**/node_modules/**', ...negatedPatterns.map(p => p.slice(1))],
+    ignore: ['**/node_modules/**', ...negatedPatterns.map(p => join(p.slice(1), 'package.json'))],
   });
 
   for (const match of matches.sort()) {
