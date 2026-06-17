@@ -20,7 +20,7 @@ const args: Args = {
   resolveInputs: (parsed, { manifest }) => {
     const inputs = [];
     if (previewCommands.has(parsed._[0])) {
-      const dep = (manifest.getMajor('react-email') ?? 0) >= 6 ? '@react-email/ui' : '@react-email/preview-server';
+      const dep = (manifest.getMajor('react-email') ?? 6) >= 6 ? '@react-email/ui' : '@react-email/preview-server';
       inputs.push(toDependency(dep));
     }
     if (parsed.dir) inputs.push(toEntry(`${parsed.dir}/**/*.tsx`));
