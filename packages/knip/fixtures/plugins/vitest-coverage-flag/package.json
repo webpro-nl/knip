@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/vitest-coverage-flag",
+  "scripts": {
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "*",
+    "@vitest/coverage-v8": "*",
+    "@vitest/coverage-istanbul": "*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/vitest-coverage-flag-istanbul",
+  "scripts": {
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "*",
+    "@vitest/coverage-istanbul": "*"
+  }
+}
