@@ -43,6 +43,7 @@ export const run = async (options: MainOptions) => {
   const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspaceManifestImports);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
+  collector.setSelectedWorkspaces(chief.selectedWorkspaces);
   collector.setIgnoreIssues(chief.getIgnoreIssues());
 
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));

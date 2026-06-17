@@ -1,0 +1,11 @@
+{
+  "ignoreDependencies": ["unused-ignore-root", "used-by-a"],
+  "workspaces": {
+    "packages/a": {
+      "ignoreDependencies": ["unused-ignore-a"]
+    },
+    "packages/b": {
+      "ignoreDependencies": ["unused-ignore-b"]
+    }
+  }
+}
