@@ -1,4 +1,7 @@
 {
   "name": "@fixtures/workspaces-config-hints-a",
-  "version": "*"
+  "version": "*",
+  "dependencies": {
+    "used-by-a": "*"
+  }
 }

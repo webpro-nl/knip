@@ -177,8 +177,11 @@ export class IssueCollector {
   }
 
   addConfigurationHint(issue: ConfigurationHint) {
-    if (this.selectedWorkspaces && !this.selectedWorkspaces.has(issue.workspaceName ?? ROOT_WORKSPACE_NAME)) return;
-    
+    if (this.selectedWorkspaces) {
+      const workspaceName = issue.workspaceName ?? ROOT_WORKSPACE_NAME;
+      if (workspaceName === ROOT_WORKSPACE_NAME || !this.selectedWorkspaces.has(workspaceName)) return;
+    }
+
     const key = `${issue.workspaceName}::${issue.type}::${issue.identifier}`;
     if (!this.configurationHints.has(key)) this.configurationHints.set(key, issue);
   }

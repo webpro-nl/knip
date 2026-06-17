@@ -39,11 +39,9 @@ test('Report config hints for multiple selected workspaces (--workspace)', async
   ]);
 });
 
-test('Report config hints for the selected root workspace only (--workspace .)', async () => {
+test('Do not report root config hints in scoped runs (--workspace .)', async () => {
   const options = await createOptions({ cwd, workspace: '.' });
   const { configurationHints } = await main(options);
 
-  assert.deepEqual(configurationHints, [
-    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignore-root' },
-  ]);
+  assert.deepEqual(configurationHints, []);
 });

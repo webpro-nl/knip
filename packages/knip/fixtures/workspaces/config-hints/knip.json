@@ -1,5 +1,5 @@
 {
-  "ignoreDependencies": ["unused-ignore-root"],
+  "ignoreDependencies": ["unused-ignore-root", "used-by-a"],
   "workspaces": {
     "packages/a": {
       "ignoreDependencies": ["unused-ignore-a"]
