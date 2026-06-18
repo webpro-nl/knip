@@ -20,7 +20,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{js,mjs,ts,cjs,mts,cts,json}'];
 
-const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
+const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 
 const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
