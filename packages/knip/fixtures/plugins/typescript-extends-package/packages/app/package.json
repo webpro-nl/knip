@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/typescript-extends-package__app",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "@plugins/typescript-extends-package__config": "*"
+  }
+}

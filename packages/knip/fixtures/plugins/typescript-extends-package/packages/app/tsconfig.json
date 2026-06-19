@@ -1,0 +1,6 @@
+{
+  "extends": "@plugins/typescript-extends-package__config/base.json",
+  "include": [
+    "src"
+  ]
+}

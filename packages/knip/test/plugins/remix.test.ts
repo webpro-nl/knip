@@ -14,6 +14,7 @@ test('Find dependencies with the Remix plugin', async () => {
   assert(issues.devDependencies['package.json']['npm-run-all']);
 
   assert(issues.unresolved['app/root.tsx']['./session.server']);
+  assert(issues.unresolved['tsconfig.json']['vitest/globals']);
 
   assert(issues.unlisted['package.json']['dotenv']);
   assert(issues.binaries['package.json']['run-s']);
@@ -43,7 +44,7 @@ test('Find dependencies with the Remix plugin', async () => {
     devDependencies: 1,
     unlisted: 12,
     binaries: 5,
-    unresolved: 1,
+    unresolved: 2,
     processed: 8,
     total: 8,
   });

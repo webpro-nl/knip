@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/typescript-extends-package__config",
+  "files": [
+    "base.json"
+  ]
+}

@@ -2,6 +2,7 @@ import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
+import { isFile } from '../../util/fs.ts';
 import { toAlias, toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
 import { dirname, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -12,7 +13,8 @@ const title = 'TypeScript';
 
 const enablers = ['typescript', '@typescript/native-preview'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ cwd, dependencies }) =>
+  hasDependency(dependencies, enablers) || isFile(cwd, 'tsconfig.json');
 
 const config = ['tsconfig.json'];
 

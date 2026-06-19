@@ -25,10 +25,13 @@ test('Find dependencies with the moonrepo plugin', async () => {
 
   assert('libs/b/server/server.ts' in issues.files);
 
+  assert(issues.unlisted['tsconfig.json']['@tsconfig/node20']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
     devDependencies: 4,
+    unlisted: 1,
     binaries: 6,
     processed: 3,
     total: 3,

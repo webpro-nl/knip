@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/typescript-extends-package",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
