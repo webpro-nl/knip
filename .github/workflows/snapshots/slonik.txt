@@ -1,2 +1,0 @@
-Unused exported types (1)
-packages/sql-tag/src/types.ts: TemporalPlainDate, TemporalInstant, TemporalDuration
