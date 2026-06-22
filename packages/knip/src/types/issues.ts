@@ -93,6 +93,7 @@ export type ConfigurationHintType =
   | 'ignoreBinaries'
   | 'ignoreDependencies'
   | 'ignoreUnresolved'
+  | 'workspaces'
   | 'ignoreWorkspaces'
   | 'entry-redundant'
   | 'project-redundant'

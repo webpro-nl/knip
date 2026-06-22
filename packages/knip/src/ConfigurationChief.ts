@@ -480,4 +480,13 @@ export class ConfigurationChief {
         return !isDirectory(dir) || isFile(dir, 'package.json');
       });
   }
+
+  public getUnusedConfiguredWorkspaces() {
+    const configuredWorkspaceNames = this.rawConfig?.workspaces ? Object.keys(this.rawConfig.workspaces) : [];
+    const matchesWorkspace = (pattern: string) => {
+      for (const name of this.workspacePackages.keys()) if (picomatch.isMatch(name, pattern)) return true;
+      return false;
+    };
+    return configuredWorkspaceNames.filter(configuredWorkspaceName => !matchesWorkspace(configuredWorkspaceName));
+  }
 }
