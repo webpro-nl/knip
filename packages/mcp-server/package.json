@@ -7,10 +7,10 @@
     "mcp",
     "model-context-protocol"
   ],
-  "license": "ISC",
-  "author": "Lars Kappert <lars@webpro.nl>",
   "homepage": "https://knip.dev",
   "bugs": "https://github.com/webpro-nl/knip/issues",
+  "license": "ISC",
+  "author": "Lars Kappert <lars@webpro.nl>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/webpro-nl/knip.git",

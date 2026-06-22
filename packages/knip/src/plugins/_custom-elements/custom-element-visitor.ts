@@ -88,7 +88,8 @@ export function createCustomElementVisitor(
     },
     ClassDeclaration(node) {
       if (depth !== 0 || !node.id?.name) return;
-      if (isCustomElementDecorated(node, decoratorNames, namespaces, decoratorName)) ctx.markExportRegistered(node.id.name);
+      if (isCustomElementDecorated(node, decoratorNames, namespaces, decoratorName))
+        ctx.markExportRegistered(node.id.name);
       else if (baseClassName && extendsBaseClass(node, baseNames)) definedClasses.add(node.id.name);
     },
     ExportDefaultDeclaration(node) {

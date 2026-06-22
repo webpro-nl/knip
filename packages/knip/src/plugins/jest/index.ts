@@ -126,7 +126,9 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const inputs = await resolveDependencies(localConfig, rootDir, options);
 
   const entries = localConfig.testMatch
-    ? arrayify(localConfig.testMatch).map(replaceRootDir).map(id => toEntry(id))
+    ? arrayify(localConfig.testMatch)
+        .map(replaceRootDir)
+        .map(id => toEntry(id))
     : entry.map(id => toEntry(id));
 
   if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));

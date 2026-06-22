@@ -14,7 +14,11 @@ const enablers = ['@commitlint/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', 'package.yaml', ...toCosmiconfig('commitlint', { additionalExtensions: ['cts', 'mts'] })];
+const config = [
+  'package.json',
+  'package.yaml',
+  ...toCosmiconfig('commitlint', { additionalExtensions: ['cts', 'mts'] }),
+];
 
 const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   const extendsConfigs = config.extends

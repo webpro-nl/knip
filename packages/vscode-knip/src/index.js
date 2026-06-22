@@ -683,10 +683,13 @@ export class Extension {
     });
 
     const showReferences = vscode.commands.registerCommand('knip.showReferences', (uri, position, importLocations) => {
-      const locations = importLocations.map(/** @param {{ filePath: string; line?: number; col?: number }} location */ location => {
-        const pos = new vscode.Position(location.line ? location.line - 1 : 0, location.col ? location.col - 1 : 0);
-        return new vscode.Location(vscode.Uri.file(location.filePath), pos);
-      });
+      const locations = importLocations.map(
+        /** @param {{ filePath: string; line?: number; col?: number }} location */
+        location => {
+          const pos = new vscode.Position(location.line ? location.line - 1 : 0, location.col ? location.col - 1 : 0);
+          return new vscode.Location(vscode.Uri.file(location.filePath), pos);
+        }
+      );
       const vsPosition = new vscode.Position(position.line, position.character);
       vscode.commands.executeCommand('editor.action.showReferences', vscode.Uri.parse(uri), vsPosition, locations);
     });

@@ -119,8 +119,15 @@ export async function build({
     const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
-    const { isFile, compilerOptions, fileNames, include, exclude, sourceMapPairs, paths: tsConfigPaths } =
-      await loadTSConfig(tsConfigFilePath);
+    const {
+      isFile,
+      compilerOptions,
+      fileNames,
+      include,
+      exclude,
+      sourceMapPairs,
+      paths: tsConfigPaths,
+    } = await loadTSConfig(tsConfigFilePath);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     const worker = new WorkspaceWorker({

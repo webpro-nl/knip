@@ -141,7 +141,14 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
 
     const sourceMapPairs: SourceMap[] = [];
     if (config.references?.length) {
-      walkReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]), sourceMapPairs, tsconfigPaths);
+      walkReferences(
+        compilerOptions,
+        config.references,
+        dir,
+        new Set([tsConfigFilePath]),
+        sourceMapPairs,
+        tsconfigPaths
+      );
     }
 
     const include = resolvePatterns(config.include, dir, true);
