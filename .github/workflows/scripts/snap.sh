@@ -18,7 +18,7 @@ fi
 NO_COLOR=1 "$@" "${EXTRA[@]}" >"$OUT" || { echo "::error::knip finished with non-zero exit code for $NAME"; cat "$OUT"; exit 1; }
 
 CLEAN="$(mktemp)"
-grep -Ev '^(> |$)' "$OUT" >"$CLEAN" || true
+grep -Ev '^(> |\[WARN\]|$)' "$OUT" >"$CLEAN" || true
 OUT="$CLEAN"
 
 if [ "${UPDATE_SNAPSHOTS:-}" = "1" ]; then
