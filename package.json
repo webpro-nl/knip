@@ -31,8 +31,8 @@
     "installed-check": "^10.0.1",
     "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.2.0",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0",
     "release-it": "^20.2.0",
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.2.0"
