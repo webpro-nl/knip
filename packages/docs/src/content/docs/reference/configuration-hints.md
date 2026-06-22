@@ -97,6 +97,17 @@ Remove, or move unused top-level project to one of "workspaces"
 }
 ```
 
+## Stale workspace configuration
+
+A key in the `workspaces` configuration matches no workspace in the project, for
+instance after the workspace was removed or renamed.
+
+```
+Remove from workspaces
+```
+
+**Solution**: Remove the stale key from `workspaces`, or correct its path.
+
 ## Unused entry in ignore group
 
 An entry of an ignore list is no longer needed, remove it.

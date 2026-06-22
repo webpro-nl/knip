@@ -69,6 +69,7 @@ export const hintPrinters = new Map<ConfigurationHintType, { print: (options: Pr
   ['ignoreBinaries', { print: unused }],
   ['ignoreDependencies', { print: unused }],
   ['ignoreUnresolved', { print: unused }],
+  ['workspaces', { print: unused }],
   ['ignoreWorkspaces', { print: unused }],
   ['entry-empty', { print: empty }],
   ['project-empty', { print: empty }],
@@ -85,6 +86,7 @@ export const hintPrinters = new Map<ConfigurationHintType, { print: (options: Pr
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['top-level-unconfigured', 'workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
+  ['workspaces'],
   ['ignore', 'ignoreFiles'],
   ['ignoreWorkspaces'],
   ['ignoreDependencies'],

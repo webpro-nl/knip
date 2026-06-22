@@ -480,4 +480,25 @@ export class ConfigurationChief {
         return !isDirectory(dir) || isFile(dir, 'package.json');
       });
   }
+
+  public getUnusedConfiguredWorkspaces() {
+    if (!this.rawConfig?.workspaces) return [];
+    const unused: string[] = [];
+    for (const key of Object.keys(this.rawConfig.workspaces)) {
+      if (key.includes('*')) {
+        const isMatch = picomatch(key);
+        let isUsed = false;
+        for (const name of this.workspacePackages.keys()) {
+          if (isMatch(name)) {
+            isUsed = true;
+            break;
+          }
+        }
+        if (!isUsed) unused.push(key);
+      } else if (!this.workspacePackages.has(key)) {
+        unused.push(key);
+      }
+    }
+    return unused;
+  }
 }

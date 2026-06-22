@@ -301,6 +301,11 @@ export const analyze = async ({
     const catalogIssues = await counselor.settleCatalogIssues(options);
     for (const issue of catalogIssues) collector.addIssue(issue);
 
+    const unusedConfiguredWorkspaces = chief.getUnusedConfiguredWorkspaces();
+    for (const identifier of unusedConfiguredWorkspaces) {
+      collector.addConfigurationHint({ type: 'workspaces', identifier });
+    }
+
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
     for (const identifier of unusedIgnoredWorkspaces) {
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
