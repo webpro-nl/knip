@@ -55,3 +55,17 @@ test('Find dependencies with the SvelteKit plugin (config in vite.config)', asyn
     total: 7,
   });
 });
+
+test('Find dependencies with the SvelteKit plugin (config in vite.config takes precedence over svelte.config.js)', async () => {
+  const cwd4 = resolve('fixtures/plugins/sveltekit-config-precedence');
+  const options = await createOptions({ cwd: cwd4, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    unresolved: 1,
+    processed: 3,
+    total: 3,
+  });
+});
