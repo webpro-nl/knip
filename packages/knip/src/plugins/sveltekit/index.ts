@@ -2,6 +2,7 @@ import type { Program } from 'oxc-parser';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { config as viteConfig } from '../vite/index.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 
 // https://svelte.dev/docs/kit
@@ -12,7 +13,7 @@ const enablers = ['@sveltejs/kit'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['svelte.config.js'];
+const config = ['svelte.config.js', ...viteConfig];
 
 const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',

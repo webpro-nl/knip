@@ -43,3 +43,15 @@ test('Find dependencies with the SvelteKit plugin (custom lib path)', async () =
     total: 3,
   });
 });
+
+test('Find dependencies with the SvelteKit plugin (config in vite.config)', async () => {
+  const cwd3 = resolve('fixtures/plugins/sveltekit-vite-config');
+  const options = await createOptions({ cwd: cwd3, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 7,
+    total: 7,
+  });
+});
