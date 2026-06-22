@@ -10,5 +10,8 @@ test('Report config hints for stale workspace configuration keys', async () => {
   const options = await createOptions({ cwd });
   const { configurationHints } = await main(options);
 
-  assert.deepEqual(configurationHints, [{ type: 'workspaces', identifier: 'packages/removed' }]);
+  assert.deepEqual(configurationHints, [
+    { type: 'workspaces', identifier: 'packages/removed' },
+    { type: 'workspaces', identifier: 'apps/*' },
+  ]);
 });

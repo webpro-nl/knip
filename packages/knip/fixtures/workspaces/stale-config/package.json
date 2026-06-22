@@ -5,7 +5,9 @@
   "knip": {
     "workspaces": {
       "packages/a": {},
-      "packages/removed": {}
+      "packages/*": {},
+      "packages/removed": {},
+      "apps/*": {}
     }
   }
 }
