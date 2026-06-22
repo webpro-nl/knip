@@ -9,4 +9,4 @@ pre-push:
     eslint:
       files: git diff --name-only HEAD @{push}
       glob: '*.{ts,tsx}'
-      run: npx eslint {files}
+      run: npx --no eslint {files}

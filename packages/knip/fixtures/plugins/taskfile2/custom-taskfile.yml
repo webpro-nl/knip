@@ -5,6 +5,6 @@ tasks:
     cmd: node scripts/custom-build.js
   custom-test:
     cmds:
-      - npx jest
+      - npx --no jest
       - node scripts/custom-test.js
 

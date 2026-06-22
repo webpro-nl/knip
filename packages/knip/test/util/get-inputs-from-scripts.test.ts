@@ -142,29 +142,29 @@ test('getInputsFromScripts (npm)', () => {
 });
 
 test('getInputsFromScripts (npx)', () => {
-  t('npx pkg', [toBinary('pkg')]);
-  t('npx prisma migrate reset --force', [toBinary('prisma')]);
+  t('npx pkg', [toBinary('pkg', opt)]);
+  t('npx prisma migrate reset --force', [toBinary('prisma', opt)]);
   t('npx @scope/pkg', [toDependency('@scope/pkg', opt)]);
-  t('npx tsx watch main', [toBinary('tsx'), toDeferResolveEntry('main', opt)]);
+  t('npx tsx watch main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
   t('npx -y pkg', []);
   t('npx --yes pkg', []);
   t('npx --no pkg --edit ${1}', [toBinary('pkg')]);
   t('npx --no -- pkg --edit ${1}', [toBinary('pkg')]);
-  t('npx pkg install --with-deps', [toBinary('pkg')]);
-  t('npx pkg migrate reset --force', [toBinary('pkg')]);
+  t('npx pkg install --with-deps', [toBinary('pkg', opt)]);
+  t('npx pkg migrate reset --force', [toBinary('pkg', opt)]);
   t('npx pkg@1.0.0 migrate reset --force', [toDependency('pkg', opt)]);
   t('npx @scope/cli migrate reset --force', [toDependency('@scope/cli', opt)]);
-  t('npx -- pkg', [toBinary('pkg')]);
+  t('npx -- pkg', [toBinary('pkg', opt)]);
   t('npx -- @scope/cli@1.0.0 migrate reset --force', [toDependency('@scope/cli', opt)]);
   t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toDependency('retry-cli', opt), toBinary('curl')]);
-  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl'), toDependency('pkg', opt)]);
-  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl'), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
+  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl', opt), toDependency('pkg', opt)]);
+  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl', opt), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
   t("npx --package=pkg -c 'curl --output /dev/null'", [toDependency('pkg', opt), toBinary('curl')]);
-  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
-  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
-  t('npx tsx main', [toBinary('tsx'), toDeferResolveEntry('main', opt)]);
-  t('npx tsx ./main.ts build', [toBinary('tsx'), ts]);
-  t('npx tsx ./main.ts -- build', [toBinary('tsx'), ts]);
+  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
+  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
+  t('npx tsx main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
+  t('npx tsx ./main.ts build', [toBinary('tsx', opt), ts]);
+  t('npx tsx ./main.ts -- build', [toBinary('tsx', opt), ts]);
 });
 
 test('getInputsFromScripts (bun)', () => {
@@ -302,7 +302,7 @@ test('getInputsFromScripts ("positionals")', () => {
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toDeferResolve('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
-  t('npx jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
+  t('npx jiti script.js', [toBinary('jiti', opt), toDeferResolve('script.js')]);
   t('npx --yes jiti script.js', [toDeferResolve('script.js')]);
   t('npx --no jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
 });
@@ -340,7 +340,7 @@ test('getInputsFromScripts (double-dash)', () => {
 test('getInputsFromScripts (advanced bash syntax)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
-  t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg'), toBinary('exit')]);
+  t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg', opt), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
   t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
   t('var=$(node ./script.js)', [toBinary('node'), js]);
@@ -348,7 +348,7 @@ test('getInputsFromScripts (advanced bash syntax)', () => {
   t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint')]);
   t('until curl -s localhost:3000; do sleep 1; done', [toBinary('curl'), toBinary('sleep')]);
   t('coproc eslint .', [toBinary('eslint')]);
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged'), toBinary('dirname')]);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged', opt), toBinary('dirname')]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toDependency('rc', opt), toDependency('@scope/rc', opt)]);
   t('curl', [], knownOnly);
   t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);

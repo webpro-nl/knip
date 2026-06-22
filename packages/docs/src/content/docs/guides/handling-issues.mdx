@@ -619,12 +619,6 @@ technically works, as `commitlint` is a transitive dependency of
 
 **Solution**: use `npx @commitlint/cli`
 
-In some cases, using `npx` in a script may result in Knip not understanding
-intention without an explicit `--yes` or `--no-install` flag.
-
-**Solution**: use `npx --yes` or `npx --no-install` so Knip will either ignore
-or consider the binary and package(s) referenced, respectively.
-
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a

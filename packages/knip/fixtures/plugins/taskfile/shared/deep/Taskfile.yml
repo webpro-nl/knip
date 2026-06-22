@@ -4,5 +4,5 @@ tasks:
   deep-task:
     cmd: node ../../scripts/deep.js
   deep-binary:
-    cmd: npx yet-another-nonexistent-binary
+    cmd: npx --no yet-another-nonexistent-binary
 

@@ -19,7 +19,7 @@ test('Find dependencies with the lint-staged plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 5,
+    binaries: 4,
     devDependencies: 1,
     processed: 1,
     total: 1,

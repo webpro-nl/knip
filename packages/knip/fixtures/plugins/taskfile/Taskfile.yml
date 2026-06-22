@@ -19,7 +19,7 @@ tasks:
   lint:
     cmds:
       - eslint src/
-      - npx prettier --check .
+      - npx --no prettier --check .
 
   dev:
     cmd: node scripts/dev.js
@@ -32,12 +32,12 @@ tasks:
   check:
     cmds:
       - node -r esbuild-register ./check.ts
-      - npx knip
+      - npx --no knip
 
   # Test command object format
   test-command-object:
     cmds:
-      - cmd: npx test-command-object-binary
+      - cmd: npx --no test-command-object-binary
         silent: true
 
   # Test deferred command format
@@ -46,11 +46,11 @@ tasks:
       - echo "Starting"
       - defer: echo "Cleanup"
       - defer:
-          cmd: npx deferred-binary
+          cmd: npx --no deferred-binary
 
   # Test for loop format
   test-for:
     cmds:
       - for: [item1, item2]
-        cmd: npx for-loop-binary {{.ITEM}}
+        cmd: npx --no for-loop-binary {{.ITEM}}
 

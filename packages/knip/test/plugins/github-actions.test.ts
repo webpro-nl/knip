@@ -18,20 +18,18 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert(issues.unresolved['.github/actions/composite/action.yml']['esbuild-register']);
 
   assert(issues.binaries['.github/actions/composite/action.yml']['eslint']);
-  assert(issues.binaries['.github/actions/composite/action.yml']['playwright']);
 
   assert(issues.binaries['.github/workflows/test.yml']['changeset']);
   assert(issues.binaries['.github/workflows/test.yml']['eslint']);
   assert(issues.binaries['.github/workflows/test.yml']['knip']);
   assert(issues.binaries['.github/workflows/test.yml']['nyc']);
   assert(issues.binaries['.github/workflows/test.yml']['playwright']);
-  assert(issues.binaries['.github/workflows/test.yml']['prisma']);
   assert(issues.binaries['.github/workflows/test.yml']['release-it']);
   assert(issues.binaries['.github/workflows/test.yml']['wait-on']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 10,
+    binaries: 8,
     unresolved: 2,
     processed: 10,
     total: 10,
