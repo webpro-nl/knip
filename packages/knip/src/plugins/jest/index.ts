@@ -20,7 +20,7 @@ const config = ['jest.config.{js,ts,mjs,cjs,mts,cts,json}', 'package.json'];
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
+const entry = ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/?(*.)+(spec|test).?(c|m)[jt]s?(x)', ...mocks];
 
 const rootDirRe = /<rootDir>/;
 
