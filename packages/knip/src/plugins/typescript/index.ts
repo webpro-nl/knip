@@ -2,8 +2,8 @@ import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
-import { toAlias, toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
-import { dirname, join } from '../../util/path.ts';
+import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://www.typescriptlang.org/tsconfig
@@ -40,22 +40,12 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
     : [];
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
-  const paths = compilerOptions.paths as Record<string, string[]> | undefined;
-  const configFileDir = dirname(options.configFilePath);
-  const aliases =
-    paths && configFileDir !== options.cwd
-      ? Object.entries(paths).map(([key, prefixes]) =>
-          toAlias(key, prefixes, { dir: join(configFileDir, (compilerOptions.baseUrl as string) ?? '.') })
-        )
-      : [];
-
   return compact([
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),
     ...[...plugins, ...importHelpers].map(id => toDeferResolve(id)),
     ...jsx,
-    ...aliases,
   ]);
 };
 

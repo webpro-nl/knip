@@ -1,6 +1,7 @@
 import { parseTsconfig, type TsConfigJsonResolved } from 'get-tsconfig';
 import type { SourceMap } from '../types/config.ts';
 import type { CompilerOptions } from '../types/project.ts';
+import { compact } from './array.ts';
 import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
 import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
@@ -18,6 +19,16 @@ const resolvePatterns = (patterns: string[] | undefined, dir: string, expandDirs
     const resolved = isAbsolute(p) ? p : join(dir, p);
     return expandDirs && !hasGlobChar(p) && !hasExtension(p) ? join(resolved, '**/*') : resolved;
   });
+};
+
+const pathsBaseDir = (baseUrl: string | undefined, dir: string) => (baseUrl ? toAbsolute(baseUrl, dir) : dir);
+
+const collectPaths = (acc: Record<string, string[]>, paths: Record<string, string[]> | undefined, baseDir: string) => {
+  if (!paths) return;
+  for (const key in paths) {
+    const resolved = paths[key].map(p => toAbsolute(p, baseDir));
+    acc[key] = key in acc ? compact([...acc[key], ...resolved]) : resolved;
+  }
 };
 
 const DEFAULT_INCLUDE = ['**/*'];
@@ -72,7 +83,8 @@ const walkReferences = (
   references: TsConfigJsonResolved['references'],
   dir: string,
   visited: Set<string>,
-  pairs: SourceMap[]
+  pairs: SourceMap[],
+  paths: Record<string, string[]>
 ) => {
   if (!references?.length) return;
   for (const ref of references) {
@@ -82,12 +94,13 @@ const walkReferences = (
     const refConfig = parseTsconfig(refPath);
     const refDir = dirname(refPath);
     const refOpts = refConfig.compilerOptions;
+    collectPaths(paths, refOpts?.paths, pathsBaseDir(refOpts?.baseUrl, refDir));
     const refOutDir = refOpts?.outDir ? absDir(refOpts.outDir, refDir) : undefined;
     const refRootDir = refOpts?.rootDir ? absDir(refOpts.rootDir, refDir) : undefined;
     if (refOutDir && refRootDir && refOutDir !== refRootDir) pairs.push({ srcDir: refRootDir, outDir: refOutDir });
     if (refOutDir && !target.outDir) target.outDir = refOutDir;
     if (refRootDir && !target.rootDir) target.rootDir = refRootDir;
-    if (!refOutDir || !refRootDir) walkReferences(target, refConfig.references, refDir, visited, pairs);
+    if (!refOutDir || !refRootDir) walkReferences(target, refConfig.references, refDir, visited, pairs, paths);
   }
 };
 
@@ -98,6 +111,7 @@ interface TSConfigInfo {
   include: string[] | undefined;
   exclude: string[] | undefined;
   sourceMapPairs: SourceMap[];
+  paths: Record<string, string[]> | undefined;
 }
 
 const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
@@ -106,6 +120,7 @@ const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
   include: undefined,
   exclude: undefined,
   sourceMapPairs: [],
+  paths: undefined,
 };
 
 export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigInfo> => {
@@ -121,17 +136,21 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     if (compilerOptions.rootDir) compilerOptions.rootDir = absDir(compilerOptions.rootDir, dir);
     if (compilerOptions.rootDirs) compilerOptions.rootDirs = compilerOptions.rootDirs.map(d => absDir(d, dir));
 
+    const tsconfigPaths: Record<string, string[]> = {};
+    collectPaths(tsconfigPaths, compilerOptions.paths, pathsBaseDir(compilerOptions.baseUrl, dir));
+
     const sourceMapPairs: SourceMap[] = [];
     if (config.references?.length) {
-      walkReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]), sourceMapPairs);
+      walkReferences(compilerOptions, config.references, dir, new Set([tsConfigFilePath]), sourceMapPairs, tsconfigPaths);
     }
 
     const include = resolvePatterns(config.include, dir, true);
     const exclude = resolvePatterns(config.exclude, dir, true);
     const files = resolvePatterns(config.files, dir);
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+    const paths = Object.keys(tsconfigPaths).length > 0 ? tsconfigPaths : undefined;
 
-    return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs };
+    return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs, paths };
   } catch {
     return { isFile: true, ...EMPTY };
   }
