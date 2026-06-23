@@ -10,10 +10,11 @@ Knip provides the following built-in reporters:
 - [`codeclimate`][1]
 - [`codeowners`][2]
 - `compact`
-- [`disclosure`][3]
-- [`github-actions`][4]
-- [`json`][5]
-- [`markdown`][6]
+- [`cycles`][3]
+- [`disclosure`][4]
+- [`github-actions`][5]
+- [`json`][6]
+- [`markdown`][7]
 - `symbols` (default)
 
 Example usage:
@@ -54,15 +55,42 @@ $ knip --reporter codeclimate
 ### CODEOWNERS
 
 When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
-Point the reporter at a different path through [`--reporter-options`][7]:
+Point the reporter at a different path through [`--reporter-options`][8]:
 
 ```sh
 knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 ```
 
-For a typed object instead of JSON to parse, write a [custom reporter][8].
-Coding agents can also call Knip through the [MCP server][9], which returns
+For a typed object instead of JSON to parse, write a [custom reporter][9].
+Coding agents can also call Knip through the [MCP server][10], which returns
 structured results and configuration hints directly.
+
+### Cycles
+
+A verbose, multi-line tree view of [circular dependencies][11]. Each file path
+is suffixed with the location of the import that continues the cycle. Each edge
+shows the import kind and specifier, descends one file per level, and closes
+(`↩`) back to the file it started from. Enable the `cycles` issue type (e.g.
+with `--cycles`) and select the reporter:
+
+```text
+$ knip --cycles --reporter cycles
+
+Circular dependencies (1)
+
+src/i18n/index.ts:1:28
+└── import ./middleware → src/i18n/middleware.ts:3:15
+    └── re-export ../core/i18n/handler → src/core/i18n/handler.ts:5:10
+        └── import ../../i18n → src/i18n/index.ts:1:28 ↩
+```
+
+Knip reports representative cycle paths found while walking the module graph.
+This is not an exhaustive list of every possible simple cycle in a cyclic
+subgraph, because that can produce a noisy and very large report. If the same
+file participates in multiple distinct reported paths, each path is shown
+separately. Dynamic imports are ignored by default because they are commonly
+used to avoid synchronous circular loads. Repeated starting imports are grouped
+under one heading. Use [`ignoreCycles`][12] to suppress accepted cycle paths.
 
 ### Disclosure
 
@@ -169,9 +197,9 @@ every issue found in one file:
 | `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
 | _issue type_ | array        | One key per enabled issue type (see below)          |
 
-Each entry carries a key for **every enabled [issue type][10]**, so the keys are
+Each entry carries a key for **every enabled [issue type][11]**, so the keys are
 the same across entries. An array is empty when that file has no issues of that
-type. Drop a type's key by disabling it with [filters or rules][11].
+type. Drop a type's key by disabling it with [filters or rules][13].
 
 Issue-type items are objects with position info:
 
@@ -183,7 +211,7 @@ Issue-type items are objects with position info:
 | `col`       | `number?` | 1-based column                                 |
 | `pos`       | `number?` | Character offset                               |
 
-See [Issue types][10] for the full set of issue-type keys.
+See [Issue types][11] for the full set of issue-type keys.
 
 ### Markdown
 
@@ -311,12 +339,14 @@ knip --preprocessor ./preprocess.ts
 
 [1]: #codeclimate
 [2]: #codeowners
-[3]: #disclosure
-[4]: #github-actions
-[5]: #json
-[6]: #markdown
-[7]: ../reference/cli.md#--reporter-options-json
-[8]: #custom-reporters
-[9]: ../reference/integrations.md
-[10]: ../reference/issue-types.md
-[11]: ./rules-and-filters.md
+[3]: #cycles
+[4]: #disclosure
+[5]: #github-actions
+[6]: #json
+[7]: #markdown
+[8]: ../reference/cli.md#--reporter-options-json
+[9]: #custom-reporters
+[10]: ../reference/integrations.md
+[11]: ../reference/issue-types.md
+[12]: ../reference/configuration.md#ignorecycles
+[13]: ./rules-and-filters.md

@@ -386,6 +386,20 @@ reporting other issues in those same files.
 }
 ```
 
+### `ignoreCycles`
+
+Ignore specific circular dependency reports while keeping other `cycles` issues
+enabled. Path entries are relative to the project root and omit the closing
+repeat of the first file.
+
+```json title="knip.json"
+{
+  "ignoreCycles": {
+    "paths": [["src/i18n/index.ts", "src/i18n/middleware.ts"]]
+  }
+}
+```
+
 ## Exports
 
 ### `ignoreExportsUsedInFile`

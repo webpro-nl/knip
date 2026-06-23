@@ -1,5 +1,6 @@
 import type { Cycle } from '../../session/types.ts';
 import type { ModuleGraph } from '../../types/module-graph.ts';
+import { getRuntimeSuccessors } from '../utils.ts';
 
 export const findCycles = (graph: ModuleGraph, filePath: string, maxDepth = 16) => {
   const cycles: Cycle[] = [];
@@ -10,16 +11,9 @@ export const findCycles = (graph: ModuleGraph, filePath: string, maxDepth = 16) 
   const visit = (currentPath: string) => {
     if (path.length > maxDepth) return;
     const node = graph.get(currentPath);
-    if (!node?.imports?.internal) return;
+    if (!node) return;
 
-    const nonTypeOnlyImports = new Set<string>();
-    for (const _import of node.imports.imports) {
-      if (_import.filePath && !_import.isTypeOnly) nonTypeOnlyImports.add(_import.filePath);
-    }
-
-    for (const [importedPath] of node.imports.internal) {
-      if (!nonTypeOnlyImports.has(importedPath)) continue;
-
+    for (const importedPath of getRuntimeSuccessors(node)) {
       if (importedPath === filePath) {
         cycles.push([...path, importedPath]);
         continue;

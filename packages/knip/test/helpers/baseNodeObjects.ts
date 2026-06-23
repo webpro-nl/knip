@@ -46,6 +46,7 @@ export const getBaseImport = (filePath: string): Import => ({
   filePath,
   identifier: 'identifier',
   isTypeOnly: false,
+  modifiers: 0,
   pos: 0,
   line: 0,
   col: 0,

@@ -45,6 +45,7 @@ export interface Import extends Position {
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
   readonly isTypeOnly: boolean;
+  readonly modifiers: number;
 }
 
 export interface ExternalRef {

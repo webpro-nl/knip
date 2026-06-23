@@ -10,4 +10,6 @@ export const initCounters = (): Counters => ({
   total: 0,
 });
 
-export const defaultRules = Object.fromEntries(ISSUE_TYPES.map(issueType => [issueType, 'error'])) as Rules;
+export const defaultRules = Object.fromEntries(
+  ISSUE_TYPES.map(issueType => [issueType, issueType === 'cycles' ? 'warn' : 'error'])
+) as Rules;

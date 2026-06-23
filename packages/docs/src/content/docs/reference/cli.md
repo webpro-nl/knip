@@ -228,6 +228,14 @@ Shortcut to include file issues:
 --include files
 ```
 
+### `--cycles`
+
+Shortcut to include circular dependencies (off by default):
+
+```sh
+--include cycles
+```
+
 ### `--tags`
 
 Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:

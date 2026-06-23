@@ -99,6 +99,9 @@
         "catalog": {
           "$ref": "#/definitions/ruleValue"
         },
+        "cycles": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "dependencies": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -251,7 +254,8 @@
           "duplicates",
           "enumMembers",
           "namespaceMembers",
-          "catalog"
+          "catalog",
+          "cycles"
         ]
       }
     },
