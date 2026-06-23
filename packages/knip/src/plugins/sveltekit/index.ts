@@ -1,8 +1,8 @@
 import type { Program } from 'oxc-parser';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { _syncGlob } from '../../util/glob.ts';
 import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { join } from '../../util/path.ts';
 import { config as viteConfig } from '../vite/index.ts';
 import {
   collectPropertyValues,
@@ -32,23 +32,14 @@ const production = [
   'src/instrumentation.server.{js,ts}',
 ];
 
-const viteConfigFiles = [
-  'vite.config.js',
-  'vite.config.mjs',
-  'vite.config.ts',
-  'vite.config.cjs',
-  'vite.config.mts',
-  'vite.config.cts',
-];
-
 /**
  * SvelteKit ignores `svelte.config.js` when options are passed to `sveltekit()`, so prefer the Vite config.
  * @see https://github.com/sveltejs/kit/blob/8fe845d036850e506f437cae0fb034c87d1e5b83/packages/kit/src/exports/vite/index.js#L149-L172
  */
 const isConfigInViteConfig = (dir: string, readFile: (filePath: string) => string): boolean => {
-  for (const name of viteConfigFiles) {
-    const text = readFile(join(dir, name));
-    if (text && findCallArg(_parseFile(name, text).program, 'sveltekit')) return true;
+  for (const filePath of _syncGlob({ cwd: dir, patterns: viteConfig })) {
+    const text = readFile(filePath);
+    if (text && findCallArg(_parseFile(filePath, text).program, 'sveltekit')) return true;
   }
   return false;
 };
