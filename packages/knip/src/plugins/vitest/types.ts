@@ -32,8 +32,12 @@ export interface ViteConfig extends VitestConfig {
       entry: string | string[] | { [entryAlias: string]: string };
     };
   };
+  optimizeDeps?: {
+    include?: string[];
+  };
   resolve?: {
     alias?: AliasOptions;
+    dedupe?: string[];
     extensions?: string[];
   };
 }
