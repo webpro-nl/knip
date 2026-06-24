@@ -36,8 +36,10 @@ export interface ResolvedModule {
 
 export const buildLineStarts = (sourceText: string): number[] => {
   const starts = [0];
-  for (let i = 0; i < sourceText.length; i++) {
-    if (sourceText.charCodeAt(i) === 10) starts.push(i + 1);
+  let index = sourceText.indexOf('\n');
+  while (index !== -1) {
+    starts.push(index + 1);
+    index = sourceText.indexOf('\n', index + 1);
   }
   return starts;
 };

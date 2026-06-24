@@ -28,11 +28,11 @@ export const getPackageNameFromFilePath = (value: string) => {
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
-const matchPackageNameStart = /^(@[a-z0-9._~]|[a-z0-9])/i;
+const isPackageNameStart = (ch: number) => (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch >= 48 && ch <= 57);
+const isPackageScopeStart = (ch: number) => isPackageNameStart(ch) || ch === 46 || ch === 95 || ch === 126;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
-  if (ch === 46 || ch === 47 || ch === 35 || ch === 126 || ch === 36) return false; // . / # ~ $
-  return matchPackageNameStart.test(specifier);
+  return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
 };
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
