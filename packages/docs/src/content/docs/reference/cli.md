@@ -80,6 +80,11 @@ The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 NO_COLOR=1 knip
 ```
 
+### KNIP_DISABLE_RAW_TRANSFER
+
+Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
+normal parser path.
+
 ## Mode
 
 ### `--cache`

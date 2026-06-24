@@ -16,7 +16,7 @@ import type { ExportMember } from '../types/module-graph.ts';
 
 const defaultParseOptions = {
   sourceType: 'unambiguous' as const,
-  experimentalRawTransfer: rawTransferSupported(),
+  experimentalRawTransfer: process.env.KNIP_DISABLE_RAW_TRANSFER !== '1' && rawTransferSupported(),
 };
 
 const parseFile = (filePath: string, sourceText: string) => {
