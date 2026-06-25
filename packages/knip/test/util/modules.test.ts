@@ -62,6 +62,8 @@ test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('./:id/specifier'), './:id/specifier');
   assert.equal(sanitizeSpecifier('#specifier'), '#specifier');
   assert.equal(sanitizeSpecifier('#id/specifier'), '#id/specifier');
+  assert.equal(sanitizeSpecifier('#:/specifier'), '#:/specifier');
+  assert.equal(sanitizeSpecifier('#:specifier'), '#:specifier');
   assert.equal(sanitizeSpecifier('~/id/specifier'), '~/id/specifier');
   assert.equal(sanitizeSpecifier(':/id/specifier'), ':/id/specifier');
   assert.equal(sanitizeSpecifier(':id/specifier'), ':id/specifier');

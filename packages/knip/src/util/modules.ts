@@ -81,6 +81,7 @@ export const sanitizeSpecifier = (specifier: string) => {
   ) {
     return specifier;
   }
+  const isSubpathImport = specifier.charCodeAt(0) === CHAR_HASH;
   const len = specifier.length;
   let start = 0;
   let end = len;
@@ -95,7 +96,7 @@ export const sanitizeSpecifier = (specifier: string) => {
     if (ch === CHAR_SLASH && colon === -1) {
       hasSlash = true;
     }
-    if (colon === -1 && ch === CHAR_COLON && !hasSlash) {
+    if (colon === -1 && ch === CHAR_COLON && !hasSlash && !isSubpathImport) {
       colon = i;
     }
     if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {
