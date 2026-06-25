@@ -12,7 +12,7 @@ test('Find dependencies with the xo plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.unresolved['.xo-config.js']['eslint-plugin-unused-imports']);
-  assert(issues.unlisted['xo.config.cjs']['glob']);
+  assert(issues.unlisted['xo.config.cjs']['my-shared-config']);
   assert(issues.unresolved['package.json']['eslint-plugin-eslint-comments']);
 
   assert.deepEqual(counters, {
