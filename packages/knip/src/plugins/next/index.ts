@@ -1,5 +1,7 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toConfig, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getPageExtensions } from './resolveFromAST.ts';
 
@@ -35,11 +37,22 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
 
 const production = getEntryFilePatterns();
 
-const resolveFromAST: ResolveFromAST = program => {
+const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = getPageExtensions(program);
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
-  const patterns = getEntryFilePatterns(extensions);
-  return patterns.map(id => toProductionEntry(id));
+  const patterns = [...getEntryFilePatterns(extensions), 'next-env.d.ts'];
+  return patterns.map(id => toProductionEntry(join(configFileDir, id)));
+};
+
+const commands = new Set(['dev', 'build', 'start']);
+
+const args: Args = {
+  boolean: ['turbo', 'turbopack'],
+  resolveInputs: parsed => {
+    const dir = commands.has(parsed._[0]) ? parsed._[1] : undefined;
+    if (!dir) return [];
+    return [toConfig('next', join(dir, 'next.config'))];
+  },
 };
 
 const plugin: Plugin = {
@@ -49,6 +62,7 @@ const plugin: Plugin = {
   config,
   production,
   resolveFromAST,
+  args,
 };
 
 export default plugin;
