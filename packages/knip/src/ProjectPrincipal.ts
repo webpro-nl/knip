@@ -16,7 +16,7 @@ import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
 import { buildVisitor } from './typescript/visitors/walk.ts';
-import { createCustomModuleResolver } from './typescript/resolve-module-names.ts';
+import { createCustomModuleResolver, createGlobAliasResolver } from './typescript/resolve-module-names.ts';
 import type { ResolveModule } from './typescript/ast-nodes.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
@@ -37,6 +37,7 @@ export class ProjectPrincipal {
     addScript: () => {},
     addImport: () => {},
     markExportRegistered: () => {},
+    resolveGlobPattern: pattern => [pattern],
   };
   pluginVisitorObjects: PluginVisitorObject[] = [];
   private _visitor: Visitor | undefined;
@@ -124,6 +125,8 @@ export class ProjectPrincipal {
       this.findWorkspaceManifestImports,
       this.tsConfigFile
     );
+    const resolveGlobPattern = createGlobAliasResolver(scopedPaths);
+    if (resolveGlobPattern) this.pluginCtx.resolveGlobPattern = resolveGlobPattern;
   }
 
   readFile(filePath: string): string {

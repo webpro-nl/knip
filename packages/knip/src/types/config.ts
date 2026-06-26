@@ -183,6 +183,12 @@ export type PluginVisitorContext = {
    * when no other file imports it by name. Pass the local binding name (or `'default'`).
    */
   markExportRegistered: (name: string) => void;
+  /**
+   * Expand a path alias (e.g. `$routes`) at the static head of a glob pattern to its absolute
+   * target(s), so plugins can glob aliased patterns. Returns `[pattern]` unchanged when no alias
+   * matches. `dir` is the directory the pattern is relative to (typically `dirname(filePath)`).
+   */
+  resolveGlobPattern: (pattern: string, dir: string) => string[];
 };
 
 export type PluginVisitorObject = VisitorObject;

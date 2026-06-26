@@ -22,7 +22,7 @@ function pickStringTarget(value: unknown): string | undefined {
   }
 }
 
-type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
+export type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
 type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;
 
 interface PathMapping {
@@ -54,6 +54,34 @@ function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[
   if (mappings.length === 0) return undefined;
   mappings.sort((a, b) => b.scope.length - a.scope.length);
   return mappings;
+}
+
+/**
+ * Resolves a path alias (e.g. SvelteKit `$routes`) at the static head of a glob pattern to its
+ * absolute target(s), so plugins like Vite's `import.meta.glob` can glob aliased patterns. Returns
+ * `[pattern]` unchanged when no alias matches, preserving relative/absolute and negated patterns.
+ */
+export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined) {
+  const mappings = compilePathMappings(scopedPaths);
+  if (!mappings) return undefined;
+  return function resolveGlobPattern(pattern: string, dir: string): string[] {
+    const isNegated = pattern.startsWith('!');
+    const specifier = isNegated ? pattern.slice(1) : pattern;
+    for (const { prefix, wildcard, values, scope } of mappings) {
+      if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
+      if (wildcard ? specifier.startsWith(prefix) : specifier === prefix || specifier.startsWith(`${prefix}/`)) {
+        const captured = specifier.slice(prefix.length);
+        const resolved: string[] = [];
+        for (const value of values) {
+          const starIdx = value.indexOf('*');
+          const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value + captured;
+          resolved.push(isNegated ? `!${mapped}` : mapped);
+        }
+        return resolved;
+      }
+    }
+    return [pattern];
+  };
 }
 
 function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRootDirs | undefined {

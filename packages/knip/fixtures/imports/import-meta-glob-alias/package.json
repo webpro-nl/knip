@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/import-meta-glob-alias",
+  "devDependencies": {
+    "vite": "*"
+  }
+}

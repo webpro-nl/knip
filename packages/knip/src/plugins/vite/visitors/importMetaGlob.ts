@@ -30,7 +30,11 @@ export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVi
       if (!patterns?.length) return;
 
       const dir = dirname(ctx.filePath);
-      const files = _syncGlob({ patterns, cwd: dir });
+      const resolvedPatterns: string[] = [];
+      for (const pattern of patterns) {
+        for (const resolved of ctx.resolveGlobPattern(pattern, dir)) resolvedPatterns.push(resolved);
+      }
+      const files = _syncGlob({ patterns: resolvedPatterns, cwd: dir });
 
       for (const f of files) {
         ctx.addImport(isAbsolute(f) ? f : join(dir, f), arg.start, IMPORT_FLAGS.ENTRY);
