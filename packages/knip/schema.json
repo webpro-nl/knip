@@ -563,6 +563,10 @@
           "title": "lost-pixel plugin configuration (https://knip.dev/reference/plugins/lost-pixel)",
           "$ref": "#/definitions/plugin"
         },
+        "lunaria": {
+          "title": "lunaria plugin configuration (https://knip.dev/reference/plugins/lunaria)",
+          "$ref": "#/definitions/plugin"
+        },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
           "$ref": "#/definitions/plugin"
