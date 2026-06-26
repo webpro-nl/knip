@@ -10,15 +10,11 @@ export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName
 
 export const getInputs = (
   config: ESLintConfigDeprecated | OverrideConfigDeprecated | ESLintConfig,
-  options: PluginOptions,
-  isFlatConfigOverride?: boolean
+  options: PluginOptions
 ): (Input | ConfigInput)[] => {
   const { configFileName } = options;
 
-  const isFlatConfigFile =
-    isFlatConfigOverride ?? (extname(configFileName) !== '.json' && isFlatConfig(configFileName));
-
-  if (!isFlatConfigFile) {
+  if (extname(configFileName) === '.json' || !isFlatConfig(configFileName)) {
     return getInputsDeprecated(config as ESLintConfigDeprecated | OverrideConfigDeprecated, options);
   }
 

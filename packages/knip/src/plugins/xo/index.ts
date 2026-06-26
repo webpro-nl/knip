@@ -1,18 +1,19 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type {
+  IsLoadConfig,
+  IsPluginEnabled,
+  Plugin,
+  PluginOptions,
+  ResolveConfig,
+  ResolveFromAST,
+} from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getInputs } from '../eslint/helpers.ts';
+import { getInputsFromFlatConfigAST } from '../eslint/resolveFromAST.ts';
 import type { XOConfig } from './types.ts';
 
-// xo@0: https://github.com/xojs/xo/tree/v0.60.0#config
-//   type: deprecated (pre-flat)
-//   locations: package.json, .xo-config.{js,cjs,json}, xo.config.{js,cjs}
-// xo@1: https://github.com/xojs/xo/releases/tag/v1.0.0
-//   type: flat
-//   locations: package.json, xo.config.{js,cjs,mjs,ts,cts,mts} (drops .xo-config.*)
-// xo@2: https://github.com/xojs/xo/releases/tag/v2.0.0
-//   locations: package.json, xo.config.{js,mjs,ts,mts} (drops xo.config.{cjs,cts})
-// xo@3: https://github.com/xojs/xo/releases/tag/v3.0.0
-//   no change
+// xo@0:  deprecated (eslintrc) config — package.json, .xo-config.{js,cjs,json}, xo.config.{js,cjs}
+// xo@1+: ESLint flat config — package.json, xo.config.{js,cjs,mjs,ts,cts,mts} (v2+ drops cjs/cts)
+// https://github.com/xojs/xo/releases
 
 const title = 'xo';
 
@@ -24,14 +25,14 @@ const config = ['package.json', '.xo-config', '.xo-config.{js,cjs,json}', 'xo.co
 
 const entry = ['.xo-config.{js,cjs}', 'xo.config.{js,cjs,mjs,ts,cts,mts}'];
 
-const resolveConfig: ResolveConfig<XOConfig> = async (config, options) => {
-  const xoVersion = options.manifest.getMajor('xo') ?? 3;
-  const isFlatConfig = xoVersion >= 1;
+const isFlatConfig = ({ manifest }: PluginOptions) => (manifest.getMajor('xo') ?? 1) >= 1;
 
-  const inputs = getInputs(config, options, isFlatConfig);
+const isLoadConfig: IsLoadConfig = options => !isFlatConfig(options);
 
-  return [...inputs];
-};
+const resolveConfig: ResolveConfig<XOConfig> = (config, options) => getInputs(config, options);
+
+const resolveFromAST: ResolveFromAST = (program, options) =>
+  isFlatConfig(options) ? getInputsFromFlatConfigAST(program) : [];
 
 const plugin: Plugin = {
   title,
@@ -39,7 +40,9 @@ const plugin: Plugin = {
   isEnabled,
   entry,
   config,
+  isLoadConfig,
   resolveConfig,
+  resolveFromAST,
 };
 
 export default plugin;
