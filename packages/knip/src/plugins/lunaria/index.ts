@@ -13,7 +13,7 @@ import type { LunariaConfig } from './types.ts';
 
 const title = 'Lunaria';
 
-const enablers = [/^@lunariajs\//];
+const enablers = ["@lunariajs/core", "@lunariajs/starlight"];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) =>
   hasDependency(dependencies, enablers);
