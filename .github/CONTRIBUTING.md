@@ -64,7 +64,7 @@ Please consider this before opening a pull request:
 [3]: #open-an-issue
 [4]: #open-a-pull-request
 [5]: https://github.com/webpro-nl/knip/releases
-[6]: ./DEVELOPMENT.md
+[6]: /.github/DEVELOPMENT.md
 [7]:
   https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
 [8]: https://knip.dev/#created-by-awesome-contributors
