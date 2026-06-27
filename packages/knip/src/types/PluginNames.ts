@@ -51,6 +51,7 @@ export type PluginName =
   | 'lit'
   | 'lockfile-lint'
   | 'lost-pixel'
+  | 'lunaria'
   | 'markdownlint'
   | 'mdx'
   | 'mdxlint'
@@ -208,6 +209,7 @@ export const pluginNames = [
   'lit',
   'lockfile-lint',
   'lost-pixel',
+  'lunaria',
   'markdownlint',
   'mdx',
   'mdxlint',
