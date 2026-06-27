@@ -10,4 +10,8 @@ await execaCommand('bunx executable7');
 
 execaCommandSync('pnpx executable8');
 
+await execaNode('execa-node.mjs');
+
+await execaNode`execa-node-tag.mjs`;
+
 await execa('node', ['build && phantomexeca']);

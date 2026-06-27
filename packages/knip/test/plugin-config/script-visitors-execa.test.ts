@@ -12,10 +12,12 @@ test('Find dependencies with custom script visitors (execa)', async () => {
   const { counters, issues } = await main(options);
 
   assert(!issues.binaries['methods.mjs']?.phantomexeca);
+  assert(!issues.files['execa-node.mjs']);
+  assert(!issues.files['execa-node-tag.mjs']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });
