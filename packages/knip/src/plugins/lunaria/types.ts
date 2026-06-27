@@ -1,12 +1,12 @@
-export type TrackedFile = {
+type TrackedFile = {
   location: string;
 };
 
-export type Favicon = {
+type Favicon = {
   inline?: string;
 };
 
-export type Dashboard = {
+type Dashboard = {
   customCss?: string[];
   favicon?: Favicon;
 };
