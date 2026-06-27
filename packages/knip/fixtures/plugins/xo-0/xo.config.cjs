@@ -1,4 +1,4 @@
-const mySharedConfig = require('glob');
+const mySharedConfig = require('my-shared-config');
 
 module.exports = {
   ...mySharedConfig,
