@@ -1,6 +1,5 @@
 import { isAbsolute, join } from 'node:path';
-import type { Program } from 'oxc-parser';
-import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { Args } from '../../types/args.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';

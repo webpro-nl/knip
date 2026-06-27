@@ -1,14 +1,5 @@
-import type {
-  IsPluginEnabled,
-  Plugin,
-  ResolveFromAST,
-} from '../../types/config.ts';
-import {
-  findCallArg,
-  getDefaultImportName,
-  getImportMap,
-  getPropertyValues,
-} from '../../typescript/ast-helpers.ts';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { findCallArg, getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { config } from '../astro/index.ts';
@@ -20,18 +11,14 @@ const title = 'Starlight';
 
 const enablers = ['@astrojs/starlight'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const resolveFromAST: ResolveFromAST = program => {
   const componentPaths = getComponentPathsFromSourceFile(program);
   const inputs = Array.from(componentPaths).map(id => toProductionEntry(id));
 
   const importMap = getImportMap(program);
-  const starlightImportName = getDefaultImportName(
-    importMap,
-    '@astrojs/starlight'
-  );
+  const starlightImportName = getDefaultImportName(importMap, '@astrojs/starlight');
 
   if (starlightImportName) {
     const starlightConfig = findCallArg(program, starlightImportName);
