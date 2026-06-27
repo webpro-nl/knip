@@ -1,6 +1,0 @@
-{
-  "name": "@plugins/lunaria",
-  "devDependencies": {
-    "@lunariajs/core": "*"
-  }
-}

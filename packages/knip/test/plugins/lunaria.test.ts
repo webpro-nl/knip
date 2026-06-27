@@ -5,16 +5,28 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/lunaria');
-
-test('Find dependencies with the lunaria plugin', async () => {
+test('Find dependencies with the lunaria core scenario', async () => {
+  const cwd = resolve('fixtures/plugins/lunaria/core');
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
+    binaries: 1,
+    dependencies: 1,
     processed: 1,
     total: 1,
+  });
+});
+
+test('Find dependencies with the lunaria starlight integration scenario', async () => {
+  const cwd = resolve('fixtures/plugins/lunaria/starlight');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
   });
 });
