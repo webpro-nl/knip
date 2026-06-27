@@ -16,6 +16,7 @@ export const pluginsSchema = z.object({
   angular: pluginSchema,
   astro: pluginSchema,
   'astro-db': pluginSchema,
+  'astro-markdoc': pluginSchema,
   'astro-og-canvas': pluginSchema,
   ava: pluginSchema,
   babel: pluginSchema,
