@@ -10,5 +10,6 @@ test('Vite and vitest plugins are enabled with vite-plus dependency', async () =
   const options = await createOptions({ cwd });
   const { enabledPlugins } = await main(options);
 
-  assert.partialDeepStrictEqual(enabledPlugins, { '.': ['vite', 'vitest'] });
+  assert.ok(enabledPlugins['.'].includes('vite'));
+  assert.ok(enabledPlugins['.'].includes('vitest'));
 });
