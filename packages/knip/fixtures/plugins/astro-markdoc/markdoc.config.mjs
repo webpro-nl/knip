@@ -8,7 +8,7 @@ export default defineMarkdocConfig({
   },
   tags: {
     callout: {
-      render: component('./src/components/Callout.astro'),
+      render: component('./src/components/Callout.astro', "CTA"),
     },
   },
 });
