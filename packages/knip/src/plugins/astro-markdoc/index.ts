@@ -1,8 +1,4 @@
-import type {
-  IsPluginEnabled,
-  Plugin,
-  ResolveConfig,
-} from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MarkdocConfig, MarkdocRenderSpecifier } from './types.ts';
@@ -13,14 +9,11 @@ const title = 'Astro Markdoc';
 
 const enablers = ['@astrojs/markdoc'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config: string[] = ['markdoc.config.{js,ts,mjs,mts}'];
 
-const extractSpecifiers = (
-  renderField: MarkdocRenderSpecifier | undefined
-): string[] => {
+const extractSpecifiers = (renderField: MarkdocRenderSpecifier | undefined): string[] => {
   if (typeof renderField === 'string') {
     return [renderField.split('#')[0]];
   }
@@ -39,15 +32,10 @@ const extractSpecifiers = (
 const resolveConfig: ResolveConfig<MarkdocConfig> = async localConfig => {
   if (!localConfig) return [];
 
-  const entries = [
-    ...Object.values(localConfig.nodes ?? {}),
-    ...Object.values(localConfig.tags ?? {}),
-  ];
+  const entries = [...Object.values(localConfig.nodes ?? {}), ...Object.values(localConfig.tags ?? {})];
 
   const specifiers = entries.flatMap(item =>
-    item && typeof item === 'object' && 'render' in item
-      ? extractSpecifiers(item.render as MarkdocRenderSpecifier)
-      : []
+    item && typeof item === 'object' && 'render' in item ? extractSpecifiers(item.render as MarkdocRenderSpecifier) : []
   );
 
   return specifiers.map(id => toProductionEntry(id));
