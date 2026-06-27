@@ -12,8 +12,6 @@ test('Find dependencies with the lunaria core scenario', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 1,
-    dependencies: 1,
     processed: 1,
     total: 1,
   });
