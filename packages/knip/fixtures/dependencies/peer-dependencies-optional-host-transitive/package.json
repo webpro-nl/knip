@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/peer-dependencies-optional-host-transitive",
+  "dependencies": {
+    "vue-demi": "*"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "*"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
+  }
+}
