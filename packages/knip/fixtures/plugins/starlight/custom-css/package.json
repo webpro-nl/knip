@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/starlight-custom-css",
+  "dependencies": {
+    "@astrojs/starlight": "*",
+    "astro": "*",
+    "tailwindcss": "*"
+  }
+}
