@@ -27,10 +27,14 @@ const resolveConfig: ResolveConfig<LunariaConfig> = async (
   if (!localConfig) return [];
   const files = localConfig.files?.map(f => f.location) ?? [];
   const renderer = localConfig.renderer ? [localConfig.renderer] : [];
+  const customCss = localConfig.dashboard?.customCss ?? [];
+  const favicon = localConfig.dashboard?.favicon?.inline
+    ? [localConfig.dashboard.favicon.inline]
+    : [];
 
   const baseDir = options.configFileDir;
 
-  return [...files, ...renderer].map(id =>
+  return [...files, ...renderer, ...customCss, ...favicon].map(id =>
     toProductionEntry(isAbsolute(id) ? id : join(baseDir, id))
   );
 };
