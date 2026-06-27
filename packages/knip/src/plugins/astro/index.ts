@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { findCallArg, getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { toConfig, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getAliasInputs } from '../vitest/helpers.ts';
 import compiler from './compiler.ts';
@@ -38,6 +39,19 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
   ];
 
   if (!usesPassthroughImageService(program)) inputs.push(toDependency('sharp', { optional: true }));
+
+  const importMap = getImportMap(program);
+  const lunariaImportName = getDefaultImportName(importMap, '@lunariajs/starlight');
+
+  if (lunariaImportName) {
+    const lunariaConfig = findCallArg(program, lunariaImportName);
+    if (lunariaConfig) {
+      const configPaths = getPropertyValues(lunariaConfig, 'configPath');
+      for (const id of configPaths) {
+        inputs.push(toConfig('lunaria', id));
+      }
+    }
+  }
 
   return inputs;
 };

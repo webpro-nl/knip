@@ -2,6 +2,7 @@
   "name": "@plugins/lunaria-starlight",
   "dependencies": {
     "@astrojs/starlight": "*",
-    "@lunariajs/starlight": "*"
+    "@lunariajs/starlight": "*",
+    "astro": "*"
   }
 }

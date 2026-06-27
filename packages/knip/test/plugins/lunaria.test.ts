@@ -26,6 +26,7 @@ test('Find dependencies with the lunaria starlight integration scenario', async 
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    dependencies: 1,
     processed: 2,
     total: 2,
   });
