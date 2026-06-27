@@ -108,14 +108,14 @@ barrel files. Knip warns:
 ![VS Code Extension Settings][21]
 
 [1]: https://github.com/webpro-nl/knip/network/dependents
-[2]: https://www.npmjs.com/package/knip
+[2]: https://www.npmx.dev/package/knip
 [3]: #editor-extension
 [4]: #lint-findings
 [5]: #imports--exports
 [6]: #mcp-server
 [7]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
 [8]: https://open-vsx.org/extension/webpro/vscode-knip
-[9]: https://www.npmjs.com/package/@knip/mcp
+[9]: https://www.npmx.dev/package/@knip/mcp
 [10]: https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
 [11]: #contention
 [12]: #circular-dependencies

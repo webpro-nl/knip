@@ -248,11 +248,11 @@
         "urls": [
           {
             "url": "https://t.co/kA81p5gkmP",
-            "expanded_url": "https://www.npmjs.com/package/knip",
-            "display_url": "npmjs.com/package/knip",
+            "expanded_url": "https://www.npmx.dev/package/knip",
+            "display_url": "npmx.dev/package/knip",
             "title": "Knip",
             "description": "Find unused dependencies, exports and files in your TypeScript and JavaScript projects.",
-            "unwound_url": "https://www.npmjs.com/package/knip"
+            "unwound_url": "https://www.npmx.dev/package/knip"
           }
         ]
       },
