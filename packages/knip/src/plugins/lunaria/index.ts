@@ -1,6 +1,6 @@
 import { isAbsolute, join } from 'node:path';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { LunariaConfig } from './types.ts';
