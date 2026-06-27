@@ -34,7 +34,7 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
         { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
-        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/knip' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmx.dev/package/knip' },
       ],
       components: {
         Head: './src/components/Head.astro',

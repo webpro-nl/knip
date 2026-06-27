@@ -516,7 +516,7 @@ Trace file to see where its exports are imported. Implies [--trace][17].
 [2]: https://bun.sh
 [3]: ../reference/known-issues.md
 [4]: https://no-color.org/
-[5]: https://www.npmjs.com/package/picocolors
+[5]: https://www.npmx.dev/package/picocolors
 [6]: ./configuration.md#includeentryexports
 [7]: ../features/production-mode.md
 [8]: #--production

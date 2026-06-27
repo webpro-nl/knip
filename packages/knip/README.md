@@ -46,16 +46,16 @@ following projects:
 - [file-entry-cache][22] ([MIT][23])
 - [json-parse-even-better-errors][24] ([MIT][25])
 
-[1]: https://www.npmjs.com/package/knip
+[1]: https://www.npmx.dev/package/knip
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
 [3]: https://img.shields.io/npm/dm/knip?color=f56e0f
 [4]: https://github.com/webpro-nl/knip
 [5]:
   https://img.shields.io/github/stars/webpro-nl/knip?style=flat-square&color=f56e0f
 [6]: https://knip.dev
-[7]: https://www.npmjs.com/package/@knip/create-config
-[8]: https://www.npmjs.com/package/@knip/language-server
-[9]: https://www.npmjs.com/package/@knip/mcp
+[7]: https://www.npmx.dev/package/@knip/create-config
+[8]: https://www.npmx.dev/package/@knip/language-server
+[9]: https://www.npmx.dev/package/@knip/mcp
 [10]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
 [11]: https://open-vsx.org/extension/webpro/vscode-knip
 [12]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
