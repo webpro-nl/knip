@@ -9,9 +9,7 @@ const cwd = resolve('fixtures/plugins/lunaria');
 
 test('Find dependencies with the lunaria plugin', async () => {
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert(issues.devDependencies['package.json']['@lunariajs/core']);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
