@@ -1,36 +1,24 @@
-import { isAbsolute, join } from 'node:path';
-import type { Program } from 'oxc-parser';
-import type {
-  IsPluginEnabled,
-  Plugin,
-  ResolveConfig,
-  ResolveFromAST,
-} from '../../types/config.ts';
+import { isAbsolute, join } from '../../util/path.ts';
 import type { Args } from '../../types/args.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { LunariaConfig } from './types.ts';
 
 const title = 'Lunaria';
 
-const enablers = ["@lunariajs/core", "@lunariajs/starlight"];
+const enablers = ['@lunariajs/core', '@lunariajs/starlight'];
 
-const isEnabled: IsPluginEnabled = ({ dependencies }) =>
-  hasDependency(dependencies, enablers);
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config: string[] = ['lunaria.config.json'];
 
-const resolveConfig: ResolveConfig<LunariaConfig> = async (
-  localConfig,
-  options
-) => {
+const resolveConfig: ResolveConfig<LunariaConfig> = async (localConfig, options) => {
   if (!localConfig) return [];
   const files = localConfig.files?.map(f => f.location) ?? [];
   const renderer = localConfig.renderer ? [localConfig.renderer] : [];
   const customCss = localConfig.dashboard?.customCss ?? [];
-  const favicon = localConfig.dashboard?.favicon?.inline
-    ? [localConfig.dashboard.favicon.inline]
-    : [];
+  const favicon = localConfig.dashboard?.favicon?.inline ? [localConfig.dashboard.favicon.inline] : [];
 
   const baseDir = options.configFileDir;
 
