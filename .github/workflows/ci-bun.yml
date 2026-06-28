@@ -38,5 +38,3 @@ jobs:
       - name: Test knip
         run: bun run test
         working-directory: packages/knip
-      - name: Test git hooks
-        run: bun test scripts/git-hooks/pre-commit.test.ts

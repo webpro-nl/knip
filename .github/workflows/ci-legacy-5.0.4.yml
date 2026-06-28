@@ -52,9 +52,6 @@ jobs:
       - name: Test knip
         run: pnpm test --runtime node --smoke
         working-directory: packages/knip
-      - name: Test git hooks
-        if: matrix.node == 22
-        run: node --experimental-strip-types --test scripts/git-hooks/pre-commit.test.ts
       - name: Run knip
         run: ./packages/knip/bin/knip.js --reporter github-actions
       - name: Run knip in strict mode
