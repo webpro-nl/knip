@@ -13,6 +13,9 @@ test('Find dependencies in vitest configuration (projects with inline and extern
 
   assert(issues.unlisted['vitest.config.ts']['jsdom']);
   assert(issues.unlisted['packages/client/vitest.config.e2e.ts']['happy-dom']);
+  assert(!issues.unlisted['vitest.config.ts']?.['top-level-dep']);
+  assert(!issues.unlisted['vitest.config.ts']?.['project-level-dep']);
+  assert(!issues.unlisted['vitest.config.ts']?.['project-dedupe-dep']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

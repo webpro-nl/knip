@@ -165,10 +165,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
-    for (const dependency of cfg.resolve?.dedupe ?? []) inputs.add(toDependency(dependency));
+    for (const dependency of cfg.resolve?.dedupe ?? []) inputs.add(toDependency(dependency, { optional: true }));
     for (const dependency of cfg.optimizeDeps?.include ?? []) {
       const packageName = getOptimizeDepsIncludePackageName(dependency);
-      if (packageName) inputs.add(toDependency(packageName));
+      if (packageName) inputs.add(toDependency(packageName, { optional: true }));
     }
     if (cfg.resolve?.extensions) {
       // Filter out default extensions from resolve.extensions
