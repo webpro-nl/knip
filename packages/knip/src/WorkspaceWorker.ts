@@ -56,6 +56,7 @@ type WorkspaceManagerOptions = {
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -88,6 +89,7 @@ export class WorkspaceWorker {
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
@@ -114,6 +116,7 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     handleInput,
     findWorkspaceByFilePath,
+    getManifest,
     readFile,
     configFilesMap,
     options,
@@ -131,6 +134,7 @@ export class WorkspaceWorker {
 
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
+    this.getManifest = getManifest;
     this.readFile = readFile;
 
     this.options = options;
@@ -300,7 +304,8 @@ export class WorkspaceWorker {
     const knownBinsOnly = false;
 
     const rootManifest = this.rootManifest;
-    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly };
+    const getManifest = this.getManifest;
+    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly, getManifest };
 
     // Get dependencies from package.json#scripts
     const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };

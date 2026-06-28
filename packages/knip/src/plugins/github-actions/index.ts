@@ -29,7 +29,7 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
 };
 
 const resolveConfig: ResolveConfig = async (config, options) => {
-  const { rootCwd, getInputsFromScripts, isProduction } = options;
+  const { rootCwd, getInputsFromScripts, isProduction, getManifest } = options;
 
   const inputs = new Set<Input>();
 
@@ -45,7 +45,8 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const workingDir = step['working-directory'];
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
-        for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true })) {
+        const manifest = getManifest(dir) ?? options.manifest;
+        for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true, manifest })) {
           if (isDeferResolveEntry(input) && path && !workingDir) {
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
           }

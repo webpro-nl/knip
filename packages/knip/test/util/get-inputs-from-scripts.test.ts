@@ -25,6 +25,7 @@ const t: T = (script, dependencies = [], options = { cwd }) =>
     _getInputsFromScripts(script, {
       rootCwd: cwd,
       manifest: toManifest(),
+      getManifest: () => undefined,
       containingFilePath,
       ...options,
     }),

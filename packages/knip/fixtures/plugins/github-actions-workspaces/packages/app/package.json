@@ -2,7 +2,8 @@
   "name": "@plugins/github-actions-workspaces__app",
   "scripts": {
     "stylelint": "stylelint",
-    "hello-world": "yarn run --top-level hello"
+    "hello-world": "yarn run --top-level hello",
+    "icons": ""
   },
   "devDependencies": {
     "stylelint": "*",

@@ -18,7 +18,7 @@ import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
-import { createManifest } from '../util/package-json.ts';
+import { createManifest, type Manifest } from '../util/package-json.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -80,6 +80,17 @@ export async function build({
   const rawRootManifest = chief.getManifestForWorkspace('.');
   const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
 
+  const manifestsByWorkspaceName = new Map<string, Manifest | undefined>();
+  const getManifest = (dir: string): Manifest | undefined => {
+    const workspace = chief.findWorkspaceByFilePath(`${dir}/`);
+    if (!workspace) return undefined;
+    if (!manifestsByWorkspaceName.has(workspace.name)) {
+      const raw = chief.getManifestForWorkspace(workspace.name);
+      manifestsByWorkspaceName.set(workspace.name, raw ? createManifest(raw) : undefined);
+    }
+    return manifestsByWorkspaceName.get(workspace.name);
+  };
+
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
     const manifest = chief.getManifestForWorkspace(name);
@@ -139,6 +150,7 @@ export async function build({
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
+      getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
@@ -462,6 +474,7 @@ export async function build({
           dependencies,
           manifest: createManifest(manifest),
           rootManifest,
+          getManifest,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {

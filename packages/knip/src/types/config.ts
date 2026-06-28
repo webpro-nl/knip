@@ -106,6 +106,7 @@ interface BaseOptions {
   cwd: string;
   manifest: Manifest;
   rootManifest: Manifest | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
 }
 
 type IsPluginEnabledOptions = {
