@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/node-test-runner-nub",
+  "scripts": {
+    "test": "nub --test"
+  }
+}

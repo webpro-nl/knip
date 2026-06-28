@@ -99,6 +99,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'npm',
   'nproc',
   'npx',
+  'nub',
+  'nubx',
   'paste',
   'pnpm',
   'pnpx',
