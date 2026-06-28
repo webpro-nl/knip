@@ -27,11 +27,11 @@ jobs:
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:
           version: 10
           package_json_file: packages/knip/package.json
