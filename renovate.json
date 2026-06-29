@@ -10,12 +10,8 @@
       "enabled": false
     },
     {
-      "matchUpdateTypes": ["minor"],
-      "groupName": "all minor dependencies"
-    },
-    {
-      "matchUpdateTypes": ["patch", "digest"],
-      "groupName": "all patch dependencies"
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "dependencies (non-major)"
     }
   ]
 }
