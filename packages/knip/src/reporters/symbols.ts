@@ -5,12 +5,11 @@ import { dim, flattenIssues, getColoredTitle, getIssueTypeTitle, getTableForType
 
 export default (options: ReporterOptions) => {
   const { report, issues, isDisableConfigHints, isDisableTagHints, isShowProgress } = options;
-  const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
+      const title = getIssueTypeTitle(reportType);
 
       const issuesForType = flattenIssues(issues[reportType]);
       if (issuesForType.length > 0) {
