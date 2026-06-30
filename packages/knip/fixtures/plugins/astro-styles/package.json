@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/astro-styles",
+  "type": "module",
+  "scripts": {
+    "build": "astro build"
+  },
+  "dependencies": {
+    "astro": "*"
+  },
+  "devDependencies": {
+    "less": "*",
+    "sass": "*",
+    "stylus": "*"
+  }
+}

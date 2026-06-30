@@ -173,6 +173,8 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.sass',
   '.scss',
   '.sh',
+  '.styl',
+  '.stylus',
   '.svg',
   '.ttf',
   '.webp',

@@ -1,12 +1,11 @@
 import { basename, dirname } from '../util/path.ts';
 import type { CompilerSync, HasDependency } from './types.ts';
 
-// https://sass-lang.com/documentation/at-rules/
+// https://stylus-lang.com/docs/import.html
 
-const condition = (hasDependency: HasDependency) =>
-  hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
+const condition = (hasDependency: HasDependency) => hasDependency('stylus');
 
-const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
+const importMatcher = /@(?:import|require)\s+['"]([^'"]+)['"]/g;
 
 const isAlias = (s: string) =>
   (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
@@ -18,23 +17,17 @@ const candidates = (specifier: string): string[] => {
   const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
   const name = basename(spec);
   const dir = dirname(spec);
-  const hasExt = name.endsWith('.scss') || name.endsWith('.sass');
-  const bases = hasExt ? [name] : [`${name}.scss`, `${name}.sass`];
-  const out: string[] = [];
-  for (const base of bases) {
-    out.push(`${dir}/${base}`);
-    if (!name.startsWith('_')) out.push(`${dir}/_${base}`);
-  }
-  return out;
+  if (/\.(styl|stylus|css)$/.test(name)) return [`${dir}/${name}`];
+  return [`${dir}/${name}.styl`, `${dir}/${name}/index.styl`];
 };
 
 export const compiler: CompilerSync = text => {
   const out: string[] = [];
   let i = 0;
   for (const match of text.matchAll(importMatcher)) {
-    let spec = match[2];
-    if (!spec || spec.startsWith('sass:')) continue;
-    let isBare = Boolean(match[1]) || isScopedPackage(spec);
+    let spec = match[1];
+    if (!spec || spec.includes('*')) continue;
+    let isBare = isScopedPackage(spec);
     if (isTildePackage(spec)) {
       spec = spec.slice(1);
       isBare = true;
