@@ -6,7 +6,7 @@ export const inlineCodeMatcher = /`[^`]+`/g;
 // Match <script> blocks, capturing attributes (1) and body (2).
 // Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
 export const scriptExtractor = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script>/gi;
-export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/style>/gi;
+const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/style>/gi;
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
