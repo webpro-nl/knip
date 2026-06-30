@@ -1,4 +1,4 @@
-import { basename, dirname } from '../util/path.ts';
+import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync, HasDependency } from './types.ts';
 
 // https://sass-lang.com/documentation/at-rules/
@@ -8,16 +8,8 @@ const condition = (hasDependency: HasDependency) =>
 
 const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
 
-const isAlias = (s: string) =>
-  (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
-
-const isScopedPackage = (s: string) => s.charCodeAt(0) === 64 && s.charCodeAt(1) !== 47;
-const isTildePackage = (s: string) => s.charCodeAt(0) === 126 && s.charCodeAt(1) !== 47;
-
 const candidates = (specifier: string): string[] => {
-  const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
-  const name = basename(spec);
-  const dir = dirname(spec);
+  const { dir, name } = splitSpec(specifier);
   const hasExt = name.endsWith('.scss') || name.endsWith('.sass');
   const bases = hasExt ? [name] : [`${name}.scss`, `${name}.sass`];
   const out: string[] = [];

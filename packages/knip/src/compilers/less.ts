@@ -1,4 +1,4 @@
-import { basename, dirname } from '../util/path.ts';
+import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync, HasDependency } from './types.ts';
 
 // https://lesscss.org/features/#import-atrules-feature
@@ -8,18 +8,10 @@ const condition = (hasDependency: HasDependency) => hasDependency('less');
 // Capture optional `(option)` and the path from either `"..."` / `'...'` or `url(...)`.
 const importMatcher = /@import\s+(?:\([^)]*\)\s+)?(?:url\(\s*['"]?([^'")\s]+)['"]?\s*\)|['"]([^'"]+)['"])/g;
 
-const isAlias = (s: string) =>
-  (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
-
-const isScopedPackage = (s: string) => s.charCodeAt(0) === 64 && s.charCodeAt(1) !== 47;
-const isTildePackage = (s: string) => s.charCodeAt(0) === 126 && s.charCodeAt(1) !== 47;
-
 const isExternalUrl = (s: string) => /^(?:https?:)?\/\//.test(s);
 
 const candidates = (specifier: string): string[] => {
-  const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
-  const name = basename(spec);
-  const dir = dirname(spec);
+  const { dir, name } = splitSpec(specifier);
   if (/\.(less|css)$/.test(name)) return [`${dir}/${name}`];
   return [`${dir}/${name}.less`];
 };
