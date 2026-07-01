@@ -3,8 +3,6 @@ export type PnpmConfig = {
     packageExtensions?: Record<
       string,
       {
-        dependencies?: Record<string, string>;
-        optionalDependencies?: Record<string, string>;
         peerDependencies?: Record<string, string>;
       }
     >;
@@ -12,8 +10,6 @@ export type PnpmConfig = {
   packageExtensions?: Record<
     string,
     {
-      dependencies?: Record<string, string>;
-      optionalDependencies?: Record<string, string>;
       peerDependencies?: Record<string, string>;
     }
   >;

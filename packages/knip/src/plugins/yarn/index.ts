@@ -36,11 +36,6 @@ const resolveConfig: ResolveConfig<YarnConfig> = config => {
 
   if (config.packageExtensions) {
     for (const extension of Object.values(config.packageExtensions)) {
-      if (extension.dependencies) {
-        for (const dep of Object.keys(extension.dependencies)) {
-          inputs.push(toDependency(dep));
-        }
-      }
       if (extension.peerDependencies) {
         for (const dep of Object.keys(extension.peerDependencies)) {
           inputs.push(toDependency(dep));

@@ -2,5 +2,5 @@ packages:
   - 'packages/*'
 packageExtensions:
   react-csv@*:
-    optionalDependencies:
+    peerDependencies:
       is-odd: "*"
