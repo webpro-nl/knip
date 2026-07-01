@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/suppressions",
+  "dependencies": {
+    "used-pkg": "*",
+    "unused-pkg": "*"
+  }
+}

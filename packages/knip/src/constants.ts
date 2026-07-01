@@ -13,6 +13,8 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.config.js',
 ];
 
+export const DEFAULT_SUPPRESSIONS_FILE = '.knip-suppressions.json';
+
 export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
 
 export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
