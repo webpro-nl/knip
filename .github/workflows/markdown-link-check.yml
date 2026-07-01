@@ -4,18 +4,28 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   markdown-link-check:
+    name: Check Markdown links
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout repository
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
 
       - name: Check Markdown links
         uses: gaurav-nelson/github-action-markdown-link-check@5c5dfc0ac2e225883c0e5f03a85311ec2830d368 # v1
         with:
-          config-file: .github/workflows/markdown-link-check.json
+          config-file: .github/markdown-link-check.json
           use-quiet-mode: 'yes'
           use-verbose-mode: 'yes'

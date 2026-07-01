@@ -8,31 +8,48 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     name: Ubuntu/Node v22
+    permissions:
+      contents: read # checkout repository
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 22
+
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+
       - name: Install dependencies
         run: pnpm install
+
       - name: Install latest peer dependencies
         run: pnpm add typescript@latest @types/node@22 --config.trustPolicy=allow
         working-directory: packages/knip
+
       - name: Build knip
         run: pnpm run build
         working-directory: packages/knip
+
       - name: Test knip
         run: pnpm test --runtime node
         working-directory: packages/knip
+
       - name: Run knip
         run: ./packages/knip/bin/knip.js
+
       - name: Run knip in strict mode
         run: ./packages/knip/bin/knip.js --production --strict
