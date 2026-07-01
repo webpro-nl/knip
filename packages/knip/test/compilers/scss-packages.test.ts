@@ -16,7 +16,6 @@ test('Built-in compiler for SCSS package imports (pkg:, scoped, tilde, tilde+sco
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    devDependencies: 1,
     processed: 3,
     total: 3,
   });

@@ -1,4 +1,5 @@
 import { frontmatterMatcher, scriptBodies } from '../../compilers/compilers.ts';
+import { stylePreprocessorImports } from '../../compilers/style-preprocessors.ts';
 
 const propsDeclMatcher = /(?:^|[\s;])(?:interface|type)\s+Props\b/;
 
@@ -14,6 +15,9 @@ const compiler = (text: string, path: string) => {
 
   const scriptContent = scriptBodies(text, path);
   if (scriptContent) scripts.push(scriptContent);
+
+  const styleImports = stylePreprocessorImports(text, path);
+  if (styleImports) scripts.push(styleImports);
 
   return scripts.join('\n');
 };

@@ -14,12 +14,9 @@ test('Find dependencies with the docusaurus plugin', async () => {
   assert(issues.unlisted['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
   assert(issues.unlisted['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
 
-  assert(issues.dependencies['package.json']['@mdx-js/react']);
-
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 2,
-    dependencies: 1,
     processed: 12,
     total: 12,
   });

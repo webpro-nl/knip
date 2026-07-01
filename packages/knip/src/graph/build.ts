@@ -161,7 +161,9 @@ export async function build({
 
     await worker.init();
 
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies, dep =>
+      deputy.addReferencedDependency(name, dep)
+    );
     const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
       const ext = normalizeCompilerExtension(extension);
       if (compilers[0].has(ext)) return;

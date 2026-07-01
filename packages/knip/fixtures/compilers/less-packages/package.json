@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/compilers-less-packages",
+  "dependencies": {
+    "bootstrap": "*",
+    "@fontsource/lato": "*",
+    "@ant-design/pro-components": "*",
+    "foundation-sites": "*"
+  },
+  "devDependencies": {
+    "less": "*"
+  }
+}

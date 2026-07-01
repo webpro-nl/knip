@@ -1,21 +1,14 @@
-import { basename, dirname } from '../util/path.ts';
-import type { CompilerSync, HasDependency } from './types.ts';
+import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
+import type { CompilerSync } from './types.ts';
 
-const condition = (hasDependency: HasDependency) =>
-  hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
+// https://sass-lang.com/documentation/at-rules/
+
+const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
 const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
 
-const isAlias = (s: string) =>
-  (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
-
-const isScopedPackage = (s: string) => s.charCodeAt(0) === 64 && s.charCodeAt(1) !== 47;
-const isTildePackage = (s: string) => s.charCodeAt(0) === 126 && s.charCodeAt(1) !== 47;
-
 const candidates = (specifier: string): string[] => {
-  const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
-  const name = basename(spec);
-  const dir = dirname(spec);
+  const { dir, name } = splitSpec(specifier);
   const hasExt = name.endsWith('.scss') || name.endsWith('.sass');
   const bases = hasExt ? [name] : [`${name}.scss`, `${name}.sass`];
   const out: string[] = [];
@@ -26,7 +19,7 @@ const candidates = (specifier: string): string[] => {
   return out;
 };
 
-const compiler: CompilerSync = text => {
+export const compiler: CompilerSync = text => {
   const out: string[] = [];
   let i = 0;
   for (const match of text.matchAll(importMatcher)) {
@@ -43,4 +36,4 @@ const compiler: CompilerSync = text => {
   return out.join('\n');
 };
 
-export default { condition, compiler };
+export default { dependencies, compiler };
