@@ -25,7 +25,7 @@ test('Find dependencies and credit @Component with the Stencil plugin', async ()
     ...baseCounters,
     files: 1,
     exports: 1,
-    processed: 14,
-    total: 14,
+    processed: 17,
+    total: 17,
   });
 });

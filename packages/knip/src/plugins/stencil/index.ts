@@ -1,4 +1,4 @@
-import { Visitor, type ImportDeclaration } from 'oxc-parser';
+import { Visitor, type Class, type ImportDeclaration, type ObjectExpression } from 'oxc-parser';
 import scss from '../../compilers/scss.ts';
 import { IMPORT_FLAGS } from '../../constants.ts';
 import { type Input, toConfig, toEntry, toProductionEntry } from '../../util/input.ts';
@@ -57,15 +57,12 @@ const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
           componentNames.add(spec.local.name);
       }
     },
-    ClassDeclaration(node: any) {
+    ClassDeclaration(node: Class) {
       resolveStyleUrls(node);
-    },
-    ExportDefaultDeclaration(node: any) {
-      if (node.declaration?.type === 'ClassDeclaration') resolveStyleUrls(node.declaration);
     },
   });
 
-  function resolveStyleUrls(node: any) {
+  function resolveStyleUrls(node: Class) {
     const dir = dirname(ctx.filePath);
     for (const decorator of node.decorators ?? []) {
       const expr = decorator.expression;
@@ -99,7 +96,7 @@ const resolveFromAST: ResolveFromAST = program => {
 
   // v5: outputTargets: [{ type: 'global-style', input: 'src/global.scss' }]
   new Visitor({
-    ObjectExpression(node: any) {
+    ObjectExpression(node: ObjectExpression) {
       const typeValues = getPropertyValues(node, 'type');
       if (!typeValues.has('global-style')) return;
       for (const input of getPropertyValues(node, 'input')) inputs.push(toProductionEntry(input));
