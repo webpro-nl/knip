@@ -14,7 +14,6 @@ test('Built-in compiler for Stylus package imports (scoped, tilde, tilde+scoped)
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
-    devDependencies: 1,
     processed: 3,
     total: 3,
   });

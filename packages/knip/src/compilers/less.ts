@@ -1,9 +1,9 @@
 import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
-import type { CompilerSync, HasDependency } from './types.ts';
+import type { CompilerSync } from './types.ts';
 
 // https://lesscss.org/features/#import-atrules-feature
 
-const condition = (hasDependency: HasDependency) => hasDependency('less');
+const dependencies = ['less'];
 
 // Capture optional `(option)` and the path from either `"..."` / `'...'` or `url(...)`.
 const importMatcher = /@import\s+(?:\([^)]*\)\s+)?(?:url\(\s*['"]?([^'")\s]+)['"]?\s*\)|['"]([^'"]+)['"])/g;
@@ -33,4 +33,4 @@ export const compiler: CompilerSync = text => {
   return out.join('\n');
 };
 
-export default { condition, compiler };
+export default { dependencies, compiler };

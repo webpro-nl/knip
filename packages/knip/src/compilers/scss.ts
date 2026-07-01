@@ -1,10 +1,9 @@
 import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
-import type { CompilerSync, HasDependency } from './types.ts';
+import type { CompilerSync } from './types.ts';
 
 // https://sass-lang.com/documentation/at-rules/
 
-const condition = (hasDependency: HasDependency) =>
-  hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
+const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
 const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
 
@@ -37,4 +36,4 @@ export const compiler: CompilerSync = text => {
   return out.join('\n');
 };
 
-export default { condition, compiler };
+export default { dependencies, compiler };

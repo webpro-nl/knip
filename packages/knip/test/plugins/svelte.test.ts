@@ -31,7 +31,6 @@ test('Detect imports from <style lang="scss|less|stylus"> in .svelte components'
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 4,
     files: 3,
     processed: 7,
     total: 7,

@@ -15,7 +15,6 @@ test('Built-in compiler for Less', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     files: 1,
     processed: 8,
     total: 8,

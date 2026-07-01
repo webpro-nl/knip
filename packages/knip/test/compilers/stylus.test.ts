@@ -15,7 +15,6 @@ test('Built-in compiler for Stylus', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     files: 1,
     processed: 7,
     total: 7,

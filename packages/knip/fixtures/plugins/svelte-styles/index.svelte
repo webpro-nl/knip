@@ -1,5 +1,11 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+
   let title = 'Hello';
+
+  onMount(() => {
+    title = 'Mounted';
+  });
 </script>
 
 <h1>{title}</h1>

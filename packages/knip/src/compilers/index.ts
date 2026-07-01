@@ -56,13 +56,19 @@ const compilers = new Map([
 export const getIncludedCompilers = (
   syncCompilers: RawSyncCompilers,
   asyncCompilers: AsyncCompilers,
-  dependencies: DependencySet
+  dependencies: DependencySet,
+  onReferencedDependency?: (packageName: string) => void
 ): Compilers => {
   const hasDependency = (packageName: string) => dependencies.has(packageName);
-  for (const [extension, { condition, compiler }] of compilers) {
-    if ((!syncCompilers.has(extension) && condition(hasDependency)) || syncCompilers.get(extension) === true) {
+  for (const [extension, { dependencies: compilerDependencies, compiler }] of compilers) {
+    if (
+      (!syncCompilers.has(extension) && compilerDependencies.some(hasDependency)) ||
+      syncCompilers.get(extension) === true
+    ) {
       syncCompilers.set(extension, compiler);
     }
+    if (onReferencedDependency)
+      for (const dependency of compilerDependencies) if (hasDependency(dependency)) onReferencedDependency(dependency);
   }
   return [syncCompilers as SyncCompilers, asyncCompilers];
 };

@@ -1,9 +1,9 @@
 import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
-import type { CompilerSync, HasDependency } from './types.ts';
+import type { CompilerSync } from './types.ts';
 
 // https://stylus-lang.com/docs/import.html
 
-const condition = (hasDependency: HasDependency) => hasDependency('stylus');
+const dependencies = ['stylus'];
 
 const importMatcher = /@(?:import|require)\s+['"]([^'"]+)['"]/g;
 
@@ -30,4 +30,4 @@ export const compiler: CompilerSync = text => {
   return out.join('\n');
 };
 
-export default { condition, compiler };
+export default { dependencies, compiler };

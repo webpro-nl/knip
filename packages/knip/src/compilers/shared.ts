@@ -14,8 +14,7 @@ export const isTildePackage = (s: string) => s.charCodeAt(0) === 126 && s.charCo
 
 // Treat a bare specifier as relative-to-current-dir by prefixing `./`, unless
 // it is already relative (`./`, `../`) or aliased.
-const ensureRelative = (spec: string) =>
-  spec.startsWith('.') || isAlias(spec) ? spec : `./${spec}`;
+const ensureRelative = (spec: string) => (spec.startsWith('.') || isAlias(spec) ? spec : `./${spec}`);
 
 // Normalize a specifier to relative-or-alias form and split into dir/name for
 // per-preprocessor candidate-file generation.

@@ -39,10 +39,8 @@ test('Detect imports from <style lang="scss|less|stylus"> in .astro components',
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
-    devDependencies: 3,
     files: 3,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });

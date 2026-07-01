@@ -28,7 +28,6 @@ test('Detect imports from <style lang="scss|less|stylus"> in .vue SFCs', async (
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 3,
     files: 3,
     processed: 7,
     total: 7,

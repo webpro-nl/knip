@@ -1,8 +1,7 @@
 import { fencedCodeBlockMatcher, frontmatterMatcher, inlineCodeMatcher } from './compilers.ts';
-import type { HasDependency } from './types.ts';
 
 // https://mdxjs.com/packages/
-const mdxDependencies = [
+const dependencies = [
   '@mdx-js/esbuild',
   '@mdx-js/loader',
   '@mdx-js/mdx',
@@ -13,8 +12,6 @@ const mdxDependencies = [
   '@mdx-js/vue',
   'remark-mdx',
 ];
-
-const condition = (hasDependency: HasDependency) => mdxDependencies.some(hasDependency);
 
 const mdxImportMatcher = /^import[^'"]+['"][^'"]+['"]/gm;
 
@@ -27,4 +24,4 @@ const compiler = (text: string) =>
       .matchAll(mdxImportMatcher),
   ].join('\n');
 
-export default { condition, compiler };
+export default { dependencies, compiler };
