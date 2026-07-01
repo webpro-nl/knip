@@ -17,11 +17,15 @@ test('Find dependencies and credit @Component with the Stencil plugin', async ()
   // A genuinely unused sibling export is still flagged (proves the file is analyzed, not entry-exempt):
   assert.equal(issues.exports['src/my-controller.ts'].unusedHelper.symbol, 'unusedHelper');
 
+  // A genuinely unused scss file is still flagged (proves the file is analyzed, not exempt):
+  assert('src/components/unused.scss' in issues.files);
+
   // `*.spec`/`*.e2e` test files and `testing.setupFilesAfterEnv` setup are entries, not unused files (files: 0):
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     exports: 1,
-    processed: 7,
-    total: 7,
+    processed: 14,
+    total: 14,
   });
 });
