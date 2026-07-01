@@ -10,8 +10,8 @@ test('Find dependencies with the yarn plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(Object.keys(issues.unlisted || {}).length === 0);
-  assert(Object.keys(issues.dependencies || {}).length === 0);
+  assert(Object.keys(issues.unlisted).length === 0);
+  assert(Object.keys(issues.dependencies).length === 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,
