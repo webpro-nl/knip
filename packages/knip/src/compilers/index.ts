@@ -1,7 +1,9 @@
 import type { RawConfiguration } from '../types/config.ts';
 import type { DependencySet } from '../types/workspace.ts';
+import LESS from './less.ts';
 import MDX from './mdx.ts';
 import SCSS from './scss.ts';
+import STYLUS from './stylus.ts';
 import type {
   AsyncCompilers,
   CompilerAsync,
@@ -46,6 +48,9 @@ const compilers = new Map([
   ['.mdx', MDX],
   ['.sass', SCSS],
   ['.scss', SCSS],
+  ['.less', LESS],
+  ['.styl', STYLUS],
+  ['.stylus', STYLUS],
 ]);
 
 export const getIncludedCompilers = (
