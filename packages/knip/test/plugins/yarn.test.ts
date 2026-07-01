@@ -5,17 +5,32 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/yarn');
-
 test('Find dependencies with the yarn plugin', async () => {
+  const cwd = resolve('fixtures/plugins/yarn');
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(Object.keys(issues.files).length === 0);
+  assert(Object.keys(issues.unlisted || {}).length === 0);
+  assert(Object.keys(issues.dependencies || {}).length === 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 1,
     total: 1,
+  });
+});
+
+test('Find dependencies with the yarn plugin (Berry)', async () => {
+  const cwd = resolve('fixtures/plugins/yarn-berry');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(Object.keys(issues.unlisted || {}).length === 0);
+  assert(Object.keys(issues.dependencies || {}).length === 0);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 4,
+    total: 4,
   });
 });
