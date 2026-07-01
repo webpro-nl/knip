@@ -3,6 +3,8 @@ import { IMPORT_FLAGS } from '../constants.ts';
 
 const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
 const jsDocImportTagRe = /@import\s+(?:\{[^}]*\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
+const jsDocTypeTagRe =
+  /@(?:type|typedef|callback|param|arg|argument|property|prop|returns?|yields?|throws?|exception|this|extends|augments|implements|enum|template|satisfies)\b/;
 const jsxImportSourceRe = /@jsxImportSource\s+(\S+)/;
 const referenceRe = /\s*<reference\s+(types|path)\s*=\s*"([^"]+)"[^/]*\/>/;
 const envPragmaRe = /@(vitest|jest)-environment\s+([@\w./-]+)/g;
@@ -27,6 +29,24 @@ type CommentImportAdder = (
   modifiers: number
 ) => void;
 
+const isInJsDocTypeExpression = (text: string, index: number) => {
+  let depth = 0;
+  for (let pos = index - 1; pos >= 0; pos--) {
+    const char = text.charCodeAt(pos);
+    if (char === 125) {
+      depth++;
+    } else if (char === 123) {
+      if (depth > 0) {
+        depth--;
+      } else {
+        const line = text.slice(text.lastIndexOf('\n', pos - 1) + 1, pos);
+        if (jsDocTypeTagRe.test(line)) return true;
+      }
+    }
+  }
+  return false;
+};
+
 export const extractImportsFromComments = (
   comments: readonly Comment[],
   firstStmtStart: number,
@@ -39,9 +59,7 @@ export const extractImportsFromComments = (
     if (comment.type === 'Block') {
       jsDocImportRe.lastIndex = 0;
       while ((results = jsDocImportRe.exec(text)) !== null) {
-        const before = text.slice(0, results.index);
-        const lastOpen = before.lastIndexOf('{');
-        if (lastOpen === -1 || before.indexOf('}', lastOpen) !== -1) continue;
+        if (!isInJsDocTypeExpression(text, results.index)) continue;
         const specifier = results[1];
         const member = results[2];
         addImport(specifier, member, undefined, undefined, comment.start + results.index, IMPORT_FLAGS.TYPE_ONLY);

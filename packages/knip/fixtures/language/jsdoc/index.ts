@@ -46,3 +46,9 @@ module.exports = {};
  * <LazyLoad component={LazyComponent} />
  */
 function lazyLoad() {}
+
+/**
+ * @example
+ *   { index: true, lazy: lazyComponent(() => import('./Foo'), 'Foo') }
+ */
+export const lazyComponent = (loader, name) => ({ loader, name });
