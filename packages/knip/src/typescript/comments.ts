@@ -4,7 +4,7 @@ import { IMPORT_FLAGS } from '../constants.ts';
 const jsDocImportRe = /import\(\s*['"]([^'"]+)['"]\s*\)(?:\.(\w+))?/g;
 const jsDocImportTagRe = /@import\s+(?:\{[^}]*\}|\*\s+as\s+\w+)\s+from\s+['"]([^'"]+)['"]/g;
 const jsDocTypeTagRe =
-  /@(?:type|typedef|callback|param|arg|argument|property|prop|returns?|yields?|throws?|exception|this|extends|augments|implements|enum|template|satisfies)\b/;
+  /@(?:type|typedef|callback|param|arg|argument|property|prop|returns?|yields?|throws?|exception|this|extends|augments|implements|enum|template|satisfies|const|constant|member|var|namespace|module)\b/;
 const jsxImportSourceRe = /@jsxImportSource\s+(\S+)/;
 const referenceRe = /\s*<reference\s+(types|path)\s*=\s*"([^"]+)"[^/]*\/>/;
 const envPragmaRe = /@(vitest|jest)-environment\s+([@\w./-]+)/g;
