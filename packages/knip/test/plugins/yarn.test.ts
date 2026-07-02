@@ -8,10 +8,7 @@ import { resolve } from '../helpers/resolve.ts';
 test('Find dependencies with the yarn plugin', async () => {
   const cwd = resolve('fixtures/plugins/yarn');
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert(Object.keys(issues.unlisted).length === 0);
-  assert(Object.keys(issues.dependencies).length === 0);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -23,10 +20,7 @@ test('Find dependencies with the yarn plugin', async () => {
 test('Find dependencies with the yarn plugin (Berry)', async () => {
   const cwd = resolve('fixtures/plugins/yarn-berry');
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert(Object.keys(issues.unlisted || {}).length === 0);
-  assert(Object.keys(issues.dependencies || {}).length === 0);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,

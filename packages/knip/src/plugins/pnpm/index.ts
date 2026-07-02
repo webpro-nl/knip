@@ -16,7 +16,9 @@ const isEnabled: IsPluginEnabled = async ({ cwd, manifest }) =>
 
 const isRootOnly = true;
 
-const config: string[] = ['.pnpmfile.cjs', 'package.json', 'pnpm-workspace.yaml'];
+const entry: string[] = ['.pnpmfile.cjs'];
+
+const config: string[] = ['package.json', 'pnpm-workspace.yaml'];
 
 const resolveConfig: ResolveConfig<PnpmConfig> = config => {
   const inputs: Input[] = [];
@@ -41,6 +43,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   isRootOnly,
+  entry,
   config,
   resolveConfig,
 };
