@@ -170,11 +170,7 @@ export class ProjectPrincipal {
 
   async runAsyncCompilers() {
     const add = timerify(this.fileManager.compileAndAddSourceFile.bind(this.fileManager));
-    const extensions = Array.from(this.asyncCompilers.keys());
-    const files = Array.from(this.projectPaths).filter(filePath => extensions.includes(extname(filePath)));
-    for (const filePath of files) {
-      await add(filePath);
-    }
+    for (const filePath of this.projectPaths) if (this.asyncCompilers.has(extname(filePath))) await add(filePath);
   }
 
   walkAndAnalyze(

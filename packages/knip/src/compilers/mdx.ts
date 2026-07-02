@@ -15,13 +15,17 @@ const dependencies = [
 
 const mdxImportMatcher = /^import[^'"]+['"][^'"]+['"]/gm;
 
-const compiler = (text: string) =>
-  [
-    ...text
-      .replace(frontmatterMatcher, '')
-      .replace(fencedCodeBlockMatcher, '')
-      .replace(inlineCodeMatcher, '')
-      .matchAll(mdxImportMatcher),
-  ].join('\n');
+const compiler = (text: string) => {
+  if (!text.includes('import')) return '';
+  const imports: string[] = [];
+  const source = text
+    .replace(frontmatterMatcher, '')
+    .replace(fencedCodeBlockMatcher, '')
+    .replace(inlineCodeMatcher, '');
+  let match: RegExpExecArray | null;
+  mdxImportMatcher.lastIndex = 0;
+  while ((match = mdxImportMatcher.exec(source))) imports.push(match[0]);
+  return imports.join('\n');
+};
 
 export default { dependencies, compiler };

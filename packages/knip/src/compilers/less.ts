@@ -8,18 +8,21 @@ const dependencies = ['less'];
 // Capture optional `(option)` and the path from either `"..."` / `'...'` or `url(...)`.
 const importMatcher = /@import\s+(?:\([^)]*\)\s+)?(?:url\(\s*['"]?([^'")\s]+)['"]?\s*\)|['"]([^'"]+)['"])/g;
 
-const isExternalUrl = (s: string) => /^(?:https?:)?\/\//.test(s);
+const isExternalUrl = (s: string) => s.startsWith('//') || s.startsWith('http://') || s.startsWith('https://');
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);
-  if (/\.(less|css)$/.test(name)) return [`${dir}/${name}`];
+  if (name.endsWith('.less') || name.endsWith('.css')) return [`${dir}/${name}`];
   return [`${dir}/${name}.less`];
 };
 
 export const compiler: CompilerSync = text => {
+  if (!text.includes('@import')) return '';
   const out: string[] = [];
   let i = 0;
-  for (const match of text.matchAll(importMatcher)) {
+  let match: RegExpExecArray | null;
+  importMatcher.lastIndex = 0;
+  while ((match = importMatcher.exec(text))) {
     let spec = match[1] ?? match[2];
     if (!spec || isExternalUrl(spec)) continue;
     let isBare = isScopedPackage(spec);
@@ -27,8 +30,11 @@ export const compiler: CompilerSync = text => {
       spec = spec.slice(1);
       isBare = true;
     }
-    const specs = isBare ? [spec] : candidates(spec);
-    for (const s of specs) out.push(`import _$${i++} from '${s}';`);
+    if (isBare) {
+      out.push(`import _$${i++} from '${spec}';`);
+    } else {
+      for (const s of candidates(spec)) out.push(`import _$${i++} from '${s}';`);
+    }
   }
   return out.join('\n');
 };

@@ -20,9 +20,12 @@ const candidates = (specifier: string): string[] => {
 };
 
 export const compiler: CompilerSync = text => {
+  if (!text.includes('@use') && !text.includes('@import') && !text.includes('@forward')) return '';
   const out: string[] = [];
   let i = 0;
-  for (const match of text.matchAll(importMatcher)) {
+  let match: RegExpExecArray | null;
+  importMatcher.lastIndex = 0;
+  while ((match = importMatcher.exec(text))) {
     let spec = match[2];
     if (!spec || spec.startsWith('sass:')) continue;
     let isBare = Boolean(match[1]) || isScopedPackage(spec);
@@ -30,8 +33,11 @@ export const compiler: CompilerSync = text => {
       spec = spec.slice(1);
       isBare = true;
     }
-    const specs = isBare ? [spec] : candidates(spec);
-    for (const s of specs) out.push(`import _$${i++} from '${s}';`);
+    if (isBare) {
+      out.push(`import _$${i++} from '${spec}';`);
+    } else {
+      for (const s of candidates(spec)) out.push(`import _$${i++} from '${s}';`);
+    }
   }
   return out.join('\n');
 };

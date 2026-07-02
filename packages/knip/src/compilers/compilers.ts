@@ -6,7 +6,7 @@ export const inlineCodeMatcher = /`[^`]+`/g;
 // Match <script> blocks, capturing attributes (1) and body (2).
 // Tag-attribute scan allows `>` inside quoted attribute values (e.g. Vue `generic="T extends F<X>"`).
 export const scriptExtractor = /<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script>/gi;
-const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/style>/gi;
+export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/style>/gi;
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
@@ -14,31 +14,30 @@ export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^
 
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
-  for (const [, , scriptBody] of text.matchAll(scriptExtractor)) {
+  scriptExtractor.lastIndex = 0;
+  let scriptMatch: RegExpExecArray | null;
+  while ((scriptMatch = scriptExtractor.exec(text))) {
+    const scriptBody = scriptMatch[2];
     const body = scriptBody.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
-    for (const importMatch of body.matchAll(importMatcher)) scripts.push(importMatch);
+    let importMatch: RegExpExecArray | null;
+    importMatcher.lastIndex = 0;
+    while ((importMatch = importMatcher.exec(body))) scripts.push(importMatch[0]);
   }
   return scripts.join(';\n');
 };
 
 export const scriptBodies: CompilerSync = (text: string) => {
   const scripts = [];
-  for (const [, , body] of text.matchAll(scriptExtractor)) {
+  scriptExtractor.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = scriptExtractor.exec(text))) {
+    const body = match[2];
     if (body) scripts.push(body);
   }
   return scripts.join(';\n');
 };
 
-// Extract bodies of <style> blocks whose `lang="..."` attribute is in `langs`, joined by newline.
-export const styleBodiesByLang = (text: string, langs: string[]): string => {
-  const bodies = [];
-  for (const [, attrs, body] of text.matchAll(styleExtractor)) {
-    if (!body) continue;
-    const lang = attrs.match(langAttrMatcher)?.[1]?.toLowerCase();
-    if (lang && langs.includes(lang)) bodies.push(body);
-  }
-  return bodies.join('\n');
-};
+export const getStyleLang = (attrs: string) => attrs.match(langAttrMatcher)?.[1]?.toLowerCase();
 
 // Extract paths as imports from frontmatter for given keys (e.g., 'layout')
 export const frontmatterMatcher = /^---\r?\n([\s\S]*?)\r?\n---/;
