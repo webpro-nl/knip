@@ -16,7 +16,7 @@ const isEnabled: IsPluginEnabled = async ({ cwd, manifest }) =>
 
 const isRootOnly = true;
 
-const entry: string[] = ['.pnpmfile.cjs'];
+const entry: string[] = ['.pnpmfile.{cjs,mjs}'];
 
 const config: string[] = ['package.json', 'pnpm-workspace.yaml'];
 
