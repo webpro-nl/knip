@@ -1,26 +1,24 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import type { Input } from '../../util/input.ts';
-import { toEntry } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
+import type { YarnConfig } from './types.ts';
 
-// https://yarnpkg.com/features/constraints
+// https://yarnpkg.com
 
 const title = 'Yarn';
 
-const enablers = 'This plugin is enabled when a `yarn.lock` file is found in the root folder.';
+const enablers =
+  'This plugin is enabled when a `yarn.lock` file is found in the root directory, or when `yarn@` is specified in the `packageManager` field of `package.json`.';
 
-const isEnabled: IsPluginEnabled = ({ cwd }) => isFile(cwd, 'yarn.lock');
+const isEnabled: IsPluginEnabled = async ({ cwd, manifest }) =>
+  manifest.packageManager?.startsWith('yarn@') || isFile(cwd, 'yarn.lock');
 
 const isRootOnly = true;
 
 const config = ['.yarnrc.yml'];
 
 const entry = ['yarn.config.cjs'];
-
-type YarnConfig = {
-  plugins?: Array<string | { path?: string }>;
-  yarnPath?: string;
-};
 
 const resolveConfig: ResolveConfig<YarnConfig> = config => {
   const inputs: Input[] = entry.map(id => toEntry(id));
@@ -34,6 +32,16 @@ const resolveConfig: ResolveConfig<YarnConfig> = config => {
 
   if (config.yarnPath) {
     inputs.push(toEntry(config.yarnPath));
+  }
+
+  if (config.packageExtensions) {
+    for (const extension of Object.values(config.packageExtensions)) {
+      if (extension.peerDependencies) {
+        for (const dep of Object.keys(extension.peerDependencies)) {
+          inputs.push(toDependency(dep));
+        }
+      }
+    }
   }
 
   return inputs;
