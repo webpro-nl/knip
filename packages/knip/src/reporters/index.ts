@@ -1,6 +1,7 @@
 import codeclimate from './codeclimate.ts';
 import codeowners from './codeowners.ts';
 import compact from './compact.ts';
+import cycles from './cycles.ts';
 import disclosure from './disclosure.ts';
 import githubActions from './github-actions.ts';
 import json from './json.ts';
@@ -11,6 +12,7 @@ export default {
   symbols,
   compact,
   codeowners,
+  cycles,
   disclosure,
   codeclimate,
   json,

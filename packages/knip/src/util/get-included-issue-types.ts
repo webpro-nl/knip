@@ -11,7 +11,8 @@ type GetIncludedIssueTypesOptions = {
 };
 
 /** @internal */
-export const defaultExcludedIssueTypes = ['nsExports', 'nsTypes'];
+export const defaultExcludedIssueTypes = ['nsExports', 'nsTypes', 'cycles'];
+const defaultAddOnIssueTypes = ['nsExports', 'nsTypes'];
 const defaultIssueTypes = ISSUE_TYPES.filter(type => !defaultExcludedIssueTypes.includes(type));
 
 const normalize = (values: string[]) => values.flatMap(value => value.split(','));
@@ -19,6 +20,7 @@ const normalize = (values: string[]) => values.flatMap(value => value.split(',')
 export const shorthandDeps = ['dependencies', 'unlisted', 'binaries', 'unresolved', 'catalog'];
 export const shorthandExports = ['exports', 'types', 'enumMembers', 'namespaceMembers', 'duplicates'];
 export const shorthandFiles = ['files'];
+export const shorthandCycles = ['cycles'];
 
 export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => {
   // Allow space-separated argument values (--include files,dependencies)
@@ -50,7 +52,7 @@ export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => 
 
   const included = (
     _include.length > 0
-      ? _include.some(type => !defaultExcludedIssueTypes.includes(type))
+      ? _include.some(type => !defaultAddOnIssueTypes.includes(type))
         ? _include
         : [..._include, ...defaultIssueTypes]
       : defaultIssueTypes

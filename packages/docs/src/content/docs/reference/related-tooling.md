@@ -28,22 +28,23 @@ values and types on imported namespaces.
 
 ## Circular dependencies
 
-See [Circular Dependencies][5].
-
-Other tools that support this include [DPDM][6], [Madge][7] and [skott][8].
+Knip detects circular dependencies as an opt-in [`cycles`][5] issue type, and
+the [editor integrations][6] visualize them inline. Other dedicated tools
+include [DPDM][7], [Madge][8] and [skott][9].
 
 ## Cleanup
 
-The [e18e.dev][9] website and in particular the [Cleanup][10] section is a great
-resource when dealing with technical debt.
+The [e18e.dev][10] website and in particular the [Cleanup][11] section is a
+great resource when dealing with technical debt.
 
 [1]: https://eslint.org
 [2]: https://biomejs.dev/linter/
 [3]: https://oxc.rs/docs/guide/usage/linter.html
 [4]: https://github.com/webpro-nl/remove-unused-vars
-[5]: ./integrations.md#circular-dependencies
-[6]: https://github.com/acrazing/dpdm
-[7]: https://github.com/pahen/madge
-[8]: https://github.com/antoine-coulon/skott
-[9]: https://e18e.dev
-[10]: https://e18e.dev/guide/cleanup.html
+[5]: ./issue-types.md
+[6]: ./integrations.md
+[7]: https://github.com/acrazing/dpdm
+[8]: https://github.com/pahen/madge
+[9]: https://github.com/antoine-coulon/skott
+[10]: https://e18e.dev
+[11]: https://e18e.dev/guide/cleanup.html

@@ -4,6 +4,7 @@ import { ISSUE_TYPES } from '../../src/constants.ts';
 import {
   defaultExcludedIssueTypes,
   getIncludedIssueTypes,
+  shorthandCycles,
   shorthandDeps,
   shorthandExports,
   shorthandFiles,
@@ -27,9 +28,9 @@ test('Resolve included issue types (default)', async () => {
   assert.deepEqual(config, { ...defaults });
 });
 
-test('Resolve included issue types (all)', async () => {
+test('Resolve included issue types (default add-ons)', async () => {
   const config = getIncludedIssueTypes({ ...base, includeOverrides: ['nsExports', 'nsTypes'] });
-  assert.deepEqual(config, { ...all });
+  assert.deepEqual(config, { ...defaults, nsExports: true, nsTypes: true });
 });
 
 test('Resolve included issue types (include single)', async () => {
@@ -108,6 +109,11 @@ test('Resolve included issue types (--files)', async () => {
   assert.deepEqual(config, { ...none, files: true });
 });
 
+test('Resolve included issue types (--cycles)', async () => {
+  const config = getIncludedIssueTypes({ ...base, includeOverrides: shorthandCycles });
+  assert.deepEqual(config, { ...none, cycles: true });
+});
+
 test('Resolve included issue types (all)', async () => {
   const config = getIncludedIssueTypes({
     ...base,
@@ -126,6 +132,7 @@ test('Resolve included issue types (all)', async () => {
       'duplicates',
       'files',
       'catalog',
+      'cycles',
     ],
   });
   assert.deepEqual(config, all);

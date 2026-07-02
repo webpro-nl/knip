@@ -3,15 +3,16 @@ import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
-import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
+import { getIssueType, getRuntimeImport, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import traceReporter from '../reporters/trace.ts';
-import type { IgnoreExportsUsedInFile } from '../types/config.ts';
+import type { IgnoreCycles, IgnoreExportsUsedInFile } from '../types/config.ts';
 import type { Export, ModuleGraph } from '../types/module-graph.ts';
 import { shouldCountRefs } from '../typescript/ast-nodes.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
-import { perfObserver } from '../util/Performance.ts';
+import { relative } from '../util/path.ts';
+import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, isAlwaysIgnored } from '../util/tag.ts';
 import { INTERNAL_TAG } from '../constants.ts';
@@ -28,6 +29,21 @@ interface AnalyzeOptions {
   unreferencedFiles: Set<string>;
   options: MainOptions;
 }
+
+const toCyclePathKey = (path: string[]) => {
+  const length = path.length > 1 && path[0] === path[path.length - 1] ? path.length - 1 : path.length;
+  return path.slice(0, length).join('\0');
+};
+
+const getIgnoredCyclePaths = (ignoreCycles: IgnoreCycles) => {
+  if (!ignoreCycles.paths?.length) return;
+  const paths = new Set<string>();
+  for (const path of ignoreCycles.paths) if (path.length > 0) paths.add(toCyclePathKey(path));
+  return paths;
+};
+
+const isIgnoredCycle = (symbols: { symbol: string }[], paths: Set<string> | undefined) =>
+  paths?.has(toCyclePathKey(symbols.map(s => s.symbol))) ?? false;
 
 export const analyze = async ({
   analyzedFiles,
@@ -275,6 +291,24 @@ export const analyze = async ({
             });
           }
         }
+      }
+    }
+
+    if (options.isReportCycles) {
+      const ignoreCycles = chief.config.ignoreCycles;
+      const ignoredCyclePaths = getIgnoredCyclePaths(ignoreCycles);
+      for (const cycle of timerify(explorer.findAllCycles, 'findAllCycles')()) {
+        const filePath = cycle[0];
+        const ws = chief.findWorkspaceByFilePath(filePath);
+        if (!ws) continue;
+        const symbols = cycle.slice(0, -1).map((file, index) => {
+          const node = graph.get(file);
+          const edge = node && getRuntimeImport(node, cycle[index + 1]);
+          return edge ? { symbol: relative(options.cwd, file), ...edge } : { symbol: relative(options.cwd, file) };
+        });
+        if (isIgnoredCycle(symbols, ignoredCyclePaths)) continue;
+        const symbol = symbols.map(s => s.symbol).join(' → ');
+        collector.addIssue({ type: 'cycles', filePath, workspace: ws.name, symbol, symbols, fixes: [] });
       }
     }
 
