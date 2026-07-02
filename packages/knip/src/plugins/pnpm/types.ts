@@ -1,16 +1,10 @@
-export type PnpmConfig = {
-  pnpm?: {
-    packageExtensions?: Record<
-      string,
-      {
-        peerDependencies?: Record<string, string>;
-      }
-    >;
-  };
+import type { Dependencies, PackageJson } from '../../types/package-json.ts';
+
+export type PnpmConfig = PackageJson & {
   packageExtensions?: Record<
     string,
     {
-      peerDependencies?: Record<string, string>;
+      peerDependencies?: Dependencies;
     }
   >;
 };

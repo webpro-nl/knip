@@ -4,8 +4,6 @@ type Primitive = null | undefined | string | number | boolean | symbol | bigint;
 
 type LiteralUnion<LiteralType, BaseType extends Primitive> = LiteralType | (BaseType & Record<never, never>);
 
-type Dependencies = Record<string, string>;
-
 type C = 'import' | 'require' | 'node' | 'node-addons' | 'deno' | 'browser' | 'electron' | 'react-native' | 'default';
 type ExportCondition = LiteralUnion<C, string>;
 type Exports = null | string | string[] | { [key in ExportCondition]: Exports } | { [key: string]: Exports };
@@ -30,6 +28,8 @@ export type Scripts = Record<string, string>;
 
 export type Catalog = Record<string, string>;
 export type Catalogs = Record<string, Catalog>;
+
+export type Dependencies = Record<string, string>;
 
 export type PackageJson = {
   name?: string;
@@ -57,6 +57,12 @@ export type PackageJson = {
   engines?: Record<string, string>;
   pnpm?: {
     overrides?: Dependencies;
+    packageExtensions?: Record<
+      string,
+      {
+        peerDependencies?: Dependencies;
+      }
+    >;
   };
   knip?: WorkspaceConfiguration;
 } & Plugins;
