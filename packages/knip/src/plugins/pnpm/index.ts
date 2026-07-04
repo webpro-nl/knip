@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import type { Input } from '../../util/input.ts';
-import { toDependency } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import type { PnpmConfig } from './types.ts';
 
 // https://pnpm.io/
@@ -21,7 +21,7 @@ const entry: string[] = ['.pnpmfile.{cjs,mjs}'];
 const config: string[] = ['package.json', 'pnpm-workspace.yaml'];
 
 const resolveConfig: ResolveConfig<PnpmConfig> = config => {
-  const inputs: Input[] = [];
+  const inputs: Input[] = entry.map(toEntry);
 
   const packageExtensions = config?.pnpm?.packageExtensions || config?.packageExtensions;
 

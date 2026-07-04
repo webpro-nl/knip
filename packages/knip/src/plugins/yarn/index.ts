@@ -21,7 +21,7 @@ const config = ['.yarnrc.yml'];
 const entry = ['yarn.config.cjs'];
 
 const resolveConfig: ResolveConfig<YarnConfig> = config => {
-  const inputs: Input[] = entry.map(id => toEntry(id));
+  const inputs: Input[] = entry.map(toEntry);
 
   if (Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
