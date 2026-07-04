@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/pnpm2",
+  "dependencies": {
+    "is-odd": "*"
+  }
+}
