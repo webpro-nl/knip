@@ -20,6 +20,7 @@ permissions:
 jobs:
   publish:
     name: Build and publish Knip
+    if: ${{ github.repository_owner == 'webpro-nl' }}
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
