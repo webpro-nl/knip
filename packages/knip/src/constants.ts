@@ -260,4 +260,5 @@ export const IMPORT_FLAGS = {
   OPTIONAL: 1 << 4, // no error if not resolved
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
+  AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
 } as const;

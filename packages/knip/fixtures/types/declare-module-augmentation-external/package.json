@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/declare-module-augmentation-external",
+  "type": "module",
+  "dependencies": {
+    "listed-lib": "*"
+  }
+}

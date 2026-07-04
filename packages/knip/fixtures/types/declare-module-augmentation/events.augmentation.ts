@@ -7,4 +7,16 @@ declare module './events.js' {
   }
 }
 
+declare module '#events' {
+  export interface EventBusEvents {
+    'entity:audited': AuditTrail & { at: number };
+  }
+}
+
+declare module '#phantom' {
+  export interface EventBusEvents {
+    'entity:phantom': PhantomPayload;
+  }
+}
+
 export {};

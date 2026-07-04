@@ -335,9 +335,15 @@ const coreVisitorObject: VisitorObject = {
     state.nsRanges.push([node.start, node.end]);
     if (node.kind !== 'global' && isStringLiteral(node.id)) {
       const specifier = getStringValue(node.id)!;
-      if (specifier.startsWith('.'))
-        for (const name of collectAugmentationRefs(node))
-          state.addImport(specifier, name, undefined, undefined, node.id.start, IMPORT_FLAGS.TYPE_ONLY);
+      for (const name of collectAugmentationRefs(node))
+        state.addImport(
+          specifier,
+          name,
+          undefined,
+          undefined,
+          node.id.start,
+          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
+        );
     }
   },
   ClassDeclaration(node) {

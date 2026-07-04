@@ -144,6 +144,13 @@ const getImportsAndExports = (
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
 
+    if (
+      modifiers & IMPORT_FLAGS.AUGMENT &&
+      (!module || module.isExternalLibraryImport || isInNodeModules(module.resolvedFileName))
+    ) {
+      return;
+    }
+
     if (module) {
       const resolvedFileName = module.resolvedFileName;
       if (resolvedFileName) {

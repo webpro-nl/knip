@@ -5,19 +5,19 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/types/declare-module-augmentation');
+const cwd = resolve('fixtures/types/declare-module-augmentation-external');
 
-test('Type used only in a declare module augmentation is not reported unused', async () => {
+test('A declare module augmentation does not count as external dependency usage', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!issues.types['events.ts']?.['BaseEntity']);
-  assert(!issues.types['events.ts']?.['EventEnvelope']);
-  assert(!issues.types['events.ts']?.['AuditTrail']);
+  assert(issues.dependencies['package.json']?.['listed-lib']);
+  assert(!issues.unlisted['index.ts']?.['transitive-lib']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    dependencies: 1,
+    processed: 1,
+    total: 1,
   });
 });
