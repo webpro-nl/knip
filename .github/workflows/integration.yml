@@ -14,14 +14,16 @@ on:
     tags:
       - '!**'
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   publish:
     name: Build and publish Knip
     if: ${{ github.repository_owner == 'webpro-nl' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # comment on referenced issues
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
@@ -65,6 +67,8 @@ jobs:
     name: Run Knip in ${{ matrix.project.name }}
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       PKG_URL: https://pkg.pr.new/knip@${{ needs.publish.outputs.sha }}
       SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
@@ -238,6 +242,8 @@ jobs:
     if: ${{ inputs.update_snapshots }}
     needs: integration
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
