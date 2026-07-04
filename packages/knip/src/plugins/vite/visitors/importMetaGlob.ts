@@ -1,7 +1,4 @@
-import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { _syncGlob } from '../../../util/glob.ts';
-import { dirname, isAbsolute, join } from '../../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 
 export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
@@ -29,12 +26,7 @@ export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVi
 
       if (!patterns?.length) return;
 
-      const dir = dirname(ctx.filePath);
-      const files = _syncGlob({ patterns, cwd: dir });
-
-      for (const f of files) {
-        ctx.addImport(isAbsolute(f) ? f : join(dir, f), arg.start, IMPORT_FLAGS.ENTRY);
-      }
+      ctx.addImportGlob(patterns);
     },
   };
 }
