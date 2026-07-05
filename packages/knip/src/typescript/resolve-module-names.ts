@@ -3,7 +3,7 @@ import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
 import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
 import type { ToSourceFilePath, WorkspaceManifestHandler } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
@@ -92,7 +92,9 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
     const resolved: string[] = [];
     for (const value of best.values) {
       const starIdx = value.indexOf('*');
-      const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value + captured;
+      const mapped = toPosix(
+        starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value + captured
+      );
       resolved.push(isNegated ? `!${mapped}` : mapped);
     }
     return resolved;
