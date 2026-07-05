@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/next-root-and-src",
+  "scripts": {
+    "dev": "next dev"
+  },
+  "devDependencies": {
+    "next": "*"
+  }
+}
