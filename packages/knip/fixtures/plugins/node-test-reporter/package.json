@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/node-test-reporter",
+  "scripts": {
+    "report": "node --test-reporter=spec index.js"
+  }
+}

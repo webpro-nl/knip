@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import { toEntry, toProductionEntry } from '../../util/input.ts';
+import { getScriptCommands } from '../../util/scripts.ts';
 
 const title = 'Node.js';
 
@@ -14,7 +15,14 @@ const patterns = [
 ];
 
 const hasNodeTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => /(?<=^|\s)(node|nub)\s(.*)--test/.test(script));
+  scripts &&
+  Object.values(scripts).some(
+    script =>
+      typeof script === 'string' &&
+      getScriptCommands(script).some(
+        ({ binary, args }) => (binary === 'node' || binary === 'nub') && args.includes('--test')
+      )
+  );
 
 const entry = ['server.js'];
 
