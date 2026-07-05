@@ -43,6 +43,7 @@ export const pluginsSchema = z.object({
   drizzle: pluginSchema,
   eleventy: pluginSchema,
   eslint: pluginSchema,
+  eve: pluginSchema,
   execa: pluginSchema,
   expo: pluginSchema,
   'expressive-code': pluginSchema,
