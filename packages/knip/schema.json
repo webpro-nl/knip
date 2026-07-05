@@ -499,6 +499,10 @@
           "title": "fast plugin configuration (https://knip.dev/reference/plugins/fast)",
           "$ref": "#/definitions/plugin"
         },
+        "fumadocs": {
+          "title": "fumadocs plugin configuration (https://knip.dev/reference/plugins/fumadocs)",
+          "$ref": "#/definitions/plugin"
+        },
         "gatsby": {
           "title": "Gatsby plugin configuration (https://knip.dev/reference/plugins/gatsby)",
           "$ref": "#/definitions/plugin"

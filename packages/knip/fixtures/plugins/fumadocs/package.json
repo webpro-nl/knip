@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/fumadocs",
+  "dependencies": {
+    "fumadocs-mdx": "*",
+    "fumadocs-ui": "*",
+    "zod": "*"
+  }
+}
