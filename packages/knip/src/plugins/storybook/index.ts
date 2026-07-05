@@ -1,4 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import MDX from '../../compilers/mdx.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
 import { join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -75,6 +76,12 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
   ];
 };
 
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('@storybook/addon-docs') || hasDependency('@storybook/addon-essentials')) {
+    registerCompiler({ extension: '.mdx', compiler: MDX.compiler });
+  }
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -83,6 +90,7 @@ const plugin: Plugin = {
   entry,
   project,
   resolveConfig,
+  registerCompilers,
 };
 
 export default plugin;
