@@ -10,6 +10,9 @@ import {
 
 const IGNORED_CYCLE_IMPORT_FLAGS = IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.DYNAMIC;
 
+export const getIgnoredCycleImportFlags = (includeDynamicImports: boolean) =>
+  includeDynamicImports ? IMPORT_FLAGS.ENTRY : IGNORED_CYCLE_IMPORT_FLAGS;
+
 export const getExportedIdentifiers = (
   graph: ModuleGraph,
   filePath: string,
@@ -67,14 +70,14 @@ export const getExportedIdentifiers = (
   return identifiers;
 };
 
-/** Internal modules imported by `node` through at least one synchronous runtime import. */
-export const getRuntimeSuccessors = (node: FileNode): Set<string> => {
+/** Internal modules imported by `node` through at least one runtime import not in `ignoredFlags`. */
+export const getRuntimeSuccessors = (node: FileNode, ignoredFlags = IGNORED_CYCLE_IMPORT_FLAGS): Set<string> => {
   const successors = new Set<string>();
   for (const _import of node.imports.imports) {
     if (
       _import.filePath &&
       !_import.isTypeOnly &&
-      !(_import.modifiers & IGNORED_CYCLE_IMPORT_FLAGS) &&
+      !(_import.modifiers & ignoredFlags) &&
       node.imports.internal.has(_import.filePath)
     ) {
       successors.add(_import.filePath);
@@ -96,13 +99,13 @@ const getImportKind = (importMaps: ImportMaps, identifier: string | undefined, m
   return 'import';
 };
 
-export const getRuntimeImport = (node: FileNode, filePath: string) => {
+export const getRuntimeImport = (node: FileNode, filePath: string, ignoredFlags = IGNORED_CYCLE_IMPORT_FLAGS) => {
   const importMaps = node.imports.internal.get(filePath);
   if (!importMaps) return;
 
   let result: Import | undefined;
   for (const _import of node.imports.imports) {
-    if (_import.filePath !== filePath || _import.isTypeOnly || _import.modifiers & IGNORED_CYCLE_IMPORT_FLAGS) continue;
+    if (_import.filePath !== filePath || _import.isTypeOnly || _import.modifiers & ignoredFlags) continue;
     if (!result || _import.line < result.line || (_import.line === result.line && _import.col < result.col)) {
       result = _import;
     }

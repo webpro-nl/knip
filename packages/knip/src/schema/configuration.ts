@@ -43,8 +43,9 @@ const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInF
 
 const ignoreIssuesSchema = z.record(z.string(), z.array(issueTypeSchema));
 
-const ignoreCyclesSchema = z.strictObject({
-  paths: z.optional(z.array(z.array(z.string()))),
+const cyclesSchema = z.strictObject({
+  allow: z.optional(z.array(z.array(z.string()))),
+  dynamicImports: z.optional(z.boolean()),
 });
 
 const rootConfigurationSchema = z.object({
@@ -279,20 +280,22 @@ const rootConfigurationSchema = z.object({
    */
   ignoreIssues: z.optional(ignoreIssuesSchema),
   /**
-   * Ignore circular dependency reports by edge type or by exact cycle path.
+   * Configure circular dependency (`cycles`) detection: allow (accept) specific
+   * cycles by exact path, or include dynamic `import()` edges (excluded by default).
    *
    * @example
    * ```json title="knip.json"
    * {
-   *   "ignoreCycles": {
-   *     "paths": [["src/a.ts", "src/b.ts"]]
+   *   "cycles": {
+   *     "dynamicImports": true,
+   *     "allow": [["src/a.ts", "src/b.ts"]]
    *   }
    * }
    * ```
    *
-   * @see {@link https://knip.dev/reference/configuration#ignorecycles}
+   * @see {@link https://knip.dev/reference/configuration#cycles}
    */
-  ignoreCycles: z.optional(ignoreCyclesSchema),
+  cycles: z.optional(cyclesSchema),
   /**
    * Array of workspaces to ignore, globs allowed.
    *

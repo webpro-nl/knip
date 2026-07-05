@@ -29,7 +29,7 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
     resolveDefinition: (filePath: string, identifier: string) => resolveDefinition(graph, filePath, identifier),
     getUsage: (filePath: string, identifier: string) => getUsage(graph, entryPaths, filePath, identifier),
     findCycles: (filePath: string, maxDepth?: number) => findCycles(graph, filePath, maxDepth),
-    findAllCycles: () => findAllCycles(graph),
+    findAllCycles: (ignoredFlags?: number) => findAllCycles(graph, ignoredFlags),
     getContention: (filePath: string) => getContention(graph, filePath),
     invalidateCache: () => invalidateCacheInternal(graph),
   };

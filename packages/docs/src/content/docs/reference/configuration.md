@@ -386,16 +386,23 @@ reporting other issues in those same files.
 }
 ```
 
-### `ignoreCycles`
+### `cycles`
 
-Ignore specific circular dependency reports while keeping other `cycles` issues
-enabled. Path entries are relative to the project root and omit the closing
-repeat of the first file.
+Configure circular dependency (`cycles`) detection.
+
+Set `dynamicImports` to include dynamic `import()` edges, which are excluded by
+default (a dynamic import defers evaluation, so it does not cause the
+initialization hazard cycles are meant to catch).
+
+Use `allow` to accept specific cycles by exact path while keeping other `cycles`
+issues enabled. Path entries are relative to the project root and omit the
+closing repeat of the first file.
 
 ```json title="knip.json"
 {
-  "ignoreCycles": {
-    "paths": [["src/i18n/index.ts", "src/i18n/middleware.ts"]]
+  "cycles": {
+    "dynamicImports": true,
+    "allow": [["src/i18n/index.ts", "src/i18n/middleware.ts"]]
   }
 }
 ```

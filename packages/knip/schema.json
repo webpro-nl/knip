@@ -67,6 +67,33 @@
         "$ref": "#/definitions/issueTypes"
       }
     },
+    "cycles": {
+      "title": "Configure circular dependency (cycles) detection",
+      "examples": [
+        {
+          "dynamicImports": true,
+          "allow": [["src/a.ts", "src/b.ts"]]
+        }
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dynamicImports": {
+          "title": "Include dynamic import() edges in cycle detection (excluded by default)",
+          "type": "boolean"
+        },
+        "allow": {
+          "title": "Allow (accept) specific cycles by exact path, relative to the root and omitting the closing repeat of the first file",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "includeEntryExports": {
       "$ref": "#/definitions/includeEntryExports"
     },

@@ -89,8 +89,9 @@ This is not an exhaustive list of every possible simple cycle in a cyclic
 subgraph, because that can produce a noisy and very large report. If the same
 file participates in multiple distinct reported paths, each path is shown
 separately. Dynamic imports are ignored by default because they are commonly
-used to avoid synchronous circular loads. Repeated starting imports are grouped
-under one heading. Use [`ignoreCycles`][12] to suppress accepted cycle paths.
+used to avoid synchronous circular loads; set [`cycles.dynamicImports`][12] to
+include them. Repeated starting imports are grouped under one heading. Use
+[`cycles.allow`][12] to accept known cycle paths.
 
 ### Disclosure
 
@@ -348,5 +349,5 @@ knip --preprocessor ./preprocess.ts
 [9]: #custom-reporters
 [10]: ../reference/integrations.md
 [11]: ../reference/issue-types.md
-[12]: ../reference/configuration.md#ignorecycles
+[12]: ../reference/configuration.md#cycles
 [13]: ./rules-and-filters.md

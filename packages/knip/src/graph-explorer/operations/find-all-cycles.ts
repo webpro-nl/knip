@@ -12,7 +12,7 @@ const DONE = 2;
  * Iterative depth-first search emitting one cycle per back-edge to a node on the current
  * recursion stack. O(V+E), no depth cap, follows synchronous runtime edges only.
  */
-export const findAllCycles = (graph: ModuleGraph): Cycle[] => {
+export const findAllCycles = (graph: ModuleGraph, ignoredFlags?: number): Cycle[] => {
   const cycles: Cycle[] = [];
   const state = new Map<string, typeof ON_STACK | typeof DONE>();
 
@@ -28,7 +28,7 @@ export const findAllCycles = (graph: ModuleGraph): Cycle[] => {
       indexOnPath.set(filePath, path.length);
       path.push(filePath);
       const node = graph.get(filePath);
-      successorsStack.push((node ? getRuntimeSuccessors(node) : new Set<string>()).values());
+      successorsStack.push((node ? getRuntimeSuccessors(node, ignoredFlags) : new Set<string>()).values());
     };
 
     push(root);

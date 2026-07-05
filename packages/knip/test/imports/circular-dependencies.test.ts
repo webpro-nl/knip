@@ -56,13 +56,26 @@ test('Reports circular dependencies when included', async () => {
   assert.deepEqual(counters, { ...baseCounters, cycles: 4, processed: 11, total: 11 });
 });
 
-test('Ignores circular dependencies by exact cycle path', async () => {
-  const options = await createOptions({ cwd, args: { cycles: true, config: 'ignore-cycle-path.json' } });
+test('Allows circular dependencies by exact cycle path', async () => {
+  const options = await createOptions({ cwd, args: { cycles: true, config: 'allow-cycle-path.json' } });
   const { issues, counters } = await main(options);
 
   assert.equal(issues.cycles['apricot.ts'], undefined);
   assert.equal(issues.cycles['ping.ts']['ping.ts → pong.ts'].symbol, 'ping.ts → pong.ts');
   assert.deepEqual(counters, { ...baseCounters, cycles: 3, processed: 11, total: 11 });
+});
+
+test('Includes dynamic import() cycles when cycles.dynamicImports is enabled', async () => {
+  const options = await createOptions({ cwd, args: { cycles: true, config: 'dynamic-imports.json' } });
+  const { issues, counters } = await main(options);
+
+  const dynamicIssue = Object.values(issues.cycles)
+    .flatMap(issuesByFile => Object.values(issuesByFile))
+    .find(issue => issue.symbol.includes('zucchini.ts') && issue.symbol.includes('zoodle.ts'));
+
+  assert.ok(dynamicIssue);
+  assert.ok(dynamicIssue.symbols?.some(s => s.kind === 'dynamicImport'));
+  assert.deepEqual(counters, { ...baseCounters, cycles: 5, processed: 11, total: 11 });
 });
 
 test('Reports only circular dependencies with --cycles shorthand', async () => {

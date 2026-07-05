@@ -1,5 +1,0 @@
-{
-  "ignoreCycles": {
-    "paths": [["apricot.ts", "banana.ts"]]
-  }
-}
