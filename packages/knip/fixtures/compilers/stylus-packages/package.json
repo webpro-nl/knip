@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/compilers-stylus-packages",
+  "dependencies": {
+    "nib": "*",
+    "@stylus-plugins/typography": "*",
+    "rupture": "*",
+    "foundation-sites": "*"
+  },
+  "devDependencies": {
+    "stylus": "*"
+  }
+}

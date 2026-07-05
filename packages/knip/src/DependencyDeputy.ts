@@ -342,7 +342,7 @@ export class DependencyDeputy {
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
-        if (!isReferencedDependency(symbol)) continue;
+        if (!referencedDependencies?.has(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({

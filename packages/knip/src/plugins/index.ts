@@ -2,6 +2,7 @@
 import { default as angular } from './angular/index.ts';
 import { default as astro } from './astro/index.ts';
 import { default as astroDb } from './astro-db/index.ts';
+import { default as astroMarkdoc } from './astro-markdoc/index.ts';
 import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
 import { default as babel } from './babel/index.ts';
@@ -50,6 +51,7 @@ import { default as linthtml } from './linthtml/index.ts';
 import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
+import { default as lunaria } from './lunaria/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
@@ -159,6 +161,7 @@ export const Plugins = {
   angular,
   astro,
   'astro-db': astroDb,
+  'astro-markdoc': astroMarkdoc,
   'astro-og-canvas': astroOgCanvas,
   ava,
   babel,
@@ -207,6 +210,7 @@ export const Plugins = {
   lit,
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
+  lunaria,
   markdownlint,
   mdx,
   mdxlint,

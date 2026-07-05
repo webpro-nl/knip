@@ -11,15 +11,13 @@ test('Find dependencies with the xo plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['.xo-config.js']['eslint-plugin-unused-imports']);
-  assert(issues.unlisted['xo.config.cjs']['glob']);
-  assert(issues.unresolved['package.json']['eslint-plugin-eslint-comments']);
+  assert(issues.unlisted['xo.config.js']['eslint-plugin-unused-imports']);
+  assert(issues.unlisted['xo.config.ts']['my-shared-config']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 2,
-    unlisted: 1,
-    unresolved: 2,
+    unlisted: 2,
     total: 2,
   });
 });

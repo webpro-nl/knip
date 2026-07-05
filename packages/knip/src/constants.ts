@@ -99,6 +99,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'npm',
   'nproc',
   'npx',
+  'nub',
+  'nubx',
   'paste',
   'pnpm',
   'pnpx',
@@ -171,6 +173,8 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.sass',
   '.scss',
   '.sh',
+  '.styl',
+  '.stylus',
   '.svg',
   '.ttf',
   '.webp',
@@ -258,5 +262,6 @@ export const IMPORT_FLAGS = {
   OPTIONAL: 1 << 4, // no error if not resolved
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
-  DYNAMIC: 1 << 7,
+  AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
+  DYNAMIC: 1 << 8, // dynamic import(), excluded from cycle detection
 } as const;

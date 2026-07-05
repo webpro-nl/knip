@@ -64,6 +64,41 @@ function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRoot
   return scoped;
 }
 
+export type ResolveGlobPattern = (pattern: string, dir: string) => string[];
+
+export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): ResolveGlobPattern {
+  const mappings = compilePathMappings(scopedPaths);
+  return (pattern, dir) => {
+    if (!mappings) return [pattern];
+    const isNegated = pattern[0] === '!';
+    const specifier = isNegated ? pattern.slice(1) : pattern;
+    let best: PathMapping | undefined;
+    for (const mapping of mappings) {
+      const { prefix, wildcard, scope } = mapping;
+      if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
+      const matches = wildcard
+        ? specifier.startsWith(prefix)
+        : specifier === prefix || specifier.startsWith(`${prefix}/`);
+      if (!matches) continue;
+      if (
+        !best ||
+        scope.length > best.scope.length ||
+        (scope.length === best.scope.length && prefix.length > best.prefix.length)
+      )
+        best = mapping;
+    }
+    if (!best) return [pattern];
+    const captured = specifier.slice(best.prefix.length);
+    const resolved: string[] = [];
+    for (const value of best.values) {
+      const starIdx = value.indexOf('*');
+      const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value + captured;
+      resolved.push(isNegated ? `!${mapped}` : mapped);
+    }
+    return resolved;
+  };
+}
+
 export function createCustomModuleResolver(
   compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
   customCompilerExtensions: string[],

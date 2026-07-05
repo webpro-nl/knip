@@ -383,6 +383,10 @@
           "title": "astro-db plugin configuration (https://knip.dev/reference/plugins/astro-db)",
           "$ref": "#/definitions/plugin"
         },
+        "astro-markdoc": {
+          "title": "astro-markdoc plugin configuration (https://knip.dev/reference/plugins/astro-markdoc)",
+          "$ref": "#/definitions/plugin"
+        },
         "ava": {
           "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
@@ -565,6 +569,10 @@
         },
         "lost-pixel": {
           "title": "lost-pixel plugin configuration (https://knip.dev/reference/plugins/lost-pixel)",
+          "$ref": "#/definitions/plugin"
+        },
+        "lunaria": {
+          "title": "lunaria plugin configuration (https://knip.dev/reference/plugins/lunaria)",
           "$ref": "#/definitions/plugin"
         },
         "markdownlint": {

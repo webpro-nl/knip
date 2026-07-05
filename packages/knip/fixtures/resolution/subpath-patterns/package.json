@@ -3,6 +3,7 @@
   "imports": {
     "#internals/*": "./src/internals/*.ts",
     "#internals-explicit-ext/*": "./src/internals/*",
-    "#internals-alias/used.alt": "./src/internals/used.alt"
+    "#internals-alias/used.alt": "./src/internals/used.alt",
+    "#:/*": "./src/internals/*.ts"
   }
 }

@@ -3,7 +3,7 @@ import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
-import type { Export, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
+import type { Export, FileNode, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
 import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
@@ -59,6 +59,7 @@ const getImportsAndExports = (
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const specifierExportNames = new Set<string>();
   const scripts = new Set<string>();
+  const importGlobs: ImportGlob[] = [];
 
   const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
   const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
@@ -144,6 +145,13 @@ const getImportsAndExports = (
     if (!specifier || isBuiltin(specifier)) return;
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
+
+    if (
+      modifiers & IMPORT_FLAGS.AUGMENT &&
+      (!module || module.isExternalLibraryImport || isInNodeModules(module.resolvedFileName))
+    ) {
+      return;
+    }
 
     if (module) {
       const resolvedFileName = module.resolvedFileName;
@@ -360,6 +368,8 @@ const getImportsAndExports = (
     pluginCtx.addScript = (s: string) => scripts.add(s);
     pluginCtx.addImport = (spec: string, pos: number, mod: number) =>
       addImport(spec, undefined, undefined, undefined, pos, mod);
+    pluginCtx.addImportGlob = (patterns, opts) =>
+      importGlobs.push({ patterns, base: opts?.base, filter: opts?.filter });
     pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 
@@ -412,6 +422,7 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
+    importGlobs,
     importedBy: undefined,
     internalImportCache: undefined,
   };

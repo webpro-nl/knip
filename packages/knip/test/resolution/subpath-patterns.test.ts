@@ -16,8 +16,8 @@ test('Allows subpath-patterns', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
 
@@ -30,8 +30,8 @@ test('Allows subpath-patterns (production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
 
@@ -44,7 +44,7 @@ test('Allows subpath-patterns (strict)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

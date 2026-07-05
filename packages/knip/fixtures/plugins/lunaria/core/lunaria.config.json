@@ -1,0 +1,29 @@
+{
+  "repository": {
+    "name": "foo/bar"
+  },
+  "defaultLocale": {
+    "label": "English",
+    "lang": "en"
+  },
+  "locales": [
+    {
+      "label": "Español",
+      "lang": "es"
+    }
+  ],
+  "files": [
+    {
+      "location": "src/content/**/*.md",
+      "pattern": "src/content/@lang/@path",
+      "type": "universal"
+    }
+  ],
+  "dashboard": {
+    "customCss": ["./styles.css"],
+    "favicon": {
+      "inline": "./favicon.svg"
+    }
+  },
+  "renderer": "./renderer.ts"
+}

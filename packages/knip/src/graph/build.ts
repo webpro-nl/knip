@@ -18,7 +18,7 @@ import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
-import { createManifest } from '../util/package-json.ts';
+import { createManifest, type Manifest } from '../util/package-json.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -32,6 +32,7 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.ts';
+import { resolveImportGlobs } from '../typescript/glob-imports.ts';
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
@@ -79,6 +80,17 @@ export async function build({
 
   const rawRootManifest = chief.getManifestForWorkspace('.');
   const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
+
+  const manifestsByWorkspaceName = new Map<string, Manifest | undefined>();
+  const getManifest = (dir: string): Manifest | undefined => {
+    const workspace = chief.findWorkspaceByFilePath(`${dir}/`);
+    if (!workspace) return undefined;
+    if (!manifestsByWorkspaceName.has(workspace.name)) {
+      const raw = chief.getManifestForWorkspace(workspace.name);
+      manifestsByWorkspaceName.set(workspace.name, raw ? createManifest(raw) : undefined);
+    }
+    return manifestsByWorkspaceName.get(workspace.name);
+  };
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -139,6 +151,7 @@ export async function build({
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
+      getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
@@ -149,7 +162,9 @@ export async function build({
 
     await worker.init();
 
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies, dep =>
+      deputy.addReferencedDependency(name, dep)
+    );
     const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
       const ext = normalizeCompilerExtension(extension);
       if (compilers[0].has(ext)) return;
@@ -462,6 +477,7 @@ export async function build({
           dependencies,
           manifest: createManifest(manifest),
           rootManifest,
+          getManifest,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {
@@ -469,6 +485,13 @@ export async function build({
           input.dir ??= dir;
           const specifierFilePath = handleInput(input, workspace);
           if (specifierFilePath) pp.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+        }
+      }
+
+      if (file.importGlobs.length > 0) {
+        const globbed = resolveImportGlobs(file.importGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of globbed) {
+          if (!isGitIgnored(importedFilePath)) pp.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
         }
       }
 
@@ -483,6 +506,7 @@ export async function build({
         node.exports = file.exports;
         node.duplicates = file.duplicates;
         node.scripts = file.scripts;
+        node.importGlobs = file.importGlobs;
         updateImportMap(node, file.imports.internal, graph);
         node.internalImportCache = file.imports.internal;
       } else {

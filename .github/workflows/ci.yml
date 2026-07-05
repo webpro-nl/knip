@@ -14,16 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     name: Ubuntu/Node v24
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 24
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - name: Install dependencies
         run: pnpm install
       - name: Install latest peer dependencies
         run: pnpm add typescript@next @types/node@24 --config.trustPolicy=allow
         working-directory: packages/knip
+      - name: Lint knip
+        run: pnpm run ci
       - name: Build knip
         run: pnpm run build
         working-directory: packages/knip

@@ -4,6 +4,7 @@ import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
@@ -14,7 +15,7 @@ import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWor
 
 const title = 'Vitest';
 
-const enablers = ['vitest'];
+const enablers = ['vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -72,6 +73,12 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
     ...workspaceDependencies,
     ...projectsDependencies,
   ];
+};
+
+const getOptimizeDepsIncludePackageName = (specifier: string) => {
+  const separatorIndex = specifier.indexOf('>');
+  const id = (separatorIndex === -1 ? specifier : specifier.slice(0, separatorIndex)).trim();
+  return getPackageNameFromModuleSpecifier(id);
 };
 
 const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
@@ -158,6 +165,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
+    for (const dependency of cfg.resolve?.dedupe ?? []) inputs.add(toDependency(dependency, { optional: true }));
+    for (const dependency of cfg.optimizeDeps?.include ?? []) {
+      const packageName = getOptimizeDepsIncludePackageName(dependency);
+      if (packageName) inputs.add(toDependency(packageName, { optional: true }));
+    }
     if (cfg.resolve?.extensions) {
       // Filter out default extensions from resolve.extensions
       const customExtensions = cfg.resolve.extensions.filter(

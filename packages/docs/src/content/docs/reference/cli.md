@@ -80,6 +80,11 @@ The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 NO_COLOR=1 knip
 ```
 
+### KNIP_DISABLE_RAW_TRANSFER
+
+Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
+normal parser path.
+
 ## Mode
 
 ### `--cache`
@@ -519,7 +524,7 @@ Trace file to see where its exports are imported. Implies [--trace][17].
 [2]: https://bun.sh
 [3]: ../reference/known-issues.md
 [4]: https://no-color.org/
-[5]: https://www.npmjs.com/package/picocolors
+[5]: https://www.npmx.dev/package/picocolors
 [6]: ./configuration.md#includeentryexports
 [7]: ../features/production-mode.md
 [8]: #--production

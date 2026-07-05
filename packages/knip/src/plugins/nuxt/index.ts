@@ -108,11 +108,13 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
       for (const [id, components] of maps.componentMap) {
         const store = componentMap.get(id);
         if (store) store.push(...components);
-        else componentMap.set(id, [...components]);
+        else componentMap.set(id, components);
       }
     }
 
     const getSyntheticImports = (identifiers: Set<string>, templateTags?: Set<string>) => {
+      if (importMap.size === 0 && (!templateTags || componentMap.size === 0)) return [];
+
       const syntheticImports: string[] = [];
 
       for (const [name, specifier] of importMap) {
@@ -144,7 +146,7 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
       if (descriptor.script?.content) scripts.push(descriptor.script.content);
       if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
 
-      const identifiers = collectIdentifiers(scripts.join('\n'), path);
+      const identifiers = scripts.length === 0 ? new Set<string>() : collectIdentifiers(scripts.join('\n'), path);
       let templateTags: Set<string> | undefined;
       if (descriptor.template?.ast) {
         const info = collectTemplateInfo(descriptor.template.ast);

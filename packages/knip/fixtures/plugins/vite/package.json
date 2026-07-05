@@ -5,6 +5,12 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "linked-package": "*",
+    "many-components": "*",
+    "shared-state": "*",
+    "upstream-esm": "*"
+  },
   "devDependencies": {
     "@babel/preset-typescript": "*",
     "@emotion/babel-plugin": "*",

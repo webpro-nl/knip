@@ -3,6 +3,7 @@ export type PluginName =
   | 'angular'
   | 'astro'
   | 'astro-db'
+  | 'astro-markdoc'
   | 'astro-og-canvas'
   | 'ava'
   | 'babel'
@@ -51,6 +52,7 @@ export type PluginName =
   | 'lit'
   | 'lockfile-lint'
   | 'lost-pixel'
+  | 'lunaria'
   | 'markdownlint'
   | 'mdx'
   | 'mdxlint'
@@ -160,6 +162,7 @@ export const pluginNames = [
   'angular',
   'astro',
   'astro-db',
+  'astro-markdoc',
   'astro-og-canvas',
   'ava',
   'babel',
@@ -208,6 +211,7 @@ export const pluginNames = [
   'lit',
   'lockfile-lint',
   'lost-pixel',
+  'lunaria',
   'markdownlint',
   'mdx',
   'mdxlint',

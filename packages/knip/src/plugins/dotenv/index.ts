@@ -2,7 +2,7 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import { argsFrom } from '../../binaries/util.ts';
 import type { Plugin } from '../../types/config.ts';
 
-// https://www.npmjs.com/package/dotenv
+// https://www.npmx.dev/package/dotenv
 
 const title = 'dotenv';
 

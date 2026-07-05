@@ -18,7 +18,13 @@ import type { Export, ExportMember, ImportMap, ImportMaps } from '../../types/mo
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { timerify } from '../../util/Performance.ts';
-import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from '../ast-nodes.ts';
+import {
+  collectAugmentationRefs,
+  getLineAndCol,
+  getStringValue,
+  isStringLiteral,
+  type ResolveModule,
+} from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import { handleCallExpression, handleNewExpression, trackCustomElementRegistry } from './calls.ts';
 import {
@@ -327,6 +333,18 @@ const coreVisitorObject: VisitorObject = {
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
+    if (node.kind !== 'global' && isStringLiteral(node.id)) {
+      const specifier = getStringValue(node.id)!;
+      for (const name of collectAugmentationRefs(node))
+        state.addImport(
+          specifier,
+          name,
+          undefined,
+          undefined,
+          node.id.start,
+          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
+        );
+    }
   },
   ClassDeclaration(node) {
     state.classNameStack.push(node.id?.name ?? '');

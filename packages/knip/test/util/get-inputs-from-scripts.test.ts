@@ -25,6 +25,7 @@ const t: T = (script, dependencies = [], options = { cwd }) =>
     _getInputsFromScripts(script, {
       rootCwd: cwd,
       manifest: toManifest(),
+      getManifest: () => undefined,
       containingFilePath,
       ...options,
     }),
@@ -200,6 +201,30 @@ test('getInputsFromScripts (bun)', () => {
   t('bun exec ./script.sh', [toBinary('bun')]);
   t('bun feedback', [toBinary('bun')]);
   t('bun ci', [toBinary('bun')]);
+});
+
+test('getInputsFromScripts (nub)', () => {
+  t('nubx eslint . --fix', [toBinary('eslint', opt)]);
+  t('nubx cowsay@1.5.0', [toDependency('cowsay', opt)]);
+  t('nub ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --watch ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --inspect ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --import tsx ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt), toDeferResolve('tsx')]);
+  t('nub --test --test-reporter=custom-reporter', [toBinary('nub'), toBinary('node'), toDeferResolve('custom-reporter')]);
+  t('nub watch ./main.ts', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
+  t('nub run ./main', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
+  t('nub run program', [toBinary('nub')], pkgScripts);
+  t('nub -r build', [toBinary('nub')]);
+  t('nub --filter pkg build', [toBinary('nub')]);
+  t('nub install', [toBinary('nub')]);
+  t('nub install --frozen-lockfile', [toBinary('nub')]);
+  t('nub ci', [toBinary('nub')]);
+  t('nub add -E -D react', [toBinary('nub')]);
+  t('nub remove webpack', [toBinary('nub')]);
+  t('nub approve-builds', [toBinary('nub')]);
+  t('nub node install 26', [toBinary('nub')]);
+  t('nub dlx eslint', [toBinary('nub'), toBinary('eslint', opt)]);
+  t('nub exec eslint', [toBinary('nub'), toBinary('eslint', opt)]);
 });
 
 test('getInputsFromScripts (pnpm)', () => {

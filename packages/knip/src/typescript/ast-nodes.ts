@@ -4,6 +4,7 @@ import {
   type TSEnumDeclaration,
   type TSEnumMember,
   type TSModuleDeclaration,
+  visitorKeys,
 } from 'oxc-parser';
 import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../constants.ts';
 import { extname } from '../util/path.ts';
@@ -16,7 +17,7 @@ import type { ExportMember } from '../types/module-graph.ts';
 
 const defaultParseOptions = {
   sourceType: 'unambiguous' as const,
-  experimentalRawTransfer: rawTransferSupported(),
+  experimentalRawTransfer: process.env.KNIP_DISABLE_RAW_TRANSFER !== '1' && rawTransferSupported(),
 };
 
 const parseFile = (filePath: string, sourceText: string) => {
@@ -157,6 +158,46 @@ export function extractNamespaceMembers(
   }
   return members;
 }
+
+export const collectAugmentationRefs = (node: TSModuleDeclaration): string[] => {
+  if (!node.body || node.body.type !== 'TSModuleBlock') return [];
+  const body = node.body.body;
+
+  const declared = new Set<string>();
+  for (const stmt of body) {
+    const decl = stmt.type === 'ExportNamedDeclaration' && stmt.declaration ? stmt.declaration : stmt;
+    if ('id' in decl && decl.id?.type === 'Identifier') declared.add(decl.id.name);
+    else if (decl.type === 'VariableDeclaration')
+      for (const d of decl.declarations) if (d.id.type === 'Identifier') declared.add(d.id.name);
+  }
+
+  const refs: string[] = [];
+  const seen = new Set<string>();
+  const add = (ref: any) => {
+    if (ref?.type === 'Identifier' && !declared.has(ref.name) && !seen.has(ref.name)) {
+      seen.add(ref.name);
+      refs.push(ref.name);
+    }
+  };
+  const visit = (n: any) => {
+    const type = n?.type;
+    if (!type) return;
+    if (type === 'TSTypeReference') add(n.typeName);
+    else if (type === 'TSInterfaceHeritage') add(n.expression);
+    const keys = visitorKeys[type];
+    if (!keys) return;
+    for (const key of keys) {
+      const val = n[key];
+      if (!val) continue;
+      if (Array.isArray(val)) {
+        for (const item of val) if (item) visit(item);
+      } else visit(val);
+    }
+  };
+  for (const stmt of body) visit(stmt);
+
+  return refs;
+};
 
 export function extractEnumMembers(
   decl: TSEnumDeclaration,

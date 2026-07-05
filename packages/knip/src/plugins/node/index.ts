@@ -14,7 +14,7 @@ const patterns = [
 ];
 
 const hasNodeTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script));
+  scripts && Object.values(scripts).some(script => /(?<=^|\s)(node|nub)\s(.*)--test/.test(script));
 
 const entry = ['server.js'];
 

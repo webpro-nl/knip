@@ -83,6 +83,21 @@ The solution is to [disable the Nx Daemon][6]:
 NX_DAEMON=false knip
 ```
 
+## Windows raw transfer memory errors
+
+On Windows with Node.js 22 or newer, oxc-parser raw transfer may fail under
+memory pressure:
+
+```sh
+RangeError: Array buffer allocation failed
+```
+
+Disable raw transfer to use the normal parser path:
+
+```sh
+KNIP_DISABLE_RAW_TRANSFER=1 knip
+```
+
 [1]: ../guides/handling-issues.mdx
 [2]: #path-aliases-in-config-files
 [3]: https://dotenvx.com/

@@ -35,7 +35,7 @@ const getEntriesFromExports = (obj: any): string[] => {
     if (typeof obj[prop] === 'string') {
       values.push(obj[prop]);
     } else if (obj[prop] === null) {
-      values.push(`!${prop}`);
+      if (prop !== '.') values.push(`!${prop}`);
     } else if (typeof obj[prop] === 'object') {
       values = values.concat(getEntriesFromExports(obj[prop]));
     }

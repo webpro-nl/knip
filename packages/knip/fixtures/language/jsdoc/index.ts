@@ -37,6 +37,12 @@ function doSomething2(myValue) {
 /** @type {import('@jest/types')} */
 module.exports = {};
 
+/** @const {import('const-types').Setting} */
+const setting = null;
+
+/** @member {import('member-types').Field} */
+const field = null;
+
 // import('./should-not-resolve')
 // See import('./also-should-not-resolve') for details
 
@@ -46,3 +52,9 @@ module.exports = {};
  * <LazyLoad component={LazyComponent} />
  */
 function lazyLoad() {}
+
+/**
+ * @example
+ *   { index: true, lazy: lazyComponent(() => import('./Foo'), 'Foo') }
+ */
+export const lazyComponent = (loader, name) => ({ loader, name });
