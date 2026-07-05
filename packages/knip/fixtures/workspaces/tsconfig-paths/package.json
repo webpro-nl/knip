@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/workspaces-tsconfig-paths",
+  "workspaces": ["apps/*"],
+  "knip": {
+    "workspaces": {
+      "apps/web": {}
+    }
+  }
+}
