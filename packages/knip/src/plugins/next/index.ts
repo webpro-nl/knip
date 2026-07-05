@@ -1,5 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -23,16 +24,18 @@ const productionEntryFilePatterns = [
   'app/**/{icon,apple-icon,opengraph-image,twitter-image}.{js,jsx,ts,tsx}',
 ];
 
-const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
+const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: string) => {
   const ext = pageExtensions.length === 1 ? pageExtensions[0] : `{${pageExtensions.join(',')}}`;
-  return [
+  const patterns = [
     ...productionEntryFilePatterns,
     `{instrumentation,instrumentation-client,middleware,proxy}.${ext}`,
     `app/global-{error,not-found}.${ext}`,
     `app/**/{default,error,forbidden,loading,not-found,unauthorized}.${ext}`,
     `app/**/{layout,page,route,template}.${ext}`,
     `pages/**/*.${ext}`,
-  ].flatMap(pattern => [pattern, `src/${pattern}`]);
+  ];
+  const hasRootDir = cwd ? isDirectory(cwd, 'pages') || isDirectory(cwd, 'app') : false;
+  return hasRootDir ? patterns : patterns.flatMap(pattern => [pattern, `src/${pattern}`]);
 };
 
 const production = getEntryFilePatterns();
@@ -40,7 +43,7 @@ const production = getEntryFilePatterns();
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = getPageExtensions(program);
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
-  const patterns = [...getEntryFilePatterns(extensions), 'next-env.d.ts'];
+  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
   return patterns.map(id => toProductionEntry(join(configFileDir, id)));
 };
 
