@@ -34,8 +34,11 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
     `app/**/{layout,page,route,template}.${ext}`,
     `pages/**/*.${ext}`,
   ];
-  const hasRootDir = cwd ? isDirectory(cwd, 'pages') || isDirectory(cwd, 'app') : false;
-  return hasRootDir ? patterns : patterns.flatMap(pattern => [pattern, `src/${pattern}`]);
+  if (cwd) {
+    if (isDirectory(cwd, 'pages') || isDirectory(cwd, 'app')) return patterns;
+    if (isDirectory(cwd, 'src/pages') || isDirectory(cwd, 'src/app')) return patterns.map(pattern => `src/${pattern}`);
+  }
+  return patterns.flatMap(pattern => [pattern, `src/${pattern}`]);
 };
 
 const production = getEntryFilePatterns();
