@@ -32,6 +32,7 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.ts';
+import { resolveImportGlobs } from '../typescript/glob-imports.ts';
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
@@ -487,6 +488,13 @@ export async function build({
         }
       }
 
+      if (file.importGlobs.length > 0) {
+        const globbed = resolveImportGlobs(file.importGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of globbed) {
+          if (!isGitIgnored(importedFilePath)) pp.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
+        }
+      }
+
       file.imports.unresolved = unresolvedImports;
 
       const pluginRefs = externalRefsFromInputs?.get(filePath);
@@ -498,6 +506,7 @@ export async function build({
         node.exports = file.exports;
         node.duplicates = file.duplicates;
         node.scripts = file.scripts;
+        node.importGlobs = file.importGlobs;
         updateImportMap(node, file.imports.internal, graph);
         node.internalImportCache = file.imports.internal;
       } else {

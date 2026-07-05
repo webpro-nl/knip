@@ -48,6 +48,7 @@ export const createFileNode = (): FileNode => ({
   exports: new Map(),
   duplicates: new Set(),
   scripts: new Set(),
+  importGlobs: [],
   importedBy: undefined,
   internalImportCache: undefined,
 });
