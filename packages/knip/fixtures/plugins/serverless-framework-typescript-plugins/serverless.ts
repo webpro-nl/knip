@@ -11,7 +11,13 @@ const config: AWS = {
   custom: {
     esbuild: {
       bundle: true,
+      inject: ['./src/libs/commonjs-globals.ts'],
       target: 'node22',
+    },
+  },
+  build: {
+    esbuild: {
+      inject: ['./src/libs/production-globals.ts'],
     },
   },
   plugins: ['serverless-esbuild', 'serverless-offline', 'serverless-offline-sns', 'serverless-offline-sqs'],
