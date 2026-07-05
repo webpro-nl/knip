@@ -5,18 +5,17 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/bun7');
+const cwd = resolve('fixtures/plugins/bun8');
 
-test('Enable the Bun plugin on a lockfile without treating test files as entries', async () => {
+test('Detect a bun test command chained after another bun command', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert('index.test.ts' in issues.files);
+  assert(!('index.test.ts' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

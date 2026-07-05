@@ -1,7 +1,8 @@
-import parseArgs from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
-import { toDeferResolve, toEntry, toIgnore } from '../../util/input.ts';
+import { type Input, toDeferResolve, toEntry, toIgnore } from '../../util/input.ts';
+import parseArgs from '../../util/parse-args.ts';
+import { getScriptCommands } from '../../util/scripts.ts';
 import type { BunfigConfig } from './types.ts';
 
 // https://bun.sh/docs/cli/test
@@ -11,23 +12,23 @@ const title = 'Bun';
 const enablers =
   'This plugin is enabled when a `bun.lock` or `bun.lockb` file is found or a `bun test` script is configured.';
 
-const getBunTestArgs = (script: string) => {
-  const args = script.split(/\s+/);
-  const bunIndex = args.indexOf('bun');
-  const testIndex = bunIndex === -1 ? -1 : args.indexOf('test', bunIndex + 1);
-  if (args.slice(bunIndex + 1, testIndex).includes('run')) return;
-  return testIndex === -1 ? undefined : args.slice(testIndex + 1);
+const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
+
+const getBunTest = (script: string) => {
+  for (const { binary, args } of getScriptCommands(script)) {
+    if (binary !== 'bun') continue;
+    const parsed = parseArgs(args, { string: ['timeout', 'rerun-each', 'preload'] });
+    if (parsed._[0] === 'test') return parsed;
+  }
 };
 
 const hasBunTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => typeof script === 'string' && getBunTestArgs(script));
+  scripts && Object.values(scripts).some(script => typeof script === 'string' && getBunTest(script));
 
 const isEnabled: IsPluginEnabled = ({ cwd, manifest }) =>
   isFile(cwd, 'bun.lock') || isFile(cwd, 'bun.lockb') || !!hasBunTest(manifest.scripts);
 
 const config = ['bunfig.toml'];
-
-const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
 
 const resolveConfig: ResolveConfig<BunfigConfig> = localConfig => {
   const preload = localConfig.test?.preload ?? [];
@@ -43,20 +44,16 @@ const toPatterns = (arg: string) => {
 
 const resolve: Resolve = options => {
   const scripts = { ...options.rootManifest?.scripts, ...options.manifest.scripts };
+  const inputs: Input[] = [toIgnore('bun', 'dependencies')];
   for (const script of Object.values(scripts)) {
-    const bunTestArgs = getBunTestArgs(script);
-    if (bunTestArgs) {
-      const parsed = parseArgs(bunTestArgs, { string: ['timeout', 'rerun-each', 'preload'] });
-      const args = parsed._;
-      const inputs = [
-        toIgnore('bun', 'dependencies'),
-        ...(args.length === 0 ? patterns : args.flatMap(toPatterns)).map(toEntry),
-      ];
-      for (const specifier of [parsed.preload ?? []].flat()) inputs.push(toDeferResolve(specifier));
-      return inputs;
-    }
+    if (typeof script !== 'string') continue;
+    const parsed = getBunTest(script);
+    if (!parsed) continue;
+    const targets = parsed._.slice(1);
+    for (const pattern of targets.length === 0 ? patterns : targets.flatMap(toPatterns)) inputs.push(toEntry(pattern));
+    for (const specifier of [parsed.preload ?? []].flat()) inputs.push(toDeferResolve(specifier));
   }
-  return [toIgnore('bun', 'dependencies'), ...patterns.map(toEntry)];
+  return inputs;
 };
 
 const plugin: Plugin = {
