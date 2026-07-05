@@ -23,11 +23,14 @@ JavaScript and TypeScript projects.
 - TypeScript
   - Avoid `any` and type casting (`as`).
   - Avoid runtime overhead just to get the types right.
+- Lint and format from root: `pnpm run ci`
 - Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links)
 
 ## Domain Knowledge
 
 - Unused file → unused exports/dependencies is a chain, not a bug
+- Non-JS/TS files (.css, .mdx, .vue) enter the graph via (usually plugin-registered) compilers (`registerCompilers`)
+- Library-specific AST patterns are caught by plugin-registered visitors (`registerVisitors`)
 - Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - If creating or modifying a plugin, read [PLUGINS.md][3] first.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE-GRAPH.md][4] first.
