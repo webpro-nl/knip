@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/serverless-framework-typescript-imported-functions",
+  "scripts": {
+    "serverless": "serverless print"
+  },
+  "devDependencies": {
+    "@serverless/typescript": "*",
+    "esbuild": "*",
+    "serverless": "*",
+    "serverless-esbuild": "*"
+  }
+}

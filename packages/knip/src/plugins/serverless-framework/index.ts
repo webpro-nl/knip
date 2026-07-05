@@ -1,8 +1,10 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { toDependency, toProductionEntry } from '../../util/input.ts';
-import { isInternal, join } from '../../util/path.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { handlerToEntry, pluginToInput } from './helpers.ts';
+import { getInputsFromAST } from './resolveFromAST.ts';
 import type { EsbuildConfig, PluginConfig } from './types.ts';
 
 // https://www.serverless.com/framework/docs
@@ -14,14 +16,6 @@ const enablers = ['serverless'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['serverless.{js,cjs,mjs,ts,cts,mts,yml,yaml}'];
-
-const handlerToEntry = (handler: string) => {
-  const dot = handler.lastIndexOf('.');
-  return toProductionEntry(`${handler.slice(0, dot)}.{js,ts}`);
-};
-
-const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toProductionEntry(join(dir, plugin)) : toDependency(plugin);
 
 const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
   esbuild && typeof esbuild === 'object' ? arrayify(esbuild.inject).map(id => toProductionEntry(join(dir, id))) : [];
@@ -51,6 +45,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  resolveFromAST: getInputsFromAST,
 };
 
 export default plugin;

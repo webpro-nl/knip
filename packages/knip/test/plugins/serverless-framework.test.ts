@@ -7,6 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/serverless-framework');
 const typescriptPluginsCwd = resolve('fixtures/plugins/serverless-framework-typescript-plugins');
+const typescriptImportedFunctionsCwd = resolve('fixtures/plugins/serverless-framework-typescript-imported-functions');
 
 test('Find dependencies with the Serverless Framework plugin', async () => {
   const options = await createOptions({ cwd });
@@ -28,5 +29,17 @@ test('Find dependencies from Serverless Framework TypeScript plugins', async () 
     processed: 5,
     total: 5,
   });
+  assert.deepEqual(issues.devDependencies, {});
+});
+
+test('Find imported TypeScript function handlers from Serverless Framework config', async () => {
+  const options = await createOptions({ cwd: typescriptImportedFunctionsCwd });
+  const { issues } = await main(options);
+
+  assert(!('scripts/cjs-shim.mjs' in issues.files));
+  assert(!('scripts/secrets.cjs' in issues.files));
+  assert(!('src/functions/process-new-file/handler.ts' in issues.files));
+  assert(!('src/functions/process-new-file/message.ts' in issues.files));
+  assert('src/functions/process-new-file/unused.ts' in issues.files);
   assert.deepEqual(issues.devDependencies, {});
 });
