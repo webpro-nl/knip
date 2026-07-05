@@ -14,7 +14,7 @@ const enablers = ['next'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['next.config.{js,ts,cjs,mjs}'];
+const config = ['next.config.{js,ts,cjs,mjs,mts}'];
 
 const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
