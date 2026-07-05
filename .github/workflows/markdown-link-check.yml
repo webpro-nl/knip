@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
 
 # Automatically cancel in-progress actions on the same branch
 concurrency:
