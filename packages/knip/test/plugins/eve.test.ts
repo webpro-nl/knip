@@ -12,9 +12,20 @@ test('Find dependencies with the eve plugin', async () => {
   const { counters, issues } = await main(options);
 
   assert('agent/lib/unused.ts' in issues.files);
+  assert('agent/subagents/researcher/channels/slack.ts' in issues.files);
+  assert('agent/subagents/researcher/instrumentation.ts' in issues.files);
+  assert('agent/subagents/researcher/schedules/daily.ts' in issues.files);
+  assert(!('agent/instructions.ts' in issues.files));
+  assert(!('agent/instrumentation.ts' in issues.files));
+  assert(!('agent/skills/summarize.ts' in issues.files));
   assert(!('agent/tools/get_weather.ts' in issues.files));
   assert(!('agent/channels/slack.ts' in issues.files));
   assert(!('agent/connections/search.ts' in issues.files));
+  assert(!('agent/subagents/researcher/connections/search.ts' in issues.files));
+  assert(!('agent/subagents/researcher/hooks/log.ts' in issues.files));
+  assert(!('agent/subagents/researcher/instructions.ts' in issues.files));
+  assert(!('agent/subagents/researcher/sandbox/sandbox.ts' in issues.files));
+  assert(!('agent/subagents/researcher/skills/summarize.ts' in issues.files));
   assert(!('agent/subagents/researcher/tools/search.ts' in issues.files));
   assert(!issues.exports['agent/lib/weather.ts']?.getWeather);
   assert(!issues.dependencies['package.json']?.eve);
@@ -23,8 +34,8 @@ test('Find dependencies with the eve plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 11,
-    total: 11,
+    files: 4,
+    processed: 22,
+    total: 22,
   });
 });
