@@ -20,8 +20,7 @@
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
     "@astrojs/starlight": "0.41.3",
-    "sharp": "0.35.1",
-    "starlight-blog": "^0.28.0"
+    "sharp": "0.35.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",
@@ -29,9 +28,10 @@
     "@octokit/graphql": "^9.0.3",
     "astro": "7.0.6",
     "picocolors": "^1.1.1",
-    "satteri": "0.9.4"
+    "satteri": "0.9.4",
+    "starlight-blog": "^0.28.0"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   }
 }
