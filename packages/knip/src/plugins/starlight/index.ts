@@ -1,9 +1,9 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { findCallArg, getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { config } from '../astro/index.ts';
-import { getComponentPathsFromSourceFile } from './resolveFromAST.ts';
+import { getCalleeImportSources, getComponentPathsFromSourceFile } from './resolveFromAST.ts';
 
 // https://starlight.astro.build/reference/configuration/
 
@@ -26,6 +26,11 @@ const resolveFromAST: ResolveFromAST = program => {
       const customCssPaths = getPropertyValues(starlightConfig, 'customCss');
       for (const id of customCssPaths) {
         inputs.push(toProductionEntry(id));
+      }
+
+      const pluginSources = getCalleeImportSources(starlightConfig, 'plugins', importMap);
+      for (const source of pluginSources) {
+        inputs.push(toDependency(source));
       }
     }
   }
