@@ -11,7 +11,7 @@ export type PluginConfig = {
 
 export type EsbuildConfig =
   | {
-      inject?: string | string[];
+      inject?: string[];
     }
   | boolean;
 
