@@ -23,28 +23,28 @@ const config = [
 const resolveConfig: ResolveConfig<PrettierConfig> = config => {
   if (typeof config === 'string') return [toDeferResolve(config)];
 
-  const result = new Set<Input>()
+  const result = new Set<Input>();
 
   const processOptions = (options: PrettierOptions) => {
-    if(Array.isArray(options.plugins)) {
-      for(const plugin of options.plugins) {
-        if(typeof plugin === 'string') {
-          result.add(toDependency(plugin))
+    if (Array.isArray(options.plugins)) {
+      for (const plugin of options.plugins) {
+        if (typeof plugin === 'string') {
+          result.add(toDependency(plugin));
         }
       }
     }
-  }
+  };
 
-  processOptions(config)
-  if(config.overrides) {
-    for(const override of config.overrides) {
-      if(override.options) {
-        processOptions(override.options)
+  processOptions(config);
+  if (config.overrides) {
+    for (const override of config.overrides) {
+      if (override.options) {
+        processOptions(override.options);
       }
     }
   }
 
-  return Array.from(result)
+  return Array.from(result);
 };
 
 const args: Args = {

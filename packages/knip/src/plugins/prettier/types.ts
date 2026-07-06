@@ -12,6 +12,6 @@ export type PrettierOptions = {
 
 export type PrettierConfig = PrettierOptions & {
   overrides?: {
-    options?: PrettierOptions
-  }[]
-}
+    options?: PrettierOptions;
+  }[];
+};
