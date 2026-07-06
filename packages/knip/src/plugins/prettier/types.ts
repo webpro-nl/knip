@@ -1,4 +1,4 @@
-export type PrettierConfig = {
+export type PrettierOptions = {
   plugins?: (
     | string
     | {
@@ -9,3 +9,9 @@ export type PrettierConfig = {
       }
   )[];
 };
+
+export type PrettierConfig = PrettierOptions & {
+  overrides?: {
+    options?: PrettierOptions
+  }[]
+}

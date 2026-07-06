@@ -14,12 +14,13 @@ test('Find dependencies with the Prettier plugin', async () => {
   assert(issues.devDependencies['package.json']['prettier']);
   assert(issues.unlisted['prettier.config.js']['prettier-plugin-xml']);
   assert(issues.unlisted['prettier.config.js']['prettier-plugin-astro']);
+  assert(issues.unlisted['prettier.config.js']['prettier-plugin-java']);
   assert(issues.unlisted['package.json']['@company/prettier-config']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 3,
+    unlisted: 4,
     processed: 1,
     total: 1,
   });
