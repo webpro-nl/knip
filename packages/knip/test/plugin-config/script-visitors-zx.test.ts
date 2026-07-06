@@ -9,7 +9,9 @@ const cwd = resolve('fixtures/plugin-config/script-visitors-zx');
 
 test('Find dependencies with custom script visitors (zx)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(!issues.binaries['zx-docs.mjs']?.config);
 
   assert.deepEqual(counters, {
     ...baseCounters,

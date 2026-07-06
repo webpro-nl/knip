@@ -251,6 +251,8 @@ export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
 
+export const SCRIPT_INTERPOLATION = '$__knip__';
+
 export const IMPORT_FLAGS = {
   NONE: 0,
   RE_EXPORT: 1 << 0,
