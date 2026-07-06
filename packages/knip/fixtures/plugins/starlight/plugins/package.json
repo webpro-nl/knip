@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/starlight-plugins",
+  "dependencies": {
+    "@astrojs/starlight": "*",
+    "astro": "*",
+    "starlight-blog": "*"
+  }
+}

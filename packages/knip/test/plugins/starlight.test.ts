@@ -30,3 +30,19 @@ test('Find custom CSS with the starlight plugin', async () => {
     files: 1,
   });
 });
+
+test('Find plugins with the starlight plugin (production strict)', async () => {
+  const cwd = resolve('fixtures/plugins/starlight/plugins');
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { issues, counters } = await main(options);
+
+  assert(
+    !issues.dependencies['package.json']?.['starlight-blog'],
+    'starlight-blog should be detected as used via starlight `plugins`'
+  );
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+  });
+});
