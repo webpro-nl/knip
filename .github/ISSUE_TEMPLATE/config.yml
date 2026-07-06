@@ -1,1 +1,11 @@
 blank_issues_enabled: false
+contact_links:
+  - name: 🧩 Contribute a new plugin
+    url: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md#contribute-a-new-plugin
+    about: Missing a plugin for a tool you use? Consider contributing one — it's often the fastest path to support.
+  - name: 👾 Chat
+    url: https://chat.e18e.dev/
+    about: Join the `#knip` channel on the e18e Discord to chat with the community.
+  - name: 💁 Support
+    url: https://chat.e18e.dev/
+    about: This issue tracker is not for support questions. Ask for help in the `#knip` channel on the e18e Discord.
