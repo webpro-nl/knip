@@ -1,4 +1,4 @@
-import { parse, type Node, type Script, type Statement, type Word } from 'unbash';
+import { type Command, parse, type Script, type Statement, type Word } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
@@ -6,6 +6,7 @@ import { type Input, toBinary, toDeferResolve } from '../util/input.ts';
 import { extractBinary, isValidBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { truncate } from '../util/string.ts';
+import { walkCommands } from '../util/scripts.ts';
 import { resolve as fallbackResolve } from './fallback.ts';
 import KnownResolvers from './resolvers/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
@@ -49,100 +50,68 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   const processScript = (s: Script): Input[] => {
     collectFunctionNames(s.commands);
     const pending: Script[] = [];
-    const mainDeps = getDependenciesFromStatements(s.commands, pending);
+    const mainDeps: Input[] = [];
+    for (const statement of s.commands) {
+      for (const command of walkCommands(statement.command)) mainDeps.push(...processCommand(command, pending));
+    }
     const expansionDeps = pending.flatMap(inner => processScript(inner));
     return [...mainDeps, ...expansionDeps];
   };
 
-  const getDependenciesFromStatements = (statements: Statement[], pending: Script[]): Input[] =>
-    statements.flatMap(stmt => getDependenciesFromNode(stmt.command, pending));
+  const processCommand = (node: Command, pending: Script[]): Input[] => {
+    const text = node.name?.value;
+    const binary = text ? extractBinary(text) : text;
 
-  const getDependenciesFromNode = (node: Node, pending: Script[]): Input[] => {
-    switch (node.type) {
-      case 'Command': {
-        const text = node.name?.value;
-        const binary = text ? extractBinary(text) : text;
+    if (node.name) collectExpansionScripts(node.name, pending);
+    for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
+    for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
 
-        if (node.name) collectExpansionScripts(node.name, pending);
-        for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
-        for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
+    // Bunch of early bail outs for things we can't or don't want to resolve
+    if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
+    if (binary.startsWith('-') || binary.startsWith('..')) return [];
+    if (definedFunctions.has(binary)) return [];
 
-        // Bunch of early bail outs for things we can't or don't want to resolve
-        if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
-        if (binary.startsWith('-') || binary.startsWith('..')) return [];
-        if (definedFunctions.has(binary)) return [];
+    const args = node.suffix.map(w => w.value);
 
-        const args = node.suffix.map(w => w.value);
+    // Commands that precede other commands, try again with the rest
+    if (['!', 'test'].includes(binary)) return fromArgs(args);
 
-        // Commands that precede other commands, try again with the rest
-        if (['!', 'test'].includes(binary)) return fromArgs(args);
+    const fromNodeOptions = node.prefix
+      .filter(a => a.name === 'NODE_OPTIONS' && a.value)
+      .map(a => a.value!.value)
+      .map(arg => parseNodeArgs(arg.split(' ')))
+      .filter(args => args.require)
+      .flatMap(arg => arg.require)
+      .map(id => toDeferResolve(id));
 
-        const fromNodeOptions = node.prefix
-          .filter(a => a.name === 'NODE_OPTIONS' && a.value)
-          .map(a => a.value!.value)
-          .map(arg => parseNodeArgs(arg.split(' ')))
-          .filter(args => args.require)
-          .flatMap(arg => arg.require)
-          .map(id => toDeferResolve(id));
-
-        if (binary in KnownResolvers) {
-          const resolver = KnownResolvers[binary as KnownResolver];
-          return resolver(binary, args, { ...options, fromArgs });
-        }
-
-        if (pluginArgsMap.has(binary)) {
-          return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
-        }
-
-        if (spawningBinaries.includes(binary)) {
-          const rest = node.suffix
-            .filter(w => w.text !== '--')
-            .map(w => w.text)
-            .join(' ');
-          return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
-        }
-
-        if (binary in Plugins) {
-          const inputs = fallbackResolve(binary, args, { ...options, fromArgs });
-          if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
-          return [...inputs, ...fromNodeOptions];
-        }
-
-        // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
-        // Actions, which are provisioned with lots of unknown global binaries.
-        if (options.knownBinsOnly && !text?.startsWith('.')) return [];
-
-        return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
-      }
-      case 'AndOr':
-      case 'Pipeline':
-        return node.commands.flatMap(n => getDependenciesFromNode(n, pending));
-      case 'If':
-        return [
-          ...getDependenciesFromStatements(node.clause.commands, pending),
-          ...getDependenciesFromStatements(node.then.commands, pending),
-          ...(node.else ? getDependenciesFromNode(node.else, pending) : []),
-        ];
-      case 'While':
-        return [
-          ...getDependenciesFromStatements(node.clause.commands, pending),
-          ...getDependenciesFromStatements(node.body.commands, pending),
-        ];
-      case 'For':
-      case 'Select':
-      case 'Subshell':
-      case 'BraceGroup':
-        return getDependenciesFromStatements(node.body.commands, pending);
-      case 'CompoundList':
-        return getDependenciesFromStatements(node.commands, pending);
-      case 'Function':
-      case 'Coproc':
-        return getDependenciesFromNode(node.body, pending);
-      case 'Statement':
-        return getDependenciesFromNode(node.command, pending);
-      default:
-        return [];
+    if (binary in KnownResolvers) {
+      const resolver = KnownResolvers[binary as KnownResolver];
+      return resolver(binary, args, { ...options, fromArgs });
     }
+
+    if (pluginArgsMap.has(binary)) {
+      return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+    }
+
+    if (spawningBinaries.includes(binary)) {
+      const rest = node.suffix
+        .filter(w => w.text !== '--')
+        .map(w => w.text)
+        .join(' ');
+      return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
+    }
+
+    if (binary in Plugins) {
+      const inputs = fallbackResolve(binary, args, { ...options, fromArgs });
+      if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
+      return [...inputs, ...fromNodeOptions];
+    }
+
+    // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
+    // Actions, which are provisioned with lots of unknown global binaries.
+    if (options.knownBinsOnly && !text?.startsWith('.')) return [];
+
+    return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
   };
 
   try {

@@ -1,12 +1,13 @@
 import {
   parseSync,
   rawTransferSupported,
+  type TemplateLiteral,
   type TSEnumDeclaration,
   type TSEnumMember,
   type TSModuleDeclaration,
   visitorKeys,
 } from 'oxc-parser';
-import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, FIX_FLAGS, SCRIPT_INTERPOLATION, SYMBOL_TYPE } from '../constants.ts';
 import { extname } from '../util/path.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.ts';
 import { timerify } from '../util/Performance.ts';
@@ -77,6 +78,16 @@ export const getStringValue = (node: any): string | undefined => {
     return node.quasis[0].value?.cooked ?? node.quasis[0].value?.raw;
   return undefined;
 };
+
+export const getScriptFromTemplate = (template: TemplateLiteral): string => {
+  const { quasis } = template;
+  let script = quasis[0].value.raw;
+  for (let i = 1; i < quasis.length; i++) script += SCRIPT_INTERPOLATION + quasis[i].value.raw;
+  return script;
+};
+
+export const getScriptFromArg = (arg: any): string | undefined =>
+  isStringLiteral(arg) ? getStringValue(arg) : arg?.type === 'TemplateLiteral' ? getScriptFromTemplate(arg) : undefined;
 
 const SAFE_SCRIPT_ARG = /^[\w@.,:/=+~-]+$/;
 

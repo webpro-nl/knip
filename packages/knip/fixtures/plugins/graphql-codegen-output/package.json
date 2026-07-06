@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/graphql-codegen-output",
+  "devDependencies": {
+    "@graphql-codegen/client-preset": "*"
+  }
+}

@@ -12,6 +12,7 @@ test('Find dependencies with custom script visitors (bun)', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.binaries['script.ts']['oh-my']);
+  assert(!issues.binaries['script.ts']?.config);
 
   assert.deepEqual(counters, {
     ...baseCounters,

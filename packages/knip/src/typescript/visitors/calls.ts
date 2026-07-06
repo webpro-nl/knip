@@ -1,7 +1,7 @@
 import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getSafeScriptFromArgs, getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
 /**
@@ -196,10 +196,8 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     if (method) {
       const arg = node.arguments[0];
       if (CHILD_PROCESS_COMMAND_METHODS.has(method)) {
-        if (isStringLiteral(arg)) {
-          const command = getStringValue(arg);
-          if (command) s.scripts.add(command);
-        }
+        const command = getScriptFromArg(arg);
+        if (command) s.scripts.add(command);
         return;
       }
       if (CHILD_PROCESS_FILE_METHODS.has(method)) {

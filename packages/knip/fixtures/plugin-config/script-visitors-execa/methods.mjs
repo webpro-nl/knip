@@ -15,3 +15,6 @@ await execaNode('execa-node.mjs');
 await execaNode`execa-node-tag.mjs`;
 
 await execa('node', ['build && phantomexeca']);
+
+const dir = '/tmp';
+await execaCommand(`git -C ${dir} config fetch.prune false`);

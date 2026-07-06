@@ -36,6 +36,12 @@ execFileSync('apricot', undefined, { cwd: '/tmp' });
 execFile('cherry', ['commit', '-m', 'ship it && phantomdeploy']);
 spawn('grape', ['render', 'a | phantomgrep']);
 
+const target = 'prod';
+execSync(`fig deploy --target=${target}`);
+exec(`melon ${target} --watch`);
+const bin = 'watermelon';
+execSync(`${bin} phantomserve`);
+
 // not referenced: dynamic command, and a non-child_process `.exec`
 const dynamic = 'kiwi';
 execSync(dynamic);

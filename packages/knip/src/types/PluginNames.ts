@@ -34,6 +34,7 @@ export type PluginName =
   | 'expo'
   | 'expressive-code'
   | 'fast'
+  | 'fumadocs'
   | 'gatsby'
   | 'github-action'
   | 'github-actions'
@@ -193,6 +194,7 @@ export const pluginNames = [
   'expo',
   'expressive-code',
   'fast',
+  'fumadocs',
   'gatsby',
   'github-action',
   'github-actions',
