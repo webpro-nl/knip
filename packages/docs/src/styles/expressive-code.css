@@ -1,0 +1,11 @@
+@layer knip {
+  .expressive-code .frame pre,
+  .expressive-code .frame div {
+    letter-spacing: -0.5px;
+  }
+
+  .expressive-code {
+    --ec-frm-tooltipSuccessBg: var(--sl-color-accent);
+    --ec-frm-tooltipSuccessFg: white;
+  }
+}
