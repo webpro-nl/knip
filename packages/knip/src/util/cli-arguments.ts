@@ -25,7 +25,7 @@ Mode
 Scope
   -W, --workspace [filter]     Filter workspaces by name, directory, or glob (can be repeated)
   -D, --directory [dir]        Run process from a different directory (default: cwd)
-      --include                Report only provided issue type(s), can be comma-separated or repeated (1)
+      --include                Include provided issue type(s), can be comma-separated or repeated (1)
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
       --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved,catalog
       --exports                Shortcut for --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates

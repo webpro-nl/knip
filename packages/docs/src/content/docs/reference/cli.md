@@ -192,7 +192,10 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-Available [issue types][10] when filtering output using `--include` or
+`nsExports` and `nsTypes` are [off by default][10]; including only those _adds_
+them to the default report instead of narrowing it.
+
+Available [issue types][11] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -211,7 +214,7 @@ Available [issue types][10] when filtering output using `--include` or
 
 ### `--dependencies`
 
-Shortcut to include all types of dependency issues:
+Shortcut to report only all types of dependency issues:
 
 ```sh
 --include dependencies,unlisted,binaries,unresolved,catalog
@@ -219,7 +222,7 @@ Shortcut to include all types of dependency issues:
 
 ### `--exports`
 
-Shortcut to include all types of export issues:
+Shortcut to report only all types of export issues:
 
 ```sh
 --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
@@ -227,7 +230,7 @@ Shortcut to include all types of export issues:
 
 ### `--files`
 
-Shortcut to include file issues:
+Shortcut to report only file issues:
 
 ```sh
 --include files
@@ -235,7 +238,7 @@ Shortcut to include file issues:
 
 ### `--cycles`
 
-Shortcut to include circular dependencies (off by default):
+Shortcut to report only circular dependencies:
 
 ```sh
 --include cycles
@@ -281,13 +284,13 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][11].
+Read more at [auto-fix][12].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][10]
+More info about fixable types at [issue types][11]
 
 ### `--allow-remove-files`
 
@@ -303,7 +306,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][12].
+Preprocess the results before providing it to the [reporter(s)][13].
 
 Can be repeated. Examples:
 
@@ -315,7 +318,7 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
-Also see [Reporters & Preprocessors][13].
+Also see [Reporters & Preprocessors][14].
 
 ### `--preprocessor-options [json]`
 
@@ -344,7 +347,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][13].
+Also see [Reporters & Preprocessors][14].
 
 ### `--reporter-options [json]`
 
@@ -398,7 +401,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][14].
+Show [debug output][15].
 
 ### `--memory`
 
@@ -475,7 +478,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][15]).
+`performance.timerify` ([GitHub issue][16]).
 
 ### `--duration`
 
@@ -505,20 +508,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][16].
+Also see [Trace][17].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][17].
+[--trace][18].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][17].
+Trace export name to see where it's imported. Implies [--trace][18].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][17].
+Trace file to see where its exports are imported. Implies [--trace][18].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -529,11 +532,12 @@ Trace file to see where its exports are imported. Implies [--trace][17].
 [7]: ../features/production-mode.md
 [8]: #--production
 [9]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[10]: ./issue-types.md
-[11]: ../features/auto-fix.mdx
-[12]: #--reporter-reporter
-[13]: ../features/reporters.md
-[14]: ../guides/troubleshooting.md#debug
-[15]: https://github.com/oven-sh/bun/issues/9271
-[16]: ../guides/troubleshooting.md#trace
-[17]: #--trace
+[10]: ../guides/namespace-imports.md
+[11]: ./issue-types.md
+[12]: ../features/auto-fix.mdx
+[13]: #--reporter-reporter
+[14]: ../features/reporters.md
+[15]: ../guides/troubleshooting.md#debug
+[16]: https://github.com/oven-sh/bun/issues/9271
+[17]: ../guides/troubleshooting.md#trace
+[18]: #--trace
