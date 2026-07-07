@@ -34,7 +34,10 @@ interested in:
 knip --include files --exclude enumMembers,duplicates
 ```
 
-Also see the [list of issue types][2].
+The `nsExports` and `nsTypes` types are [off by default][2]. Including only
+those _adds_ them to the default report, rather than narrowing it to just those.
+
+Also see the [list of issue types][3].
 
 ### Shorthands
 
@@ -54,7 +57,9 @@ Knip has shortcuts to include only specific issue types.
    - `namespaceMembers`
    - `duplicates`
 
-3. The `--files` flag is a shortcut for `--include files`
+3. The `--files` flag is a shortcut for [`--include files`][4]
+
+4. The `--cycles` flag is a shortcut for [`--include cycles`][5]
 
 ## Rules
 
@@ -78,7 +83,7 @@ Example:
 }
 ```
 
-Also see the [issue types overview][2].
+Also see the [issue types overview][3].
 
 NOTE: If the `dependencies` issue type is included, the `devDependencies` and
 `optionalPeerDependencies` types can still be set to `"warn"` separately.
@@ -98,4 +103,7 @@ fine-grained configuration.
 - Filters have shorthands (rules don't have this).
 
 [1]: ../reference/jsdoc-tsdoc-tags.md
-[2]: ../reference/issue-types.md
+[2]: ../guides/namespace-imports.md
+[3]: ../reference/issue-types.md
+[4]: ../reference/cli.md#--files
+[5]: ../reference/cli.md#--cycles

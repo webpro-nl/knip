@@ -54,6 +54,7 @@ const defaultConfig: Configuration = {
   ignoreBinaries: [],
   ignoreDependencies: [],
   ignoreFiles: [],
+  cycles: {},
   ignoreIssues: {},
   ignoreMembers: [],
   ignoreUnresolved: [],
@@ -145,6 +146,7 @@ export class ConfigurationChief {
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const cycles = rawConfig.cycles ?? {};
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
@@ -162,6 +164,7 @@ export class ConfigurationChief {
     return {
       ignore,
       ignoreFiles,
+      cycles,
       ignoreBinaries,
       ignoreDependencies,
       ignoreMembers,

@@ -5,6 +5,8 @@ export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
 export interface IssueSymbol {
   symbol: string;
+  kind?: string;
+  specifier?: string;
   pos?: number;
   line?: number;
   col?: number;
@@ -45,6 +47,7 @@ export type Issues = {
   enumMembers: IssueRecords;
   namespaceMembers: IssueRecords;
   catalog: IssueRecords;
+  cycles: IssueRecords;
 };
 
 export type IssueType = keyof Issues;

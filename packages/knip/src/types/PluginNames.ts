@@ -30,6 +30,7 @@ export type PluginName =
   | 'drizzle'
   | 'eleventy'
   | 'eslint'
+  | 'eve'
   | 'execa'
   | 'expo'
   | 'expressive-code'
@@ -190,6 +191,7 @@ export const pluginNames = [
   'drizzle',
   'eleventy',
   'eslint',
+  'eve',
   'execa',
   'expo',
   'expressive-code',

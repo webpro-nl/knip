@@ -124,3 +124,6 @@ export on a namespace individually, include the `nsExports` issue type:
 
 Or use the `--include nsExports` argument from the CLI. The `nsTypes` can be
 added as well to do the same for exported types.
+
+Including these _adds_ them to the report; all other issue types are still
+reported.

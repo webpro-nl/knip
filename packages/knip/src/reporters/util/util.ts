@@ -33,6 +33,8 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
 export const convert = (issue: Issue | IssueSymbol) => ({
   namespace: 'parentSymbol' in issue ? issue.parentSymbol : undefined,
   name: issue.symbol,
+  kind: 'kind' in issue ? issue.kind : undefined,
+  specifier: 'kind' in issue ? issue.specifier : undefined,
   line: issue.line,
   col: issue.col,
   pos: issue.pos,
@@ -70,7 +72,9 @@ export const getTableForType = (
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
     const isFileIssue = issue.type === 'files';
-    const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
+    const symbol = issue.symbols
+      ? issue.symbols.map(s => s.symbol).join(issue.type === 'cycles' ? ' → ' : ', ')
+      : issue.symbol;
     if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));

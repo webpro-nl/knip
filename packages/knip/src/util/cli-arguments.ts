@@ -25,11 +25,12 @@ Mode
 Scope
   -W, --workspace [filter]     Filter workspaces by name, directory, or glob (can be repeated)
   -D, --directory [dir]        Run process from a different directory (default: cwd)
-      --include                Report only provided issue type(s), can be comma-separated or repeated (1)
+      --include                Include provided issue type(s), can be comma-separated or repeated (1)
       --exclude                Exclude provided issue type(s) from report, can be comma-separated or repeated (1)
       --dependencies           Shortcut for --include dependencies,unlisted,binaries,unresolved,catalog
       --exports                Shortcut for --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
       --files                  Shortcut for --include files
+      --cycles                 Shortcut for --include cycles (circular dependencies)
       --tags                   Include or exclude tagged exports
 
 Fix
@@ -63,9 +64,9 @@ Troubleshooting
       --trace-export [name]    Show trace output for named export(s)
       --trace-file [file]      Show trace output for exports in file
 
-(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog
+(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, cycles
 (2) Fixable issue types: dependencies, exports, types, files, catalog
-(3) Built-in reporters: symbols (default), compact, codeowners, json, codeclimate, markdown, disclosure, github-actions
+(3) Built-in reporters: symbols (default), compact, codeowners, cycles, json, codeclimate, markdown, disclosure, github-actions
 
 Examples:
 
@@ -88,6 +89,7 @@ export default function parseCLIArgs() {
       cache: { type: 'boolean' },
       'cache-location': { type: 'string' },
       config: { type: 'string', short: 'c' },
+      cycles: { type: 'boolean' },
       debug: { type: 'boolean', short: 'd' },
       dependencies: { type: 'boolean' },
       directory: { type: 'string', short: 'D' },

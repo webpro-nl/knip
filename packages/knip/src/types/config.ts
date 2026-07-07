@@ -53,6 +53,11 @@ export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, 
 
 export type IgnoreIssues = Record<string, IssueType[]>;
 
+export type CyclesConfig = {
+  allow?: string[][];
+  dynamicImports?: boolean;
+};
+
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
@@ -67,6 +72,7 @@ export interface Configuration {
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreFiles: NormalizedGlob;
+  cycles: CyclesConfig;
   ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;

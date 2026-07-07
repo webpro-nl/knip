@@ -26,8 +26,6 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
     paths: *paths
 
 # Automatically cancel in-progress actions on the same branch
