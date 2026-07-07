@@ -29,6 +29,7 @@ import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as eslint } from './eslint/index.ts';
+import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
@@ -189,6 +190,7 @@ export const Plugins = {
   drizzle,
   eleventy,
   eslint,
+  eve,
   execa,
   expo,
   'expressive-code': expressiveCode,
