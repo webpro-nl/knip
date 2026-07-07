@@ -34,12 +34,12 @@ test('Find dependencies from Serverless Framework TypeScript plugins', async () 
 
 test('Find imported TypeScript function handlers from Serverless Framework config', async () => {
   const options = await createOptions({ cwd: typescriptImportedFunctionsCwd });
-  const { issues } = await main(options);
+  const { counters } = await main(options);
 
-  assert(!('scripts/cjs-shim.mjs' in issues.files));
-  assert(!('scripts/secrets.cjs' in issues.files));
-  assert(!('src/functions/process-new-file/handler.ts' in issues.files));
-  assert(!('src/functions/process-new-file/message.ts' in issues.files));
-  assert('src/functions/process-new-file/unused.ts' in issues.files);
-  assert.deepEqual(issues.devDependencies, {});
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    processed: 9,
+    total: 9,
+  });
 });

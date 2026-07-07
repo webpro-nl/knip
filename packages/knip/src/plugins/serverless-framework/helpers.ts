@@ -1,5 +1,5 @@
-import { toDependency, toProductionEntry } from '../../util/input.ts';
-import { isInternal, join } from '../../util/path.ts';
+import { toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
 
 export const handlerToEntry = (handler: string) => {
   const dot = handler.lastIndexOf('.');
@@ -7,4 +7,4 @@ export const handlerToEntry = (handler: string) => {
 };
 
 export const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toProductionEntry(join(dir, plugin)) : toDependency(plugin);
+  isInternal(plugin) ? toDeferResolveProductionEntry(plugin, { dir }) : toDeferResolve(plugin, { dir });

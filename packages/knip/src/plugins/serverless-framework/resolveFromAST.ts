@@ -1,6 +1,15 @@
-import { Visitor, type Program } from 'oxc-parser';
+import type {
+  BindingIdentifier,
+  Expression,
+  IdentifierName,
+  IdentifierReference,
+  Node,
+  ObjectExpression,
+  Program,
+  TemplateLiteral,
+} from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
-import { collectPropertyValues, getImportMap, getPropertyKey, getStringValues } from '../../typescript/ast-helpers.ts';
+import { getImportMap, getPropertyKey, getStringValues } from '../../typescript/ast-helpers.ts';
 import { _parseFile, getStringValue } from '../../typescript/ast-nodes.ts';
 import type { Input } from '../../util/input.ts';
 import { toDependency, toProductionEntry } from '../../util/input.ts';
@@ -10,12 +19,38 @@ import { handlerToEntry, pluginToInput } from './helpers.ts';
 
 const serverlessFileReference = /\$\{file\(([^):]+)\)(?::[^}]*)?\}/g;
 
-const unwrapExpression = (node: any): any => {
+type Identifier = BindingIdentifier | IdentifierName | IdentifierReference;
+
+const isIdentifier = (node: Node | null | undefined, name?: string): node is Identifier =>
+  node?.type === 'Identifier' && (name === undefined || node.name === name);
+
+const isNode = (value: unknown): value is Node =>
+  value !== null &&
+  typeof value === 'object' &&
+  'type' in value &&
+  typeof (value as { type?: unknown }).type === 'string';
+
+const walkNode = (node: Node, visit: (node: Node) => void, seen = new Set<Node>()) => {
+  if (seen.has(node)) return;
+  seen.add(node);
+  visit(node);
+
+  for (const [key, value] of Object.entries(node)) {
+    if (key === 'parent') continue;
+    if (Array.isArray(value)) {
+      for (const item of value) if (isNode(item)) walkNode(item, visit, seen);
+    } else if (isNode(value)) {
+      walkNode(value, visit, seen);
+    }
+  }
+};
+
+const unwrapExpression = (node: Expression): Expression => {
   if (
-    node?.type === 'ParenthesizedExpression' ||
-    node?.type === 'TSAsExpression' ||
-    node?.type === 'TSSatisfiesExpression' ||
-    node?.type === 'TSTypeAssertion'
+    node.type === 'ParenthesizedExpression' ||
+    node.type === 'TSAsExpression' ||
+    node.type === 'TSSatisfiesExpression' ||
+    node.type === 'TSTypeAssertion'
   ) {
     return unwrapExpression(node.expression);
   }
@@ -23,33 +58,26 @@ const unwrapExpression = (node: any): any => {
   return node;
 };
 
-const containsIdentifier = (node: any, name: string, seen = new Set<any>()): boolean => {
-  if (!node || typeof node !== 'object') return false;
-  if (seen.has(node)) return false;
-  if (node.type === 'Identifier' && node.name === name) return true;
-
-  seen.add(node);
-
-  for (const value of Object.values(node)) {
-    if (Array.isArray(value)) {
-      if (value.some(item => containsIdentifier(item, name, seen))) return true;
-    } else if (containsIdentifier(value, name, seen)) {
-      return true;
-    }
-  }
-
-  return false;
+const containsIdentifier = (node: Node, name: string) => {
+  let result = false;
+  walkNode(node, node => {
+    if (isIdentifier(node, name)) result = true;
+  });
+  return result;
 };
 
-const getTemplateHandler = (node: any, containingFilePath: string, options: Parameters<ResolveFromAST>[1]) => {
-  if (node?.type !== 'TemplateLiteral') return;
-  if (node.expressions?.length !== 1) return;
+const getTemplateHandler = (
+  node: TemplateLiteral,
+  containingFilePath: string,
+  options: Parameters<ResolveFromAST>[1]
+) => {
+  if (node.expressions.length !== 1) return;
   if (!containsIdentifier(node.expressions[0], '__dirname')) return;
 
-  const prefix = node.quasis?.[0]?.value?.cooked ?? node.quasis?.[0]?.value?.raw;
-  const suffix = node.quasis?.[1]?.value?.cooked ?? node.quasis?.[1]?.value?.raw;
+  const prefix = node.quasis[0]?.value.cooked ?? node.quasis[0]?.value.raw;
+  const suffix = node.quasis[1]?.value.cooked ?? node.quasis[1]?.value.raw;
 
-  if (prefix !== '' || !suffix?.startsWith('/')) return;
+  if (prefix !== '' || !suffix.startsWith('/')) return;
 
   const absoluteContainingFilePath = toAbsolute(containingFilePath, options.cwd);
   const configRelativeDir = relative(options.configFileDir, dirname(absoluteContainingFilePath));
@@ -57,27 +85,178 @@ const getTemplateHandler = (node: any, containingFilePath: string, options: Para
   return join(configRelativeDir, suffix);
 };
 
-const getHandlerInputs = (node: any, containingFilePath: string, options: Parameters<ResolveFromAST>[1]) => {
-  const handler = getStringValue(node) ?? getTemplateHandler(node, containingFilePath, options);
+const getHandlerInputs = (node: Expression, containingFilePath: string, options: Parameters<ResolveFromAST>[1]) => {
+  const expression = unwrapExpression(node);
+  const handler =
+    getStringValue(expression) ??
+    (expression.type === 'TemplateLiteral' ? getTemplateHandler(expression, containingFilePath, options) : undefined);
   return handler ? [handlerToEntry(handler)] : [];
 };
 
-const getHandlerInputsFromProgram = (
-  program: Program,
+const getObjectPropertyValue = (node: ObjectExpression, name: string) => {
+  for (const prop of node.properties) {
+    if (prop.type === 'Property' && getPropertyKey(prop) === name) return prop.value;
+  }
+};
+
+const getTopLevelObjectDeclarations = (program: Program) => {
+  const declarations = new Map<string, Expression>();
+
+  const addDeclaration = (node: Node) => {
+    if (node.type === 'FunctionDeclaration' && node.id) {
+      declarations.set(node.id.name, node);
+      return;
+    }
+
+    if (node.type !== 'VariableDeclaration') return;
+    for (const declaration of node.declarations) {
+      if (isIdentifier(declaration.id) && declaration.init) declarations.set(declaration.id.name, declaration.init);
+    }
+  };
+
+  for (const statement of program.body) {
+    addDeclaration(statement);
+    if (statement.type === 'ExportNamedDeclaration' && statement.declaration) addDeclaration(statement.declaration);
+  }
+
+  return declarations;
+};
+
+type Declarations = ReturnType<typeof getTopLevelObjectDeclarations>;
+
+const getReturnedObjectExpressions = (node: Expression, declarations: Declarations) => {
+  const expression = unwrapExpression(node);
+
+  if (expression.type === 'ArrowFunctionExpression') {
+    if (expression.body.type !== 'BlockStatement') return getObjectExpressions(expression.body, declarations);
+
+    return expression.body.body.flatMap(statement =>
+      statement.type === 'ReturnStatement' && statement.argument
+        ? getObjectExpressions(statement.argument, declarations)
+        : []
+    );
+  }
+
+  if (expression.type === 'FunctionDeclaration' || expression.type === 'FunctionExpression') {
+    if (!expression.body) return [];
+
+    return expression.body.body.flatMap(statement =>
+      statement.type === 'ReturnStatement' && statement.argument
+        ? getObjectExpressions(statement.argument, declarations)
+        : []
+    );
+  }
+
+  return [];
+};
+
+const getObjectExpressions = (
+  node: Expression | undefined,
+  declarations: Declarations,
+  seen = new Set<string>()
+): ObjectExpression[] => {
+  if (!node) return [];
+
+  const expression = unwrapExpression(node);
+
+  if (expression.type === 'ObjectExpression') return [expression];
+  if (expression.type === 'ConditionalExpression') {
+    return [
+      ...getObjectExpressions(expression.consequent, declarations, seen),
+      ...getObjectExpressions(expression.alternate, declarations, seen),
+    ];
+  }
+  if (expression.type === 'CallExpression' && isIdentifier(expression.callee)) {
+    const declaration = declarations.get(expression.callee.name);
+    return declaration ? getReturnedObjectExpressions(declaration, declarations) : [];
+  }
+  if (isIdentifier(expression)) {
+    if (seen.has(expression.name)) return [];
+    const declaration = declarations.get(expression.name);
+    if (!declaration) return [];
+
+    seen.add(expression.name);
+    return getObjectExpressions(declaration, declarations, seen);
+  }
+
+  return getReturnedObjectExpressions(expression, declarations);
+};
+
+const getObjectExpression = (node: Expression | undefined, declarations: Declarations) =>
+  getObjectExpressions(node, declarations)[0];
+
+const walkResolvedNode = (
+  node: Node,
+  declarations: Declarations,
+  visit: (node: Node) => void,
+  seen = new Set<Node>()
+) => {
+  if (seen.has(node)) return;
+  seen.add(node);
+  visit(node);
+
+  if (isIdentifier(node)) {
+    const declaration = declarations.get(node.name);
+    if (declaration) walkResolvedNode(declaration, declarations, visit, seen);
+  }
+
+  for (const [key, value] of Object.entries(node)) {
+    if (key === 'parent') continue;
+    if (Array.isArray(value)) {
+      for (const item of value) if (isNode(item)) walkResolvedNode(item, declarations, visit, seen);
+    } else if (isNode(value)) {
+      walkResolvedNode(value, declarations, visit, seen);
+    }
+  }
+};
+
+const getServerlessConfigObject = (program: Program, declarations: Declarations) => {
+  const getConfig = (node: Expression) => getObjectExpression(node, declarations);
+
+  for (const statement of program.body) {
+    if (statement.type === 'ExportDefaultDeclaration') {
+      if (statement.declaration.type === 'TSInterfaceDeclaration') continue;
+      const config = getConfig(statement.declaration);
+      if (config) return config;
+    }
+
+    if (statement.type !== 'ExpressionStatement') continue;
+    const expression = statement.expression;
+    if (expression.type !== 'AssignmentExpression') continue;
+    if (!isMemberExpressionPath(expression.left, ['module', 'exports'])) continue;
+    const config = getConfig(expression.right);
+    if (config) return config;
+  }
+};
+
+const isMemberExpressionPath = (node: Node, path: string[]): boolean => {
+  const [first, ...rest] = path;
+  if (!first) return false;
+  if (rest.length === 0) return isIdentifier(node, first);
+  if (node.type !== 'MemberExpression' || node.computed) return false;
+  return isMemberExpressionPath(node.object, path.slice(0, -1)) && isIdentifier(node.property, path.at(-1));
+};
+
+const getHandlerInputsFromFunctionObject = (
+  functionConfig: ObjectExpression,
   containingFilePath: string,
   options: Parameters<ResolveFromAST>[1]
 ) => {
-  const inputs: Input[] = [];
-  const visitor = new Visitor({
-    Property(node) {
-      if (getPropertyKey(node) === 'handler') inputs.push(...getHandlerInputs(node.value, containingFilePath, options));
-    },
-  });
-  visitor.visit(program);
-  return inputs;
+  const handler = getObjectPropertyValue(functionConfig, 'handler');
+  return handler ? getHandlerInputs(handler, containingFilePath, options) : [];
 };
 
-const getHandlerInputsFromImportedFunctionConfigs = (program: Program, options: Parameters<ResolveFromAST>[1]) => {
+const getImportedFunctionObject = (program: Program, identifierName: string) => {
+  const declarations = getTopLevelObjectDeclarations(program);
+  const declaration = declarations.get(identifierName);
+  return getObjectExpression(declaration, declarations);
+};
+
+const getFunctionInputsFromObject = (
+  functions: ObjectExpression,
+  program: Program,
+  options: Parameters<ResolveFromAST>[1]
+) => {
   const inputs: Input[] = [];
   const importMap = getImportMap(program);
   const visited = new Set<string>();
@@ -93,34 +272,49 @@ const getHandlerInputsFromImportedFunctionConfigs = (program: Program, options: 
     if (visited.has(resolvedFilePath)) return;
 
     visited.add(resolvedFilePath);
+    inputs.push(toProductionEntry(relative(options.configFileDir, resolvedFilePath)));
 
-    const sourceText = options.readFile(resolvedFilePath);
-    if (!sourceText) return;
+    try {
+      const sourceText = options.readFile(resolvedFilePath);
+      if (!sourceText) return;
 
-    const importedProgram = _parseFile(resolvedFilePath, sourceText).program;
-    inputs.push(...getHandlerInputsFromProgram(importedProgram, resolvedFilePath, options));
+      const importedProgram = _parseFile(resolvedFilePath, sourceText).program;
+      const functionConfig = getImportedFunctionObject(importedProgram, identifierName);
+      if (functionConfig) inputs.push(...getHandlerInputsFromFunctionObject(functionConfig, resolvedFilePath, options));
+    } catch {}
   };
 
-  const visitor = new Visitor({
-    Property(node) {
-      if (getPropertyKey(node) !== 'functions') return;
-      const functions = unwrapExpression(node.value);
-      if (functions?.type !== 'ObjectExpression') return;
+  for (const prop of functions.properties) {
+    if (prop.type !== 'Property') continue;
+    const value = unwrapExpression(prop.value);
 
-      for (const prop of functions.properties ?? []) {
-        if (prop.type !== 'Property') continue;
-        if (prop.value?.type === 'Identifier') addImportedFunctionConfig(prop.value.name);
-      }
-    },
-  });
-  visitor.visit(program);
+    if (value.type === 'Identifier') {
+      addImportedFunctionConfig(value.name);
+    } else if (value.type === 'ObjectExpression') {
+      inputs.push(...getHandlerInputsFromFunctionObject(value, options.configFilePath, options));
+    }
+  }
 
   return inputs;
 };
 
-const getServerlessFileReferenceInputs = (program: Program, configFileDir: string) => {
+const getFunctionInputs = (
+  config: ObjectExpression,
+  program: Program,
+  declarations: Declarations,
+  options: Parameters<ResolveFromAST>[1]
+) => {
+  const functions = getObjectExpression(getObjectPropertyValue(config, 'functions'), declarations);
+  return functions ? getFunctionInputsFromObject(functions, program, options) : [];
+};
+
+const getServerlessFileReferenceInputs = (
+  config: ObjectExpression,
+  declarations: Declarations,
+  configFileDir: string
+) => {
   const inputs: Input[] = [];
-  const addFileReferences = (node: any) => {
+  const addFileReferences = (node: Node) => {
     const value = getStringValue(node);
     if (!value) return;
 
@@ -130,35 +324,56 @@ const getServerlessFileReferenceInputs = (program: Program, configFileDir: strin
     }
   };
 
-  const visitor = new Visitor({
-    Property(node) {
-      addFileReferences(node.value);
-    },
-  });
-  visitor.visit(program);
+  walkResolvedNode(config, declarations, addFileReferences);
 
   return inputs;
 };
 
-const getEsbuildInjectInputs = (program: Program, configFileDir: string) => {
+const getPluginInputs = (config: ObjectExpression, configFileDir: string) => {
+  const plugins = getObjectPropertyValue(config, 'plugins');
+  return plugins ? Array.from(getStringValues(plugins)).map(plugin => pluginToInput(plugin, configFileDir)) : [];
+};
+
+const getEsbuildConfigObjects = (config: ObjectExpression, declarations: Declarations) => {
+  const objects: ObjectExpression[] = [];
+  const customObjects = getObjectExpressions(getObjectPropertyValue(config, 'custom'), declarations);
+  const buildObjects = getObjectExpressions(getObjectPropertyValue(config, 'build'), declarations);
+
+  for (const custom of customObjects) {
+    objects.push(...getObjectExpressions(getObjectPropertyValue(custom, 'esbuild'), declarations));
+  }
+
+  for (const build of buildObjects) {
+    objects.push(...getObjectExpressions(getObjectPropertyValue(build, 'esbuild'), declarations));
+  }
+
+  return objects;
+};
+
+const getEsbuildInjectInputs = (config: ObjectExpression, declarations: Declarations, configFileDir: string) => {
   const inputs: Input[] = [];
-  const visitor = new Visitor({
-    Property(node) {
-      if (getPropertyKey(node) !== 'inject') return;
+  for (const esbuildConfig of getEsbuildConfigObjects(config, declarations)) {
+    for (const node of esbuildConfig.properties) {
+      if (node.type !== 'Property' || getPropertyKey(node) !== 'inject') continue;
       for (const value of getStringValues(node.value)) {
         if (value.startsWith('.')) inputs.push(toProductionEntry(join(configFileDir, value)));
       }
-    },
-  });
-  visitor.visit(program);
+    }
+  }
+
   return inputs;
 };
 
-export const getInputsFromAST: ResolveFromAST = (program, options) => [
-  ...getHandlerInputsFromProgram(program, options.configFilePath, options),
-  ...getHandlerInputsFromImportedFunctionConfigs(program, options),
-  ...Array.from(collectPropertyValues(program, 'plugins')).map(plugin => pluginToInput(plugin, options.configFileDir)),
-  ...getServerlessFileReferenceInputs(program, options.configFileDir),
-  ...getEsbuildInjectInputs(program, options.configFileDir),
-  ...(collectPropertyValues(program, 'esbuild').size > 0 ? [toDependency('esbuild', { optional: true })] : []),
-];
+export const getInputsFromAST: ResolveFromAST = (program, options) => {
+  const declarations = getTopLevelObjectDeclarations(program);
+  const config = getServerlessConfigObject(program, declarations);
+  if (!config) return [];
+
+  return [
+    ...getFunctionInputs(config, program, declarations, options),
+    ...getPluginInputs(config, options.configFileDir),
+    ...getServerlessFileReferenceInputs(config, declarations, options.configFileDir),
+    ...getEsbuildInjectInputs(config, declarations, options.configFileDir),
+    ...(getEsbuildConfigObjects(config, declarations).length > 0 ? [toDependency('esbuild', { optional: true })] : []),
+  ];
+};
