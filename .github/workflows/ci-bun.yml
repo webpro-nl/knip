@@ -3,8 +3,7 @@ name: Tests (Bun)
 on:
   workflow_dispatch:
   pull_request:
-    paths: &paths
-      # All package sources (knip lints across the monorepo and analyzes the repo itself)
+    paths: &paths # All package sources (knip lints across the monorepo and analyzes the repo itself)
       - 'packages/**'
       - '!packages/docs/**/*.md'
       - '!packages/docs/**/*.mdx'

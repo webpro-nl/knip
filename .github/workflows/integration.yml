@@ -8,8 +8,7 @@ on:
         type: boolean
         default: false
   pull_request:
-    paths: &paths
-      # Sources of the three packages published to pkg.pr.new
+    paths: &paths # Sources of the three packages published to pkg.pr.new
       - 'packages/knip/**'
       - '!packages/knip/test/**'
       - '!packages/knip/fixtures/**'
