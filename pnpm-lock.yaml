@@ -46,9 +46,15 @@ importers:
       '@astrojs/starlight':
         specifier: 0.40.0
         version: 0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)
+      '@fontsource-variable/fraunces':
+        specifier: 5.2.9
+        version: 5.2.9
       sharp:
         specifier: 0.35.1
         version: 0.35.1
+      starlight-theme-rapide:
+        specifier: 0.5.2
+        version: 0.5.2(@astrojs/starlight@0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))
     devDependencies:
       '@astrojs/check':
         specifier: 0.9.9
@@ -689,6 +695,9 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.43.1':
     resolution: {integrity: sha512-JWf8wdbZSNoGY4TFv3lmt3/NNDaCP7iYL6rRYD05g8YYjKL62hKUHLl5+B47+v0+bqbuMhXDN7qz2wywFUvMkg==}
+
+  '@fontsource-variable/fraunces@5.2.9':
+    resolution: {integrity: sha512-Y6IjunlN9Ni723np+GIgAaKzCDBrPRrqNi01TZxHs5wtHYROWFM9W6yiT+/gGwSjWIRD18oX17kD/BRWekc/Lw==}
 
   '@hono/node-server@1.19.14':
     resolution: {integrity: sha512-GwtvgtXxnWsucXvbQXkRgqksiH2Qed37H9xHZocE5sA3N8O8O8/8FA3uclQXxXVzc9XBZuEOMK7+r02FmSpHtw==}
@@ -4558,6 +4567,12 @@ packages:
   spdx-license-ids@3.0.23:
     resolution: {integrity: sha512-CWLcCCH7VLu13TgOH+r8p1O/Znwhqv/dbb6lqWy67G+pT1kHmeD/+V36AVb/vq8QMIQwVShJ6Ssl5FPh0fuSdw==}
 
+  starlight-theme-rapide@0.5.2:
+    resolution: {integrity: sha512-4kNJutt0/3E0rjZvG9hvKeTTHGOHC97t2ZQDwDcokTM25yLgxavFu7BCm2Dm2UTw7fJpRXpu4gUWJ9xAOBmNww==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@astrojs/starlight': '>=0.34.0'
+
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
     engines: {node: '>= 0.8'}
@@ -5684,6 +5699,8 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.43.1':
     dependencies:
       '@expressive-code/core': 0.43.1
+
+  '@fontsource-variable/fraunces@5.2.9': {}
 
   '@hono/node-server@1.19.14(hono@4.12.26)':
     dependencies:
@@ -10091,6 +10108,10 @@ snapshots:
       spdx-license-ids: 3.0.23
 
   spdx-license-ids@3.0.23: {}
+
+  starlight-theme-rapide@0.5.2(@astrojs/starlight@0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)):
+    dependencies:
+      '@astrojs/starlight': 0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)
 
   statuses@2.0.2: {}
 

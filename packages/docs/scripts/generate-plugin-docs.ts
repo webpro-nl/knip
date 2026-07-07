@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Root } from 'mdast';
 import remarkDirective from 'remark-directive';
 import remarkFrontmatter from 'remark-frontmatter';
@@ -45,7 +45,7 @@ for await (const dir of directories) {
   if (dir.isDirectory() && !dir.name.startsWith('_')) {
     const pluginName = dir.name;
     const pluginDir = path.join(pluginsDir, pluginName);
-    const mod = await import(path.join(pluginDir, 'index.ts'));
+    const mod = await import(pathToFileURL(path.join(pluginDir, 'index.ts')).href);
     const plugin: Plugin = mod.default;
     const docs: undefined | { note: string; entry?: string[]; production?: string[] } = mod.docs;
 

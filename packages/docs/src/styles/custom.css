@@ -1,8 +1,10 @@
-@import url("./theme-dark.css");
-@import url("./theme-light.css");
-@import url("./hero.css");
-@import url("./content.css");
-@import url("./cards.css");
-@import url("./links.css");
-@import url("./expressive-code.css");
-@import url("./sponsors.css");
+@layer starlight, rapide, knip;
+
+@import "@fontsource-variable/fraunces/index.css";
+@import "@fontsource-variable/fraunces/wght-italic.css";
+
+@import "./theme.css";
+@import "./hero.css";
+@import "./content.css";
+@import "./sponsors.css";
+@import "./testimonials.css";

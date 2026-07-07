@@ -20,7 +20,9 @@
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
     "@astrojs/starlight": "0.40.0",
-    "sharp": "0.35.1"
+    "@fontsource-variable/fraunces": "5.2.9",
+    "sharp": "0.35.1",
+    "starlight-theme-rapide": "0.5.2"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",

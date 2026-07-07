@@ -1,14 +1,9 @@
 import starlight from '@astrojs/starlight';
-import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
+import starlightThemeRapide from 'starlight-theme-rapide';
 import { fixInternalLinks } from './remark/fixInternalLinks.ts';
 import { transformDirectives } from './remark/transformDirectives.ts';
-
-const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
-  const settings = theme.settings.find(setting => setting.scope?.includes(scope));
-  if (settings) settings.settings.foreground = value;
-};
 
 export default defineConfig({
   site: 'https://knip.dev',
@@ -25,12 +20,8 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: 'Knip',
-      logo: {
-        light: './src/assets/title-light.svg',
-        dark: './src/assets/title-dark.svg',
-        replacesTitle: true,
-      },
+      title: 'Knip ✂️',
+      plugins: [starlightThemeRapide()],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
         { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
@@ -40,7 +31,8 @@ export default defineConfig({
         Head: './src/components/Head.astro',
         Footer: './src/components/Footer.astro',
       },
-      customCss: ['./src/styles/custom.css', './src/fonts/font-face.css'],
+      customCss: ['./src/styles/custom.css'],
+      lastUpdated: true,
       editLink: {
         baseUrl: 'https://github.com/webpro-nl/knip/edit/main/packages/docs/',
       },
@@ -124,26 +116,8 @@ export default defineConfig({
       ],
       expressiveCode: {
         emitExternalStylesheet: true,
-        styleOverrides: {
-          // @ts-expect-error deal with it
-          'frm-tooltipSuccessBg': 'var(--sl-color-orange)',
-          'frm-tooltipSuccessFg': 'var(--sl-color-white)',
-          'frm-edBg': 'var(--sl-color-black)',
-          'frm-edActTabBg': 'var(--sl-color-black)',
-          'frm-edActTabBrdCol': 'var(--sl-color-black)',
-          'frm-edTabBarBg': 'none',
-          'frm-edTabBarBrdBtmCol': 'none',
-          'frm-frameBoxShdCssVal': 'none',
-        },
         frames: {
           showCopyToClipboardButton: true,
-        },
-        themes: ['min-dark'],
-        customizeTheme: theme => {
-          setForeground(theme, 'entity.name.tag', '#f68a22');
-          setForeground(theme, 'entity.name.type', '#ededed');
-          setForeground(theme, 'string', '#ededed');
-          return theme;
         },
       },
     }),

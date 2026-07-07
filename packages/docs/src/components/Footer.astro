@@ -1,27 +1,139 @@
 ---
 import Default from '@astrojs/starlight/components/Footer.astro';
+
+const year = new Date().getFullYear();
 ---
 
 <style>
-  p {
-    border-top: 1px solid var(--sl-color-gray-3);
-    margin-top: 5rem !important;
-    padding-top: 1rem;
-    text-align: center;
+  .knip-footer {
+    margin-top: 5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--sl-color-gray-5);
   }
-  a {
+  .footer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr));
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (max-width: 60rem) {
+    .footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 30rem) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .brand .mark {
+    font-family: var(--sl-font);
+    font-size: 1.75rem;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: -0.02em;
     color: var(--sl-color-white);
-    margin: 0 0.5rem;
+    line-height: 1;
+  }
+  .brand .tag {
+    color: var(--sl-color-gray-3);
+    font-size: 0.9375rem;
+    max-width: 22rem;
+    line-height: 1.5;
+  }
+  .col h4 {
+    margin: 0 0 0.75rem;
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sl-color-gray-3);
+  }
+  .col a {
+    display: block;
+    padding: 0.25rem 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+  .col a:is(:hover, :focus-visible) {
+    color: var(--sl-color-accent-high);
+  }
+  .signature {
+    margin: 2.5rem 0 1rem !important;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    text-align: center;
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
+    font-family: var(--sl-font);
+    font-style: italic;
+  }
+  .signature .heart {
+    color: var(--sl-color-accent);
+    font-style: normal;
+    margin: 0 0.15rem;
+  }
+  .signature a {
+    color: var(--sl-color-white);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition:
+      color 150ms ease,
+      border-color 150ms ease;
+  }
+  .signature a:is(:hover, :focus-visible) {
+    color: var(--sl-color-accent-high);
+    border-bottom-color: var(--sl-color-accent);
   }
 </style>
 
 <Default {...Astro.props} />
-<p>
-  <a href="https://github.com/webpro-nl/knip/blob/main/LICENSE"
-    >ISC License</a
-  > © 2026
-  <a href="https://www.webpro.nl">Lars Kappert</a>
-</p>
+
+<footer class="knip-footer">
+  <div class="footer-grid">
+    <div class="brand">
+      <span class="mark">Knip</span>
+      <span class="tag">Find and fix unused files, dependencies and exports in your JavaScript & TypeScript projects.</span>
+    </div>
+    <div class="col">
+      <h4>Learn</h4>
+      <a href="/overview/getting-started">Getting started</a>
+      <a href="/reference/plugins">Plugins</a>
+      <a href="/reference/cli">CLI reference</a>
+      <a href="/playground">Playground</a>
+    </div>
+    <div class="col">
+      <h4>Community</h4>
+      <a href="https://github.com/webpro-nl/knip" rel="noopener">GitHub</a>
+      <a href="https://bsky.app/profile/webpro.nl" rel="noopener">Bluesky</a>
+      <a href="/sponsors">Sponsors</a>
+      <a href="/guides/contributing">Contributing</a>
+    </div>
+    <div class="col">
+      <h4>Project</h4>
+      <a href="https://www.npmjs.com/package/knip" rel="noopener">npm</a>
+      <a href="/guides/issue-reproduction">Report an issue</a>
+      <a href="/reference/faq">FAQ</a>
+      <a href="https://github.com/webpro-nl/knip/blob/main/LICENSE" rel="noopener">ISC License</a>
+    </div>
+  </div>
+  <p class="signature">
+    Crafted with <span class="heart" aria-hidden="true">♥</span> by <a href="https://www.webpro.nl">Lars Kappert</a> · © {year}
+  </p>
+</footer>
+
 <script async defer src="https://smplnltcs.knip.dev/latest.js"></script>
 <noscript>
   <img

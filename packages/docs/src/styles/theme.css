@@ -1,0 +1,38 @@
+@layer knip {
+  :root {
+    --sl-font: "Fraunces Variable", "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, serif;
+    --sl-font-system-mono:
+      ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+
+    --sl-content-width: 50rem;
+  }
+
+  :root,
+  ::backdrop {
+    --sl-hue-accent: 44;
+    --sl-color-accent-low: oklch(24% 0.06 var(--sl-hue-accent));
+    --sl-color-accent: oklch(66% 0.19 var(--sl-hue-accent));
+    --sl-color-accent-high: oklch(84% 0.13 var(--sl-hue-accent));
+  }
+
+  :root[data-theme="light"],
+  [data-theme="light"] ::backdrop {
+    --sl-hue-accent: 40;
+    --sl-color-accent-low: oklch(96% 0.03 var(--sl-hue-accent));
+    --sl-color-accent: oklch(56% 0.19 var(--sl-hue-accent));
+    --sl-color-accent-high: oklch(42% 0.16 var(--sl-hue-accent));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-optical-sizing: auto;
+    font-variation-settings:
+      "SOFT" 50,
+      "opsz" 144;
+    letter-spacing: -0.015em;
+  }
+}
