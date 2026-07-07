@@ -8,9 +8,24 @@ on:
         type: boolean
         default: false
   pull_request:
+    paths: &paths # Sources of the three packages published to pkg.pr.new
+      - 'packages/knip/**'
+      - '!packages/knip/test/**'
+      - '!packages/knip/fixtures/**'
+      - 'packages/language-server/**'
+      - 'packages/mcp-server/**'
+      # Root workspace / dependency config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      # This workflow and its support files
+      - '.github/workflows/integration.yml'
+      - '.github/workflows/scripts/**'
+      - '.github/workflows/snapshots/**'
   push:
     branches:
       - '**'
+    paths: *paths
 
 # Automatically cancel in-progress actions on the same branch
 concurrency:

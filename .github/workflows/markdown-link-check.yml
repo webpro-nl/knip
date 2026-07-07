@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      # Any markdown across the monorepo
+      - '**/*.md'
+      - '**/*.mdx'
+      # This workflow and its config
+      - '.github/workflows/markdown-link-check.yml'
+      - '.github/workflows/markdown-link-check.json'
 
 # Automatically cancel in-progress actions on the same branch
 concurrency:

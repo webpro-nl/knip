@@ -3,9 +3,23 @@ name: Tests (against typescript@next in Node.js v24)
 on:
   workflow_dispatch:
   pull_request:
+    paths: &paths # All package sources (knip lints across the monorepo and analyzes the repo itself)
+      - 'packages/**'
+      - '!packages/docs/**/*.md'
+      - '!packages/docs/**/*.mdx'
+      # Root workspace / dependency / lint / knip-on-self config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.oxlintrc.json'
+      - '.oxfmtrc.json'
+      - 'knip.json'
+      # This workflow file
+      - '.github/workflows/ci.yml'
   push:
     branches:
       - '**'
+    paths: *paths
 
 # Automatically cancel in-progress actions on the same branch
 concurrency:
