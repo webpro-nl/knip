@@ -101,6 +101,7 @@ const getImportsAndExports = (
       line: opts.line,
       col: opts.col,
       isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+      modifiers,
     });
 
     const file = internal.get(importFilePath);
@@ -196,6 +197,7 @@ const getImportsAndExports = (
             line,
             col,
             isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+            modifiers,
           });
         }
       }
@@ -219,6 +221,7 @@ const getImportsAndExports = (
           line,
           col,
           isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+          modifiers,
         });
       }
     }

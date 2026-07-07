@@ -1,4 +1,5 @@
-import type { Import, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
+import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, SIDE_EFFECTS } from '../constants.ts';
+import type { FileNode, Import, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
 import { getCachedExportedIdentifiers, setCachedExportedIdentifiers } from './cache.ts';
 import {
   forEachAliasReExport,
@@ -6,6 +7,11 @@ import {
   forEachPassThroughReExport,
   getStarReExportSources,
 } from './visitors.ts';
+
+const IGNORED_CYCLE_IMPORT_FLAGS = IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.DYNAMIC;
+
+export const getIgnoredCycleImportFlags = (includeDynamicImports: boolean) =>
+  includeDynamicImports ? IMPORT_FLAGS.ENTRY : IGNORED_CYCLE_IMPORT_FLAGS;
 
 export const getExportedIdentifiers = (
   graph: ModuleGraph,
@@ -62,6 +68,52 @@ export const getExportedIdentifiers = (
 
   setCachedExportedIdentifiers(graph, filePath, identifiers);
   return identifiers;
+};
+
+/** Internal modules imported by `node` through at least one runtime import not in `ignoredFlags`. */
+export const getRuntimeSuccessors = (node: FileNode, ignoredFlags = IGNORED_CYCLE_IMPORT_FLAGS): Set<string> => {
+  const successors = new Set<string>();
+  for (const _import of node.imports.imports) {
+    if (
+      _import.filePath &&
+      !_import.isTypeOnly &&
+      !(_import.modifiers & ignoredFlags) &&
+      node.imports.internal.has(_import.filePath)
+    ) {
+      successors.add(_import.filePath);
+    }
+  }
+  return successors;
+};
+
+const getImportKind = (importMaps: ImportMaps, identifier: string | undefined, modifiers: number) => {
+  if (modifiers & IMPORT_FLAGS.DYNAMIC) return 'dynamicImport';
+  if (identifier === IMPORT_STAR && importMaps.reExport.has(IMPORT_STAR)) return 'reExportStar';
+  if (identifier && importMaps.reExportNs.has(identifier)) return 'reExportNS';
+  if (identifier && importMaps.reExportAs.has(identifier)) return 'reExportAs';
+  if (identifier && importMaps.reExport.has(identifier)) return 'reExport';
+  if (identifier === IMPORT_STAR && importMaps.importNs.size > 0) return 'importNS';
+  if (identifier && importMaps.importAs.has(identifier)) return 'importAs';
+  if (identifier === OPAQUE) return 'dynamicImport';
+  if (identifier === SIDE_EFFECTS) return 'sideEffectImport';
+  return 'import';
+};
+
+export const getRuntimeImport = (node: FileNode, filePath: string, ignoredFlags = IGNORED_CYCLE_IMPORT_FLAGS) => {
+  const importMaps = node.imports.internal.get(filePath);
+  if (!importMaps) return;
+
+  let result: Import | undefined;
+  for (const _import of node.imports.imports) {
+    if (_import.filePath !== filePath || _import.isTypeOnly || _import.modifiers & ignoredFlags) continue;
+    if (!result || _import.line < result.line || (_import.line === result.line && _import.col < result.col)) {
+      result = _import;
+    }
+  }
+
+  if (!result) return;
+  const { specifier, pos, line, col, identifier, modifiers } = result;
+  return { kind: getImportKind(importMaps, identifier, modifiers), specifier, pos, line, col };
 };
 
 export const hasStrictlyEnumReferences = (importsForExport: ImportMaps | undefined, identifier: string): boolean => {

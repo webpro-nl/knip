@@ -208,6 +208,7 @@ export const ISSUE_TYPES = [
   'namespaceMembers',
   'duplicates',
   'catalog',
+  'cycles',
 ] as const;
 
 export const ISSUE_TYPE_TITLE = {
@@ -226,6 +227,7 @@ export const ISSUE_TYPE_TITLE = {
   namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
+  cycles: 'Circular dependencies',
 } as const;
 
 export const SYMBOL_TYPE = {
@@ -263,4 +265,5 @@ export const IMPORT_FLAGS = {
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
   AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
+  DYNAMIC: 1 << 8, // dynamic import(), excluded from cycle detection
 } as const;

@@ -56,6 +56,9 @@ Knip has shortcuts to include only specific issue types.
 
 3. The `--files` flag is a shortcut for `--include files`
 
+4. The `--cycles` flag is a shortcut for `--include cycles` (circular
+   dependencies, off by default)
+
 ## Rules
 
 Use `rules` in the configuration to customize the issue types that count towards
