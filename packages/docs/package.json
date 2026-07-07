@@ -21,8 +21,7 @@
     "@astro-community/astro-embed-youtube": "0.5.10",
     "@astrojs/starlight": "0.40.0",
     "@fontsource-variable/fraunces": "5.2.9",
-    "sharp": "0.35.1",
-    "starlight-theme-rapide": "0.5.2"
+    "sharp": "0.35.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",
@@ -37,6 +36,7 @@
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
     "remark-stringify": "11.0.0",
+    "starlight-theme-rapide": "0.5.2",
     "unified": "11.0.5",
     "unist-builder": "4.0.0",
     "unist-util-visit": "5.1.0"

@@ -52,9 +52,6 @@ importers:
       sharp:
         specifier: 0.35.1
         version: 0.35.1
-      starlight-theme-rapide:
-        specifier: 0.5.2
-        version: 0.5.2(@astrojs/starlight@0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))
     devDependencies:
       '@astrojs/check':
         specifier: 0.9.9
@@ -92,6 +89,9 @@ importers:
       remark-stringify:
         specifier: 11.0.0
         version: 11.0.0
+      starlight-theme-rapide:
+        specifier: 0.5.2
+        version: 0.5.2(@astrojs/starlight@0.40.0(astro@6.4.8(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))
       unified:
         specifier: 11.0.5
         version: 11.0.5
