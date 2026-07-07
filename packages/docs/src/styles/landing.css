@@ -1,0 +1,106 @@
+@layer knip {
+  .hero h1 {
+    font-size: clamp(4rem, 12vw, 8rem);
+    font-variation-settings:
+      "SOFT" 30,
+      "opsz" 144;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .hero img {
+    border: 4px solid var(--sl-color-white);
+    border-radius: 80px;
+  }
+
+  :root[data-theme="light"] .hero img {
+    border-color: var(--sl-color-black);
+  }
+
+  .sl-link-button.primary {
+    background-color: var(--sl-color-accent-low);
+    border-color: var(--sl-color-accent);
+    color: var(--sl-color-accent-high);
+  }
+
+  .sl-link-button.primary:is(:hover, :focus-visible) {
+    border-color: var(--sl-color-accent-high);
+    color: var(--sl-color-white);
+  }
+
+  [data-has-hero] .sl-markdown-content .sl-heading-wrapper:is(.level-h2, .level-h3):not(:where(.not-content *)) {
+    margin-top: 5rem;
+  }
+
+  [data-has-hero] .sl-markdown-content > .sl-heading-wrapper:is(.level-h2, .level-h3):first-child {
+    margin-top: 3rem;
+  }
+
+  .sl-markdown-content .badges p {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .sl-markdown-content .sponsor {
+    font-size: 1.75rem;
+    text-align: center;
+    margin: 2.5rem 0;
+    font-style: italic;
+  }
+
+  .sl-markdown-content p:has(> .sponsors-intro) {
+    text-align: center;
+    margin-top: 3rem;
+  }
+
+  .sl-markdown-content .sponsors-intro {
+    font-style: italic;
+  }
+
+  .projects {
+    margin: 4rem auto 6rem;
+  }
+
+  .sl-markdown-content p + lite-youtube {
+    margin-top: 2rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--sl-color-gray-5);
+    box-shadow: 0 12px 32px oklch(0% 0 0 / 0.25);
+    transition:
+      box-shadow 250ms ease,
+      transform 250ms ease;
+    max-width: 100%;
+  }
+
+  .sl-markdown-content p + lite-youtube:hover {
+    box-shadow: 0 20px 48px oklch(from var(--sl-color-accent) l c h / 0.25);
+    transform: translateY(-2px);
+  }
+
+  .no-title-cards .card-grid {
+    display: block;
+    columns: 3 20rem;
+    column-gap: 1rem;
+    grid-template-columns: none;
+  }
+
+  .no-title-cards .card-grid > * {
+    display: block;
+    width: 100%;
+    margin: 0 0 1rem;
+    padding: 1.25rem;
+    transform: none !important;
+    break-inside: avoid;
+  }
+
+  .no-title-cards .card {
+    gap: 0;
+  }
+
+  .no-title-cards .card .title {
+    display: none;
+  }
+}

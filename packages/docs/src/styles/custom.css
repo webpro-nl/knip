@@ -4,8 +4,7 @@
 @import "@fontsource-variable/fraunces/wght-italic.css";
 
 @import "./theme.css";
-@import "./hero.css";
 @import "./content.css";
+@import "./landing.css";
 @import "./sponsors.css";
-@import "./testimonials.css";
 @import "./expressive-code.css";
