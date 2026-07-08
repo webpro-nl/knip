@@ -29,6 +29,14 @@ const parseFile = (filePath: string, sourceText: string) => {
 
 export const _parseFile = timerify(parseFile);
 
+export const isAmbientDeclarationFile = (filePath: string, sourceText: string): boolean => {
+  try {
+    return _parseFile(filePath, sourceText).module.staticExports.length === 0;
+  } catch {
+    return false;
+  }
+};
+
 export type ResolveModule = (specifier: string, containingFile: string) => ResolvedModule | undefined;
 
 export interface ResolvedModule {

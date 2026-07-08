@@ -32,6 +32,7 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.ts';
+import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
 import { resolveImportGlobs } from '../typescript/glob-imports.ts';
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
@@ -537,7 +538,10 @@ export async function build({
     return paths;
   });
 
-  for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
+  for (const filePath of principal.getUnreferencedFiles()) {
+    if (IS_DTS.test(filePath) && isAmbientDeclarationFile(filePath, principal.readFile(filePath))) continue;
+    unreferencedFiles.add(filePath);
+  }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
   principal.reconcileCache(graph);
