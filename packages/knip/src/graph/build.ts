@@ -163,8 +163,11 @@ export async function build({
 
     await worker.init();
 
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies, dep =>
-      deputy.addReferencedDependency(name, dep)
+    const compilers = getIncludedCompilers(
+      new Map(chief.config.syncCompilers),
+      new Map(chief.config.asyncCompilers),
+      dependencies,
+      dep => deputy.addReferencedDependency(name, dep)
     );
     const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
       const ext = normalizeCompilerExtension(extension);
