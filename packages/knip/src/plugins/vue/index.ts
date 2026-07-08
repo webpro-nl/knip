@@ -45,8 +45,10 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
   return inputs;
 };
 
+const sfcCompilers = ['vue', 'nuxt', 'unplugin-vue', '@vitejs/plugin-vue'];
+
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('vue') || hasDependency('nuxt')) {
+  if (sfcCompilers.some(hasDependency)) {
     registerCompiler({ extension: '.vue', compiler: vueAutoImportCompiler });
   }
 };
