@@ -506,6 +506,10 @@
           "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
           "$ref": "#/definitions/plugin"
         },
+        "electron-vite": {
+          "title": "electron-vite plugin configuration (https://knip.dev/reference/plugins/electron-vite)",
+          "$ref": "#/definitions/plugin"
+        },
         "eleventy": {
           "title": "eleventy plugin configuration (https://knip.dev/reference/plugins/eleventy)",
           "$ref": "#/definitions/plugin"

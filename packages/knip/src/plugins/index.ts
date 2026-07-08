@@ -27,6 +27,7 @@ import { default as dependencyCruiser } from './dependency-cruiser/index.ts';
 import { default as docusaurus } from './docusaurus/index.ts';
 import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
+import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as eslint } from './eslint/index.ts';
 import { default as eve } from './eve/index.ts';
@@ -188,6 +189,7 @@ export const Plugins = {
   docusaurus,
   dotenv,
   drizzle,
+  'electron-vite': electronVite,
   eleventy,
   eslint,
   eve,
