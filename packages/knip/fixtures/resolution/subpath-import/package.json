@@ -4,6 +4,10 @@
     "#dep": {
       "node": "dep-node-native",
       "default": "./lib/dep-polyfill.js"
+    },
+    "#builtless": {
+      "node": "./dist/builtless.js",
+      "default": "./lib/builtless.ts"
     }
   },
   "dependencies": {

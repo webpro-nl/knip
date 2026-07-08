@@ -23,7 +23,10 @@ const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =
     tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
     ...baseOptions,
   });
-  const fallbackResolver = new ResolverFactory(baseOptions);
+  const fallbackResolver = new ResolverFactory({
+    ...baseOptions,
+    conditionNames: ['require', 'import', 'browser', 'default'],
+  });
 
   resolverInstances.push(resolver, fallbackResolver);
 
