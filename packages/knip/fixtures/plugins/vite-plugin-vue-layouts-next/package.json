@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/vite-plugin-vue-layouts-next",
+  "dependencies": {
+    "vue": "*",
+    "vite-plugin-vue-layouts-next": "*"
+  }
+}

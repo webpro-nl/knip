@@ -962,6 +962,22 @@
           "title": "unocss plugin configuration (https://knip.dev/reference/plugins/unocss)",
           "$ref": "#/definitions/plugin"
         },
+        "unplugin-auto-import": {
+          "title": "unplugin-auto-import plugin configuration (https://knip.dev/reference/plugins/unplugin-auto-import)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-components": {
+          "title": "unplugin-vue-components plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-components)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-markdown": {
+          "title": "unplugin-vue-markdown plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-markdown)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-router": {
+          "title": "unplugin-vue-router plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-router)",
+          "$ref": "#/definitions/plugin"
+        },
         "vercel": {
           "title": "vercel plugin configuration (https://knip.dev/reference/plugins/vercel)",
           "$ref": "#/definitions/plugin"
@@ -976,6 +992,10 @@
         },
         "vite": {
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-vue-layouts-next": {
+          "title": "vite-plugin-vue-layouts-next plugin configuration (https://knip.dev/reference/plugins/vite-plugin-vue-layouts-next)",
           "$ref": "#/definitions/plugin"
         },
         "vitepress": {

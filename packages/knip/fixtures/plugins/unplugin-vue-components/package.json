@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/unplugin-vue-components",
+  "dependencies": {
+    "vue": "*",
+    "unplugin-vue-components": "*"
+  }
+}

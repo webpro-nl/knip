@@ -145,10 +145,15 @@ export type PluginName =
   | 'typescript'
   | 'unbuild'
   | 'unocss'
+  | 'unplugin-auto-import'
+  | 'unplugin-vue-components'
+  | 'unplugin-vue-markdown'
+  | 'unplugin-vue-router'
   | 'vercel'
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vite-plugin-vue-layouts-next'
   | 'vitepress'
   | 'vitest'
   | 'vue'
@@ -308,10 +313,15 @@ export const pluginNames = [
   'typescript',
   'unbuild',
   'unocss',
+  'unplugin-auto-import',
+  'unplugin-vue-components',
+  'unplugin-vue-markdown',
+  'unplugin-vue-router',
   'vercel',
   'vercel-og',
   'vike',
   'vite',
+  'vite-plugin-vue-layouts-next',
   'vitepress',
   'vitest',
   'vue',

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/unplugin-vue-router",
+  "dependencies": {
+    "vue": "*",
+    "vue-router": "*"
+  }
+}
