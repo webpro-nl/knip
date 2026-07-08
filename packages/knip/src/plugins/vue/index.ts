@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { type Input, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { vueAutoImportCompiler } from '../_vue/auto-import.ts';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
-import compiler from './compiler.ts';
 import type { VueConfig, WebpackConfiguration } from './types.ts';
 
 // https://cli.vuejs.org/config/
@@ -46,7 +46,9 @@ const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
 };
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('vue') || hasDependency('nuxt')) registerCompiler({ extension: '.vue', compiler });
+  if (hasDependency('vue') || hasDependency('nuxt')) {
+    registerCompiler({ extension: '.vue', compiler: vueAutoImportCompiler });
+  }
 };
 
 const plugin: Plugin = {
