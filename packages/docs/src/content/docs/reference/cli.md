@@ -244,6 +244,8 @@ Shortcut to report only circular dependencies:
 --include cycles
 ```
 
+Also see the [cycles reporter][12].
+
 ### `--tags`
 
 Exports can be tagged with known or arbitrary JSDoc/TSDoc tags:
@@ -284,7 +286,7 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][12].
+Read more at [auto-fix][13].
 
 ### `--fix-type`
 
@@ -306,7 +308,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][13].
+Preprocess the results before providing it to the [reporter(s)][14].
 
 Can be repeated. Examples:
 
@@ -318,7 +320,7 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
-Also see [Reporters & Preprocessors][14].
+Also see [Reporters & Preprocessors][15].
 
 ### `--preprocessor-options [json]`
 
@@ -347,7 +349,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][14].
+Also see [Reporters & Preprocessors][15].
 
 ### `--reporter-options [json]`
 
@@ -401,7 +403,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][15].
+Show [debug output][16].
 
 ### `--memory`
 
@@ -478,7 +480,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][16]).
+`performance.timerify` ([GitHub issue][17]).
 
 ### `--duration`
 
@@ -508,20 +510,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][17].
+Also see [Trace][18].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][18].
+[--trace][19].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][18].
+Trace export name to see where it's imported. Implies [--trace][19].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][18].
+Trace file to see where its exports are imported. Implies [--trace][19].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -534,10 +536,11 @@ Trace file to see where its exports are imported. Implies [--trace][18].
 [9]: ../features/monorepos-and-workspaces.md#filter-workspaces
 [10]: ../guides/namespace-imports.md
 [11]: ./issue-types.md
-[12]: ../features/auto-fix.mdx
-[13]: #--reporter-reporter
-[14]: ../features/reporters.md
-[15]: ../guides/troubleshooting.md#debug
-[16]: https://github.com/oven-sh/bun/issues/9271
-[17]: ../guides/troubleshooting.md#trace
-[18]: #--trace
+[12]: ../features/reporters.md#cycles
+[13]: ../features/auto-fix.mdx
+[14]: #--reporter-reporter
+[15]: ../features/reporters.md
+[16]: ../guides/troubleshooting.md#debug
+[17]: https://github.com/oven-sh/bun/issues/9271
+[18]: ../guides/troubleshooting.md#trace
+[19]: #--trace

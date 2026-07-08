@@ -28,13 +28,17 @@ values and types on imported namespaces.
 
 ## Circular dependencies
 
-Knip detects circular dependencies as an opt-in [`cycles`][5] issue type, and
-the [editor integrations][6] visualize them inline. Other dedicated tools
-include [DPDM][7], [Madge][8] and [skott][9].
+Knip reports circular dependencies as an opt-in [`cycles`][5] issue type. The
+[editor integrations][6] show cyclic paths directly in IDE.
+
+Other dedicated tools include [DPDM][7], [Madge][8] and [skott][9]. Linters such
+as ESLint have similar plugins and rules, e.g. the `eslint-plugin-import-x`
+plugin has the [import-x/no-cycle][10] and oxlint has the [import/no-cycle][11]
+rule.
 
 ## Cleanup
 
-The [e18e.dev][10] website and in particular the [Cleanup][11] section is a
+The [e18e.dev][12] website and in particular the [Cleanup][13] section is a
 great resource when dealing with technical debt.
 
 [1]: https://eslint.org
@@ -42,9 +46,11 @@ great resource when dealing with technical debt.
 [3]: https://oxc.rs/docs/guide/usage/linter.html
 [4]: https://github.com/webpro-nl/remove-unused-vars
 [5]: ./issue-types.md
-[6]: ./integrations.md
+[6]: ./integrations.md#circular-dependencies
 [7]: https://github.com/acrazing/dpdm
 [8]: https://github.com/pahen/madge
 [9]: https://github.com/antoine-coulon/skott
-[10]: https://e18e.dev
-[11]: https://e18e.dev/guide/cleanup.html
+[10]: https://github.com/un-ts/eslint-plugin-import-x/blob/master/docs/rules/no-cycle.md
+[11]: https://oxc.rs/docs/guide/usage/linter/rules/import/no-cycle.html
+[12]: https://e18e.dev
+[13]: https://e18e.dev/guide/cleanup.html
