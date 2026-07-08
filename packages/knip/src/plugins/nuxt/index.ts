@@ -16,13 +16,12 @@ import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
-  collectIdentifiers,
   collectLocalImportPaths,
-  collectTemplateInfo,
-  getVueSfc,
+  createAutoImportMaps,
+  createTsCompiler,
+  createVueCompiler,
   readAndParseFile,
-  toKebabCase,
-} from './helpers.ts';
+} from '../_vue/auto-import.ts';
 import type { NuxtConfig } from './types.ts';
 
 const title = 'Nuxt';
@@ -88,10 +87,7 @@ const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [
 
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
   if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
-    const vueSfc = getVueSfc(cwd);
-
-    const importMap = new Map<string, string>();
-    const componentMap = new Map<string, string[]>();
+    const maps = createAutoImportMaps();
 
     const definitionFiles = [
       '.nuxt/imports.d.ts',
@@ -102,74 +98,11 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 
     for (const file of definitionFiles) {
       const path = join(cwd, file);
-      const result = readAndParseFile(path);
-      const maps = buildAutoImportMap(path, result);
-      for (const [id, specifier] of maps.importMap) importMap.set(id, specifier);
-      for (const [id, components] of maps.componentMap) {
-        const store = componentMap.get(id);
-        if (store) store.push(...components);
-        else componentMap.set(id, components);
-      }
+      buildAutoImportMap(path, readAndParseFile(path), maps, file.endsWith('components.d.ts'));
     }
 
-    const getSyntheticImports = (identifiers: Set<string>, templateTags?: Set<string>) => {
-      if (importMap.size === 0 && (!templateTags || componentMap.size === 0)) return [];
-
-      const syntheticImports: string[] = [];
-
-      for (const [name, specifier] of importMap) {
-        if (identifiers.has(name)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
-      }
-
-      if (templateTags) {
-        for (const [name, specifiers] of componentMap) {
-          const kebab = toKebabCase(name);
-          if (
-            templateTags.has(name) ||
-            templateTags.has(kebab) ||
-            templateTags.has(`Lazy${name}`) ||
-            templateTags.has(`lazy-${kebab}`)
-          ) {
-            syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
-            for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
-          }
-        }
-      }
-
-      return syntheticImports;
-    };
-
-    const compiler = (source: string, path: string) => {
-      const { descriptor } = vueSfc.parse(source, path);
-      const scripts: string[] = [];
-
-      if (descriptor.script?.content) scripts.push(descriptor.script.content);
-      if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
-
-      const identifiers = scripts.length === 0 ? new Set<string>() : collectIdentifiers(scripts.join('\n'), path);
-      let templateTags: Set<string> | undefined;
-      if (descriptor.template?.ast) {
-        const info = collectTemplateInfo(descriptor.template.ast);
-        templateTags = info.tags;
-        for (const id of info.identifiers) identifiers.add(id);
-      }
-      const synthetic = getSyntheticImports(identifiers, templateTags);
-      scripts.push(...synthetic);
-
-      return scripts.join(';\n');
-    };
-
-    const tsCompiler = (source: string, path: string) => {
-      // TODO Can we filter out more files that are outside the realm of auto-imports?
-      if (path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
-      const identifiers = collectIdentifiers(source, path);
-      const syntheticImports = getSyntheticImports(identifiers);
-      if (syntheticImports.length === 0) return source;
-      return `${source}\n${syntheticImports.join('\n')}`;
-    };
-
-    registerCompiler({ extension: '.vue', compiler });
-    registerCompiler({ extension: '.ts', compiler: tsCompiler });
+    registerCompiler({ extension: '.vue', compiler: createVueCompiler(maps, cwd) });
+    registerCompiler({ extension: '.ts', compiler: createTsCompiler(maps) });
   }
 };
 
