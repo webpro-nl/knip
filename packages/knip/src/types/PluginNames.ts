@@ -146,6 +146,7 @@ export type PluginName =
   | 'unbuild'
   | 'unocss'
   | 'unplugin-auto-import'
+  | 'unplugin-icons'
   | 'unplugin-vue-components'
   | 'unplugin-vue-markdown'
   | 'unplugin-vue-router'
@@ -153,6 +154,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vite-plugin-pages'
   | 'vite-plugin-vue-layouts-next'
   | 'vitepress'
   | 'vitest'
@@ -314,6 +316,7 @@ export const pluginNames = [
   'unbuild',
   'unocss',
   'unplugin-auto-import',
+  'unplugin-icons',
   'unplugin-vue-components',
   'unplugin-vue-markdown',
   'unplugin-vue-router',
@@ -321,6 +324,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vite-plugin-pages',
   'vite-plugin-vue-layouts-next',
   'vitepress',
   'vitest',

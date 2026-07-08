@@ -966,6 +966,10 @@
           "title": "unplugin-auto-import plugin configuration (https://knip.dev/reference/plugins/unplugin-auto-import)",
           "$ref": "#/definitions/plugin"
         },
+        "unplugin-icons": {
+          "title": "unplugin-icons plugin configuration (https://knip.dev/reference/plugins/unplugin-icons)",
+          "$ref": "#/definitions/plugin"
+        },
         "unplugin-vue-components": {
           "title": "unplugin-vue-components plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-components)",
           "$ref": "#/definitions/plugin"
@@ -992,6 +996,10 @@
         },
         "vite": {
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-pages": {
+          "title": "vite-plugin-pages plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pages)",
           "$ref": "#/definitions/plugin"
         },
         "vite-plugin-vue-layouts-next": {
