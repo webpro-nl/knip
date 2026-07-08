@@ -148,6 +148,7 @@ export type PluginName =
   | 'unplugin-auto-import'
   | 'unplugin-icons'
   | 'unplugin-vue-components'
+  | 'unplugin-vue-i18n'
   | 'unplugin-vue-markdown'
   | 'unplugin-vue-router'
   | 'vercel'
@@ -155,6 +156,7 @@ export type PluginName =
   | 'vike'
   | 'vite'
   | 'vite-plugin-pages'
+  | 'vite-plugin-pwa'
   | 'vite-plugin-vue-layouts-next'
   | 'vitepress'
   | 'vitest'
@@ -318,6 +320,7 @@ export const pluginNames = [
   'unplugin-auto-import',
   'unplugin-icons',
   'unplugin-vue-components',
+  'unplugin-vue-i18n',
   'unplugin-vue-markdown',
   'unplugin-vue-router',
   'vercel',
@@ -325,6 +328,7 @@ export const pluginNames = [
   'vike',
   'vite',
   'vite-plugin-pages',
+  'vite-plugin-pwa',
   'vite-plugin-vue-layouts-next',
   'vitepress',
   'vitest',

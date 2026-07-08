@@ -147,6 +147,7 @@ import { default as unocss } from './unocss/index.ts';
 import { default as unpluginAutoImport } from './unplugin-auto-import/index.ts';
 import { default as unpluginIcons } from './unplugin-icons/index.ts';
 import { default as unpluginVueComponents } from './unplugin-vue-components/index.ts';
+import { default as unpluginVueI18n } from './unplugin-vue-i18n/index.ts';
 import { default as unpluginVueMarkdown } from './unplugin-vue-markdown/index.ts';
 import { default as unpluginVueRouter } from './unplugin-vue-router/index.ts';
 import { default as vercel } from './vercel/index.ts';
@@ -154,6 +155,7 @@ import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
 import { default as vite } from './vite/index.ts';
 import { default as vitePluginPages } from './vite-plugin-pages/index.ts';
+import { default as vitePluginPwa } from './vite-plugin-pwa/index.ts';
 import { default as vitePluginVueLayoutsNext } from './vite-plugin-vue-layouts-next/index.ts';
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
@@ -317,6 +319,7 @@ export const Plugins = {
   'unplugin-auto-import': unpluginAutoImport,
   'unplugin-icons': unpluginIcons,
   'unplugin-vue-components': unpluginVueComponents,
+  'unplugin-vue-i18n': unpluginVueI18n,
   'unplugin-vue-markdown': unpluginVueMarkdown,
   'unplugin-vue-router': unpluginVueRouter,
   vercel,
@@ -324,6 +327,7 @@ export const Plugins = {
   vike,
   vite,
   'vite-plugin-pages': vitePluginPages,
+  'vite-plugin-pwa': vitePluginPwa,
   'vite-plugin-vue-layouts-next': vitePluginVueLayoutsNext,
   vitepress,
   vitest,

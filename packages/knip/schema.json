@@ -974,6 +974,10 @@
           "title": "unplugin-vue-components plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-components)",
           "$ref": "#/definitions/plugin"
         },
+        "unplugin-vue-i18n": {
+          "title": "unplugin-vue-i18n plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-i18n)",
+          "$ref": "#/definitions/plugin"
+        },
         "unplugin-vue-markdown": {
           "title": "unplugin-vue-markdown plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-markdown)",
           "$ref": "#/definitions/plugin"
@@ -1000,6 +1004,10 @@
         },
         "vite-plugin-pages": {
           "title": "vite-plugin-pages plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pages)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-pwa": {
+          "title": "vite-plugin-pwa plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pwa)",
           "$ref": "#/definitions/plugin"
         },
         "vite-plugin-vue-layouts-next": {
