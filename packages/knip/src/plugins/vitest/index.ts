@@ -25,6 +25,8 @@ const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 
 const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
 
+const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
+
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const { configFileDir: dir } = options;
   const testConfig = localConfig.test;
@@ -157,6 +159,8 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       if (cfg.test?.include) {
         for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
         if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(dir, dependency)));
+        const benchmarkInclude = cfg.test.benchmark?.include ?? benchmark;
+        for (const dependency of benchmarkInclude) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
       } else {
         for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
       }

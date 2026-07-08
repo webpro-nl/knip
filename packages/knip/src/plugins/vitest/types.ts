@@ -9,6 +9,9 @@ export type AliasOptions = readonly Alias[] | { [find: string]: string };
 interface VitestConfig {
   test: {
     include: string[];
+    benchmark?: {
+      include?: string[];
+    };
     coverage?: {
       enabled?: boolean;
       provider: string;
