@@ -84,6 +84,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'false',
   'find',
   'gem',
+  'gh',
   'git',
   'grep',
   'groups',
