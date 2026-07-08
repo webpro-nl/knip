@@ -43,15 +43,9 @@ importers:
       '@astro-community/astro-embed-youtube':
         specifier: 0.5.10
         version: 0.5.10
-      '@astrojs/markdown-satteri':
-        specifier: 0.3.3
-        version: 0.3.3
       '@astrojs/starlight':
         specifier: 0.41.3
         version: 0.41.3(@astrojs/markdown-remark@7.2.1)(astro@7.0.6(@astrojs/markdown-remark@7.2.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@26.0.0)(jiti@2.7.0)(rollup@4.62.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)
-      satteri:
-        specifier: 0.9.4
-        version: 0.9.4
       sharp:
         specifier: 0.35.1
         version: 0.35.1
@@ -59,6 +53,9 @@ importers:
       '@astrojs/check':
         specifier: 0.9.9
         version: 0.9.9(prettier@3.8.4)(typescript@6.0.3)
+      '@astrojs/markdown-satteri':
+        specifier: 0.3.3
+        version: 0.3.3
       '@octokit/graphql':
         specifier: ^9.0.3
         version: 9.0.3
@@ -68,6 +65,9 @@ importers:
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
+      satteri:
+        specifier: 0.9.4
+        version: 0.9.4
 
   packages/knip:
     dependencies:
