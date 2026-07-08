@@ -5,7 +5,7 @@ import { hasDependency } from '../../util/plugin.ts';
 
 const title = 'vite-plugin-vue-layouts-next';
 
-const enablers = ['vite-plugin-vue-layouts-next', 'vite-plugin-vue-layouts'];
+const enablers = ['vite-plugin-vue-layouts-next', 'vite-plugin-vue-layouts', 'vite-plugin-vue-meta-layouts'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
