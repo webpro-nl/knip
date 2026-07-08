@@ -29,6 +29,7 @@ import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
 import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
+import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
@@ -191,6 +192,7 @@ export const Plugins = {
   drizzle,
   'electron-vite': electronVite,
   eleventy,
+  esbuild,
   eslint,
   eve,
   execa,
