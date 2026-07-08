@@ -22,13 +22,20 @@ article.prose {
 }
 
 .sponsors .platinum,
-.sponsors .gold,
 .sponsors .silver {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 2rem;
+}
+
+.sponsors .gold {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 320px));
+  justify-content: center;
+  align-items: center;
+  gap: 2rem 4rem;
 }
 
 .sponsors.front {
