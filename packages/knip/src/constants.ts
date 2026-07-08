@@ -33,11 +33,14 @@ export const PROTOCOL_VIRTUAL = 'virtual:';
 /**
  * Binaries that are expected to be globally available. The package at
  * https://www.npmjs.com/package/[name] might exist, but is not expected to be
- * listed in package.json because last npm publish was >6 years ago OR weekly downloads <5_000
+ * listed in package.json because last npm publish was >6 years ago OR weekly
+ * downloads <5_000 OR it doesn't even provide a bin of that name (so the package
+ * can't be the source of the binary)
  */
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'amplify',
   'aws',
+  'az',
   'base64',
   'basename',
   'bash',
@@ -52,6 +55,10 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'cksum',
   'clear',
   'cmd',
+  'cmd.exe',
+  'code',
+  'code-insiders',
+  'codesign',
   'comm',
   'command',
   'corepack',
@@ -60,10 +67,12 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'cut',
   'date',
   'deno',
+  'devtunnel',
   'df',
   'dir',
   'dirname',
   'docker',
+  'dotnet',
   'echo',
   'env',
   'exec',
@@ -101,12 +110,17 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'npx',
   'nub',
   'nubx',
+  'open',
   'paste',
   'pnpm',
   'pnpx',
+  'powershell',
+  'powershell.exe',
   'pr',
   'printenv',
   'pwd',
+  'python',
+  'python3',
   'rm',
   'rmdir',
   'rsync',
