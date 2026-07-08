@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/oclif-commands",
+  "dependencies": {
+    "@oclif/core": "*"
+  },
+  "oclif": {
+    "bin": "mycli",
+    "commands": "./dist/commands"
+  }
+}
