@@ -29,7 +29,15 @@ export type Scripts = Record<string, string>;
 export type Catalog = Record<string, string>;
 export type Catalogs = Record<string, Catalog>;
 
-export type Dependencies = Record<string, string>;
+type Dependencies = Record<string, string>;
+
+export type PackageExtensions = Record<
+  string,
+  {
+    peerDependencies?: Dependencies;
+    peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+  }
+>;
 
 export type PackageJson = {
   name?: string;
@@ -57,12 +65,7 @@ export type PackageJson = {
   engines?: Record<string, string>;
   pnpm?: {
     overrides?: Dependencies;
-    packageExtensions?: Record<
-      string,
-      {
-        peerDependencies?: Dependencies;
-      }
-    >;
+    packageExtensions?: PackageExtensions;
   };
   knip?: WorkspaceConfiguration;
 } & Plugins;

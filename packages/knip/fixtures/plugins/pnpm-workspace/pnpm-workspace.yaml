@@ -4,3 +4,7 @@ packageExtensions:
   react-csv@*:
     peerDependencies:
       is-odd: "*"
+      is-even: "*"
+    peerDependenciesMeta:
+      is-even:
+        optional: true
