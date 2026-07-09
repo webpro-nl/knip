@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getInputFromAST } from './resolveFromAST.ts';
 
 // https://rolldown.rs
 
@@ -13,10 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rolldown.config.{js,cjs,mjs,ts,cts,mts}'];
 
-const resolveFromAST: ResolveFromAST = program => {
-  const inputs = getInputFromAST(program);
-  return [...inputs].map(id => toProductionEntry(id));
-};
+const resolveFromAST: ResolveFromAST = program =>
+  [...collectPropertyValues(program, 'input')].map(id => toProductionEntry(id));
 
 const plugin: Plugin = {
   title,

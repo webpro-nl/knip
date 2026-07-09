@@ -1,7 +1,7 @@
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getEntryFromAST } from './resolveFromAST.ts';
 import type { TsupConfig } from './types.ts';
 
 // https://paka.dev/npm/tsup/api
@@ -33,10 +33,8 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
   return entryPatterns;
 };
 
-const resolveFromAST: ResolveFromAST = program => {
-  const entries = getEntryFromAST(program);
-  return [...entries].map(id => toProductionEntry(id, { allowIncludeExports: true }));
-};
+const resolveFromAST: ResolveFromAST = program =>
+  [...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true }));
 
 const args = {
   config: true,

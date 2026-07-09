@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getEntryFromAST } from './resolveFromAST.ts';
 
 // https://rslib.rs/guide/basic/configure-rslib
 
@@ -13,10 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rslib*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveFromAST: ResolveFromAST = program => {
-  const entries = getEntryFromAST(program);
-  return [...entries].map(id => toProductionEntry(id, { allowIncludeExports: true }));
-};
+const resolveFromAST: ResolveFromAST = program =>
+  [...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true }));
 
 const plugin: Plugin = {
   title,

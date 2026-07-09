@@ -1,10 +1,10 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getPageExtensions } from './resolveFromAST.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -53,7 +53,7 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 const production = getEntryFilePatterns();
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
-  const pageExtensions = getPageExtensions(program);
+  const pageExtensions = [...collectPropertyValues(program, 'pageExtensions')];
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
   return patterns.map(id => toProductionEntry(join(configFileDir, id)));

@@ -6,7 +6,7 @@ import { toDeferResolveProductionEntry } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
 
-export const getInputsFromHandlers: ResolveFromAST = (program, options) => {
+export const resolveFromAST: ResolveFromAST = (program, options) => {
   const entries = new Set<string>();
 
   const addHandlers = (values: Set<string>) => {
