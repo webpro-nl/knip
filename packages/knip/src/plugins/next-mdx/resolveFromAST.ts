@@ -1,25 +1,23 @@
 import type { Program } from 'oxc-parser';
-import { Visitor } from 'oxc-parser';
-import { findProperty, getDefaultImportName, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
+import type { ResolveFromAST } from '../../types/config.ts';
+import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
 
-export const getMdxPlugins = (program: Program) => {
+export const production = ['{src/,}mdx-components.{js,jsx,ts,tsx}'];
+
+const getMdxPlugins = (program: Program) => {
   const plugins = new Set<string>();
-
-  const importMap = getImportMap(program);
-  const mdxImportName = getDefaultImportName(importMap, '@next/mdx');
-  if (!mdxImportName) return plugins;
-
-  const visitor = new Visitor({
-    CallExpression(node) {
-      if (node.callee?.type !== 'Identifier' || node.callee.name !== mdxImportName) return;
-      const options = findProperty(node.arguments?.[0], 'options');
-      if (options?.type !== 'ObjectExpression') return;
-      for (const pluginType of ['remarkPlugins', 'rehypePlugins', 'recmaPlugins']) {
-        for (const v of getStringValues(findProperty(options, pluginType))) plugins.add(v);
-      }
-    },
-  });
-  visitor.visit(program);
-
+  for (const call of findImportedCalls(program, '@next/mdx')) {
+    const options = findProperty(call.arguments?.[0], 'options');
+    if (options?.type !== 'ObjectExpression') continue;
+    for (const pluginType of ['remarkPlugins', 'rehypePlugins', 'recmaPlugins']) {
+      for (const v of getStringValues(findProperty(options, pluginType))) plugins.add(v);
+    }
+  }
   return plugins;
 };
+
+export const resolveFromAST: ResolveFromAST = program => [
+  ...production.map(id => toProductionEntry(id)),
+  ...Array.from(getMdxPlugins(program)).map(id => toDependency(id)),
+];

@@ -83,7 +83,7 @@ const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency 
   }
 };
 
-const resolveFromAST: ResolveFromAST = program => getBabelInputs(program);
+const resolveFromAST: ResolveFromAST = getBabelInputs;
 
 const plugin: Plugin = {
   title,

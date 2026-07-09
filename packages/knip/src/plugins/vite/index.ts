@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const resolveFromAST: ResolveFromAST = program => getBabelInputs(program);
+const resolveFromAST: ResolveFromAST = getBabelInputs;
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createImportMetaGlobVisitor(ctx));

@@ -38,12 +38,6 @@ export const getImportMap = (program: Program) => {
   return importMap;
 };
 
-export const getDefaultImportName = (importMap: Map<string, string>, specifier: string) => {
-  for (const [name, path] of importMap) {
-    if (path === specifier) return name;
-  }
-};
-
 const addStringValue = (values: Set<string>, node: any) => {
   const value = getStringValue(node);
   if (value != null) values.add(value);

@@ -1,11 +1,9 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveFromAST } from '../../types/config.ts';
-import { findCallArg, getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toConfig, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve } from '../../types/config.ts';
+import { toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getAliasInputs } from '../vitest/helpers.ts';
 import compiler from './compiler.ts';
 import mdxCompiler from './compiler-mdx.ts';
-import { getSrcDir, getViteAliases, usesPassthroughImageService } from './resolveFromAST.ts';
+import { entry, production, resolveFromAST } from './resolveFromAST.ts';
 
 // https://docs.astro.build/en/reference/configuration-reference/
 
@@ -16,45 +14,6 @@ const enablers = ['astro'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 export const config = ['astro.config.{js,cjs,mjs,ts,mts}'];
-
-const entry = ['src/content/config.ts', 'src/content.config.ts'];
-
-const production = [
-  'src/pages/**/*.{astro,mdx,js,ts}',
-  '!src/pages/**/_*', // negate files prefixed with _.
-  '!src/pages/**/_*/**', // negate folders prefixed with _. The pattern _** would be collapsed into _* so we have to use **/_*/**
-  'src/content/**/*.mdx',
-  'src/middleware.{js,ts}',
-  'src/middleware/index.{js,ts}',
-  'src/actions/index.{js,ts}',
-];
-
-const resolveFromAST: ResolveFromAST = (program, options) => {
-  const srcDir = getSrcDir(program);
-  const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
-  const inputs = [
-    ...entry.map(setSrcDir).map(path => toEntry(path)),
-    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
-    ...getAliasInputs(getViteAliases(program), options.cwd),
-  ];
-
-  if (!usesPassthroughImageService(program)) inputs.push(toDependency('sharp', { optional: true }));
-
-  const importMap = getImportMap(program);
-  const lunariaImportName = getDefaultImportName(importMap, '@lunariajs/starlight');
-
-  if (lunariaImportName) {
-    const lunariaConfig = findCallArg(program, lunariaImportName);
-    if (lunariaConfig) {
-      const configPaths = getPropertyValues(lunariaConfig, 'configPath');
-      for (const id of configPaths) {
-        inputs.push(toConfig('lunaria', id));
-      }
-    }
-  }
-
-  return inputs;
-};
 
 // https://docs.astro.build/en/guides/integrations-guide/mdx/
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {

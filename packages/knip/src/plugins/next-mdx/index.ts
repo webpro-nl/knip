@@ -1,7 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getMdxPlugins } from './resolveFromAST.ts';
+import { production, resolveFromAST } from './resolveFromAST.ts';
 
 // https://nextjs.org/docs/pages/building-your-application/configuring/mdx
 
@@ -12,13 +11,6 @@ const enablers = ['@next/mdx'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['next.config.{js,ts,cjs,mjs,mts}'];
-
-const production = ['{src/,}mdx-components.{js,jsx,ts,tsx}'];
-
-const resolveFromAST: ResolveFromAST = program => {
-  const mdxPlugins = getMdxPlugins(program);
-  return [...production.map(id => toProductionEntry(id)), ...Array.from(mdxPlugins).map(id => toDependency(id))];
-};
 
 const plugin: Plugin = {
   title,
