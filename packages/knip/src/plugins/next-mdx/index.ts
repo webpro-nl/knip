@@ -11,7 +11,7 @@ const enablers = ['@next/mdx'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['next.config.{js,ts,cjs,mjs}'];
+const config = ['next.config.{js,ts,cjs,mjs,mts}'];
 
 const production = ['{src/,}mdx-components.{js,jsx,ts,tsx}'];
 
