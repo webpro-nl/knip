@@ -157,6 +157,7 @@ import { default as vite } from './vite/index.ts';
 import { default as vitePluginPages } from './vite-plugin-pages/index.ts';
 import { default as vitePluginPwa } from './vite-plugin-pwa/index.ts';
 import { default as vitePluginVueLayoutsNext } from './vite-plugin-vue-layouts-next/index.ts';
+import { default as vitePlus } from './vite-plus/index.ts';
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
 import { default as vue } from './vue/index.ts';
@@ -329,6 +330,7 @@ export const Plugins = {
   'vite-plugin-pages': vitePluginPages,
   'vite-plugin-pwa': vitePluginPwa,
   'vite-plugin-vue-layouts-next': vitePluginVueLayoutsNext,
+  'vite-plus': vitePlus,
   vitepress,
   vitest,
   vue,

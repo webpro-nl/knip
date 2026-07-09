@@ -158,6 +158,7 @@ export type PluginName =
   | 'vite-plugin-pages'
   | 'vite-plugin-pwa'
   | 'vite-plugin-vue-layouts-next'
+  | 'vite-plus'
   | 'vitepress'
   | 'vitest'
   | 'vue'
@@ -330,6 +331,7 @@ export const pluginNames = [
   'vite-plugin-pages',
   'vite-plugin-pwa',
   'vite-plugin-vue-layouts-next',
+  'vite-plus',
   'vitepress',
   'vitest',
   'vue',
