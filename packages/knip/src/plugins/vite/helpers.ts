@@ -4,7 +4,7 @@ import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../
 import { findProperty, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { dirname, join } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 
 const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
@@ -73,11 +73,52 @@ const getModuleScriptSources = (html: string): string[] => {
   return sources;
 };
 
-export const getIndexHtmlEntries = async (rootDir: string): Promise<Input[]> => {
-  const indexPath = join(rootDir, 'index.html');
-  if (!isFile(indexPath)) return [];
+export const getHtmlScriptEntries = async (htmlPath: string): Promise<Input[]> => {
+  if (!isFile(htmlPath)) return [];
 
-  const html = await loadFile(indexPath);
-  const entries = getModuleScriptSources(html).map(src => join(rootDir, src));
-  return entries.map(entry => toProductionEntry(entry));
+  const html = await loadFile(htmlPath);
+  const dir = dirname(htmlPath);
+  return getModuleScriptSources(html).map(src => toProductionEntry(join(dir, src)));
+};
+
+export const getIndexHtmlEntries = (rootDir: string): Promise<Input[]> =>
+  getHtmlScriptEntries(join(rootDir, 'index.html'));
+
+const getStringLiteral = (node: any): string | undefined =>
+  node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string')
+    ? node.value
+    : undefined;
+
+export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
+  const names = new Set(
+    Array.from(getImportMap(program))
+      .filter(([, path]) => specifiers.includes(path))
+      .map(([name]) => name)
+  );
+  if (names.size === 0) return undefined;
+
+  let dirs: string[] | undefined;
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (node.callee?.type !== 'Identifier' || !names.has(node.callee.name)) return;
+      const value = findProperty(node.arguments?.[0], key);
+      if (!value) return;
+      const collected: string[] = [];
+      const single = getStringLiteral(value);
+      if (single !== undefined) collected.push(single);
+      else if (value.type === 'ArrayExpression') {
+        for (const element of value.elements ?? []) {
+          const str = getStringLiteral(element);
+          if (str !== undefined) collected.push(str);
+          else if (element?.type === 'ObjectExpression') {
+            const dir = getStringLiteral(findProperty(element, 'dir'));
+            if (dir !== undefined) collected.push(dir);
+          }
+        }
+      }
+      if (collected.length > 0) dirs = collected;
+    },
+  });
+  visitor.visit(program);
+  return dirs;
 };

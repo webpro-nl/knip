@@ -2,6 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getHtmlScriptEntries } from '../vite/helpers.ts';
 import type { ElectronViteConfig } from './types.ts';
 
 // https://electron-vite.org/config/
@@ -41,7 +42,13 @@ const resolveConfig: ResolveConfig<ElectronViteConfig> = async (localConfig, opt
     }
 
     const patterns = ids.length > 0 ? ids : [defaultEntry[name]];
-    for (const id of patterns) inputs.push(toProductionEntry(isAbsolute(id) ? id : join(configFileDir, id)));
+    for (const id of patterns) {
+      const resolved = isAbsolute(id) ? id : join(configFileDir, id);
+      inputs.push(toProductionEntry(resolved));
+      if (name === 'renderer' && resolved.endsWith('.html')) {
+        for (const input of await getHtmlScriptEntries(resolved)) inputs.push(input);
+      }
+    }
   }
 
   return inputs;

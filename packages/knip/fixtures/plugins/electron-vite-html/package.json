@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/electron-vite-html",
+  "devDependencies": {
+    "electron-vite": "*"
+  }
+}
