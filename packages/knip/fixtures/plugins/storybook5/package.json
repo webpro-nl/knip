@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/storybook5",
+  "devDependencies": {
+    "@storybook/react-vite": "*",
+    "@vitejs/plugin-react": "*",
+    "babel-plugin-react-compiler": "*"
+  }
+}

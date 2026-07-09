@@ -1,8 +1,9 @@
 import MDX from '../../compilers/mdx.ts';
-import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
 import { join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getBabelInputs } from '../vite/helpers.ts';
 import type { StorybookConfig } from './types.ts';
 
 // https://storybook.js.org/docs/react/configure/overview
@@ -82,6 +83,8 @@ const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency 
   }
 };
 
+const resolveFromAST: ResolveFromAST = program => getBabelInputs(program);
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -90,6 +93,7 @@ const plugin: Plugin = {
   entry,
   project,
   resolveConfig,
+  resolveFromAST,
   registerCompilers,
 };
 
