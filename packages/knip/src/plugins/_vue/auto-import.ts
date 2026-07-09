@@ -112,6 +112,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
       addEntry(node.id.name, node.start, node.end);
     },
     TSPropertySignature(node) {
+      if (!isComponents) return;
       const key = node.key;
       const name = key?.type === 'Identifier' ? key.name : key?.type === 'Literal' ? String(key.value) : undefined;
       if (name) addEntry(name, node.start, node.end);
