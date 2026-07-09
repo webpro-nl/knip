@@ -702,6 +702,10 @@
           "title": "Nuxt plugin configuration (https://knip.dev/reference/plugins/nuxt)",
           "$ref": "#/definitions/plugin"
         },
+        "nuxtjs-i18n": {
+          "title": "nuxtjs-i18n plugin configuration (https://knip.dev/reference/plugins/nuxtjs-i18n)",
+          "$ref": "#/definitions/plugin"
+        },
         "nx": {
           "title": "Nx plugin configuration (https://knip.dev/reference/plugins/nx)",
           "$ref": "#/definitions/plugin"
@@ -1012,6 +1016,14 @@
         },
         "vite-plugin-vue-layouts-next": {
           "title": "vite-plugin-vue-layouts-next plugin configuration (https://knip.dev/reference/plugins/vite-plugin-vue-layouts-next)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plus": {
+          "title": "vite-plus plugin configuration (https://knip.dev/reference/plugins/vite-plus)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-pwa-assets-generator": {
+          "title": "vite-pwa-assets-generator plugin configuration (https://knip.dev/reference/plugins/vite-pwa-assets-generator)",
           "$ref": "#/definitions/plugin"
         },
         "vitepress": {

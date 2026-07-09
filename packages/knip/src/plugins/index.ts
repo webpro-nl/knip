@@ -76,6 +76,7 @@ import { default as nodeModulesInspector } from './node-modules-inspector/index.
 import { default as nodemon } from './nodemon/index.ts';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.ts';
 import { default as nuxt } from './nuxt/index.ts';
+import { default as nuxtjsI18n } from './nuxtjs-i18n/index.ts';
 import { default as nx } from './nx/index.ts';
 import { default as nyc } from './nyc/index.ts';
 import { default as oclif } from './oclif/index.ts';
@@ -250,6 +251,7 @@ export const Plugins = {
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
+  'nuxtjs-i18n': nuxtjsI18n,
   nx,
   nyc,
   oclif,

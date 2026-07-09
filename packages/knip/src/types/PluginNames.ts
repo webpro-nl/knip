@@ -77,6 +77,7 @@ export type PluginName =
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
+  | 'nuxtjs-i18n'
   | 'nx'
   | 'nyc'
   | 'oclif'
@@ -251,6 +252,7 @@ export const pluginNames = [
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
+  'nuxtjs-i18n',
   'nx',
   'nyc',
   'oclif',

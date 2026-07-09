@@ -90,6 +90,7 @@ export const pluginsSchema = z.object({
   nodemon: pluginSchema,
   'npm-package-json-lint': pluginSchema,
   nuxt: pluginSchema,
+  'nuxtjs-i18n': pluginSchema,
   nx: pluginSchema,
   nyc: pluginSchema,
   oclif: pluginSchema,
