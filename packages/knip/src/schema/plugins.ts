@@ -172,6 +172,7 @@ export const pluginsSchema = z.object({
   'vite-plugin-pwa': pluginSchema,
   'vite-plugin-vue-layouts-next': pluginSchema,
   'vite-plus': pluginSchema,
+  'vite-pwa-assets-generator': pluginSchema,
   vitepress: pluginSchema,
   vitest: pluginSchema,
   vue: pluginSchema,
