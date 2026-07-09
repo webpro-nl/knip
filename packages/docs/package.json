@@ -19,25 +19,16 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
-    "@astrojs/starlight": "0.40.0",
+    "@astrojs/starlight": "0.41.3",
     "sharp": "0.35.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.9",
+    "@astrojs/markdown-satteri": "0.3.3",
     "@octokit/graphql": "^9.0.3",
-    "@types/mdast": "4.0.4",
-    "@types/unist": "3.0.3",
-    "astro": "6.4.8",
-    "hastscript": "9.0.1",
+    "astro": "7.0.6",
     "picocolors": "^1.1.1",
-    "remark-directive": "4.0.0",
-    "remark-frontmatter": "5.0.0",
-    "remark-gfm": "4.0.1",
-    "remark-parse": "11.0.0",
-    "remark-stringify": "11.0.0",
-    "unified": "11.0.5",
-    "unist-builder": "4.0.0",
-    "unist-util-visit": "5.1.0"
+    "satteri": "0.9.4"
   },
   "engines": {
     "node": ">=22.0.0"

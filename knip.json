@@ -11,7 +11,7 @@
       "ignoreDependencies": ["prettier"]
     },
     "packages/docs": {
-      "entry": ["{remark,scripts}/*.ts"]
+      "entry": ["{plugins,scripts}/*.ts"]
     },
     "packages/vscode-knip": {
       "entry": ["src/index.js!", "scripts/*.js", "test/*.mjs"],

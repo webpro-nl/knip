@@ -1,9 +1,9 @@
+import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
-import remarkDirective from 'remark-directive';
-import { fixInternalLinks } from './remark/fixInternalLinks.ts';
-import { transformDirectives } from './remark/transformDirectives.ts';
+import { fixInternalLinks } from './plugins/fixInternalLinks.ts';
+import { transformDirectives } from './plugins/transformDirectives.ts';
 
 const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
@@ -21,7 +21,10 @@ export default defineConfig({
     '/guides/writing-a-plugin': '/writing-a-plugin',
   },
   markdown: {
-    remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
+    processor: satteri({
+      features: { directive: true },
+      mdastPlugins: [fixInternalLinks, transformDirectives],
+    }),
   },
   integrations: [
     starlight({
