@@ -1,17 +1,14 @@
 import type { Program } from 'oxc-parser';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import {
-  collectPropertyValues,
+  collectFirstPropertyValue,
   findProperty,
   getPropertyKey,
   hasImportSpecifier,
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 
-export const getSrcDir = (program: Program): string => {
-  const values = collectPropertyValues(program, 'srcDir');
-  return values.size > 0 ? Array.from(values)[0] : 'src';
-};
+export const getSrcDir = (program: Program): string => collectFirstPropertyValue(program, 'srcDir') ?? 'src';
 
 export const usesPassthroughImageService = (program: Program) =>
   hasImportSpecifier(program, 'astro/config', 'passthroughImageService');

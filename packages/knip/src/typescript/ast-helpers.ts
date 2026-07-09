@@ -1,4 +1,4 @@
-import type { ParseResult, Program } from 'oxc-parser';
+import type { CallExpression, ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
@@ -54,8 +54,7 @@ export const getPropertyValues = (node: any, propertyName: string) => {
   if (node?.type !== 'ObjectExpression') return values;
   for (const prop of node.properties ?? []) {
     if (prop.type !== 'Property') continue;
-    const name = prop.key?.name ?? prop.key?.value;
-    if (name !== propertyName) continue;
+    if (getPropertyKey(prop) !== propertyName) continue;
     const init = prop.value;
     if (init?.type === 'ArrayExpression') {
       for (const el of init.elements ?? []) addStringValue(values, el);
@@ -82,6 +81,18 @@ export const collectPropertyValues = (program: Program, propertyName: string): S
   return values;
 };
 
+const firstValue = (values: Iterable<string>): string | undefined => {
+  for (const value of values) return value;
+};
+
+/** First value of a named property in an ObjectExpression */
+export const getFirstPropertyValue = (node: any, propertyName: string) =>
+  firstValue(getPropertyValues(node, propertyName));
+
+/** First value of a named property from any ObjectExpression in the program */
+export const collectFirstPropertyValue = (program: Program, propertyName: string) =>
+  firstValue(collectPropertyValues(program, propertyName));
+
 const unwrapParens = (node: any): any =>
   node?.type === 'ParenthesizedExpression' ? unwrapParens(node.expression) : node;
 
@@ -104,6 +115,37 @@ export const resolveObjectArg = (arg: any): any | undefined => {
       const ret = unwrapParens(stmt.argument);
       if (ret?.type === 'ObjectExpression') return ret;
     }
+  }
+};
+
+type ModuleMatch = string | string[] | ((path: string) => boolean);
+
+/** Find all CallExpressions whose callee is a binding imported from the given module(s) */
+export const findImportedCalls = (program: Program, module: ModuleMatch): CallExpression[] => {
+  const isMatch =
+    typeof module === 'function'
+      ? module
+      : Array.isArray(module)
+        ? (path: string) => module.includes(path)
+        : (path: string) => path === module;
+  const names = new Set<string>();
+  for (const [name, path] of getImportMap(program)) if (isMatch(path)) names.add(name);
+  const calls: CallExpression[] = [];
+  if (names.size === 0) return calls;
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (node.callee?.type === 'Identifier' && names.has(node.callee.name)) calls.push(node);
+    },
+  });
+  visitor.visit(program);
+  return calls;
+};
+
+/** Find the first ObjectExpression argument of a call to a binding imported from the given module(s) */
+export const findImportedCallArg = (program: Program, module: ModuleMatch): any | undefined => {
+  for (const call of findImportedCalls(program, module)) {
+    const arg = resolveObjectArg(call.arguments?.[0]);
+    if (arg) return arg;
   }
 };
 

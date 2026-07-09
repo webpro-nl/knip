@@ -1,7 +1,7 @@
 import type { Program } from 'oxc-parser';
-import { Visitor } from 'oxc-parser';
 import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../compilers/compilers.ts';
-import { findProperty, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
+import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { dirname, join } from '../../util/path.ts';
@@ -13,27 +13,17 @@ const isBabelWrappingPlugin = (path: string) =>
   babelPluginSources.some(source => path === source || path.startsWith(`${source}/`));
 
 export const getBabelInputs = (program: Program): Input[] => {
-  const pluginNames = new Set<string>();
-  for (const [name, path] of getImportMap(program)) {
-    if (isBabelWrappingPlugin(path)) pluginNames.add(name);
-  }
-  if (pluginNames.size === 0) return [];
-
   const inputs: Input[] = [];
-  const visitor = new Visitor({
-    CallExpression(node) {
-      if (node.callee?.type !== 'Identifier' || !pluginNames.has(node.callee.name)) return;
-      const options = node.arguments?.[0];
-      const plugins: string[] = [];
-      const presets: string[] = [];
-      for (const config of [options, findProperty(options, 'babel'), findProperty(options, 'babelConfig')]) {
-        plugins.push(...getStringValues(findProperty(config, 'plugins')));
-        presets.push(...getStringValues(findProperty(config, 'presets')));
-      }
-      inputs.push(...getDependenciesFromConfig({ plugins, presets }));
-    },
-  });
-  visitor.visit(program);
+  for (const call of findImportedCalls(program, isBabelWrappingPlugin)) {
+    const options = call.arguments?.[0];
+    const plugins: string[] = [];
+    const presets: string[] = [];
+    for (const config of [options, findProperty(options, 'babel'), findProperty(options, 'babelConfig')]) {
+      plugins.push(...getStringValues(findProperty(config, 'plugins')));
+      presets.push(...getStringValues(findProperty(config, 'presets')));
+    }
+    inputs.push(...getDependenciesFromConfig({ plugins, presets }));
+  }
   return inputs;
 };
 
@@ -84,41 +74,25 @@ export const getHtmlScriptEntries = async (htmlPath: string): Promise<Input[]> =
 export const getIndexHtmlEntries = (rootDir: string): Promise<Input[]> =>
   getHtmlScriptEntries(join(rootDir, 'index.html'));
 
-const getStringLiteral = (node: any): string | undefined =>
-  node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string')
-    ? node.value
-    : undefined;
-
 export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
-  const names = new Set(
-    Array.from(getImportMap(program))
-      .filter(([, path]) => specifiers.includes(path))
-      .map(([name]) => name)
-  );
-  if (names.size === 0) return undefined;
-
   let dirs: string[] | undefined;
-  const visitor = new Visitor({
-    CallExpression(node) {
-      if (node.callee?.type !== 'Identifier' || !names.has(node.callee.name)) return;
-      const value = findProperty(node.arguments?.[0], key);
-      if (!value) return;
-      const collected: string[] = [];
-      const single = getStringLiteral(value);
-      if (single !== undefined) collected.push(single);
-      else if (value.type === 'ArrayExpression') {
-        for (const element of value.elements ?? []) {
-          const str = getStringLiteral(element);
-          if (str !== undefined) collected.push(str);
-          else if (element?.type === 'ObjectExpression') {
-            const dir = getStringLiteral(findProperty(element, 'dir'));
-            if (dir !== undefined) collected.push(dir);
-          }
+  for (const call of findImportedCalls(program, specifiers)) {
+    const value = findProperty(call.arguments?.[0], key);
+    if (!value) continue;
+    const collected: string[] = [];
+    const single = getStringValue(value);
+    if (single !== undefined) collected.push(single);
+    else if (value.type === 'ArrayExpression') {
+      for (const element of value.elements ?? []) {
+        const str = getStringValue(element);
+        if (str !== undefined) collected.push(str);
+        else if (element?.type === 'ObjectExpression') {
+          const dir = getStringValue(findProperty(element, 'dir'));
+          if (dir !== undefined) collected.push(dir);
         }
       }
-      if (collected.length > 0) dirs = collected;
-    },
-  });
-  visitor.visit(program);
+    }
+    if (collected.length > 0) dirs = collected;
+  }
   return dirs;
 };

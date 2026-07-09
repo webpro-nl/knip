@@ -1,13 +1,9 @@
 import type { Program } from 'oxc-parser';
-import { findCallArg, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findCallArg, getFirstPropertyValue, getPropertyValues } from '../../typescript/ast-helpers.ts';
 
 export const getSrcDir = (program: Program): string => {
   const arg = findCallArg(program, 'qwikVite');
-  if (arg) {
-    const values = getPropertyValues(arg, 'srcDir');
-    if (values.size > 0) return Array.from(values)[0];
-  }
-  return 'src';
+  return (arg && getFirstPropertyValue(arg, 'srcDir')) ?? 'src';
 };
 
 export const getRoutesDirs = (program: Program, srcDir: string): string[] => {
