@@ -590,6 +590,10 @@
           "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"
         },
+        "laravel-vite-plugin": {
+          "title": "laravel-vite-plugin plugin configuration (https://knip.dev/reference/plugins/laravel-vite-plugin)",
+          "$ref": "#/definitions/plugin"
+        },
         "lefthook": {
           "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"

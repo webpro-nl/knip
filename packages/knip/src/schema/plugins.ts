@@ -63,6 +63,7 @@ export const pluginsSchema = z.object({
   karma: pluginSchema,
   knex: pluginSchema,
   ladle: pluginSchema,
+  'laravel-vite-plugin': pluginSchema,
   lefthook: pluginSchema,
   'lint-staged': pluginSchema,
   linthtml: pluginSchema,

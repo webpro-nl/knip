@@ -49,6 +49,7 @@ import { default as jest } from './jest/index.ts';
 import { default as karma } from './karma/index.ts';
 import { default as knex } from './knex/index.ts';
 import { default as ladle } from './ladle/index.ts';
+import { default as laravelVitePlugin } from './laravel-vite-plugin/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
 import { default as lintStaged } from './lint-staged/index.ts';
 import { default as linthtml } from './linthtml/index.ts';
@@ -225,6 +226,7 @@ export const Plugins = {
   karma,
   knex,
   ladle,
+  'laravel-vite-plugin': laravelVitePlugin,
   lefthook,
   'lint-staged': lintStaged,
   linthtml,

@@ -50,6 +50,7 @@ export type PluginName =
   | 'karma'
   | 'knex'
   | 'ladle'
+  | 'laravel-vite-plugin'
   | 'lefthook'
   | 'lint-staged'
   | 'linthtml'
@@ -226,6 +227,7 @@ export const pluginNames = [
   'karma',
   'knex',
   'ladle',
+  'laravel-vite-plugin',
   'lefthook',
   'lint-staged',
   'linthtml',
