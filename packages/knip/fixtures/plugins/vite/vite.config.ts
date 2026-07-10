@@ -8,6 +8,9 @@ export default defineConfig(() => ({
   optimizeDeps: {
     include: ['linked-package', 'many-components/**/*.vue', 'upstream-esm > nested-commonjs'],
   },
+  ssr: {
+    external: ['native-renderer', 'transitive-runtime', /^@grpc\//],
+  },
   plugins: [
     react({
       babel: {

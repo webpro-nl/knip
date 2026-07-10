@@ -174,6 +174,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       const packageName = getOptimizeDepsIncludePackageName(dependency);
       if (packageName) inputs.add(toDependency(packageName, { optional: true }));
     }
+    if (Array.isArray(cfg.ssr?.external)) {
+      for (const dependency of cfg.ssr.external) {
+        if (typeof dependency === 'string') inputs.add(toDependency(dependency, { optional: true }));
+      }
+    }
     if (cfg.resolve?.extensions) {
       // Filter out default extensions from resolve.extensions
       const customExtensions = cfg.resolve.extensions.filter(

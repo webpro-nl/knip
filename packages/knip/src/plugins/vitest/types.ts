@@ -38,6 +38,9 @@ export interface ViteConfig extends VitestConfig {
   optimizeDeps?: {
     include?: string[];
   };
+  ssr?: {
+    external?: (string | RegExp)[] | true;
+  };
   resolve?: {
     alias?: AliasOptions;
     dedupe?: string[];
