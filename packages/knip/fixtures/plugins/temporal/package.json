@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/temporal",
+  "main": "src/worker.ts",
+  "dependencies": {
+    "@temporalio/worker": "*",
+    "@temporalio/workflow": "*"
+  }
+}

@@ -153,6 +153,7 @@ export const pluginsSchema = z.object({
   'tanstack-router': pluginSchema,
   taskfile: pluginSchema,
   tauri: pluginSchema,
+  temporal: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
   tsdown: pluginSchema,
