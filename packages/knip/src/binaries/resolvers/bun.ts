@@ -3,6 +3,7 @@ import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
+import { argsAfter, expandScript } from '../util.ts';
 import { resolveX } from './bunx.ts';
 
 const commands = new Set([
@@ -65,8 +66,12 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const { manifest, cwd, fromArgs } = options;
 
-  if (command === 'run' && manifest.scriptNames.has(script)) return [binary];
-  if (manifest.scriptNames.has(command)) return [binary];
+  if (command === 'run' && manifest.scriptNames.has(script)) {
+    return [binary, ...(expandScript(script, argsAfter(args, script), manifest.scripts, options) ?? [])];
+  }
+  if (manifest.scriptNames.has(command)) {
+    return [binary, ...(expandScript(command, argsAfter(args, command), manifest.scripts, options) ?? [])];
+  }
   if (command !== 'run' && commands.has(command)) return [binary];
 
   const filePath = command === 'run' ? script : command;

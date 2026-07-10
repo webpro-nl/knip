@@ -3,7 +3,7 @@ import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.t
 import { isBinary, isDependency, toBinary, toDependency } from '../../util/input.ts';
 import { stripVersionFromSpecifier } from '../../util/modules.ts';
 import { join } from '../../util/path.ts';
-import { argsFrom } from '../util.ts';
+import { argsAfter, argsFrom, expandScript } from '../util.ts';
 
 // https://yarnpkg.com/cli
 
@@ -68,7 +68,10 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const _childArgs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--'], { knownBinsOnly: true }) : [];
 
   if (command === 'run') {
-    if (dirManifest.scriptNames.has(binary)) return _childArgs;
+    if (dirManifest.scriptNames.has(binary)) {
+      const opts = dir ? { cwd: dir, manifest: dirManifest } : {};
+      return expandScript(binary, argsAfter(args, binary), dirManifest.scripts, options, opts) ?? _childArgs;
+    }
     const bin = toBinary(binary, { optional: true });
     if (dir) Object.assign(bin, { dir });
     return [bin, ..._childArgs];
@@ -81,7 +84,11 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return resolveDlx(argsForDlx, options);
   }
 
-  if (dirManifest.scriptNames.has(command) || commands.includes(command)) return _childArgs;
+  if (dirManifest.scriptNames.has(command)) {
+    const opts = dir ? { cwd: dir, manifest: dirManifest } : {};
+    return expandScript(command, argsAfter(args, command), dirManifest.scripts, options, opts) ?? _childArgs;
+  }
+  if (commands.includes(command)) return _childArgs;
 
   const opts = dir ? { cwd: dir } : {};
   return fromArgs(argsFrom(args, command === 'exec' ? binary : command), opts);

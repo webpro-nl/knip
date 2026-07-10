@@ -12,6 +12,7 @@ const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
 const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
+const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
 const knownOnly = { cwd, knownBinsOnly: true };
 const opt = { optional: true };
 
@@ -140,6 +141,7 @@ test('getInputsFromScripts (npm)', () => {
   t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('npm run program -- run --coverage.enabled', [], pkgScripts);
+  t('npm run with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
 });
 
 test('getInputsFromScripts (npx)', () => {
@@ -183,6 +185,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bun install', [toBinary('bun')]);
   t('bun remove webpack', [toBinary('bun')]);
   t('bun update lodash', [toBinary('bun')]);
+  t('bun with-env src/main.ts', [toBinary('bun'), toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('bun run with-env src/main.ts', [toBinary('bun'), toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
   t('bun link', [toBinary('bun')]);
   t('bun unlink', [toBinary('bun')]);
   t('bun pm cache', [toBinary('bun')]);
@@ -240,7 +244,6 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
-  const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
   t('pnpm with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
   t('pnpm run with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
   t('pnpm with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
@@ -308,6 +311,8 @@ test('getInputsFromScripts (yarn)', () => {
   const dir = join(cwd, 'components');
   t('yarn --cwd components vitest -c vitest.components.config.ts', [toBinary('vitest', { dir }), toConfig('vitest', 'vitest.components.config.ts', { dir })]);
   t('yarn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('yarn with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('yarn run with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
 });
 
 test('getInputsFromScripts (yarn dlx)', () => {
