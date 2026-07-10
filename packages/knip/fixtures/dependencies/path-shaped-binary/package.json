@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/gitignored-binary-path",
+  "scripts": {
+    "cli": "target/release/mytool run",
+    "greet": "say-hello"
+  }
+}
