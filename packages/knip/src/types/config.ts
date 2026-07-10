@@ -15,6 +15,7 @@ import type { PackageJson } from './package-json.ts';
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
   containingFilePath: string;
+  expandedScripts?: Set<string>;
 }
 
 export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (

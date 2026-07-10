@@ -108,8 +108,27 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));
   }
 
+  const expandScript = (name: string) => {
+    const source = manifest.scripts?.[name];
+    if (!source) return;
+    const index = args.indexOf(name);
+    const forwardedArgs = index === -1 ? [] : args.slice(index + 1).filter(arg => arg !== '--');
+    if (forwardedArgs.length === 0) return;
+    const expandedScripts = options.expandedScripts ?? new Set();
+    if (expandedScripts.has(name)) return;
+    expandedScripts.add(name);
+    return fromArgs([source, ...forwardedArgs], { expandedScripts });
+  };
+
+  if (command === 'run') {
+    const script = parsed._[1];
+    if (script && manifest.scriptNames.has(script)) return expandScript(script) ?? childInputs;
+    return childInputs;
+  }
+
   const isScript = manifest.scriptNames.has(command);
-  if (isScript || commands.includes(command)) return childInputs;
+  if (isScript) return expandScript(command) ?? childInputs;
+  if (commands.includes(command)) return childInputs;
 
   return command && isValidBinary(command) ? [toBinary(command)] : [];
 };

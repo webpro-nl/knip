@@ -240,6 +240,12 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
+  const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
+  t('pnpm with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm run with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm with-env', [], withEnv);
+  t('pnpm loop src/main.ts', [], withEnv);
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, [toBinary('git')]);
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
