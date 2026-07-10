@@ -99,6 +99,7 @@ import { default as postcss } from './postcss/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
+import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
 import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
@@ -276,6 +277,7 @@ export const Plugins = {
   preconstruct,
   prettier,
   prisma,
+  quasar,
   qwik,
   raycast,
   'react-cosmos': reactCosmos,

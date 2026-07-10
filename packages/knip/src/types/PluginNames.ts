@@ -100,6 +100,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'quasar'
   | 'qwik'
   | 'raycast'
   | 'react-cosmos'
@@ -277,6 +278,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'prisma',
+  'quasar',
   'qwik',
   'raycast',
   'react-cosmos',

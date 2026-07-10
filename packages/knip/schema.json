@@ -786,6 +786,10 @@
           "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
           "$ref": "#/definitions/plugin"
         },
+        "quasar": {
+          "title": "quasar plugin configuration (https://knip.dev/reference/plugins/quasar)",
+          "$ref": "#/definitions/plugin"
+        },
         "qwik": {
           "title": "qwik plugin configuration (https://knip.dev/reference/plugins/qwik)",
           "$ref": "#/definitions/plugin"
