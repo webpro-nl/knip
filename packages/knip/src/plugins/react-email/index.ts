@@ -17,6 +17,7 @@ const previewCommands = new Set(['build', 'dev', 'start']);
 
 const args: Args = {
   binaries: ['email'],
+  alias: { dir: ['d'] },
   resolveInputs: (parsed, { manifest }) => {
     const inputs = [];
     if (previewCommands.has(parsed._[0])) {
