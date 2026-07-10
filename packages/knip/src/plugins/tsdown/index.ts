@@ -1,8 +1,8 @@
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import type { Entry, TsdownConfig } from './types.ts';
+import type { Entry, Options, TsdownConfig } from './types.ts';
 
 // https://github.com/rolldown/tsdown/blob/main/src/options/index.ts
 
@@ -31,6 +31,12 @@ const normalizeEntry = (entry: Entry | undefined): string[] => {
   return Object.values(entry).flatMap(value => (Array.isArray(value) ? value : [value]));
 };
 
+const getExternalDependencies = (options: Options): string[] => {
+  const neverBundle = options.deps?.neverBundle;
+  const values = Array.isArray(neverBundle) ? neverBundle : [neverBundle];
+  return values.filter(value => typeof value === 'string');
+};
+
 const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
   if (typeof config === 'function') config = await config({});
 
@@ -39,11 +45,18 @@ const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
     .flatMap(config => normalizeEntry(config.entry))
     .map(id => toProductionEntry(id, { allowIncludeExports: true }));
 
-  return entryPatterns;
+  const externalDependencies = [config]
+    .flat()
+    .flatMap(getExternalDependencies)
+    .map(id => toDependency(id, { optional: true }));
+
+  return [...entryPatterns, ...externalDependencies];
 };
 
-const resolveFromAST: ResolveFromAST = program =>
-  [...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true }));
+const resolveFromAST: ResolveFromAST = program => [
+  ...[...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true })),
+  ...[...collectPropertyValues(program, 'neverBundle')].map(id => toDependency(id, { optional: true })),
+];
 
 const args = {
   config: true,
