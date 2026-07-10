@@ -150,6 +150,7 @@ export const pluginsSchema = z.object({
   tailwind: pluginSchema,
   'tanstack-router': pluginSchema,
   taskfile: pluginSchema,
+  tauri: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
   tsdown: pluginSchema,

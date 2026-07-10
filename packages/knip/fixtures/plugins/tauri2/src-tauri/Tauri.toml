@@ -1,0 +1,6 @@
+[build]
+before-dev-command = "vite"
+frontend-dist = "../dist"
+
+[build.before-build-command]
+script = "vite build"

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/tauri",
+  "scripts": {
+    "tauri": "tauri dev"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "*",
+    "vite": "*"
+  }
+}

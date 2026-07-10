@@ -137,6 +137,7 @@ export type PluginName =
   | 'tailwind'
   | 'tanstack-router'
   | 'taskfile'
+  | 'tauri'
   | 'travis'
   | 'ts-node'
   | 'tsdown'
@@ -312,6 +313,7 @@ export const pluginNames = [
   'tailwind',
   'tanstack-router',
   'taskfile',
+  'tauri',
   'travis',
   'ts-node',
   'tsdown',

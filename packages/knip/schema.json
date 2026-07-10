@@ -930,6 +930,10 @@
           "title": "taskfile plugin configuration (https://knip.dev/reference/plugins/taskfile)",
           "$ref": "#/definitions/plugin"
         },
+        "tauri": {
+          "title": "tauri plugin configuration (https://knip.dev/reference/plugins/tauri)",
+          "$ref": "#/definitions/plugin"
+        },
         "travis": {
           "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
           "$ref": "#/definitions/plugin"
