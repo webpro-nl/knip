@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/package-entry-points-gitignored",
+  "exports": {
+    ".": "./index.js",
+    "./generated": "./dist/generated.js",
+    "./extra/*": "./dist/*.js",
+    "./aliased": "./hidden.js",
+    "./hidden.js": null,
+    "./missing": "./missing.js"
+  }
+}

@@ -204,7 +204,7 @@ export async function build({
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
-      inputs.add(toProductionEntry(filePath));
+      if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
     }
 
     for (const identifier of entrySpecifiersFromManifest) {

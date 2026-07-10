@@ -101,7 +101,7 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       patterns.add(mapped ?? absSpecifier);
     }
 
-    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: dir, label });
+    const filePaths = await _glob({ patterns: Array.from(patterns), cwd: chief.cwd, dir, label });
 
     debugLogArray(toRelative(dir, chief.cwd), 'Source mapping (package.json)', filePaths);
 

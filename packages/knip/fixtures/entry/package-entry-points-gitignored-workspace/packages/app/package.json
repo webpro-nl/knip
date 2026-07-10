@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/package-entry-points-gitignored-workspace__app",
+  "exports": {
+    ".": "./dist/public.js",
+    "./ignored": "./generated/deep/ignored.js"
+  }
+}

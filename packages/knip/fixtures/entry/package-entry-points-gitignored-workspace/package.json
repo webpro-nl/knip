@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/package-entry-points-gitignored-workspace",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
