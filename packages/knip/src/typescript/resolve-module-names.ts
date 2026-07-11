@@ -4,7 +4,7 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
-import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
+import type { Resolver } from '../util/resolve.ts';
 import type { ToSourceFilePath, WorkspaceManifestHandler } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
@@ -102,6 +102,7 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
 }
 
 export function createCustomModuleResolver(
+  resolver: Resolver,
   compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
@@ -112,7 +113,9 @@ export function createCustomModuleResolver(
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
   const resolveSync =
-    hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
+    hasCustomExts || tsConfigFile
+      ? resolver.createModuleResolver(extensions, tsConfigFile)
+      : resolver.resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
   const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
 

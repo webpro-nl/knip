@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/resolution-conditions",
+  "type": "module",
+  "imports": {
+    "#feature": {
+      "source": "./src/feature.ts",
+      "default": "./dist/feature.js"
+    }
+  }
+}

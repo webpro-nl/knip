@@ -24,6 +24,7 @@ import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
+import type { Resolver } from './util/resolve.ts';
 import type { ToSourceFilePath, WorkspaceManifestHandler } from './util/to-source-path.ts';
 
 export class ProjectPrincipal {
@@ -56,6 +57,7 @@ export class ProjectPrincipal {
   private findWorkspaceManifestImports: WorkspaceManifestHandler | undefined;
 
   fileManager: SourceFileManager;
+  resolver: Resolver;
   private resolveModule: ResolveModule = () => undefined;
   resolveGlobPattern: ResolveGlobPattern = pattern => [pattern];
 
@@ -66,11 +68,13 @@ export class ProjectPrincipal {
   constructor(
     options: MainOptions,
     toSourceFilePath: ToSourceFilePath,
+    resolver: Resolver,
     findWorkspaceManifestImports?: WorkspaceManifestHandler
   ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspaceManifestImports = findWorkspaceManifestImports;
+    this.resolver = resolver;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -121,6 +125,7 @@ export class ProjectPrincipal {
     const scopedRootDirs =
       this.rootDirs.size > 0 ? Array.from(this.rootDirs, ([scope, rootDirs]) => ({ scope, rootDirs })) : undefined;
     this.resolveModule = createCustomModuleResolver(
+      this.resolver,
       { scopedPaths, scopedRootDirs },
       customCompilerExtensions,
       this.toSourceFilePath,

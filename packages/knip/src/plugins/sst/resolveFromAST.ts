@@ -4,7 +4,6 @@ import { collectPropertyValues, getImportMap } from '../../typescript/ast-helper
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { toDeferResolveProductionEntry } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
-import { _resolveSync } from '../../util/resolve.ts';
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   const entries = new Set<string>();
@@ -27,7 +26,7 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
           if (arg?.type === 'Identifier') {
             const importPath = importMap.get(arg.name);
             if (importPath) {
-              const resolvedPath = _resolveSync(importPath, dirname(options.configFilePath));
+              const resolvedPath = options.resolve(importPath, dirname(options.configFilePath));
               if (resolvedPath) {
                 const stackText = options.readFile(resolvedPath);
                 if (stackText) {

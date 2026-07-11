@@ -77,7 +77,15 @@ export async function build({
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
-  const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const handleInput = createInputHandler(
+    deputy,
+    chief,
+    isGitIgnored,
+    addIssue,
+    externalRefsFromInputs,
+    options,
+    principal.resolver
+  );
 
   const rawRootManifest = chief.getManifestForWorkspace('.');
   const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
@@ -157,6 +165,7 @@ export async function build({
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
       readFile: (filePath: string) => principal.readFile(filePath),
+      resolve: principal.resolver.resolveSync,
       configFilesMap,
       options,
     });
@@ -482,6 +491,7 @@ export async function build({
           manifest: createManifest(manifest),
           rootManifest,
           getManifest,
+          resolve: principal.resolver.resolveSync,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {

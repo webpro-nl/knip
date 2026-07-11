@@ -2,7 +2,6 @@ import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
-import { _resolveSync } from '../../util/resolve.ts';
 import { resolveX } from './bunx.ts';
 
 const commands = new Set([
@@ -72,7 +71,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const filePath = command === 'run' ? script : command;
   if (!filePath) return [binary];
   const _cwd = parsed.cwd ? join(cwd, parsed.cwd) : cwd;
-  const resolved = _resolveSync(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
+  const resolved = options.resolve(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
   if (resolved) return [binary, toEntry(resolved)];
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;

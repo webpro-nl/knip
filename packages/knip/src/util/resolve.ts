@@ -10,70 +10,70 @@ const extensionAlias = {
   '.cjs': ['.cjs', '.cts', '.d.cts'],
 };
 
-const resolverInstances: ResolverFactory[] = [];
+const defaultConditionNames = ['require', 'import', 'node', 'default'];
+const browserConditionNames = ['require', 'import', 'browser', 'default'];
 
-const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
-  const baseOptions = {
-    extensions,
-    extensionAlias,
-    conditionNames: ['require', 'import', 'node', 'default'],
-    nodePath: false,
+export const createResolver = (conditions?: string[]) => {
+  const resolverInstances: ResolverFactory[] = [];
+  const getConditionNames = (conditionNames: string[]) => conditions ?? conditionNames;
+
+  const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
+    const baseOptions = {
+      extensions,
+      extensionAlias,
+      conditionNames: getConditionNames(defaultConditionNames),
+      nodePath: false,
+    };
+    const resolver = new ResolverFactory({
+      tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
+      ...baseOptions,
+    });
+    const fallbackResolver = new ResolverFactory({
+      ...baseOptions,
+      conditionNames: getConditionNames(browserConditionNames),
+    });
+
+    resolverInstances.push(resolver, fallbackResolver);
+
+    return function resolveSync(specifier: string, basePath: string) {
+      const resolved = resolver.resolveFileSync(basePath, specifier);
+      if (resolved.path) return toPosix(resolved.path);
+      if (resolved.error) {
+        const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
+        if (fallback.path) return toPosix(fallback.path);
+      }
+    };
   };
-  const resolver = new ResolverFactory({
-    tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
-    ...baseOptions,
-  });
-  const fallbackResolver = new ResolverFactory({
-    ...baseOptions,
-    conditionNames: ['require', 'import', 'browser', 'default'],
-  });
 
-  resolverInstances.push(resolver, fallbackResolver);
+  const resolveModuleSync = timerify(
+    createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DTS_EXTENSIONS, '.json', '.jsonc']),
+    'resolveModuleSync'
+  );
 
-  return function resolveSync(specifier: string, basePath: string) {
-    const resolved = resolver.resolveFileSync(basePath, specifier);
-    if (resolved.path) return toPosix(resolved.path);
-    if (resolved.error) {
-      const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
-      if (fallback.path) return toPosix(fallback.path);
-    }
+  const createModuleResolver = (extensions: string[], tsConfigFile?: string) =>
+    timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');
+
+  const createSyncResolver = (extensions: string[]) => {
+    const resolver = new ResolverFactory({
+      extensions,
+      conditionNames: getConditionNames(defaultConditionNames),
+      nodePath: false,
+    });
+
+    resolverInstances.push(resolver);
+
+    return function resolveSync(specifier: string, baseDir: string) {
+      const resolved = resolver.sync(baseDir, specifier);
+      if (resolved.path) return toPosix(resolved.path);
+    };
   };
+
+  const resolveSync = timerify(createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']));
+  const clearCache = () => {
+    for (const resolver of resolverInstances) resolver.clearCache();
+  };
+
+  return { resolveModuleSync, createModuleResolver, resolveSync, clearCache };
 };
 
-const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DTS_EXTENSIONS, '.json', '.jsonc']);
-
-/**
- * Default module resolver (no custom extensions or path aliases).
- */
-export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
-
-export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =>
-  timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');
-
-const createSyncResolver = (extensions: string[]) => {
-  const resolver = new ResolverFactory({
-    extensions,
-    conditionNames: ['require', 'import', 'node', 'default'],
-    nodePath: false,
-  });
-
-  resolverInstances.push(resolver);
-
-  return function resolveSync(specifier: string, baseDir: string) {
-    const resolved = resolver.sync(baseDir, specifier);
-    if (resolved.path) return toPosix(resolved.path);
-  };
-};
-
-export function clearResolverCache() {
-  for (const resolver of resolverInstances) resolver.clearCache();
-}
-
-const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);
-
-/**
- * Resolver for everything outside the realm of TS module resolution.
- * That's everything coming directly from package.json, scripts and plugins
- * that's an `Input` except those of type `entry` or `project`.
- */
-export const _resolveSync = timerify(resolveSync);
+export type Resolver = ReturnType<typeof createResolver>;

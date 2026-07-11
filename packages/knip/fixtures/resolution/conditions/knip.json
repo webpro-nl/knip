@@ -1,0 +1,6 @@
+{
+  "entry": ["src/index.ts!"],
+  "project": ["**/*.ts!"],
+  "includeEntryExports": true,
+  "conditions": ["source", "require", "import", "node", "default"]
+}

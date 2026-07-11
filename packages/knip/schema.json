@@ -21,6 +21,9 @@
     }
   ],
   "properties": {
+    "conditions": {
+      "$ref": "#/definitions/conditions"
+    },
     "ignoreBinaries": {
       "$ref": "#/definitions/ignoreBinaries"
     },
@@ -181,6 +184,12 @@
   },
   "unevaluatedProperties": false,
   "definitions": {
+    "conditions": {
+      "title": "Export/import map conditions to use during module resolution",
+      "description": "Replaces Knip's built-in condition names for all module resolvers. The node defaults are require, import, and node; the browser fallback uses require, import, and browser. Package map default targets remain fallbacks. Matching conditions follow map key order, not array order.",
+      "examples": [["source", "require", "import", "node", "default"]],
+      "$ref": "#/definitions/list"
+    },
     "list": {
       "type": "array",
       "items": {

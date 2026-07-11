@@ -86,6 +86,42 @@ TypeScript semantics:
 - Path values are an array of relative paths.
 - Paths without an `*` are exact matches.
 
+### `conditions`
+
+Use `conditions` to replace the condition names Knip uses to resolve
+`package.json#exports` and `#imports`. The configured array applies to all module
+resolvers. By default, Knip uses `require`, `import`, and `node`, while the
+browser fallback uses `require`, `import`, and `browser`. Include those names
+explicitly if you still want them to participate. Package map `default` targets
+remain fallbacks.
+
+Condition names form a set: their order in this array does not determine which
+target wins. When multiple conditions match, the order of keys in the `exports`
+or `imports` object determines precedence.
+
+This is useful in monorepos where packages expose their uncompiled sources
+through a custom condition, so Knip follows imports into source files instead of
+(possibly non-existent) build artifacts:
+
+```json title="knip.json"
+{
+  "conditions": ["source", "require", "import", "node", "default"]
+}
+```
+
+```json title="package.json"
+{
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}
+```
+
+Also see [source mapping][13].
+
 ## Workspaces
 
 ### `workspaces`
@@ -489,3 +525,4 @@ Also see [Compilers][12].
 [10]: ../features/production-mode.md
 [11]: ../guides/handling-issues.mdx#unused-dependencies
 [12]: ../features/compilers.md
+[13]: ../features/source-mapping.md

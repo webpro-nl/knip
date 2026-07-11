@@ -50,6 +50,7 @@ const getDefaultWorkspaceConfig = (extensions: string[] = []) => {
 const isPluginName = (name: string): name is PluginName => pluginNames.includes(name as PluginName);
 
 const defaultConfig: Configuration = {
+  conditions: undefined,
   ignore: [],
   ignoreBinaries: [],
   ignoreDependencies: [],
@@ -139,6 +140,7 @@ export class ConfigurationChief {
   }
 
   private normalize(rawConfig: RawConfiguration): Configuration {
+    const conditions = rawConfig.conditions ?? defaultConfig.conditions;
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
     const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
@@ -162,6 +164,7 @@ export class ConfigurationChief {
     }
 
     return {
+      conditions,
       ignore,
       ignoreFiles,
       cycles,

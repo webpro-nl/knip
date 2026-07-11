@@ -28,6 +28,7 @@ export type GetInputsFromScriptsPartial = (
 ) => Input[];
 
 export type FromArgs = (args: string[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
+export type ResolveFile = (specifier: string, baseDir: string) => string | undefined;
 
 export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
@@ -67,6 +68,7 @@ export type GetImportsAndExportsOptions = {
 };
 
 export interface Configuration {
+  conditions?: string[];
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
   ignoreDependencies: IgnorePatterns;
@@ -113,6 +115,7 @@ interface BaseOptions {
   manifest: Manifest;
   rootManifest: Manifest | undefined;
   getManifest: (dir: string) => Manifest | undefined;
+  resolve: ResolveFile;
 }
 
 type IsPluginEnabledOptions = {

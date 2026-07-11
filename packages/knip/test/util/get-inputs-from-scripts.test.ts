@@ -6,10 +6,12 @@ import { _getInputsFromScripts } from '../../src/binaries/index.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
+import { createResolver } from '../../src/util/resolve.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
+const resolver = createResolver();
 const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const knownOnly = { cwd, knownBinsOnly: true };
@@ -26,6 +28,7 @@ const t: T = (script, dependencies = [], options = { cwd }) =>
       rootCwd: cwd,
       manifest: toManifest(),
       getManifest: () => undefined,
+      resolve: resolver.resolveSync,
       containingFilePath,
       ...options,
     }),

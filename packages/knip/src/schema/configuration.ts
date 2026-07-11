@@ -78,6 +78,40 @@ const rootConfigurationSchema = z.object({
    */
   $schema: z.optional(z.string()),
   /**
+   * Export/import map conditions to use during module resolution.
+   *
+   * Replaces Knip's built-in condition names for all module resolvers. The default
+   * node conditions are `require`, `import`, and `node`; the browser fallback uses
+   * `require`, `import`, and `browser`. Package map `default` targets remain
+   * fallbacks. The order of keys in the `exports` or `imports` object determines
+   * which matching condition wins; the order of this array does not.
+   *
+   * @default undefined
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "conditions": ["source", "require", "import", "node", "default"]
+   * }
+   * ```
+   *
+   * With a workspace package exposing its sources through a custom condition:
+   *
+   * ```json title="package.json"
+   * {
+   *   "exports": {
+   *     ".": {
+   *       "source": "./src/index.ts",
+   *       "default": "./dist/index.js"
+   *     }
+   *   }
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/features/source-mapping | Source Mapping}
+   */
+  conditions: z.optional(z.array(z.string())),
+  /**
    * @default {}
    *
    * @see {@link https://knip.dev/features/rules-and-filters | Rules & Filters}

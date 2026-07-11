@@ -13,6 +13,7 @@ import { debugLogObject } from './util/debug.ts';
 import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
 import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
+import { createResolver } from './util/resolve.ts';
 import { getModuleSourcePathHandler, getWorkspaceManifestHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
@@ -40,7 +41,8 @@ export const run = async (options: MainOptions) => {
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
   const findWorkspaceManifestImports = getWorkspaceManifestHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspaceManifestImports);
+  const resolver = createResolver(chief.config.conditions);
+  const principal = new ProjectPrincipal(options, toSourceFilePath, resolver, findWorkspaceManifestImports);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setSelectedWorkspaces(chief.selectedWorkspaces);

@@ -12,6 +12,7 @@ import type {
   Plugin,
   RegisterCompiler,
   RegisterVisitorsOptions,
+  ResolveFile,
   SourceMap,
   WorkspaceConfiguration,
 } from './types/config.ts';
@@ -58,6 +59,7 @@ type WorkspaceManagerOptions = {
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
+  resolve: ResolveFile;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -91,6 +93,7 @@ export class WorkspaceWorker {
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
+  resolve: ResolveFile;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -118,6 +121,7 @@ export class WorkspaceWorker {
     findWorkspaceByFilePath,
     getManifest,
     readFile,
+    resolve,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -136,6 +140,7 @@ export class WorkspaceWorker {
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getManifest = getManifest;
     this.readFile = readFile;
+    this.resolve = resolve;
 
     this.options = options;
 
@@ -305,7 +310,16 @@ export class WorkspaceWorker {
 
     const rootManifest = this.rootManifest;
     const getManifest = this.getManifest;
-    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly, getManifest };
+    const baseOptions = {
+      manifest,
+      rootManifest,
+      cwd,
+      rootCwd,
+      containingFilePath,
+      knownBinsOnly,
+      getManifest,
+      resolve: this.resolve,
+    };
 
     // Get dependencies from package.json#scripts
     const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };
