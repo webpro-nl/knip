@@ -31,8 +31,8 @@ article.prose {
 }
 
 .sponsors .gold {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 320px));
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   gap: 2rem 4rem;
@@ -61,8 +61,8 @@ article.prose {
   width: 500px;
 }
 
-.sponsors .w320 {
-  width: 320px;
+.sponsors .w280 {
+  width: 280px;
 }
 
 .sponsors .w300 {
