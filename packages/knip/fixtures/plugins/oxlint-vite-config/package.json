@@ -2,6 +2,7 @@
   "name": "@plugins/oxlint-vite-config",
   "devDependencies": {
     "vite-plus": "*",
-    "eslint-plugin-regexp": "*"
+    "eslint-plugin-regexp": "*",
+    "@e18e/eslint-plugin": "*"
   }
 }
