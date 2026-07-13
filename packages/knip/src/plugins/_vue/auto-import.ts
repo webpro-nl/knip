@@ -11,7 +11,17 @@ import type { AutoImportMaps, TemplateAstNode, VueSfc } from './types.ts';
 
 const getVueSfc = (cwd: string): VueSfc => {
   try {
-    return createRequire(join(cwd, 'package.json'))('vue/compiler-sfc');
+    const req = createRequire(join(cwd, 'package.json'));
+    const sfc = req('vue/compiler-sfc');
+    let isVue2 = false;
+    try {
+      isVue2 = req('vue/package.json').version.startsWith('2.');
+    } catch {}
+    // Vue 2.7's compiler-sfc takes a single options object and returns the descriptor directly,
+    // unlike Vue 3's `parse(source, options)` returning `{ descriptor, errors }`.
+    return isVue2
+      ? { parse: (source: string, path: string) => ({ descriptor: sfc.parse({ source, filename: path }) }) }
+      : sfc;
   } catch {}
   return {
     parse: (source: string, path: string) => ({
