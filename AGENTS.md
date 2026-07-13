@@ -43,6 +43,7 @@ JavaScript and TypeScript projects.
 - When given a bug report, first confirm the behavior is actually wrong. Reproduce, then check if the reported behavior is correct-by-design before writing any fix.
 - Find repositories/CodeSandbox/StackBlitz source files and local fixtures to actually reproduce the issue at hand.
 - To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+- Before opening a pull request, read [DEVELOPMENT.md][10] and run the QA checklist (`pnpm fmt`, `pnpm lint`, `pnpm knip`, `pnpm knip --strict`, `pnpm test`).
 
 ## Run & Debug
 
@@ -135,3 +136,4 @@ pnpm build
 [7]: ./.agents/TESTS.md
 [8]: ./packages/knip/src/util/debug.ts
 [9]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[10]: ./.github/DEVELOPMENT.md
