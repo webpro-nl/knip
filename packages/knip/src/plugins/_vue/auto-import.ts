@@ -11,7 +11,27 @@ import type { AutoImportMaps, TemplateAstNode, VueSfc } from './types.ts';
 
 const getVueSfc = (cwd: string): VueSfc => {
   try {
-    return createRequire(join(cwd, 'package.json'))('vue/compiler-sfc');
+    const sfc = createRequire(join(cwd, 'package.json'))('vue/compiler-sfc');
+    if (typeof sfc.parseComponent === 'function') {
+      return {
+        parse: (source: string, path: string) => ({
+          descriptor: sfc.parse({ source, filename: path, sourceMap: false }),
+        }),
+        compileTemplate: (source: string, path: string, isTS: boolean, preprocessLang?: string) =>
+          sfc.compileTemplate({
+            source,
+            filename: path,
+            sourceMap: false,
+            isProduction: true,
+            prettify: false,
+            isTS,
+            preprocessLang,
+          }),
+      };
+    }
+    return {
+      parse: (source: string, path: string) => sfc.parse(source, { filename: path, sourceMap: false }),
+    };
   } catch {}
   return {
     parse: (source: string, path: string) => ({
@@ -44,10 +64,13 @@ const collectIdentifiers = (source: string, fileName: string) => {
 const collectTemplateInfo = (tree: TemplateAstNode) => {
   const tags = new Set<string>();
   const identifiers = new Set<string>();
+  const visited = new Set<TemplateAstNode>();
   const addExprIdentifiers = (expr: string) => {
     for (const id of collectIdentifiers(expr, 'expr.ts')) identifiers.add(id);
   };
   const visit = (node: TemplateAstNode) => {
+    if (visited.has(node)) return;
+    visited.add(node);
     if (node.tag) tags.add(node.tag);
     if (node.type === 5 && node.content && !node.content.isStatic) addExprIdentifiers(node.content.content);
     if (node.props) {
@@ -59,9 +82,32 @@ const collectTemplateInfo = (tree: TemplateAstNode) => {
       }
     }
     if (node.children) for (const child of node.children) visit(child);
+    if (node.ifConditions) for (const condition of node.ifConditions) visit(condition.block);
+    if (node.scopedSlots) for (const name in node.scopedSlots) visit(node.scopedSlots[name]);
   };
   visit(tree);
   return { tags, identifiers };
+};
+
+const collectVue2TemplateIdentifiers = (source: string) => {
+  const identifiers = new Set<string>();
+  const visitor = new Visitor({
+    MemberExpression(node) {
+      if (
+        !node.computed &&
+        node.object.type === 'Identifier' &&
+        node.object.name === '_vm' &&
+        node.property.type === 'Identifier'
+      ) {
+        const name = node.property.name;
+        if (name !== '_self' && name !== '$set' && name !== '$delete' && !(name.length === 2 && name[0] === '_')) {
+          identifiers.add(name);
+        }
+      }
+    },
+  });
+  visitor.visit(_parseFile('template.js', source).program);
+  return identifiers;
 };
 
 const toKebabCase = (s: string) => s.replace(/[A-Z]/g, (m, i) => (i ? '-' : '') + m.toLowerCase());
@@ -186,17 +232,35 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
     return [scriptBodies(source, path), stylePreprocessorImports(source, path)].filter(Boolean).join(';\n');
   }
 
-  const { descriptor } = sfcForRoot(root).parse(source, path);
+  const sfc = sfcForRoot(root);
+  const { descriptor } = sfc.parse(source, path);
   const scripts: string[] = [];
   if (descriptor.script?.content) scripts.push(descriptor.script.content);
   if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
 
   const identifiers = scripts.length === 0 ? new Set<string>() : collectIdentifiers(scripts.join('\n'), path);
+  const template = descriptor.template;
+  const compiled =
+    template && !template.ast && sfc.compileTemplate
+      ? sfc.compileTemplate(
+          template.content,
+          path,
+          descriptor.script?.lang === 'ts' ||
+            descriptor.script?.lang === 'tsx' ||
+            descriptor.scriptSetup?.lang === 'ts' ||
+            descriptor.scriptSetup?.lang === 'tsx',
+          template.lang
+        )
+      : undefined;
   let templateTags: Set<string> | undefined;
-  if (descriptor.template?.ast) {
-    const info = collectTemplateInfo(descriptor.template.ast);
+  const templateAst = template?.ast ?? compiled?.ast;
+  if (templateAst) {
+    const info = collectTemplateInfo(templateAst);
     templateTags = info.tags;
     for (const id of info.identifiers) identifiers.add(id);
+  }
+  if (compiled?.code) {
+    for (const id of collectVue2TemplateIdentifiers(compiled.code)) identifiers.add(id);
   }
   scripts.push(...getSyntheticImports(maps, identifiers, templateTags));
 

@@ -15,15 +15,30 @@ export interface TemplateAstNode {
   props?: TemplateAstProp[];
   content?: TemplateExpressionNode;
   children?: TemplateAstNode[];
+  ifConditions?: { block: TemplateAstNode }[];
+  scopedSlots?: Record<string, TemplateAstNode>;
+}
+
+interface DescriptorBlock {
+  content: string;
+  lang?: string;
 }
 
 interface Descriptor {
-  script: { content: string } | null;
-  scriptSetup: { content: string } | null;
-  template: { content: string; ast?: TemplateAstNode } | null;
+  script: DescriptorBlock | null;
+  scriptSetup: DescriptorBlock | null;
+  template: (DescriptorBlock & { ast?: TemplateAstNode }) | null;
 }
 
-export type VueSfc = { parse: (source: string, path: string) => { descriptor: Descriptor } };
+export interface VueSfc {
+  parse: (source: string, path: string) => { descriptor: Descriptor };
+  compileTemplate?: (
+    source: string,
+    path: string,
+    isTS: boolean,
+    preprocessLang?: string
+  ) => { ast?: TemplateAstNode; code: string };
+}
 
 export interface AutoImportMaps {
   importMap: Map<string, string>;
