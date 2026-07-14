@@ -1,4 +1,5 @@
-const directiveMatcher = /@(?:import|config|plugin)\s+['"]([^'"]+)['"][^;]*;/g;
+const directiveMatcher =
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@(?:import|config|plugin)\s+['"]([^'"]+)['"][^;]*;/g;
 
 const compiler = (text: string) => {
   if (!text.includes('@import') && !text.includes('@config') && !text.includes('@plugin')) return '';

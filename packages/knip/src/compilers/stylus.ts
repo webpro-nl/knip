@@ -5,7 +5,8 @@ import type { CompilerSync } from './types.ts';
 
 const dependencies = ['stylus'];
 
-const importMatcher = /@(?:import|require)\s+['"]([^'"]+)['"]/g;
+const importMatcher =
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@(?:import|require)\s+['"]([^'"]+)['"]/g;
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);

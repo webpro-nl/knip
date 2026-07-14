@@ -6,7 +6,8 @@ import type { CompilerSync } from './types.ts';
 const dependencies = ['less'];
 
 // Capture optional `(option)` and the path from either `"..."` / `'...'` or `url(...)`.
-const importMatcher = /@import\s+(?:\([^)]*\)\s+)?(?:url\(\s*['"]?([^'")\s]+)['"]?\s*\)|['"]([^'"]+)['"])/g;
+const importMatcher =
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@import\s+(?:\([^)]*\)\s+)?(?:url\(\s*['"]?([^'")\s]+)['"]?\s*\)|['"]([^'"]+)['"])/g;
 
 const isExternalUrl = (s: string) => s.startsWith('//') || s.startsWith('http://') || s.startsWith('https://');
 

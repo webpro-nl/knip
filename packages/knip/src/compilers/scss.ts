@@ -5,7 +5,8 @@ import type { CompilerSync } from './types.ts';
 
 const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
-const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
+const importMatcher =
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);
