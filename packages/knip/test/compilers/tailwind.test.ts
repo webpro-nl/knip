@@ -17,4 +17,10 @@ test('Built-in compiler for Tailwind CSS', async () => {
     processed: 6,
     total: 6,
   });
+
+  const cycleOptions = await createOptions({ cwd, includedIssueTypes: ['cycles'] });
+  const cycleResult = await main(cycleOptions);
+
+  assert.equal(Object.keys(cycleResult.issues.cycles).length, 0);
+  assert.deepEqual(cycleResult.counters, { ...baseCounters, processed: 6, total: 6 });
 });

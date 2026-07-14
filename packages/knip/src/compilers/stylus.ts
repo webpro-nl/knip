@@ -1,3 +1,4 @@
+import { blockCommentMatcher } from './compilers.ts';
 import { isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync } from './types.ts';
 
@@ -15,11 +16,12 @@ const candidates = (specifier: string): string[] => {
 
 export const compiler: CompilerSync = text => {
   if (!text.includes('@import') && !text.includes('@require')) return '';
+  const body = text.replace(blockCommentMatcher, '');
   const out: string[] = [];
   let i = 0;
   let match: RegExpExecArray | null;
   importMatcher.lastIndex = 0;
-  while ((match = importMatcher.exec(text))) {
+  while ((match = importMatcher.exec(body))) {
     let spec = match[1];
     if (!spec || spec.includes('*')) continue;
     let isBare = isScopedPackage(spec);
