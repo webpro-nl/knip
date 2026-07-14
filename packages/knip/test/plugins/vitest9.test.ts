@@ -16,6 +16,8 @@ test('Find dependencies in vitest configuration (projects with inline and extern
   assert(!issues.unlisted['vitest.config.ts']?.['top-level-dep']);
   assert(!issues.unlisted['vitest.config.ts']?.['project-level-dep']);
   assert(!issues.unlisted['vitest.config.ts']?.['project-dedupe-dep']);
+  assert(!issues.files['vitest.shared.config.ts']);
+  assert(!issues.files['src/shared.setup.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -23,7 +25,7 @@ test('Find dependencies in vitest configuration (projects with inline and extern
     devDependencies: 0,
     unlisted: 2,
     unresolved: 0,
-    processed: 7,
-    total: 7,
+    processed: 9,
+    total: 9,
   });
 });
