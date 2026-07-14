@@ -174,8 +174,9 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       const packageName = getOptimizeDepsIncludePackageName(dependency);
       if (packageName) inputs.add(toDependency(packageName, { optional: true }));
     }
-    if (Array.isArray(cfg.ssr?.external)) {
-      for (const dependency of cfg.ssr.external) {
+    const ssrExternal = cfg.ssr?.external;
+    if (Array.isArray(ssrExternal)) {
+      for (const dependency of ssrExternal) {
         if (typeof dependency === 'string') inputs.add(toDependency(dependency, { optional: true }));
       }
     }
