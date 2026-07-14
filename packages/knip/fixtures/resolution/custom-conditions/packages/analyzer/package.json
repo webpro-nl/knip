@@ -1,0 +1,32 @@
+{
+  "name": "@fixtures/custom-conditions-analyzer",
+  "type": "module",
+  "exports": {
+    ".": {
+      "monorepo": "./src/analyzer.ts",
+      "types": "./dist/analyzer.d.ts",
+      "import": "./dist/analyzer.js",
+      "default": "./dist/analyzer.js"
+    },
+    "./format/*": {
+      "monorepo": "./src/*.format.ts",
+      "types": "./dist/*.format.d.ts",
+      "import": "./dist/*.format.js",
+      "default": "./dist/*.format.js"
+    },
+    "./tuning": {
+      "monorepo": "./src/tuning.json",
+      "default": "./dist/tuning.json"
+    }
+  },
+  "imports": {
+    "#formats/*": {
+      "monorepo": "./src/*.format.ts",
+      "default": "./dist/*.format.js"
+    },
+    "#tuning": {
+      "monorepo": "./src/tuning.json",
+      "default": "./dist/tuning.json"
+    }
+  }
+}

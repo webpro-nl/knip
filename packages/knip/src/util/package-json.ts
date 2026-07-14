@@ -43,6 +43,41 @@ const getEntriesFromExports = (obj: any): string[] => {
   return values;
 };
 
+export const getPackageMapTarget = (map: unknown, key: string) => {
+  if (!map || typeof map !== 'object' || Array.isArray(map)) return key === '.' ? { target: map } : undefined;
+
+  const entries = Object.entries(map);
+  let hasSubpaths = false;
+  for (const [subpath, target] of entries) {
+    if (!subpath.startsWith('.') && !subpath.startsWith('#')) continue;
+    hasSubpaths = true;
+    if (subpath === key) return { target };
+  }
+  if (!hasSubpaths) return key === '.' ? { target: map } : undefined;
+
+  let best: { target: unknown; patternMatch: string; prefixLength: number; subpathLength: number } | undefined;
+  for (const [subpath, target] of entries) {
+    const starIndex = subpath.indexOf('*');
+    if (starIndex < 0) continue;
+    const prefix = subpath.slice(0, starIndex);
+    const suffix = subpath.slice(starIndex + 1);
+    if (!key.startsWith(prefix) || !key.endsWith(suffix) || key.length < prefix.length + suffix.length) continue;
+    if (
+      !best ||
+      prefix.length > best.prefixLength ||
+      (prefix.length === best.prefixLength && subpath.length > best.subpathLength)
+    ) {
+      best = {
+        target,
+        patternMatch: key.slice(prefix.length, key.length - suffix.length),
+        prefixLength: prefix.length,
+        subpathLength: subpath.length,
+      };
+    }
+  }
+  if (best) return { target: best.target, patternMatch: best.patternMatch };
+};
+
 export const load = async (filePath: string) => {
   const file = await readFile(filePath, 'utf8');
   return parseJson(file);

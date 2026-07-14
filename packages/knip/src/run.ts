@@ -13,7 +13,7 @@ import { debugLogObject } from './util/debug.ts';
 import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
 import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
-import { getModuleSourcePathHandler, getWorkspaceManifestHandler } from './util/to-source-path.ts';
+import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
@@ -39,8 +39,8 @@ export const run = async (options: MainOptions) => {
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
-  const findWorkspaceManifestImports = getWorkspaceManifestHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspaceManifestImports);
+  const findWorkspacePackageTarget = getWorkspacePackageTargetHandler(chief);
+  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspacePackageTarget);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setSelectedWorkspaces(chief.selectedWorkspaces);

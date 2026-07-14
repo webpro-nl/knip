@@ -24,7 +24,7 @@ import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
-import type { ToSourceFilePath, WorkspaceManifestHandler } from './util/to-source-path.ts';
+import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -53,7 +53,7 @@ export class ProjectPrincipal {
 
   cache: CacheConsultant<FileNode>;
   toSourceFilePath: ToSourceFilePath;
-  private findWorkspaceManifestImports: WorkspaceManifestHandler | undefined;
+  private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -66,11 +66,11 @@ export class ProjectPrincipal {
   constructor(
     options: MainOptions,
     toSourceFilePath: ToSourceFilePath,
-    findWorkspaceManifestImports?: WorkspaceManifestHandler
+    findWorkspacePackageTarget?: WorkspacePackageTargetHandler
   ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
-    this.findWorkspaceManifestImports = findWorkspaceManifestImports;
+    this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -124,7 +124,7 @@ export class ProjectPrincipal {
       { scopedPaths, scopedRootDirs },
       customCompilerExtensions,
       this.toSourceFilePath,
-      this.findWorkspaceManifestImports,
+      this.findWorkspacePackageTarget,
       this.tsConfigFile
     );
     this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);

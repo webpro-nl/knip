@@ -5,6 +5,8 @@ import { DEFAULT_EXTENSIONS } from '../constants.ts';
 import { debugLog, debugLogArray } from './debug.ts';
 import { findFileWithExtensions, isDirectory } from './fs.ts';
 import { _glob, prependDirToPattern } from './glob.ts';
+import { getPackageNameFromModuleSpecifier } from './modules.ts';
+import { getPackageMapTarget } from './package-json.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
@@ -53,15 +55,30 @@ const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extension
   }
 };
 
-export type WorkspaceManifestHandler = (filePath: string) => { dir: string; imports: unknown } | undefined;
+export type WorkspacePackageTargetHandler = (
+  specifier: string,
+  filePath: string
+) => { dir: string; target: unknown; patternMatch?: string } | undefined;
 
-export const getWorkspaceManifestHandler = (chief: ConfigurationChief): WorkspaceManifestHandler => {
-  return (filePath: string) => {
-    const workspace = chief.findWorkspaceByFilePath(filePath);
+export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): WorkspacePackageTargetHandler => {
+  return (specifier, filePath) => {
+    const isImports = specifier.startsWith('#');
+    let workspace: Workspace | undefined;
+    let key = specifier;
+    if (isImports) {
+      workspace = chief.findWorkspaceByFilePath(filePath);
+    } else {
+      const packageName = getPackageNameFromModuleSpecifier(specifier);
+      if (!packageName) return;
+      workspace = chief.workspacesByPkgName.get(packageName);
+      key = packageName === specifier ? '.' : `.${specifier.slice(packageName.length)}`;
+    }
     if (!workspace) return;
     const manifest = chief.workspacePackages.get(workspace.name)?.manifest;
-    if (!manifest?.imports) return;
-    return { dir: workspace.dir, imports: manifest.imports };
+    const map = isImports ? manifest?.imports : manifest?.exports;
+    if (!manifest || !map) return;
+    const result = getPackageMapTarget(map, key);
+    if (result) return { dir: workspace.dir, ...result };
   };
 };
 
