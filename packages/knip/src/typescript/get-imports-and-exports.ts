@@ -5,7 +5,12 @@ import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisito
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
 import type { Export, FileNode, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
 import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
-import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import {
+  getPackageNameFromFilePath,
+  getPackageNameFromModuleSpecifier,
+  isStartsLikePackageName,
+  sanitizeSpecifier,
+} from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, isInNodeModules, resolve } from '../util/path.ts';
 import { shouldIgnore } from '../util/tag.ts';
@@ -179,11 +184,18 @@ const getImportsAndExports = (
         if (module.isExternalLibraryImport) {
           if (options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
 
-          const sanitizedSpecifier = sanitizeSpecifier(
-            isInNodeModules(resolvedFileName) || isInNodeModules(specifier)
-              ? getPackageNameFromFilePath(specifier)
-              : specifier
+          let sanitizedSpecifier = sanitizeSpecifier(
+            isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : specifier
           );
+          if (isInNodeModules(resolvedFileName)) {
+            const packageName = getPackageNameFromFilePath(resolvedFileName);
+            if (
+              isStartsLikePackageName(packageName) &&
+              getPackageNameFromModuleSpecifier(sanitizedSpecifier) !== packageName
+            ) {
+              sanitizedSpecifier = packageName;
+            }
+          }
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) return;
 
