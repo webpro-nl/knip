@@ -82,5 +82,9 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  return command === 'run' ? [binary] : [binary, ...fromArgs(args, opts)];
+  if (command !== 'run') return [binary, ...fromArgs(args, opts)];
+
+  const input = toBinary(filePath, { optional: true });
+  if (dir) input.dir = dir;
+  return [binary, input];
 };

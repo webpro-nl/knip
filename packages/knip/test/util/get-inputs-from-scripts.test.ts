@@ -179,7 +179,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bun ./main.ts', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
   t('bun run script.js', [toBinary('bun'), toEntry(join(cwd, 'script.js'))]);
   t('bun run ./main', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
-  t('bun run --cwd packages/knip watch', [toBinary('bun')]);
+  t('bun run orval --config orval.config.ts', [toBinary('bun'), toBinary('orval', opt)]);
+  t('bun run --cwd packages/knip watch', [toBinary('bun'), toBinary('watch', { optional: true, dir: join(cwd, 'packages/knip') })]);
   t('bun test', [toBinary('bun')]);
   t('bun add zod', [toBinary('bun')]);
   t('bun install', [toBinary('bun')]);
