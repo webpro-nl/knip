@@ -87,6 +87,7 @@ export interface WalkState extends WalkContext {
   filePath: string;
   sourceText: string;
   isJS: boolean;
+  isModuleFile: boolean;
   handledImportExpressions: Set<number>;
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
@@ -333,7 +334,7 @@ const coreVisitorObject: VisitorObject = {
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
-    if (node.kind !== 'global' && isStringLiteral(node.id)) {
+    if (node.kind !== 'global' && state.isModuleFile && isStringLiteral(node.id)) {
       const specifier = getStringValue(node.id)!;
       for (const name of collectAugmentationRefs(node))
         state.addImport(
@@ -768,7 +769,17 @@ export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[], includ
   return new Visitor(merged as VisitorObject);
 }
 
-function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
+const isExternalModule = (program: Program, hasModuleSyntax: boolean) => {
+  if (hasModuleSyntax) return true;
+  for (const node of program.body) {
+    if (node.type === 'TSImportEqualsDeclaration' && node.moduleReference.type === 'TSExternalModuleReference') {
+      return true;
+    }
+  }
+  return false;
+};
+
+function walkAST(program: Program, sourceText: string, filePath: string, hasModuleSyntax: boolean, ctx: WalkContext) {
   const isJS =
     filePath.endsWith('.js') || filePath.endsWith('.mjs') || filePath.endsWith('.cjs') || filePath.endsWith('.jsx');
 
@@ -777,6 +788,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     filePath,
     sourceText,
     isJS,
+    isModuleFile: isExternalModule(program, hasModuleSyntax),
     handledImportExpressions: new Set(),
     bareExprRefs: new Set(),
     accessedAliases: new Set(),

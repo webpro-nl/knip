@@ -10,4 +10,8 @@ export interface AuditTrail {
   actor: string;
 }
 
+export interface ArchiveMeta {
+  reason: string;
+}
+
 export interface EventBusEvents {}

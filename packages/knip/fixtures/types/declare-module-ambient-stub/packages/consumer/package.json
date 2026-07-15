@@ -1,0 +1,5 @@
+{
+  "name": "@stub/consumer",
+  "version": "1.0.0",
+  "types": "./types/lib-stub.d.ts"
+}

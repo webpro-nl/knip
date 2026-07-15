@@ -383,7 +383,7 @@ const getImportsAndExports = (
     pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 
-  const localRefs = _walkAST(result.program, sourceText, filePath, {
+  const localRefs = _walkAST(result.program, sourceText, filePath, result.module.hasModuleSyntax, {
     lineStarts,
     skipExports,
     options,

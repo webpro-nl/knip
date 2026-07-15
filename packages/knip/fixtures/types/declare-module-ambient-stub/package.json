@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/declare-module-ambient-stub",
+  "workspaces": ["packages/*"]
+}

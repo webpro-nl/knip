@@ -5,20 +5,17 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/types/declare-module-augmentation');
+const cwd = resolve('fixtures/types/declare-module-ambient-stub');
 
-test('Type used only in a declare module augmentation is not reported unused', async () => {
+test('Ambient module declaration in a script file does not count as dependency usage', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!issues.types['events.ts']?.['BaseEntity']);
-  assert(!issues.types['events.ts']?.['EventEnvelope']);
-  assert(!issues.types['events.ts']?.['AuditTrail']);
-  assert(!issues.types['events.ts']?.['ArchiveMeta']);
+  assert(!issues.unlisted['packages/consumer/types/lib-stub.d.ts']?.['@stub/lib']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 2,
+    total: 2,
   });
 });
