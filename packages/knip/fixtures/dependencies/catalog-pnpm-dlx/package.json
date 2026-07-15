@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/catalog-pnpm-dlx",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint:packages": "pnpm dlx sherif@catalog:"
+  }
+}

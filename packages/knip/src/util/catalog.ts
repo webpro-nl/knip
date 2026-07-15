@@ -70,12 +70,27 @@ export const extractCatalogReferences = (manifest: PackageJson): Set<string> => 
     }
   };
 
+  // Package managers (pnpm, yarn) allow referencing a catalog entry directly from a script through
+  // the `catalog:` protocol, e.g. `pnpm dlx sherif@catalog:` or `yarn dlx pkg@catalog:frontend`.
+  const catalogSpecifier = /(@?[\w.-]+(?:\/[\w.-]+)?)@catalog:([\w.-]*)/g;
+  const checkScripts = (scripts: Record<string, string> | undefined) => {
+    if (!scripts) return;
+
+    for (const script of Object.values(scripts)) {
+      if (typeof script !== 'string') continue;
+      for (const [, name, catalogName] of script.matchAll(catalogSpecifier)) {
+        catalogReferences.add([catalogName || DEFAULT_CATALOG, name].join(':'));
+      }
+    }
+  };
+
   checkDependencies(manifest.dependencies);
   checkDependencies(manifest.devDependencies);
   checkDependencies(manifest.peerDependencies);
   checkDependencies(manifest.optionalDependencies);
   checkDependencies(manifest.resolutions);
   checkDependencies(manifest.pnpm?.overrides);
+  checkScripts(manifest.scripts);
 
   return catalogReferences;
 };
