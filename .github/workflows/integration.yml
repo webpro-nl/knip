@@ -107,7 +107,7 @@ jobs:
 
           - name: argos
             repo: argos-ci/argos
-            commands: |
+            commands: | # build required: knexfile.js requires ./dist at config load time
               pnpm install
               pnpm build
               pnpm add -D -w $PKG_URL
@@ -118,7 +118,7 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              bash $SNAP astro -- pnpm knip --fix --exclude unresolved
+              bash $SNAP astro -- pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
@@ -220,7 +220,6 @@ jobs:
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npx hereby generate-diagnostics
               bash $SNAP TypeScript -- npx knip
 
     steps:
