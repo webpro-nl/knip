@@ -198,7 +198,8 @@ export class DependencyDeputy {
     workspace: Workspace,
     packageName: string,
     isDevOnly?: boolean,
-    isTypeOnly?: boolean
+    isTypeOnly?: boolean,
+    isResolved?: boolean
   ): boolean {
     if (!this.isReportDependencies) return true;
     if (isBuiltin(packageName)) return true;
@@ -232,7 +233,7 @@ export class DependencyDeputy {
       return true;
     }
 
-    if (!this.isStrict) {
+    if (!this.isStrict && isResolved !== false) {
       for (const name of workspaceNames) {
         const hosts = this.getHostDependenciesFor(name, packageName);
         if (hosts.length === 0) continue;

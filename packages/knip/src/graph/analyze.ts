@@ -265,7 +265,13 @@ export const analyze = async ({
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
             const isHandled =
               packageName &&
-              deputy.maybeAddReferencedExternalDependency(ws, packageName, undefined, extImport.isTypeOnly);
+              deputy.maybeAddReferencedExternalDependency(
+                ws,
+                packageName,
+                undefined,
+                extImport.isTypeOnly,
+                extImport.filePath !== undefined
+              );
             if (!isHandled)
               collector.addIssue({
                 type: 'unlisted',
