@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
 
-const extensionAlias = {
+export const extensionAlias: Record<string, string[]> = {
   '.js': ['.js', '.ts', '.tsx', '.d.ts'],
   '.jsx': ['.jsx', '.tsx'],
   '.mjs': ['.mjs', '.mts', '.d.mts'],

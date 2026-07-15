@@ -40,6 +40,7 @@ import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpe
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
@@ -439,9 +440,21 @@ export async function build({
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
-          if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
-            const ext = extname(sanitizedSpecifier);
-            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
+          const candidate = join(dirname(filePath), sanitizedSpecifier);
+          const ext = extname(sanitizedSpecifier);
+          const aliases = extensionAlias[ext];
+          let isIgnored = isGitIgnored(candidate);
+          if (!isIgnored && aliases) {
+            const basePath = candidate.slice(0, -ext.length);
+            for (const alias of aliases) {
+              if (alias !== ext && isGitIgnored(basePath + alias)) {
+                isIgnored = true;
+                break;
+              }
+            }
+          }
+          if (!isIgnored && (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext)))) {
+            unresolvedImports.add(unresolvedImport);
           }
         }
       }
