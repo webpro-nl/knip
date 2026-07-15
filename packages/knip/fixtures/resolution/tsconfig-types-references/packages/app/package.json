@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/tsconfig-types-references__app",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "@types/chrome": "*",
+    "typescript": "*"
+  }
+}

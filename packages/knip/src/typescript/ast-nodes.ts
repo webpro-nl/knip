@@ -42,6 +42,7 @@ export type ResolveModule = (specifier: string, containingFile: string) => Resol
 export interface ResolvedModule {
   resolvedFileName: string;
   isExternalLibraryImport: boolean;
+  packageName?: string;
 }
 
 export const buildLineStarts = (sourceText: string): number[] => {

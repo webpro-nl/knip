@@ -1,8 +1,8 @@
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
-import { sanitizeSpecifier } from '../util/modules.ts';
+import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
 import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
@@ -75,9 +75,38 @@ interface PathMapping {
 }
 
 const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
+const installedPackageRootCache = new Map<string, string | undefined>();
 
 export function clearModuleResolutionCaches() {
   for (const cache of moduleResolutionCaches) cache.clear();
+  installedPackageRootCache.clear();
+}
+
+function getInstalledPackageRoot(candidate: string) {
+  if (installedPackageRootCache.has(candidate)) return installedPackageRootCache.get(candidate);
+  let packageRoot: string | undefined;
+  try {
+    packageRoot = toPosix(realpathSync(candidate));
+  } catch {}
+  installedPackageRootCache.set(candidate, packageRoot);
+  return packageRoot;
+}
+
+function getAttributedPackageName(specifier: string, containingFile: string, resolvedFileName: string) {
+  const packageName = getPackageNameFromFilePath(resolvedFileName);
+  const specifierPackageName = getPackageNameFromModuleSpecifier(specifier);
+  if (!specifierPackageName || specifierPackageName === packageName) return packageName;
+  let dir = dirname(containingFile);
+  while (true) {
+    const packageRoot = getInstalledPackageRoot(join(dir, 'node_modules', specifierPackageName));
+    if (packageRoot) {
+      const isResolvedInstall = resolvedFileName === packageRoot || resolvedFileName.startsWith(`${packageRoot}/`);
+      return isResolvedInstall ? specifierPackageName : packageName;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) return packageName;
+    dir = parent;
+  }
 }
 
 function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[] | undefined {
@@ -166,11 +195,15 @@ export function createCustomModuleResolver(
     return resolvedFileName;
   }
 
-  function toResult(resolvedFileName: string): ResolvedModule {
+  function toResult(specifier: string, containingFile: string, resolvedFileName: string): ResolvedModule {
     const mapped = toSourcePath(resolvedFileName);
+    const isExternalLibraryImport = mapped === resolvedFileName && isInNodeModules(resolvedFileName);
     return {
       resolvedFileName: mapped,
-      isExternalLibraryImport: mapped === resolvedFileName && isInNodeModules(resolvedFileName),
+      isExternalLibraryImport,
+      packageName: isExternalLibraryImport
+        ? getAttributedPackageName(specifier, containingFile, resolvedFileName)
+        : undefined,
     };
   }
 
@@ -197,7 +230,7 @@ export function createCustomModuleResolver(
     if (isBuiltin(specifier)) return undefined;
 
     const resolvedFileName = resolveSync(specifier, containingFile);
-    if (resolvedFileName) return toResult(resolvedFileName);
+    if (resolvedFileName) return toResult(specifier, containingFile, resolvedFileName);
 
     // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths, scoped per workspace
     if (pathMappings) {
@@ -210,7 +243,7 @@ export function createCustomModuleResolver(
             const starIdx = value.indexOf('*');
             const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value;
             const resolved = resolveSync(mapped, containingFile);
-            if (resolved) return toResult(resolved);
+            if (resolved) return toResult(specifier, containingFile, resolved);
           }
         }
       }
@@ -228,7 +261,7 @@ export function createCustomModuleResolver(
           for (const targetRoot of rootDirs) {
             if (targetRoot === rootDir) continue;
             const resolved = resolveSync(join(targetRoot, relPath, specifier), containingFile);
-            if (resolved) return toResult(resolved);
+            if (resolved) return toResult(specifier, containingFile, resolved);
           }
         }
       }
@@ -240,7 +273,7 @@ export function createCustomModuleResolver(
       if (target) {
         const targetPath = toPackagePath(workspaceTarget.dir, target);
         const sourcePath = targetPath && toSourceFilePath(targetPath);
-        if (sourcePath) return toResult(sourcePath);
+        if (sourcePath) return toResult(specifier, containingFile, sourcePath);
       }
 
       const existingTarget = pickExistingPackageTarget(
@@ -249,7 +282,7 @@ export function createCustomModuleResolver(
         workspaceTarget.patternMatch,
         moduleExtensions
       );
-      if (existingTarget) return toResult(existingTarget);
+      if (existingTarget) return toResult(specifier, containingFile, existingTarget);
     }
 
     const candidate = isAbsolute(specifier) ? specifier : join(dirname(containingFile), specifier);

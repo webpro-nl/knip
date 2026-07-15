@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "mirrored/*": ["node_modules/@org/mirror-target/*"]
+    }
+  }
+}

@@ -187,14 +187,12 @@ const getImportsAndExports = (
           let sanitizedSpecifier = sanitizeSpecifier(
             isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : specifier
           );
-          if (isInNodeModules(resolvedFileName)) {
-            const packageName = getPackageNameFromFilePath(resolvedFileName);
-            if (
-              isStartsLikePackageName(packageName) &&
-              getPackageNameFromModuleSpecifier(sanitizedSpecifier) !== packageName
-            ) {
-              sanitizedSpecifier = packageName;
-            }
+          if (
+            module.packageName &&
+            isStartsLikePackageName(module.packageName) &&
+            getPackageNameFromModuleSpecifier(sanitizedSpecifier) !== module.packageName
+          ) {
+            sanitizedSpecifier = module.packageName;
           }
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) return;

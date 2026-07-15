@@ -95,12 +95,25 @@ export const createInputHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {
-        const isHandled = deputy.maybeAddReferencedExternalDependency(
+        let isHandled = deputy.maybeAddReferencedExternalDependency(
           inputWorkspace,
           packageName,
           isConfig(input),
           input.isTypeOnly
         );
+
+        if (input.isTypeOnly && input.containingFilePath) {
+          const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
+          if (owningWorkspace && owningWorkspace !== inputWorkspace) {
+            const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(
+              owningWorkspace,
+              packageName,
+              isConfig(input),
+              input.isTypeOnly
+            );
+            isHandled = isHandled || isOwnerHandled;
+          }
+        }
 
         if (externalRefs && !isWorkspace) {
           addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });

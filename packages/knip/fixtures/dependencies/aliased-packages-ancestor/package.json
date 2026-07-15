@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/aliased-packages-ancestor",
+  "workspaces": ["packages/*"],
+  "main": "index.ts",
+  "devDependencies": {
+    "@org/styled-lib": "1.0.0"
+  }
+}
