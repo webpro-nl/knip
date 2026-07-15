@@ -21,6 +21,7 @@ interface VitestConfig {
     globalSetup?: string | string[];
     reporters?: (string | [string, unknown] | unknown)[];
     setupFiles?: string | string[];
+    snapshotSerializers?: string[];
     workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never } })[];
     projects?: (string | (ViteConfig & { test: VitestConfig['test'] & { projects: never } }))[];
     alias?: AliasOptions;

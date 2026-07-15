@@ -48,6 +48,10 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
     .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
+  const snapshotSerializers = (testConfig.snapshotSerializers ?? []).map(specifier => ({
+    ...toDeferResolve(specifier),
+    dir: vitestRoot,
+  }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
   const workspaceDependencies: Input[] = [];
@@ -71,6 +75,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
     ...reporters.map(id => toDependency(id)),
     ...coverage.map(id => toDependency(id)),
     ...setupFiles,
+    ...snapshotSerializers,
     ...globalSetup,
     ...workspaceDependencies,
     ...projectsDependencies,
