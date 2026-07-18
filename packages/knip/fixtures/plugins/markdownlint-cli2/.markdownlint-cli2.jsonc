@@ -1,4 +1,5 @@
 {
+  "extends": "markdownlint/style/prettier",
   "config": {
     "extends": "markdownlint-config-prettier"
   },

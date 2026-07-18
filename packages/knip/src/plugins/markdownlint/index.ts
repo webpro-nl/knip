@@ -18,8 +18,9 @@ const config = ['.markdownlint-cli2.{jsonc,yaml,cjs,mjs}', '.markdownlint.{json,
 const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   const { manifest } = options;
   const dependencies: string[] = [];
-  if (config?.extends) dependencies.push(config.extends);
-  if (config?.config?.extends) dependencies.push(config.config.extends);
+  for (const extend of [config?.extends, config?.config?.extends]) {
+    if (extend && !extend.startsWith('markdownlint/style/')) dependencies.push(extend);
+  }
   for (const customRule of config?.customRules ?? []) {
     if (typeof customRule === 'string') dependencies.push(customRule);
     else if (Array.isArray(customRule)) {
