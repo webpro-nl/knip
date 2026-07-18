@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { createSession } from '../../src/session/session.ts';
 import type { Issues } from '../../src/types/issues.ts';
-import { join } from '../../src/util/path.ts';
+import { join, toPosix } from '../../src/util/path.ts';
 import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { exec } from '../helpers/exec.ts';
@@ -45,7 +45,7 @@ test('returns the same config-preprocessed issues through the CLI and session', 
 });
 
 test('reapplies the config preprocessor after a session refresh', async () => {
-  const cwd = await copyFixture('fixtures/session/preprocessor-refresh');
+  const cwd = toPosix(await copyFixture('fixtures/session/preprocessor-refresh'));
   const options = await createOptions({ cwd, isSession: true });
   const session = await createSession(options);
   const addedFilePath = join(cwd, 'added-module.ts');
