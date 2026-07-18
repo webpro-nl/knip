@@ -149,13 +149,15 @@ export const analyze = async ({
 
               if (isIgnored) continue;
 
-              if (reExportingEntryFile && !isReferenced) {
+              if (reExportingEntryFile) {
                 if (!isIncludeEntryExports) {
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
-                const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
-                if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
+                if (!isReferenced) {
+                  const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
+                  if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
+                }
               }
 
               if (isReferenced) {

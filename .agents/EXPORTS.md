@@ -192,6 +192,13 @@ In `analyze.ts`: for referenced namespace/enum exports, members without
 `hasRefsInFile` are checked via `explorer.isReferenced(filePath, "Ns.member")`.
 If neither, reported as unused.
 
+`isReferenced` returns reference usage and entry exposure independently. If the
+namespace/enum is exposed by an entry and `includeEntryExports` is off, all of
+its members stay public even when other workspace files reference only some of
+them. Imports used by an entry without a re-export do not qualify. `nsExports`
+and `nsTypes` refine namespace analysis after this public-entry boundary and do
+not override it.
+
 **Edge case:** when a namespace/enum has export-level `hasRefsInFile = true`
 but is NOT externally imported, `analyze.ts` skips the member check entirely.
 Unused members silently pass. By design: the export itself is considered "used".
