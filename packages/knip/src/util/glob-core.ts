@@ -11,7 +11,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, join, relative, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -28,6 +28,8 @@ export type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 const cachedGitIgnores = new Map<string, Gitignores>();
 // ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
+
+let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
 
 // Check if directory is a git root (has .git directory or .git file for worktrees)
 const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
@@ -280,11 +282,20 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   return paths;
 }
 
+export function reconcileGitignoredPaths(paths: string[], cwd: string): string[] {
+  if (!gitignoreReconciler || paths.length === 0) return paths;
+  const isGitIgnored = gitignoreReconciler;
+  const result: string[] = [];
+  for (const path of paths) if (!isGitIgnored(isAbsolute(path) ? path : join(cwd, path))) result.push(path);
+  return result;
+}
+
 export async function getGitIgnoredHandler(
   options: Options,
   workspaceDirs?: Set<string>
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
+  gitignoreReconciler = undefined;
 
   if (options.gitignore === false) return () => false;
 
@@ -300,6 +311,8 @@ export async function getGitIgnoredHandler(
     }
     return result;
   };
+
+  if (unignores.size > 0) gitignoreReconciler = isGitIgnored;
 
   return isGitIgnored;
 }

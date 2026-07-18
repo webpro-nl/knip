@@ -1,7 +1,7 @@
 import { globSync } from 'tinyglobby';
 import { compact } from './array.ts';
 import { computeGlobCacheKey, getCachedGlob, isGlobCacheEnabled, setCachedGlob } from './glob-cache.ts';
-import { glob } from './glob-core.ts';
+import { glob, reconcileGitignoredPaths } from './glob-core.ts';
 import { timerify } from './Performance.ts';
 import { isAbsolute, join, relative } from './path.ts';
 
@@ -46,7 +46,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   const cacheKey = cacheEnabled ? computeGlobCacheKey({ patterns: globPatterns, cwd, dir, gitignore }) : '';
   if (cacheEnabled) {
     const cached = getCachedGlob(cacheKey);
-    if (cached) return cached;
+    if (cached) return gitignore ? reconcileGitignoredPaths(cached, cwd) : cached;
   }
 
   const paths = await glob(globPatterns, {
@@ -60,7 +60,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 
   if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, dir);
 
-  return paths;
+  return gitignore ? reconcileGitignoredPaths(paths, cwd) : paths;
 };
 
 const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] }) => {
