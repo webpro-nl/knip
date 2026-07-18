@@ -37,7 +37,7 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
     ? Object.values(manifest.scripts).filter((script): script is string => typeof script === 'string')
     : [];
   const uses = scripts
-    .filter(script => script.includes('markdownlint '))
+    .filter(script => script.includes('markdownlint ') || script.includes('markdownlint-cli2 '))
     .flatMap(script => getArgumentValues(script, / (--rules|-r)[ =]([^ ]+)/g));
   return [...dependencies, ...uses].map(id => toDependency(id));
 };
