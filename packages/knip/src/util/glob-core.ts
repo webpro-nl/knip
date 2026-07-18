@@ -218,15 +218,24 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
         p = parent;
       }
     }
+    // Whether a pattern is shadowed depends only on the pattern, not the dir, so memoize the
+    // picomatch compile+test across the (often identical) patterns repeated in per-dir caches.
+    const isShadowed = new Map<string, boolean>();
     for (const cacheForDir of cachedGitIgnores.values()) {
       for (const pattern of cacheForDir.ignores) {
-        const match = picomatch(pattern);
-        for (const p of unignorePaths) {
-          if (match(p)) {
-            cacheForDir.ignores.delete(pattern);
-            break;
+        let shadowed = isShadowed.get(pattern);
+        if (shadowed === undefined) {
+          const match = picomatch(pattern);
+          shadowed = false;
+          for (const p of unignorePaths) {
+            if (match(p)) {
+              shadowed = true;
+              break;
+            }
           }
+          isShadowed.set(pattern, shadowed);
         }
+        if (shadowed) cacheForDir.ignores.delete(pattern);
       }
     }
   }
