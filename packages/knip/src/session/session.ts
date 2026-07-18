@@ -1,6 +1,7 @@
 import type { CollectorIssues } from '../IssueCollector.ts';
 import { type Results, run } from '../run.ts';
 import type { MainOptions } from '../util/create-options.ts';
+import { runPreprocessorStage } from '../util/reporter.ts';
 import type { SessionHandler, WatchChange } from '../util/watch.ts';
 import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 import { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
@@ -24,11 +25,38 @@ export const createSession = async (options: MainOptions): Promise<Session> => {
   return createSessionAdapter(session, results, options);
 };
 
-const createSessionAdapter = (session: SessionHandler, results: Results, options: MainOptions): Session => {
+const createSessionAdapter = async (
+  session: SessionHandler,
+  results: Results,
+  options: MainOptions
+): Promise<Session> => {
+  const getRawResults = (): Results => ({ ...results, ...session.getIssues() });
+  let data = await runPreprocessorStage(getRawResults(), options);
+
+  const handleFileChanges = async (changes: WatchChange[]) => {
+    const update = await session.handleFileChanges(changes);
+    if (update) data = await runPreprocessorStage(getRawResults(), options);
+    return update;
+  };
+
+  const getIssues = (): CollectorIssues => ({
+    issues: data.issues,
+    counters: data.counters,
+    tagHints: data.tagHints,
+    configurationHints: data.configurationHints,
+  });
+
+  const getResults = (): Results => ({
+    ...getIssues(),
+    selectedWorkspaces: data.selectedWorkspaces,
+    includedWorkspaceDirs: data.includedWorkspaceDirs,
+    enabledPlugins: data.enabledPlugins,
+  });
+
   return {
-    handleFileChanges: session.handleFileChanges,
-    getIssues: session.getIssues,
-    getResults: () => results,
+    handleFileChanges,
+    getIssues,
+    getResults,
     describeFile: (filePath, opts) =>
       buildFileDescriptor(filePath, options.cwd, session.getGraph(), session.getEntryPaths(), opts),
     describePackageJson: () => buildPackageJsonDescriptor(session.getGraph(), session.getEntryPaths()),

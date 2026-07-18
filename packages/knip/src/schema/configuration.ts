@@ -347,6 +347,8 @@ const rootConfigurationSchema = z.object({
   syncCompilers: z.optional(z.record(z.string(), syncCompilerSchema)),
   /** @internal */
   asyncCompilers: z.optional(z.record(z.string(), asyncCompilerSchema)),
+  preprocessor: z.optional(z.union([z.string(), z.array(z.string())])),
+  preprocessorOptions: z.optional(z.string()),
   /**
    * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
    *

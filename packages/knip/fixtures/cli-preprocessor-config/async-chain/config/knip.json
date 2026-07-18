@@ -1,0 +1,5 @@
+{
+  "preprocessor": ["./async-first.js", "./sync-second.js"],
+  "preprocessorOptions": "start-",
+  "project": []
+}

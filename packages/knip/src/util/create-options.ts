@@ -58,11 +58,8 @@ export const createOptions = async (options: CreateOptions) => {
     throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
 
-  const loadedConfig = Object.assign(
-    {},
-    manifest.knip,
-    configFilePath ? await loadResolvedConfigFile(configFilePath, args) : {}
-  );
+  const configFileConfig = configFilePath ? await loadResolvedConfigFile(configFilePath, args) : undefined;
+  const loadedConfig = Object.assign({}, manifest.knip, configFileConfig ?? {});
 
   const validIssueTypes = new Set<string>(ISSUE_TYPES);
   for (const key of ['rules', 'include', 'exclude'] as const) {
@@ -127,6 +124,18 @@ export const createOptions = async (options: CreateOptions) => {
 
   const fixTypes = (options.fixTypes ?? args['fix-type'] ?? []).flatMap(type => type.split(','));
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
+  const preprocessor = args.preprocessor ?? parsedConfig.preprocessor ?? [];
+  const preprocessorOptions = args['preprocessor-options'] ?? parsedConfig.preprocessorOptions ?? '';
+  const isConfigPreprocessor = args.preprocessor === undefined && parsedConfig.preprocessor !== undefined;
+  const isConfigFilePreprocessor =
+    typeof configFileConfig === 'object' &&
+    configFileConfig !== null &&
+    Object.hasOwn(configFileConfig, 'preprocessor');
+  const preprocessorConfigFilePath = isConfigPreprocessor
+    ? isConfigFilePreprocessor
+      ? configFilePath
+      : manifestPath
+    : undefined;
   const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? []);
 
   const workspace = options.workspace ?? args.workspace;
@@ -195,6 +204,10 @@ export const createOptions = async (options: CreateOptions) => {
     isWatch: args.watch ?? options.isWatch ?? false,
     maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
+    preprocessor: typeof preprocessor === 'string' ? [preprocessor] : preprocessor,
+    preprocessorConfigFilePath,
+    preprocessorOptions,
+    reporterOptions: args['reporter-options'] ?? '',
     rules,
     tags,
     traceDependency: args['trace-dependency'],

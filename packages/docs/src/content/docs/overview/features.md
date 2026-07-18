@@ -28,7 +28,7 @@ Also see [related tooling][2].
 | [Plugins][15]                | Over 100 plugins with custom entry paths and config parsing           |
 | [Plugins: inputs][16]        | Inputs are an affective mechanism to add entries, dependencies & more |
 | [Plugins: CLI arguments][17] | Tool-specific CLI argument parsing make plugins go the extra mile     |
-| [Preprocessors][18]          | Preprocess issues before being reported                               |
+| [Preprocessors][18]          | Preprocess CLI and editor results through one shared stage            |
 | [Production mode][19]        | Use `--production` to lint only production code                       |
 | [Reporters][20]              | Choose from many built-in reporters or use your own                   |
 | [Rules][21]                  | Exclude or focus on specific issue types                              |

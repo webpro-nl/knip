@@ -1,0 +1,5 @@
+{
+  "entry": "index.ts",
+  "project": ["*.ts"],
+  "preprocessor": "./preprocessor.js"
+}

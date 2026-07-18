@@ -117,6 +117,7 @@ page, except for the following root-only options:
 
 - `exclude` / `include`
 - `ignoreWorkspaces`
+- `preprocessor` / `preprocessorOptions`
 - `workspaces`
 
 Workspaces can't be nested in a Knip configuration, but they can be nested in a
@@ -232,6 +233,42 @@ Exit with non-zero code (1) if there are any tag hints.
   "treatTagHintsAsErrors": true
 }
 ```
+
+## Preprocessors
+
+### `preprocessor`
+
+Preprocess results before they are passed to reporters or returned by session
+consumers such as the language server. Set a string for one preprocessor or an
+array to run multiple preprocessors from left to right:
+
+```json title="knip.json"
+{
+  "preprocessor": ["./normalize-results.ts", "preprocessor-package"]
+}
+```
+
+Relative paths and package names are resolved from the directory containing the
+configuration file. A command-line `--preprocessor` option overrides the whole
+configuration list rather than merging with it.
+
+### `preprocessorOptions`
+
+Pass extra options to preprocessors as a string:
+
+```json title="knip.json"
+{
+  "preprocessor": "./normalize-results.ts",
+  "preprocessorOptions": "{\"key\":\"value\"}"
+}
+```
+
+The command-line `--preprocessor-options` value overrides this configuration
+value.
+
+Preprocessors do not run in CLI watch mode. Preprocessor source files are not
+watched; restart the editor or extension host, or change the configured
+preprocessor path, to load source edits.
 
 ## Ignore Issues
 

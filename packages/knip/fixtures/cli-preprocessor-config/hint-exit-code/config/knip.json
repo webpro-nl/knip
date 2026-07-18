@@ -1,0 +1,5 @@
+{
+  "ignoreDependencies": ["unused-ignore"],
+  "preprocessor": "./preprocessor.js",
+  "project": []
+}

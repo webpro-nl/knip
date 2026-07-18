@@ -316,8 +316,23 @@ receives the results from the analysis and should return data in the same
 shape/structure (unless you pass it to only your own reporter).
 
 The data goes through the preprocessors before the final data is passed to the
-reporters. There are no built-in preprocessors. Just like reporters, use e.g.
-`--preprocessor ./my-preprocessor` from the command line (can be repeated).
+reporters or returned by a session consumer such as the language server. There
+are no built-in preprocessors. Configure one or more preprocessors in the
+configuration file, or use `--preprocessor ./my-preprocessor` from the command
+line (can be repeated):
+
+```json title="knip.json"
+{
+  "preprocessor": ["./normalize.ts", "preprocessor-package"],
+  "preprocessorOptions": "{\"key\":\"value\"}"
+}
+```
+
+Configuration entries run from left to right. Relative paths and package names
+are resolved from the directory containing the configuration file. Command-line
+paths retain their existing behavior and resolve from the current working
+directory. Providing `--preprocessor` or `--preprocessor-options` overrides the
+corresponding configuration value rather than merging with it.
 
 The default export of the preprocessor should be a function with this interface:
 
@@ -346,6 +361,10 @@ Example usage:
 ```sh
 knip --preprocessor ./preprocess.ts
 ```
+
+Preprocessors do not run in CLI watch mode. Preprocessor source files are not
+watched; restart the editor or extension host, or change the configured
+preprocessor path, to load source edits.
 
 [1]: #codeclimate
 [2]: #codeowners

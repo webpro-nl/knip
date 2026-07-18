@@ -10,8 +10,13 @@ export class ConfigurationError extends Error {}
 
 export class LoaderError extends Error {}
 
+export class PreprocessorError extends Error {}
+
 export const isKnownError = (error: Error) =>
-  error instanceof ConfigurationError || error instanceof LoaderError || isZodErrorLike(error);
+  error instanceof ConfigurationError ||
+  error instanceof LoaderError ||
+  error instanceof PreprocessorError ||
+  isZodErrorLike(error);
 
 export const hasErrorCause = (error: Error): error is ErrorWithCause =>
   !isZodErrorLike(error) && error.cause instanceof Error;

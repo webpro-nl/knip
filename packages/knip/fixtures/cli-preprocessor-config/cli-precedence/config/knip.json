@@ -1,0 +1,5 @@
+{
+  "preprocessor": "./missing-config-preprocessor.js",
+  "preprocessorOptions": "config-options",
+  "project": []
+}

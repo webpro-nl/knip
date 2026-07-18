@@ -97,6 +97,24 @@
     "includeEntryExports": {
       "$ref": "#/definitions/includeEntryExports"
     },
+    "preprocessor": {
+      "title": "Preprocess results before providing them to reporters and session consumers",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "preprocessorOptions": {
+      "title": "Extra options passed to preprocessors as a string",
+      "type": "string"
+    },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
       "examples": ["+custom", "-lintignore", "-@internal"],
