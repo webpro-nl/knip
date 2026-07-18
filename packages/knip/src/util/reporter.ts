@@ -6,13 +6,13 @@ import type { MainOptions } from './create-options.ts';
 import { LoaderError, PreprocessorError } from './errors.ts';
 import { _load } from './loader.ts';
 import { logError } from './log.ts';
-import { dirname, isAbsolute, isInternal, resolve } from './path.ts';
+import { dirname, isAbsolute, isInternal, join, resolve } from './path.ts';
 
 const resolvePreprocessor = (preprocessor: string, configFilePath: string | undefined) => {
   if (!configFilePath)
     return isInternal(preprocessor) && !isAbsolute(preprocessor) ? resolve(preprocessor) : preprocessor;
   if (isAbsolute(preprocessor)) return preprocessor;
-  if (isInternal(preprocessor)) return resolve(dirname(configFilePath), preprocessor);
+  if (isInternal(preprocessor)) return join(dirname(configFilePath), preprocessor);
   return createRequire(configFilePath).resolve(preprocessor);
 };
 

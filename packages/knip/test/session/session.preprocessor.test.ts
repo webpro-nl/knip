@@ -9,6 +9,8 @@ import { createOptions } from '../helpers/create-options.ts';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+
 const getFileIssues = (issues: Issues) => Object.values(issues.files).flatMap(records => Object.values(records));
 
 const getIssueCount = (issues: Issues) =>
@@ -89,7 +91,7 @@ test('keeps deep preprocessor mutations out of live collector state on refresh',
   assert.ok(!session.getResults().configurationHints.some(hint => hint.identifier === 'collector-corrupted'));
 });
 
-test('fails open and surfaces config preprocessor loader errors in a session', async t => {
+skipIfBun('fails open and surfaces config preprocessor loader errors in a session', async t => {
   const errors: string[] = [];
   t.mock.method(console, 'error', (...values: unknown[]) => errors.push(values.map(String).join(' ')));
   const cwd = resolve('fixtures/session/preprocessor-load-error');
@@ -100,7 +102,7 @@ test('fails open and surfaces config preprocessor loader errors in a session', a
   assert.match(errors.join('\n'), /Error loading .*missing-preprocessor\.js/);
 });
 
-test('fails open to untransformed issues and surfaces throwing preprocessors in a session', async t => {
+skipIfBun('fails open to untransformed issues and surfaces throwing preprocessors in a session', async t => {
   const errors: string[] = [];
   t.mock.method(console, 'error', (...values: unknown[]) => errors.push(values.map(String).join(' ')));
   const cwd = resolve('fixtures/session/preprocessor-throw-error');
@@ -111,7 +113,7 @@ test('fails open to untransformed issues and surfaces throwing preprocessors in 
   assert.match(errors.join('\n'), /session preprocessor exploded/);
 });
 
-test('fails open when a session preprocessor returns undefined', async t => {
+skipIfBun('fails open when a session preprocessor returns undefined', async t => {
   const errors: string[] = [];
   t.mock.method(console, 'error', (...values: unknown[]) => errors.push(values.map(String).join(' ')));
   const cwd = resolve('fixtures/session/preprocessor-undefined-return');
@@ -123,7 +125,7 @@ test('fails open when a session preprocessor returns undefined', async t => {
   assert.match(errors.join('\n'), /Preprocessor contract violation/);
 });
 
-test('fails open when a session preprocessor omits issues from its result', async t => {
+skipIfBun('fails open when a session preprocessor omits issues from its result', async t => {
   const errors: string[] = [];
   t.mock.method(console, 'error', (...values: unknown[]) => errors.push(values.map(String).join(' ')));
   const cwd = resolve('fixtures/session/preprocessor-shape-drop');
