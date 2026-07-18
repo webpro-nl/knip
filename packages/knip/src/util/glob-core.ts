@@ -11,7 +11,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, join, relative, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -28,6 +28,10 @@ export type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 const cachedGitIgnores = new Map<string, Gitignores>();
 // ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
+
+// The flat ignore lists can't express unignores (`!pattern`), so shadowed ignore patterns are dropped from them and
+// glob results are filtered through this exact matcher instead (only set when unignores are present)
+let exactGitignoreMatcher: ((relativePath: string) => boolean) | undefined;
 
 // Check if directory is a git root (has .git directory or .git file for worktrees)
 const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
@@ -265,7 +269,16 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
 
   const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns, expandDirectories: false };
 
-  const paths = await tinyGlob(patterns, fgOptions);
+  let paths = await tinyGlob(patterns, fgOptions);
+
+  if (options.gitignore && exactGitignoreMatcher && paths.length > 0) {
+    const matcher = exactGitignoreMatcher;
+    const filtered: string[] = [];
+    for (const path of paths) {
+      if (!matcher(isAbsolute(path) ? relative(options.cwd, path) : path)) filtered.push(path);
+    }
+    paths = filtered;
+  }
 
   debugLogObject(relative(options.cwd, dir), label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
@@ -285,11 +298,14 @@ export async function getGitIgnoredHandler(
   workspaceDirs?: Set<string>
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
+  exactGitignoreMatcher = undefined;
 
   if (options.gitignore === false) return () => false;
 
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
   const matcher = picomatch(expandIgnorePatterns(ignores), { ignore: expandIgnorePatterns(unignores) });
+
+  if (unignores.size > 0) exactGitignoreMatcher = matcher;
 
   const cache = new Map<string, boolean>();
   const isGitIgnored = (filePath: string) => {
