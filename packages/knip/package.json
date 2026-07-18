@@ -96,7 +96,7 @@
     "get-tsconfig": "4.14.0",
     "jiti": "^2.7.0",
     "oxc-parser": "^0.137.0",
-    "oxc-resolver": "11.21.3",
+    "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.4",
     "smol-toml": "^1.6.1",
     "strip-json-comments": "5.0.3",
