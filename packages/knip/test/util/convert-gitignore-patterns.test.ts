@@ -28,7 +28,8 @@ test('convertGitignoreToPicomatch', () => {
 test('toExtendedIgnorePattern', () => {
   assert.equal(ext('*'), '*');
   assert.equal(ext('**'), '**');
-  assert.equal(ext('**/.dot/*'), '**/.dot/*');
+  assert.equal(ext('**/.dot/*'), '**/.dot/*/**');
+  assert.equal(ext('**/.dot/*', true), '**/.dot/*');
   assert.equal(ext('**/dir'), '**/dir/**');
   assert.equal(ext('root'), 'root/**');
   assert.equal(ext('**/a/b/c'), '**/a/b/c/**');

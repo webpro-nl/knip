@@ -11,7 +11,8 @@ export function parseCodeowners(content: string) {
     .map(rule => {
       const [path, ...owners] = rule.split(/\s+/);
       const { pattern } = convertGitignoreToPicomatchIgnorePatterns(path);
-      return { owners, match: picomatch(expandIgnorePatterns([pattern])) };
+      // CODEOWNERS `dir/*` is shallow: it owns direct files only, not nested subdirectories
+      return { owners, match: picomatch(expandIgnorePatterns([pattern], true)) };
     });
 
   return (filePath: string) => {
