@@ -1,6 +1,1 @@
-{
-  "name": "@fixtures/config-preprocessor-manifest-provenance",
-  "knip": {
-    "preprocessor": "./manifest-preprocessor.js"
-  }
-}
+{ "knip": { "preprocessor": "./manifest-preprocessor.js" } }

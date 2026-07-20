@@ -1,5 +1,0 @@
-{
-  "preprocessor": "./preprocessor.js",
-  "preprocessorOptions": "{\"food\":\"cupcake\"}",
-  "project": []
-}

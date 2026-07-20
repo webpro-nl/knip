@@ -112,8 +112,8 @@
       ]
     },
     "preprocessorOptions": {
-      "title": "Extra options passed to preprocessors as a string",
-      "type": "string"
+      "title": "Extra options passed to preprocessors",
+      "type": "object"
     },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",

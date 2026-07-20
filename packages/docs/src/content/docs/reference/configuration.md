@@ -238,37 +238,27 @@ Exit with non-zero code (1) if there are any tag hints.
 
 ### `preprocessor`
 
-Preprocess results before they are passed to reporters or returned by session
-consumers such as the language server. Set a string for one preprocessor or an
-array to run multiple preprocessors from left to right:
+Run one preprocessor or an array from left to right; paths and packages resolve
+from the config directory, with `--preprocessor` taking precedence.
 
 ```json title="knip.json"
 {
-  "preprocessor": ["./normalize-results.ts", "preprocessor-package"]
+  "preprocessor": ["./normalize-results.js", "preprocessor-package"]
 }
 ```
-
-Relative paths and package names are resolved from the directory containing the
-configuration file. A command-line `--preprocessor` option overrides the whole
-configuration list rather than merging with it.
 
 ### `preprocessorOptions`
 
-Pass extra options to preprocessors as a string:
+Pass an object of extra options to preprocessors; a CLI
+`--preprocessor-options` JSON string takes precedence.
 
 ```json title="knip.json"
 {
-  "preprocessor": "./normalize-results.ts",
-  "preprocessorOptions": "{\"key\":\"value\"}"
+  "preprocessorOptions": { "key": "value" }
 }
 ```
 
-The command-line `--preprocessor-options` value overrides this configuration
-value.
-
-Preprocessors do not run in CLI watch mode. Preprocessor source files are not
-watched; restart the editor or extension host, or change the configured
-preprocessor path, to load source edits.
+Also see [Reporters & Preprocessors][13].
 
 ## Ignore Issues
 
@@ -526,3 +516,4 @@ Also see [Compilers][12].
 [10]: ../features/production-mode.md
 [11]: ../guides/handling-issues.mdx#unused-dependencies
 [12]: ../features/compilers.md
+[13]: ../features/reporters.md#preprocessors

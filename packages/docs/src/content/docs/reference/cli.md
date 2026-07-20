@@ -310,9 +310,7 @@ Format modified files after `--fix` using the local formatter.
 
 Preprocess the results before providing it to the [reporter(s)][14].
 
-Can be repeated. Providing this option overrides the complete `preprocessor`
-list from the configuration file. Command-line preprocessor paths resolve from
-the current working directory. Examples:
+Can be repeated. Examples:
 
 ```sh
 knip --preprocessor ./my-preprocessor.ts
@@ -328,14 +326,9 @@ Also see [Reporters & Preprocessors][15].
 
 Pass extra options to the preprocessor as JSON string.
 
-Providing this option overrides `preprocessorOptions` from the configuration
-file.
-
 ```sh
 knip --preprocessor ./preproc.ts --preprocessor-options '{"key":"value"}'
 ```
-
-Preprocessors do not run in CLI watch mode.
 
 ### `--reporter [reporter]`
 

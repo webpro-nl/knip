@@ -1,5 +1,0 @@
-{
-  "preprocessor": ["./first-preprocessor.js", "./second-preprocessor.js"],
-  "preprocessorOptions": "start-",
-  "project": []
-}

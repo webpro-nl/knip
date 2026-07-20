@@ -125,7 +125,9 @@ export const createOptions = async (options: CreateOptions) => {
   const fixTypes = (options.fixTypes ?? args['fix-type'] ?? []).flatMap(type => type.split(','));
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
   const preprocessor = args.preprocessor ?? parsedConfig.preprocessor ?? [];
-  const preprocessorOptions = args['preprocessor-options'] ?? parsedConfig.preprocessorOptions ?? '';
+  const preprocessorOptions =
+    args['preprocessor-options'] ??
+    (parsedConfig.preprocessorOptions === undefined ? '' : JSON.stringify(parsedConfig.preprocessorOptions));
   const isConfigPreprocessor = args.preprocessor === undefined && parsedConfig.preprocessor !== undefined;
   const isConfigFilePreprocessor =
     typeof configFileConfig === 'object' &&
