@@ -96,6 +96,7 @@ export const pluginsSchema = z.object({
   nyc: pluginSchema,
   oclif: pluginSchema,
   'openapi-ts': pluginSchema,
+  openclaw: pluginSchema,
   orval: pluginSchema,
   oxfmt: pluginSchema,
   oxlint: pluginSchema,

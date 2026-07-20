@@ -83,6 +83,7 @@ export type PluginName =
   | 'nyc'
   | 'oclif'
   | 'openapi-ts'
+  | 'openclaw'
   | 'orval'
   | 'oxfmt'
   | 'oxlint'
@@ -262,6 +263,7 @@ export const pluginNames = [
   'nyc',
   'oclif',
   'openapi-ts',
+  'openclaw',
   'orval',
   'oxfmt',
   'oxlint',

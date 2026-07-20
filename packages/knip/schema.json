@@ -726,6 +726,10 @@
           "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
           "$ref": "#/definitions/plugin"
         },
+        "openclaw": {
+          "title": "openclaw plugin configuration (https://knip.dev/reference/plugins/openclaw)",
+          "$ref": "#/definitions/plugin"
+        },
         "orval": {
           "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
           "$ref": "#/definitions/plugin"

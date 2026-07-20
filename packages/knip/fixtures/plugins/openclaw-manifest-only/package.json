@@ -1,0 +1,4 @@
+{
+  "name": "@plugins/openclaw-manifest-only",
+  "openclaw": { "runtimeExtensions": ["./bootstrap.ts"] }
+}

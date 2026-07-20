@@ -82,6 +82,7 @@ import { default as nx } from './nx/index.ts';
 import { default as nyc } from './nyc/index.ts';
 import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
+import { default as openclaw } from './openclaw/index.ts';
 import { default as orval } from './orval/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
@@ -261,6 +262,7 @@ export const Plugins = {
   nyc,
   oclif,
   'openapi-ts': openapiTs,
+  openclaw,
   orval,
   oxfmt,
   oxlint,
