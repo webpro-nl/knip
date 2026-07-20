@@ -202,7 +202,7 @@ export class DependencyDeputy {
     isResolved?: boolean
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (isBuiltin(packageName)) return true;
+    if (packageName.startsWith('node:') || isBuiltin(packageName)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
