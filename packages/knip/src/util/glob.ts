@@ -7,7 +7,7 @@ import {
   isGlobCacheEnabled,
   setCachedGlob,
 } from './glob-cache.ts';
-import { glob, reconcileGitignoredPaths } from './glob-core.ts';
+import { getGitignoreFingerprint, glob, reconcileGitignoredPaths } from './glob-core.ts';
 import { timerify } from './Performance.ts';
 import { isAbsolute, join, relative } from './path.ts';
 
@@ -49,7 +49,10 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   if (globPatterns[0].startsWith('!')) return [];
 
   const cacheEnabled = isGlobCacheEnabled();
-  const cacheKey = cacheEnabled ? computeGlobCacheKey({ patterns: globPatterns, cwd, dir, gitignore }) : '';
+  const gitignoreFingerprint = gitignore ? getGitignoreFingerprint() : '';
+  const cacheKey = cacheEnabled
+    ? computeGlobCacheKey({ patterns: globPatterns, cwd, dir, gitignore, gitignoreFingerprint })
+    : '';
   if (cacheEnabled) {
     const cached = getCachedGlob(cacheKey);
     if (cached) return gitignore ? reconcileGitignoredPaths(cached, cwd) : cached;
@@ -76,7 +79,7 @@ const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] 
   const cacheEnabled = isGlobCacheEnabled();
   const patternList = Array.isArray(patterns) ? patterns : [patterns];
   const cacheKey = cacheEnabled
-    ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false })
+    ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false, gitignoreFingerprint: '' })
     : '';
   if (cacheEnabled) {
     const cached = getCachedGlob(cacheKey);

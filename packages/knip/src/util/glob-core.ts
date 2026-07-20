@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 // oxlint-disable-next-line no-restricted-imports
 import { basename } from 'node:path';
@@ -30,6 +31,26 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 const cachedGlobIgnores = new Map<string, string[]>();
 
 let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
+
+// Fingerprint of the resolved ignore set, mixed into glob cache keys so an edited .gitignore
+// (which changes no directory mtime) still invalidates cached glob results.
+let gitignoreFingerprint = '';
+
+export const getGitignoreFingerprint = () => gitignoreFingerprint;
+
+const hashIgnores = (ignores: Set<string>, unignores: Set<string>): string => {
+  const h = createHash('sha1');
+  for (const p of [...ignores].sort()) {
+    h.update(p);
+    h.update('\0');
+  }
+  h.update('\u0001');
+  for (const p of [...unignores].sort()) {
+    h.update(p);
+    h.update('\0');
+  }
+  return h.digest('base64url');
+};
 
 // Check if directory is a git root (has .git directory or .git file for worktrees)
 const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
@@ -305,10 +326,12 @@ export async function getGitIgnoredHandler(
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
   gitignoreReconciler = undefined;
+  gitignoreFingerprint = '';
 
   if (options.gitignore === false) return () => false;
 
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
+  gitignoreFingerprint = hashIgnores(ignores, unignores);
   const matcher = picomatch(expandIgnorePatterns(ignores), { ignore: expandIgnorePatterns(unignores) });
 
   const cache = new Map<string, boolean>();
