@@ -46,6 +46,24 @@ export default {
 };
 ```
 
+## Compiled files and `project` patterns
+
+The default `project` patterns include compiler extensions automatically. When
+you override `project`, list them explicitly:
+
+```ts title="knip.ts"
+export default {
+  project: ['src/**/*.{ts,tsx,css}'],
+};
+```
+
+Files outside `project` are not analyzed, so their imports don't count. A
+narrowed pattern like `['src/**/*.{ts,tsx}']` silently drops everything a
+stylesheet imports, which is a common source of false positives: `@import
+'tailwindcss'` in an excluded `.css` file gets `tailwindcss` reported as an
+unused dependency. Knip reports a configuration hint when a compiled extension
+is excluded this way.
+
 ## Custom compilers
 
 Built-in compilers can be overridden, and additional compilers can be added.
@@ -61,14 +79,6 @@ The compiler function interface is straightforward. Text in, text out:
 ```
 
 This may also be an `async` function.
-
-:::tip[Note]
-
-When the default `project` patterns are used, compiler extensions are included
-automatically. If you override `project`, list the compiler extensions
-explicitly (e.g. `['src/**/*.{ts,vue}']`).
-
-:::
 
 ### Examples
 

@@ -615,11 +615,19 @@ export class WorkspaceWorker {
 
     if (type === 'project' && compilerExtensions) {
       const seen = new Set<string>();
+      const patternExtensions = new Set<string>();
       for (const pattern of userDefinedPatterns) {
         for (const ext of extractPatternExtensions(pattern)) {
+          patternExtensions.add(ext);
           if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext) || compilerExtensions.has(ext)) continue;
           seen.add(ext);
           hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
+        }
+      }
+      if (patternExtensions.size > 0) {
+        for (const ext of compilerExtensions) {
+          if (patternExtensions.has(ext)) continue;
+          hints.push({ type: 'project-extension-excluded', identifier: ext, workspaceName });
         }
       }
     }
