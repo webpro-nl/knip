@@ -13,13 +13,16 @@ const enablers = ['markdownlint-cli', 'markdownlint-cli2'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
+const isBundled = (specifier: string) =>
+  specifier.startsWith('markdownlint/style/') || specifier === 'markdownlint-cli2-formatter-default';
+
 const config = ['.markdownlint-cli2.{jsonc,yaml,cjs,mjs}', '.markdownlint.{json,jsonc,yaml,yml,cjs,mjs}'];
 
 const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   const { manifest } = options;
   const dependencies: string[] = [];
   for (const extend of [config?.extends, config?.config?.extends]) {
-    if (extend && !extend.startsWith('markdownlint/style/')) dependencies.push(extend);
+    if (extend) dependencies.push(extend);
   }
   for (const customRule of config?.customRules ?? []) {
     if (typeof customRule === 'string') dependencies.push(customRule);
@@ -40,7 +43,7 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
   const uses = scripts
     .filter(script => script.includes('markdownlint ') || script.includes('markdownlint-cli2 '))
     .flatMap(script => getArgumentValues(script, / (--rules|-r)[ =]([^ ]+)/g));
-  return [...dependencies, ...uses].map(id => toDependency(id));
+  return [...dependencies, ...uses].filter(id => !isBundled(id)).map(id => toDependency(id));
 };
 
 const plugin: Plugin = {
