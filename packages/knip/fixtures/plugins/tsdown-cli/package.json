@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/tsdown-cli",
+  "type": "module",
+  "exports": {
+    ".": "./dist/library.js",
+    "./nested": "./dist/modules/nested.js"
+  },
+  "scripts": {
+    "build": "tsdown --root src --platform node --publint src/library.ts src/modules/nested.ts --dts --no-config --outDir dist"
+  },
+  "devDependencies": {
+    "tsdown": "*"
+  }
+}
