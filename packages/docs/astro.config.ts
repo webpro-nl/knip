@@ -155,7 +155,7 @@ export default defineConfig({
           authors: {
             lars: {
               name: 'Lars Kappert',
-              title: 'Knip it, then ship it',
+              title: 'Knip it before you ship it',
               picture: '/authors/lars.jpg',
               url: 'https://webpro.nl/',
             },
