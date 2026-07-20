@@ -28,8 +28,10 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
   return scripts.map(script => join(configFileDir, script));
 };
 
+const ACTION_PATH_VAR = /\$\{\{\s*github\.action_path\s*\}\}|\$\{GITHUB_ACTION_PATH\}|\$GITHUB_ACTION_PATH/g;
+
 const resolveConfig: ResolveConfig = async (config, options) => {
-  const { rootCwd, getInputsFromScripts, isProduction, getManifest } = options;
+  const { rootCwd, getInputsFromScripts, isProduction, getManifest, configFileDir } = options;
 
   const inputs = new Set<Input>();
 
@@ -46,7 +48,9 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
       if (step.run) {
         const manifest = getManifest(dir) ?? options.manifest;
-        for (const input of getInputsFromScripts([step.run], { knownBinsOnly: true, manifest })) {
+        const actionPath = relative(dir, configFileDir);
+        const run = step.run.replace(ACTION_PATH_VAR, actionPath ? `./${actionPath}` : '.');
+        for (const input of getInputsFromScripts([run], { knownBinsOnly: true, manifest })) {
           if (isDeferResolveEntry(input) && path && !workingDir) {
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
           }
