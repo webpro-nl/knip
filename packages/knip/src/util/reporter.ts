@@ -7,9 +7,9 @@ export const runPreprocessors = async (processors: string[], data: ReporterOptio
   const preprocessors = await Promise.all(
     processors.map(proc => _load(isInternal(proc) && !isAbsolute(proc) ? resolve(proc) : proc))
   );
-  return preprocessors.length === 0
-    ? Promise.resolve(data)
-    : runPreprocessors(preprocessors.slice(1), preprocessors[0](data));
+  let result = data;
+  for (const preprocessor of preprocessors) result = await preprocessor(result);
+  return result;
 };
 
 export const runReporters = async (reporter: string[], options: ReporterOptions) => {
