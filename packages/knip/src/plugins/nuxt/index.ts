@@ -12,7 +12,7 @@ import {
   toProductionEntry,
 } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
@@ -113,9 +113,16 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   const serverDir = localConfig.serverDir ?? 'server';
   const inputs: Input[] = [];
 
+  const addModule = (id: string) => {
+    const specifier = resolveAlias(id, srcDir, cwd);
+    inputs.push(
+      isInternal(id) || specifier !== id ? toDeferResolveProductionEntry(specifier) : toDependency(specifier)
+    );
+  };
+
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
-    if (typeof id === 'string') inputs.push(toDependency(id));
+    if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
+    if (typeof id === 'string') addModule(id);
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
