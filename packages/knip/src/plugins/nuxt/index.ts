@@ -114,8 +114,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   const inputs: Input[] = [];
 
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
-    if (typeof id === 'string') inputs.push(toDependency(id));
+    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(resolveAlias(id[0], srcDir, cwd)));
+    if (typeof id === 'string') inputs.push(toDependency(resolveAlias(id, srcDir, cwd)));
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);

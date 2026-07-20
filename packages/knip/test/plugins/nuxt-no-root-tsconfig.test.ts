@@ -13,7 +13,7 @@ test('Resolve nuxt aliases without a root tsconfig.json', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });
