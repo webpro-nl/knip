@@ -1,6 +1,12 @@
 import { globSync } from 'tinyglobby';
 import { compact } from './array.ts';
-import { computeGlobCacheKey, getCachedGlob, isGlobCacheEnabled, setCachedGlob } from './glob-cache.ts';
+import {
+  computeGlobCacheKey,
+  createDirTracker,
+  getCachedGlob,
+  isGlobCacheEnabled,
+  setCachedGlob,
+} from './glob-cache.ts';
 import { glob, reconcileGitignoredPaths } from './glob-core.ts';
 import { timerify } from './Performance.ts';
 import { isAbsolute, join, relative } from './path.ts';
@@ -49,6 +55,8 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
     if (cached) return gitignore ? reconcileGitignoredPaths(cached, cwd) : cached;
   }
 
+  const tracker = cacheEnabled ? createDirTracker() : undefined;
+
   const paths = await glob(globPatterns, {
     cwd,
     dir,
@@ -56,9 +64,10 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
     absolute: true,
     dot: true,
     label,
+    fs: tracker?.fs,
   });
 
-  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, dir);
+  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, dir, tracker?.dirs);
 
   return gitignore ? reconcileGitignoredPaths(paths, cwd) : paths;
 };
@@ -66,13 +75,22 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] }) => {
   const cacheEnabled = isGlobCacheEnabled();
   const patternList = Array.isArray(patterns) ? patterns : [patterns];
-  const cacheKey = cacheEnabled ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false }) : '';
+  const cacheKey = cacheEnabled
+    ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false })
+    : '';
   if (cacheEnabled) {
     const cached = getCachedGlob(cacheKey);
     if (cached) return cached;
   }
-  const paths = globSync(patterns, { cwd, absolute: true, followSymbolicLinks: false, expandDirectories: false });
-  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, cwd);
+  const tracker = cacheEnabled ? createDirTracker() : undefined;
+  const paths = globSync(patterns, {
+    cwd,
+    absolute: true,
+    followSymbolicLinks: false,
+    expandDirectories: false,
+    fs: tracker?.fs,
+  });
+  if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, cwd, tracker?.dirs);
   return paths;
 };
 
