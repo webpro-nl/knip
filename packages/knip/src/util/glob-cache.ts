@@ -30,6 +30,7 @@ export const computeGlobCacheKey = (input: {
   cwd: string;
   dir: string;
   gitignore: boolean;
+  gitignoreFingerprint: string;
 }): string => {
   const h = createHash('sha1');
   h.update(input.cwd);
@@ -37,6 +38,8 @@ export const computeGlobCacheKey = (input: {
   h.update(input.dir);
   h.update('\0');
   h.update(input.gitignore ? '1' : '0');
+  h.update('\0');
+  h.update(input.gitignoreFingerprint);
   h.update('\0');
   for (const p of input.patterns) {
     h.update(p);

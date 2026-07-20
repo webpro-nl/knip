@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/cache-glob-unignored",
+  "knip": {
+    "entry": [
+      "index.ts"
+    ],
+    "project": [
+      "**/*.ts"
+    ]
+  }
+}
