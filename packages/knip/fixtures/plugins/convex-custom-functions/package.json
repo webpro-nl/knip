@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/convex-custom-functions",
+  "dependencies": {
+    "convex": "*"
+  }
+}

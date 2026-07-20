@@ -5,19 +5,19 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/convex');
+const cwd = resolve('fixtures/plugins/convex-custom-functions');
 
-test('Find dependencies with the convex plugin', async () => {
+test('Use the Convex functions directory from convex.json', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!('convex/credentials.ts' in issues.files));
-  assert('src/unrelated.ts' in issues.files);
+  assert(!('backend/http.ts' in issues.files));
+  assert('convex/legacy.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 5,
-    total: 5,
+    processed: 2,
+    total: 2,
   });
 });
