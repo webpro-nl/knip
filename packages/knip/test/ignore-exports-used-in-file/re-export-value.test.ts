@@ -5,11 +5,14 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/re-exports/ignore-exports-used-in-file');
+const cwd = resolve('fixtures/ignore-exports-used-in-file/re-export-value');
 
-test('Find unused export through re-export in entry file (includeEntryExports/ignoreExportsUsedInFile)', async () => {
+test('Find unused exports respecting an ignoreExportsUsedInFile (re-export from source)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert('plum' in issues.exports['barrel.ts']);
+  assert('plum' in issues.exports['fruits.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

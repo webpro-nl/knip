@@ -38,6 +38,7 @@ const fixtures = [
   'types/type-visibility',
   'types/typeof-in-type-alias',
   'infra/zero-config',
+  'ignore-exports-used-in-file/re-export-specifier',
 ];
 
 for (const name of fixtures) {

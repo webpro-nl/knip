@@ -422,7 +422,7 @@ const getImportsAndExports = (
 
   for (const [id, item] of exports) {
     item.referencedIn = referencedInExport.get(id);
-    if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && (localRefs.has(id) || item.isReExport)) {
+    if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && localRefs.has(id)) {
       item.hasRefsInFile = true;
     }
   }

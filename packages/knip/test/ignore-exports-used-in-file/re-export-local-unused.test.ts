@@ -5,15 +5,17 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/re-exports/ignore-exports-used-in-file');
+const cwd = resolve('fixtures/ignore-exports-used-in-file/re-export-local-unused');
 
-test('Find unused export through re-export in entry file (includeEntryExports/ignoreExportsUsedInFile)', async () => {
+test('Find unused exports respecting an ignoreExportsUsedInFile (re-export of unreferenced import)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert('grape' in issues.exports['barrel.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
+    exports: 1,
     processed: 3,
     total: 3,
   });

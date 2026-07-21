@@ -97,6 +97,7 @@ export interface WalkState extends WalkContext {
   currentVarDeclStart: number;
   nsRanges: [number, number][];
   memberRefsInFile: string[];
+  importedRefs: Set<string> | undefined;
   scopeDepth: number;
   scopeStarts: number[];
   scopeEnds: number[];
@@ -283,7 +284,9 @@ export const isShadowed = (name: string, pos: number): boolean => {
 };
 
 const _addLocalRef = (name: string, pos: number) => {
-  if (!state.localImportMap.has(name) && !isShadowed(name, pos)) state.localRefs!.add(name);
+  if (isShadowed(name, pos)) return;
+  if (state.localImportMap.has(name)) (state.importedRefs ??= new Set()).add(name);
+  else state.localRefs!.add(name);
 };
 
 const _addShadowRange = (name: string, range: [number, number]) => {
@@ -798,6 +801,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     currentVarDeclStart: -1,
     nsRanges: [],
     memberRefsInFile: [],
+    importedRefs: undefined,
     scopeDepth: 0,
     scopeStarts: [],
     scopeEnds: [],
@@ -899,6 +903,13 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
         const aliased = state.exports.get(exportName);
         if (aliased) aliased.isRegistered = true;
       }
+    }
+  }
+
+  if (state.localRefs && state.importedRefs) {
+    for (const name of state.importedRefs) {
+      const exportNames = state.localToExports.get(name);
+      if (exportNames) for (const exportName of exportNames) state.localRefs.add(exportName);
     }
   }
 
