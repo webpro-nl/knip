@@ -1,0 +1,9 @@
+Unused exported types (8)
+packages/@repo/debug-proxy/src/createDebugProxy.ts: ProxyHeaders, SSEEvent
+packages/sanity/src/core/canvas/i18n/index.ts: CanvasLocaleResourceKeys
+packages/sanity/src/core/comments/i18n/index.ts: CommentsLocaleResourceKeys
+packages/sanity/src/core/form/inputs/PortableText/contexts/fullscreen/index.ts: FullscreenPTEContextValue
+packages/sanity/src/core/releases/i18n/index.ts: ReleasesLocaleResourceKeys
+packages/sanity/src/core/singleDocRelease/i18n/index.ts: SingleDocReleaseLocaleResourceKeys
+packages/sanity/src/core/tasks/i18n/index.ts: TasksLocaleResourceKeys
+packages/sanity/src/core/validation/index.ts: ValidationContext
