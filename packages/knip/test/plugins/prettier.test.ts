@@ -34,6 +34,22 @@ test('Find dependencies with the Prettier plugin (--config arg)', async () => {
   assert(issues.unlisted['my-prettier-settings.js']['my-custom-prettier-plugin']);
 });
 
+test('Find dependencies with the Prettier plugin (--config arg with -c check flag)', async () => {
+  const cwd = resolve('fixtures/plugins/prettier-check-flag');
+  const options = await createOptions({ cwd });
+  // Before #1902, -c was aliased to --config causing parsed.config to be
+  // ["path", ""] (an array), which crashed on specifier.charCodeAt().
+  const { issues, counters } = await main(options);
+
+  // .prettierrc was correctly resolved via --config and its plugin was found
+  assert(!issues.unlisted['.prettierrc']);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});
+
 test('Find dependencies with the Prettier plugin (.json5 config)', async () => {
   const cwd = resolve('fixtures/plugins/prettier-json5');
   const options = await createOptions({ cwd });
