@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/compilers-tsrx",
+  "dependencies": {
+    "octane": "*"
+  },
+  "devDependencies": {
+    "@tsrx/react": "*"
+  }
+}

@@ -21,22 +21,24 @@ Knip has built-in "compilers" for the following file extensions:
 - `.less`
 - `.styl` + `.stylus`
 - `.svelte`
+- `.tsrx`
 - `.vue`
 
 Knip does not include real compilers for those files, but regular expressions to
 collect `import` statements. This is fast, requires no dependencies, and enough
-for Knip to build the module graph.
+for Knip to build the module graph. The tradeoff is that unused exports inside
+these files go unreported.
 
-On the other hand, real compilers may expose their own challenges in the context
-of Knip. For instance, the Svelte compiler keeps `exports` intact, while they
-might represent component properties. This results in those exports being
-reported as unused by Knip.
+Real compilers recover those exports, but bring their own challenges. The Svelte
+compiler, for instance, keeps `exports` intact even when they represent
+component properties, so Knip reports them as unused. When you need that
+fidelity, override any built-in with the framework's own compiler (see the
+[Svelte][2] and [Vue][3] examples below). For example, to report unused exports
+in [`.tsrx`][1] files.
 
-The built-in functions seem to do a decent job, but override them however you
-like.
-
-Compilers are enabled only if certain dependencies are found. If that's not
-working for your project, set `true` and enable any compiler manually:
+Compilers are enabled only when a related dependency is found. The `.tsrx`
+compiler when a `@tsrx/*` package is installed, for example. If that detection
+doesn't work for your project, set `true` to enable any compiler manually:
 
 ```ts title="knip.ts"
 export default {
@@ -82,10 +84,10 @@ This may also be an `async` function.
 
 ### Examples
 
-- [CSS][1]
-- [MDX][2]
-- [Svelte][3]
-- [Vue][4]
+- [CSS][4]
+- [MDX][5]
+- [Svelte][2]
+- [Vue][3]
 
 #### CSS
 
@@ -190,7 +192,8 @@ export default {
 };
 ```
 
-[1]: #css
-[2]: #mdx
-[3]: #svelte
-[4]: #vue
+[1]: https://tsrx.dev
+[2]: #svelte
+[3]: #vue
+[4]: #css
+[5]: #mdx
