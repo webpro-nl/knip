@@ -1,0 +1,8 @@
+Unused exports (4)
+static/app/components/core/hotkey/index.tsx: Kbd
+static/app/components/core/layout/index.tsx: useContainerBreakpoint
+static/app/components/core/modal/index.tsx: makeClosableHeader, makeCloseButton, ModalBody, ModalFooter
+static/app/views/issueDetails/sidebar/seerDrawer.tsx: SeerDrawer
+Unused exported types (2)
+static/app/components/core/layout/index.tsx: FlexPropsWithRenderFunction, GridPropsWithRenderFunction, StackPropsWithRenderFunction
+static/app/components/core/text/index.tsx: TextPropsWithRenderFunction, HeadingProps, HeadingPropsWithRenderFunction

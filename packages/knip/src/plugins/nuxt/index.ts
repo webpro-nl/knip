@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
@@ -9,10 +9,11 @@ import {
   toDependency,
   toEntry,
   toIgnore,
+  toProductionDependency,
   toProductionEntry,
 } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
@@ -62,7 +63,15 @@ const setup = async () => {
   }
 };
 
-// Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
+const resolve: Resolve = () => [
+  toIgnore('^#build/', 'unresolved'),
+  toIgnore('#components', 'unresolved'),
+  toIgnore('#imports', 'unresolved'),
+  toIgnore('^#internal/', 'unresolved'),
+  toIgnore('#spa-template', 'unresolved'),
+];
+
+// Nuxt aliases are unavailable until `nuxt prepare` generates `.nuxt/tsconfig.json`.
 const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
   if (specifier.startsWith('~~/') || specifier.startsWith('@@/')) return join(rootDir, specifier.slice(3));
   if (specifier.startsWith('~/') || specifier.startsWith('@/')) return join(srcDir, specifier.slice(2));
@@ -109,13 +118,18 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) => {
   const { configFileDir: cwd } = options;
   const hasAppDir = isDirectory(cwd, 'app');
-  const srcDir = localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd);
+  const srcDir = toAbsolute(localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd), cwd);
   const serverDir = localConfig.serverDir ?? 'server';
   const inputs: Input[] = [];
 
+  const addModule = (id: string) => {
+    const specifier = resolveAlias(id, srcDir, cwd);
+    inputs.push(isInternal(specifier) ? toDeferResolveProductionEntry(specifier) : toProductionDependency(specifier));
+  };
+
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
-    if (typeof id === 'string') inputs.push(toDependency(id));
+    if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
+    if (typeof id === 'string') addModule(id);
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
@@ -132,7 +146,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   }
 
   for (const ext of localConfig.extends ?? []) {
-    const resolved = resolveAlias(ext, srcDir, cwd);
+    const target = resolveAlias(ext, srcDir, cwd);
+    const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
     if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
     else inputs.push(toDependency(ext));
@@ -160,9 +175,6 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  inputs.push(toIgnore('#imports', 'unresolved'));
-  inputs.push(toIgnore('#components', 'unresolved'));
-
   return inputs;
 };
 
@@ -174,6 +186,7 @@ const plugin: Plugin = {
   entry,
   production,
   setup,
+  resolve,
   resolveConfig,
   registerCompilers,
 };

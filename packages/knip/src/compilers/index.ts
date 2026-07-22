@@ -4,6 +4,7 @@ import LESS from './less.ts';
 import MDX from './mdx.ts';
 import SCSS from './scss.ts';
 import STYLUS from './stylus.ts';
+import TSRX from './tsrx.ts';
 import type {
   AsyncCompilers,
   CompilerAsync,
@@ -49,6 +50,7 @@ const compilers = [
   { extensions: ['.sass', '.scss'], ...SCSS },
   { extensions: ['.less'], ...LESS },
   { extensions: ['.styl', '.stylus'], ...STYLUS },
+  { extensions: ['.tsrx'], ...TSRX },
 ];
 
 export const getIncludedCompilers = (

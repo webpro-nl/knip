@@ -48,7 +48,7 @@ const resolveConfig: ResolveConfig<PrettierConfig> = config => {
 };
 
 const args: Args = {
-  config: true,
+  config: ['config'],
 };
 
 const isFilterTransitiveDependencies = true;

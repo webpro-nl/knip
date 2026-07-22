@@ -36,3 +36,8 @@ test('knip --preprocessor {cwd}/index.js', () => {
   const { stdout } = exec(`knip --preprocessor ${cwd}/index.js`, { cwd });
   assert.equal(stdout, 'hi from js preprocessor');
 });
+
+test('knip --preprocessor ./chain-async.js --preprocessor ./chain-sync.js', () => {
+  const { stdout } = exec('knip --preprocessor ./chain-async.js --preprocessor ./chain-sync.js', { cwd });
+  assert.equal(stdout, 'hi from async then sync preprocessor');
+});

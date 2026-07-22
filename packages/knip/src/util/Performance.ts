@@ -16,7 +16,7 @@ const { values } = parseArgs({
     'performance-fn': { type: 'string', multiple: true },
     memory: { type: 'boolean' },
     'memory-realtime': { type: 'boolean' },
-    duration: { type: 'boolean' },
+    duration: { type: 'boolean', short: 'u' },
   },
 });
 

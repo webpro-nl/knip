@@ -205,7 +205,7 @@ jobs:
             repo: getsentry/sentry
             commands: |
               pnpm install
-              pnpm add -D $PKG_URL
+              pnpm add -D -w $PKG_URL
               bash $SNAP sentry -- pnpm run knip --fix
               bash $SNAP sentry-prod -- pnpm run knip:prod
 

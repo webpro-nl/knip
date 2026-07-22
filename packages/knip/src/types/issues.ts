@@ -105,6 +105,7 @@ export type ConfigurationHintType =
   | 'entry-empty'
   | 'project-empty'
   | 'project-extension-unregistered'
+  | 'project-extension-excluded'
   | 'package-entry'
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';

@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/configuration-hints-extension-excluded",
+  "type": "module",
+  "devDependencies": {
+    "tailwindcss": "*"
+  }
+}

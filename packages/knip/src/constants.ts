@@ -185,6 +185,8 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'yarn',
   'yes',
   'zip',
+  'zsh',
+  'zstd',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);

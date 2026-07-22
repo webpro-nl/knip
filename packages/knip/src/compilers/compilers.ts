@@ -12,6 +12,15 @@ export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
 export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
 
+export const collectImports: CompilerSync = text => {
+  if (!text.includes('import')) return '';
+  const imports: string[] = [];
+  importMatcher.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = importMatcher.exec(text))) imports.push(match[0]);
+  return imports.join('\n');
+};
+
 export const importsWithinScripts: CompilerSync = (text: string) => {
   const scripts = [];
   scriptExtractor.lastIndex = 0;

@@ -121,6 +121,12 @@ const entriesByOption = (opts: TargetOptions): EntriesByOption =>
               typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input
             )
           : [],
+      styles:
+        'styles' in opts && opts.styles && Array.isArray(opts.styles)
+          ? (opts.styles as StylesBuildOption).map(styleStringOrObject =>
+              typeof styleStringOrObject === 'string' ? styleStringOrObject : styleStringOrObject.input
+            )
+          : [],
       polyfills:
         'polyfills' in opts && opts.polyfills
           ? Array.isArray(opts.polyfills)
@@ -160,6 +166,7 @@ type EntriesByOption = Map<string, readonly string[]>;
 //👇 Using Webpack-based browser schema to support old `replaceWith` file replacements
 type FileReplacementsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['fileReplacements'], undefined>;
 type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'], undefined>;
+type StylesBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['styles'], undefined>;
 
 const PRODUCTION_CONFIG_NAME = 'production';
 const BUILD_TARGET_NAME = 'build';

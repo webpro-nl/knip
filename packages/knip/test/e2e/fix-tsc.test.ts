@@ -6,7 +6,7 @@ import { join } from '../../src/util/path.ts';
 import { copyFixture } from '../helpers/copy-fixture.ts';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
-import { tsgo } from '../helpers/tsgo.ts';
+import { tsc } from '../helpers/tsc.ts';
 
 const tsconfig = JSON.stringify({
   compilerOptions: {
@@ -38,29 +38,30 @@ const fixtures = [
   'types/type-visibility',
   'types/typeof-in-type-alias',
   'infra/zero-config',
+  'ignore-exports-used-in-file/re-export-specifier',
 ];
 
 for (const name of fixtures) {
-  test(`tsgo clean before and after knip --fix: ${name}`, async () => {
+  test(`tsc clean before and after knip --fix: ${name}`, async () => {
     const cwd = await copyFixture(`fixtures/${name}`);
     await writeFile(join(cwd, 'tsconfig.json'), tsconfig);
 
-    const baseline = tsgo(cwd);
-    assert.equal(baseline.status, 0, `baseline tsgo failed:\n${baseline.stdout}${baseline.stderr}`);
+    const baseline = tsc(cwd);
+    assert.equal(baseline.status, 0, `baseline tsc failed:\n${baseline.stdout}${baseline.stderr}`);
 
     const fix = exec('knip --fix --no-progress', { cwd });
     assert.match(fix.stdout, /\(removed\)/, `knip --fix removed nothing:\n${fix.stdout}\n${fix.stderr}`);
 
-    const after = tsgo(cwd);
-    assert.equal(after.status, 0, `post-fix tsgo failed:\n${after.stdout}${after.stderr}`);
+    const after = tsc(cwd);
+    assert.equal(after.status, 0, `post-fix tsc failed:\n${after.stdout}${after.stderr}`);
   });
 }
 
-// FP-direction lib fixtures (knip must NOT strip names tsc/tsgo still needs).
-// The post-fix tsgo emit on pkg/ catches violations as a declaration-emit
+// FP-direction lib fixtures (knip must NOT strip names tsc still needs).
+// The post-fix tsc emit on pkg/ catches violations as a declaration-emit
 // error. The exact code depends on shape (TS4023 cross-module is the most
 // common; TS4081/4082 fire on same-module private names; TS4060/4063 on
-// return/param positions). Test asserts on tsgo exit status, not error code:
+// return/param positions). Test asserts on tsc exit status, not error code:
 //   typed-exports             — explicit return-type annotations on exported values
 //   export-star-as            — `export * as Ns from '…'` namespace re-export
 //   arrow-inferred-return     — arrow with block body, no return type
@@ -68,7 +69,7 @@ for (const name of fixtures) {
 //   member-call               — `obj.method()` member-expression callee
 //   call-arg                  — Identifier as call argument at top level (`wrap(inner)`)
 //
-// FN-direction lib fixtures (knip must FLAG names tsc/tsgo doesn't strictly
+// FN-direction lib fixtures (knip must FLAG names tsc doesn't strictly
 // need; post-fix file content must NOT contain the names in libFixtureRemovals):
 //   as-cast-in-body           — `as T` / `<T>x` / `satisfies T` inside a function body
 //   call-arg-in-body          — Identifier as call argument inside a function body
@@ -110,10 +111,10 @@ for (const name of libFixtures) {
     await writeFile(join(tmp, 'package.json'), '{ "name": "e2e-lib-consumer", "type": "module" }\n');
     await writeFile(join(tmp, 'tsconfig.json'), tsconfig);
 
-    const buildBaseline = tsgo(pkgDir);
+    const buildBaseline = tsc(pkgDir);
     assert.equal(buildBaseline.status, 0, `baseline build failed:\n${buildBaseline.stdout}${buildBaseline.stderr}`);
 
-    const consumerBaseline = tsgo(tmp);
+    const consumerBaseline = tsc(tmp);
     assert.equal(
       consumerBaseline.status,
       0,
@@ -131,10 +132,10 @@ for (const name of libFixtures) {
       }
     }
 
-    const buildAfter = tsgo(pkgDir);
+    const buildAfter = tsc(pkgDir);
     assert.equal(buildAfter.status, 0, `post-fix build failed:\n${buildAfter.stdout}${buildAfter.stderr}`);
 
-    const consumerAfter = tsgo(tmp);
+    const consumerAfter = tsc(tmp);
     assert.equal(consumerAfter.status, 0, `post-fix consumer failed:\n${consumerAfter.stdout}${consumerAfter.stderr}`);
   });
 }

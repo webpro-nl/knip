@@ -63,6 +63,25 @@ test('No hints when user overrides plugin entry config', async () => {
   });
 });
 
+test('Hint when project pattern excludes an extension registered as a compiler', async () => {
+  const cwd = resolve('fixtures/tags-hints/configuration-hints-extension-excluded');
+  const options = await createOptions({ cwd });
+  const { issues, counters, configurationHints } = await main(options);
+
+  assert('tailwindcss' in issues.devDependencies['package.json']);
+
+  assert.deepEqual(configurationHints, [
+    { type: 'project-extension-excluded', identifier: '.css', workspaceName: '.' },
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    processed: 1,
+    total: 1,
+  });
+});
+
 test('Hint when project pattern lists extensions not registered as a compiler', async () => {
   const cwd = resolve('fixtures/tags-hints/configuration-hints-extension');
   const options = await createOptions({ cwd });

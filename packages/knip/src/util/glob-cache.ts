@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
-import { createDiskCache, mtimeMatches } from './disk-cache.ts';
-import { dirname } from './path.ts';
+import type { FSLike } from 'fdir';
+import { createDiskCache } from './disk-cache.ts';
 
 interface GlobCacheEntry {
   paths: string[];
@@ -11,16 +11,26 @@ interface GlobCacheEntry {
 
 const store = createDiskCache<GlobCacheEntry>('glob');
 
-export const initGlobCache = store.init;
+// Dir mtimes are constant during a run, so memoize stat across the many cache entries that share dirs.
+const dirMtimeCache = new Map<string, number>();
+
+export const initGlobCache = (cacheLocation: string) => {
+  dirMtimeCache.clear();
+  store.init(cacheLocation);
+};
 export const isGlobCacheEnabled = store.isEnabled;
 export const flushGlobCache = store.flush;
-export const clearGlobCache = store.clear;
+export const clearGlobCache = () => {
+  dirMtimeCache.clear();
+  store.clear();
+};
 
 export const computeGlobCacheKey = (input: {
   patterns: string[];
   cwd: string;
   dir: string;
   gitignore: boolean;
+  gitignoreFingerprint: string;
 }): string => {
   const h = createHash('sha1');
   h.update(input.cwd);
@@ -29,6 +39,8 @@ export const computeGlobCacheKey = (input: {
   h.update('\0');
   h.update(input.gitignore ? '1' : '0');
   h.update('\0');
+  h.update(input.gitignoreFingerprint);
+  h.update('\0');
   for (const p of input.patterns) {
     h.update(p);
     h.update('\0');
@@ -36,9 +48,23 @@ export const computeGlobCacheKey = (input: {
   return h.digest('base64url');
 };
 
+const statDirMtime = (dir: string): number => {
+  let mtime = dirMtimeCache.get(dir);
+  if (mtime === undefined) {
+    try {
+      const stat = fs.statSync(dir);
+      mtime = stat.isDirectory() ? stat.mtimeMs : Number.NaN;
+    } catch {
+      mtime = Number.NaN;
+    }
+    dirMtimeCache.set(dir, mtime);
+  }
+  return mtime;
+};
+
 const validateEntry = (entry: GlobCacheEntry): boolean => {
   for (const dir in entry.dirMtimes) {
-    if (!mtimeMatches(dir, entry.dirMtimes[dir])) return false;
+    if (statDirMtime(dir) !== entry.dirMtimes[dir]) return false;
   }
   return true;
 };
@@ -53,32 +79,42 @@ export const getCachedGlob = (key: string): string[] | undefined => {
   return entry.paths;
 };
 
-const captureDirMtimes = (paths: string[], baseDir: string): Record<string, number> => {
+// Delegate to a native fs function while recording the directory it reads. The native overload +
+// `__promisify__` types don't survive a plain wrapper, so bridge them at this single boundary.
+const trackReads = <T>(native: T, dirs: Set<string>): T => {
+  const tracked = function (this: unknown, path: unknown, ...rest: unknown[]) {
+    if (typeof path === 'string') dirs.add(path);
+    return (native as (...args: unknown[]) => unknown).call(this, path, ...rest);
+  };
+  return tracked as unknown as T;
+};
+
+/**
+ * Records every directory the glob crawl visits. tinyglobby forwards this `fs` to fdir, which reads
+ * each traversed directory exactly once — so the recorded set is the complete set of directories whose
+ * contents can affect the result, including ones that matched nothing.
+ */
+export const createDirTracker = (): { dirs: Set<string>; fs: Partial<FSLike> } => {
   const dirs = new Set<string>();
-  // Always track the base dir to catch new top-level files/dirs
-  dirs.add(baseDir);
-  for (const p of paths) {
-    let d = dirname(p);
-    while (d.length >= baseDir.length) {
-      if (dirs.has(d)) break;
-      dirs.add(d);
-      const parent = dirname(d);
-      if (parent === d) break;
-      d = parent;
-    }
-  }
+  return { dirs, fs: { readdir: trackReads(fs.readdir, dirs), readdirSync: trackReads(fs.readdirSync, dirs) } };
+};
+
+const stripTrailingSlash = (dir: string) => (dir.length > 1 && dir.endsWith('/') ? dir.slice(0, -1) : dir);
+
+const captureDirMtimes = (dirs: Iterable<string>, baseDir: string): Record<string, number> => {
   const result: Record<string, number> = {};
-  for (const d of dirs) {
-    try {
-      const stat = fs.statSync(d);
-      if (stat.isDirectory()) result[d] = stat.mtimeMs;
-    } catch {
-      // dir disappeared between glob and stat — skip
-    }
+  // Always track the base dir to catch new top-level entries even when the crawl root sits deeper.
+  const baseMtime = statDirMtime(baseDir);
+  if (!Number.isNaN(baseMtime)) result[baseDir] = baseMtime;
+  for (const dir of dirs) {
+    const d = stripTrailingSlash(dir);
+    if (d in result) continue;
+    const mtime = statDirMtime(d);
+    if (!Number.isNaN(mtime)) result[d] = mtime;
   }
   return result;
 };
 
-export const setCachedGlob = (key: string, paths: string[], baseDir: string): void => {
-  store.set(key, { paths, dirMtimes: captureDirMtimes(paths, baseDir) });
+export const setCachedGlob = (key: string, paths: string[], baseDir: string, dirs: Iterable<string> = []): void => {
+  store.set(key, { paths, dirMtimes: captureDirMtimes(dirs, baseDir) });
 };
