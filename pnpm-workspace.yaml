@@ -11,7 +11,4 @@ minimumReleaseAgeExclude:
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
-  - express-rate-limit@8.3.0
-  - tinyclip@0.1.13
-  - tinyexec@1.2.2
   - undici-types@6.21.0
