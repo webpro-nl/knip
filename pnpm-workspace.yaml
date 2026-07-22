@@ -12,3 +12,7 @@ trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - undici-types@6.21.0
+packageExtensions:
+  '@astrojs/mdx@7.0.3':
+    dependencies:
+      satteri: 0.9.5

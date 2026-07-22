@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/typescript-native",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "@typescript/native": "npm:typescript@7.0.2"
+  }
+}

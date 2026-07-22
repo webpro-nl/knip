@@ -28,7 +28,8 @@
     "@octokit/graphql": "^9.0.3",
     "astro": "7.1.1",
     "picocolors": "^1.1.1",
-    "satteri": "0.9.5"
+    "satteri": "0.9.5",
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": ">=22.0.0"
