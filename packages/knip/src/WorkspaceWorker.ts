@@ -339,26 +339,23 @@ export class WorkspaceWorker {
 
     const storeConfigFilePath = (pluginName: PluginName, input: ConfigInput) => {
       const configFilePath = this.handleInput(input);
-      if (configFilePath) {
-        const workspace = this.findWorkspaceByFilePath(configFilePath);
-        if (workspace) {
-          // TODO Are we handling root → child and vice-versa transfers properly?
-          const name = this.name === ROOT_WORKSPACE_NAME ? workspace.name : this.name;
-          if (name === wsName && seen.get(pluginName)?.has(configFilePath)) return;
+      if (!configFilePath) return;
+      const workspace = this.findWorkspaceByFilePath(configFilePath);
+      // TODO Are we handling root → child and vice-versa transfers properly?
+      const name = this.name === ROOT_WORKSPACE_NAME && workspace ? workspace.name : this.name;
+      if (name === wsName && seen.get(pluginName)?.has(configFilePath)) return;
 
-          let configFiles = configFilesMap.get(name);
-          if (!configFiles) {
-            configFiles = new Map();
-            configFilesMap.set(name, configFiles);
-          }
-          let configFilePaths = configFiles.get(pluginName);
-          if (!configFilePaths) {
-            configFilePaths = new Set();
-            configFiles.set(pluginName, configFilePaths);
-          }
-          configFilePaths.add(configFilePath);
-        }
+      let configFiles = configFilesMap.get(name);
+      if (!configFiles) {
+        configFiles = new Map();
+        configFilesMap.set(name, configFiles);
       }
+      let configFilePaths = configFiles.get(pluginName);
+      if (!configFilePaths) {
+        configFilePaths = new Set();
+        configFiles.set(pluginName, configFilePaths);
+      }
+      configFilePaths.add(configFilePath);
     };
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {

@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-tsconfig-package-extends",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}

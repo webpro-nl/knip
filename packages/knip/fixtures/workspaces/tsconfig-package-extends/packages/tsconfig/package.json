@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tsconfig-package",
+  "private": true,
+  "exports": {
+    "./app.json": "./app.json"
+  }
+}
