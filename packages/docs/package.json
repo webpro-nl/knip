@@ -29,9 +29,10 @@
     "astro": "7.1.1",
     "picocolors": "^1.1.1",
     "satteri": "0.9.5",
+    "starlight-blog": "^0.28.0",
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   }
 }

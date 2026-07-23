@@ -4,12 +4,12 @@
   transition: border-color 300ms;
 }
 
-.sl-markdown-content a:not(:where(.not-content *)) {
+.sl-markdown-content a:not(:where(.not-content *, .post-footer *, .preview-link, .preview footer *)) {
   color: var(--sl-color-text);
   border-bottom: 1px solid var(--sl-color-gray-1);
 }
 
-.sl-markdown-content a:not(:where(.not-content *)):hover {
+.sl-markdown-content a:not(:where(.not-content *, .post-footer *, .preview-link, .preview footer *)):hover {
   border-color: var(--sl-color-white);
 }
 
@@ -24,7 +24,6 @@
 }
 
 .right-sidebar a:hover,
-.sidebar-content a:hover,
 .sidebar-content a:hover {
   color: var(--sl-color-orange);
 }

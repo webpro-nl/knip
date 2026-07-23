@@ -1,5 +1,6 @@
 import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
+import starlightBlog from 'starlight-blog';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
 import { fixInternalLinks } from './plugins/fixInternalLinks.ts';
@@ -120,10 +121,6 @@ export default defineConfig({
             },
           ],
         },
-        {
-          label: 'Blog',
-          items: [{ autogenerate: { directory: 'blog' } }],
-        },
       ],
       expressiveCode: {
         emitExternalStylesheet: true,
@@ -149,6 +146,26 @@ export default defineConfig({
           return theme;
         },
       },
+      plugins: [
+        starlightBlog({
+          title: 'Blog',
+          postCount: 7,
+          recentPostCount: 5,
+          prevNextLinksOrder: 'chronological',
+          authors: {
+            lars: {
+              name: 'Lars Kappert',
+              title: 'Knip it before you ship it',
+              picture: '/authors/lars.jpg',
+              url: 'https://webpro.nl/',
+            },
+          },
+          metrics: {
+            readingTime: true,
+            words: 'rounded',
+          },
+        }),
+      ],
     }),
   ],
 });
