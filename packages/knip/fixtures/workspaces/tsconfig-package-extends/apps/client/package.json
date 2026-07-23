@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/workspaces-tsconfig-package-extends__client",
+  "private": true,
+  "main": "src/index.ts",
+  "devDependencies": {
+    "@fixtures/tsconfig-package": "workspace:*",
+    "@types/chrome": "*",
+    "typescript": "*"
+  }
+}

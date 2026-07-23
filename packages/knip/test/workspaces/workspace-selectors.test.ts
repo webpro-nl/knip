@@ -14,7 +14,7 @@ test('Select workspace by package name', async () => {
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
 
-  assert.equal(includedWorkspaceDirs.length, 4);
+  assert.equal(includedWorkspaceDirs.length, 5);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -37,8 +37,8 @@ test('Select workspaces by package name glob with brace expansion', async () => 
     types: 1,
     dependencies: 2,
     unlisted: 2,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -77,8 +77,8 @@ test('Select workspaces by directory glob pattern', async () => {
     ...baseCounters,
     dependencies: 2,
     unlisted: 3,
-    processed: 2,
-    total: 2,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -88,7 +88,7 @@ test('Exclude workspace by package name', async () => {
 
   assert('docs/dangling.ts' in issues.files);
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
-  assert(!includedWorkspaceDirs.includes(join(cwd, 'packages/tools')));
+  assert(includedWorkspaceDirs.includes(join(cwd, 'packages/tools')));
   assert(!selectedWorkspaces?.includes('packages/tools'));
   assert(selectedWorkspaces?.includes('apps/frontend'));
   assert(selectedWorkspaces?.includes('apps/backend'));
@@ -99,8 +99,8 @@ test('Exclude workspace by package name', async () => {
     dependencies: 2,
     unlisted: 3,
     types: 1,
-    processed: 5,
-    total: 5,
+    processed: 7,
+    total: 7,
   });
 });
 
@@ -182,8 +182,8 @@ test('Multiple workspace selectors union', async () => {
     types: 1,
     dependencies: 2,
     unlisted: 2,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -198,8 +198,8 @@ test('Mixed directory and package name selectors', async () => {
     ...baseCounters,
     types: 1,
     unlisted: 1,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });
 

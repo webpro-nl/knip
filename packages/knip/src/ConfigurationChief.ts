@@ -296,20 +296,30 @@ export class ConfigurationChief {
       if (graph) {
         const seen = new Set<string>();
         const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
-        const workspaceDirsWithDependents = new Set(initialWorkspaces);
+        const includedWorkspaceDirs = new Set(initialWorkspaces);
+        const addDependencies = (dir: string) => {
+          const dirs = graph.get(dir);
+          if (!dirs || dirs.size === 0) return;
+          for (const dir of dirs) {
+            if (!graph.has(dir) || includedWorkspaceDirs.has(dir)) continue;
+            includedWorkspaceDirs.add(dir);
+            addDependencies(dir);
+          }
+        };
         const addDependents = (dir: string) => {
           seen.add(dir);
           const dirs = graph.get(dir);
           if (!dirs || dirs.size === 0) return;
           for (const d of dirs)
             if (initialWorkspaces.has(d)) {
-              workspaceDirsWithDependents.add(dir);
+              includedWorkspaceDirs.add(dir);
               break;
             }
           for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
         };
+        for (const dir of initialWorkspaces) addDependencies(dir);
         for (const dir of this.availableWorkspaceDirs) addDependents(dir);
-        for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir));
+        for (const dir of includedWorkspaceDirs) ws.add(relative(this.cwd, dir));
       }
     } else {
       for (const name of workspaceNames) ws.add(name);

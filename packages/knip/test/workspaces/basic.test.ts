@@ -75,7 +75,7 @@ test('Find unused dependencies, exports and files in workspaces (production)', a
   });
 });
 
-test('Analyze only ancestor and dependent workspaces', async () => {
+test('Analyze ancestor, dependency and dependent workspaces', async () => {
   const options = await createOptions({ cwd, workspace: 'packages/shared' });
   const { issues, counters } = await main(options);
 

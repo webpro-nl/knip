@@ -156,8 +156,9 @@ changes in `package.json` or `node_modules` may not cause an updated report.
 
 ### `--workspace [filter]`
 
-Select one or multiple workspaces (including its ancestor and dependent
-workspaces). The default behavior is to lint all configured workspaces.
+Select one or multiple workspaces (including its ancestor, dependency and
+dependent workspaces). The default behavior is to lint all configured
+workspaces.
 
 Shortcut: `-W`
 
