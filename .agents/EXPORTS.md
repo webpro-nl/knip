@@ -1,247 +1,305 @@
-# Resolving export usage
+# Export usage and declaration safety
 
-How knip answers "is this export used?" across an AST. Matching is name-based, with no type checker.
+Knip answers "is this export used?" by matching names from syntax and the
+module graph. It does not run a type checker. Export analysis must therefore
+stay conservative when removing an `export` could break declaration emit.
 
-## DTS correctness
+## Safety contract
 
-For libraries that emit `.d.ts` (`declaration: true`), removing an `export`
-keyword is only safe when tsc/tsgo can still produce a valid declaration.
-Knip's chain-ref machinery approximates the rules `isolatedDeclarations`
-enforces (TS 5.5+): types referenced from exported value signatures must be
-nameable in the emitted `.d.ts`, else `tsc --declaration` errors. The
-diagnostic varies by shape: TS4023 (cross-module, the common case),
-TS4081/TS4082 (same-module private names), TS4060/TS4063 (return/parameter
-positions). All trace to one problem: a type isn't nameable where the
-declaration needs it. Unlike `isolatedDeclarations`, which requires explicit
-annotations and rejects implicit forms, knip handles the implicit forms by
-walking the chain name-based, without a type checker.
+A report is also a promise about `knip --fix`. Keeping a redundant export is a
+missed report; removing a required export can break a build or a downstream
+consumer. Prefer the missed report whenever syntax alone cannot prove removal
+safe.
+
+Types in exported value signatures are the main risk. TypeScript may need an
+apparently unused type name while emitting a `.d.ts`, including from a different
+module or package. Typical failures include TS4023, TS4081/TS4082,
+TS4060/TS4063, TS2742, and TS2883. The exact diagnostic depends on the
+TypeScript version and syntax.
+
+Knip applies this conservative protection even when its selected
+`tsconfig.json` does not set `declaration: true`. A package may use another
+build config or declaration tool, and consumers may infer the type into their
+own public declarations. Absence from the selected config is not proof that
+`tsc --declaration` or another declaration tool can remove the export safely.
+
+### `isolatedDeclarations` does not make removal safe
+
+`isolatedDeclarations` requires enough annotations to emit each source file
+without cross-file inference. It says nothing about whether another package
+can name a type after its `export` modifier is removed.
+
+For example, an isolated library can emit this file with `Hook` private:
+
+```ts
+const brand: unique symbol = Symbol('hook');
+
+type Hook = { readonly [brand]: true };
+export const createHook = (): Hook => ({ [brand]: true });
+```
+
+A non-isolated consumer may still fail after that change:
+
+```ts
+import { createHook } from 'library';
+
+export const wrap = () => createHook();
+```
+
+The library's own emit succeeds, but the consumer can fail with TS4023 because
+its inferred return type cannot name the private brand. External consumers do
+not inherit the library's compiler options.
+
+Do not gate `isReferencedInUsedExport` on the defining workspace's
+`isolatedDeclarations` setting. Such a change is safe only if the analysis can
+also prove every downstream declaration shape nameable. Knip cannot currently
+prove that.
+
+Explicit annotations can narrow the syntax Knip must walk, but they do not
+prove that a referenced type export is removable.
 
 See:
 
 - [`isolatedDeclarations` TSConfig reference][1]
-- [TS 5.5 release notes: Isolated Declarations][2]
-- [microsoft/TypeScript#5711][3] (TS4023 origin)
+- [TypeScript 5.5 release notes][2]
+- [microsoft/TypeScript#5711][3]
+- [Knip #1722: declaration export regression][4]
+- [Knip #1903: internal return type report][5]
 
-Operating model:
+## Ownership of graph facts
 
-- Correctness floor: never strip an export tsc still needs. FNs (knip kept a
-  type alive that could have been removed) are a reportable miss; FPs (knip
-  removed an export tsc still needs) are a broken build.
-- Approximate, don't infer. Chains follow what is _structurally_ visible.
-  Don't capture from positions that demonstrably don't flow (e.g. `as` casts
-  in body context).
-- Escape hatch: when the heuristic is wrong, an explicit return type or value
-  type annotation always wins.
+Cross-file imports and re-exports belong to `ImportMaps`. Signature containment
+belongs to the defining file:
 
-The rest is the mechanical detail of how knip approximates this.
+- `referencedInExport` is built while walking one AST. It maps a local
+  identifier to the exports whose declarations reference it.
+- The map is copied to `Export.referencedIn` after the walk.
+- `isReferencedInUsedExport` follows that local chain, then asks the module
+  graph whether each containing export is live.
 
-## Shadow detection
+The containment chain never crosses a file boundary. Do not add a partial
+`referencedInExport` relation to `ImportMaps`; calls, wrappers, nested values,
+spreads, aliases, barrels, and entry exposure would all need complete semantics.
+An incomplete edge creates declaration-breaking reports.
 
-A local binding can shadow an exported name, producing false negatives.
-`isShadowed(name, pos)` returns true if the reference at `pos` falls inside a
-scope that shadows `name`. Shadows registered via:
-
-- `_addShadow`: block-scoped variables and nested function declarations (uses
-  current `scopeDepth` range from `BlockStatement`)
-- `_addParamShadows`: function/arrow/method parameters (uses function body
-  range directly, since params are visited before the body's `BlockStatement`)
-- `CatchClause` handler: catch binding (uses catch body range)
-- `ForInStatement`/`ForOfStatement` handlers: loop variable (uses loop body
-  range, since the `VariableDeclaration` fires before the body's `BlockStatement`)
-
-`_collectBindingNames` recurses into destructuring patterns (ObjectPattern,
-ArrayPattern, AssignmentPattern, RestElement) to extract bound Identifiers.
+Every correctness-critical graph fact needs one canonical owner, complete
+producer coverage, and a total meaning at its consumer. Optionality may encode
+genuine absence; it must not hide incomplete assembly.
 
 ## `ignoreExportsUsedInFile`
 
-Opt-in config (default `false`).
+This option defaults to `false`. By default, a same-file reference does not
+keep an export alive. Setting the option to `true` is a code-organization
+preference that lets selected local references count.
 
-By default, an export only referenced in its own file is reported as unused,
-matching what `tsc` would tolerate (structural inlining of type aliases,
-`typeof X` in type aliases). Opting `true` is a code-organization preference,
-not a correctness concern. Either way, types reachable from exported value
-signatures stay alive unconditionally regardless of this config. That's the
-DTS-correctness path covered above.
+`localRefsVisitorObject` collects names in `localRefs` when the option is
+enabled. After the walk, matching exports receive `hasRefsInFile = true`.
+`shouldCountRefs` selects the eligible symbol types. Computed access such as
+`obj[EXPORTED_KEY]` is included.
 
-With the config on: `localRefsVisitorObject` populates `localRefs` during AST
-traversal. Exports present in `localRefs` get `hasRefsInFile = true`.
-`shouldCountRefs` gates eligible types. Computed member access
-(`obj[EXPORTED_KEY]`) is handled.
+The signature-containment path is evaluated independently of this option and
+protects declaration emit. By contrast, a reference such as `typeof X` inside
+another exported type follows the configured same-file rules.
 
-`analyze.ts` reads this via `isReferencedInUsedExport` for exports not directly
-imported: returns true when a containing export has `hasRefsInFile` and is a
-type/interface (recursively checked). Alive-ness does not cascade through
-external imports; chains stay in-file.
+`isReferencedInUsedExport` remains local while walking `Export.referencedIn`.
+For each containing export, it checks `hasRefsInFile`, runtime registration,
+and external liveness through `explorer.isReferenced`. Only the liveness query
+crosses the module graph.
 
-## Chain refs (`referencedInExport` + `_collectRefsInType`)
+## Chain collection
 
-Maps exported identifier to set of export names whose declarations reference
-it. Walked by `_collectRefsInType(node, exportName, signatureOnly, seen, inBody)`.
+The `_collectRefsInType` walker records local identifiers that may affect an
+exported declaration. Its full call shape is
+`_collectRefsInType(node, exportName, signatureOnly, seen, inBody)`.
 
-### Where chains are seeded
+### Seeds
 
-- **Type aliases** (`TSTypeAliasDeclaration.typeAnnotation`): full walk.
-- **Interfaces** (`TSInterfaceDeclaration.body` plus `extends`): full walk;
-  `extends` clauses captured via `addRefInExport`.
-- **Variable export with type annotation**: walks `id.typeAnnotation` only. The
-  annotation already names everything visible to declaration emit; the init's
-  signature is dead work.
-- **Variable export without type annotation**: walks the init.
+- Type aliases: walk `TSTypeAliasDeclaration.typeAnnotation`.
+- Interfaces: walk `TSInterfaceDeclaration.body` and record direct `extends`
+  identifiers with `addRefInExport`.
+- Variables with a type annotation: walk `id.typeAnnotation`, not the
+  initializer.
+- Variables without a type annotation: walk the initializer with
   `signatureOnly = hasExplicitFunctionReturnType(init)`.
-- **Function declarations** (named, default, declare): walks the function node
-  with `signatureOnly = hasExplicitFunctionReturnType(decl)`.
-- **Class declarations** (named, default): walks with `signatureOnly = true`
-  (param types of methods captured; method bodies skipped).
-- **Destructured exports** (`export const { a } = factory()`): walks the init
-  with `signatureOnly = false` so types inside the factory's return shape are
-  captured.
+- Named, default, and declared functions: walk the function with
+  `signatureOnly = hasExplicitFunctionReturnType(decl)`.
+- Classes: use `signatureOnly = true` so method bodies are skipped.
+- Destructured exports such as `export const { a } = factory()`: walk the
+  initializer with `signatureOnly = false`.
 
-### `signatureOnly` semantics
+### `signatureOnly`
 
-- `true`: skip `BlockStatement` / `FunctionBody`. Walk only signature-shaped
-  nodes (params, return types, type parameters, type annotations, type
-  references, type queries).
-- `false`: enter blocks. Used for inferred-return functions where the body
-  itself defines the inferred shape (and for type alias / interface bodies,
-  which never contain blocks anyway).
+With `signatureOnly = true`, the walker stops at `BlockStatement` and
+`FunctionBody`. Parameters, return types, type parameters, annotations,
+references, and queries remain visible.
 
-### Helper-call following (deferred resolution)
+With `signatureOnly = false`, the walker enters bodies because an inferred
+return may depend on their syntax. Type aliases and interface bodies also use
+the full walk.
 
-When the walker sees a `CallExpression` it does not resolve the helper inline.
-Source order is unreliable: a helper declared after an export wouldn't yet be
-in `localDeclarations` at the call site. Instead, three queues collect
-references and are drained after the visitor pass:
+### Deferred calls
 
-- `pendingCallRefs`: `callee` is an `Identifier` (always), or an argument is an
-  `Identifier` _and_ `inBody` is false. The body restriction prevents the
-  `useReducer(localReducer, …)` over-capture: a helper passed as an argument
-  inside a body usually has its signature types consumed locally, not surfaced
-  in the outer inferred return. Top-level `wrap(inner)` and expression-body
-  `() => wrap(inner)` still follow (`inBody` stays false).
-- `pendingMemberCallRefs`: `callee` is a non-computed `MemberExpression` whose
-  object is an `Identifier` resolving to a local `const`-initialized
-  `ObjectExpression` and whose property name maps to a function-typed value.
-  Covers the `helpers.recurse()` / handler-bag pattern, one level deep.
+When `_collectRefsInType` sees a `CallExpression`, it defers resolution until
+forward-declared helpers exist in `localDeclarations`. There are two queues:
 
-Drain logic walks the resolved decl with `signatureOnly = true` (helper's
-public surface is the signature, never the body). The `seen` set is per-chain
-and prevents cycles. New entries pushed during drain are processed in the
-same loop until both queues are empty.
+- `pendingCallRefs` follows a `callee` or argument that is an `Identifier`. It
+  follows arguments only outside a function body, covering `wrap(inner)` and
+  `() => wrap(inner)`.
+- `pendingMemberCallRefs` follows a non-computed `MemberExpression` when its
+  object is a local `Identifier` whose declaration contains an
+  `ObjectExpression`. Resolution requires the selected property to contain a
+  function and covers one-level patterns such as `helpers.recurse()`.
 
-This deferred pattern mirrors `memberRefsInFile`.
+The drain walks each resolved helper with `signatureOnly = true`. A per-chain
+`seen` set terminates cycles. Items queued during the drain are processed
+before it ends.
 
-### `inBody` flag (cast-skip heuristic)
+Member-call resolution checks the initializer shape, not the declaration kind;
+it does not require `const`.
 
-Tracks whether the walker is currently descending through a function body.
-Set to `true` when entering a non-skipped `BlockStatement` / `FunctionBody`;
-propagates to children.
+Identifier arguments inside a function body are deliberately ignored. Following
+`useReducer(localReducer, …)`, for example, would usually keep types that do not
+appear in the outer inferred return.
 
-When `inBody` is true:
+### Body-local annotations
 
-- `TSAsExpression` / `TSTypeAssertion` / `TSSatisfiesExpression` are walked
-  through their `expression` only. The type annotation is treated as a local
-  hint that doesn't flow into declaration emit. `JSON.parse('{}') as T` is the
-  motivating case.
-- `VariableDeclarator` is walked through its `init` only. A body-local binding's
-  own annotation (`let x: T`) is a local hint that doesn't flow into the inferred
-  return.
+`inBody` becomes `true` below a `BlockStatement` or `FunctionBody`. In that
+context:
 
-When `inBody` is false (signature mode, top-level inits, type alias targets):
+- `TSAsExpression`, `TSTypeAssertion`, and `TSSatisfiesExpression` walk only
+  their runtime `expression`.
+- `VariableDeclarator` walks only its `init`.
 
-- The same nodes are walked normally; their type annotations are captured.
-  `export const x = parse() as T` and similar top-level cast inits keep T
-  alive correctly.
+This excludes the type side of an `as` cast such as
+`JSON.parse('{}') as T`, along with local annotations such as `let x: T`.
+Outside a body, the same annotations count; `export const x = parse() as T`
+can determine the exported declaration.
 
-Edge case: `() => { return x as T; }` (block body, cast as return value, no
-explicit return type) loses T. Mitigation: add an explicit return type. The
-trade prefers fixing the common FN (internal-hint casts) over preserving an
-uncommon shape that has a clean user-visible workaround.
+Known limitation: an unannotated block body such as
+`() => { return x as T; }` loses the `T` edge. Naming `T` in an explicit return
+type makes the dependency visible. The annotation improves collection but does
+not make `T` safe to de-export.
 
-### Chain consumption
+## Chain consumption
 
-`isReferencedInUsedExport` walks the chain from a non-imported export upward,
-classifying each hop:
+`isReferencedInUsedExport` walks from a candidate export toward the local
+exports that contain it:
 
-- **Type→type hop** (containing export is `type` / `interface` / `enum`):
-  propagates only when `ignoreExportsUsedInFile` is on. Otherwise the chain
-  breaks here, since tsc structurally inlines the inner type and its export
-  is removable.
-- **Type→value hop** (containing export is a function/class/variable):
-  propagates unconditionally. Needed for `tsc --declaration`; removing the
-  inner type's export would error in declaration emit (TS4023 / TS4081 / etc.).
+- For a type-to-type hop, the chain is eligible only when
+  `ignoreExportsUsedInFile` counts the containing `type`, `interface`, or
+  `enum`. Otherwise TypeScript can often inline the inner structural type.
+- For a type-to-value hop, `ignoreExportsUsedInFile` does not stop the chain.
+  A live containing value keeps the candidate alive. Some shapes can be
+  inlined, but Knip cannot prove that from names alone; a nominal member,
+  unique symbol, inferred wrapper, or downstream declaration can still require
+  the export.
 
-## Namespace/enum member `hasRefsInFile`
+This is a conservative boundary, not a claim that every retained type is
+required by TypeScript.
 
-`ExportMember.hasRefsInFile` (separate from export-level `Export.hasRefsInFile`)
-is set via deferred resolution. During the walk, same-file member references
-(e.g. `Bar.value`) are pushed as interleaved pairs to a flat
-`memberRefsInFile: string[]` on `WalkState`. After the walk, pairs are resolved
-against the final `exports` map.
+## Shadow detection
 
-Deferred because the AST visitor walks source-order; forward references to
-namespace members defined later in the file would miss inline resolution.
-Same pattern as `pendingCallRefs` and `bareExprRefs`.
+A local binding can shadow an exported name. `isShadowed(name, pos)` checks
+whether `pos` falls inside a shadow range for `name`.
 
-Collection: `handleMemberExpression` (3 depth levels) and
-`coreVisitorObject.TSQualifiedName` push pairs to `memberRefsInFile`.
-`localRefsVisitorObject.TSQualifiedName` only adds the namespace name to
-`localRefs` (no member push, core handler covers it). Resolution happens in
-`walkAST` post-walk.
+Ranges come from:
 
-In `analyze.ts`: for referenced namespace/enum exports, members without
-`hasRefsInFile` are checked via `explorer.isReferenced(filePath, "Ns.member")`.
-If neither, reported as unused.
+- `_addShadow` for block-scoped variables and nested functions, using the
+  current `scopeDepth` range from `BlockStatement`
+- `_addParamShadows` for function, arrow, and method parameters, using the
+  function body because parameters are visited before its `BlockStatement`
+- `CatchClause` bindings
+- `ForInStatement` and `ForOfStatement` bindings, using the loop body because
+  its `VariableDeclaration` is visited before the body block
 
-`isReferenced` returns reference usage and entry exposure independently. If the
-namespace/enum is exposed by an entry and `includeEntryExports` is off, all of
-its members stay public even when other workspace files reference only some of
-them. Imports used by an entry without a re-export do not qualify. `nsExports`
-and `nsTypes` refine namespace analysis after this public-entry boundary and do
-not override it.
+`_collectBindingNames` handles object and array destructuring, assignment
+patterns, and rest elements.
 
-**Edge case:** when a namespace/enum has export-level `hasRefsInFile = true`
-but is NOT externally imported, `analyze.ts` skips the member check entirely.
-Unused members silently pass. By design: the export itself is considered "used".
+## Namespace and enum members
 
-## E2E
+`ExportMember.hasRefsInFile` is separate from `Export.hasRefsInFile`. During
+the AST walk, the flat `memberRefsInFile: string[]` field on `WalkState` stores
+same-file references such as `Bar.value` as name/member pairs. Resolving
+`memberRefsInFile` against `exports` after `walkAST` preserves forward
+references. This is the same deferred-resolution pattern used by
+`pendingCallRefs` and `bareExprRefs`.
 
-`packages/knip/test/e2e/fix-tsgo.test.ts` covers the resolution paths above.
-Each fixture builds clean under tsgo, gets `knip --fix`, then must build clean
-again. A failing post-fix build means knip removed something tsc/tsgo still
-needs: a false positive in one of these mechanisms.
+`handleMemberExpression` and `coreVisitorObject.TSQualifiedName` queue those
+pairs, while `localRefsVisitorObject.TSQualifiedName` records only the
+namespace name in `localRefs`. The core visitor owns the member relation.
 
-`e2e-lib-*` fixtures extend the round-trip to a consumer with
-`declaration: true` so type-visibility regressions (any TS4xxx code) also fail.
-FP-direction (knip must NOT strip a name tsc still needs) is caught by the
-post-fix tsgo emit on `pkg/`. FN-direction (knip must FLAG a name tsc
-doesn't need) is caught by per-fixture `remove` regexes in
-`libFixtureRemovals`. The two checks are orthogonal; neither is redundant.
+For a referenced namespace or enum, `analyze.ts` checks members without
+`hasRefsInFile` through
+`explorer.isReferenced(filePath, "Ns.member")`. `isReferenced` reports ordinary
+reference usage and entry exposure separately. A namespace re-exported by an
+entry stays public when `includeEntryExports` is off, while a plain entry import
+does not.
+`nsExports` and `nsTypes` refine member analysis after that public boundary;
+they do not override it.
 
-FP-direction:
+When an unimported namespace or enum has export-level
+`hasRefsInFile = true`, member analysis is skipped because the whole export is
+already considered live.
 
-- `e2e-lib-typed-exports`: explicit return-type annotations on exported values
-- `e2e-lib-export-star-as`: `export * as Ns from '…'` namespace re-export
-- `e2e-lib-arrow-inferred-return`: arrow with block body, no return type;
-  body walked for chain refs (the `createHandler` shape)
-- `e2e-lib-call-forward-decl`: Identifier callee resolving to a forward-declared
-  local (deferred-resolution path)
-- `e2e-lib-member-call`: `obj.method()` MemberExpression callee
-- `e2e-lib-call-arg`: Identifier as call argument at top level (`wrap(inner)`)
+## Verification requirements
 
-FN-direction:
+`packages/knip/test/e2e/fix-tsc.test.ts` is the declaration-safety harness. Each
+fixture builds with `tsc` before `knip --fix`, runs the fix, and builds again.
+The `e2e-lib-*` fixtures are copied to a temporary `pkg/` and compile a
+downstream consumer before and after the fix.
 
-- `e2e-lib-as-cast-in-body`: `as T` cast inside a function body must NOT
-  keep T alive (inBody cast-skip)
-- `e2e-lib-call-arg-in-body`: Identifier as call argument inside a body must
-  NOT keep the helper's signature types alive (the `useReducer(reducer, …)`
-  case; `pendingCallRefs` arg-follow is gated on `!inBody`)
+The harness proves two separate directions:
 
-When adding a value-to-type-visibility fixture, don't also re-export the
-type explicitly from the public entry. That masks type-chain bugs because
-the type stays alive via the re-export regardless of whether knip tracks
-the value's signature. Test the implicit case so the chain is the only
-thing keeping the export alive.
+- Keep fixtures catch names that Knip must not remove. The post-fix package or
+  consumer build fails if a required export was stripped.
+- Removal fixtures in `libFixtureRemovals` catch names Knip must report. Their
+  source assertions fail if Knip becomes too conservative.
+
+Keep coverage:
+
+- `e2e-lib-typed-exports`: explicit return annotations on exported values
+- `e2e-lib-export-star-as`: `export * as Ns from '…'`
+- `e2e-lib-arrow-inferred-return`: inferred block return (`createHandler`)
+- `e2e-lib-call-forward-decl`: forward-declared identifier callee
+- `e2e-lib-member-call`: member callee such as `obj.method()`
+- `e2e-lib-call-arg`: top-level identifier argument such as `wrap(inner)`
+
+Removal coverage:
+
+- `e2e-lib-as-cast-in-body`: body-local `as T`, type assertion, and
+  `satisfies T`
+- `e2e-lib-call-arg-in-body`: body-local call argument such as
+  `useReducer(reducer, …)`, gated by `!inBody`
+
+Before changing export liveness:
+
+1. Add a focused fixture that fails for the intended reason before editing the
+   graph.
+2. Keep existing fixtures and assertions unchanged unless the old contract is
+   independently proven wrong. In particular, a type-only issue must not alter
+   class, function, or other value-export results. Preserve
+   `packages/knip/test/ignore-exports-used-in-file/typeof-class.test.ts`.
+3. Run `knip --fix`, then compile both the defining package and a downstream
+   declaration consumer. A library-only emit is insufficient.
+4. Include a nominal or non-inlineable shape when the proposal relies on
+   structural inlining. A private `unique symbol` is a useful check.
+5. Test the TypeScript version from the report when behavior may differ from the
+   repository version.
+6. Use integration snapshots only as supporting evidence. Investigate every new
+   report and stop on broad or cross-category deltas.
+7. Keep test-harness types and shared fixture tables stable.
+   `libFixtureRemovals: Record<string, RegExp[]>` has one purpose: assert
+   expected removals from the shared `src/handler.ts` shape. Use a focused
+   assertion for a fixture with a different path instead of weakening that
+   contract.
+
+The #1903 pass-through return type remains intentionally protected. The
+defining library's `isolatedDeclarations` setting is not enough to relax the
+type-to-value edge. Revisit that decision only with a complete nameability
+model and two-sided declaration-consumer tests.
 
 [1]: https://www.typescriptlang.org/tsconfig#isolatedDeclarations
 [2]: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#isolated-declarations
 [3]: https://github.com/microsoft/TypeScript/issues/5711
+[4]: https://github.com/webpro-nl/knip/issues/1722
+[5]: https://github.com/webpro-nl/knip/issues/1903
