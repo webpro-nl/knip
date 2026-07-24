@@ -219,8 +219,9 @@ test('Backward compatibility: single directory workspace', async () => {
 
 test('Strict mode: only analyze explicitly selected workspaces', async () => {
   const options = await createOptions({ cwd, workspace: '@fixtures/workspaces__shared', isStrict: true });
-  const { counters } = await main(options);
+  const { counters, includedWorkspaceDirs } = await main(options);
 
+  assert.deepEqual(includedWorkspaceDirs, [join(cwd, 'packages/shared')]);
   assert.deepEqual(counters, {
     ...baseCounters,
     types: 1,

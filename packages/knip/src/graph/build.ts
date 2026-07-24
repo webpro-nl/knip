@@ -122,7 +122,7 @@ export async function build({
   }
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, manifestPath: filePath } = workspace;
+    const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
     streamer.cast('Analyzing workspace', name);
 
@@ -130,7 +130,6 @@ export async function build({
     if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
-    const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const {

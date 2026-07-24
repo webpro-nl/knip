@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
+import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -77,9 +78,19 @@ test('Find unused dependencies, exports and files in workspaces (production)', a
 
 test('Analyze ancestor, dependency and dependent workspaces', async () => {
   const options = await createOptions({ cwd, workspace: 'packages/shared' });
-  const { issues, counters } = await main(options);
+  const { issues, counters, includedWorkspaceDirs } = await main(options);
 
   assert(issues.types['packages/shared/types.ts']['UnusedEnum']);
+  assert.deepEqual(
+    new Set(includedWorkspaceDirs),
+    new Set([
+      cwd,
+      join(cwd, 'apps/backend'),
+      join(cwd, 'apps/frontend'),
+      join(cwd, 'local/tsconfig'),
+      join(cwd, 'packages/shared'),
+    ])
+  );
 
   assert.deepEqual(counters, {
     ...baseCounters,
