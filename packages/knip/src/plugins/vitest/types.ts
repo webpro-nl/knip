@@ -50,7 +50,7 @@ export interface ViteConfig extends VitestConfig {
   };
 }
 
-export type COMMAND = 'dev' | 'serve' | 'build';
+export type COMMAND = 'serve' | 'build';
 export type MODE = 'development' | 'production';
 
 interface Options {
