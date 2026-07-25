@@ -58,7 +58,7 @@ test('Should report unused entries and unresolved references independently', asy
   });
 });
 
-test('Should track catalog references outside the selected workspaces', async () => {
+test('Should track dependency and script catalog references outside the selected workspaces', async () => {
   const cwd = resolve('fixtures/dependencies/catalog-workspace-selection');
   const options = await createOptions({ cwd, workspace: '.' });
   const { issues, counters } = await main(options);

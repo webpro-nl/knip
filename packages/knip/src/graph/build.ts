@@ -1,4 +1,6 @@
 import { _getInputsFromScripts } from '../binaries/index.ts';
+import type { ScriptParserContext } from '../binaries/create-script-parser-context.ts';
+import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
@@ -17,7 +19,7 @@ import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
-import { createManifest, type Manifest } from '../util/package-json.ts';
+import { createManifest } from '../util/package-json.ts';
 import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
@@ -47,9 +49,11 @@ import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 interface BuildOptions {
   chief: ConfigurationChief;
   collector: IssueCollector;
+  counselor: CatalogCounselor;
   deputy: DependencyDeputy;
   principal: ProjectPrincipal;
   isGitIgnored: (path: string) => boolean;
+  scriptParserContext: ScriptParserContext;
   streamer: ConsoleStreamer;
   workspaces: Workspace[];
   options: MainOptions;
@@ -58,9 +62,11 @@ interface BuildOptions {
 export async function build({
   chief,
   collector,
+  counselor,
   deputy,
   principal,
   isGitIgnored,
+  scriptParserContext,
   streamer,
   workspaces,
   options,
@@ -78,19 +84,7 @@ export async function build({
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
 
-  const rawRootManifest = chief.getManifestForWorkspace('.');
-  const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
-
-  const manifestsByWorkspaceName = new Map<string, Manifest | undefined>();
-  const getManifest = (dir: string): Manifest | undefined => {
-    const workspace = chief.findWorkspaceByFilePath(`${dir}/`);
-    if (!workspace) return undefined;
-    if (!manifestsByWorkspaceName.has(workspace.name)) {
-      const raw = chief.getManifestForWorkspace(workspace.name);
-      manifestsByWorkspaceName.set(workspace.name, raw ? createManifest(raw) : undefined);
-    }
-    return manifestsByWorkspaceName.get(workspace.name);
-  };
+  const { rootManifest, getManifest } = scriptParserContext;
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;

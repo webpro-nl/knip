@@ -1,6 +1,9 @@
 {
   "name": "@fixtures/catalog-workspace-selection__consumer",
   "private": true,
+  "scripts": {
+    "tool": "pnpm dlx sherif@catalog:"
+  },
   "dependencies": {
     "picocolors": "catalog:"
   }
