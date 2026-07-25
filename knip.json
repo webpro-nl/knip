@@ -2,8 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "project": ["!templates"],
-      "ignoreBinaries": ["tsc"]
+      "project": ["!templates"]
     },
     "packages/knip": {
       "entry": ["test/**/*.ts"],
