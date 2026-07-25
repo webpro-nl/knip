@@ -38,7 +38,6 @@ import {
   toProductionEntry,
 } from './util/input.ts';
 import { getPackageNameFromSpecifier } from './util/modules.ts';
-import { getKeysByValue } from './util/object.ts';
 import { timerify } from './util/Performance.ts';
 import { basename, dirname, isInternal, join, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
@@ -69,12 +68,6 @@ type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[]; configFile
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
 
-const initEnabledPluginsMap = () =>
-  Object.keys(Plugins).reduce(
-    (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
-    {} as Record<PluginName, boolean>
-  );
-
 /**
  * - Determines enabled plugins
  * - Hands out workspace and plugin glob patterns
@@ -96,7 +89,7 @@ export class WorkspaceWorker {
 
   options: MainOptions;
 
-  enabledPluginsMap = initEnabledPluginsMap();
+  enabledPluginsMap: Partial<Record<PluginName, boolean>> = {};
   enabledPlugins: PluginName[] = [];
   enabledPluginsInAncestors: string[];
 
@@ -150,12 +143,14 @@ export class WorkspaceWorker {
 
   private async determineEnabledPlugins() {
     const manifest = this.manifest;
+    const enabledPlugins: PluginName[] = [];
 
     for (const [pluginName, plugin] of PluginEntries) {
       if (this.config[pluginName] === false) continue;
       if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
       if (this.config[pluginName]) {
         this.enabledPluginsMap[pluginName] = true;
+        enabledPlugins.push(pluginName);
         continue;
       }
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
@@ -165,10 +160,11 @@ export class WorkspaceWorker {
           (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config })))
       ) {
         this.enabledPluginsMap[pluginName] = true;
+        enabledPlugins.push(pluginName);
       }
     }
 
-    return getKeysByValue(this.enabledPluginsMap, true);
+    return enabledPlugins;
   }
 
   private getConfigForPlugin(pluginName: PluginName): EnsuredPluginConfiguration {
