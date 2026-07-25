@@ -337,7 +337,9 @@ export async function getGitIgnoredHandler(
 
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
   gitignoreFingerprint = hashIgnores(ignores, unignores);
-  const matcher = picomatch(expandIgnorePatterns(ignores), { ignore: expandIgnorePatterns(unignores) });
+  const ignoreMatcher = picomatch(expandIgnorePatterns(ignores));
+  const unignoreMatcher = unignores.size > 0 ? picomatch(expandIgnorePatterns(unignores)) : undefined;
+  const matcher = unignoreMatcher ? (path: string) => ignoreMatcher(path) && !unignoreMatcher(path) : ignoreMatcher;
 
   const cache = new Map<string, boolean>();
   const isGitIgnored = (filePath: string) => {
