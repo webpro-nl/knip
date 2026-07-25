@@ -48,8 +48,12 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       const lint = findProperty(node, 'lint');
-      if (lint?.type === 'ObjectExpression')
-        for (const specifier of getPropertyValues(lint, 'jsPlugins')) jsPlugins.add(specifier);
+      if (lint?.type !== 'ObjectExpression') return;
+      for (const specifier of getPropertyValues(lint, 'jsPlugins')) jsPlugins.add(specifier);
+      for (const plugin of findProperty(lint, 'jsPlugins')?.elements ?? []) {
+        if (plugin?.type !== 'ObjectExpression') continue;
+        for (const specifier of getPropertyValues(plugin, 'specifier')) jsPlugins.add(specifier);
+      }
     },
   });
   visitor.visit(program);
