@@ -66,7 +66,7 @@ Troubleshooting
 
 (1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, cycles
 (2) Fixable issue types: dependencies, exports, types, files, catalog
-(3) Built-in reporters: symbols (default), compact, codeowners, cycles, json, codeclimate, markdown, disclosure, github-actions
+(3) Built-in reporters: symbols (default), compact, codeowners, cycles, json, codeclimate, markdown, disclosure, github-actions, sarif
 
 Examples:
 

@@ -343,6 +343,7 @@ Available reporters:
 - `markdown`
 - `disclosure`
 - `github-actions`
+- `sarif`
 
 Can be repeated. Example:
 

@@ -94,3 +94,8 @@ export const getTableForType = (
 export const flattenIssues = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
 export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');
+
+export const getIssueDescription = ({ type, symbol, symbols, parentSymbol }: Issue) => {
+  const description = symbols ? symbols.map(item => item.symbol).join(', ') : symbol;
+  return `${getIssuePrefix(type)}: ${description}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+};

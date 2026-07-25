@@ -15,6 +15,7 @@ Knip provides the following built-in reporters:
 - [`github-actions`][5]
 - [`json`][6]
 - [`markdown`][7]
+- [`sarif`](#sarif)
 - `symbols` (default)
 
 Example usage:
@@ -223,6 +224,35 @@ For a typed object instead of JSON to parse, write a [custom reporter][12].
 Coding agents can also call Knip through the [MCP server][13], which returns
 structured results and configuration hints directly.
 
+### SARIF
+
+The `sarif` reporter emits [SARIF 2.1.0][14] for code-scanning integrations:
+
+```sh
+knip --reporter sarif > knip.sarif
+```
+
+For example, upload the report to GitHub Code Scanning after installing project
+dependencies:
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+steps:
+  - uses: actions/checkout@v4
+  - run: pnpm exec knip --reporter sarif > knip.sarif
+  - if: always()
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: knip.sarif
+```
+
+The upload step runs even when Knip finds issues and exits non-zero. GitHub
+Code Scanning availability for private repositories depends on the repository's
+GitHub Code Security plan.
+
 ### Markdown
 
 The built-in `markdown` reporter output is meant to be saved to a Markdown file.
@@ -360,3 +390,4 @@ knip --preprocessor ./preprocess.ts
 [11]: ./rules-and-filters.md
 [12]: #custom-reporters
 [13]: ../reference/integrations.md
+[14]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
