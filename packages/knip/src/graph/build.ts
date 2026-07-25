@@ -23,6 +23,7 @@ import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../
 import {
   type Input,
   isAlias,
+  isCatalog,
   isConfig,
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
@@ -262,7 +263,9 @@ export async function build({
     for (const input of inputs) {
       if (input.group) groups.add(input.group);
       const specifier = input.specifier;
-      if (isEntry(input)) {
+      if (isCatalog(input)) {
+        counselor.addReference({ catalogName: input.catalogName, packageName: specifier });
+      } else if (isEntry(input)) {
         const targetMap = input.skipExportsAnalysis ? entryPatternsSkipExports : entryPatterns;
         addPattern(targetMap, input, toWorkspaceRelative(specifier));
       } else if (isProductionEntry(input)) {
@@ -497,6 +500,10 @@ export async function build({
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {
+          if (isCatalog(input)) {
+            counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
+            continue;
+          }
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = handleInput(input, workspace);

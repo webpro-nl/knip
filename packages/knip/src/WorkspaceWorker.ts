@@ -29,6 +29,7 @@ import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './uti
 import {
   type ConfigInput,
   type Input,
+  isCatalog,
   isConfig,
   isDeferResolve,
   isDependency,
@@ -358,7 +359,9 @@ export class WorkspaceWorker {
     };
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
-      if (isConfig(input)) {
+      if (isCatalog(input)) {
+        inputs.push({ ...input, containingFilePath });
+      } else if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
       } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
         inputs.push({ ...input, containingFilePath });

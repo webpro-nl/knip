@@ -2,9 +2,30 @@ import type { CatalogContainer } from '../CatalogCounselor.ts';
 import type { PackageJson } from '../types/package-json.ts';
 import { isFile } from './fs.ts';
 import { _load } from './loader.ts';
+import { getPackageNameFromModuleSpecifier } from './modules.ts';
 import { basename, join } from './path.ts';
 
 export const DEFAULT_CATALOG = 'default';
+
+export type CatalogReference = {
+  catalogName: string;
+  packageName: string;
+};
+
+const CATALOG_PROTOCOL = '@catalog:';
+
+export const getCatalogReference = (specifier: string): CatalogReference | undefined => {
+  const protocolIndex = specifier.lastIndexOf(CATALOG_PROTOCOL);
+  if (protocolIndex <= 0) return;
+
+  const packageName = specifier.slice(0, protocolIndex);
+  if (getPackageNameFromModuleSpecifier(packageName) !== packageName) return;
+
+  return {
+    catalogName: specifier.slice(protocolIndex + CATALOG_PROTOCOL.length) || DEFAULT_CATALOG,
+    packageName,
+  };
+};
 
 export const getCatalogContainer = async (
   cwd: string,

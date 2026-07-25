@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/catalog-pnpm-dlx",
+  "private": true,
+  "scripts": {
+    "default": "pnpm dlx sherif@catalog:",
+    "named": "pnpm dlx --silent 'typescript@catalog:tools'",
+    "scoped": "pnpx \"@scope/cli@catalog:\"",
+    "package": "pnpm --package=@scope/tool@catalog:tools dlx sherif@catalog:",
+    "unrelated": "echo 'unused@catalog:tools'"
+  }
+}

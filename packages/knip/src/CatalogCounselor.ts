@@ -4,7 +4,7 @@ import { JsonCatalogPeeker } from './JsonCatalogPeeker.ts';
 import type { Fixes } from './types/exports.ts';
 import type { Issue } from './types/issues.ts';
 import type { Catalog, Catalogs, PackageJson } from './types/package-json.ts';
-import { extractCatalogReferences, parseCatalog } from './util/catalog.ts';
+import { type CatalogReference, extractCatalogReferences, parseCatalog } from './util/catalog.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { extname } from './util/path.ts';
 import { YamlCatalogPeeker } from './YamlCatalogPeeker.ts';
@@ -24,6 +24,10 @@ export class CatalogCounselor {
 
   private addReferencedCatalogEntry(entryName: string) {
     this.referencedEntries.add(entryName);
+  }
+
+  public addReference({ catalogName, packageName }: CatalogReference) {
+    this.addReferencedCatalogEntry(`${catalogName}:${packageName}`);
   }
 
   public addWorkspace(manifest: PackageJson) {

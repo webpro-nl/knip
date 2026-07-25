@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { type Input, toBinary, toCatalog, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -240,7 +240,11 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
+  t('pnpm dlx pkg@catalog:', [toDependency('pkg', opt), toCatalog('pkg', 'default')]);
+  t("pnpm dlx --silent '@scope/pkg@catalog:tools'", [toDependency('@scope/pkg', opt), toCatalog('@scope/pkg', 'tools')]);
+  t('echo "pnpm dlx pkg@catalog:"', [toBinary('echo')]);
   t('pnpm --package=pkg-a dlx pkg', [toDependency('pkg', opt), toDependency('pkg-a', opt)]);
+  t('pnpm --package=helper@catalog:tools dlx pkg@catalog:', [toDependency('pkg', opt), toCatalog('pkg', 'default'), toDependency('helper', opt), toCatalog('helper', 'tools')]);
   t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', []);
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);

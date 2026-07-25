@@ -1,0 +1,9 @@
+catalog:
+  sherif: ^1.0.0
+  '@scope/cli': ^1.0.0
+  lodash: ^4.17.21
+catalogs:
+  tools:
+    typescript: ^5.9.0
+    '@scope/tool': ^1.0.0
+    unused: ^1.0.0
