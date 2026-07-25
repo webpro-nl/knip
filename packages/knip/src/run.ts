@@ -36,6 +36,10 @@ export const run = async (options: MainOptions) => {
   streamer.cast('Reading workspace configuration');
 
   const workspaces = await chief.getWorkspaces();
+  for (const name of chief.availableWorkspaceNames) {
+    const workspace = chief.workspacePackages.get(name);
+    if (workspace) counselor.addWorkspace(workspace);
+  }
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
@@ -54,7 +58,6 @@ export const run = async (options: MainOptions) => {
   const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } = await build({
     chief,
     collector,
-    counselor,
     deputy,
     principal,
     isGitIgnored,

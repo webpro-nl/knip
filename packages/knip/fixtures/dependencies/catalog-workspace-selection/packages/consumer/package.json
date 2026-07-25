@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/catalog-workspace-selection__consumer",
+  "private": true,
+  "dependencies": {
+    "picocolors": "catalog:"
+  }
+}

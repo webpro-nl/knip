@@ -1,5 +1,4 @@
 import { _getInputsFromScripts } from '../binaries/index.ts';
-import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
@@ -48,7 +47,6 @@ import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 interface BuildOptions {
   chief: ConfigurationChief;
   collector: IssueCollector;
-  counselor: CatalogCounselor;
   deputy: DependencyDeputy;
   principal: ProjectPrincipal;
   isGitIgnored: (path: string) => boolean;
@@ -60,7 +58,6 @@ interface BuildOptions {
 export async function build({
   chief,
   collector,
-  counselor,
   deputy,
   principal,
   isGitIgnored,
@@ -109,8 +106,6 @@ export async function build({
       manifest,
       ...chief.getIgnores(name),
     });
-
-    counselor.addWorkspace({ name, manifest, manifestPath, manifestStr });
   }
 
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
