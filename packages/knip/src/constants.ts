@@ -243,6 +243,7 @@ export const ISSUE_TYPES = [
   'namespaceMembers',
   'duplicates',
   'catalog',
+  'catalogReferences',
   'cycles',
 ] as const;
 
@@ -262,6 +263,7 @@ export const ISSUE_TYPE_TITLE = {
   namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
+  catalogReferences: 'Unresolved catalog references',
   cycles: 'Circular dependencies',
 } as const;
 

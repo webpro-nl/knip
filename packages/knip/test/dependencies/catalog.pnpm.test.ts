@@ -36,3 +36,24 @@ test('Should track referenced named catalog entries', async () => {
     total: 1,
   });
 });
+
+test('Should report unused entries and unresolved references independently', async () => {
+  const cwd = resolve('fixtures/dependencies/catalog-references');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(issues.catalog['pnpm-workspace.yaml']['default.react']);
+  assert(issues.catalog['pnpm-workspace.yaml']['frontend.vue']);
+  const defaultReference = issues.catalogReferences['packages/app/package.json']['default.lodash'];
+  const namedReference = issues.catalogReferences['packages/app/package.json']['backend.express'];
+  assert.deepEqual({ line: defaultReference.line, col: defaultReference.col }, { line: 4, col: 6 });
+  assert.deepEqual({ line: namedReference.line, col: namedReference.col }, { line: 5, col: 6 });
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    catalog: 2,
+    catalogReferences: 2,
+    processed: 1,
+    total: 1,
+  });
+});

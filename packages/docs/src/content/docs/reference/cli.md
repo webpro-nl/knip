@@ -212,13 +212,14 @@ Available [issue types][11] when filtering output using `--include` or
 - `namespaceMembers`
 - `duplicates`
 - `catalog`
+- `catalogReferences`
 
 ### `--dependencies`
 
 Shortcut to report only all types of dependency issues:
 
 ```sh
---include dependencies,unlisted,binaries,unresolved,catalog
+--include dependencies,unlisted,binaries,unresolved,catalog,catalogReferences
 ```
 
 ### `--exports`

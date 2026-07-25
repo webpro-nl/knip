@@ -28,6 +28,7 @@ const issueTypeSchema = z.union([
   z.literal('enumMembers'),
   z.literal('namespaceMembers'),
   z.literal('catalog'),
+  z.literal('catalogReferences'),
   z.literal('cycles'),
 ]);
 

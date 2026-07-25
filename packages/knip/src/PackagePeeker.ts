@@ -48,4 +48,35 @@ export class PackagePeeker {
       pos += line.length + 1;
     }
   }
+
+  getCatalogReferenceLocation(packageName: string, catalogName: string) {
+    const property = `"${packageName}"`;
+    const value = `"catalog:${catalogName === 'default' ? '' : catalogName}"`;
+    let propertyPos = this.manifestStr.indexOf(property);
+
+    while (propertyPos !== -1) {
+      const colonPos = this.manifestStr.indexOf(':', propertyPos + property.length);
+      let valuePos = colonPos + 1;
+      while (valuePos > 0 && this.manifestStr[valuePos]?.trim() === '') valuePos++;
+
+      if (colonPos !== -1 && this.manifestStr.startsWith(value, valuePos)) {
+        const pos = propertyPos + 1;
+        let line = 1;
+        let lineStart = 0;
+        for (let index = 0; index < pos; index++) {
+          if (this.manifestStr[index] === '\n') {
+            line++;
+            lineStart = index + 1;
+          }
+        }
+        return {
+          line,
+          col: pos - lineStart + 1,
+          pos,
+        };
+      }
+
+      propertyPos = this.manifestStr.indexOf(property, propertyPos + property.length);
+    }
+  }
 }

@@ -77,8 +77,8 @@ export const parseCatalog = (container: CatalogContainer) => {
   return entries;
 };
 
-export const extractCatalogReferences = (manifest: PackageJson): Set<string> => {
-  const catalogReferences = new Set<string>();
+export const extractCatalogReferences = (manifest: PackageJson): CatalogReference[] => {
+  const catalogReferences: CatalogReference[] = [];
 
   const checkDependencies = (dependencies: Record<string, string> | undefined) => {
     if (!dependencies) return;
@@ -86,7 +86,7 @@ export const extractCatalogReferences = (manifest: PackageJson): Set<string> => 
     for (const [name, version] of Object.entries(dependencies)) {
       if (typeof version === 'string' && version.startsWith('catalog:')) {
         const catalogName = version.slice('catalog:'.length) || DEFAULT_CATALOG;
-        catalogReferences.add([catalogName, name].join(':'));
+        catalogReferences.push({ catalogName, packageName: name });
       }
     }
   };

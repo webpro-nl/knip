@@ -12,6 +12,7 @@ test('knip --reporter json (catalog)', () => {
         file: 'pnpm-workspace.yaml',
         binaries: [],
         catalog: [{ namespace: 'default', name: 'lodash', line: 7, col: 3 }],
+        catalogReferences: [],
         dependencies: [],
         devDependencies: [],
         duplicates: [],

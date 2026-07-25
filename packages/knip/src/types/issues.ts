@@ -47,6 +47,7 @@ export type Issues = {
   enumMembers: IssueRecords;
   namespaceMembers: IssueRecords;
   catalog: IssueRecords;
+  catalogReferences: IssueRecords;
   cycles: IssueRecords;
 };
 

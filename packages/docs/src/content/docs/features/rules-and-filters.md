@@ -49,6 +49,7 @@ Knip has shortcuts to report only specific issue types.
    - `binaries`
    - `unresolved`
    - `catalog`
+   - `catalogReferences`
 
 2. The `--exports` flag includes:
    - `exports`

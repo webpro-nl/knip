@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/catalog-references__app",
+  "dependencies": {
+    "lodash": "catalog:",
+    "express": "catalog:backend"
+  }
+}

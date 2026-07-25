@@ -110,7 +110,7 @@ export async function build({
       ...chief.getIgnores(name),
     });
 
-    counselor.addWorkspace(manifest);
+    counselor.addWorkspace({ name, manifest, manifestPath, manifestStr });
   }
 
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);

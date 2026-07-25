@@ -86,6 +86,7 @@ test('Resolve included issue types (--dependencies)', async () => {
     binaries: true,
     unresolved: true,
     catalog: true,
+    catalogReferences: true,
   });
 });
 
@@ -132,6 +133,7 @@ test('Resolve included issue types (all)', async () => {
       'duplicates',
       'files',
       'catalog',
+      'catalogReferences',
       'cycles',
     ],
   });

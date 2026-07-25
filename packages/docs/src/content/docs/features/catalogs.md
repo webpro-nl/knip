@@ -5,7 +5,8 @@ description: How Knip finds unused pnpm, Yarn and Bun catalog entries referenced
 
 Catalogs let you define dependency version ranges once and reference them across
 workspaces in a monorepo. Knip reports catalog entries that are defined but no
-longer referenced, and can remove them with [auto-fix][1].
+longer referenced, and references to entries that do not exist. It can remove
+unused entries with [auto-fix][1].
 
 ## Supported catalogs
 
@@ -38,14 +39,21 @@ references the named `validation` catalog. References are resolved from
 Entries defined in a catalog but not referenced anywhere are reported as [unused
 catalog entries][2].
 
+## Unresolved catalog references
+
+A `catalog:` reference is reported when the selected catalog does not define
+that package. These issues point to the consuming `package.json`, where package
+managers would otherwise fail to resolve the version.
+
 ## Filter and fix
 
-The `catalog` issue type is included by the [`--dependencies`][3] shortcut.
-Focus on it (or exclude it) like any other issue type:
+The `catalog` and `catalogReferences` issue types are included by the
+[`--dependencies`][3] shortcut. Focus on them (or exclude them) like any other
+issue type:
 
 ```sh
-knip --include catalog
-knip --exclude catalog
+knip --include catalog,catalogReferences
+knip --exclude catalog,catalogReferences
 ```
 
 [Auto-fix][1] removes unused catalog entries from the catalog file:
