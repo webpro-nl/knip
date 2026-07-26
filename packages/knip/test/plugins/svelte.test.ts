@@ -36,3 +36,17 @@ test('Detect imports from <style lang="scss|less|stylus"> in .svelte components'
     total: 7,
   });
 });
+
+test('Detect dynamic imports from Svelte template markup (built-in compiler)', async () => {
+  const cwd = resolve('fixtures/plugins/svelte-template-import');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  // `Lazy.svelte` is referenced only via `{#await import('./Lazy.svelte')}` in
+  // App.svelte's template. The built-in compiler used to scan <script> only, so
+  // it was reported as an unused file.
+  assert(!('Lazy.svelte' in issues.files));
+  assert.deepEqual(Object.keys(issues.files), []);
+
+  assert.deepEqual(counters, { ...baseCounters, processed: 3, total: 3 });
+});

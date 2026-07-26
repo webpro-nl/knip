@@ -11,6 +11,7 @@ const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
 export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
+export const dynamicImportMatcher = /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 export const collectImports: CompilerSync = text => {
   if (!text.includes('import')) return '';
@@ -33,6 +34,20 @@ export const importsWithinScripts: CompilerSync = (text: string) => {
     while ((importMatch = importMatcher.exec(body))) scripts.push(importMatch[0]);
   }
   return scripts.join(';\n');
+};
+
+// Components can lazily `import()` modules straight from their template markup,
+// outside of any <script> block (e.g. Svelte's `{#await import('./Modal.svelte')}`).
+// `importsWithinScripts` only scans <script>, so collect these separately to
+// avoid reporting lazily-imported files (and their transitive deps) as unused.
+export const dynamicImportsWithinTemplate: CompilerSync = (text: string) => {
+  const template = text.replace(scriptExtractor, '');
+  if (!template.includes('import')) return '';
+  const imports: string[] = [];
+  dynamicImportMatcher.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = dynamicImportMatcher.exec(template))) imports.push(`import(${JSON.stringify(match[1])})`);
+  return imports.join(';\n');
 };
 
 export const scriptBodies: CompilerSync = (text: string) => {

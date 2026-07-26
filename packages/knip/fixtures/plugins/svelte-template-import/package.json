@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/svelte-template-import",
+  "type": "module",
+  "devDependencies": {
+    "svelte": "*"
+  }
+}
