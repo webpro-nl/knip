@@ -42,11 +42,12 @@ test('Detect dynamic imports from Svelte template markup (built-in compiler)', a
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  // `Lazy.svelte` is referenced only via `{#await import('./Lazy.svelte')}` in
-  // App.svelte's template. The built-in compiler used to scan <script> only, so
-  // it was reported as an unused file.
-  assert(!('Lazy.svelte' in issues.files));
-  assert.deepEqual(Object.keys(issues.files), []);
+  // App.svelte imports components via every dynamic-import syntax variant —
+  // single/double quotes, whitespace/multiline, an event handler, import
+  // attributes, and multiple per line — plus a static and a type-only import.
+  // All must resolve. Only `Removed.svelte`, referenced solely from an HTML
+  // comment, stays unused: the comment (like <script>/<style>) is stripped.
+  assert.deepEqual(Object.keys(issues.files), ['Removed.svelte']);
 
-  assert.deepEqual(counters, { ...baseCounters, processed: 3, total: 3 });
+  assert.deepEqual(counters, { ...baseCounters, files: 1, processed: 12, total: 12 });
 });
