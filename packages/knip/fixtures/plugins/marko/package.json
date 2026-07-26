@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/marko",
+  "files": ["dist", "marko.json"],
+  "scripts": {
+    "build": "mtc"
+  },
+  "dependencies": {
+    "@orchard/marko-tags": "*"
+  },
+  "devDependencies": {
+    "@marko/type-check": "*",
+    "marko": "*",
+    "sass": "*"
+  }
+}

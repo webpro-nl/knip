@@ -1,0 +1,33 @@
+import { formatWeight } from "../../util/format-weight.ts";
+
+export interface Input {
+  weight?: number;
+}
+
+class {
+  declare state: {
+    isOpen: boolean;
+  };
+
+  onCreate() {
+    this.state = { isOpen: false };
+  }
+
+  toggle() {
+    this.state.isOpen = !this.state.isOpen;
+  }
+}
+
+<div.fruit-basket onClick("toggle")>
+  <berry-badge count=input.weight/>
+  <berry-tally berries=input.weight/>
+  <fruit-label label=formatWeight(input.weight ?? 0)/>
+</div>
+
+style.scss {
+  @use "../../styles/palette";
+
+  .fruit-basket {
+    color: palette.$ink;
+  }
+}

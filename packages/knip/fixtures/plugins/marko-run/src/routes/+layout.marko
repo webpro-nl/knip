@@ -1,0 +1,22 @@
+export interface Input {
+  content: Marko.Body;
+}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Recipes</title>
+  </head>
+  <body>
+    <site-header/>
+    <${input.content}/>
+  </body>
+</html>
+
+<style lang="scss">
+  @use "../styles/palette";
+
+  body {
+    background: palette.$paper;
+  }
+</style>

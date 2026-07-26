@@ -630,6 +630,10 @@
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
           "$ref": "#/definitions/plugin"
         },
+        "marko": {
+          "title": "marko plugin configuration (https://knip.dev/reference/plugins/marko)",
+          "$ref": "#/definitions/plugin"
+        },
         "mdx": {
           "title": "mdx plugin configuration (https://knip.dev/reference/plugins/mdx)",
           "$ref": "#/definitions/plugin"

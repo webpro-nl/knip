@@ -1,0 +1,15 @@
+import styles from "./recipe-card.module.css";
+
+export interface Input {
+  recipe: { title: string };
+}
+
+<let/isExpanded=false>
+
+<article class=styles.card>
+  <h2>${input.recipe.title}</h2>
+  <button onClick() { isExpanded = !isExpanded }>Toggle</button>
+  <if(isExpanded)>
+    <empty-state message="Nothing here yet"/>
+  </if>
+</article>
