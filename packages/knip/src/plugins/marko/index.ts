@@ -3,7 +3,6 @@ import { type Input, toDeferResolve, toDependency, toProductionEntry } from '../
 import { join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createCompiler } from './compiler.ts';
-import { getTaglibDirs, tagDiscoveryDirs } from './taglib.ts';
 import type { MarkoTagDef, MarkoTaglib } from './types.ts';
 
 // https://markojs.com/docs/custom-tags/
@@ -17,6 +16,11 @@ const enablers = ['marko'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['**/marko.json', '**/marko-tag.json'];
+
+// Marko 5 auto-scans `components`, Marko 6 `tags`, interop projects both
+const tagDiscoveryDirs = ['components', 'tags'];
+
+const toArray = (value: string | string[] | undefined) => (typeof value === 'string' ? [value] : (value ?? []));
 
 // @marko/build pages and @marko/run routes
 export const production = [
@@ -57,7 +61,7 @@ const resolveConfig: ResolveConfig<MarkoTaglib & MarkoTagDef> = (localConfig, op
   const dir = relative(cwd, configFileDir);
 
   // A `tags-dir` outside `node_modules` overrides tag discovery, so those are the tags of this package
-  for (const tagsDir of getTaglibDirs(localConfig, false)) {
+  for (const tagsDir of toArray(localConfig['tags-dir'])) {
     inputs.push(toProductionEntry(join(dir, tagsDir, '**/*.marko')));
   }
 
@@ -73,19 +77,24 @@ const resolveConfig: ResolveConfig<MarkoTaglib & MarkoTagDef> = (localConfig, op
 const resolve: Resolve = () => [toDependency('@marko/compiler', { optional: true })];
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, cwd, hasDependency }) => {
-  if (hasDependency('marko')) registerCompiler({ extension: '.marko', compiler: createCompiler(cwd) });
+  if (!hasDependency('marko')) return;
+  // Marko depends on @marko/compiler, so this only comes up empty when node_modules is incomplete
+  const compiler = createCompiler(cwd);
+  if (compiler) registerCompiler({ extension: '.marko', compiler });
 };
 
 const note = `Marko compiles \`.marko\` files, so this plugin registers a compiler for them to find imports,
 style blocks and custom tags.
 
-Custom tags are resolved the way the Marko compiler discovers them, since using a tag is often the only
-reference a project has to what implements it:
+Using a custom tag is often the only reference a project has to what implements it, so tags are resolved
+through the project's own \`@marko/compiler\` taglib lookup. This covers both Marko 5 and Marko 6:
 
-- Tags in \`components\` (Marko 5) and \`tags\` (Marko 6) directories, found by walking up from the
-  template, or in the \`tags-dir\` of a \`marko.json\`.
+- Tags in \`components\` (Marko 5) and \`tags\` (Marko 6) directories, and in the \`tags-dir\` of a
+  \`marko.json\`.
 - Tags from any dependency that ships a \`marko.json\`, which Marko discovers automatically. This is why
   a package like \`@ebay/ebayui-core\` is not reported as an unused dependency when only its tags are used.
+
+When \`@marko/compiler\` is not installed, the same locations are scanned directly as a fallback.
 
 A \`marko.json\` with an \`exports\` field means the package publishes the tags it discovers locally, so
 those are added as production entry files.
