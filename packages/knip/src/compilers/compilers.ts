@@ -10,12 +10,7 @@ export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
-const htmlCommentMatcher = /<!--[\s\S]*?-->/g;
 export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
-// Capture the specifier of a dynamic `import('…')` call. Not preceded by `.` or a
-// word char (so `foo.import(` and `reimport(` don't match), and only up to the
-// specifier string, so trailing import attributes (`, { with: … }`) are ignored.
-const dynamicImportMatcher = /(?<![.\w])import\s*\(\s*['"]([^'"]+)['"]/g;
 
 export const collectImports: CompilerSync = text => {
   if (!text.includes('import')) return '';
@@ -38,22 +33,6 @@ export const importsWithinScripts: CompilerSync = (text: string) => {
     while ((importMatch = importMatcher.exec(body))) scripts.push(importMatch[0]);
   }
   return scripts.join(';\n');
-};
-
-// Components can lazily `import()` modules straight from their template markup,
-// outside of any <script> block (e.g. Svelte's `{#await import('./Modal.svelte')}`
-// or an event handler). `importsWithinScripts` only scans <script>, so collect
-// these separately to avoid reporting lazily-imported files (and their transitive
-// deps) as unused. <script>, <style> and comments are stripped first so their
-// contents (handled elsewhere, or intentionally disabled) aren't picked up here.
-export const dynamicImportsWithinTemplate: CompilerSync = (text: string) => {
-  const template = text.replace(scriptExtractor, '').replace(styleExtractor, '').replace(htmlCommentMatcher, '');
-  if (!template.includes('import')) return '';
-  const imports: string[] = [];
-  dynamicImportMatcher.lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = dynamicImportMatcher.exec(template))) imports.push(`import(${JSON.stringify(match[1])})`);
-  return imports.join(';\n');
 };
 
 export const scriptBodies: CompilerSync = (text: string) => {

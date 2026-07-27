@@ -1,5 +1,6 @@
-import { dynamicImportsWithinTemplate, importsWithinScripts } from '../../compilers/compilers.ts';
+import { importsWithinScripts } from '../../compilers/compilers.ts';
 import { stylePreprocessorImports } from '../../compilers/style-preprocessors.ts';
+import { dynamicImportsWithinTemplate } from '../../compilers/svelte.ts';
 import type { CompilerSync } from '../../compilers/types.ts';
 
 const compiler: CompilerSync = (text, path) => {
