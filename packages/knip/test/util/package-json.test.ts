@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getPackageMapTarget } from '../../src/util/package-json.ts';
+import {
+  getPackageMapTarget,
+  getPublishedTypeEntrySpecifiers,
+  getPublishedTypeExportSpecifiers,
+  isPublishedTypeExportTarget,
+} from '../../src/util/package-json.ts';
 
 test('Return a root conditional exports map', () => {
   const target = { source: './src/index.ts', default: './dist/index.js' };
@@ -22,4 +27,70 @@ test('Prefer exact and more specific package subpath matches', () => {
     patternMatch: 'json',
   });
   assert.equal(getPackageMapTarget(map, './missing'), undefined);
+});
+
+test('Collect only the published declaration variants', () => {
+  const manifest = {
+    main: './dist/index.js',
+    types: './dist/index.d.ts',
+    typings: './legacy/index.d.ts',
+    exports: {
+      '.': {
+        'types@>=5.0': './types-v5/index.d.ts',
+        types: './dist/index.d.ts',
+        import: './dist/index.mjs',
+        require: './dist/index.cjs',
+      },
+      './feature/*': {
+        types: './dist/feature/*.d.ts',
+        default: './dist/feature/*.js',
+      },
+      './plain': './dist/plain.js',
+    },
+    typesVersions: {
+      '<5.0': {
+        '*': ['types-v4/*'],
+      },
+    },
+  };
+
+  assert.deepEqual(getPublishedTypeEntrySpecifiers(manifest), {
+    candidates: ['./dist/index.d.ts', './legacy/index.d.ts', 'index.d.ts'],
+    versioned: new Set(['types-v4/*']),
+  });
+  assert.deepEqual(
+    getPublishedTypeExportSpecifiers(manifest.exports),
+    new Set(['./types-v5/index.d.ts', './dist/index.d.ts', './dist/feature/*.d.ts', './dist/plain.d.ts'])
+  );
+});
+
+test('Fall back to an index declaration after package fields', () => {
+  assert.deepEqual(getPublishedTypeEntrySpecifiers({}), {
+    candidates: ['index.d.ts'],
+    versioned: new Set(),
+  });
+});
+
+test('Exclude declaration files behind a more specific null export', () => {
+  const exports = {
+    './features/*': {
+      types: './dist/features/*.d.ts',
+      default: './dist/features/*.js',
+    },
+    './features/private': null,
+  };
+
+  assert(isPublishedTypeExportTarget(exports, './dist/features/public.d.ts'));
+  assert(!isPublishedTypeExportTarget(exports, './dist/features/private.d.ts'));
+});
+
+test('Apply the same export pattern match to every target wildcard', () => {
+  const exports = {
+    './themes/*': {
+      types: './dist/*/theme-*.d.ts',
+    },
+  };
+
+  assert(isPublishedTypeExportTarget(exports, './dist/dark/theme-dark.d.ts'));
+  assert(!isPublishedTypeExportTarget(exports, './dist/dark/theme-light.d.ts'));
 });

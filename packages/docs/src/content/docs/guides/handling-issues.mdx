@@ -546,13 +546,11 @@ obsolete respectively.
 
 #### Production types
 
-Knip is strict in the divide between `dependencies` and `devDependencies`. Some
-packages are published with one or more type packages listed in `dependencies`.
-In strict production mode, even when re-exported and part of the package's
-public API, Knip does not try to figure out what exactly are "production types"
-and expects those in `devDependencies`.
-
-**Solution**: list exceptions in [ignoreDependencies][24].
+In packages that aren't `private`, Knip automatically follows existing
+declaration files exposed through `types`, `typings`, `exports`, and
+`typesVersions`. Dependencies referenced by this public type graph count as
+production usage and, in strict mode, cannot live only in `devDependencies`. If
+declaration output has not been built, Knip does not guess from source imports.
 
 ### Unlisted dependencies
 

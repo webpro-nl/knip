@@ -1,0 +1,35 @@
+{
+  "name": "@fixtures/declaration-dependencies",
+  "private": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./features/*": {
+      "types": "./dist/features/*.d.ts",
+      "default": "./dist/features/*.js"
+    },
+    "./features/private": null
+  },
+  "dependencies": {
+    "@types/reference-public": "*",
+    "inferred-public": "*",
+    "inline-public": "*",
+    "path-public": "*",
+    "pattern-public": "*",
+    "public-signature": "*",
+    "reexported-public": "*",
+    "transitive-public": "*",
+    "unused-production": "*"
+  },
+  "devDependencies": {
+    "@types/legacy": "*",
+    "@types/manifest-only": "*",
+    "misplaced-public": "*",
+    "private-pattern": "*",
+    "private-source": "*",
+    "virtual-public": "*"
+  }
+}

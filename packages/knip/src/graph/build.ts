@@ -36,6 +36,7 @@ import {
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
 import { resolveImportGlobs } from '../typescript/glob-imports.ts';
+import { createPublishedTypeDependencyAnalyzer } from '../typescript/get-published-type-dependencies.ts';
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
@@ -83,6 +84,9 @@ export async function build({
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const getPublishedTypeDependencies = options.isReportDependencies
+    ? createPublishedTypeDependencyAnalyzer()
+    : undefined;
 
   const { rootManifest, getManifest } = scriptParserContext;
 
@@ -195,6 +199,29 @@ export async function build({
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
       if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
+    }
+
+    if (getPublishedTypeDependencies && !manifest.private) {
+      for (const dependency of getPublishedTypeDependencies(workspace, manifest)) {
+        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, dependency.packageName, {
+          isTypeOnly: true,
+          isResolved: dependency.isResolved,
+          isPublishedType: true,
+        });
+        if (!isHandled) {
+          addIssue({
+            type: 'unlisted',
+            filePath: dependency.containingFilePath,
+            workspace: name,
+            symbol: dependency.packageName,
+            specifier: dependency.specifier,
+            pos: dependency.pos,
+            line: dependency.line,
+            col: dependency.col,
+            fixes: [],
+          });
+        }
+      }
     }
 
     for (const identifier of entrySpecifiersFromManifest) {

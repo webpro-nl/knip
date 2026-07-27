@@ -1,5 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
+import { IS_DTS } from '../constants.ts';
 import type { PackageJson } from '../types/package-json.ts';
 
 const INDENT = Symbol.for('indent');
@@ -43,6 +44,70 @@ const getEntriesFromExports = (obj: any): string[] => {
   return values;
 };
 
+const declarationExtensionMap = new Map([
+  ['.js', '.d.ts'],
+  ['.mjs', '.d.mts'],
+  ['.cjs', '.d.cts'],
+]);
+
+export const toDeclarationSpecifier = (specifier: string) => {
+  for (const [extension, declarationExtension] of declarationExtensionMap) {
+    if (specifier.endsWith(extension)) return specifier.slice(0, -extension.length) + declarationExtension;
+  }
+  if (IS_DTS.test(specifier)) return specifier;
+};
+
+const isLocalTypeTarget = (target: string) =>
+  !target.startsWith('/') && !target.split('/').some(segment => segment === '..' || segment === 'node_modules');
+
+const collectPublishedTypeTargets = (value: unknown, targets: Set<string>) => {
+  if (typeof value === 'string') {
+    const specifier = toDeclarationSpecifier(value);
+    if (specifier && isLocalTypeTarget(specifier)) targets.add(specifier);
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const child of value) collectPublishedTypeTargets(child, targets);
+    return;
+  }
+
+  const children = Object.entries(value);
+  const typeConditions = children.filter(([condition]) => condition === 'types' || condition.startsWith('types@'));
+  for (const [, child] of typeConditions.length > 0 ? typeConditions : children)
+    collectPublishedTypeTargets(child, targets);
+};
+
+export const getPublishedTypeExportSpecifiers = (exports: PackageJson['exports']) => {
+  const specifiers = new Set<string>();
+  if (exports) collectPublishedTypeTargets(exports, specifiers);
+  return specifiers;
+};
+
+export const getPublishedTypeEntrySpecifiers = (manifest: PackageJson) => {
+  const versioned = new Set<string>();
+  if (manifest.typesVersions) {
+    for (const paths of Object.values(manifest.typesVersions)) {
+      for (const targets of Object.values(paths)) {
+        if (!Array.isArray(targets)) continue;
+        for (const target of targets) {
+          if (typeof target === 'string' && isLocalTypeTarget(target)) versioned.add(target);
+        }
+      }
+    }
+  }
+
+  const candidates: string[] = [];
+  for (const field of [manifest.types, manifest.typings, manifest.main]) {
+    if (typeof field !== 'string') continue;
+    const specifier = toDeclarationSpecifier(field);
+    if (specifier && isLocalTypeTarget(specifier) && !candidates.includes(specifier)) candidates.push(specifier);
+  }
+  if (!candidates.includes('index.d.ts')) candidates.push('index.d.ts');
+
+  return { candidates, versioned };
+};
+
 export const getPackageMapTarget = (map: unknown, key: string) => {
   if (!map || typeof map !== 'object' || Array.isArray(map)) return key === '.' ? { target: map } : undefined;
 
@@ -76,6 +141,41 @@ export const getPackageMapTarget = (map: unknown, key: string) => {
     }
   }
   if (best) return { target: best.target, patternMatch: best.patternMatch };
+};
+
+const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
+  const parts = pattern.split('*');
+  if (parts.length === 1) return pattern === candidate ? { patternMatch: undefined } : undefined;
+  const starCount = parts.length - 1;
+  const matchLength = (candidate.length - pattern.length + starCount) / starCount;
+  if (matchLength < 0 || !Number.isInteger(matchLength)) return;
+  const patternMatch = candidate.slice(parts[0].length, parts[0].length + matchLength);
+  if (parts.join(patternMatch) === candidate) return { patternMatch };
+};
+
+const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
+  if (!Array.isArray(exports) && typeof exports === 'object') {
+    const entries = Object.entries(exports);
+    if (entries.some(([key]) => key.startsWith('.'))) return entries.filter(([key]) => key.startsWith('.'));
+  }
+  return [['.', exports] as const];
+};
+
+export const isPublishedTypeExportTarget = (exports: PackageJson['exports'], candidate: string) => {
+  if (!exports) return false;
+  for (const [subpath, target] of getExportEntries(exports)) {
+    for (const pattern of getPublishedTypeExportSpecifiers(target)) {
+      const match = matchPublishedTypeTarget(pattern, candidate);
+      if (!match) continue;
+      const publicSubpath = match.patternMatch === undefined ? subpath : subpath.replaceAll('*', match.patternMatch);
+      const resolved = getPackageMapTarget(exports, publicSubpath);
+      if (!resolved) continue;
+      for (const selected of getPublishedTypeExportSpecifiers(resolved.target)) {
+        if (matchPublishedTypeTarget(selected, candidate)) return true;
+      }
+    }
+  }
+  return false;
 };
 
 export const load = async (filePath: string) => {

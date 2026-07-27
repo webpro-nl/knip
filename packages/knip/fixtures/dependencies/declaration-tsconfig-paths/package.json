@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/declaration-tsconfig-paths",
+  "private": false,
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@types/untyped-lib": "*"
+  }
+}

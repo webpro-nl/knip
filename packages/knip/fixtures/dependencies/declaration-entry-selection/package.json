@@ -1,0 +1,20 @@
+{
+  "name": "@fixtures/declaration-entry-selection",
+  "private": false,
+  "types": "./types/public.d.ts",
+  "bin": "./bin/cli.js",
+  "exports": {
+    ".": {
+      "types": "./types/public.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "public-dependency": "*"
+  },
+  "devDependencies": {
+    "bin-only-dependency": "*",
+    "fallback-only-dependency": "*",
+    "runtime-only-dependency": "*"
+  }
+}

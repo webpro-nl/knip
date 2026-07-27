@@ -31,6 +31,13 @@ import { findMatch, toRegexOrString } from './util/regex.ts';
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
 
+interface DependencyReferenceOptions {
+  isDevOnly?: boolean;
+  isTypeOnly?: boolean;
+  isResolved?: boolean;
+  isPublishedType?: boolean;
+}
+
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
@@ -197,9 +204,7 @@ export class DependencyDeputy {
   public maybeAddReferencedExternalDependency(
     workspace: Workspace,
     packageName: string,
-    isDevOnly?: boolean,
-    isTypeOnly?: boolean,
-    isResolved?: boolean
+    { isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions = {}
   ): boolean {
     if (!this.isReportDependencies) return true;
     if (packageName.startsWith('node:') || isBuiltin(packageName)) return true;
@@ -209,7 +214,7 @@ export class DependencyDeputy {
     if (packageName === workspace.pkgName) return true;
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const isDevOrTypeOnly = isDevOnly || isTypeOnly;
+    const isDevOrTypeOnly = isDevOnly || (isTypeOnly && !isPublishedType);
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
