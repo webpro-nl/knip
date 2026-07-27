@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/remark-primary-scoped",
+  "scripts": {
+    "format": "remark README.md -o"
+  },
+  "devDependencies": {
+    "remark-cli": "*",
+    "@scope/remark-pkg-b": "*"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "@scope/pkg-b"
+    ]
+  }
+}

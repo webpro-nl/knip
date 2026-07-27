@@ -1,0 +1,15 @@
+{
+  "name": "@fixtures/remark-fallback-scoped",
+  "scripts": {
+    "format": "remark README.md -o"
+  },
+  "devDependencies": {
+    "remark-cli": "*",
+    "@scope/pkg-b": "*"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "@scope/pkg-b"
+    ]
+  }
+}
