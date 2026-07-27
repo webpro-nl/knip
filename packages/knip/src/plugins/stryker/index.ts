@@ -11,7 +11,7 @@ const enablers = ['@stryker-mutator/core'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json}'];
+const config = ['?(.)stryker.{conf,config}.{js,mjs,cjs,json,mts,cts,ts}'];
 
 const resolveConfig: ResolveConfig<StrykerConfig> = localConfig => {
   const runners = localConfig.testRunner ? [`@stryker-mutator/${localConfig.testRunner}-runner`] : [];

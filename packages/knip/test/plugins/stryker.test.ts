@@ -26,6 +26,18 @@ test('Find dependencies with the Stryker plugin', async () => {
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/typescript-checker']);
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/jasmine-framework']);
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['.stryker.conf.ts']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['.stryker.conf.ts']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['.stryker.conf.ts']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['.stryker.conf.ts']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['.stryker.conf.mts']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['.stryker.conf.mts']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['.stryker.conf.mts']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['.stryker.conf.mts']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['.stryker.conf.cts']['@stryker-mutator/mocha-runner']);
+  assert(issues.unlisted['.stryker.conf.cts']['@stryker-mutator/typescript-checker']);
+  assert(issues.unlisted['.stryker.conf.cts']['@stryker-mutator/jasmine-framework']);
+  assert(issues.unlisted['.stryker.conf.cts']['@stryker-mutator/karma-runner']);
   assert(issues.binaries['package.json']['stryker']);
 
   assert.deepEqual(counters, {
