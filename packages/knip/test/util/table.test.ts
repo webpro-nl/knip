@@ -17,7 +17,7 @@ test('Render table with column gaps and truncated values', () => {
 
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
-  assert.equal(output.split('\n')[0].length, 72);
+  assert.equal(output.indexOf('\n'), 72);
 });
 
 test('Render single column table with start-truncated values', () => {
@@ -59,9 +59,10 @@ normalizeInjected…       function  …tro/src/integrations/hooks.ts:157:17`;
 
   const output = table.toString();
   assert.equal(expected.trimStart(), output);
-  assert.equal(output.split('\n')[0].length, 72);
-  assert.equal(output.split('\n')[1].length, 72);
-  assert.equal(output.split('\n')[2].length, 72);
+  const lines = output.split('\n');
+  assert.equal(lines[0].length, 72);
+  assert.equal(lines[1].length, 72);
+  assert.equal(lines[2].length, 72);
 });
 
 test('Render table with header', () => {

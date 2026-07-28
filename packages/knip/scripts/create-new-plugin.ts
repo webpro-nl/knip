@@ -86,9 +86,11 @@ properties[name] = {
   $ref: '#/definitions/plugin',
 };
 
-plugins.properties = Object.keys(properties)
-  .sort()
-  .reduce((props, key) => ({ ...props, [key]: properties[key] }), {});
+plugins.properties = Object.fromEntries(
+  Object.keys(properties)
+    .sort()
+    .map(key => [key, properties[key]])
+);
 
 await fs.writeFile(schemaFilePath, JSON.stringify(schema, null, 2));
 

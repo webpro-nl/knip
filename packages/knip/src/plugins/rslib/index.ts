@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['rslib*.config.{mjs,ts,js,cjs,mts,cts}'];
 
 const resolveFromAST: ResolveFromAST = program =>
-  [...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true }));
+  Array.from(collectPropertyValues(program, 'entry'), id => toProductionEntry(id, { allowIncludeExports: true }));
 
 const plugin: Plugin = {
   title,

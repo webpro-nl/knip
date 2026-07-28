@@ -2,6 +2,7 @@ import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
 import st from '../../util/colors.ts';
 import { relative } from '../../util/path.ts';
+import { compareStrings } from '../../util/string.ts';
 import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
@@ -41,7 +42,7 @@ export const convert = (issue: Issue | IssueSymbol) => ({
 });
 
 const sortByPos = (a: Issue, b: Issue) => {
-  if (a.filePath !== b.filePath) return a.filePath.localeCompare(b.filePath);
+  if (a.filePath !== b.filePath) return compareStrings(a.filePath, b.filePath);
   if (a.line !== b.line) return (a.line ?? 0) - (b.line ?? 0);
   return (a.col ?? 0) - (b.col ?? 0);
 };

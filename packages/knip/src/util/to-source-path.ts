@@ -9,7 +9,7 @@ import { getPackageNameFromModuleSpecifier } from './modules.ts';
 import { getPackageMapTarget } from './package-json.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
-const defaultExtensions = `.{${[...DEFAULT_EXTENSIONS].map(ext => ext.slice(1)).join(',')}}`;
+const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 

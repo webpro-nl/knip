@@ -8,7 +8,7 @@ import { extname, join, toPosix } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isDirectory();
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath, { throwIfNoEntry: false })?.isDirectory() ?? false;
   } catch {
     return false;
   }
@@ -16,7 +16,7 @@ export const isDirectory = (cwdOrPath: string, name?: string) => {
 
 export const isFile = (cwdOrPath: string, name?: string) => {
   try {
-    return statSync(name ? join(cwdOrPath, name) : cwdOrPath).isFile();
+    return statSync(name ? join(cwdOrPath, name) : cwdOrPath, { throwIfNoEntry: false })?.isFile() ?? false;
   } catch {
     return false;
   }

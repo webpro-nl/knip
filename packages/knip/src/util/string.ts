@@ -4,6 +4,14 @@ import { stripVTControlCharacters } from 'node:util';
 const CONTROL_CHARACTERS = /\u001b\[[0-9;]+m/g;
 export const ELLIPSIS = '…';
 
+export const substringBefore = (value: string, separator: string) => {
+  const index = value.indexOf(separator);
+  return index === -1 ? value : value.slice(0, index);
+};
+
+const collator = new Intl.Collator();
+export const compareStrings = (a: string, b: string) => collator.compare(a, b);
+
 const getTruncatedParts = (input: string, limit: number, fromStart: boolean) => {
   const parts = [];
   let width = 0;

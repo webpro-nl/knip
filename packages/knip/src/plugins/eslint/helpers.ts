@@ -3,6 +3,7 @@ import { compact } from '../../util/array.ts';
 import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
+import { substringBefore } from '../../util/string.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.ts';
 
@@ -66,7 +67,7 @@ const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpeci
   if (!specifier.startsWith('@')) {
     const id = rawSpecifier.startsWith('plugin:')
       ? getPackageNameFromModuleSpecifier(specifier)
-      : specifier.split('/')[0];
+      : substringBefore(specifier, '/');
     return `${namespace}-${id}`;
   }
   const [scope, name, ...rest] = specifier.split('/');

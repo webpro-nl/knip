@@ -218,7 +218,8 @@ export const analyze = async ({
 
             const [hasStrictlyNsRefs, namespace] = explorer.hasStrictlyNsReferences(filePath, identifier);
 
-            const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+            const isType =
+              exportedItem.type === 'enum' || exportedItem.type === 'type' || exportedItem.type === 'interface';
 
             if (
               isIgnored ||

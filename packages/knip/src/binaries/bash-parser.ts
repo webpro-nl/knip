@@ -5,7 +5,7 @@ import { debugLogObject } from '../util/debug.ts';
 import { type Input, toBinary, toDeferResolve } from '../util/input.ts';
 import { extractBinary, isValidBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
-import { truncate } from '../util/string.ts';
+import { substringBefore, truncate } from '../util/string.ts';
 import { walkCommands } from '../util/scripts.ts';
 import { resolve as fallbackResolve } from './fallback.ts';
 import KnownResolvers from './resolvers/index.ts';
@@ -34,7 +34,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
   // Helper for recursive calls
   const fromArgs: FromArgs = (args, opts): Input[] => {
-    if (args.length === 0 || !isValidBinary(args[0].split(' ')[0])) return [];
+    if (args.length === 0 || !isValidBinary(substringBefore(args[0], ' '))) return [];
     return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
       ...options,
       knownBinsOnly: false,
@@ -74,7 +74,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     const args = node.suffix.map(w => w.value);
 
     // Commands that precede other commands, try again with the rest
-    if (['!', 'test'].includes(binary)) return fromArgs(args);
+    if (binary === '!' || binary === 'test') return fromArgs(args);
 
     const fromNodeOptions = node.prefix
       .filter(a => a.name === 'NODE_OPTIONS' && a.value)

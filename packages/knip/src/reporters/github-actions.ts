@@ -2,6 +2,7 @@ import { ISSUE_TYPE_TITLE } from '../constants.ts';
 import type { Entries } from '../types/entries.ts';
 import type { ReporterOptions } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
+import { compareStrings } from '../util/string.ts';
 import { hintPrinters } from './util/configuration-hints.ts';
 import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
@@ -87,7 +88,7 @@ export default ({
       const title = reportMultipleGroups && getIssueTypeTitle(reportType);
 
       const issuesForType = flattenIssues(issues[reportType]);
-      issuesForType.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
+      issuesForType.sort((a, b) => compareStrings(a.filePath, b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       if (issuesForType.length > 0) {
         title && core.info(`${title} (${issuesForType.length})`);
 
@@ -116,7 +117,7 @@ export default ({
     const CONFIG_HINTS_TITLE = 'Configuration hints';
     core.info(`${CONFIG_HINTS_TITLE} (${configurationHints.length})`);
 
-    const sortedHints = [...configurationHints].sort((a, b) => (a.filePath ?? '').localeCompare(b.filePath ?? ''));
+    const sortedHints = configurationHints.toSorted((a, b) => compareStrings(a.filePath ?? '', b.filePath ?? ''));
     for (const hint of sortedHints) {
       const hintPrinter = hintPrinters.get(hint.type);
       const message =
@@ -160,7 +161,8 @@ export default ({
     const TAG_HINTS_TITLE = 'Tag hints';
     core.info(`${TAG_HINTS_TITLE} (${tagHints.size})`);
 
-    const sortedHints = [...tagHints].sort((a, b) => a.filePath.localeCompare(b.filePath));
+    const sortedHints = Array.from(tagHints);
+    sortedHints.sort((a, b) => compareStrings(a.filePath, b.filePath));
     for (const hint of sortedHints) {
       const file = relative(cwd, hint.filePath);
       const hintMessage = `Unused tag in ${file}: ${hint.identifier} → ${hint.tagName}`;

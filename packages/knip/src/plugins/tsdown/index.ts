@@ -58,8 +58,8 @@ const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
 };
 
 const resolveFromAST: ResolveFromAST = program => [
-  ...[...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true })),
-  ...[...collectPropertyValues(program, 'neverBundle')].map(id => toDependency(id, { optional: true })),
+  ...Array.from(collectPropertyValues(program, 'entry'), id => toProductionEntry(id, { allowIncludeExports: true })),
+  ...Array.from(collectPropertyValues(program, 'neverBundle'), id => toDependency(id, { optional: true })),
 ];
 
 const args: Args = {

@@ -1,4 +1,5 @@
 import { core } from 'zod/mini';
+import { substringBefore } from './string.ts';
 
 const isZodErrorLike = (error: unknown): error is core.$ZodError<any> => error instanceof core.$ZodError;
 
@@ -25,12 +26,12 @@ export const isLoaderError = (error: Error): error is LoaderError => error insta
 export const formatCauseMessage = (error: Error, cwd: string) => {
   let root: Error = error;
   while (root.cause instanceof Error) root = root.cause;
-  return root.message.split('\n', 1)[0].replace(`${cwd}/`, '');
+  return substringBefore(root.message, '\n').replace(`${cwd}/`, '');
 };
 
 export const getKnownErrors = (error: Error) => {
   if (isZodErrorLike(error))
-    return [...error.issues].map(error => {
+    return Array.from(error.issues, error => {
       let message = error.message;
       const details = [];
       if (error.path.length > 0) details.push(`location: ${error.path.join('.')}`);

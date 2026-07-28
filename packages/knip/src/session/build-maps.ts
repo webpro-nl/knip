@@ -9,6 +9,7 @@ import {
   getStarReExportSources,
 } from '../graph-explorer/visitors.ts';
 import type { FileNode, ModuleGraph } from '../types/module-graph.ts';
+import { compareStrings } from '../util/string.ts';
 import type { Export, ImportLookup, InternalImport } from './types.ts';
 
 const FALLBACK_LOCATION = { identifier: undefined, pos: 0, line: 0, col: 0 };
@@ -71,7 +72,7 @@ export const buildExportsMap = (
       col,
       importLocations: usage.locations
         .filter(excludeReExports)
-        .sort((a, b) => a.filePath.localeCompare(b.filePath) || a.line - b.line || a.col - b.col),
+        .sort((a, b) => compareStrings(a.filePath, b.filePath) || a.line - b.line || a.col - b.col),
       entryPaths: usageEntryPaths,
       exports: childExports,
     });

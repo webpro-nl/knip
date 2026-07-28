@@ -27,6 +27,7 @@
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
+    "@e18e/eslint-plugin": "^0.6.0",
     "@release-it/bumper": "^7.0.6",
     "installed-check": "^10.0.1",
     "mdxlint": "^1.0.0",

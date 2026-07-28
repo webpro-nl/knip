@@ -407,7 +407,7 @@ export class WorkspaceWorker {
         for (const id of config.entry) inputs.push(toInput(id));
       } else if (
         (!plugin.resolveConfig && !plugin.resolveFromAST) ||
-        (configFilePaths.filter(path => basename(path) !== 'package.json').length === 0 &&
+        (!configFilePaths.some(path => basename(path) !== 'package.json') &&
           (!this.configFilesMap.get(wsName)?.get(pluginName) ||
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
