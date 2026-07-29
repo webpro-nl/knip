@@ -9,11 +9,19 @@ const cwd = resolve('fixtures/plugins/marko');
 
 test('Find dependencies with the marko plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(issues.dependencies['package.json']['unused-library']);
+  assert(!issues.dependencies['package.json']['@orchard/marko-tags']);
+  assert(issues.files['src/components/fruit-basket/seasonal-price-helper.ts']);
+  assert.deepEqual(issues.unlisted, {});
+  assert.deepEqual(issues.unresolved, {});
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 8,
-    total: 8,
+    files: 1,
+    dependencies: 1,
+    processed: 11,
+    total: 11,
   });
 });

@@ -5,7 +5,8 @@
     "build": "mtc"
   },
   "dependencies": {
-    "@orchard/marko-tags": "*"
+    "@orchard/marko-tags": "*",
+    "unused-library": "*"
   },
   "devDependencies": {
     "@marko/type-check": "*",

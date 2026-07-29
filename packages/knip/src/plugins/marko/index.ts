@@ -1,8 +1,18 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
+import type {
+  IsLoadConfig,
+  IsPluginEnabled,
+  Plugin,
+  RegisterCompilers,
+  Resolve,
+  ResolveConfig,
+  ResolveFromAST,
+} from '../../types/config.ts';
+import { isFile } from '../../util/fs.ts';
 import { type Input, toDeferResolve, toDependency, toProductionEntry } from '../../util/input.ts';
 import { join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { createCompiler } from './compiler.ts';
+import { getVitePluginDirs } from '../vite/helpers.ts';
+import compiler from './compiler.ts';
 import type { MarkoTagDef, MarkoTaglib } from './types.ts';
 
 // https://markojs.com/docs/custom-tags/
@@ -15,21 +25,35 @@ const enablers = ['marko'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['**/marko.json', '**/marko-tag.json'];
+const viteConfig = 'vite.config.{js,mjs,ts,cjs,mts,cts}';
+const config = [viteConfig, '**/marko.json', '**/marko-tag.json'];
+const isViteConfig = (fileName: string) => fileName.startsWith('vite.config.');
+const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configFileName);
 
-// Marko 5 auto-scans `components`, Marko 6 `tags`, interop projects both
 const tagDiscoveryDirs = ['components', 'tags'];
-
-const toArray = (value: string | string[] | undefined) => (typeof value === 'string' ? [value] : (value ?? []));
-
-// @marko/build pages and @marko/run routes
-export const production = [
-  'src/pages/**/*.marko',
-  'src/routes/**/+{page,layout,404,500}.marko',
-  'src/routes/**/+{handler,middleware,meta}.{js,mjs,ts,mts}',
+const scriptExtensions = '{js,jsx,ts,tsx,mjs,cjs,mts,cts}';
+const styleExtensions = '{css,less,scss,sass,styl,stylus}';
+const tagFilePatterns = [
+  '**/*.marko',
+  `**/{component,component-browser}.${scriptExtensions}`,
+  `**/*.{component,component-browser}.${scriptExtensions}`,
+  `**/style.${styleExtensions}`,
+  `**/*.style.${styleExtensions}`,
 ];
 
-// Files a tag definition points to instead of importing
+const toArray = (value: string | string[] | undefined) => (typeof value === 'string' ? [value] : (value ?? []));
+const toTagEntries = (dir: string) => tagFilePatterns.map(pattern => toProductionEntry(join(dir, pattern)));
+
+// @marko/build pages and @marko/run routes
+const pageProduction = ['src/pages/**/*.marko'];
+const routeProduction = ['**/+{page,layout,404,500}.marko', '**/+{handler,middleware,meta}.{js,mjs,ts,mts}'];
+const tagProduction = tagFilePatterns.map(pattern => `**/{${tagDiscoveryDirs.join(',')}}/${pattern}`);
+export const production = [
+  ...pageProduction,
+  ...routeProduction.map(pattern => `src/routes/${pattern}`),
+  ...tagProduction,
+];
+
 const tagDefFields = [
   'template',
   'renderer',
@@ -60,47 +84,63 @@ const resolveConfig: ResolveConfig<MarkoTaglib & MarkoTagDef> = (localConfig, op
 
   const dir = relative(cwd, configFileDir);
 
-  // A `tags-dir` outside `node_modules` overrides tag discovery, so those are the tags of this package
   for (const tagsDir of toArray(localConfig['tags-dir'])) {
-    inputs.push(toProductionEntry(join(dir, tagsDir, '**/*.marko')));
+    inputs.push(...toTagEntries(join(dir, tagsDir)));
   }
 
-  // `exports` means this package publishes the tags it discovers locally, making them its public API
   if (localConfig.exports) {
-    inputs.push(toProductionEntry(join(dir, `**/{${tagDiscoveryDirs.join(',')}}/**/*.marko`)));
+    for (const tagsDir of tagDiscoveryDirs) inputs.push(...toTagEntries(join(dir, `**/${tagsDir}`)));
   }
 
   return inputs;
 };
 
-// Every Marko toolchain compiles templates through @marko/compiler, but not every one declares it as a peer
-const resolve: Resolve = () => [toDependency('@marko/compiler', { optional: true })];
-
-const registerCompilers: RegisterCompilers = ({ registerCompiler, cwd, hasDependency }) => {
-  if (!hasDependency('marko')) return;
-  // Marko depends on @marko/compiler, so this only comes up empty when node_modules is incomplete
-  const compiler = createCompiler(cwd);
-  if (compiler) registerCompiler({ extension: '.marko', compiler });
+const resolveFromAST: ResolveFromAST = (program, options) => {
+  if (!isViteConfig(options.configFileName)) return [];
+  const routesDirs = getVitePluginDirs(program, ['@marko/run/vite'], 'routesDir') ?? ['src/routes'];
+  return [
+    ...pageProduction.map(pattern => toProductionEntry(join(options.configFileDir, pattern))),
+    ...tagProduction.map(pattern => toProductionEntry(join(options.configFileDir, pattern))),
+    ...routesDirs.flatMap(dir =>
+      routeProduction.map(pattern => toProductionEntry(join(options.configFileDir, dir, pattern)))
+    ),
+  ];
 };
 
-const note = `Marko compiles \`.marko\` files, so this plugin registers a compiler for them to find imports,
-style blocks and custom tags.
+const dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'] as const;
 
-Using a custom tag is often the only reference a project has to what implements it, so tags are resolved
-through the project's own \`@marko/compiler\` taglib lookup. This covers both Marko 5 and Marko 6:
+const resolve: Resolve = ({ cwd, rootCwd, manifest }) => {
+  const packageNames = new Set<string>();
+  for (const field of dependencyFields) {
+    for (const packageName in manifest[field] ?? {}) packageNames.add(packageName);
+  }
 
-- Tags in \`components\` (Marko 5) and \`tags\` (Marko 6) directories, and in the \`tags-dir\` of a
-  \`marko.json\`.
-- Tags from any dependency that ships a \`marko.json\`, which Marko discovers automatically. This is why
-  a package like \`@ebay/ebayui-core\` is not reported as an unused dependency when only its tags are used.
+  const inputs: Input[] = [];
+  for (const packageName of packageNames) {
+    if (
+      isFile(cwd, `node_modules/${packageName}/marko.json`) ||
+      (cwd !== rootCwd && isFile(rootCwd, `node_modules/${packageName}/marko.json`))
+    ) {
+      inputs.push(toDependency(packageName));
+    }
+  }
+  return inputs;
+};
 
-When \`@marko/compiler\` is not installed, the same locations are scanned directly as a fallback.
+const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
+  if (hasDependency('marko')) registerCompiler({ extension: '.marko', compiler });
+};
 
-A \`marko.json\` with an \`exports\` field means the package publishes the tags it discovers locally, so
-those are added as production entry files.
+const note = `Marko compiles \`.marko\` files, so this plugin registers a lightweight compiler that extracts
+explicit module imports, re-exports and style imports without loading the Marko compiler.
 
-Sibling \`component.js\`, \`component-browser.js\` and \`style.css\` files are associated with a template
-by Marko automatically, so they are not reported as unused either.`;
+Marko automatically discovers installed tag libraries. Direct dependencies with a root \`marko.json\`
+are therefore considered used without checking which of their tags appear in templates.
+
+Local tag templates and their conventionally associated component and style files in \`components\`
+(Marko 5), \`tags\` (Marko 6), or a configured \`tags-dir\` are conservatively treated as production
+entries. Knip does not yet resolve individual custom tag names, so it cannot report an unused
+auto-discovered tag inside those directories.`;
 
 export const docs = { note };
 
@@ -110,8 +150,10 @@ const plugin: Plugin = {
   isEnabled,
   config,
   production,
+  isLoadConfig,
   resolve,
   resolveConfig,
+  resolveFromAST,
   registerCompilers,
 };
 

@@ -1,13 +1,29 @@
-import { createRequire } from 'node:module';
-import { collectImports } from '../../compilers/compilers.ts';
+import { getStyleLang, styleExtractor } from '../../compilers/compilers.ts';
 import { compiler as lessCompiler } from '../../compilers/less.ts';
 import { compiler as scssCompiler } from '../../compilers/scss.ts';
 import { compiler as stylusCompiler } from '../../compilers/stylus.ts';
 import type { CompilerSync } from '../../compilers/types.ts';
-import { dirname, extname, join } from '../../util/path.ts';
-import type { MarkoCompiler, MarkoDep } from './types.ts';
 
-const styleImports = (body: string, lang: string, path: string) => {
+const commentMatcher = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
+const importMatcher =
+  /^[ \t]*(?:(?:server|client)[ \t]+)?(import[ \t]+(?:(?:type[ \t]+)?[^"'\r\n]+?[ \t]+from[ \t]+)?(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
+const dynamicImportMatcher =
+  /^[ \t]*(?:(?:const|let|var)[ \t]+[$\w]+[ \t]*=[ \t]*|(?:await[ \t]+)?)(import\([ \t]*(["'])([^"'\r\n]+)\2[ \t]*(?:,[^)\r\n]*)?\))[ \t]*;?/gm;
+const exportMatcher =
+  /^[ \t]*(export[ \t]+(?:type[ \t]+)?(?:\*(?:[ \t]+as[ \t]+[$\w]+)?|\{[^}\r\n]*\})[ \t]+from[ \t]+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
+const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
+
+const collectStatements = (text: string, matcher: RegExp) => {
+  const statements: string[] = [];
+  matcher.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = matcher.exec(text))) {
+    if (!match[3].startsWith('<')) statements.push(`${match[1]};`);
+  }
+  return statements;
+};
+
+const compileStyle = (body: string, lang: string | undefined, path: string) => {
   switch (lang) {
     case 'less':
       return lessCompiler(body, path);
@@ -19,58 +35,32 @@ const styleImports = (body: string, lang: string, path: string) => {
   }
 };
 
-/**
- * Load the project's own `@marko/compiler`, the way `@marko/language-tools` does. The translator is a
- * specifier to resolve from the project, since Marko 5 and Marko 6 ship different ones.
- */
-const loadCompiler = (cwd: string) => {
-  try {
-    const require = createRequire(join(cwd, '_.js'));
-    let configPath: string;
-    try {
-      configPath = require.resolve('@marko/compiler/config');
-    } catch {
-      configPath = createRequire(require.resolve('marko/package.json')).resolve('@marko/compiler/config');
-    }
-    const imported = require(configPath);
-    const defaults: { translator: string } = imported?.__esModule && imported.default ? imported.default : imported;
-    const compiler: MarkoCompiler = require(dirname(configPath));
-    // Sharing one cache lets taglib lookups be reused across templates
-    const config = { ...defaults, cache: new Map(), translator: require(require.resolve(defaults.translator)) };
-    compiler.configure(config);
-    return { compiler, config };
-  } catch {}
-};
-
-const depImports = (deps: MarkoDep[] | undefined, path: string) => {
+const collectStyles = (text: string, path: string) => {
   const imports: string[] = [];
-  for (const dep of deps ?? []) {
-    if (typeof dep === 'string') imports.push(`import "${dep}";`);
-    // An inline `style` block has no file to import, so its body goes to the preprocessor instead
-    else if (dep.code) imports.push(styleImports(dep.code, extname(dep.virtualPath ?? '').slice(1), path));
+  styleExtractor.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = styleExtractor.exec(text))) {
+    const lang = getStyleLang(match[1]) ?? match[1].match(/\.([\w-]+)/)?.[1];
+    const output = compileStyle(match[2], lang, path);
+    if (output) imports.push(output);
+  }
+  conciseStyleMatcher.lastIndex = 0;
+  while ((match = conciseStyleMatcher.exec(text))) {
+    const output = compileStyle(match[2], match[1]?.split('.').pop(), path);
+    if (output) imports.push(output);
   }
   return imports;
 };
 
-/**
- * Compiling a template is the only reliable way to see what it references. Custom tags, sibling
- * `component.js` and `style.css` files and the Marko runtime are all resolved by the compiler and
- * emitted as imports, while the source itself has no mention of them.
- *
- * Returns nothing if the compiler can't be loaded, so that templates are left alone rather than
- * analyzed as if they had no tags.
- */
-export const createCompiler = (cwd: string): CompilerSync | undefined => {
-  const loaded = loadCompiler(cwd);
-  if (!loaded) return;
-
-  return (text, path) => {
-    try {
-      const { code, meta } = loaded.compiler.compileSync(text, path, loaded.config);
-      return [collectImports(code, path), ...depImports(meta.deps, path)].filter(Boolean).join('\n');
-    } catch {
-      // Nothing read from a template that does not compile can be trusted
-      return '';
-    }
-  };
+const compiler: CompilerSync = (text, path) => {
+  const source = text.replace(commentMatcher, '');
+  return [
+    'import "marko";',
+    ...collectStatements(source, importMatcher),
+    ...collectStatements(source, dynamicImportMatcher),
+    ...collectStatements(source, exportMatcher),
+    ...collectStyles(source, path),
+  ].join('\n');
 };
+
+export default compiler;

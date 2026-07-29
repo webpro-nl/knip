@@ -9,11 +9,15 @@ const cwd = resolve('fixtures/plugins/marko-run');
 
 test('Find dependencies with the marko plugin (@marko/run)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(issues.files['src/routes/+page.marko']);
+  assert(!issues.files['src/app-routes/+page.marko']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 14,
-    total: 14,
+    files: 1,
+    processed: 15,
+    total: 15,
   });
 });
