@@ -546,11 +546,19 @@ obsolete respectively.
 
 #### Production types
 
-In packages that aren't `private`, Knip automatically follows existing
-declaration files exposed through `types`, `typings`, `exports`, and
-`typesVersions`. Dependencies referenced by this public type graph count as
-production usage and, in strict mode, cannot live only in `devDependencies`. If
-declaration output has not been built, Knip does not guess from source imports.
+In [strict mode][51], a dependency used only in type-only source imports can
+live in `devDependencies`. If the dependency is exposed through the package's
+built declaration files, it is production usage and must instead be listed in
+`dependencies` or required `peerDependencies`.
+
+Knip finds this public type graph by following existing declaration files
+exposed through `main`, `types`, `typings`, `exports`, and `typesVersions`. If
+pnpm `publishConfig` overrides those manifest fields, Knip uses their published
+values.
+
+Private workspaces and packages using `publishConfig.directory` are not
+analyzed. Knip only follows existing declaration output and does not guess from
+source imports.
 
 ### Unlisted dependencies
 
@@ -582,7 +590,7 @@ reported as an unlisted binary as there is no package that contains it.
 
 Binaries that are installed on the OS already and thus likely not meant to be
 installed from npm are not reported as unlisted (details: [list of ignored
-binaries in source][51]).
+binaries in source][52]).
 
 #### Missing binaries
 
@@ -592,7 +600,7 @@ either the way your package manager installs dependencies and binaries, or by
 not running Knip from the root of the repository.
 
 **Solution**: run Knip from the project root. If needed, [lint workspaces
-individually][52].
+individually][53].
 
 Sometimes binaries and how they're reported can be a bit confusing. See this
 example:
@@ -620,7 +628,7 @@ technically works, as `commitlint` is a transitive dependency of
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][53] and open an
+false positive), feel free to create a [minimal reproduction][54] and open an
 issue on GitHub. It'll make Knip better for everyone!
 
 [1]: ../explanations/how-knip-works.md
@@ -673,6 +681,7 @@ issue on GitHub. It'll make Knip better for everyone!
 [48]: #type-definition-packages
 [49]: #unlisted-dependencies
 [50]: #unlisted-binaries
-[51]: https://github.com/webpro-nl/knip/blob/e031018e676c47d84873cc2403251c0111ef318d/packages/knip/src/constants.ts#L39-L148
-[52]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[53]: ../guides/issue-reproduction.md
+[51]: ../features/production-mode.md#strict-mode
+[52]: https://github.com/webpro-nl/knip/blob/e031018e676c47d84873cc2403251c0111ef318d/packages/knip/src/constants.ts#L39-L148
+[53]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[54]: ../guides/issue-reproduction.md

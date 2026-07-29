@@ -59,6 +59,20 @@ test('Skip published declaration analysis for private workspaces', async () => {
   });
 });
 
+test('Skip published declaration analysis for publishConfig.directory', async () => {
+  const cwd = resolve('fixtures/dependencies/declaration-publish-directory');
+  const { issues } = await main(
+    await createOptions({
+      cwd,
+      isProduction: true,
+      isStrict: true,
+      includedIssueTypes: ['unlisted'],
+    })
+  );
+
+  assert.deepEqual(issues.unlisted, {});
+});
+
 test('Resolve published declarations without author tsconfig paths', async () => {
   const cwd = resolve('fixtures/dependencies/declaration-tsconfig-paths');
   const { issues } = await main(

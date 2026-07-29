@@ -201,7 +201,7 @@ export async function build({
       if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
     }
 
-    if (getPublishedTypeDependencies && !manifest.private) {
+    if (getPublishedTypeDependencies && !manifest.private && !manifest.publishConfig?.directory) {
       for (const dependency of getPublishedTypeDependencies(workspace, manifest)) {
         const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, dependency.packageName, {
           isTypeOnly: true,
