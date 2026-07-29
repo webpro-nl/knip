@@ -11,7 +11,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - '.oxlintrc.json'
+      - 'oxlint.config.ts'
       - '.oxfmtrc.json'
       - 'knip.json'
       # This workflow file

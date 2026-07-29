@@ -213,7 +213,7 @@ export class DependencyDeputy {
     // Ignore self-referenced imports
     if (packageName === workspace.pkgName) return true;
 
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
     const isDevOrTypeOnly = isDevOnly || (isTypeOnly && !isPublishedType);
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
 
@@ -260,7 +260,7 @@ export class DependencyDeputy {
 
     this.addReferencedBinary(workspace.name, binaryName);
 
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
 
     for (const name of workspaceNames) {
       const binaries = this.installedBinaries.get(name);
@@ -318,8 +318,7 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspace, dependency),
             ...this.getHostDependenciesFor(workspace, typedPackageName),
           ];
-          if (hostDependencies.length)
-            return !!hostDependencies.find(host => isReferencedDependency(host.name, visited));
+          if (hostDependencies.length) return hostDependencies.some(host => isReferencedDependency(host.name, visited));
 
           if (!referencedDependencies?.has(dependency)) return false;
 

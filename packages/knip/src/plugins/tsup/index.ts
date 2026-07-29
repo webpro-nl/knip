@@ -34,7 +34,7 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
 };
 
 const resolveFromAST: ResolveFromAST = program =>
-  [...collectPropertyValues(program, 'entry')].map(id => toProductionEntry(id, { allowIncludeExports: true }));
+  Array.from(collectPropertyValues(program, 'entry'), id => toProductionEntry(id, { allowIncludeExports: true }));
 
 const args = {
   config: true,

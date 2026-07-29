@@ -1,6 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { substringBefore } from '../../util/string.ts';
 import type { MarkdocConfig, MarkdocRenderSpecifier } from './types.ts';
 
 // https://docs.astro.build/en/guides/integrations-guide/markdoc
@@ -15,13 +16,13 @@ const config: string[] = ['markdoc.config.{js,ts,mjs,mts}'];
 
 const extractSpecifiers = (renderField: MarkdocRenderSpecifier | undefined): string[] => {
   if (typeof renderField === 'string') {
-    return [renderField.split('#')[0]];
+    return [substringBefore(renderField, '#')];
   }
 
   if (renderField && typeof renderField === 'object') {
     for (const key of ['Component', 'file', 'path']) {
       if (typeof renderField[key] === 'string') {
-        return [(renderField[key] as string).split('#')[0]];
+        return [substringBefore(renderField[key] as string, '#')];
       }
     }
   }

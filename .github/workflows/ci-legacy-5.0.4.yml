@@ -13,7 +13,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - '.oxlintrc.json'
+      - 'oxlint.config.ts'
       - '.oxfmtrc.json'
       - 'knip.json'
       # This workflow file
@@ -67,7 +67,7 @@ jobs:
         working-directory: packages/knip
       - name: Type-check against TS 5.0.4
         run: |
-          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:rewriteRelativeImportExtensions|erasableSyntaxOnly).*\n/g,''))"
+          node -e "const f=require('fs'),p='tsconfig.json',c=JSON.parse(f.readFileSync(p,'utf8'));delete c.compilerOptions.rewriteRelativeImportExtensions;delete c.compilerOptions.erasableSyntaxOnly;c.include.push('./typescript-5.0.d.ts');f.writeFileSync(p,JSON.stringify(c,null,2)+'\n')"
           pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip

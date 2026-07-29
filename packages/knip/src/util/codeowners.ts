@@ -16,7 +16,7 @@ export function parseCodeowners(content: string) {
     });
 
   return (filePath: string) => {
-    for (const matcher of [...matchers].reverse()) {
+    for (const matcher of matchers.toReversed()) {
       if (matcher.match(filePath)) {
         return matcher.owners;
       }

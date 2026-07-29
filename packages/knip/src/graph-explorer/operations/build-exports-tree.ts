@@ -1,4 +1,5 @@
 import type { FileNode, Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
+import { substringBefore } from '../../util/string.ts';
 import { CONTINUE } from '../constants.ts';
 import type { Via } from '../walk-down.ts';
 import { walkDown } from '../walk-down.ts';
@@ -67,7 +68,7 @@ const buildExportTree = (
     (sourceFile, sourceId, importingFile, id, isEntry, via) => {
       const importMaps = graph.get(importingFile)?.imports.internal.get(sourceFile);
       const importRefs = importMaps?.refs;
-      const ns = id.split('.')[0];
+      const ns = substringBefore(id, '.');
       if (via === 'importNS' && !hasRelevantRef(importRefs, id) && !isNsReExported(importMaps, ns)) return CONTINUE;
       const key = `${importingFile}:${id}`;
       const isRenamed = via.endsWith('As') && sourceId !== ns;

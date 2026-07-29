@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['esbuild.config.{js,mjs,cjs,ts,mts,cts}', 'esbuild.{js,mjs,cjs,ts,mts,cts}'];
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) =>
-  [...collectPropertyValues(program, 'entryPoints')].map(id => toProductionEntry(join(configFileDir, id)));
+  Array.from(collectPropertyValues(program, 'entryPoints'), id => toProductionEntry(join(configFileDir, id)));
 
 const plugin: Plugin = {
   title,

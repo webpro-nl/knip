@@ -14,14 +14,13 @@ export class PackagePeeker {
 
     for (let i = 0; i < this.lines.length; i++) {
       const line = this.lines[i];
-      const section =
-        line.indexOf('"dependencies"') !== -1
-          ? 'dependencies'
-          : line.indexOf('"devDependencies"') !== -1
-            ? 'devDependencies'
-            : line.indexOf('"optionalPeerDependencies"') !== -1
-              ? 'optionalPeerDependencies'
-              : undefined;
+      const section = line.includes('"dependencies"')
+        ? 'dependencies'
+        : line.includes('"devDependencies"')
+          ? 'devDependencies'
+          : line.includes('"optionalPeerDependencies"')
+            ? 'optionalPeerDependencies'
+            : undefined;
       if (section) this.sections[section] = { startLine: i, startPos: pos };
       pos += line.length + 1;
     }

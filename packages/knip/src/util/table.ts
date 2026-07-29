@@ -1,5 +1,5 @@
 import { stripVTControlCharacters } from 'node:util';
-import { pad, truncate, truncateStart } from './string.ts';
+import { compareStrings, pad, truncate, truncateStart } from './string.ts';
 
 type Value = string | number | undefined | false | null;
 type Align = 'left' | 'center' | 'right';
@@ -50,7 +50,7 @@ export class Table {
     this.rows.sort((a, b) => {
       const vA = a[column]?.value;
       const vB = b[column]?.value;
-      if (typeof vA === 'string' && typeof vB === 'string') return dir * vA.localeCompare(vB);
+      if (typeof vA === 'string' && typeof vB === 'string') return dir * compareStrings(vA, vB);
       if (typeof vA === 'number' && typeof vB === 'number') return dir * (vA - vB);
       return !isPrintable(vA) ? 1 : !isPrintable(vB) ? -1 : 0;
     });

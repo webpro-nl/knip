@@ -9,7 +9,7 @@ import { dirname } from './path.ts';
 
 export const mtimeMatches = (filePath: string, mtimeMs: number): boolean => {
   try {
-    return fs.statSync(filePath).mtimeMs === mtimeMs;
+    return fs.statSync(filePath, { throwIfNoEntry: false })?.mtimeMs === mtimeMs;
   } catch {
     return false;
   }

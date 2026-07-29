@@ -56,7 +56,7 @@ const resolveFromAST: ResolveFromAST = (_, options) => {
   if (options.configFileName !== 'openclaw.plugin.json') return [];
   const sourceText = options.readFile(options.configFilePath).replace(/^\uFEFF/, '');
   const { program } = _parseFile(`${options.configFilePath}.ts`, `(${sourceText}\n)`);
-  return [...collectPropertyValues(program, 'providerCatalogEntry')].map(entry => toProductionEntry(entry));
+  return Array.from(collectPropertyValues(program, 'providerCatalogEntry'), entry => toProductionEntry(entry));
 };
 
 const plugin: Plugin = {

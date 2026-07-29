@@ -4,6 +4,7 @@ import { compact } from '../../util/array.ts';
 import { toConfig, toDependency } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { substringBefore } from '../../util/string.ts';
 import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
 const title = 'Nx';
@@ -20,7 +21,7 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
         // Ensure we only grab executors from plugins instead of manual targets
         // Limiting to scoped packages to ensure we don't have false positives
         .filter(it => it.includes(':') && it.startsWith('@'))
-        .map(it => it.split(':')[0])
+        .map(it => substringBefore(it, ':'))
     : [];
 
   const plugins =
@@ -33,7 +34,7 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
   const generators = localConfig.generators
     ? Object.keys(localConfig.generators)
         .filter(value => value !== undefined)
-        .map(value => value.split(':')[0])
+        .map(value => substringBefore(value, ':'))
     : [];
 
   return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
@@ -53,7 +54,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
   const executors = targets
     .map(target => target?.executor)
     .filter(executor => executor && !executor.startsWith('.'))
-    .map(executor => executor?.split(':')[0]);
+    .map(executor => executor && substringBefore(executor, ':'));
 
   const expand = (value: string) =>
     value.replaceAll('{projectRoot}', options.configFileDir).replaceAll('{workspaceRoot}', options.rootCwd);

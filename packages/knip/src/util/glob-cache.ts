@@ -52,8 +52,8 @@ const statDirMtime = (dir: string): number => {
   let mtime = dirMtimeCache.get(dir);
   if (mtime === undefined) {
     try {
-      const stat = fs.statSync(dir);
-      mtime = stat.isDirectory() ? stat.mtimeMs : Number.NaN;
+      const stat = fs.statSync(dir, { throwIfNoEntry: false });
+      mtime = stat?.isDirectory() ? stat.mtimeMs : Number.NaN;
     } catch {
       mtime = Number.NaN;
     }

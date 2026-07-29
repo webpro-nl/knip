@@ -6,6 +6,7 @@ import st from '../util/colors.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { toRelative } from '../util/path.ts';
 import { toRegexOrString } from '../util/regex.ts';
+import { compareStrings } from '../util/string.ts';
 import { Table } from '../util/table.ts';
 import { formatTrace, type TraceMemberStatus } from '../util/trace.ts';
 import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
@@ -26,7 +27,7 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     const seen = new Set<string>();
     for (const [packageName, { imports }] of explorer.getDependencyUsage(pattern)) {
       const filtered = imports.filter(i => workspaceFilePathFilter(i.filePath));
-      filtered.sort((a, b) => a.filePath.localeCompare(b.filePath) || (a.line ?? 0) - (b.line ?? 0));
+      filtered.sort((a, b) => compareStrings(a.filePath, b.filePath) || (a.line ?? 0) - (b.line ?? 0));
       for (const _import of filtered) {
         const pos = _import.line ? `:${_import.line}:${_import.col}` : '';
         const key = `${_import.filePath}${pos}:${packageName}`;
@@ -70,7 +71,7 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
       }
     }
 
-    nodes.sort((a, b) => a.filePath.localeCompare(b.filePath) || a.identifier.localeCompare(b.identifier));
+    nodes.sort((a, b) => compareStrings(a.filePath, b.filePath) || compareStrings(a.identifier, b.identifier));
     const toRel = (path: string) => toRelative(path, options.cwd);
 
     if (nodes.length === 0) {

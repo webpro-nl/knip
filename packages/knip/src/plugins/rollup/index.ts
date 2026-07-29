@@ -23,7 +23,7 @@ const args: Args = {
 };
 
 const resolveFromAST: ResolveFromAST = program =>
-  [...collectPropertyValues(program, 'input')].map(id => toProductionEntry(id));
+  Array.from(collectPropertyValues(program, 'input'), id => toProductionEntry(id));
 
 const plugin: Plugin = {
   title,

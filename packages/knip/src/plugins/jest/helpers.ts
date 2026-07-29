@@ -49,7 +49,7 @@ export const getReportersDependencies = (config: JestInitialOptions, options: Pl
   const reporters = config.reporters
     ? config.reporters
         .map(reporter => (typeof reporter === 'string' ? reporter : reporter[0]))
-        .filter(reporter => !['default', 'github-actions', 'summary'].includes(reporter))
+        .filter(reporter => reporter !== 'default' && reporter !== 'github-actions' && reporter !== 'summary')
     : [];
 
   return [...reporters, ...jUnitReporterDeps];

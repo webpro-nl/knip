@@ -3,6 +3,7 @@ import { cp, mkdir, mkdtemp, readFile, realpath, rename, symlink, writeFile } fr
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { join } from '../../src/util/path.ts';
+import { substringBefore } from '../../src/util/string.ts';
 import { copyFixture } from '../helpers/copy-fixture.ts';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -105,7 +106,7 @@ for (const name of libFixtures) {
     await mkdir(pkgDir, { recursive: true });
     await cp(resolve(`fixtures/${name}`), pkgDir, { recursive: true });
     await rename(join(pkgDir, '_index.ts'), join(tmp, '_index.ts'));
-    await mkdir(join(tmp, 'node_modules', pkgName.split('/')[0]), { recursive: true });
+    await mkdir(join(tmp, 'node_modules', substringBefore(pkgName, '/')), { recursive: true });
     await symlink(pkgDir, join(tmp, 'node_modules', pkgName), 'dir');
 
     await writeFile(join(tmp, 'package.json'), '{ "name": "e2e-lib-consumer", "type": "module" }\n');
