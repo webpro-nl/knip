@@ -12,6 +12,8 @@ const dynamicImportMatcher =
 const exportMatcher =
   /^[ \t]*(export[ \t]+(?:type[ \t]+)?(?:\*(?:[ \t]+as[ \t]+[$\w]+)?|\{[^}\r\n]*\})[ \t]+from[ \t]+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
 const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
+const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
+const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;
 
 const collectStatements = (text: string, matcher: RegExp) => {
   const statements: string[] = [];
@@ -52,15 +54,36 @@ const collectStyles = (text: string, path: string) => {
   return imports;
 };
 
-const compiler: CompilerSync = (text, path) => {
-  const source = text.replace(commentMatcher, '');
-  return [
-    'import "marko";',
-    ...collectStatements(source, importMatcher),
-    ...collectStatements(source, dynamicImportMatcher),
-    ...collectStatements(source, exportMatcher),
-    ...collectStyles(source, path),
-  ].join('\n');
+const collectTagDependencies = (
+  text: string,
+  tagDependencies: Map<string, string[]>,
+  fallbackDependencies: string[]
+) => {
+  const dependencies = new Set(fallbackDependencies);
+  for (const matcher of [htmlTagMatcher, conciseTagMatcher]) {
+    matcher.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = matcher.exec(text))) {
+      for (const dependency of tagDependencies.get(match[1]) ?? []) dependencies.add(dependency);
+    }
+  }
+  return [...dependencies].map(dependency => `import "${dependency}";`);
 };
+
+export const createCompiler =
+  (tagDependencies = new Map<string, string[]>(), fallbackDependencies: string[] = []): CompilerSync =>
+  (text, path) => {
+    const source = text.replace(commentMatcher, '');
+    return [
+      'import "marko";',
+      ...collectTagDependencies(source, tagDependencies, fallbackDependencies),
+      ...collectStatements(source, importMatcher),
+      ...collectStatements(source, dynamicImportMatcher),
+      ...collectStatements(source, exportMatcher),
+      ...collectStyles(source, path),
+    ].join('\n');
+  };
+
+const compiler = createCompiler();
 
 export default compiler;

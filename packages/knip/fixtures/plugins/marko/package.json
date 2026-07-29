@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "@orchard/marko-tags": "*",
+    "@orchard/unused-marko-tags": "*",
+    "legacy-marko-tags": "*",
     "unused-library": "*"
   },
   "devDependencies": {
