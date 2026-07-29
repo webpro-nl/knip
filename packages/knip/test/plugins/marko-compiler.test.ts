@@ -91,3 +91,59 @@ import _$0 from '@scope/tokens';
 import _$0 from '@scope/theme';`
   );
 });
+
+test('Match concise style fences by length', () => {
+  const source = `style.scss
+  ----
+    @use "pkg:@scope/long-fence";
+  ----
+style.scss
+  ---
+    --
+    @use "pkg:@scope/after-shorter-fence";
+    ----
+    @use "pkg:@scope/after-longer-fence";
+  ---
+`;
+
+  assert.equal(
+    compiler(source, 'template.marko'),
+    `import "marko";
+import _$0 from '@scope/long-fence';
+import _$0 from '@scope/after-shorter-fence';
+import _$1 from '@scope/after-longer-fence';`
+  );
+});
+
+test('Terminate concise style blocks at a dedent', () => {
+  const source = `style.scss
+  --
+    @use "pkg:@scope/implicit";
+div
+style.less
+  --
+    @import "@scope/explicit";
+  --
+`;
+
+  assert.equal(
+    compiler(source, 'template.marko'),
+    `import "marko";
+import _$0 from '@scope/implicit';
+import _$0 from '@scope/explicit';`
+  );
+});
+
+test('Extract imports from CRLF concise style blocks', () => {
+  const source = `style.scss
+  --
+    @use "pkg:@scope/tokens";
+  --
+`.replaceAll('\n', '\r\n');
+
+  assert.equal(
+    compiler(source, 'template.marko'),
+    `import "marko";
+import _$0 from '@scope/tokens';`
+  );
+});
