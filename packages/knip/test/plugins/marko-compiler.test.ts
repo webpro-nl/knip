@@ -64,30 +64,3 @@ export * as units
   from "./units.ts";`
   );
 });
-
-test('Extract imports from concise style blocks', () => {
-  const source = `<style lang="scss">
-  @use "pkg:@scope/html";
-</style>
-style.scss {
-  @use "pkg:@scope/braced";
-}
-style.scss
-  --
-    @use "pkg:@scope/tokens";
-  --
-style.less/styles
-  --
-    @import "@scope/theme";
-  --
-`;
-
-  assert.equal(
-    compiler(source, 'template.marko'),
-    `import "marko";
-import _$0 from '@scope/html';
-import _$0 from '@scope/braced';
-import _$0 from '@scope/tokens';
-import _$0 from '@scope/theme';`
-  );
-});

@@ -11,9 +11,7 @@ const dynamicImportMatcher =
   /^[ \t]*(?:(?:const|let|var)[ \t]+[$\w]+[ \t]*=[ \t]*|(?:await[ \t]+)?)(import\([ \t]*(["'])([^"'\r\n]+)\2[ \t]*(?:,[^)\r\n]*)?\))[ \t]*;?/gm;
 const exportMatcher =
   /^[ \t]*(export\s+(?:type\s+)?(?:\*(?:\s+as\s+[$\w]+)?|\{[^}]*\})\s+from\s+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
-const bracedStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
-const fencedStyleMatcher =
-  /^[ \t]*style(?:\.([\w.-]+))?(?:\/[$\w]+)?[^\r\n]*\r?\n[ \t]+--[ \t]*\r?\n([\s\S]*?)^[ \t]+--[ \t]*\r?$/gm;
+const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
 const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
 const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;
 
@@ -48,12 +46,10 @@ const collectStyles = (text: string, path: string) => {
     const output = compileStyle(match[2], lang, path);
     if (output) imports.push(output);
   }
-  for (const matcher of [bracedStyleMatcher, fencedStyleMatcher]) {
-    matcher.lastIndex = 0;
-    while ((match = matcher.exec(text))) {
-      const output = compileStyle(match[2], match[1]?.split('.').pop(), path);
-      if (output) imports.push(output);
-    }
+  conciseStyleMatcher.lastIndex = 0;
+  while ((match = conciseStyleMatcher.exec(text))) {
+    const output = compileStyle(match[2], match[1]?.split('.').pop(), path);
+    if (output) imports.push(output);
   }
   return imports;
 };
