@@ -6,11 +6,11 @@ import type { CompilerSync } from '../../compilers/types.ts';
 
 const commentMatcher = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
 const importMatcher =
-  /^[ \t]*(?:(?:server|client)[ \t]+)?(import[ \t]+(?:(?:type[ \t]+)?[^"'\r\n]+?[ \t]+from[ \t]+)?(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
+  /^[ \t]*(?:(?:server|client)[ \t]+)?(import\s+(?:(?:type\s+)?[^"'`;]+?\s+from\s+)?(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
 const dynamicImportMatcher =
   /^[ \t]*(?:(?:const|let|var)[ \t]+[$\w]+[ \t]*=[ \t]*|(?:await[ \t]+)?)(import\([ \t]*(["'])([^"'\r\n]+)\2[ \t]*(?:,[^)\r\n]*)?\))[ \t]*;?/gm;
 const exportMatcher =
-  /^[ \t]*(export[ \t]+(?:type[ \t]+)?(?:\*(?:[ \t]+as[ \t]+[$\w]+)?|\{[^}\r\n]*\})[ \t]+from[ \t]+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
+  /^[ \t]*(export\s+(?:type\s+)?(?:\*(?:\s+as\s+[$\w]+)?|\{[^}]*\})\s+from\s+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
 const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
 const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
 const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;

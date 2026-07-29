@@ -29,3 +29,38 @@ import("./lazy.ts");
 export { exportedValue } from "./exported.ts";`
   );
 });
+
+test('Extract multiline imports and re-exports', () => {
+  const source = `import {
+  formatPrice,
+  formatWeight,
+} from "./formatters.ts"
+server import type {
+  Product,
+} from "./product.ts"
+export {
+  formatCurrency,
+  formatQuantity,
+} from "./formatters.ts"
+export * as units
+  from "./units.ts"
+`;
+
+  assert.equal(
+    compiler(source, 'template.marko'),
+    `import "marko";
+import {
+  formatPrice,
+  formatWeight,
+} from "./formatters.ts";
+import type {
+  Product,
+} from "./product.ts";
+export {
+  formatCurrency,
+  formatQuantity,
+} from "./formatters.ts";
+export * as units
+  from "./units.ts";`
+  );
+});
