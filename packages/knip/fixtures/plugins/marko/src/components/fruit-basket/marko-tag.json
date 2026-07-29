@@ -1,4 +1,4 @@
 {
   "@weight": "number",
-  "transformer": "./transformer.ts"
+  "transform": "./transform.ts"
 }

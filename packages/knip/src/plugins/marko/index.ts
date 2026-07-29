@@ -1,23 +1,13 @@
-import type {
-  IsLoadConfig,
-  IsPluginEnabled,
-  Plugin,
-  RegisterCompilers,
-  Resolve,
-  ResolveConfig,
-  ResolveFromAST,
-} from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import { type Input, toDeferResolve, toDependency, toProductionEntry } from '../../util/input.ts';
 import { join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getVitePluginDirs } from '../vite/helpers.ts';
 import compiler from './compiler.ts';
 import type { MarkoTagDef, MarkoTaglib } from './types.ts';
 
 // https://markojs.com/docs/custom-tags/
 // https://markojs.com/docs/marko-json/
-// https://github.com/marko-js/run
 
 const title = 'Marko';
 
@@ -25,10 +15,7 @@ const enablers = ['marko'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const viteConfig = 'vite.config.{js,mjs,ts,cjs,mts,cts}';
-const config = [viteConfig, '**/marko.json', '**/marko-tag.json'];
-const isViteConfig = (fileName: string) => fileName.startsWith('vite.config.');
-const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configFileName);
+const config = ['**/marko.json', '**/marko-tag.json'];
 
 const tagDiscoveryDirs = ['components', 'tags'];
 const scriptExtensions = '{js,jsx,ts,tsx,mjs,cjs,mts,cts}';
@@ -44,28 +31,17 @@ const tagFilePatterns = [
 const toArray = (value: string | string[] | undefined) => (typeof value === 'string' ? [value] : (value ?? []));
 const toTagEntries = (dir: string) => tagFilePatterns.map(pattern => toProductionEntry(join(dir, pattern)));
 
-// @marko/build pages and @marko/run routes
-const pageProduction = ['src/pages/**/*.marko'];
-const routeProduction = ['**/+{page,layout,404,500}.marko', '**/+{handler,middleware,meta}.{js,mjs,ts,mts}'];
 const tagProduction = tagFilePatterns.map(pattern => `**/{${tagDiscoveryDirs.join(',')}}/${pattern}`);
-export const production = [
-  ...pageProduction,
-  ...routeProduction.map(pattern => `src/routes/${pattern}`),
-  ...tagProduction,
-];
+export const production = tagProduction;
 
 const tagDefFields = [
   'template',
   'renderer',
-  'transformer',
-  'transform',
-  'migrator',
-  'migrate',
-  'code-generator',
-  'translate',
-  'node-factory',
   'parse',
+  'migrate',
+  'transform',
   'analyze',
+  'translate',
 ] satisfies (keyof MarkoTagDef)[];
 
 const resolveConfig: ResolveConfig<MarkoTaglib & MarkoTagDef> = (localConfig, options) => {
@@ -93,18 +69,6 @@ const resolveConfig: ResolveConfig<MarkoTaglib & MarkoTagDef> = (localConfig, op
   }
 
   return inputs;
-};
-
-const resolveFromAST: ResolveFromAST = (program, options) => {
-  if (!isViteConfig(options.configFileName)) return [];
-  const routesDirs = getVitePluginDirs(program, ['@marko/run/vite'], 'routesDir') ?? ['src/routes'];
-  return [
-    ...pageProduction.map(pattern => toProductionEntry(join(options.configFileDir, pattern))),
-    ...tagProduction.map(pattern => toProductionEntry(join(options.configFileDir, pattern))),
-    ...routesDirs.flatMap(dir =>
-      routeProduction.map(pattern => toProductionEntry(join(options.configFileDir, dir, pattern)))
-    ),
-  ];
 };
 
 const dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'] as const;
@@ -140,7 +104,8 @@ are therefore considered used without checking which of their tags appear in tem
 Local tag templates and their conventionally associated component and style files in \`components\`
 (Marko 5), \`tags\` (Marko 6), or a configured \`tags-dir\` are conservatively treated as production
 entries. Knip does not yet resolve individual custom tag names, so it cannot report an unused
-auto-discovered tag inside those directories.`;
+auto-discovered tag inside those directories. Modern Marko 5 \`marko-tag.json\` entry points and
+compiler hooks are also resolved.`;
 
 export const docs = { note };
 
@@ -150,10 +115,8 @@ const plugin: Plugin = {
   isEnabled,
   config,
   production,
-  isLoadConfig,
   resolve,
   resolveConfig,
-  resolveFromAST,
   registerCompilers,
 };
 
