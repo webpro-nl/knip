@@ -57,6 +57,19 @@ export const toDeclarationSpecifier = (specifier: string) => {
   if (IS_DTS.test(specifier)) return specifier;
 };
 
+export const getPublishedTypeManifest = (manifest: PackageJson) => {
+  const { publishConfig } = manifest;
+  if (!publishConfig) return manifest;
+
+  const publishedManifest = { ...manifest };
+  if (Object.hasOwn(publishConfig, 'main')) publishedManifest.main = publishConfig.main;
+  if (Object.hasOwn(publishConfig, 'exports')) publishedManifest.exports = publishConfig.exports;
+  if (Object.hasOwn(publishConfig, 'types')) publishedManifest.types = publishConfig.types;
+  if (Object.hasOwn(publishConfig, 'typings')) publishedManifest.typings = publishConfig.typings;
+  if (Object.hasOwn(publishConfig, 'typesVersions')) publishedManifest.typesVersions = publishConfig.typesVersions;
+  return publishedManifest;
+};
+
 const isLocalTypeTarget = (target: string) =>
   !target.startsWith('/') && !target.split('/').some(segment => segment === '..' || segment === 'node_modules');
 

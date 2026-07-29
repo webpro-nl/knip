@@ -61,6 +61,14 @@ export type PackageJson = {
   types?: string;
   typings?: string;
   typesVersions?: TypesVersions;
+  publishConfig?: {
+    directory?: string;
+    main?: string;
+    exports?: Exports;
+    types?: string;
+    typings?: string;
+    typesVersions?: TypesVersions;
+  };
   catalog?: Catalog;
   catalogs?: Catalogs;
   packageManager?: string;

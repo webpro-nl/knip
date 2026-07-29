@@ -78,6 +78,7 @@ test('Only analyze declarations selected by the published type surface', async (
   const { issues } = await main(
     await createOptions({
       cwd,
+      isProduction: true,
       isStrict: true,
       includedIssueTypes: ['dependencies', 'unlisted'],
     })

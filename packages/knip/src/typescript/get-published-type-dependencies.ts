@@ -14,6 +14,7 @@ import {
   sanitizeSpecifier,
 } from '../util/modules.ts';
 import {
+  getPublishedTypeManifest,
   getPublishedTypeEntrySpecifiers,
   getPublishedTypeExportSpecifiers,
   isPublishedTypeExportTarget,
@@ -147,7 +148,7 @@ export const createPublishedTypeDependencyAnalyzer = () => {
       ...Object.keys(manifest.peerDependencies ?? {}),
       ...Object.keys(manifest.optionalDependencies ?? {}),
     ]);
-    const files = getPublishedTypeEntryPaths(manifest, workspace.dir);
+    const files = getPublishedTypeEntryPaths(getPublishedTypeManifest(manifest), workspace.dir);
 
     for (const filePath of files) {
       let file: FileNode;

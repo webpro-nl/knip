@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   getPackageMapTarget,
+  getPublishedTypeManifest,
   getPublishedTypeEntrySpecifiers,
   getPublishedTypeExportSpecifiers,
   isPublishedTypeExportTarget,
@@ -62,6 +63,51 @@ test('Collect only the published declaration variants', () => {
     getPublishedTypeExportSpecifiers(manifest.exports),
     new Set(['./types-v5/index.d.ts', './dist/index.d.ts', './dist/feature/*.d.ts', './dist/plain.d.ts'])
   );
+});
+
+test('Apply publishConfig overrides to the published type manifest', () => {
+  const publishConfig = {
+    main: './dist/index.js',
+    types: './dist/index.d.ts',
+    typings: './dist/legacy.d.ts',
+    exports: {
+      '.': {
+        types: './dist/index.d.ts',
+        default: './dist/index.js',
+      },
+    },
+    typesVersions: {
+      '<5.0': {
+        '*': ['types-v4/*'],
+      },
+    },
+    private: false,
+  };
+  const manifest = {
+    private: true,
+    main: './src/index.ts',
+    types: './src/index.d.ts',
+    typings: './src/legacy.d.ts',
+    exports: {
+      '.': './src/index.ts',
+    },
+    typesVersions: {
+      '<5.0': {
+        '*': ['src/*'],
+      },
+    },
+    publishConfig,
+  };
+
+  assert.deepEqual(getPublishedTypeManifest(manifest), {
+    ...manifest,
+    private: true,
+    main: publishConfig.main,
+    types: publishConfig.types,
+    typings: publishConfig.typings,
+    exports: publishConfig.exports,
+    typesVersions: publishConfig.typesVersions,
+  });
 });
 
 test('Fall back to an index declaration after package fields', () => {
