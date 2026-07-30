@@ -290,6 +290,8 @@ export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
 
+export const LOADER_DEFAULT = '__loader-default';
+
 export const SCRIPT_INTERPOLATION = '$__knip__';
 
 export const IMPORT_FLAGS = {
@@ -303,4 +305,5 @@ export const IMPORT_FLAGS = {
   OPAQUE: 1 << 6,
   AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
   DYNAMIC: 1 << 8, // dynamic import(), excluded from cycle detection
+  LOADER: 1 << 9, // inline arrow loader in call args: consumes default export only, if the target has one
 } as const;

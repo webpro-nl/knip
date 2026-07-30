@@ -1,4 +1,4 @@
-import { OPAQUE } from '../../constants.ts';
+import { LOADER_DEFAULT, OPAQUE } from '../../constants.ts';
 import type { Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
 import {
   getAliasReExportMap,
@@ -47,9 +47,10 @@ export const isReferenced = (
       return hasCompleteResult();
     }
 
-    const file = graph.get(path)?.importedBy;
+    const node = graph.get(path);
+    const file = node?.importedBy;
 
-    if (!identifier || !file) {
+    if (!identifier || !node || !file) {
       return false;
     }
 
@@ -61,8 +62,10 @@ export const isReferenced = (
     };
 
     if (!isReferenced) {
+      const isLoaderImport = file.import.has(LOADER_DEFAULT);
       const hasDirectReference =
-        (file.import.get(OPAQUE) && !hasOnlyNsRefs(file)) ||
+        ((file.import.get(OPAQUE) || (isLoaderImport && !node.exports.has('default'))) && !hasOnlyNsRefs(file)) ||
+        (isLoaderImport && identifier === 'default') ||
         ((identifier === id || (identifier !== id && file.refs.has(id))) &&
           (file.import.has(identifier) || file.importAs.has(identifier)));
       if (hasDirectReference) {

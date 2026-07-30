@@ -1,6 +1,6 @@
 import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
-import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
+import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
 import type { Export, FileNode, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
@@ -95,7 +95,9 @@ const getImportsAndExports = (
 
   const addInternalImport = (opts: AddInternalImportOptions) => {
     const { filePath: importFilePath, namespace, specifier, modifiers } = opts;
-    const identifier = opts.identifier ?? (modifiers & IMPORT_FLAGS.OPAQUE ? OPAQUE : SIDE_EFFECTS);
+    const identifier =
+      opts.identifier ??
+      (modifiers & IMPORT_FLAGS.OPAQUE ? OPAQUE : modifiers & IMPORT_FLAGS.LOADER ? LOADER_DEFAULT : SIDE_EFFECTS);
     const isStar = identifier === IMPORT_STAR;
 
     imports.add({

@@ -1,4 +1,4 @@
-import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, SIDE_EFFECTS } from '../constants.ts';
+import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, SIDE_EFFECTS } from '../constants.ts';
 import type { FileNode, Import, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
 import { getCachedExportedIdentifiers, setCachedExportedIdentifiers } from './cache.ts';
 import {
@@ -94,7 +94,7 @@ const getImportKind = (importMaps: ImportMaps, identifier: string | undefined, m
   if (identifier && importMaps.reExport.has(identifier)) return 'reExport';
   if (identifier === IMPORT_STAR && importMaps.importNs.size > 0) return 'importNS';
   if (identifier && importMaps.importAs.has(identifier)) return 'importAs';
-  if (identifier === OPAQUE) return 'dynamicImport';
+  if (identifier === OPAQUE || identifier === LOADER_DEFAULT) return 'dynamicImport';
   if (identifier === SIDE_EFFECTS) return 'sideEffectImport';
   return 'import';
 };
