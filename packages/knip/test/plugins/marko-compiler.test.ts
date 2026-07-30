@@ -33,7 +33,6 @@ import { serverValue } from './server.ts'
 import type { ClientValue } from "./client.ts";
 import staticValue from "./static.ts";
 import LocalTag from "./local-tag.marko"
-
 export { exportedValue } from "./exported.ts";
 export type { ExportedType } from "./exported-type.ts";
 
@@ -84,11 +83,35 @@ export * as units
   assert.equal(result.module.dynamicImports.length, 0);
 });
 
+test('Remove multiline Marko tag imports', () => {
+  const source = `import RegularTag from "./regular-tag.marko";
+import EbayButton
+  from "<ebay-button>";
+import {
+  FruitCard,
+} from "<fruit-card>";
+`;
+  const output = createCompiler()(source, 'template.marko');
+  const result = parseSync('template.ts', output);
+
+  assert(!output.includes('<ebay-button>'));
+  assert(!output.includes('<fruit-card>'));
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(
+    result.module.staticImports.map(item => item.moduleRequest.value),
+    ['marko', './regular-tag.marko']
+  );
+});
+
 test('Neutralize Marko scripts and local exports', () => {
   const source = `$ const sharedValue = 1;
 server const serverValue = 2;
 client let clientValue = 3;
   static function getStaticValue() {}
+static async function loadStaticValue() {}
+static {
+  const topStaticValue = 5;
+}
 export interface Input {
   value: string;
 }
@@ -98,6 +121,10 @@ export async function loadValue() {}
 export { sharedValue };
 class {
   static create() {}
+  static async loadStatic() {}
+static {
+    this.created = true;
+}
 
   async load() {
     return import("./lazy.ts");
@@ -114,6 +141,10 @@ const sharedValue = 1;
 const serverValue = 2;
 let clientValue = 3;
   function getStaticValue() {}
+async function loadStaticValue() {}
+{
+  const topStaticValue = 5;
+}
 interface Input {
   value: string;
 }
@@ -123,6 +154,10 @@ async function loadValue() {}
 
 class MarkoComponent {
   static create() {}
+  static async loadStatic() {}
+static {
+    this.created = true;
+}
 
   async load() {
     return import("./lazy.ts");
@@ -131,6 +166,7 @@ class MarkoComponent {
 `
   );
   const result = parseSync('template.ts', output);
+  assert.deepEqual(result.errors, []);
   assert.equal(result.module.staticExports.length, 0);
   assert.equal(result.module.dynamicImports.length, 1);
 });

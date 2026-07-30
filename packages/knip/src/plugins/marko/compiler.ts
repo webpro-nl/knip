@@ -9,11 +9,15 @@ const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \
 const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
 const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;
 const tagImportMatcher =
-  /^[ \t]*(?:(?:server|client|static|\$)[ \t]+)?import\b[^\r\n]*\bfrom[ \t]*(["'])<[^"'\r\n]+>\1[ \t]*;?[ \t]*$/gm;
+  /^[ \t]*(?:(?:server|client|static|\$)[ \t]+)?import[ \t\r\n]+(?:type[ \t\r\n]+)?(?:[$\w]+(?:[ \t\r\n]*,[ \t\r\n]*(?:\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\}))?|\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\})[ \t\r\n]+from[ \t\r\n]*(["'])<[^"'\r\n]+>\1[ \t]*;?[ \t]*(?:\r?\n|$)/gm;
 const markupLineMatcher = /^[ \t]*<.*$/gm;
 const markoPrefixMatcher = /^([ \t]*)(?:server|client|\$)[ \t]+/gm;
 const staticPrefixMatcher =
-  /^([ \t]*)static[ \t]+(?=(?:import|export|const|let|var|function|class|interface|type|enum|namespace)\b)/gm;
+  /^([ \t]*)static[ \t]+(?=(?:import|export|const|let|var|function|class|interface|type|enum|namespace|async[ \t]+function)\b)/gm;
+const staticBlockPrefixMatcher = /^([ \t]*)static[ \t]+(?=\{)/gm;
+const classBodyMatcher = /^([ \t]*)class\b[^{]*\{[\s\S]*?^\1\}/gm;
+const classStaticBlockMatcher = /^([ \t]*)static(?=[ \t]*\{)/gm;
+const classStaticBlockPlaceholder = '__MARKO_CLASS_STATIC_BLOCK__';
 const anonymousClassMatcher = /^([ \t]*)class[ \t]*\{/gm;
 const localExportDeclarationMatcher =
   /^([ \t]*)export[ \t]+(?:default[ \t]+)?(?=(?:(?:declare|abstract|async)[ \t]+)*(?:interface|type[ \t]+[$\w]+|const|let|var|function|class|enum|namespace)\b)/gm;
@@ -49,8 +53,8 @@ const collectStyles = (text: string, path: string) => {
   return imports;
 };
 
-const sanitize = (text: string) =>
-  text
+const sanitize = (text: string) => {
+  const source = text
     .replace(styleExtractor, '')
     .replace(conciseStyleMatcher, '')
     .replace(tagImportMatcher, '')
@@ -58,8 +62,13 @@ const sanitize = (text: string) =>
     .replace(markoPrefixMatcher, '$1')
     .replace(staticPrefixMatcher, '$1')
     .replace(localExportDeclarationMatcher, '$1')
-    .replace(localExportListMatcher, '')
+    .replace(localExportListMatcher, '');
+  return source
+    .replace(classBodyMatcher, body => body.replace(classStaticBlockMatcher, `$1${classStaticBlockPlaceholder}`))
+    .replace(staticBlockPrefixMatcher, '$1')
+    .replaceAll(classStaticBlockPlaceholder, 'static')
     .replace(anonymousClassMatcher, '$1class MarkoComponent {');
+};
 
 const collectTagDependencies = (
   text: string,
