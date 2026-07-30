@@ -83,23 +83,33 @@ export * as units
   assert.equal(result.module.dynamicImports.length, 0);
 });
 
-test('Remove multiline Marko tag imports', () => {
+test('Remove multiline and lazy Marko tag imports', () => {
   const source = `import RegularTag from "./regular-tag.marko";
+import data from "./data.json" with { type: "json" };
 import EbayButton
   from "<ebay-button>";
 import {
   FruitCard,
 } from "<fruit-card>";
+import HeavyChart from "<heavy-chart>" with { load: "visible#chart" };
+import HeavyMap
+  from "<heavy-map>"
+  with {
+    load: "interaction#map",
+  };
 `;
   const output = createCompiler()(source, 'template.marko');
   const result = parseSync('template.ts', output);
 
   assert(!output.includes('<ebay-button>'));
   assert(!output.includes('<fruit-card>'));
+  assert(!output.includes('<heavy-chart>'));
+  assert(!output.includes('<heavy-map>'));
+  assert(output.includes('from "./data.json" with { type: "json" }'));
   assert.deepEqual(result.errors, []);
   assert.deepEqual(
     result.module.staticImports.map(item => item.moduleRequest.value),
-    ['marko', './regular-tag.marko']
+    ['marko', './regular-tag.marko', './data.json']
   );
 });
 

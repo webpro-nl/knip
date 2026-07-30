@@ -9,7 +9,7 @@ const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \
 const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
 const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;
 const tagImportMatcher =
-  /^[ \t]*(?:(?:server|client|static|\$)[ \t]+)?import[ \t\r\n]+(?:type[ \t\r\n]+)?(?:[$\w]+(?:[ \t\r\n]*,[ \t\r\n]*(?:\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\}))?|\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\})[ \t\r\n]+from[ \t\r\n]*(["'])<[^"'\r\n]+>\1[ \t]*;?[ \t]*(?:\r?\n|$)/gm;
+  /^[ \t]*(?:(?:server|client|static|\$)[ \t]+)?import[ \t\r\n]+(?:type[ \t\r\n]+)?(?:[$\w]+(?:[ \t\r\n]*,[ \t\r\n]*(?:\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\}))?|\*[ \t\r\n]+as[ \t\r\n]+[$\w]+|\{[^}]*\})[ \t\r\n]+from[ \t\r\n]*(["'])<[^"'\r\n]+>\1(?:[ \t\r\n]+with[ \t\r\n]*\{(?:[^}"']+|"[^"]*"|'[^']*')*\})?[ \t]*;?[ \t]*(?:\r?\n|$)/gm;
 const markupLineMatcher = /^[ \t]*<.*$/gm;
 const markoPrefixMatcher = /^([ \t]*)(?:server|client|\$)[ \t]+/gm;
 const staticPrefixMatcher =
