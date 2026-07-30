@@ -5,25 +5,20 @@ import { compiler as stylusCompiler } from '../../compilers/stylus.ts';
 import type { CompilerSync } from '../../compilers/types.ts';
 
 const commentMatcher = /<!--[\s\S]*?-->|\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
-const importMatcher =
-  /^[ \t]*(?:(?:server|client)[ \t]+)?(import\s+(?:(?:type\s+)?[^"'`;]+?\s+from\s+)?(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
-const dynamicImportMatcher =
-  /^[ \t]*(?:(?:const|let|var)[ \t]+[$\w]+[ \t]*=[ \t]*|(?:await[ \t]+)?)(import\([ \t]*(["'])([^"'\r\n]+)\2[ \t]*(?:,[^)\r\n]*)?\))[ \t]*;?/gm;
-const exportMatcher =
-  /^[ \t]*(export\s+(?:type\s+)?(?:\*(?:\s+as\s+[$\w]+)?|\{[^}]*\})\s+from\s+(["'])([^"'\r\n]+)\2)[ \t]*;?/gm;
 const conciseStyleMatcher = /^[ \t]*style(?:\.([\w.-]+))?[^\n{]*\{([\s\S]*?)^[ \t]*\}/gm;
 const htmlTagMatcher = /<([a-z][\w.-]*)(?=[\s/|>])/g;
 const conciseTagMatcher = /^[ \t]*([a-z][\w.-]*)(?=[ \t/|]|--|$)/gm;
-
-const collectStatements = (text: string, matcher: RegExp) => {
-  const statements: string[] = [];
-  matcher.lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = matcher.exec(text))) {
-    if (!match[3].startsWith('<')) statements.push(`${match[1]};`);
-  }
-  return statements;
-};
+const tagImportMatcher =
+  /^[ \t]*(?:(?:server|client|static|\$)[ \t]+)?import\b[^\r\n]*\bfrom[ \t]*(["'])<[^"'\r\n]+>\1[ \t]*;?[ \t]*$/gm;
+const markupLineMatcher = /^[ \t]*<.*$/gm;
+const markoPrefixMatcher = /^([ \t]*)(?:server|client|\$)[ \t]+/gm;
+const staticPrefixMatcher =
+  /^([ \t]*)static[ \t]+(?=(?:import|export|const|let|var|function|class|interface|type|enum|namespace)\b)/gm;
+const anonymousClassMatcher = /^([ \t]*)class[ \t]*\{/gm;
+const localExportDeclarationMatcher =
+  /^([ \t]*)export[ \t]+(?:default[ \t]+)?(?=(?:(?:declare|abstract|async)[ \t]+)*(?:interface|type[ \t]+[$\w]+|const|let|var|function|class|enum|namespace)\b)/gm;
+const localExportListMatcher =
+  /^[ \t]*export[ \t]+(?:type[ \t]+)?\{[^}]*\}(?![ \t\r\n]*from\b)[ \t]*;?[ \t]*(?=\r?$)/gm;
 
 const compileStyle = (body: string, lang: string | undefined, path: string) => {
   switch (lang) {
@@ -54,6 +49,18 @@ const collectStyles = (text: string, path: string) => {
   return imports;
 };
 
+const sanitize = (text: string) =>
+  text
+    .replace(styleExtractor, '')
+    .replace(conciseStyleMatcher, '')
+    .replace(tagImportMatcher, '')
+    .replace(markupLineMatcher, '')
+    .replace(markoPrefixMatcher, '$1')
+    .replace(staticPrefixMatcher, '$1')
+    .replace(localExportDeclarationMatcher, '$1')
+    .replace(localExportListMatcher, '')
+    .replace(anonymousClassMatcher, '$1class MarkoComponent {');
+
 const collectTagDependencies = (
   text: string,
   tagDependencies: Map<string, string[]>,
@@ -77,10 +84,8 @@ export const createCompiler =
     return [
       'import "marko";',
       ...collectTagDependencies(source, tagDependencies, fallbackDependencies),
-      ...collectStatements(source, importMatcher),
-      ...collectStatements(source, dynamicImportMatcher),
-      ...collectStatements(source, exportMatcher),
       ...collectStyles(source, path),
+      sanitize(source),
     ].join('\n');
   };
 
