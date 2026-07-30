@@ -39,7 +39,7 @@ const readDir = (dir: string) => {
 const getTagName = (fileName: string) => (fileName.endsWith('.marko') ? basename(fileName, '.marko') : undefined);
 const isTagDir = (dir: string, name: string) => isFile(dir, 'index.marko') || isFile(dir, `${name}.marko`);
 
-const getExportedTags = (dir: string) => {
+const getTags = (dir: string) => {
   const tags = new Set<string>();
   for (const entry of readDir(dir)) {
     if (entry.name.startsWith('.')) continue;
@@ -80,11 +80,21 @@ export const getTaglibDependencies = async (cwd: string) => {
       fallbackDependencies.push(packageName);
       continue;
     }
-    if (!isRecord(config) || typeof config.exports !== 'string') {
+    if (!isRecord(config)) {
       fallbackDependencies.push(packageName);
       continue;
     }
-    for (const tagName of getExportedTags(join(dirname(configPath), config.exports))) {
+    const tagsDir =
+      typeof config.exports === 'string'
+        ? config.exports
+        : typeof config['tags-dir'] === 'string'
+          ? config['tags-dir']
+          : undefined;
+    if (!tagsDir) {
+      fallbackDependencies.push(packageName);
+      continue;
+    }
+    for (const tagName of getTags(join(dirname(configPath), tagsDir))) {
       const dependencies = tagDependencies.get(tagName);
       if (dependencies) dependencies.push(packageName);
       else tagDependencies.set(tagName, [packageName]);

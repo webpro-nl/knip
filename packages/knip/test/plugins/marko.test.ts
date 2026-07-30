@@ -12,6 +12,7 @@ test('Find dependencies with the marko plugin', async () => {
   const { counters, issues } = await main(options);
 
   assert(issues.dependencies['package.json']['unused-library']);
+  assert(issues.dependencies['package.json']['@orchard/unused-legacy-marko-tags']);
   assert(issues.dependencies['package.json']['@orchard/unused-marko-tags']);
   assert(!issues.dependencies['package.json']['@orchard/marko-tags']);
   assert(!issues.dependencies['package.json']['legacy-marko-tags']);
@@ -22,7 +23,7 @@ test('Find dependencies with the marko plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    dependencies: 2,
+    dependencies: 3,
     processed: 11,
     total: 11,
   });
