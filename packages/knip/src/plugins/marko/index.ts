@@ -29,7 +29,7 @@ const tagFilePatterns = [
 ];
 
 const tagProduction = tagFilePatterns.map(pattern => `**/{${tagDiscoveryDirs.join(',')}}/${pattern}`);
-export const production = tagProduction;
+const production = tagProduction;
 
 const tagDefFields = [
   'template',

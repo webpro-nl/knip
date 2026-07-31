@@ -97,7 +97,3 @@ export const createCompiler =
       sanitize(source),
     ].join('\n');
   };
-
-const compiler = createCompiler();
-
-export default compiler;
