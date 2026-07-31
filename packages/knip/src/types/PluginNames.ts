@@ -59,6 +59,7 @@ export type PluginName =
   | 'lost-pixel'
   | 'lunaria'
   | 'markdownlint'
+  | 'marko'
   | 'mdx'
   | 'mdxlint'
   | 'metro'
@@ -239,6 +240,7 @@ export const pluginNames = [
   'lost-pixel',
   'lunaria',
   'markdownlint',
+  'marko',
   'mdx',
   'mdxlint',
   'metro',
