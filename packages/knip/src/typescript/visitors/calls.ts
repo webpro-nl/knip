@@ -255,7 +255,21 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   };
   for (const arg of node.arguments) {
     if (arg.type === 'Identifier') markRefIfNs(arg.name);
-    else if (arg.type === 'ArrayExpression') {
+    else if (arg.type === 'ArrowFunctionExpression' && arg.expression) {
+      const body = arg.body.type === 'AwaitExpression' ? arg.body.argument : arg.body;
+      if (body.type === 'ImportExpression' && isStringLiteral(body.source)) {
+        s.handledImportExpressions.add(body.start);
+        const specifier = getStringValue(body.source)!;
+        s.addImport(
+          specifier,
+          undefined,
+          undefined,
+          undefined,
+          body.source.start,
+          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.LOADER
+        );
+      }
+    } else if (arg.type === 'ArrayExpression') {
       for (const el of arg.elements ?? []) {
         if (el?.type === 'Identifier') markRefIfNs(el.name);
       }
