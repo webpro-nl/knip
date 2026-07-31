@@ -14,7 +14,7 @@ EXTRA=("$@")
 pnpm run --dir packages/knip release --no-git.tag --no-git.push --no-github.release "${EXTRA[@]}"
 
 # Bump and publish other packages
-BUMP_AND_PUBLISH=(--no-git.changelog --no-git.commitMessage --no-git.tag --no-git.push '--git.commitArgs=--amend --no-edit')
+BUMP_AND_PUBLISH=(--no-git.changelog --no-git.commitMessage --no-git.tag --no-git.push --git.commitArgs=--amend --git.commitArgs=--no-edit)
 pnpm run --dir packages/create-config release "${BUMP_AND_PUBLISH[@]}" "${EXTRA[@]}"
 pnpm run --dir packages/language-server release "${BUMP_AND_PUBLISH[@]}" "${EXTRA[@]}"
 pnpm run --dir packages/mcp-server release "${BUMP_AND_PUBLISH[@]}" "${EXTRA[@]}"
