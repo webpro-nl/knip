@@ -2,6 +2,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { IS_DTS } from '../constants.ts';
 import type { PackageJson } from '../types/package-json.ts';
+import { getPackageNameFromModuleSpecifier } from './modules.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -262,7 +263,9 @@ export const getManifestImportDependencies = (manifest: PackageJson) => {
   for (const [entry, exportValue] of Object.entries(manifest.imports)) {
     if (!entry.startsWith('#')) continue;
     for (const item of getEntriesFromExports(exportValue)) {
-      if (!item.startsWith('.') && !item.startsWith('!')) dependencies.add(item);
+      if (item.startsWith('.') || item.startsWith('!')) continue;
+      const packageName = getPackageNameFromModuleSpecifier(item);
+      if (packageName) dependencies.add(packageName);
     }
   }
   return dependencies;
