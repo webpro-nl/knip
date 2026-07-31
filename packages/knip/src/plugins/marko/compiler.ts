@@ -83,7 +83,7 @@ const collectTagDependencies = (
       for (const dependency of tagDependencies.get(match[1]) ?? []) dependencies.add(dependency);
     }
   }
-  return [...dependencies].map(dependency => `import "${dependency}";`);
+  return Array.from(dependencies, dependency => `import "${dependency}";`);
 };
 
 export const createCompiler =
