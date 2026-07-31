@@ -95,22 +95,18 @@ export const createInputHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {
-        let isHandled = deputy.maybeAddReferencedExternalDependency(
-          inputWorkspace,
-          packageName,
-          isConfig(input),
-          input.isTypeOnly
-        );
+        let isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, {
+          isDevOnly: isConfig(input),
+          isTypeOnly: input.isTypeOnly,
+        });
 
         if (input.isTypeOnly && input.containingFilePath) {
           const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
           if (owningWorkspace && owningWorkspace !== inputWorkspace) {
-            const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(
-              owningWorkspace,
-              packageName,
-              isConfig(input),
-              input.isTypeOnly
-            );
+            const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owningWorkspace, packageName, {
+              isDevOnly: isConfig(input),
+              isTypeOnly: input.isTypeOnly,
+            });
             isHandled = isHandled || isOwnerHandled;
           }
         }

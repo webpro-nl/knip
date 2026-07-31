@@ -30,6 +30,7 @@ export type Catalog = Record<string, string>;
 export type Catalogs = Record<string, Catalog>;
 
 type Dependencies = Record<string, string>;
+type TypesVersions = Record<string, Record<string, string[]>>;
 
 export type PackageExtensions = Record<
   string,
@@ -59,6 +60,15 @@ export type PackageJson = {
   browser?: string;
   types?: string;
   typings?: string;
+  typesVersions?: TypesVersions;
+  publishConfig?: {
+    directory?: string;
+    main?: string;
+    exports?: Exports;
+    types?: string;
+    typings?: string;
+    typesVersions?: TypesVersions;
+  };
   catalog?: Catalog;
   catalogs?: Catalogs;
   packageManager?: string;
