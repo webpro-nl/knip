@@ -15,6 +15,7 @@ test('Find dependencies with the marko plugin', async () => {
   assert(issues.dependencies['package.json']['@orchard/unused-legacy-marko-tags']);
   assert(issues.dependencies['package.json']['@orchard/unused-marko-tags']);
   assert(!issues.dependencies['package.json']['@orchard/marko-tags']);
+  assert(!issues.dependencies['package.json']['combined-marko-tags']);
   assert(!issues.dependencies['package.json']['legacy-marko-tags']);
   assert(issues.files['src/components/fruit-basket/seasonal-price-helper.ts']);
   assert.deepEqual(issues.unlisted, {});
