@@ -23,10 +23,10 @@
     "sharp": "0.35.3"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.9",
+    "@astrojs/check": "0.9.10",
     "@astrojs/markdown-satteri": "0.3.4",
     "@octokit/graphql": "^9.0.3",
-    "astro": "7.1.3",
+    "astro": "7.1.4",
     "picocolors": "^1.1.1",
     "satteri": "0.9.5",
     "starlight-blog": "^0.28.0",
