@@ -66,20 +66,6 @@ const registerCompilers: RegisterCompilers = async ({ cwd, registerCompiler, has
   }
 };
 
-const note = `Marko compiles \`.marko\` files, so this plugin registers a lightweight compiler that extracts
-explicit module imports, re-exports and style imports without loading the Marko compiler.
-
-For installed tag libraries, tag names are discovered from the directory configured by
-\`marko.json#exports\` or \`marko.json#tags-dir\` and matched against literal tags in project templates.
-Tag libraries without either field are conservatively considered used. \`taglib-imports\` is not resolved.
-
-Local tag templates and their conventionally associated component and style files in \`components\`
-(Marko 5) or \`tags\` (Marko 6) are conservatively treated as production entries. Knip does not
-report unused auto-discovered local tags inside those directories. Modern Marko 5
-\`marko-tag.json\` entry points and compiler hooks are also resolved.`;
-
-export const docs = { note };
-
 const plugin: Plugin = {
   title,
   enablers,
