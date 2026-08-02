@@ -173,6 +173,14 @@
         }
       }
     },
+    "preprocessor": {
+      "title": "Preprocess the results before providing them to the reporter(s)",
+      "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/list" }]
+    },
+    "preprocessorOptions": {
+      "title": "Extra options to pass to the preprocessor",
+      "type": "object"
+    },
     "treatConfigHintsAsErrors": {
       "title": "Exit with non-zero code (1) if there are any configuration hints",
       "type": "boolean"

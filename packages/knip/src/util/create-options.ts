@@ -195,6 +195,10 @@ export const createOptions = async (options: CreateOptions) => {
     isWatch: args.watch ?? options.isWatch ?? false,
     maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
+    preprocessor: args.preprocessor ?? (parsedConfig.preprocessor ? [parsedConfig.preprocessor].flat() : []),
+    preprocessorOptions: args['preprocessor-options']
+      ? JSON.parse(args['preprocessor-options'])
+      : (parsedConfig.preprocessorOptions ?? {}),
     rules,
     tags,
     traceDependency: args['trace-dependency'],
