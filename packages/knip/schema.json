@@ -430,6 +430,10 @@
           "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
           "$ref": "#/definitions/plugin"
         },
+        "borp": {
+          "title": "borp plugin configuration (https://knip.dev/reference/plugins/borp)",
+          "$ref": "#/definitions/plugin"
+        },
         "bumpp": {
           "title": "bumpp plugin configuration (https://knip.dev/reference/plugins/bumpp)",
           "$ref": "#/definitions/plugin"

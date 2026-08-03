@@ -7,6 +7,7 @@ import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
+import { default as borp } from './borp/index.ts';
 import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
@@ -188,6 +189,7 @@ export const Plugins = {
   ava,
   babel,
   biome,
+  borp,
   bumpp,
   bun,
   c8,

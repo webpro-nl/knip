@@ -8,6 +8,7 @@ export type PluginName =
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'borp'
   | 'bumpp'
   | 'bun'
   | 'c8'
@@ -189,6 +190,7 @@ export const pluginNames = [
   'ava',
   'babel',
   'biome',
+  'borp',
   'bumpp',
   'bun',
   'c8',
