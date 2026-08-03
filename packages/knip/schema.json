@@ -970,6 +970,10 @@
           "title": "ts-node plugin configuration (https://knip.dev/reference/plugins/ts-node)",
           "$ref": "#/definitions/plugin"
         },
+        "tsd": {
+          "title": "tsd plugin configuration (https://knip.dev/reference/plugins/tsd)",
+          "$ref": "#/definitions/plugin"
+        },
         "tsdown": {
           "title": "tsdown plugin configuration (https://knip.dev/reference/plugins/tsdown)",
           "$ref": "#/definitions/plugin"

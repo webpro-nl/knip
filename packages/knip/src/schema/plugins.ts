@@ -159,6 +159,7 @@ export const pluginsSchema = z.object({
   temporal: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
+  tsd: pluginSchema,
   tsdown: pluginSchema,
   tsup: pluginSchema,
   tsx: pluginSchema,

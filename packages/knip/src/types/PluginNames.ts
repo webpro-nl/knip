@@ -146,6 +146,7 @@ export type PluginName =
   | 'temporal'
   | 'travis'
   | 'ts-node'
+  | 'tsd'
   | 'tsdown'
   | 'tsup'
   | 'tsx'
@@ -328,6 +329,7 @@ export const pluginNames = [
   'temporal',
   'travis',
   'ts-node',
+  'tsd',
   'tsdown',
   'tsup',
   'tsx',
