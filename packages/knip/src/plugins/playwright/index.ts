@@ -13,7 +13,7 @@ const enablers = ['@playwright/test'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['playwright.config.{js,ts,mjs}'];
+const config = ['playwright.config.{js,cjs,mjs,ts,cts,mts}'];
 
 export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
