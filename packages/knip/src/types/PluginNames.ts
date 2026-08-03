@@ -100,6 +100,7 @@ export type PluginName =
   | 'pm2'
   | 'pnpm'
   | 'postcss'
+  | 'pre-commit'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
@@ -283,6 +284,7 @@ export const pluginNames = [
   'pm2',
   'pnpm',
   'postcss',
+  'pre-commit',
   'preconstruct',
   'prettier',
   'prisma',

@@ -99,6 +99,7 @@ import { default as plop } from './plop/index.ts';
 import { default as pm2 } from './pm2/index.ts';
 import { default as pnpm } from './pnpm/index.ts';
 import { default as postcss } from './postcss/index.ts';
+import { default as preCommit } from './pre-commit/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
@@ -282,6 +283,7 @@ export const Plugins = {
   pm2,
   pnpm,
   postcss,
+  'pre-commit': preCommit,
   preconstruct,
   prettier,
   prisma,

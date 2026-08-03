@@ -113,6 +113,7 @@ export const pluginsSchema = z.object({
   pm2: pluginSchema,
   pnpm: pluginSchema,
   postcss: pluginSchema,
+  'pre-commit': pluginSchema,
   preconstruct: pluginSchema,
   prettier: pluginSchema,
   prisma: pluginSchema,
