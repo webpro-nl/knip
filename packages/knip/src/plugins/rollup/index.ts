@@ -16,8 +16,16 @@ const config = ['rollup.config.{js,cjs,mjs,ts}'];
 
 const args: Args = {
   alias: { plugin: ['p'] },
+  string: ['config'],
+  config: ['config'],
   // minimist has an issue with dots like in `--watch.onEnd` so we remap it
-  args: (args: string[]) => args.map(arg => (arg.startsWith('--watch.onEnd') ? `--_exec${arg.slice(13)}` : arg)),
+  // a bare `--config` (no value) means the default config file, so drop it
+  args: (args: string[]) =>
+    args
+      .filter(
+        (arg, index) => !(arg === '--config' && (args[index + 1] === undefined || args[index + 1].startsWith('-')))
+      )
+      .map(arg => (arg.startsWith('--watch.onEnd') ? `--_exec${arg.slice(13)}` : arg)),
   fromArgs: ['_exec'],
   resolve: ['plugin', 'configPlugin'],
 };
