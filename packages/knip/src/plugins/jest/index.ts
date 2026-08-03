@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { _glob, _dirGlob } from '../../util/glob.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
@@ -87,7 +87,14 @@ const resolveDependencies = async (
       transform.push(transformer);
     } else {
       transform.push(transformer[0]);
-      if (isBabelJest(transformer)) transform.push(...getDependenciesFromConfig(transformer[1]));
+      if (isBabelJest(transformer)) {
+        transform.push(...getDependenciesFromConfig(transformer[1]));
+        const { configFile } = transformer[1];
+        if (typeof configFile === 'string')
+          transform.push(
+            toConfig('babel', rootDirRe.test(configFile) ? configFile : toAbsolute(configFile, options.cwd))
+          );
+      }
     }
   }
   const moduleNameMapper = (
