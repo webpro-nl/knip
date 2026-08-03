@@ -6,7 +6,7 @@ export interface ScriptCommand {
   args: string[];
 }
 
-const spawningBinaries = new Set(['cross-env', 'retry-cli']);
+const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 
 export function* walkCommands(node: Node): Generator<Command> {
   switch (node.type) {
