@@ -20,6 +20,12 @@ test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
 });
 
+test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {
+  assert.deepEqual(getScriptCommands('cross-env FLAGS="-a;-b" bun test --filter="unit;fast"'), [
+    { binary: 'bun', args: ['test', '--filter=unit;fast'] },
+  ]);
+});
+
 test('getScriptCommands normalizes binary paths', () => {
   assert.deepEqual(getScriptCommands('./node_modules/.bin/bun test'), [{ binary: 'bun', args: ['test'] }]);
 });

@@ -5,9 +5,9 @@ import { stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
 import { argsFrom } from '../util.ts';
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
+export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs } = options;
-  const parsed = parseArgs(args, {
+  const parsed = parseArgs(words, {
     boolean: ['yes', 'no', 'quiet'],
     alias: { yes: 'y', no: 'no-install', package: 'p', call: 'c' },
   });
@@ -17,7 +17,6 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const packages = parsed.package && !parsed.yes ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
   const command = parsed.call ? fromArgs([parsed.call]) : [];
-  const restArgs = argsFrom(args, packageSpecifier);
 
   const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
   const opts = parsed.no ? undefined : { optional: true };
@@ -28,6 +27,6 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
     ...specifiers,
     ...packages.map(id => toDependency(id, { optional: true })),
     ...command,
-    ...fromArgs(restArgs).slice(1),
+    ...fromArgs(argsFrom(words, packageSpecifier)).slice(1),
   ];
 };

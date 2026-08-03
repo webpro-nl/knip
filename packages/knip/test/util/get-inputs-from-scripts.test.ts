@@ -163,6 +163,8 @@ test('getInputsFromScripts (npx)', () => {
   t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl', opt), toDependency('pkg', opt)]);
   t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl', opt), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
   t("npx --package=pkg -c 'curl --output /dev/null'", [toDependency('pkg', opt), toBinary('curl')]);
+  t('npx license-checker --production --onlyAllow="0BSD;Apache-2.0;BSD-2-Clause;ISC;MIT;"', [toBinary('license-checker', opt)]);
+  t('npx license-checker --excludePackages="pkg-a@1.0.0 pkg-b;pkg-c@2.0.0 pkg-d"', [toBinary('license-checker', opt)]);
   t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
   t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
   t('npx tsx main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
@@ -234,6 +236,7 @@ test('getInputsFromScripts (nub)', () => {
 
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
+  t('pnpm exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('program')]);
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
@@ -309,6 +312,7 @@ test('getInputsFromScripts (yarn)', () => {
   t('yarn exec program', [toBinary('program')]);
   t('yarn run program', [toBinary('program', opt)]);
   t('yarn program', [toBinary('program')]);
+  t('yarn program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('program')]);
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
   t('yarn node ./script.js', [toBinary('node'), js]);

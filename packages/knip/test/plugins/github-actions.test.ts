@@ -22,6 +22,8 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert(issues.binaries['.github/workflows/test.yml']['changeset']);
   assert(issues.binaries['.github/workflows/test.yml']['eslint']);
   assert(issues.binaries['.github/workflows/test.yml']['knip']);
+  assert(!issues.binaries['.github/workflows/test.yml']['MIT']);
+  assert(!issues.binaries['.github/workflows/test.yml']['Apache-2.0']);
   assert(issues.binaries['.github/workflows/test.yml']['nyc']);
   assert(issues.binaries['.github/workflows/test.yml']['playwright']);
   assert(issues.binaries['.github/workflows/test.yml']['release-it']);

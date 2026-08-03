@@ -3,6 +3,7 @@ import type { BinaryResolver } from '../types/config.ts';
 import { compact } from '../util/array.ts';
 import { toBinary, toDeferResolve, toEntry } from '../util/input.ts';
 import { isValidBinary } from '../util/modules.ts';
+import { argsAfter } from './util.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
@@ -15,8 +16,8 @@ const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode',
 // Binaries where each positional arg is a separate script
 const positionalBinaries = new Set(['concurrently']);
 
-export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
-  const parsed = parseArgs(args, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
+export const resolve: BinaryResolver = (binary, words, { fromArgs }) => {
+  const parsed = parseArgs(words, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
   const bin =
     binary.startsWith('.') || binary.includes('/')
       ? toEntry(binary)
@@ -24,7 +25,7 @@ export const resolve: BinaryResolver = (binary, args, { fromArgs }) => {
         ? toBinary(binary)
         : undefined;
   const pos = positionals.has(binary) ? [toDeferResolve(parsed._[0])] : [];
-  const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--']) : [];
+  const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--')) : [];
   const commands = positionalBinaries.has(binary) ? parsed._.flatMap(cmd => fromArgs([cmd])) : [];
   return compact([bin, ...pos, ...newCommand, ...commands]);
 };

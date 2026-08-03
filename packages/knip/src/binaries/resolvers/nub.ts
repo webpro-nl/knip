@@ -28,14 +28,14 @@ const commands = new Set([
   'why',
 ]);
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
+export const resolve: BinaryResolver = (_binary, words, options) => {
   const binary = toBinary(_binary);
   const { manifest, cwd, fromArgs } = options;
-  const parsed = parseArgs(args, { string: ['filter'], boolean: ['recursive'], alias: { recursive: 'r' } });
+  const parsed = parseArgs(words, { string: ['filter'], boolean: ['recursive'], alias: { recursive: 'r' } });
   const [command, script] = parsed._;
 
   if (runtimes.has(command)) {
-    const rest = args.filter(arg => arg !== command);
+    const rest = words.filter(word => word.value !== command);
     return [binary, ...resolveX(rest, options)];
   }
 
@@ -49,5 +49,5 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   if (command && (commands.has(command) || manifest.scriptNames.has(command))) return [binary];
 
-  return [binary, ...fromArgs(['node', ...args])];
+  return [binary, ...fromArgs(['node', ...words])];
 };

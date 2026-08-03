@@ -60,9 +60,13 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
       const text = node.name?.value;
       if (!text) continue;
       const binary = extractBinary(text);
-      const args = node.suffix.map(word => word.value);
-      if (spawningBinaries.has(binary)) out.push(...getScriptCommands(args.filter(arg => arg !== '--').join(' ')));
-      else out.push({ binary, args });
+      if (spawningBinaries.has(binary)) {
+        const rest = node.suffix
+          .filter(word => word.text !== '--')
+          .map(word => word.text)
+          .join(' ');
+        out.push(...getScriptCommands(rest));
+      } else out.push({ binary, args: node.suffix.map(word => word.value) });
     }
   }
   return out;

@@ -32,10 +32,18 @@ const collectExpansionScripts = (word: Word, out: Script[]) => {
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
 
-  // Helper for recursive calls
+  // Helper for recursive calls; Word args re-serialize from their raw text, string args are script fragments
   const fromArgs: FromArgs = (args, opts): Input[] => {
-    if (args.length === 0 || !isValidBinary(substringBefore(args[0], ' '))) return [];
-    return getDependenciesFromScript(args.filter(arg => arg !== '--').join(' '), {
+    if (args.length === 0) return [];
+    const first = typeof args[0] === 'string' ? args[0] : args[0].value;
+    if (!isValidBinary(substringBefore(first, ' '))) return [];
+    const parts: string[] = [];
+    for (const arg of args) {
+      if (typeof arg === 'string') {
+        if (arg !== '--') parts.push(arg);
+      } else if (arg.value !== '--') parts.push(arg.text);
+    }
+    return getDependenciesFromScript(parts.join(' '), {
       ...options,
       knownBinsOnly: false,
       ...opts,
@@ -71,10 +79,10 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (binary.startsWith('-') || binary.startsWith('..')) return [];
     if (definedFunctions.has(binary)) return [];
 
-    const args = node.suffix.map(w => w.value);
+    const words = node.suffix;
 
     // Commands that precede other commands, try again with the rest
-    if (binary === '!' || binary === 'test') return fromArgs(args);
+    if (binary === '!' || binary === 'test') return fromArgs(words);
 
     const fromNodeOptions = node.prefix
       .filter(a => a.name === 'NODE_OPTIONS' && a.value)
@@ -86,11 +94,11 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
     if (binary in KnownResolvers) {
       const resolver = KnownResolvers[binary as KnownResolver];
-      return resolver(binary, args, { ...options, fromArgs });
+      return resolver(binary, words, { ...options, fromArgs });
     }
 
     if (pluginArgsMap.has(binary)) {
-      return [...resolverFromPlugins(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+      return [...resolverFromPlugins(binary, words, { ...options, fromArgs }), ...fromNodeOptions];
     }
 
     if (spawningBinaries.includes(binary)) {
@@ -102,7 +110,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     }
 
     if (binary in Plugins) {
-      const inputs = fallbackResolve(binary, args, { ...options, fromArgs });
+      const inputs = fallbackResolve(binary, words, { ...options, fromArgs });
       if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
       return [...inputs, ...fromNodeOptions];
     }
@@ -111,7 +119,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     // Actions, which are provisioned with lots of unknown global binaries.
     if (options.knownBinsOnly && !text?.startsWith('.')) return [];
 
-    return [...fallbackResolve(binary, args, { ...options, fromArgs }), ...fromNodeOptions];
+    return [...fallbackResolve(binary, words, { ...options, fromArgs }), ...fromNodeOptions];
   };
 
   try {

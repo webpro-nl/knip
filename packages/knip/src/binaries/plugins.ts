@@ -6,22 +6,25 @@ import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, to
 import { extractBinary } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { resolve as fallbackResolve } from './fallback.ts';
+import { toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
-export const resolve: BinaryResolver = (binary, _args, options) => {
+export const resolve: BinaryResolver = (binary, words, options) => {
   const { cwd, fromArgs, containingFilePath, manifest } = options;
   const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
 
-  if (!pluginArgs) return fallbackResolve(binary, _args, options);
+  if (!pluginArgs) return fallbackResolve(binary, words, options);
 
   const inputOpts = {};
   if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });
 
-  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(_args) : _args;
+  const values: string[] = [];
+  for (const word of words) values.push(word.value);
+  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
 
   const parsed = parseArgs(args, {
     string: [
@@ -55,7 +58,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
 
   const resolvedFromArgs =
     typeof pluginArgs.fromArgs === 'function'
-      ? fromArgs(pluginArgs.fromArgs(parsed, args))
+      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args), words))
       : Array.isArray(pluginArgs.fromArgs)
         ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];
