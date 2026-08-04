@@ -14,6 +14,7 @@
     },
     "packages/vscode-knip": {
       "entry": ["src/index.js!", "scripts/*.js", "test/*.mjs"],
+      "project": ["**!", "!test/fixtures"],
       "ignoreBinaries": ["vsce", "ovsx"]
     }
   }
