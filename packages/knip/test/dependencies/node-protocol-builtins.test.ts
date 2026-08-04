@@ -7,9 +7,11 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/dependencies/node-protocol-builtins');
 
-test('Treat any `node:` specifier as a built-in, never an unlisted dependency', async () => {
+test('Distinguish built-in specifiers from packages with built-in names', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(issues.dependencies, {});
 
   const unlisted = issues.unlisted['index.ts'] ?? {};
   assert(unlisted['unlisted-package']);
