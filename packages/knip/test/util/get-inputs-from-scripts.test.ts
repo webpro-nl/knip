@@ -50,6 +50,8 @@ test('getInputsFromScripts (unknown programs)', () => {
 
 test('getInputsFromScripts (unknown scripts)', () => {
   t('./script.sh -r 10', [toEntry('./script.sh')]);
+  t('target/release/mytool run', [toEntry('target/release/mytool')]);
+  t('/opt/example-tool --batch', []);
 });
 
 test('getInputsFromScripts (node)', () => {
