@@ -213,6 +213,29 @@ letters and avoid snake-case.
 
 Also see [JSDoc & TSDoc Tags][8].
 
+### `preprocessor`
+
+Preprocess the results before providing them to the reporter(s). Can be a single preprocessor or an array of preprocessors. Each value is a path to a local file or an npm package name.
+
+```json title="knip.json"
+{
+  "preprocessor": ["./first.ts", "./second.ts"]
+}
+```
+
+Also see [Preprocessors](../features/reporters.md#preprocessors).
+
+### `preprocessorOptions`
+
+Extra options to pass to the preprocessor.
+
+```json title="knip.json"
+{
+  "preprocessor": "./my-preprocessor.ts",
+  "preprocessorOptions": { "key": "value" }
+}
+```
+
 ### `treatConfigHintsAsErrors`
 
 Exit with non-zero code (1) if there are any configuration hints.

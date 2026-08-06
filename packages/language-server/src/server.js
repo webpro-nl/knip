@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
+import { createOptions, createSession, KNIP_CONFIG_LOCATIONS, runPreprocessors } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -64,7 +64,7 @@ const DEFAULT_CONFIG = {
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
 
 /**
- * @import { Issues, Rules } from 'knip/session';
+ * @import { Issues, ReporterOptions, Rules } from 'knip/session';
  * @import { Connection, Diagnostic, CodeAction } from 'vscode-languageserver';
  * @import { CodeActionParams, DidChangeWatchedFilesParams } from 'vscode-languageserver';
  * @import { Config, IssuesByUri } from './types.js';
@@ -101,6 +101,15 @@ export class LanguageServer {
 
   /** @type {Rules}  */
   rules = {};
+
+  /** @type {string[]} */
+  preprocessor = [];
+
+  /** @type {Record<string, unknown>} */
+  preprocessorOptions = {};
+
+  /** @type {{ runPreprocessors: typeof runPreprocessors } | undefined} */
+  knip;
 
   /** @type {IssuesByUri} */
   issuesByUri = new Map();
@@ -239,7 +248,7 @@ export class LanguageServer {
     this.connection.console.log(
       `Using bundled knip${readKnipVersion(createRequire(__filename).resolve('knip/session'))}`
     );
-    return { createOptions, createSession };
+    return { createOptions, createSession, runPreprocessors };
   }
 
   async start() {
@@ -258,6 +267,9 @@ export class LanguageServer {
       this.connection.console.log('Creating options');
       const options = await knip.createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
       this.rules = options.rules;
+      this.preprocessor = options.preprocessor ?? [];
+      this.preprocessorOptions = options.preprocessorOptions ?? {};
+      this.knip = knip;
 
       this.connection.console.log('Building module graph...');
       const start = Date.now();
@@ -265,7 +277,8 @@ export class LanguageServer {
       this.connection.console.log(`Finished building module graph (${Date.now() - start}ms)`);
 
       this.session = session;
-      this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
+      const issues = await this.#preprocessIssues(session.getIssues().issues);
+      this.publishDiagnostics(this.buildDiagnostics(issues, config, this.rules));
       this.connection.sendNotification(NOTIFICATION_MODULE_GRAPH_BUILT, { duration: Date.now() - start });
     } catch (_error) {
       this.connection.console.error(`Error: ${_error}`);
@@ -282,6 +295,35 @@ export class LanguageServer {
   restart() {
     this.stop();
     this.start();
+  }
+
+  /** @param {Issues} issues */
+  async #preprocessIssues(issues) {
+    if (this.preprocessor.length === 0) return issues;
+    const run = this.knip?.runPreprocessors ?? runPreprocessors;
+    /** @type {ReporterOptions} */
+    const data = {
+      report: {},
+      issues,
+      counters: /** @type {any} */ ({}),
+      tagHints: new Set(),
+      configurationHints: [],
+      enabledPlugins: {},
+      includedWorkspaceDirs: [],
+      cwd: this.cwd ?? process.cwd(),
+      isProduction: false,
+      isShowProgress: false,
+      isDisableConfigHints: true,
+      isDisableTagHints: true,
+      isTreatConfigHintsAsErrors: false,
+      isTreatTagHintsAsErrors: false,
+      options: '',
+      preprocessorOptions: this.preprocessorOptions,
+      selectedWorkspaces: undefined,
+      configFilePath: undefined,
+    };
+    const result = await run(this.preprocessor, data);
+    return result.issues;
   }
 
   getResults() {
@@ -324,7 +366,8 @@ export class LanguageServer {
       );
 
       const config = await this.getConfig();
-      this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+      const issues = await this.#preprocessIssues(this.session.getIssues().issues);
+      this.publishDiagnostics(this.buildDiagnostics(issues, config, this.rules));
     } catch (_error) {
       this.connection.console.error(`Error handling file changes: ${_error}`);
     }

@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/config-preprocessor-options",
+  "knip": {
+    "entry": ["preprocessor-with-options.js"],
+    "preprocessor": "./preprocessor-with-options.js",
+    "preprocessorOptions": { "food": "cupcake" }
+  }
+}

@@ -3,7 +3,8 @@ export type { DependencyNode, DependencyNodes } from '../graph-explorer/operatio
 export { finalizeConfigurationHints } from '../reporters/util/configuration-hints.ts';
 export { getIssuePrefix } from '../reporters/util/util.ts';
 export type { Results } from '../run.ts';
-export type { Issue, Issues, IssueType, Rules } from '../types/issues.ts';
+export type { Issue, Issues, IssueType, ReporterOptions, Rules } from '../types/issues.ts';
+export { runPreprocessors } from '../util/reporter.ts';
 export type { PackageJson } from '../types/package-json.ts';
 export { createOptions, type MainOptions } from '../util/create-options.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
