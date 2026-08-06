@@ -93,7 +93,7 @@
   "dependencies": {
     "fdir": "^6.5.0",
     "formatly": "^0.3.0",
-    "get-tsconfig": "4.14.0",
+    "get-tsconfig": "4.14.1",
     "jiti": "^2.7.0",
     "oxc-parser": "^0.142.0",
     "oxc-resolver": "11.24.2",
@@ -112,7 +112,7 @@
     "@types/webpack": "^5.28.5",
     "codeclimate-types": "^0.3.1",
     "prettier": "^3.9.6",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.5",
     "typescript": "7.0.2"
   },
   "engines": {
