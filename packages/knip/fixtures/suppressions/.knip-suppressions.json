@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "suppressions": {
+    "module.ts": {
+      "exports": {
+        "anotherUnused": {},
+        "unusedExport": {}
+      }
+    },
+    "package.json": {
+      "dependencies": {
+        "unused-pkg": {},
+        "used-pkg": {}
+      }
+    },
+    "unused.ts": {
+      "files": {
+        "unused.ts": {}
+      }
+    }
+  }
+}
