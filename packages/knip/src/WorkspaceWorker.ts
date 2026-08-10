@@ -530,7 +530,7 @@ export class WorkspaceWorker {
       const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         while (configFiles.size > 0) {
-          const entry = configFiles.entries().next().value;
+          const entry: [PluginName, Set<string>] | undefined = configFiles.entries().next().value;
           if (!entry) break;
 
           const [pluginName, dependencies] = entry;
