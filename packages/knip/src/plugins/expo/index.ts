@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getConfig, getDependencies } from './helpers.ts';
@@ -15,11 +15,14 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['app.json', 'app.config.{ts,js}'];
 
+const entry = ['babel.config.{js,cjs,mjs,cts}'];
+
 const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 
 const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
   const { manifest } = options;
   const config = getConfig(localConfig, options);
+  const entries = entry.map(id => toEntry(id));
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (manifest.main === 'expo-router/entry') {
@@ -37,10 +40,10 @@ const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) =>
       }
     }
 
-    return patterns.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
+    return patterns.map(id => toProductionEntry(id)).concat(entries, await getDependencies(localConfig, options));
   }
 
-  return production.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
+  return production.map(id => toProductionEntry(id)).concat(entries, await getDependencies(localConfig, options));
 };
 
 const plugin: Plugin = {
@@ -48,6 +51,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
+  entry,
   production,
   resolveConfig,
 };
