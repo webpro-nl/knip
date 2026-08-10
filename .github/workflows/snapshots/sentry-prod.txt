@@ -1,8 +1,11 @@
-Unused exports (4)
+Unused exports (7)
+static/app/components/core/chat/index.tsx: ThinkingBlock
 static/app/components/core/hotkey/index.tsx: Kbd
+static/app/components/core/input/index.tsx: NumberDragInput
 static/app/components/core/layout/index.tsx: useContainerBreakpoint
 static/app/components/core/modal/index.tsx: makeClosableHeader, makeCloseButton, ModalBody, ModalFooter
 static/app/views/issueDetails/sidebar/seerDrawer.tsx: SeerDrawer
+static/app/views/settings/projectPerformance/index.tsx: allowedCountValues, allowedDurationValues, allowedPercentageValues, allowedSizeValues, DetectorConfigCustomer
 Unused exported types (2)
 static/app/components/core/layout/index.tsx: FlexPropsWithRenderFunction, GridPropsWithRenderFunction, StackPropsWithRenderFunction
 static/app/components/core/text/index.tsx: TextPropsWithRenderFunction, HeadingProps, HeadingPropsWithRenderFunction
