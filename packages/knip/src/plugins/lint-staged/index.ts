@@ -13,9 +13,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [
   'package.{json,yaml,yml}',
-  ".lintstagedrc",
-  ".lintstagedrc.{json,yaml,yml,mjs,mts,js,ts,cjs,cts}",
-  "lint-staged.config.{mjs,mts,js,ts,cjs,cts}",
+  '.lintstagedrc',
+  '.lintstagedrc.{json,yaml,yml,mjs,mts,js,ts,cjs,cts}',
+  'lint-staged.config.{mjs,mts,js,ts,cjs,cts}',
 ];
 
 const resolveEntry = async (value: Entry): Promise<string[]> => {
