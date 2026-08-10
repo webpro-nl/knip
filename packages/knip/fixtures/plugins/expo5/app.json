@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Knip",
+    "slug": "knip",
+    "platforms": ["ios", "android"],
+    "updates": {
+      "enabled": false
+    }
+  }
+}
