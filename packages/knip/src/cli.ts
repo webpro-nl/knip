@@ -77,11 +77,11 @@ const main = async () => {
       isTreatTagHintsAsErrors: options.isTreatTagHintsAsErrors,
       maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
       options: args['reporter-options'] ?? '',
-      preprocessorOptions: args['preprocessor-options'] ?? '',
+      preprocessorOptions: options.preprocessorOptions,
       selectedWorkspaces,
     };
 
-    const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
+    const finalData = await runPreprocessors(options.preprocessor, initialData);
 
     if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
