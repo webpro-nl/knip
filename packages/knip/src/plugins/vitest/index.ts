@@ -160,7 +160,8 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
     }
 
-    const dir = toAbsolute(cfg.test?.root ?? '.', options.cwd);
+    const vitestRoot = toAbsolute(cfg.test?.root ?? '.', options.cwd);
+    const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, vitestRoot) : vitestRoot;
 
     if (cfg.test) {
       if (cfg.test?.include) {
@@ -197,10 +198,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
         inputs.add(toEntry(`src/**/*${ext}`));
       }
     }
-    for (const dependency of findConfigDependencies(cfg, options, dir)) inputs.add(dependency);
+    for (const dependency of findConfigDependencies(cfg, options, vitestRoot)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
-      .map(specifier => join(dir, specifier))
+      .map(specifier => join(vitestRoot, specifier))
       .map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }

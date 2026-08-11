@@ -17,6 +17,7 @@ interface VitestConfig {
       provider: string;
     };
     root?: string;
+    dir?: string;
     environment?: string;
     globalSetup?: string | string[];
     reporters?: (string | [string, unknown] | unknown)[];
