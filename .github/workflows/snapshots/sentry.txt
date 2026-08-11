@@ -1,3 +1,0 @@
-Unused exported types (2)
-static/app/views/explore/releases/detail/overview/index.tsx: TransactionsListOption
-static/app/views/settings/projectProguard/index.tsx: ProguardMappingAssociation
