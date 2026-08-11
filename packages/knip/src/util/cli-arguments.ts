@@ -39,6 +39,15 @@ Fix
       --allow-remove-files     Allow Knip to remove files (with --fix)
   -F, --format                 Format modified files after --fix using the local formatter
 
+Suppressions
+      --suppress-all           Generate suppressions file for all current issues
+      --suppress-type [type]   Suppress only a specific issue type
+      --suppress-until [date]  Set an expiry date (YYYY-MM-DD) on generated suppressions
+      --prune-suppressions     Remove stale entries from suppressions file
+      --check-suppressions     Fail if suppressions file needs updating
+      --suppressions-location  Suppressions file location (default: .knip-suppressions.json)
+      --no-suppressions        Ignore suppressions
+
 Output
       --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
       --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
@@ -88,6 +97,7 @@ export default function parseCLIArgs() {
     options: {
       cache: { type: 'boolean' },
       'cache-location': { type: 'string' },
+      'check-suppressions': { type: 'boolean' },
       config: { type: 'string', short: 'c' },
       cycles: { type: 'boolean' },
       debug: { type: 'boolean', short: 'd' },
@@ -113,15 +123,21 @@ export default function parseCLIArgs() {
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
       'no-tag-hints': { type: 'boolean' },
+      'no-suppressions': { type: 'boolean' },
       performance: { type: 'boolean' },
       'performance-fn': { type: 'string' },
       production: { type: 'boolean', short: 'p' },
       preprocessor: { type: 'string', multiple: true },
       'preprocessor-options': { type: 'string' },
       reporter: { type: 'string', multiple: true },
+      'prune-suppressions': { type: 'boolean' },
       'reporter-options': { type: 'string' },
       duration: { type: 'boolean', short: 'u' },
       strict: { type: 'boolean', short: 's' },
+      'suppress-all': { type: 'boolean' },
+      'suppress-type': { type: 'string' },
+      'suppress-until': { type: 'string' },
+      'suppressions-location': { type: 'string' },
       trace: { type: 'boolean' },
       'trace-dependency': { type: 'string' },
       'trace-export': { type: 'string' },

@@ -79,6 +79,8 @@ export type ReporterOptions = {
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
+  suppressedCount?: number;
+  expiredCount?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;
