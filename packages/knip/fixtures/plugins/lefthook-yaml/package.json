@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/lefthook-yaml",
+  "devDependencies": {
+    "eslint": "*",
+    "lefthook": "*"
+  }
+}
