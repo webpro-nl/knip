@@ -80,7 +80,15 @@ export const run = async (options: MainOptions) => {
     workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))
   );
 
-  const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } = await build({
+  const {
+    graph,
+    entryPaths,
+    analyzedFiles,
+    unreferencedFiles,
+    analyzeSourceFile,
+    enabledPluginsStore,
+    hasConfigLoadErrors,
+  } = await build({
     chief,
     collector,
     counselor,
@@ -156,5 +164,6 @@ export const run = async (options: MainOptions) => {
     },
     session,
     streamer,
+    hasConfigLoadErrors,
   };
 };

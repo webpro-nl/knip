@@ -20,12 +20,14 @@ test('Plugin config that throws on load should not be fatal', async () => {
 test('Plugin config that throws on load exits non-zero via CLI', () => {
   const result = exec('knip --no-progress', { cwd });
   assert.match(result.stderr, /^ERROR: Error loading vite\.config\.ts /m);
+  assert.equal(result.stdout, '');
   assert.equal(result.status, 1);
 });
 
 test('Plugin config that throws on load exits zero with --no-exit-code', () => {
   const result = exec('knip --no-progress --no-exit-code', { cwd });
   assert.match(result.stderr, /^ERROR: Error loading vite\.config\.ts /m);
+  assert.equal(result.stdout, '');
   assert.equal(result.status, 0);
 });
 
