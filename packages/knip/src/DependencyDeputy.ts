@@ -71,7 +71,6 @@ export class DependencyDeputy {
 
   public addWorkspace({
     name,
-    cwd,
     dir,
     manifestPath,
     manifestStr,
@@ -81,7 +80,6 @@ export class DependencyDeputy {
     ignoreUnresolved: iu,
   }: {
     name: string;
-    cwd: string;
     dir: string;
     manifestPath: string;
     manifestStr: string;
@@ -109,7 +107,6 @@ export class DependencyDeputy {
       const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
         packageNames,
         dir,
-        cwd,
       });
 
       this.setHostDependencies(name, hostDependencies);
