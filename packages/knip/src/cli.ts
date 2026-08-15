@@ -44,7 +44,7 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
-    const { results } = await run(options);
+    const { results, hasConfigLoadErrors } = await run(options);
 
     const {
       issues,
@@ -105,6 +105,7 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+        hasConfigLoadErrors ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {

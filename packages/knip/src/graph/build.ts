@@ -75,6 +75,7 @@ export async function build({
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
+  let hasConfigLoadErrors = false;
   const registeredVisitorPlugins = new Set<string>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
@@ -248,7 +249,9 @@ export async function build({
     if (tsConfigPaths) principal.addPaths(tsConfigPaths, dir, dir);
     principal.addRootDirs(compilerOptions.rootDirs, dir);
 
-    const inputsFromPlugins = await worker.runPlugins();
+    const pluginResults = await worker.runPlugins();
+    const inputsFromPlugins = pluginResults.inputs;
+    if (pluginResults.hasConfigLoadErrors) hasConfigLoadErrors = true;
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
@@ -602,5 +605,6 @@ export async function build({
     unreferencedFiles,
     analyzeSourceFile,
     enabledPluginsStore,
+    hasConfigLoadErrors,
   };
 }
