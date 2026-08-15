@@ -284,6 +284,15 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm home lodash', []);
   t('pnpm la', []);
   t('pnpm ll', []);
+  t('pnpm info knip', []);
+  t('pnpm view knip version', []);
+  t('pnpm create vite my-app', []);
+  t('pnpm login --registry https://registry.npmjs.org', []);
+  t('pnpm logout', []);
+  t('pnpm token list', []);
+  t('pnpm recursive run program', [], pkgScripts);
+  t('pnpm multi run program', [], pkgScripts);
+  t('pnpm m run program', [], pkgScripts);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
