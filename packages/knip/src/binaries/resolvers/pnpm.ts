@@ -19,6 +19,7 @@ const commands = [
   'clean-install',
   'clean',
   'config',
+  'create',
   'dedupe',
   'deploy',
   'dlx',
@@ -32,6 +33,7 @@ const commands = [
   'ic',
   'ignored-builds',
   'import',
+  'info',
   'init',
   'install-clean',
   'install-test',
@@ -43,6 +45,8 @@ const commands = [
   'list',
   'll',
   'ln',
+  'login',
+  'logout',
   'ls',
   'outdated',
   'pack-app',
@@ -74,6 +78,7 @@ const commands = [
   'store',
   't',
   'test',
+  'token',
   'tst',
   'un',
   'uninstall',
@@ -82,9 +87,12 @@ const commands = [
   'update',
   'upgrade',
   'version',
+  'view',
   'why',
   'with',
 ];
+
+const recursiveCommands = ['recursive', 'multi', 'm'];
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const parsed = parseArgs(words, {
@@ -97,6 +105,10 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (command === 'dlx') {
     const wordsForDlx = words.filter(word => word.value !== 'dlx');
     return resolveDlx(wordsForDlx, options);
+  }
+
+  if (recursiveCommands.includes(command)) {
+    return resolve(_binary, argsAfter(words, command), options);
   }
 
   const { manifest, fromArgs } = options;
