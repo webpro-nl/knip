@@ -2,7 +2,7 @@ import type { PackageJson, Scripts } from '../types/package-json.ts';
 import { resolvePackageManifestPath } from '../util/resolve.ts';
 import { _require } from '../util/require.ts';
 
-type LoadPackageManifestOptions = { dir: string; packageName: string; cwd: string };
+type LoadPackageManifestOptions = { dir: string; packageName: string };
 
 export const loadPackageManifest = ({ dir, packageName }: LoadPackageManifestOptions): PackageJson | undefined => {
   const manifestPath = resolvePackageManifestPath(packageName, dir);

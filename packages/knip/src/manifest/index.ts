@@ -6,10 +6,9 @@ import { loadPackageManifest } from './helpers.ts';
 type Options = {
   packageNames: string[];
   dir: string;
-  cwd: string;
 };
 
-const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
+const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
   const hostDependencies: HostDependencies = new Map();
 
   // Find all binaries for each dependency
@@ -24,7 +23,7 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
   };
 
   for (const packageName of packageNames) {
-    const manifest = loadPackageManifest({ cwd, dir, packageName });
+    const manifest = loadPackageManifest({ dir, packageName });
     if (manifest) {
       // Read and store installed binaries
       const defaultBinaryName = packageName.replace(/^@[^/]+\//, '');
