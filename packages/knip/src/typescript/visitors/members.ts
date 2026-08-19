@@ -24,6 +24,10 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
         } else if (node.computed && _import.isNamespace) {
           addValue(internalImport.import, OPAQUE, s.filePath);
           return;
+        } else if (node.computed) {
+          internalImport.refs.add(localName);
+          (internalImport.enumerated ??= new Set()).add(localName);
+          return;
         }
         if (memberName) {
           if (_import.isDynamicImport) {
