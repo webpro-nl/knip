@@ -135,8 +135,18 @@ export const analyze = async ({
                 traverseEntries: isIncludeEntryExports,
               });
 
+              // On an export with members the tag also gates the member analysis below, which the
+              // `continue` on `isIgnored` skips. A referenced export is then not on its own
+              // evidence that the tag is unused, since removing it can surface member issues.
+              const gatesMemberAnalysis =
+                exportedItem.members.length > 0 &&
+                (exportedItem.type === 'enum'
+                  ? options.includedIssueTypes.enumMembers
+                  : options.includedIssueTypes.namespaceMembers);
+
               if (
                 isIgnored &&
+                !gatesMemberAnalysis &&
                 (isReferenced ||
                   isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile))
               ) {
