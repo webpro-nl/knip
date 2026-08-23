@@ -11,13 +11,18 @@ test('knip with preprocessor in config', () => {
 });
 
 test('knip --preprocessor overrides config preprocessor', () => {
-  const { stdout } = exec('knip --preprocessor ./preprocessor-with-options.js', { cwd });
-  assert.equal(stdout, 'hi from config preprocessor with options: undefined');
+  const { stdout } = exec('knip --preprocessor ./override.js', {
+    cwd: resolve('fixtures/config-preprocessor-override'),
+  });
+  assert.equal(stdout, 'hi from override preprocessor');
 });
 
-const cwdWithOptions = resolve('fixtures/config-preprocessor-options');
+test('knip with preprocessorOptions in config', () => {
+  const { stdout } = exec('knip', { cwd: resolve('fixtures/config-preprocessor-options') });
+  assert.equal(stdout, 'hi from config preprocessor, you gave me: cupcake');
+});
 
-test('knip with preprocessor and preprocessorOptions in config', () => {
-  const { stdout } = exec('knip', { cwd: cwdWithOptions });
-  assert.equal(stdout, 'hi from config preprocessor with options: cupcake');
+test('knip with multiple preprocessors in config', () => {
+  const { stdout } = exec('knip', { cwd: resolve('fixtures/config-preprocessor-chain') });
+  assert.equal(stdout, 'hi from first then second preprocessor');
 });

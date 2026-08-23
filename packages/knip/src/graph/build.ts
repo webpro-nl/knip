@@ -42,7 +42,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
@@ -113,6 +113,10 @@ export async function build({
 
   if (options.configFilePath) {
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
+  }
+
+  for (const filePath of new Set([...options.configuredPreprocessor, ...options.preprocessor])) {
+    if (isInternal(filePath)) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
   }
 
   for (const workspace of workspaces) {

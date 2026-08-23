@@ -74,7 +74,7 @@ export type ReporterOptions = {
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
-  preprocessorOptions: Record<string, unknown>;
+  preprocessorOptions: string;
   includedWorkspaceDirs: string[];
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;

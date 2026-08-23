@@ -5,6 +5,7 @@ import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
+import { arrayify } from './array.ts';
 import { getCatalogContainer } from './catalog.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
@@ -22,6 +23,7 @@ import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
 import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { toPreprocessorPath } from './preprocessor.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -131,11 +133,16 @@ export const createOptions = async (options: CreateOptions) => {
 
   const workspace = options.workspace ?? args.workspace;
 
+  const toPreprocessor = (specifier: string) => toPreprocessorPath(specifier, cwd);
+  const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
+  const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
     catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
     config: args.config,
     configFilePath,
+    configuredPreprocessor,
     cwd,
     cycles: args.cycles ?? false,
     dependencies: args.dependencies ?? false,
@@ -195,10 +202,11 @@ export const createOptions = async (options: CreateOptions) => {
     isWatch: args.watch ?? options.isWatch ?? false,
     maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
-    preprocessor: args.preprocessor ?? (parsedConfig.preprocessor ? [parsedConfig.preprocessor].flat() : []),
-    preprocessorOptions: args['preprocessor-options']
-      ? JSON.parse(args['preprocessor-options'])
-      : (parsedConfig.preprocessorOptions ?? {}),
+    preprocessor,
+    preprocessorOptions:
+      args['preprocessor-options'] ??
+      (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : ''),
+    reporterOptions: args['reporter-options'] ?? '',
     rules,
     tags,
     traceDependency: args['trace-dependency'],

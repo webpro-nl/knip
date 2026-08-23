@@ -377,11 +377,11 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
-Preprocessors can also be configured in the knip configuration file:
+Preprocessors can also be configured in the Knip configuration file:
 
 ```json title="knip.json"
 {
-  "preprocessor": "./preprocess.ts",
+  "preprocessor": "./preprocess.ts"
 }
 ```
 
