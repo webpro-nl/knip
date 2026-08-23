@@ -319,7 +319,6 @@ export class WorkspaceWorker {
         _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath });
 
     const inputs: Input[] = [];
-    const enabledPlugins = new Set(this.enabledPlugins);
 
     const configFilesMap = this.configFilesMap;
     const seen = new Map<PluginName, Set<string>>();
@@ -531,22 +530,25 @@ export class WorkspaceWorker {
       const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         while (configFiles.size > 0) {
-          const entry = configFiles.entries().next().value;
+          const entry: [PluginName, Set<string>] | undefined = configFiles.entries().next().value;
           if (!entry) break;
 
           const [pluginName, dependencies] = entry;
           configFiles.delete(pluginName);
-          if (enabledPlugins.has(pluginName)) {
-            const seenConfigFiles = getSeenConfigFiles(pluginName);
-            const unprocessed: string[] = [];
-            for (const filePath of dependencies) {
-              if (!seenConfigFiles.has(filePath)) unprocessed.push(filePath);
-            }
-            if (unprocessed.length > 0) {
-              for (const input of await runPlugin(pluginName, unprocessed, true)) inputs.push(input);
-            }
-          } else {
+
+          // Referenced config files are handled by their own plugin, unless it's explicitly disabled
+          if (this.config[pluginName] === false) {
             for (const id of dependencies) inputs.push(toEntry(id));
+            continue;
+          }
+
+          const seenConfigFiles = getSeenConfigFiles(pluginName);
+          const unprocessed: string[] = [];
+          for (const filePath of dependencies) {
+            if (!seenConfigFiles.has(filePath)) unprocessed.push(filePath);
+          }
+          if (unprocessed.length > 0) {
+            for (const input of await runPlugin(pluginName, unprocessed, true)) inputs.push(input);
           }
         }
       }

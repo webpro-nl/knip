@@ -1,4 +1,5 @@
 import type { Program, VisitorObject } from 'oxc-parser';
+import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
 import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
@@ -28,13 +29,15 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
-export type FromArgs = (args: string[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
+export type ScriptArg = string | Word;
+
+export type FromArgs = (args: ScriptArg[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
 
 export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
 }
 
-export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
+export type BinaryResolver = (binary: string, words: Word[], options: BinaryResolverOptions) => Input[];
 
 export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
 

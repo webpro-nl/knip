@@ -1,3 +1,4 @@
+import type { Word } from 'unbash';
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.ts';
 import { getCatalogReference } from '../../util/catalog.ts';
@@ -10,8 +11,8 @@ const toDependencyInputs = (packageSpecifier: string) => {
   return reference ? [dependency, toCatalog(reference.packageName, reference.catalogName)] : [dependency];
 };
 
-export const resolveDlx = (args: string[], options: BinaryResolverOptions) => {
-  const parsed = parseArgs(args, {
+export const resolveDlx = (words: Word[], options: BinaryResolverOptions) => {
+  const parsed = parseArgs(words, {
     boolean: ['silent'],
     alias: { package: 'p', 'shell-mode': 'c' },
   });
@@ -22,6 +23,6 @@ export const resolveDlx = (args: string[], options: BinaryResolverOptions) => {
   return [...dependencyInputs, ...packages.flatMap(toDependencyInputs), ...command];
 };
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
-  return resolveDlx(args, options);
+export const resolve: BinaryResolver = (_binary, words, options) => {
+  return resolveDlx(words, options);
 };

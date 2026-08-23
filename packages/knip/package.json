@@ -1,6 +1,6 @@
 {
   "name": "knip",
-  "version": "6.31.0",
+  "version": "6.32.2",
   "description": "Find and fix unused dependencies, exports and files in your TypeScript and JavaScript projects",
   "keywords": [
     "analysis",
@@ -93,15 +93,15 @@
   "dependencies": {
     "fdir": "^6.5.0",
     "formatly": "^0.3.0",
-    "get-tsconfig": "4.14.0",
+    "get-tsconfig": "4.14.1",
     "jiti": "^2.7.0",
-    "oxc-parser": "^0.142.0",
+    "oxc-parser": "^0.143.0",
     "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.5",
     "smol-toml": "^1.7.1",
     "strip-json-comments": "5.0.3",
     "tinyglobby": "^0.2.17",
-    "unbash": "^4.0.4",
+    "unbash": "^4.0.9",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
@@ -112,7 +112,7 @@
     "@types/webpack": "^5.28.5",
     "codeclimate-types": "^0.3.1",
     "prettier": "^3.9.6",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.11",
     "typescript": "7.0.2"
   },
   "engines": {

@@ -54,23 +54,23 @@ const commands = new Set([
   'x',
 ]);
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
+export const resolve: BinaryResolver = (_binary, words, options) => {
   const binary = toBinary(_binary);
-  const parsed = parseArgs(args, { string: ['cwd'] });
+  const parsed = parseArgs(words, { string: ['cwd'] });
   const [command, script] = parsed._;
 
   if (command === 'x') {
-    const argsForX = args.filter(arg => arg !== 'x');
-    return [binary, ...resolveX(argsForX, options)];
+    const wordsForX = words.filter(word => word.value !== 'x');
+    return [binary, ...resolveX(wordsForX, options)];
   }
 
   const { manifest, cwd, fromArgs } = options;
 
   if (command === 'run' && manifest.scriptNames.has(script)) {
-    return [binary, ...(expandScript(script, argsAfter(args, script), manifest.scripts, options) ?? [])];
+    return [binary, ...(expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? [])];
   }
   if (manifest.scriptNames.has(command)) {
-    return [binary, ...(expandScript(command, argsAfter(args, command), manifest.scripts, options) ?? [])];
+    return [binary, ...(expandScript(command, argsAfter(words, command), manifest.scripts, options) ?? [])];
   }
   if (command !== 'run' && commands.has(command)) return [binary];
 
@@ -82,7 +82,7 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  if (command !== 'run') return [binary, ...fromArgs(args, opts)];
+  if (command !== 'run') return [binary, ...fromArgs(words, opts)];
 
   const input = toBinary(filePath, { optional: true });
   if (dir) input.dir = dir;

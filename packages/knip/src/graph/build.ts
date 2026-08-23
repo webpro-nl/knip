@@ -208,6 +208,7 @@ export async function build({
     if (getPublishedTypeDependencies && !manifest.private && !manifest.publishConfig?.directory) {
       for (const dependency of getPublishedTypeDependencies(workspace, manifest)) {
         const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, dependency.packageName, {
+          specifier: dependency.specifier,
           isTypeOnly: true,
           isResolved: dependency.isResolved,
           isPublishedType: true,

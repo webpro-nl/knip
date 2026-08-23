@@ -96,6 +96,7 @@ export const createInputHandler =
 
       if (inputWorkspace) {
         let isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, {
+          specifier,
           isDevOnly: isConfig(input),
           isTypeOnly: input.isTypeOnly,
         });
@@ -104,6 +105,7 @@ export const createInputHandler =
           const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
           if (owningWorkspace && owningWorkspace !== inputWorkspace) {
             const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owningWorkspace, packageName, {
+              specifier,
               isDevOnly: isConfig(input),
               isTypeOnly: input.isTypeOnly,
             });

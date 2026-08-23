@@ -312,7 +312,7 @@ export class Extension {
       if (!client) return;
       try {
         this.#packageJsonCache = undefined;
-        await client.sendRequest(REQUEST_RESTART);
+        await client.restart();
       } catch (error) {
         vscode.window.showErrorMessage(error instanceof Error ? error.message : String(error));
       }

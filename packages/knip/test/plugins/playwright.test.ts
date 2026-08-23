@@ -13,7 +13,7 @@ test('Find dependencies with the Playwright plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 9,
+    total: 9,
   });
 });

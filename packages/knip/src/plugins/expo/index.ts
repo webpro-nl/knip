@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import { toConfig, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getConfig, getDependencies } from './helpers.ts';
@@ -16,6 +16,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['app.json', 'app.config.{ts,js}'];
 
 const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
+
+// https://docs.expo.dev/versions/latest/config/babel/
+const resolve: Resolve = () => [toConfig('babel', 'babel.config'), toIgnore('babel-preset-expo', 'unresolved')];
 
 const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
   const { manifest } = options;
@@ -49,6 +52,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   production,
+  resolve,
   resolveConfig,
 };
 

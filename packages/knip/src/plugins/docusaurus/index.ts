@@ -1,5 +1,5 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toAlias, toDependency, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import { type Input, toAlias, toConfig, toDependency, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
@@ -17,7 +17,8 @@ const config = ['docusaurus.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const production = ['src/pages/**/*.{js,ts,jsx,tsx}', '{blog,docs}/**/*.mdx', 'versioned_docs/**/*.{mdx,jsx,tsx}'];
 
-const entry = ['babel.config.{js,cjs,mjs,cts}'];
+// https://docusaurus.io/docs/babel
+const resolve: Resolve = () => [toConfig('babel', 'babel.config')];
 
 const resolveStaticAssets = (items: DocusaurusConfig['scripts'] | DocusaurusConfig['stylesheets'], cwd: string) => {
   const entries: Input[] = [];
@@ -53,7 +54,6 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     // https://docusaurus.io/blog/releases/3.8
     ...(config.future?.experimental_faster ? [toDependency('@docusaurus/faster')] : []),
     ...production.map(id => toProductionEntry(id)),
-    ...entry.map(id => toEntry(id)),
     ...themes,
     ...plugins,
     ...presets,
@@ -67,8 +67,8 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
-  entry,
   production,
+  resolve,
   resolveConfig,
 };
 

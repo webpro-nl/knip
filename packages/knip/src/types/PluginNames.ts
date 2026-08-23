@@ -8,6 +8,7 @@ export type PluginName =
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'borp'
   | 'bumpp'
   | 'bun'
   | 'c8'
@@ -99,6 +100,7 @@ export type PluginName =
   | 'pm2'
   | 'pnpm'
   | 'postcss'
+  | 'pre-commit'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
@@ -145,6 +147,7 @@ export type PluginName =
   | 'temporal'
   | 'travis'
   | 'ts-node'
+  | 'tsd'
   | 'tsdown'
   | 'tsup'
   | 'tsx'
@@ -189,6 +192,7 @@ export const pluginNames = [
   'ava',
   'babel',
   'biome',
+  'borp',
   'bumpp',
   'bun',
   'c8',
@@ -280,6 +284,7 @@ export const pluginNames = [
   'pm2',
   'pnpm',
   'postcss',
+  'pre-commit',
   'preconstruct',
   'prettier',
   'prisma',
@@ -326,6 +331,7 @@ export const pluginNames = [
   'temporal',
   'travis',
   'ts-node',
+  'tsd',
   'tsdown',
   'tsup',
   'tsx',

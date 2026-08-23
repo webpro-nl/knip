@@ -1,4 +1,5 @@
 import { parseArgs as nodeParseArgs } from 'node:util';
+import type { Word } from 'unbash';
 
 type ParsedValue = any;
 
@@ -34,7 +35,12 @@ const setNested = (target: ParsedArgs, key: string, value: ParsedValue) => {
   obj[parts[parts.length - 1]] = value;
 };
 
-const parseArgs = (argv: string[], opts: Opts = {}): ParsedArgs => {
+const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedArgs => {
+  const argv: string[] = [];
+  for (const arg of input) {
+    if (typeof arg === 'string') argv.push(arg);
+    else if (arg && typeof arg.value === 'string') argv.push(arg.value);
+  }
   const strings = new Set(opts.string ?? []);
   const booleans = new Set(opts.boolean ?? []);
   const groups = new Map<string, string[]>();

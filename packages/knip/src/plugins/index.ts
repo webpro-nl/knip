@@ -7,6 +7,7 @@ import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
+import { default as borp } from './borp/index.ts';
 import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
@@ -98,6 +99,7 @@ import { default as plop } from './plop/index.ts';
 import { default as pm2 } from './pm2/index.ts';
 import { default as pnpm } from './pnpm/index.ts';
 import { default as postcss } from './postcss/index.ts';
+import { default as preCommit } from './pre-commit/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
@@ -144,6 +146,7 @@ import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
 import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
+import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
@@ -188,6 +191,7 @@ export const Plugins = {
   ava,
   babel,
   biome,
+  borp,
   bumpp,
   bun,
   c8,
@@ -279,6 +283,7 @@ export const Plugins = {
   pm2,
   pnpm,
   postcss,
+  'pre-commit': preCommit,
   preconstruct,
   prettier,
   prisma,
@@ -325,6 +330,7 @@ export const Plugins = {
   temporal,
   travis,
   'ts-node': tsNode,
+  tsd,
   tsdown,
   tsup,
   tsx,

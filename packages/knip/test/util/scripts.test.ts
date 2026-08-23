@@ -18,6 +18,13 @@ test('getScriptCommands keeps options with their command', () => {
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);
+});
+
+test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {
+  assert.deepEqual(getScriptCommands('cross-env FLAGS="-a;-b" bun test --filter="unit;fast"'), [
+    { binary: 'bun', args: ['test', '--filter=unit;fast'] },
+  ]);
 });
 
 test('getScriptCommands normalizes binary paths', () => {

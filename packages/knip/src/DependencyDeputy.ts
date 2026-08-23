@@ -32,6 +32,7 @@ const filterIsProduction = (id: string | RegExp, isProduction: boolean): string 
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
 
 interface DependencyReferenceOptions {
+  specifier: string;
   isDevOnly?: boolean;
   isTypeOnly?: boolean;
   isResolved?: boolean;
@@ -204,10 +205,10 @@ export class DependencyDeputy {
   public maybeAddReferencedExternalDependency(
     workspace: Workspace,
     packageName: string,
-    { isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions = {}
+    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (packageName.startsWith('node:') || isBuiltin(packageName)) return true;
+    if (specifier.startsWith('node:') || isBuiltin(specifier)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports

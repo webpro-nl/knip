@@ -13,6 +13,7 @@ test('Treat path-shaped script tokens as file references, report unlisted binari
 
   assert(issues.binaries['package.json']['say-hello']);
   assert(!issues.binaries['package.json']['target/release/mytool']);
+  assert(!issues.binaries['package.json']['/opt/example-tool']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

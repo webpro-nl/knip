@@ -269,6 +269,7 @@ export const analyze = async ({
             const isHandled =
               packageName &&
               deputy.maybeAddReferencedExternalDependency(ws, packageName, {
+                specifier: extImport.specifier,
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
               });
