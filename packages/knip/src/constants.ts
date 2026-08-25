@@ -125,6 +125,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'powershell.exe',
   'pr',
   'printenv',
+  'printf',
   'ps',
   'pulumi',
   'pwd',
