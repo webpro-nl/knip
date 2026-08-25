@@ -10,6 +10,11 @@ test('knip with preprocessor in config', () => {
   assert.equal(stdout, 'hi from config preprocessor');
 });
 
+test('knip --strict with preprocessor in config', () => {
+  const { stdout } = exec('knip --strict', { cwd });
+  assert.equal(stdout, 'hi from config preprocessor');
+});
+
 test('knip --preprocessor overrides config preprocessor', () => {
   const { stdout } = exec('knip --preprocessor ./override.js', {
     cwd: resolve('fixtures/config-preprocessor-override'),

@@ -2,7 +2,7 @@
 import { fix } from './IssueFixer.ts';
 import { run } from './run.ts';
 import type { IssueType } from './types/issues.ts';
-import parseArgs, { helpText } from './util/cli-arguments.ts';
+import parseArgs, { helpText, type ParsedCLIArgs } from './util/cli-arguments.ts';
 import { createOptions } from './util/create-options.ts';
 import {
   getKnownErrors,
@@ -14,12 +14,12 @@ import {
 } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
-import { runPreprocessors, toReporterOptions } from './util/preprocessor.ts';
+import { createPreprocessor, toReporterOptions } from './util/preprocessor.ts';
 import { runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
 import { version } from './version.ts';
 
-let args: ReturnType<typeof parseArgs> = {};
+let args: ParsedCLIArgs = {};
 try {
   args = parseArgs();
 } catch (error: unknown) {
@@ -50,9 +50,8 @@ const main = async () => {
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
 
-    const initialData = toReporterOptions(options, results);
-
-    const finalData = await runPreprocessors(options.preprocessor, initialData);
+    const preprocess = await createPreprocessor(options.preprocessor);
+    const finalData = await preprocess(toReporterOptions(options, results, args));
 
     if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 

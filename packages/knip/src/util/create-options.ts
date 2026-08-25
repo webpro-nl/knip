@@ -136,6 +136,9 @@ export const createOptions = async (options: CreateOptions) => {
   const toPreprocessor = (specifier: string) => toPreprocessorPath(specifier, cwd);
   const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
   const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+  const preprocessorOptions =
+    args['preprocessor-options'] ??
+    (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
 
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
@@ -200,13 +203,9 @@ export const createOptions = async (options: CreateOptions) => {
     isTreatTagHintsAsErrors: args['treat-tag-hints-as-errors'] ?? parsedConfig.treatTagHintsAsErrors ?? false,
     isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
     isWatch: args.watch ?? options.isWatch ?? false,
-    maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
     preprocessor,
-    preprocessorOptions:
-      args['preprocessor-options'] ??
-      (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : ''),
-    reporterOptions: args['reporter-options'] ?? '',
+    preprocessorOptions,
     rules,
     tags,
     traceDependency: args['trace-dependency'],

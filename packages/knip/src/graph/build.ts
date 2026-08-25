@@ -4,7 +4,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS, ROOT_WORKSPACE_NAME } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -32,6 +32,7 @@ import {
   isIgnore,
   isProductionEntry,
   isProject,
+  toDeferResolve,
   toProductionEntry,
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
@@ -42,7 +43,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
@@ -115,10 +116,6 @@ export async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
-  for (const filePath of new Set([...options.configuredPreprocessor, ...options.preprocessor])) {
-    if (isInternal(filePath)) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
-  }
-
   for (const workspace of workspaces) {
     const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
@@ -186,6 +183,13 @@ export async function build({
     augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
     const inputs = new Set<Input>();
+
+    if (name === ROOT_WORKSPACE_NAME) {
+      const containingFilePath = options.configFilePath ?? filePath;
+      for (const specifier of new Set([...options.configuredPreprocessor, ...options.preprocessor])) {
+        inputs.add(toDeferResolve(specifier, { containingFilePath, optional: true, production: true }));
+      }
+    }
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);

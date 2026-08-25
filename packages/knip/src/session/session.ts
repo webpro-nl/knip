@@ -1,7 +1,7 @@
 import type { CollectorIssues } from '../IssueCollector.ts';
 import { type Results, run } from '../run.ts';
 import type { MainOptions } from '../util/create-options.ts';
-import { runPreprocessors, toReporterOptions } from '../util/preprocessor.ts';
+import { createPreprocessor, toReporterOptions } from '../util/preprocessor.ts';
 import type { SessionHandler, WatchChange } from '../util/watch.ts';
 import { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 import { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
@@ -22,42 +22,42 @@ export const createSession = async (options: MainOptions): Promise<Session> => {
 
   if (!session) throw new Error('Unable to initialize watch session');
 
-  return createSessionAdapter(session, results, options);
+  const adapter = createSessionAdapter(session, results, options);
+  return options.preprocessor.length === 0 ? adapter : withPreprocessor(adapter, options);
 };
 
-const createSessionAdapter = async (
-  session: SessionHandler,
-  results: Results,
-  options: MainOptions
-): Promise<Session> => {
-  const preprocess = () =>
-    runPreprocessors(options.preprocessor, toReporterOptions(options, { ...results, ...session.getIssues() }));
-
-  let data = await preprocess();
-
+const createSessionAdapter = (session: SessionHandler, results: Results, options: MainOptions): Session => {
   return {
-    handleFileChanges: async changes => {
-      const update = await session.handleFileChanges(changes);
-      data = await preprocess();
-      return update;
-    },
-    getIssues: () => ({
-      issues: data.issues,
-      counters: data.counters,
-      tagHints: data.tagHints,
-      configurationHints: data.configurationHints,
-    }),
-    getResults: () => ({
-      issues: data.issues,
-      counters: data.counters,
-      tagHints: data.tagHints,
-      configurationHints: data.configurationHints,
-      enabledPlugins: data.enabledPlugins,
-      includedWorkspaceDirs: data.includedWorkspaceDirs,
-      selectedWorkspaces: data.selectedWorkspaces,
-    }),
+    handleFileChanges: session.handleFileChanges,
+    getIssues: session.getIssues,
+    getResults: () => results,
     describeFile: (filePath, opts) =>
       buildFileDescriptor(filePath, options.cwd, session.getGraph(), session.getEntryPaths(), opts),
     describePackageJson: () => buildPackageJsonDescriptor(session.getGraph(), session.getEntryPaths()),
+  };
+};
+
+const withPreprocessor = async (session: Session, options: MainOptions): Promise<Session> => {
+  const results = session.getResults();
+  const input = toReporterOptions(options, results);
+  const preprocess = await createPreprocessor(options.preprocessor);
+  const updateResults = async () => {
+    const data = await preprocess({ ...input, ...session.getIssues() });
+    results.issues = data.issues;
+    results.counters = data.counters;
+    results.tagHints = data.tagHints;
+    results.configurationHints = data.configurationHints;
+  };
+
+  await updateResults();
+
+  return {
+    ...session,
+    handleFileChanges: async changes => {
+      const update = await session.handleFileChanges(changes);
+      if (update) await updateResults();
+      return update;
+    },
+    getIssues: () => results,
   };
 };

@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/session-preprocessor",
   "knip": {
-    "preprocessor": "./preprocessor.js"
+    "preprocessor": "./preprocessor.js",
+    "preprocessorOptions": { "source": "session" }
   }
 }
