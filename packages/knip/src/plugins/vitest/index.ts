@@ -42,7 +42,11 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
         ? [toDeferResolve(env)]
         : [toDependency(getEnvSpecifier(env))]
       : [];
-  const reporters = getExternalReporters(testConfig.reporters);
+  const reporters = getExternalReporters(testConfig.reporters).map(specifier =>
+    isInternal(specifier) || isAbsolute(specifier)
+      ? { ...toDeferResolve(specifier), dir: vitestRoot }
+      : toDependency(specifier)
+  );
 
   const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
   const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
@@ -74,7 +78,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
 
   return [
     ...environments,
-    ...reporters.map(id => toDependency(id)),
+    ...reporters,
     ...coverage.map(id => toDependency(id)),
     ...setupFiles,
     ...snapshotSerializers,
