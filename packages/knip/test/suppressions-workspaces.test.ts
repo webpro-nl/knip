@@ -3,6 +3,7 @@ import test from 'node:test';
 import { main } from '../src/index.ts';
 import type { Suppressions, SuppressionScope } from '../src/types/suppressions.ts';
 import { generateSuppressions, mergeSuppressions, pruneSuppressions } from '../src/util/suppressions.ts';
+import { initIssues } from '../src/util/issue-initializers.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
@@ -11,7 +12,7 @@ const cwd = resolve('fixtures/suppressions-workspaces');
 const allInScope: SuppressionScope = () => true;
 
 test('--suppress-all without workspace filter covers both workspaces', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions = generateSuppressions(issues);
@@ -21,11 +22,11 @@ test('--suppress-all without workspace filter covers both workspaces', async () 
 });
 
 test('--suppress-all -W accumulates across workspaces', async () => {
-  const optionsA = await createOptions({ cwd, workspace: 'workspace-a' });
+  const optionsA = await createOptions({ noSuppressions: true, cwd, workspace: 'workspace-a' });
   const { issues: issuesA } = await main(optionsA);
   const first = generateSuppressions(issuesA);
 
-  const optionsB = await createOptions({ cwd, workspace: 'workspace-b' });
+  const optionsB = await createOptions({ noSuppressions: true, cwd, workspace: 'workspace-b' });
   const { issues: issuesB } = await main(optionsB);
   const second = generateSuppressions(issuesB);
 
@@ -48,10 +49,10 @@ const createSuppressions = (): Suppressions => ({
 });
 
 test('Pruning after fix in one workspace preserves the other', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
-  const pruned = pruneSuppressions(issues, createSuppressions(), allInScope);
+  const pruned = pruneSuppressions(issues, initIssues(), createSuppressions(), allInScope);
 
   assert(pruned.suppressions['workspace-a/module.ts']?.exports?.['unusedA']);
   assert(!pruned.suppressions['workspace-a/module.ts']?.exports?.['alreadyFixed']);
@@ -60,11 +61,11 @@ test('Pruning after fix in one workspace preserves the other', async () => {
 });
 
 test('Pruning in a workspace-scoped run leaves other workspaces untouched', async () => {
-  const options = await createOptions({ cwd, workspace: 'workspace-a' });
+  const options = await createOptions({ noSuppressions: true, cwd, workspace: 'workspace-a' });
   const { issues } = await main(options);
 
   const isInScope: SuppressionScope = filePath => filePath.startsWith('workspace-a/');
-  const pruned = pruneSuppressions(issues, createSuppressions(), isInScope);
+  const pruned = pruneSuppressions(issues, initIssues(), createSuppressions(), isInScope);
 
   assert(pruned.suppressions['workspace-a/module.ts']?.exports?.['unusedA']);
   assert(!pruned.suppressions['workspace-a/module.ts']?.exports?.['alreadyFixed']);

@@ -16,7 +16,7 @@ import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
 import { runPreprocessors, runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
-import { _handleSuppressions } from './util/suppressions.ts';
+import { writeSuppressions } from './util/suppressions.ts';
 import { version } from './version.ts';
 
 let args: ReturnType<typeof parseArgs> = {};
@@ -45,7 +45,7 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
-    const { results, scope } = await run(options);
+    const { results, scope, suppressionsState } = await run(options);
 
     const {
       issues,
@@ -55,28 +55,25 @@ const main = async () => {
       includedWorkspaceDirs,
       enabledPlugins,
       selectedWorkspaces,
+      suppressedIssues,
+      suppressedCount,
+      expiredCount,
     } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
 
-    let suppressedCount = 0;
-    let expiredCount = 0;
     let staleSuppressionsCount = 0;
 
     if (!options.isProduction) {
-      const suppressionResult = await _handleSuppressions(issues, counters, options, scope);
+      const result = await writeSuppressions(issues, options, scope, suppressionsState);
 
-      if (suppressionResult.action === 'generated') {
-        console.log(suppressionResult.message);
+      if ('message' in result) {
+        console.log(result.message);
         process.exit(0);
       }
 
-      if (suppressionResult.action === 'applied') {
-        suppressedCount = suppressionResult.suppressedCount;
-        expiredCount = suppressionResult.expiredCount;
-        if (options.checkSuppressions) staleSuppressionsCount = suppressionResult.staleCount;
-      }
+      if (options.checkSuppressions) staleSuppressionsCount = result.staleCount;
     }
 
     const initialData: ReporterOptions = {
@@ -99,6 +96,7 @@ const main = async () => {
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
       selectedWorkspaces,
+      suppressedIssues,
       suppressedCount,
       expiredCount,
     };
@@ -111,9 +109,7 @@ const main = async () => {
 
     if (staleSuppressionsCount > 0) {
       const label = staleSuppressionsCount === 1 ? 'suppression no longer applies' : 'suppressions no longer apply';
-      console.log(
-        `\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip\` to update it.`
-      );
+      console.log(`\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip\` to update it.`);
     }
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])

@@ -16,7 +16,9 @@ import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.
 import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
 import { isCatalog } from './util/input.ts';
+import { initIssues } from './util/issue-initializers.ts';
 import { createManifest } from './util/package-json.ts';
+import { _readAndApplySuppressions } from './util/suppressions.ts';
 import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
@@ -137,6 +139,8 @@ export const run = async (options: MainOptions) => {
 
   const { issues, counters, tagHints, configurationHints } = collector.getIssues();
 
+  const suppressionsState = await _readAndApplySuppressions(issues, counters, options);
+
   if (!options.isWatch) streamer.clear();
 
   if (options.isCache) {
@@ -156,7 +160,11 @@ export const run = async (options: MainOptions) => {
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
+      suppressedIssues: suppressionsState?.suppressedIssues ?? initIssues(),
+      suppressedCount: suppressionsState?.suppressedCount ?? 0,
+      expiredCount: suppressionsState?.expiredCount ?? 0,
     },
+    suppressionsState,
     scope: {
       workspaceFilePathFilter: chief.workspaceFilePathFilter,
       isConsidered: (filePath: string) =>

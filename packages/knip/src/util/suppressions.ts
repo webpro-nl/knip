@@ -10,6 +10,7 @@ import type {
   SuppressionsByType,
   SuppressionScope,
 } from '../types/suppressions.ts';
+import { initIssues } from './issue-initializers.ts';
 import { timerify } from './Performance.ts';
 import { join } from './path.ts';
 
@@ -56,6 +57,7 @@ export const generateSuppressions = (issues: Issues, until?: string, rules?: Rul
 /** @internal */
 export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Rules): ApplyResult => {
   const now = getToday();
+  const suppressedIssues = initIssues();
   let suppressedCount = 0;
   let expiredCount = 0;
 
@@ -72,7 +74,11 @@ export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Ru
           expiredCount++;
           continue;
         }
-        if (records[key]?.[symbol]) {
+        const issue = records[key]?.[symbol];
+        if (issue) {
+          const suppressed = getRecords(suppressedIssues, issueType);
+          suppressed[key] = suppressed[key] ?? {};
+          suppressed[key][symbol] = issue;
           delete records[key][symbol];
           suppressedCount++;
           matchedAny = true;
@@ -83,11 +89,20 @@ export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Ru
     }
   }
 
-  return { suppressedCount, expiredCount };
+  return { suppressedCount, expiredCount, suppressedIssues };
 };
 
-/** @internal */
-export const pruneSuppressions = (issues: Issues, bulk: Suppressions, isInScope: SuppressionScope): Suppressions => {
+/**
+ * An entry survives if its issue is still current, which means either still reported or currently
+ * held back by this same file — `applySuppressions` has already moved the latter out of `issues`.
+ * @internal
+ */
+export const pruneSuppressions = (
+  issues: Issues,
+  suppressedIssues: Issues,
+  bulk: Suppressions,
+  isInScope: SuppressionScope
+): Suppressions => {
   const now = getToday();
   const pruned: Record<string, SuppressionsByType> = {};
 
@@ -104,10 +119,11 @@ export const pruneSuppressions = (issues: Issues, bulk: Suppressions, isInScope:
       }
 
       const records = getRecords(issues, issueType);
+      const suppressedRecords = getRecords(suppressedIssues, issueType);
       const remaining: Record<string, SuppressionMeta> = {};
       for (const [s, meta] of Object.entries(entry)) {
         if (isExpired(meta.until, now)) continue;
-        if (records[key]?.[s]) remaining[s] = meta;
+        if (records[key]?.[s] || suppressedRecords[key]?.[s]) remaining[s] = meta;
       }
       if (Object.keys(remaining).length > 0) {
         prunedByType[issueType] = remaining;
@@ -159,8 +175,9 @@ export const mergeSuppressions = (existing: Suppressions, incoming: Suppressions
   return { version: 1, suppressions: merged };
 };
 
-interface HandleSuppressionsOptions {
+interface SuppressionsOptions {
   cwd: string;
+  isProduction: boolean;
   isSuppressAll: boolean;
   suppressUntil?: string;
   suppressionsFilePath?: string;
@@ -169,15 +186,12 @@ interface HandleSuppressionsOptions {
   rules: Rules;
 }
 
-type HandleSuppressionsResult =
-  | { action: 'generated'; message: string }
-  | {
-      action: 'applied';
-      suppressedCount: number;
-      expiredCount: number;
-      staleCount: number;
-    }
-  | { action: 'none' };
+export interface SuppressionsState {
+  suppressions: Suppressions;
+  suppressedIssues: Issues;
+  suppressedCount: number;
+  expiredCount: number;
+}
 
 const countEntries = (suppressions: Suppressions) => {
   let count = 0;
@@ -187,41 +201,33 @@ const countEntries = (suppressions: Suppressions) => {
   return count;
 };
 
-const handleSuppressions = async (
-  issues: Issues,
-  counters: Counters,
-  options: HandleSuppressionsOptions,
-  scope: AnalysisScope
-): Promise<HandleSuppressionsResult> => {
-  const filePath = options.suppressionsFilePath ?? getDefaultSuppressionsFilePath(options.cwd);
+const getSuppressionsFilePath = (options: SuppressionsOptions) =>
+  options.suppressionsFilePath ?? getDefaultSuppressionsFilePath(options.cwd);
 
-  const isInScope: SuppressionScope = (key, issueType) => {
+const createScope =
+  (options: SuppressionsOptions, scope: AnalysisScope): SuppressionScope =>
+  (key, issueType) => {
     if (options.rules[issueType] !== 'error') return false;
     const entryPath = join(options.cwd, key);
     if (!scope.workspaceFilePathFilter(entryPath)) return false;
     return scope.isConsidered(entryPath) || !existsSync(entryPath);
   };
 
-  if (options.isSuppressAll) {
-    const newSuppressions = generateSuppressions(issues, options.suppressUntil, options.rules);
-    const existing = await loadSuppressions(filePath);
-    const merged = existing
-      ? mergeSuppressions(pruneSuppressions(issues, existing, isInScope), newSuppressions)
-      : newSuppressions;
-    await saveSuppressions(filePath, merged);
-    return {
-      action: 'generated',
-      message: `Suppressions written to ${options.suppressionsFilePath ?? DEFAULT_SUPPRESSIONS_FILE}`,
-    };
-  }
+/**
+ * Moves suppressed issues out of the report and into a sidecar. Pure: reads the suppressions file,
+ * never writes it, so editors and agents can share it with the CLI.
+ */
+const readAndApplySuppressions = async (
+  issues: Issues,
+  counters: Counters,
+  options: SuppressionsOptions
+): Promise<SuppressionsState | undefined> => {
+  if (options.isProduction || options.isSuppressAll || options.noSuppressions) return undefined;
 
-  if (options.noSuppressions) return { action: 'none' };
+  const suppressions = await loadSuppressions(getSuppressionsFilePath(options));
+  if (!suppressions) return undefined;
 
-  const existing = await loadSuppressions(filePath);
-  if (!existing) return { action: 'none' };
-
-  const updated = pruneSuppressions(issues, existing, isInScope);
-  const result = applySuppressions(issues, existing, options.rules);
+  const { suppressedCount, expiredCount, suppressedIssues } = applySuppressions(issues, suppressions, options.rules);
 
   for (const issueType of ISSUE_TYPES) {
     const records = getRecords(issues, issueType);
@@ -230,18 +236,39 @@ const handleSuppressions = async (
     counters[issueType] = count;
   }
 
-  const staleCount = countEntries(existing) - countEntries(updated);
-  if (staleCount > 0 && !options.checkSuppressions) await saveSuppressions(filePath, updated);
-
-  return {
-    action: 'applied',
-    suppressedCount: result.suppressedCount,
-    expiredCount: result.expiredCount,
-    staleCount,
-  };
+  return { suppressions, suppressedIssues, suppressedCount, expiredCount };
 };
 
-export const _handleSuppressions = timerify(handleSuppressions);
+export const _readAndApplySuppressions = timerify(readAndApplySuppressions);
+
+/** Writes the suppressions file. CLI only — never call this from a session. */
+export const writeSuppressions = async (
+  issues: Issues,
+  options: SuppressionsOptions,
+  scope: AnalysisScope,
+  state: SuppressionsState | undefined
+): Promise<{ message: string } | { staleCount: number }> => {
+  const filePath = getSuppressionsFilePath(options);
+  const isInScope = createScope(options, scope);
+
+  if (options.isSuppressAll) {
+    const newSuppressions = generateSuppressions(issues, options.suppressUntil, options.rules);
+    const existing = await loadSuppressions(filePath);
+    const merged = existing
+      ? mergeSuppressions(pruneSuppressions(issues, initIssues(), existing, isInScope), newSuppressions)
+      : newSuppressions;
+    await saveSuppressions(filePath, merged);
+    return { message: `Suppressions written to ${options.suppressionsFilePath ?? DEFAULT_SUPPRESSIONS_FILE}` };
+  }
+
+  if (!state) return { staleCount: 0 };
+
+  const updated = pruneSuppressions(issues, state.suppressedIssues, state.suppressions, isInScope);
+  const staleCount = countEntries(state.suppressions) - countEntries(updated);
+  if (staleCount > 0 && !options.checkSuppressions) await saveSuppressions(filePath, updated);
+
+  return { staleCount };
+};
 
 /** @internal */
 export const stringify = (data: Suppressions) => {

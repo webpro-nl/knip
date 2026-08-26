@@ -3,6 +3,7 @@ import test from 'node:test';
 import { ISSUE_TYPES } from '../../src/constants.ts';
 import type { Issues } from '../../src/types/issues.ts';
 import type { Suppressions, SuppressionScope } from '../../src/types/suppressions.ts';
+import { initIssues } from '../../src/util/issue-initializers.ts';
 import { applySuppressions, mergeSuppressions, pruneSuppressions, stringify } from '../../src/util/suppressions.ts';
 
 const createEmptyIssues = (): Issues => {
@@ -82,7 +83,7 @@ test('pruneSuppressions: preserves custom fields', () => {
     },
   };
 
-  const result = pruneSuppressions(issues, suppressions, allInScope);
+  const result = pruneSuppressions(issues, initIssues(), suppressions, allInScope);
   const entry = result.suppressions['file.ts'].exports as any;
 
   assert.equal(entry.foo.ticket, 'JIRA-123');
@@ -134,7 +135,7 @@ test('pruneSuppressions: preserves custom fields on files entries', () => {
     },
   };
 
-  const result = pruneSuppressions(issues, suppressions, allInScope);
+  const result = pruneSuppressions(issues, initIssues(), suppressions, allInScope);
   const entry = result.suppressions['old.ts'].files as any;
 
   assert.equal(entry['old.ts'].until, '3000-01-01');

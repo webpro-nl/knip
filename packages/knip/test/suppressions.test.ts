@@ -3,7 +3,7 @@ import test from 'node:test';
 import { main } from '../src/index.ts';
 import type { Rules } from '../src/types/issues.ts';
 import type { Suppressions, SuppressionScope } from '../src/types/suppressions.ts';
-import { defaultRules } from '../src/util/issue-initializers.ts';
+import { defaultRules, initIssues } from '../src/util/issue-initializers.ts';
 import {
   applySuppressions,
   generateSuppressions,
@@ -19,7 +19,7 @@ const cwd = resolve('fixtures/suppressions');
 const allInScope: SuppressionScope = () => true;
 
 test('Baseline: fixture produces expected issues without suppressions', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues, counters } = await main(options);
 
   assert(Object.keys(issues.files).length > 0);
@@ -39,7 +39,7 @@ test('Baseline: fixture produces expected issues without suppressions', async ()
 });
 
 test('generateSuppressions creates correct structure', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions = generateSuppressions(issues);
@@ -64,7 +64,7 @@ test('generateSuppressions creates correct structure', async () => {
 });
 
 test('generateSuppressions with --include only includes that type', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const rules: Rules = { ...defaultRules };
@@ -80,7 +80,7 @@ test('generateSuppressions with --include only includes that type', async () => 
 });
 
 test('--suppress-all with --include merges with existing', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const existing: Suppressions = {
@@ -105,7 +105,7 @@ test('--suppress-all with --include merges with existing', async () => {
 });
 
 test('applySuppressions filters matching issues', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions: Suppressions = {
@@ -129,7 +129,7 @@ test('applySuppressions filters matching issues', async () => {
 });
 
 test('applySuppressions respects expired until dates', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions: Suppressions = {
@@ -150,7 +150,7 @@ test('applySuppressions respects expired until dates', async () => {
 });
 
 test('applySuppressions keeps future until dates', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions: Suppressions = {
@@ -170,7 +170,7 @@ test('applySuppressions keeps future until dates', async () => {
 });
 
 test('pruneSuppressions removes expired entries', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions: Suppressions = {
@@ -182,7 +182,7 @@ test('pruneSuppressions removes expired entries', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, suppressions, allInScope);
+  const updated = pruneSuppressions(issues, initIssues(), suppressions, allInScope);
 
   assert(!updated.suppressions['module.ts']);
 });
@@ -221,7 +221,7 @@ test('mergeSuppressions combines two suppressions objects', () => {
 });
 
 test('generateSuppressions skips warn-level issue types', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const rules: Rules = { ...defaultRules, exports: 'warn' };
@@ -233,7 +233,7 @@ test('generateSuppressions skips warn-level issue types', async () => {
 });
 
 test('applySuppressions skips warn-level issue types', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const suppressions: Suppressions = {
@@ -312,7 +312,7 @@ test('mergeSuppressions preserves until on new symbols', () => {
 });
 
 test('Regular run auto-prunes stale suppressions', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const existing: Suppressions = {
@@ -327,7 +327,7 @@ test('Regular run auto-prunes stale suppressions', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, existing, allInScope);
+  const updated = pruneSuppressions(issues, initIssues(), existing, allInScope);
   const isChanged = JSON.stringify(existing) !== JSON.stringify(updated);
 
   assert(isChanged);
@@ -338,7 +338,7 @@ test('Regular run auto-prunes stale suppressions', async () => {
 });
 
 test('Regular run detects no change when suppressions match', async () => {
-  const options = await createOptions({ cwd });
+  const options = await createOptions({ cwd, noSuppressions: true });
   const { issues } = await main(options);
 
   const existing: Suppressions = {
@@ -350,7 +350,7 @@ test('Regular run detects no change when suppressions match', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, existing, allInScope);
+  const updated = pruneSuppressions(issues, initIssues(), existing, allInScope);
   const isChanged = JSON.stringify(existing) !== JSON.stringify(updated);
 
   assert(!isChanged);

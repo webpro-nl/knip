@@ -197,7 +197,7 @@ export const createOptions = async (options: CreateOptions) => {
     maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
     parsedConfig,
     checkSuppressions: args['check-suppressions'] ?? false,
-    noSuppressions: args['no-suppressions'] ?? false,
+    noSuppressions: options.noSuppressions ?? args['no-suppressions'] ?? false,
     rules,
     tags,
     suppressUntil: args['suppress-until'],

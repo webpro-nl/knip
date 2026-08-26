@@ -1,5 +1,5 @@
 import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
-import type { IssueType } from './issues.ts';
+import type { Issues, IssueType } from './issues.ts';
 
 export interface SuppressionMeta {
   until?: string;
@@ -26,4 +26,5 @@ export interface AnalysisScope {
 export interface ApplyResult {
   suppressedCount: number;
   expiredCount: number;
+  suppressedIssues: Issues;
 }
