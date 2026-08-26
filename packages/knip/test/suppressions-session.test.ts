@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createSession } from '../src/session/session.ts';
+import { join } from '../src/util/path.ts';
+import { copyFixture } from './helpers/copy-fixture.ts';
 import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
@@ -49,4 +52,19 @@ test('--no-suppressions leaves the session report untouched', async () => {
   assert(issues.exports['module.ts']['unusedExport']);
   assert(issues.files['unused.ts']);
   assert.equal(suppressedCount, 0);
+});
+
+test('Session reapplies suppressions after file changes', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
+  const session = await createSession(options);
+  const filePath = join(cwd, 'module.ts');
+  const source = await readFile(filePath, 'utf8');
+
+  await writeFile(filePath, `${source}\nexport const newlyUnused = 1;\n`);
+  await session.handleFileChanges([{ type: 'modified', filePath }]);
+
+  const { issues, counters } = session.getIssues();
+  assert.deepEqual(Object.keys(issues.exports['module.ts'] ?? {}), ['newlyUnused']);
+  assert.equal(counters.exports, 1);
 });

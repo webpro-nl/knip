@@ -179,6 +179,34 @@ export interface SuppressionsState {
   suppressedCount: number;
 }
 
+export const cloneIssues = (issues: Issues) => {
+  const clone = initIssues();
+  for (const issueType of ISSUE_TYPES) {
+    for (const [filePath, records] of Object.entries(getRecords(issues, issueType))) {
+      getRecords(clone, issueType)[filePath] = { ...records };
+    }
+  }
+  return clone;
+};
+
+export const applySuppressionsToResults = (
+  issues: Issues,
+  counters: Counters,
+  suppressions: Suppressions,
+  rules: Rules
+): SuppressionsState => {
+  const { suppressedCount, suppressedIssues } = applySuppressions(issues, suppressions, rules);
+
+  for (const issueType of ISSUE_TYPES) {
+    const records = getRecords(issues, issueType);
+    let count = 0;
+    for (const rec of Object.values(records)) count += Object.keys(rec).length;
+    counters[issueType] = count;
+  }
+
+  return { suppressions, suppressedIssues, suppressedCount };
+};
+
 const countEntries = (suppressions: Suppressions) => {
   let count = 0;
   for (const byType of Object.values(suppressions.suppressions)) {
@@ -213,16 +241,7 @@ const readAndApplySuppressions = async (
   const suppressions = await loadSuppressions(getSuppressionsFilePath(options));
   if (!suppressions) return undefined;
 
-  const { suppressedCount, suppressedIssues } = applySuppressions(issues, suppressions, options.rules);
-
-  for (const issueType of ISSUE_TYPES) {
-    const records = getRecords(issues, issueType);
-    let count = 0;
-    for (const rec of Object.values(records)) count += Object.keys(rec).length;
-    counters[issueType] = count;
-  }
-
-  return { suppressions, suppressedIssues, suppressedCount };
+  return applySuppressionsToResults(issues, counters, suppressions, options.rules);
 };
 
 export const _readAndApplySuppressions = timerify(readAndApplySuppressions);
