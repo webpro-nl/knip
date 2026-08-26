@@ -23,7 +23,9 @@ const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,proj
 
 const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 
-const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
+const testEntry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)'];
+
+const entry = [...testEntry, ...mocks];
 
 const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
 
@@ -166,12 +168,12 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     if (cfg.test) {
       if (cfg.test?.include) {
         for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
-        if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(dir, dependency)));
         const benchmarkInclude = cfg.test.benchmark?.include ?? benchmark;
         for (const dependency of benchmarkInclude) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
       } else {
-        for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
+        for (const dependency of options.config.entry ?? testEntry) inputs.add(toEntry(join(dir, dependency)));
       }
+      if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(vitestRoot, dependency)));
 
       if (cfg.test.alias) addAliases(cfg.test.alias);
     }

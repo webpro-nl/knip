@@ -12,11 +12,12 @@ test('Find dependencies with the Vitest plugin (11)', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/unused.test.ts' in issues.files);
+  assert(!('__mocks__/network-client.ts' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
