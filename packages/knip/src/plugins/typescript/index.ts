@@ -30,7 +30,12 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
       ?.filter(reference => reference.path.endsWith('.json'))
       .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
 
-  if (!(compilerOptions && localConfig)) return compact([...extend, ...references]);
+  const contentMappers =
+    localConfig.contentMappers?.map(contentMapper =>
+      toConfig('typescript', contentMapper.package, { containingFilePath: options.configFilePath })
+    ) ?? [];
+
+  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
 
   const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(toProductionDependency);
 
@@ -41,6 +46,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
   return compact([
+    ...contentMappers,
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),

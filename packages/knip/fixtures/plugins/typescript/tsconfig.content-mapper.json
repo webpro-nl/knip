@@ -1,0 +1,12 @@
+{
+  "contentMappers": [
+    {
+      "package": "@mdx-js/content-mapper",
+      "extensions": [".mdx"]
+    },
+    {
+      "package": "ember-content-mapper",
+      "extensions": [".gjs", ".gts"]
+    }
+  ]
+}
