@@ -57,14 +57,3 @@ test('Suppressed count is reported without a TTY, so CI can see it', async () =>
 
   assert.match(stdout, /5 suppressed/);
 });
-
-test('Expired suppressions are counted alongside suppressed ones', async () => {
-  const cwd = await copyFixture('fixtures/suppressions');
-  await write(cwd, {
-    'module.ts': { exports: { unusedExport: {}, anotherUnused: { until: '2020-01-01' } } },
-  });
-
-  const { stdout } = exec('knip', { cwd });
-
-  assert.match(stdout, /1 suppressed, 1 expired/);
-});

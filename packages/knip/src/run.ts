@@ -162,7 +162,6 @@ export const run = async (options: MainOptions) => {
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
       suppressedIssues: suppressionsState?.suppressedIssues ?? initIssues(),
       suppressedCount: suppressionsState?.suppressedCount ?? 0,
-      expiredCount: suppressionsState?.expiredCount ?? 0,
     },
     suppressionsState,
     scope: {

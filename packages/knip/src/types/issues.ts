@@ -82,7 +82,6 @@ export type ReporterOptions = {
   /** Issues held back by the suppressions file: known debt, not part of the report */
   suppressedIssues?: Issues;
   suppressedCount?: number;
-  expiredCount?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;

@@ -410,14 +410,10 @@ issues.
 Combine with [scope][20] flags like `--exports` or `--workspace` to suppress
 only part of what Knip reports.
 
-### `--suppress-until [date]`
-
-Snapshot this date into the suppressions file. Format: `YYYY-MM-DD`. Knip
-ignores the suppression after this date.
-
 ### `--prune-suppressions`
 
-Remove stale entries from the suppressions file.
+Remove entries that no longer apply from the suppressions file. A regular `knip`
+run reports them but never writes.
 
 ### `--suppressions-location`
 
@@ -425,8 +421,9 @@ Path to the suppressions file. Default: `.knip-suppressions.json`.
 
 ### `--check-suppressions`
 
-Report suppressions that no longer apply and exit with an error code, without
-writing to the suppressions file. Useful in CI to ensure the file is up-to-date.
+Report suppressions that no longer apply and exit with an error code. Useful in
+CI to ensure the file is up-to-date. Writes nothing, like every run other than
+`--suppress-all` and `--prune-suppressions`.
 
 ### `--no-suppressions`
 

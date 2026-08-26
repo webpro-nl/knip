@@ -57,7 +57,6 @@ const main = async () => {
       selectedWorkspaces,
       suppressedIssues,
       suppressedCount,
-      expiredCount,
     } = results;
 
     // These modes have their own reporting mechanism
@@ -73,7 +72,7 @@ const main = async () => {
         process.exit(0);
       }
 
-      if (options.checkSuppressions) staleSuppressionsCount = result.staleCount;
+      staleSuppressionsCount = result.staleCount;
     }
 
     const initialData: ReporterOptions = {
@@ -98,7 +97,6 @@ const main = async () => {
       selectedWorkspaces,
       suppressedIssues,
       suppressedCount,
-      expiredCount,
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
@@ -109,7 +107,9 @@ const main = async () => {
 
     if (staleSuppressionsCount > 0) {
       const label = staleSuppressionsCount === 1 ? 'suppression no longer applies' : 'suppressions no longer apply';
-      console.log(`\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip\` to update it.`);
+      console.log(
+        `\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip --prune-suppressions\` to update it.`
+      );
     }
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
@@ -130,7 +130,7 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > Number(args['max-issues'] ?? 0) ||
-        staleSuppressionsCount > 0 ||
+        (options.checkSuppressions && staleSuppressionsCount > 0) ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {

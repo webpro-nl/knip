@@ -71,7 +71,7 @@ test('generateSuppressions with --include only includes that type', async () => 
   for (const type of Object.keys(rules) as (keyof Rules)[]) {
     if (type !== 'exports') rules[type] = 'off';
   }
-  const suppressions = generateSuppressions(issues, undefined, rules);
+  const suppressions = generateSuppressions(issues, rules);
 
   assert.equal(suppressions.version, 1);
   assert(suppressions.suppressions['module.ts']);
@@ -96,7 +96,7 @@ test('--suppress-all with --include merges with existing', async () => {
   for (const type of Object.keys(rules) as (keyof Rules)[]) {
     if (type !== 'exports') rules[type] = 'off';
   }
-  const newSuppressions = generateSuppressions(issues, undefined, rules);
+  const newSuppressions = generateSuppressions(issues, rules);
   const merged = mergeSuppressions(existing, newSuppressions);
 
   assert(merged.suppressions['module.ts']?.exports);
@@ -126,65 +126,6 @@ test('applySuppressions filters matching issues', async () => {
   assert(!issues.exports['module.ts']);
   assert(issues.dependencies['package.json']['used-pkg']);
   assert(!issues.dependencies['package.json']['unused-pkg']);
-});
-
-test('applySuppressions respects expired until dates', async () => {
-  const options = await createOptions({ cwd, noSuppressions: true });
-  const { issues } = await main(options);
-
-  const suppressions: Suppressions = {
-    version: 1,
-    suppressions: {
-      'module.ts': {
-        exports: { unusedExport: { until: '2020-01-01' }, anotherUnused: { until: '2020-01-01' } },
-      },
-    },
-  };
-
-  const result = applySuppressions(issues, suppressions);
-
-  assert.equal(result.expiredCount, 2);
-  assert.equal(result.suppressedCount, 0);
-  assert(issues.exports['module.ts']['unusedExport']);
-  assert(issues.exports['module.ts']['anotherUnused']);
-});
-
-test('applySuppressions keeps future until dates', async () => {
-  const options = await createOptions({ cwd, noSuppressions: true });
-  const { issues } = await main(options);
-
-  const suppressions: Suppressions = {
-    version: 1,
-    suppressions: {
-      'module.ts': {
-        exports: { unusedExport: { until: '2099-12-31' } },
-      },
-    },
-  };
-
-  const result = applySuppressions(issues, suppressions);
-
-  assert.equal(result.suppressedCount, 1);
-  assert(!issues.exports['module.ts']['unusedExport']);
-  assert(issues.exports['module.ts']['anotherUnused']);
-});
-
-test('pruneSuppressions removes expired entries', async () => {
-  const options = await createOptions({ cwd, noSuppressions: true });
-  const { issues } = await main(options);
-
-  const suppressions: Suppressions = {
-    version: 1,
-    suppressions: {
-      'module.ts': {
-        exports: { unusedExport: { until: '2026-02-10' } },
-      },
-    },
-  };
-
-  const updated = pruneSuppressions(issues, initIssues(), suppressions, allInScope);
-
-  assert(!updated.suppressions['module.ts']);
 });
 
 test('mergeSuppressions combines two suppressions objects', () => {
@@ -225,7 +166,7 @@ test('generateSuppressions skips warn-level issue types', async () => {
   const { issues } = await main(options);
 
   const rules: Rules = { ...defaultRules, exports: 'warn' };
-  const suppressions = generateSuppressions(issues, undefined, rules);
+  const suppressions = generateSuppressions(issues, rules);
 
   assert(!suppressions.suppressions['module.ts']?.exports);
   assert(suppressions.suppressions['package.json']?.dependencies);

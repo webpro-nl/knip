@@ -119,7 +119,6 @@ export function buildResults(results, options) {
       suppressed: {
         note: SUPPRESSED_NOTE,
         count: suppressedCount,
-        expired: results.expiredCount ?? 0,
         files: suppressed.files,
         issues: suppressed.issues,
       },

@@ -14,10 +14,6 @@ import { initIssues } from './issue-initializers.ts';
 import { timerify } from './Performance.ts';
 import { join } from './path.ts';
 
-const isExpired = (until: string | undefined, now: string) => until !== undefined && until <= now;
-
-const getToday = () => new Date().toISOString().slice(0, 10);
-
 const getRecords = (issues: Issues, issueType: string) => issues[issueType as IssueType] as IssueRecords;
 
 const getDefaultSuppressionsFilePath = (cwd: string) => join(cwd, DEFAULT_SUPPRESSIONS_FILE);
@@ -33,9 +29,8 @@ const saveSuppressions = async (filePath: string, suppressions: Suppressions) =>
 };
 
 /** @internal */
-export const generateSuppressions = (issues: Issues, until?: string, rules?: Rules): Suppressions => {
+export const generateSuppressions = (issues: Issues, rules?: Rules): Suppressions => {
   const entries: Record<string, SuppressionsByType> = {};
-  const meta: SuppressionMeta = until ? { until } : {};
 
   for (const issueType of ISSUE_TYPES) {
     if (rules && rules[issueType] !== 'error') continue;
@@ -46,7 +41,7 @@ export const generateSuppressions = (issues: Issues, until?: string, rules?: Rul
       if (symbolNames.length === 0) continue;
 
       const symbols: Record<string, SuppressionMeta> = {};
-      for (const name of symbolNames) symbols[name] = { ...meta };
+      for (const name of symbolNames) symbols[name] = {};
       entries[relPath][issueType] = symbols;
     }
   }
@@ -56,10 +51,8 @@ export const generateSuppressions = (issues: Issues, until?: string, rules?: Rul
 
 /** @internal */
 export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Rules): ApplyResult => {
-  const now = getToday();
   const suppressedIssues = initIssues();
   let suppressedCount = 0;
-  let expiredCount = 0;
 
   for (const [key, byType] of Object.entries(bulk.suppressions)) {
     for (const issueType of ISSUE_TYPES) {
@@ -70,10 +63,6 @@ export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Ru
       const records = getRecords(issues, issueType);
       let matchedAny = false;
       for (const symbol of Object.keys(entry)) {
-        if (isExpired(entry[symbol].until, now)) {
-          expiredCount++;
-          continue;
-        }
         const issue = records[key]?.[symbol];
         if (issue) {
           const suppressed = getRecords(suppressedIssues, issueType);
@@ -89,7 +78,7 @@ export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Ru
     }
   }
 
-  return { suppressedCount, expiredCount, suppressedIssues };
+  return { suppressedCount, suppressedIssues };
 };
 
 /**
@@ -103,7 +92,6 @@ export const pruneSuppressions = (
   bulk: Suppressions,
   isInScope: SuppressionScope
 ): Suppressions => {
-  const now = getToday();
   const pruned: Record<string, SuppressionsByType> = {};
 
   for (const [key, byType] of Object.entries(bulk.suppressions)) {
@@ -122,7 +110,6 @@ export const pruneSuppressions = (
       const suppressedRecords = getRecords(suppressedIssues, issueType);
       const remaining: Record<string, SuppressionMeta> = {};
       for (const [s, meta] of Object.entries(entry)) {
-        if (isExpired(meta.until, now)) continue;
         if (records[key]?.[s] || suppressedRecords[key]?.[s]) remaining[s] = meta;
       }
       if (Object.keys(remaining).length > 0) {
@@ -179,7 +166,7 @@ interface SuppressionsOptions {
   cwd: string;
   isProduction: boolean;
   isSuppressAll: boolean;
-  suppressUntil?: string;
+  isPruneSuppressions: boolean;
   suppressionsFilePath?: string;
   noSuppressions: boolean;
   checkSuppressions: boolean;
@@ -190,7 +177,6 @@ export interface SuppressionsState {
   suppressions: Suppressions;
   suppressedIssues: Issues;
   suppressedCount: number;
-  expiredCount: number;
 }
 
 const countEntries = (suppressions: Suppressions) => {
@@ -227,7 +213,7 @@ const readAndApplySuppressions = async (
   const suppressions = await loadSuppressions(getSuppressionsFilePath(options));
   if (!suppressions) return undefined;
 
-  const { suppressedCount, expiredCount, suppressedIssues } = applySuppressions(issues, suppressions, options.rules);
+  const { suppressedCount, suppressedIssues } = applySuppressions(issues, suppressions, options.rules);
 
   for (const issueType of ISSUE_TYPES) {
     const records = getRecords(issues, issueType);
@@ -236,12 +222,15 @@ const readAndApplySuppressions = async (
     counters[issueType] = count;
   }
 
-  return { suppressions, suppressedIssues, suppressedCount, expiredCount };
+  return { suppressions, suppressedIssues, suppressedCount };
 };
 
 export const _readAndApplySuppressions = timerify(readAndApplySuppressions);
 
-/** Writes the suppressions file. CLI only — never call this from a session. */
+/**
+ * Updates the suppressions file, but only when asked to. CLI only — never call this from a session,
+ * and never let a plain run write: this file is committed, and a read should not change it.
+ */
 export const writeSuppressions = async (
   issues: Issues,
   options: SuppressionsOptions,
@@ -249,23 +238,28 @@ export const writeSuppressions = async (
   state: SuppressionsState | undefined
 ): Promise<{ message: string } | { staleCount: number }> => {
   const filePath = getSuppressionsFilePath(options);
+  const location = options.suppressionsFilePath ?? DEFAULT_SUPPRESSIONS_FILE;
   const isInScope = createScope(options, scope);
 
   if (options.isSuppressAll) {
-    const newSuppressions = generateSuppressions(issues, options.suppressUntil, options.rules);
+    const newSuppressions = generateSuppressions(issues, options.rules);
     const existing = await loadSuppressions(filePath);
     const merged = existing
       ? mergeSuppressions(pruneSuppressions(issues, initIssues(), existing, isInScope), newSuppressions)
       : newSuppressions;
     await saveSuppressions(filePath, merged);
-    return { message: `Suppressions written to ${options.suppressionsFilePath ?? DEFAULT_SUPPRESSIONS_FILE}` };
+    return { message: `Suppressions written to ${location}` };
   }
 
   if (!state) return { staleCount: 0 };
 
   const updated = pruneSuppressions(issues, state.suppressedIssues, state.suppressions, isInScope);
   const staleCount = countEntries(state.suppressions) - countEntries(updated);
-  if (staleCount > 0 && !options.checkSuppressions) await saveSuppressions(filePath, updated);
+
+  if (options.isPruneSuppressions) {
+    if (staleCount > 0) await saveSuppressions(filePath, updated);
+    return { message: `Pruned ${staleCount} ${staleCount === 1 ? 'suppression' : 'suppressions'} from ${location}` };
+  }
 
   return { staleCount };
 };

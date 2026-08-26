@@ -22,19 +22,24 @@ burn down the existing ones at your own pace.
 
 Flags:
 
-- Use `--suppress-until <date>` to add an expiry date (`YYYY-MM-DD`) to new
-  suppressions.
 - Use `--suppressions-location <path>` for a custom file path.
 - Use existing [scope flags][3] like `--include`, `--exports` and `--workspace`
   to filter suppressions.
 
 ## Managing suppressions
 
-Stale suppressions are pruned automatically on every `knip` run. When you fix an
-issue (or delete the code), the corresponding entry will be automatically
-removed from the file.
+Only `--suppress-all` and `--prune-suppressions` write to the suppressions file.
+A regular `knip` run never touches it: the file is committed, and reading your
+code should not change it.
 
-A run only prunes what it analyzed. Under a [scope flag][3] such as
+When you fix an issue (or delete the code), its entry no longer applies. Knip
+says so, and `knip --prune-suppressions` removes them:
+
+```
+Suppressions file is out of date: 3 suppressions no longer apply. Run `knip --prune-suppressions` to update it.
+```
+
+A prune only removes what the run analyzed. Under a [scope flag][3] such as
 `--workspace` or `--exports`, or a `--config` that covers part of the project,
 entries outside that scope are left untouched, so a run never discards
 suppressions it knows nothing about. This also means several passes with
@@ -51,24 +56,7 @@ knip --no-suppressions --exports
 ```
 
 This shows all suppressed export issues so you can fix them incrementally. After
-fixing, just run `knip` to update the suppressions file automatically.
-
-### Expiry
-
-Use the `--suppress-until` argument, or manually add an `until` field to any
-suppression in the JSON file:
-
-```json
-"src/feature-flagged.ts": {
-  "exports": {
-    "deprecatedHelper": {"until":"2026-02-16"}
-  }
-}
-```
-
-After this date, the suppression is ignored, and Knip will report the issue
-again. This might help with planning, temporary workarounds and migration
-processes.
+fixing, run `knip --prune-suppressions` to drop the entries you no longer need.
 
 ## CI
 
@@ -79,16 +67,9 @@ is up-to-date (no unused entries):
 knip --check-suppressions
 ```
 
-New issues are reported as usual, and suppressions that no longer apply are
-reported too:
-
-```
-Suppressions file is out of date: 3 suppressions no longer apply. Run `knip` to update it.
-```
-
-Either one exits non-zero. Unlike a regular run, this does not write to the
-suppressions file, so it leaves the checkout clean. Run `knip` locally to update
-the file and commit it along with the fixed issues.
+New issues are reported as usual, and so are suppressions that no longer apply.
+Either one exits non-zero, and nothing is written. Run `knip
+--prune-suppressions` locally and commit the result along with the fixed issues.
 
 ## Editors and agents
 
@@ -99,6 +80,50 @@ ones. Only the CLI writes to the suppressions file.
 The [JSON reporter][5] carries the same split, in a `suppressed` array beside
 `issues`, which is the easiest way to track how much is left per file, per issue
 type or per workspace.
+
+## Custom fields
+
+Knip preserves fields it does not recognize, so you can annotate entries with a
+ticket, an owner or a date and they survive `--suppress-all` and
+`--prune-suppressions`. Knip attaches no meaning to them.
+
+A \[preprocessor]\[9] can. This one reports an entry again once its `until` date
+has passed, by moving it out of `suppressedIssues` and back into the report,
+which also makes the run fail:
+
+```js title="expire-suppressions.js"
+import { readFileSync } from 'node:fs';
+
+const today = new Date().toISOString().slice(0, 10);
+
+export default options => {
+  const { suppressions } = JSON.parse(
+    readFileSync('.knip-suppressions.json', 'utf8')
+  );
+  for (const [file, byType] of Object.entries(suppressions)) {
+    for (const [type, entries] of Object.entries(byType)) {
+      for (const [symbol, meta] of Object.entries(entries)) {
+        if (!meta.until || meta.until > today) continue;
+        const issue = options.suppressedIssues?.[type]?.[file]?.[symbol];
+        if (!issue) continue;
+        options.issues[type][file] ??= {};
+        options.issues[type][file][symbol] = issue;
+        delete options.suppressedIssues[type][file][symbol];
+        options.counters[type]++;
+        options.suppressedCount--;
+      }
+    }
+  }
+  return options;
+};
+```
+
+```sh
+knip --preprocessor ./expire-suppressions.js
+```
+
+The same shape works for anything else you want to encode: escalate entries
+older than a quarter, fail only on entries owned by your team, and so on.
 
 ## Suppressions vs. JSDoc tags
 
@@ -143,13 +168,13 @@ keys and one line per item:
     },
     "src/old-module.ts": {
       "files": {
-        "src/old-module.ts": { "until": "2026-02-16" }
+        "src/old-module.ts": {}
       }
     },
     "src/utils/helpers.ts": {
       "exports": {
         "formatDate": {},
-        "parseQuery": { "until": "2026-02-16" }
+        "parseQuery": { "ticket": "ABC-123" }
       }
     }
   }

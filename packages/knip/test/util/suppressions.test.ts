@@ -50,23 +50,6 @@ test('applySuppressions: ignores unmatched suppressions', () => {
   assert.equal(result.suppressedCount, 0);
 });
 
-test('applySuppressions: counts expired suppressions', () => {
-  const issues = createEmptyIssues();
-  const suppressions: Suppressions = {
-    version: 1,
-    suppressions: {
-      'expired.ts': {
-        files: { 'expired.ts': { until: '2000-01-01' } },
-      },
-    },
-  };
-
-  const result = applySuppressions(issues, suppressions);
-
-  assert.equal(result.expiredCount, 1);
-  assert.equal(result.suppressedCount, 0);
-});
-
 test('pruneSuppressions: preserves custom fields', () => {
   const issues = createEmptyIssues();
   issues.exports['file.ts'] = { foo: { symbol: 'foo' } } as any;

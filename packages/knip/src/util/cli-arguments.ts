@@ -41,8 +41,7 @@ Fix
 
 Suppressions
       --suppress-all           Generate suppressions file for all current issues
-      --suppress-until [date]  Set an expiry date (YYYY-MM-DD) on generated suppressions
-      --prune-suppressions     Remove stale entries from suppressions file
+      --prune-suppressions     Remove entries that no longer apply from suppressions file
       --check-suppressions     Fail if suppressions file needs updating
       --suppressions-location  Suppressions file location (default: .knip-suppressions.json)
       --no-suppressions        Ignore suppressions
@@ -134,7 +133,6 @@ export default function parseCLIArgs() {
       strict: { type: 'boolean', short: 's' },
       'prune-suppressions': { type: 'boolean' },
       'suppress-all': { type: 'boolean' },
-      'suppress-until': { type: 'string' },
       'suppressions-location': { type: 'string' },
       trace: { type: 'boolean' },
       'trace-dependency': { type: 'string' },

@@ -188,6 +188,7 @@ export const createOptions = async (options: CreateOptions) => {
       typeof process.stdout.cursorTo === 'function',
 
     isStrict,
+    isPruneSuppressions: args['prune-suppressions'] ?? false,
     isSuppressAll: args['suppress-all'] ?? false,
     isTrace,
     isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
@@ -200,7 +201,6 @@ export const createOptions = async (options: CreateOptions) => {
     noSuppressions: options.noSuppressions ?? args['no-suppressions'] ?? false,
     rules,
     tags,
-    suppressUntil: args['suppress-until'],
     suppressionsFilePath: args['suppressions-location'] ? join(cwd, args['suppressions-location']) : undefined,
     traceDependency: args['trace-dependency'],
     traceExport: args['trace-export'],

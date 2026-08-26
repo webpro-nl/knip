@@ -1,9 +1,8 @@
 import type { WorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
 import type { Issues, IssueType } from './issues.ts';
 
-export interface SuppressionMeta {
-  until?: string;
-}
+/** Knip preserves these fields but gives them no meaning; use a preprocessor to act on your own */
+export type SuppressionMeta = Record<string, unknown>;
 
 type SuppressionEntry = Record<string, SuppressionMeta>;
 
@@ -25,6 +24,5 @@ export interface AnalysisScope {
 
 export interface ApplyResult {
   suppressedCount: number;
-  expiredCount: number;
   suppressedIssues: Issues;
 }
