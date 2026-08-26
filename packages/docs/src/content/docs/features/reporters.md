@@ -191,12 +191,13 @@ Output is one line of JSON. Formatted here for readability:
       "dependencies": [{ "name": "lodash" }],
       "unlisted": [{ "name": "rimraf" }]
     }
-  ]
+  ],
+  "suppressed": []
 }
 ```
 
-The top level is an object with a single `issues` array. Each element groups
-every issue found in one file:
+The top level has an `issues` array and a `suppressed` array. Each element
+groups every issue found in one file:
 
 | Field        | Type         | Notes                                               |
 | :----------- | :----------- | :-------------------------------------------------- |
@@ -207,6 +208,10 @@ every issue found in one file:
 Each entry carries a key for **every enabled [issue type][9]**, so the keys are
 the same across entries. An array is empty when that file has no issues of that
 type. Drop a type's key by disabling it with [filters or rules][11].
+
+`suppressed` uses the same shape and holds the issues kept out of `issues` by
+the [suppressions file][15]. It is empty when there is no such file. Use it to
+track how much known debt is left, per file or per issue type.
 
 Issue-type items are objects with position info:
 
@@ -391,3 +396,4 @@ knip --preprocessor ./preprocess.ts
 [12]: #custom-reporters
 [13]: ../reference/integrations.md
 [14]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
+[15]: ./bulk-suppressions.md

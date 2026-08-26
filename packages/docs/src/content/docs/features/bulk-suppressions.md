@@ -90,6 +90,16 @@ Either one exits non-zero. Unlike a regular run, this does not write to the
 suppressions file, so it leaves the checkout clean. Run `knip` locally to update
 the file and commit it along with the fixed issues.
 
+## Editors and agents
+
+The editor extension, language server and [MCP server][4] all apply the same
+suppressions file, and hand back the suppressed issues separately from the live
+ones. Only the CLI writes to the suppressions file.
+
+The [JSON reporter][5] carries the same split, in a `suppressed` array beside
+`issues`, which is the easiest way to track how much is left per file, per issue
+type or per workspace.
+
 ## Suppressions vs. JSDoc tags
 
 The suppressions file is intended for bulk-ignoring existing issues when
@@ -103,7 +113,7 @@ export function formatDate() {}
 ```
 
 Tags live next to the code, carry context naturally, and don't rely on an
-external file. See [JSDoc Tags][4] for details.
+external file. See [JSDoc Tags][6] for details.
 
 That said, additional fields in the JSON file are preserved.
 
@@ -112,9 +122,9 @@ That said, additional fields in the JSON file are preserved.
 Use `ignore*` items for false positives (i.e. when Knip is wrong), use
 suppressions for actual issues you want to fix later.
 
-Remember that [ignore][5] patterns are nearly always a bad idea. They might hurt
+Remember that [ignore][7] patterns are nearly always a bad idea. They might hurt
 performance and hide issues that you do want to know about. [Exclude the file
-from analysis][6], use a more specific `ignore*` pattern to get rid of a false
+from analysis][8], use a more specific `ignore*` pattern to get rid of a false
 positive, or suppress a specific issue temporarily.
 
 ## Suppressions file
@@ -149,6 +159,8 @@ keys and one line per item:
 [1]: ./production-mode.md
 [2]: ./production-mode.md#strict-mode
 [3]: ../reference/cli.md#scope
-[4]: ../reference/jsdoc-tsdoc-tags.md
-[5]: ../reference/configuration.md#ignore
-[6]: ../guides/configuring-project-files.md
+[4]: ../reference/integrations.md
+[5]: ./reporters.md#json
+[6]: ../reference/jsdoc-tsdoc-tags.md
+[7]: ../reference/configuration.md#ignore
+[8]: ../guides/configuring-project-files.md
