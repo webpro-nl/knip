@@ -1,0 +1,6 @@
+packages:
+  - 'pkg'
+
+catalog:
+  lodash: 4.17.23
+  zod: 4.4.3

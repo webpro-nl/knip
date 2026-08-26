@@ -4,7 +4,7 @@ import { parse as parseYAMLContents } from 'yaml';
 import { parse as parseTOML } from 'smol-toml';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.ts';
-import { extname, join, toPosix } from './path.ts';
+import { dirname, extname, join, toPosix } from './path.ts';
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
@@ -25,6 +25,17 @@ export const isFile = (cwdOrPath: string, name?: string) => {
 export const findFile = (cwd: string, fileName: string) => {
   const filePath = join(cwd, fileName);
   return isFile(filePath) ? filePath : undefined;
+};
+
+export const findFileUp = (cwd: string, fileName: string) => {
+  let dir = cwd;
+  while (true) {
+    const filePath = findFile(dir, fileName);
+    if (filePath) return filePath;
+    const parent = dirname(dir);
+    if (parent === dir || parent === '.' || /^\/\/[^/]+\/[^/]+\/?$/.test(dir)) return;
+    dir = parent;
+  }
 };
 
 export const findFileWithExtensions = (basePath: string, extensions: string[]): string | undefined => {

@@ -1,9 +1,9 @@
 import type { CatalogContainer } from '../CatalogCounselor.ts';
 import type { PackageJson } from '../types/package-json.ts';
-import { isFile } from './fs.ts';
+import { findFileUp, isFile } from './fs.ts';
 import { _load } from './loader.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
-import { basename, join } from './path.ts';
+import { basename, dirname, isSameDir, join } from './path.ts';
 
 export const DEFAULT_CATALOG = 'default';
 
@@ -34,18 +34,39 @@ export const getCatalogContainer = async (
   pnpmWorkspacePath?: string,
   pnpmWorkspace?: any
 ): Promise<CatalogContainer> => {
-  const filePath = pnpmWorkspacePath ?? (isFile(cwd, '.yarnrc.yml') ? join(cwd, '.yarnrc.yml') : manifestPath);
+  const localPnpmWorkspacePath =
+    pnpmWorkspacePath && isSameDir(dirname(pnpmWorkspacePath), cwd) ? pnpmWorkspacePath : undefined;
+  const yarnWorkspacePath = isFile(cwd, '.yarnrc.yml') ? join(cwd, '.yarnrc.yml') : undefined;
+  const manifestWorkspaces = !Array.isArray(manifest.workspaces) ? manifest.workspaces : undefined;
+  const hasManifestCatalog =
+    manifest.catalog !== undefined ||
+    manifest.catalogs !== undefined ||
+    manifestWorkspaces?.catalog !== undefined ||
+    manifestWorkspaces?.catalogs !== undefined;
+  const pnpmCatalogPath =
+    localPnpmWorkspacePath ??
+    (!yarnWorkspacePath && !hasManifestCatalog ? findFileUp(dirname(cwd), 'pnpm-workspace.yaml') : undefined);
+  const filePath =
+    localPnpmWorkspacePath ??
+    yarnWorkspacePath ??
+    (hasManifestCatalog ? manifestPath : (pnpmCatalogPath ?? manifestPath));
+  const activePnpmWorkspace =
+    filePath === pnpmWorkspacePath
+      ? pnpmWorkspace
+      : basename(filePath) === 'pnpm-workspace.yaml'
+        ? await _load(filePath)
+        : undefined;
 
   const yarnWorkspace = basename(filePath) === '.yarnrc.yml' ? await _load(filePath) : undefined;
 
   const catalog =
-    pnpmWorkspace?.catalog ??
+    activePnpmWorkspace?.catalog ??
     yarnWorkspace?.catalog ??
     manifest.catalog ??
     ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalog) || {});
 
   const catalogs =
-    pnpmWorkspace?.catalogs ??
+    activePnpmWorkspace?.catalogs ??
     yarnWorkspace?.catalogs ??
     manifest.catalogs ??
     ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalogs) || {});

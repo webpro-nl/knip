@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/catalog-subdirectory__pkg",
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

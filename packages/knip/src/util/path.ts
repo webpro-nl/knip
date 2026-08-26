@@ -36,3 +36,5 @@ export const toRelative = (id: string, base: string) => (isAbsolute(id) ? relati
 export const isInternal = (id: string) => (id.startsWith('.') || isAbsolute(id)) && !isInNodeModules(id);
 
 export const normalize = path.posix.normalize;
+
+export const isSameDir = (left: string, right: string) => normalize(`${left}/`) === normalize(`${right}/`);

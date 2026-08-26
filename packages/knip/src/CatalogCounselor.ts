@@ -7,13 +7,14 @@ import type { Issue } from './types/issues.ts';
 import type { Catalog, Catalogs, WorkspacePackage } from './types/package-json.ts';
 import { type CatalogReference, extractCatalogReferences, parseCatalog } from './util/catalog.ts';
 import type { MainOptions } from './util/create-options.ts';
-import { extname } from './util/path.ts';
+import { dirname, extname, isSameDir } from './util/path.ts';
 import { YamlCatalogPeeker } from './YamlCatalogPeeker.ts';
 
 export type CatalogContainer = { filePath: string; catalog?: Catalog; catalogs?: Catalogs };
 
 export class CatalogCounselor {
   private filePath: string;
+  private isExternal: boolean;
   private entries = new Set<string>();
   private referencedEntries = new Set<string>();
   private referenceIssues: Issue[] = [];
@@ -21,6 +22,7 @@ export class CatalogCounselor {
 
   constructor(options: MainOptions) {
     this.filePath = options.catalog.filePath;
+    this.isExternal = !isSameDir(dirname(this.filePath), options.cwd);
     this.entries = parseCatalog(options.catalog);
   }
 
@@ -65,7 +67,7 @@ export class CatalogCounselor {
     const workspace = ROOT_WORKSPACE_NAME;
     const catalogIssues: Issue[] = [];
 
-    if (this.entries.size > 0) {
+    if (!this.isExternal && this.entries.size > 0) {
       this.fileContent = await readFile(filePath, 'utf-8');
       const isYaml = ['.yml', '.yaml'].includes(extname(filePath));
       const Peeker = isYaml ? YamlCatalogPeeker : JsonCatalogPeeker;
