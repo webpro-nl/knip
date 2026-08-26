@@ -41,7 +41,6 @@ Fix
 
 Suppressions
       --suppress-all           Generate suppressions file for all current issues
-      --suppress-type [type]   Suppress only a specific issue type
       --suppress-until [date]  Set an expiry date (YYYY-MM-DD) on generated suppressions
       --prune-suppressions     Remove stale entries from suppressions file
       --check-suppressions     Fail if suppressions file needs updating
@@ -130,12 +129,11 @@ export default function parseCLIArgs() {
       preprocessor: { type: 'string', multiple: true },
       'preprocessor-options': { type: 'string' },
       reporter: { type: 'string', multiple: true },
-      'prune-suppressions': { type: 'boolean' },
       'reporter-options': { type: 'string' },
       duration: { type: 'boolean', short: 'u' },
       strict: { type: 'boolean', short: 's' },
+      'prune-suppressions': { type: 'boolean' },
       'suppress-all': { type: 'boolean' },
-      'suppress-type': { type: 'string' },
       'suppress-until': { type: 'string' },
       'suppressions-location': { type: 'string' },
       trace: { type: 'boolean' },

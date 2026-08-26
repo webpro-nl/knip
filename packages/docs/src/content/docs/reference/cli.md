@@ -407,15 +407,17 @@ The default exit codes:
 Generate a `.knip-suppressions.json` file to suppress all currently reported
 issues.
 
-### `--suppress-type [type]`
-
-Suppress only a specific issue type (e.g. `exports` or `dependencies`). Can be
-combined with `--suppress-all` to refresh only one type.
+Combine with [scope][20] flags like `--exports` or `--workspace` to suppress
+only part of what Knip reports.
 
 ### `--suppress-until [date]`
 
 Snapshot this date into the suppressions file. Format: `YYYY-MM-DD`. Knip
 ignores the suppression after this date.
+
+### `--prune-suppressions`
+
+Remove stale entries from the suppressions file.
 
 ### `--suppressions-location`
 
@@ -425,11 +427,6 @@ Path to the suppressions file. Default: `.knip-suppressions.json`.
 
 Exit with an error code if the suppressions file is modified (e.g. by
 auto-pruning). Useful in CI to ensure the file is up-to-date.
-
-### `--prune-suppressions`
-
-Explicitly remove unused entries from the suppressions file. (Note: Knip
-automatically prunes unused suppressions when running with `--fix`).
 
 ### `--no-suppressions`
 
@@ -582,3 +579,4 @@ Trace file to see where its exports are imported. Implies [--trace][19].
 [17]: https://github.com/oven-sh/bun/issues/9271
 [18]: ../guides/troubleshooting.md#trace
 [19]: #--trace
+[20]: #scope
