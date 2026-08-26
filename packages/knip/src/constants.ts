@@ -11,6 +11,10 @@ export const KNIP_CONFIG_LOCATIONS = [
   'knip.js',
   'knip.config.ts',
   'knip.config.js',
+  'knip.config.mts',
+  'knip.config.mjs',
+  'knip.config.cts',
+  'knip.config.cjs',
 ];
 
 export const DEFAULT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.tsx', '.mts', '.cts']);
