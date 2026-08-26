@@ -72,15 +72,15 @@ This is equal to `bunx --bun knip`
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO_COLOR
+### NO\_COLOR
 
-The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
+The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
 
-### KNIP_DISABLE_RAW_TRANSFER
+### KNIP\_DISABLE\_RAW\_TRANSFER
 
 Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
 normal parser path.
@@ -407,7 +407,7 @@ The default exit codes:
 Generate a `.knip-suppressions.json` file to suppress all currently reported
 issues.
 
-Combine with [scope][20] flags like `--exports` or `--workspace` to suppress
+Combine with [scope][16] flags like `--exports` or `--workspace` to suppress
 only part of what Knip reports.
 
 ### `--prune-suppressions`
@@ -435,7 +435,7 @@ Run Knip ignoring any existing suppressions file.
 
 Shortcut: `-d`
 
-Show [debug output][16].
+Show [debug output][17].
 
 ### `--memory`
 
@@ -512,7 +512,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][17]).
+`performance.timerify` ([GitHub issue][18]).
 
 ### `--duration`
 
@@ -542,20 +542,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][18].
+Also see [Trace][19].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][19].
+[--trace][20].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][19].
+Trace export name to see where it's imported. Implies [--trace][20].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][19].
+Trace file to see where its exports are imported. Implies [--trace][20].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -572,8 +572,8 @@ Trace file to see where its exports are imported. Implies [--trace][19].
 [13]: ../features/auto-fix.mdx
 [14]: #--reporter-reporter
 [15]: ../features/reporters.md
-[16]: ../guides/troubleshooting.md#debug
-[17]: https://github.com/oven-sh/bun/issues/9271
-[18]: ../guides/troubleshooting.md#trace
-[19]: #--trace
-[20]: #scope
+[16]: #scope
+[17]: ../guides/troubleshooting.md#debug
+[18]: https://github.com/oven-sh/bun/issues/9271
+[19]: ../guides/troubleshooting.md#trace
+[20]: #--trace

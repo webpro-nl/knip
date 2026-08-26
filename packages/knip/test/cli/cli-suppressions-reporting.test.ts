@@ -20,13 +20,22 @@ test('JSON reporter reports suppressed issues separately from live ones', async 
   const report: JSONReport = JSON.parse(exec('knip --reporter json', { cwd }).stdout);
 
   const live = report.issues.find(entry => entry.file === 'module.ts');
-  assert.deepEqual(live?.exports?.map(item => item.name), ['anotherUnused']);
+  assert.deepEqual(
+    live?.exports?.map(item => item.name),
+    ['anotherUnused']
+  );
 
   const suppressed = report.suppressed.find(entry => entry.file === 'module.ts');
-  assert.deepEqual(suppressed?.exports?.map(item => item.name), ['unusedExport']);
+  assert.deepEqual(
+    suppressed?.exports?.map(item => item.name),
+    ['unusedExport']
+  );
 
   const suppressedDeps = report.suppressed.find(entry => entry.file === 'package.json');
-  assert.deepEqual(suppressedDeps?.dependencies?.map(item => item.name), ['unused-pkg']);
+  assert.deepEqual(
+    suppressedDeps?.dependencies?.map(item => item.name),
+    ['unused-pkg']
+  );
 });
 
 test('JSON reporter keeps positions on suppressed issues', async () => {
