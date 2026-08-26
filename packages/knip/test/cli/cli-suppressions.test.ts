@@ -171,6 +171,37 @@ test('Full run prunes dependency entries that no longer apply', async () => {
   assert(!after.suppressions['package.json']?.dependencies?.['never-listed-pkg']);
 });
 
+test('--suppress-all converges a conflicted file in one run', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  await write(cwd, {
+    // as if both sides of a merge landed: one entry fixed on theirs, one stale from ours
+    'module.ts': { exports: { unusedExport: {}, ghostFromTheirBranch: {} } },
+    'package.json': { dependencies: { 'unused-pkg': {}, 'used-pkg': {} } },
+    'unused.ts': { files: { 'unused.ts': {} } },
+  });
+
+  exec('knip --suppress-all', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert(after.suppressions['module.ts']?.exports?.['anotherUnused']);
+  assert(after.suppressions['module.ts']?.exports?.['unusedExport']);
+  assert(!after.suppressions['module.ts']?.exports?.['ghostFromTheirBranch']);
+  assert.equal(exec('knip', { cwd }).status, 0);
+});
+
+test('--suppress-all preserves until metadata on entries it keeps', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  await write(cwd, {
+    'module.ts': { exports: { unusedExport: { until: '2099-12-31' } } },
+  });
+
+  exec('knip --suppress-all', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert.equal(after.suppressions['module.ts']?.exports?.['unusedExport']?.until, '2099-12-31');
+  assert(after.suppressions['module.ts']?.exports?.['anotherUnused']);
+});
+
 test('Scope flags filter what --suppress-all writes', async () => {
   const cwd = await copyFixture('fixtures/suppressions');
   await writeFile(join(cwd, FILE), JSON.stringify({ version: 1, suppressions: {} }, null, 2));

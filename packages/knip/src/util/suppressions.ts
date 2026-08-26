@@ -195,10 +195,19 @@ const handleSuppressions = async (
 ): Promise<HandleSuppressionsResult> => {
   const filePath = options.suppressionsFilePath ?? getDefaultSuppressionsFilePath(options.cwd);
 
+  const isInScope: SuppressionScope = (key, issueType) => {
+    if (options.rules[issueType] !== 'error') return false;
+    const entryPath = join(options.cwd, key);
+    if (!scope.workspaceFilePathFilter(entryPath)) return false;
+    return scope.isConsidered(entryPath) || !existsSync(entryPath);
+  };
+
   if (options.isSuppressAll) {
     const newSuppressions = generateSuppressions(issues, options.suppressUntil, options.rules);
     const existing = await loadSuppressions(filePath);
-    const merged = existing ? mergeSuppressions(existing, newSuppressions) : newSuppressions;
+    const merged = existing
+      ? mergeSuppressions(pruneSuppressions(issues, existing, isInScope), newSuppressions)
+      : newSuppressions;
     await saveSuppressions(filePath, merged);
     return {
       action: 'generated',
@@ -210,13 +219,6 @@ const handleSuppressions = async (
 
   const existing = await loadSuppressions(filePath);
   if (!existing) return { action: 'none' };
-
-  const isInScope: SuppressionScope = (key, issueType) => {
-    if (options.rules[issueType] !== 'error') return false;
-    const entryPath = join(options.cwd, key);
-    if (!scope.workspaceFilePathFilter(entryPath)) return false;
-    return scope.isConsidered(entryPath) || !existsSync(entryPath);
-  };
 
   const updated = pruneSuppressions(issues, existing, isInScope);
   const result = applySuppressions(issues, existing, options.rules);
