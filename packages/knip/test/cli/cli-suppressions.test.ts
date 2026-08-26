@@ -13,6 +13,32 @@ const write = (cwd: string, suppressions: Suppressions['suppressions']) =>
 
 const read = (cwd: string) => readFile(join(cwd, FILE), 'utf8');
 
+test('--check-suppressions does not write, and reports issues before failing', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  await write(cwd, {
+    'module.ts': { exports: { unusedExport: {}, ghostThatNoLongerExists: {} } },
+  });
+  const before = await read(cwd);
+
+  const { stdout, status } = exec('knip --check-suppressions', { cwd });
+
+  assert.equal(await read(cwd), before);
+  assert.match(stdout, /anotherUnused/);
+  assert.match(stdout, /unused-pkg/);
+  assert.match(stdout, /1 suppression no longer applies/);
+  assert.equal(status, 1);
+});
+
+test('--check-suppressions exits zero when the file is up to date', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  const before = await read(cwd);
+
+  const { status } = exec('knip --check-suppressions', { cwd });
+
+  assert.equal(await read(cwd), before);
+  assert.equal(status, 0);
+});
+
 test('Regular run auto-prunes stale suppressions', async () => {
   const cwd = await copyFixture('fixtures/suppressions');
   await write(cwd, {

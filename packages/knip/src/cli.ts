@@ -62,6 +62,7 @@ const main = async () => {
 
     let suppressedCount = 0;
     let expiredCount = 0;
+    let staleSuppressionsCount = 0;
 
     if (!options.isProduction) {
       const suppressionResult = await _handleSuppressions(issues, counters, options, workspaceFilePathFilter);
@@ -74,10 +75,7 @@ const main = async () => {
       if (suppressionResult.action === 'applied') {
         suppressedCount = suppressionResult.suppressedCount;
         expiredCount = suppressionResult.expiredCount;
-        if (suppressionResult.isChanged && options.checkSuppressions) {
-          console.log('Suppressions file has been updated. Please commit the changes.');
-          process.exit(1);
-        }
+        if (options.checkSuppressions) staleSuppressionsCount = suppressionResult.staleCount;
       }
     }
 
@@ -111,6 +109,13 @@ const main = async () => {
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
 
+    if (staleSuppressionsCount > 0) {
+      const label = staleSuppressionsCount === 1 ? 'suppression no longer applies' : 'suppressions no longer apply';
+      console.log(
+        `\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip\` to update it.`
+      );
+    }
+
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
@@ -129,6 +134,7 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+        staleSuppressionsCount > 0 ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {

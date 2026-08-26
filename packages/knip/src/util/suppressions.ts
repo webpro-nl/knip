@@ -165,6 +165,7 @@ interface HandleSuppressionsOptions {
   suppressUntil?: string;
   suppressionsFilePath?: string;
   noSuppressions: boolean;
+  checkSuppressions: boolean;
   rules: Rules;
 }
 
@@ -174,9 +175,17 @@ type HandleSuppressionsResult =
       action: 'applied';
       suppressedCount: number;
       expiredCount: number;
-      isChanged: boolean;
+      staleCount: number;
     }
   | { action: 'none' };
+
+const countEntries = (suppressions: Suppressions) => {
+  let count = 0;
+  for (const byType of Object.values(suppressions.suppressions)) {
+    for (const entry of Object.values(byType)) count += Object.keys(entry).length;
+  }
+  return count;
+};
 
 const handleSuppressions = async (
   issues: Issues,
@@ -215,14 +224,14 @@ const handleSuppressions = async (
     counters[issueType] = count;
   }
 
-  const isChanged = JSON.stringify(existing) !== JSON.stringify(updated);
-  if (isChanged) await saveSuppressions(filePath, updated);
+  const staleCount = countEntries(existing) - countEntries(updated);
+  if (staleCount > 0 && !options.checkSuppressions) await saveSuppressions(filePath, updated);
 
   return {
     action: 'applied',
     suppressedCount: result.suppressedCount,
     expiredCount: result.expiredCount,
-    isChanged,
+    staleCount,
   };
 };
 
