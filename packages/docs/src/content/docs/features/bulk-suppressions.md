@@ -34,6 +34,11 @@ Stale suppressions are pruned automatically on every `knip` run. When you fix an
 issue (or delete the code), the corresponding entry will be automatically
 removed from the file.
 
+A run only prunes what it analyzed. Under a [scope flag][3] such as
+`--workspace` or `--exports`, entries for other workspaces and other issue types
+are left untouched, so a scoped run never discards suppressions it knows nothing
+about. Pruning them takes a full run.
+
 ### Tackling suppressed issues
 
 To reveal a subset of suppressed issues, combine `--no-suppressions` with one or
@@ -72,9 +77,16 @@ is up-to-date (no unused entries):
 knip --check-suppressions
 ```
 
-This exits non-zero if the suppression file has changed (i.e. if suppressions
-were auto-pruned or added). This enforces suppression file updates committed
-along with fixed issues.
+New issues are reported as usual, and suppressions that no longer apply are
+reported too:
+
+```
+Suppressions file is out of date: 3 suppressions no longer apply. Run `knip` to update it.
+```
+
+Either one exits non-zero. Unlike a regular run, this does not write to the
+suppressions file, so it leaves the checkout clean. Run `knip` locally to update
+the file and commit it along with the fixed issues.
 
 ## Suppressions vs. JSDoc tags
 

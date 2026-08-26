@@ -425,8 +425,8 @@ Path to the suppressions file. Default: `.knip-suppressions.json`.
 
 ### `--check-suppressions`
 
-Exit with an error code if the suppressions file is modified (e.g. by
-auto-pruning). Useful in CI to ensure the file is up-to-date.
+Report suppressions that no longer apply and exit with an error code, without
+writing to the suppressions file. Useful in CI to ensure the file is up-to-date.
 
 ### `--no-suppressions`
 
