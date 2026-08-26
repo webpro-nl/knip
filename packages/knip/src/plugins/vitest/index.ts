@@ -15,7 +15,7 @@ import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWor
 
 const title = 'Vitest';
 
-const enablers = ['vitest'];
+const enablers = ['vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -23,7 +23,11 @@ const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,proj
 
 const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 
-const entry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)', ...mocks];
+const testEntry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)'];
+
+const entry = [...testEntry, ...mocks];
+
+const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const { configFileDir: dir } = options;
@@ -38,7 +42,11 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
         ? [toDeferResolve(env)]
         : [toDependency(getEnvSpecifier(env))]
       : [];
-  const reporters = getExternalReporters(testConfig.reporters);
+  const reporters = getExternalReporters(testConfig.reporters).map(specifier =>
+    isInternal(specifier) || isAbsolute(specifier)
+      ? { ...toDeferResolve(specifier), dir: vitestRoot }
+      : toDependency(specifier)
+  );
 
   const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
   const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
@@ -46,6 +54,10 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
     .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
+  const snapshotSerializers = (testConfig.snapshotSerializers ?? []).map(specifier => ({
+    ...toDeferResolve(specifier),
+    dir: vitestRoot,
+  }));
   const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
 
   const workspaceDependencies: Input[] = [];
@@ -66,9 +78,10 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
 
   return [
     ...environments,
-    ...reporters.map(id => toDependency(id)),
+    ...reporters,
     ...coverage.map(id => toDependency(id)),
     ...setupFiles,
+    ...snapshotSerializers,
     ...globalSetup,
     ...workspaceDependencies,
     ...projectsDependencies,
@@ -86,7 +99,7 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {
       if (typeof config === 'function') {
-        for (const command of ['dev', 'serve', 'build'] as COMMAND[]) {
+        for (const command of ['serve', 'build'] as COMMAND[]) {
           for (const mode of ['development', 'production'] as MODE[]) {
             const cfg = await config({ command, mode, ssrBuild: undefined });
             configs.push(cfg);
@@ -133,6 +146,8 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
           for (const projectFile of projectFiles) {
             inputs.add(toConfig('vitest', projectFile, { containingFilePath: options.configFilePath }));
           }
+        } else if (typeof project.extends === 'string') {
+          inputs.add(toConfig('vitest', project.extends, { containingFilePath: options.configFilePath }));
         }
       }
     }
@@ -151,24 +166,33 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
     }
 
-    const dir = toAbsolute(cfg.test?.root ?? '.', options.cwd);
+    const vitestRoot = toAbsolute(cfg.test?.root ?? '.', options.cwd);
+    const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, vitestRoot) : vitestRoot;
 
     if (cfg.test) {
       if (cfg.test?.include) {
         for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
-        if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(dir, dependency)));
+        const benchmarkInclude = cfg.test.benchmark?.include ?? benchmark;
+        for (const dependency of benchmarkInclude) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
       } else {
-        for (const dependency of options.config.entry ?? entry) inputs.add(toEntry(join(dir, dependency)));
+        for (const dependency of options.config.entry ?? testEntry) inputs.add(toEntry(join(dir, dependency)));
       }
+      if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(vitestRoot, dependency)));
 
       if (cfg.test.alias) addAliases(cfg.test.alias);
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
-    for (const dependency of cfg.resolve?.dedupe ?? []) inputs.add(toDependency(dependency));
+    for (const dependency of cfg.resolve?.dedupe ?? []) inputs.add(toDependency(dependency, { optional: true }));
     for (const dependency of cfg.optimizeDeps?.include ?? []) {
       const packageName = getOptimizeDepsIncludePackageName(dependency);
-      if (packageName) inputs.add(toDependency(packageName));
+      if (packageName) inputs.add(toDependency(packageName, { optional: true }));
+    }
+    const ssrExternal = cfg.ssr?.external;
+    if (Array.isArray(ssrExternal)) {
+      for (const dependency of ssrExternal) {
+        if (typeof dependency === 'string') inputs.add(toDependency(dependency, { optional: true }));
+      }
     }
     if (cfg.resolve?.extensions) {
       // Filter out default extensions from resolve.extensions
@@ -180,10 +204,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
         inputs.add(toEntry(`src/**/*${ext}`));
       }
     }
-    for (const dependency of findConfigDependencies(cfg, options, dir)) inputs.add(dependency);
+    for (const dependency of findConfigDependencies(cfg, options, vitestRoot)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
     const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
-      .map(specifier => join(dir, specifier))
+      .map(specifier => join(vitestRoot, specifier))
       .map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }

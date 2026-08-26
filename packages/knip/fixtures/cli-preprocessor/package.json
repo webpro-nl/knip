@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/cli-preprocessor"
+  "name": "@fixtures/cli-preprocessor",
+  "knip": {
+    "entry": ["index.{js,ts}", "chain-{async,sync}.js"]
+  }
 }

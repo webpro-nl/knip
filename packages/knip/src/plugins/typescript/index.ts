@@ -10,7 +10,7 @@ import { hasDependency } from '../../util/plugin.ts';
 
 const title = 'TypeScript';
 
-const enablers = ['typescript', '@typescript/native-preview'];
+const enablers = ['typescript', '@typescript/native', '@typescript/native-preview'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

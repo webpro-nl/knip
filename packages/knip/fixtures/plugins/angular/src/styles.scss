@@ -1,0 +1,5 @@
+@use './theme';
+
+body {
+  color: theme.$text-color;
+}

@@ -15,6 +15,7 @@ Knip reports the following types of issues:
 | Unlisted dependencies                | Used dependencies not listed in package.json               |       | `unlisted`         |
 | Unlisted binaries                    | Binaries from dependencies not listed in package.json      |       | `binaries`         |
 | Unused catalog entries               | Unable to find a reference to this catalog entry           | 🔧    | `catalog`          |
+| Unresolved catalog references        | Catalog does not contain the referenced package            |       | `catalogReferences` |
 | Unresolved imports                   | Unable to resolve this (import) specifier                  |       | `unresolved`       |
 | Unused exports                       | Unable to find a reference to this export                  | 🔧    | `exports`          |
 | Unused exported types                | Unable to find a reference to this exported type           | 🔧    | `types`            |
@@ -23,6 +24,7 @@ Knip reports the following types of issues:
 | Unused exported enum members         | Unable to find a reference to this enum member             | 🔧    | `enumMembers`      |
 | Unused exported namespace members    | Unable to find a reference to this namespace member        | 🔧    | `namespaceMembers` |
 | Duplicate exports                    | This is exported more than once                            |       | `duplicates`       |
+| Circular dependencies                | These files (in)directly import each other at runtime      | 🟠    | `cycles`           |
 
 ## Legend
 
@@ -39,6 +41,8 @@ Knip reports the following types of issues:
    `optionalPeerDependencies`. In [rules][3], each key can be set individually.
 3. In [strict production mode][4], `devDependencies` are not included.
 4. The `types` issue type includes `enum`, `interface` and `type` exports.
+5. `cycles` defaults to the `warn` [rule][3] (reported, but not counted as an
+   error). Set `rules.cycles` to `error` to fail on circular dependencies.
 
 [1]: ../features/auto-fix.mdx
 [2]: ../features/rules-and-filters.md#filters

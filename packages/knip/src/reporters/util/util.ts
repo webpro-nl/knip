@@ -2,6 +2,7 @@ import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
 import st from '../../util/colors.ts';
 import { relative } from '../../util/path.ts';
+import { compareStrings } from '../../util/string.ts';
 import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
@@ -33,13 +34,15 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
 export const convert = (issue: Issue | IssueSymbol) => ({
   namespace: 'parentSymbol' in issue ? issue.parentSymbol : undefined,
   name: issue.symbol,
+  kind: 'kind' in issue ? issue.kind : undefined,
+  specifier: 'kind' in issue ? issue.specifier : undefined,
   line: issue.line,
   col: issue.col,
   pos: issue.pos,
 });
 
 const sortByPos = (a: Issue, b: Issue) => {
-  if (a.filePath !== b.filePath) return a.filePath.localeCompare(b.filePath);
+  if (a.filePath !== b.filePath) return compareStrings(a.filePath, b.filePath);
   if (a.line !== b.line) return (a.line ?? 0) - (b.line ?? 0);
   return (a.col ?? 0) - (b.col ?? 0);
 };
@@ -70,7 +73,9 @@ export const getTableForType = (
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
     const isFileIssue = issue.type === 'files';
-    const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
+    const symbol = issue.symbols
+      ? issue.symbols.map(s => s.symbol).join(issue.type === 'cycles' ? ' → ' : ', ')
+      : issue.symbol;
     if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
@@ -90,3 +95,8 @@ export const getTableForType = (
 export const flattenIssues = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
 export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');
+
+export const getIssueDescription = ({ type, symbol, symbols, parentSymbol }: Issue) => {
+  const description = symbols ? symbols.map(item => item.symbol).join(', ') : symbol;
+  return `${getIssuePrefix(type)}: ${description}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+};

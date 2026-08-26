@@ -1,21 +1,37 @@
-import { basename, dirname } from '../util/path.ts';
-import type { CompilerSync, HasDependency } from './types.ts';
+import { ensureRelative, isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
+import type { CompilerSync } from './types.ts';
 
-const condition = (hasDependency: HasDependency) =>
-  hasDependency('sass') || hasDependency('sass-embedded') || hasDependency('node-sass');
+// https://sass-lang.com/documentation/at-rules/
 
-const importMatcher = /@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]/g;
+const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
-const isAlias = (s: string) =>
-  (s.charCodeAt(0) === 64 && s.charCodeAt(1) === 47) || s.charCodeAt(0) === 126 || s.charCodeAt(0) === 35;
+const dependencyMatcher =
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]|url\(\s*(?:["']([^"']*)["']|([^'")\s]+))\s*\)/g;
 
-const isScopedPackage = (s: string) => s.charCodeAt(0) === 64 && s.charCodeAt(1) !== 47;
-const isTildePackage = (s: string) => s.charCodeAt(0) === 126 && s.charCodeAt(1) !== 47;
+const urlSchemeMatcher = /^[a-z][a-z\d+.-]*:/i;
+
+const getUrlSpecifier = (url: string): string | undefined => {
+  if (
+    !url ||
+    url.startsWith('//') ||
+    url.startsWith('/') ||
+    url.startsWith('#') ||
+    urlSchemeMatcher.test(url) ||
+    url.includes('$') ||
+    url.includes('#{')
+  )
+    return;
+  let end = url.length;
+  const queryIndex = url.indexOf('?');
+  if (queryIndex !== -1) end = queryIndex;
+  const fragmentIndex = url.indexOf('#');
+  if (fragmentIndex !== -1 && fragmentIndex < end) end = fragmentIndex;
+  const path = url.slice(0, end);
+  return path ? ensureRelative(path) : undefined;
+};
 
 const candidates = (specifier: string): string[] => {
-  const spec = specifier.startsWith('.') || isAlias(specifier) ? specifier : `./${specifier}`;
-  const name = basename(spec);
-  const dir = dirname(spec);
+  const { dir, name } = splitSpec(specifier);
   const hasExt = name.endsWith('.scss') || name.endsWith('.sass');
   const bases = hasExt ? [name] : [`${name}.scss`, `${name}.sass`];
   const out: string[] = [];
@@ -26,10 +42,20 @@ const candidates = (specifier: string): string[] => {
   return out;
 };
 
-const compiler: CompilerSync = text => {
+export const compiler: CompilerSync = text => {
+  if (!text.includes('@use') && !text.includes('@import') && !text.includes('@forward') && !text.includes('url('))
+    return '';
   const out: string[] = [];
   let i = 0;
-  for (const match of text.matchAll(importMatcher)) {
+  let match: RegExpExecArray | null;
+  dependencyMatcher.lastIndex = 0;
+  while ((match = dependencyMatcher.exec(text))) {
+    const url = match[3] ?? match[4];
+    if (url !== undefined) {
+      const spec = getUrlSpecifier(url);
+      if (spec) out.push(`import _$${i++} from '${spec}';`);
+      continue;
+    }
     let spec = match[2];
     if (!spec || spec.startsWith('sass:')) continue;
     let isBare = Boolean(match[1]) || isScopedPackage(spec);
@@ -37,10 +63,13 @@ const compiler: CompilerSync = text => {
       spec = spec.slice(1);
       isBare = true;
     }
-    const specs = isBare ? [spec] : candidates(spec);
-    for (const s of specs) out.push(`import _$${i++} from '${s}';`);
+    if (isBare) {
+      out.push(`import _$${i++} from '${spec}';`);
+    } else {
+      for (const s of candidates(spec)) out.push(`import _$${i++} from '${s}';`);
+    }
   }
   return out.join('\n');
 };
 
-export default { condition, compiler };
+export default { dependencies, compiler };

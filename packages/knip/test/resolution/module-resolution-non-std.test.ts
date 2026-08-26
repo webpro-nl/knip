@@ -13,6 +13,7 @@ test('Resolve non-standard extensions and report unresolved imports', async () =
 
   assert(issues.unlisted['src/index.ts']['@org/unresolved']);
   assert(issues.unlisted['src/index.ts']['unresolved']);
+  assert(!issues.unlisted['src/index.ts']['@icons/github.svg']);
   assert(issues.unresolved['src/index.ts']['./unresolved']);
 
   assert.deepEqual(counters, {

@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+
+catalog:
+  react: ^18.0.0
+
+catalogs:
+  frontend:
+    vue: ^3.0.0

@@ -1,0 +1,1 @@
+extends: markdownlint/style/prettier

@@ -4,6 +4,7 @@ import { isAbsolute, toRelative } from './path.ts';
 
 type InputType =
   | 'binary'
+  | 'catalog'
   | 'entry'
   | 'project'
   | 'config'
@@ -30,6 +31,11 @@ export interface ConfigInput extends Input {
   type: 'config';
   containingFilePath?: string;
   pluginName: PluginName;
+}
+
+export interface CatalogInput extends Input {
+  type: 'catalog';
+  catalogName: string;
 }
 
 interface AliasInput extends Input {
@@ -59,6 +65,14 @@ export const toBinary = (specifier: string, options: Options = {}): Input => ({
 });
 
 export const isBinary = (input: Input) => input.type === 'binary';
+
+export const toCatalog = (specifier: string, catalogName: string): CatalogInput => ({
+  type: 'catalog',
+  specifier,
+  catalogName,
+});
+
+export const isCatalog = (input: Input): input is CatalogInput => input.type === 'catalog';
 
 export const toEntry = (specifier: string): Input => ({ type: 'entry', specifier });
 

@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/aliased-packages-ancestor__app",
+  "main": "index.ts",
+  "dependencies": {
+    "styled": "npm:@org/styled-lib@1.0.0"
+  }
+}

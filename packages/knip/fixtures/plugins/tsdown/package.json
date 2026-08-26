@@ -11,6 +11,15 @@
   "tsdown": {
     "entry": [
       "entry-5.ts"
-    ]
+    ],
+    "deps": {
+      "neverBundle": [
+        "legacy-external"
+      ]
+    }
+  },
+  "dependencies": {
+    "wasm-sandbox": "*",
+    "legacy-external": "*"
   }
 }

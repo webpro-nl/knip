@@ -139,7 +139,7 @@ for (const [target, binding] of selectedTargets) {
 
 if (args.publish) {
   for (const vsix of vsixFiles) {
-    execSync(`pnpm vsce publish --packagePath ${vsix}`, { cwd: root, stdio: 'inherit' });
+    execSync(`pnpm vsce publish --azure-credential --packagePath ${vsix}`, { cwd: root, stdio: 'inherit' });
     execSync(`ovsx publish ${vsix}`, { cwd: root, stdio: 'inherit' });
   }
 }

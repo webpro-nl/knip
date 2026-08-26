@@ -8,8 +8,10 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/compilers/tailwind');
 
 test('Built-in compiler for Tailwind CSS', async () => {
-  const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const options = await createOptions({ cwd, includedIssueTypes: ['unresolved', 'cycles'] });
+  const { issues, counters } = await main(options);
+
+  assert.equal(Object.keys(issues.cycles).length, 0);
 
   assert.deepEqual(counters, {
     ...baseCounters,

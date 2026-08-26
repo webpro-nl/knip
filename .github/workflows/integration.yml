@@ -8,27 +8,48 @@ on:
         type: boolean
         default: false
   pull_request:
+    paths: &paths # Sources of the three packages published to pkg.pr.new
+      - 'packages/knip/**'
+      - '!packages/knip/test/**'
+      - '!packages/knip/fixtures/**'
+      - 'packages/language-server/**'
+      - 'packages/mcp-server/**'
+      # Root workspace / dependency config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      # This workflow and its support files
+      - '.github/workflows/integration.yml'
+      - '.github/workflows/scripts/**'
+      - '.github/workflows/snapshots/**'
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+    paths: *paths
 
-permissions:
-  issues: write
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   publish:
     name: Build and publish Knip
+    if: ${{ github.repository_owner == 'webpro-nl' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # comment on referenced issues
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
       - run: pnpm run build
@@ -38,7 +59,7 @@ jobs:
           pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'
       - name: Comment on referenced issues
         if: github.event_name == 'push'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const sha = '${{ steps.publish.outputs.sha }}';
@@ -64,6 +85,8 @@ jobs:
     name: Run Knip in ${{ matrix.project.name }}
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       PKG_URL: https://pkg.pr.new/knip@${{ needs.publish.outputs.sha }}
       SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
@@ -84,7 +107,7 @@ jobs:
 
           - name: argos
             repo: argos-ci/argos
-            commands: |
+            commands: | # build required: knexfile.js requires ./dist at config load time
               pnpm install
               pnpm build
               pnpm add -D -w $PKG_URL
@@ -95,7 +118,7 @@ jobs:
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              bash $SNAP astro -- pnpm knip --fix --exclude unresolved
+              bash $SNAP astro -- pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
@@ -182,7 +205,7 @@ jobs:
             repo: getsentry/sentry
             commands: |
               pnpm install
-              pnpm add -D $PKG_URL
+              pnpm add -D -w $PKG_URL
               bash $SNAP sentry -- pnpm run knip --fix
               bash $SNAP sentry-prod -- pnpm run knip:prod
 
@@ -194,29 +217,30 @@ jobs:
 
           - name: TypeScript
             repo: microsoft/TypeScript
+            ref: b465fdbfe175304d9b977da137b2c178ae1091d3 # Last passing commit before the TypeScript 7 migration
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npx hereby generate-diagnostics
               bash $SNAP TypeScript -- npx knip
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Check out ${{ matrix.project.repo }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ${{ matrix.project.repo }}
+          ref: ${{ matrix.project.ref }}
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}
@@ -226,7 +250,7 @@ jobs:
 
       - name: Upload updated snapshots
         if: ${{ inputs.update_snapshots }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: snapshots-${{ matrix.project.name }}
           path: /tmp/snapshot-updates/
@@ -237,13 +261,15 @@ jobs:
     if: ${{ inputs.update_snapshots }}
     needs: integration
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: snapshots-*
           path: snapshots/
           merge-multiple: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: snapshots
           path: snapshots/

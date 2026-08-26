@@ -13,8 +13,8 @@ test('Find dependencies with the react-email plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
 

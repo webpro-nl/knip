@@ -9,3 +9,5 @@ await Promise.all([$`executable1; echo 1`, $`executable2; echo 2`, $`executable3
 
 const name = 'content';
 await $`mkdir /tmp/${name}`;
+
+await $`git -C ${name} config fetch.prune false`;

@@ -1,15 +1,17 @@
 /** @internal */
-export const toExtendedIgnorePattern = (pattern: string): string => {
+// `dir/*` matches direct children; gitignore also ignores their contents (deep), but CODEOWNERS
+// ownership is shallow (direct files only). Default is deep; shallow callers (codeowners) opt in.
+export const toExtendedIgnorePattern = (pattern: string, shallow = false): string => {
   if (pattern === '*' || pattern === '**') return pattern;
-  if (pattern.endsWith('/*')) return pattern;
+  if (shallow && pattern.endsWith('/*')) return pattern;
   return `${pattern}/**`;
 };
 
-export const expandIgnorePatterns = (patterns: Iterable<string>): string[] => {
+export const expandIgnorePatterns = (patterns: Iterable<string>, shallow = false): string[] => {
   const result: string[] = [];
   for (const p of patterns) {
     result.push(p);
-    const ext = toExtendedIgnorePattern(p);
+    const ext = toExtendedIgnorePattern(p, shallow);
     if (ext !== p) result.push(ext);
   }
   return result;

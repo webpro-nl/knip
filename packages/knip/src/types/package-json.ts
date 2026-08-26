@@ -4,8 +4,6 @@ type Primitive = null | undefined | string | number | boolean | symbol | bigint;
 
 type LiteralUnion<LiteralType, BaseType extends Primitive> = LiteralType | (BaseType & Record<never, never>);
 
-type Dependencies = Record<string, string>;
-
 type C = 'import' | 'require' | 'node' | 'node-addons' | 'deno' | 'browser' | 'electron' | 'react-native' | 'default';
 type ExportCondition = LiteralUnion<C, string>;
 type Exports = null | string | string[] | { [key in ExportCondition]: Exports } | { [key: string]: Exports };
@@ -31,6 +29,17 @@ export type Scripts = Record<string, string>;
 export type Catalog = Record<string, string>;
 export type Catalogs = Record<string, Catalog>;
 
+type Dependencies = Record<string, string>;
+type TypesVersions = Record<string, Record<string, string[]>>;
+
+export type PackageExtensions = Record<
+  string,
+  {
+    peerDependencies?: Dependencies;
+    peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+  }
+>;
+
 export type PackageJson = {
   name?: string;
   main?: string;
@@ -51,12 +60,22 @@ export type PackageJson = {
   browser?: string;
   types?: string;
   typings?: string;
+  typesVersions?: TypesVersions;
+  publishConfig?: {
+    directory?: string;
+    main?: string;
+    exports?: Exports;
+    types?: string;
+    typings?: string;
+    typesVersions?: TypesVersions;
+  };
   catalog?: Catalog;
   catalogs?: Catalogs;
   packageManager?: string;
   engines?: Record<string, string>;
   pnpm?: {
     overrides?: Dependencies;
+    packageExtensions?: PackageExtensions;
   };
   knip?: WorkspaceConfiguration;
 } & Plugins;

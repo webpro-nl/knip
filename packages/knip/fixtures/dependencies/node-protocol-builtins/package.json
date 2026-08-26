@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/node-protocol-builtins",
+  "dependencies": {
+    "punycode": "*"
+  }
+}

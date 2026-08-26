@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "paths": {
+      "#events": ["./events.ts"]
+    }
+  },
+  "include": ["**/*.ts"]
+}

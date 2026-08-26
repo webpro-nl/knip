@@ -16,14 +16,15 @@ import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
 import { buildVisitor } from './typescript/visitors/walk.ts';
-import { createCustomModuleResolver } from './typescript/resolve-module-names.ts';
+import { createCustomModuleResolver, createGlobAliasResolver } from './typescript/resolve-module-names.ts';
+import type { ResolveGlobPattern } from './typescript/resolve-module-names.ts';
 import type { ResolveModule } from './typescript/ast-nodes.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
-import type { ToSourceFilePath, WorkspaceManifestHandler } from './util/to-source-path.ts';
+import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -36,6 +37,7 @@ export class ProjectPrincipal {
     sourceText: '',
     addScript: () => {},
     addImport: () => {},
+    addImportGlob: () => {},
     markExportRegistered: () => {},
   };
   pluginVisitorObjects: PluginVisitorObject[] = [];
@@ -51,10 +53,11 @@ export class ProjectPrincipal {
 
   cache: CacheConsultant<FileNode>;
   toSourceFilePath: ToSourceFilePath;
-  private findWorkspaceManifestImports: WorkspaceManifestHandler | undefined;
+  private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
+  resolveGlobPattern: ResolveGlobPattern = pattern => [pattern];
 
   resolvedFiles = new Set<string>();
   deletedFiles = new Set<string>();
@@ -63,11 +66,11 @@ export class ProjectPrincipal {
   constructor(
     options: MainOptions,
     toSourceFilePath: ToSourceFilePath,
-    findWorkspaceManifestImports?: WorkspaceManifestHandler
+    findWorkspacePackageTarget?: WorkspacePackageTargetHandler
   ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
-    this.findWorkspaceManifestImports = findWorkspaceManifestImports;
+    this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -121,9 +124,10 @@ export class ProjectPrincipal {
       { scopedPaths, scopedRootDirs },
       customCompilerExtensions,
       this.toSourceFilePath,
-      this.findWorkspaceManifestImports,
+      this.findWorkspacePackageTarget,
       this.tsConfigFile
     );
+    this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
   }
 
   readFile(filePath: string): string {
@@ -170,11 +174,7 @@ export class ProjectPrincipal {
 
   async runAsyncCompilers() {
     const add = timerify(this.fileManager.compileAndAddSourceFile.bind(this.fileManager));
-    const extensions = Array.from(this.asyncCompilers.keys());
-    const files = Array.from(this.projectPaths).filter(filePath => extensions.includes(extname(filePath)));
-    for (const filePath of files) {
-      await add(filePath);
-    }
+    for (const filePath of this.projectPaths) if (this.asyncCompilers.has(extname(filePath))) await add(filePath);
   }
 
   walkAndAnalyze(

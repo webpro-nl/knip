@@ -13,7 +13,7 @@ test('Find unused export through re-export in entry file (includeEntryExports/ig
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 2,
     processed: 3,
     total: 3,
   });

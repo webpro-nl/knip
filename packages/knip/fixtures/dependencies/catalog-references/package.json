@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/catalog-references",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

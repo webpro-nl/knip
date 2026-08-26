@@ -22,6 +22,7 @@ import * as vscode from 'vscode';
 
 /** @param {string} specifier */
 const isGlobLike = specifier => specifier.includes('*');
+const collator = new Intl.Collator();
 
 /** @implements {vscode.TreeDataProvider<TreeViewItem>} */
 export class BaseTreeViewProvider {
@@ -267,7 +268,7 @@ export class BaseTreeViewProvider {
         ? childList.toSorted((a, b) => {
             const af = 'filePath' in a ? a.filePath : undefined;
             const bf = 'filePath' in b ? b.filePath : undefined;
-            return af && bf ? af.localeCompare(bf) : 0;
+            return af && bf ? collator.compare(af, bf) : 0;
           })
         : childList;
 

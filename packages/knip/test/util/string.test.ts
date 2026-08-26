@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pad, truncate, truncateStart } from '../../src/util/string.ts';
+import { pad, substringBefore, truncate, truncateStart } from '../../src/util/string.ts';
+
+test('substringBefore', () => {
+  assert.equal(substringBefore('plugin:target', ':'), 'plugin');
+  assert.equal(substringBefore('plugin', ':'), 'plugin');
+  assert.equal(substringBefore(':target', ':'), '');
+});
 
 test('truncate', () => {
   assert.equal(truncate('hello world', 8), 'hello w…');

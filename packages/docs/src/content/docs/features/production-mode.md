@@ -73,8 +73,10 @@ when finding unused or unlisted dependencies.
 Additionally, the `--strict` flag can be added to:
 
 - Verify isolation: workspaces should use strictly their own `dependencies`
-- Include `peerDependencies` when finding unused or unlisted dependencies
-- Report type-only imports listed in `dependencies`
+- Include required `peerDependencies` when finding unused or unlisted
+  dependencies
+- [Distinguish development-only type imports from types exposed to package
+  consumers][3]
 
 ```sh
 knip --production --strict
@@ -92,3 +94,4 @@ knip --production --exclude types
 
 [1]: ../reference/jsdoc-tsdoc-tags.md#internal
 [2]: ../guides/configuring-project-files.md
+[3]: ../guides/handling-issues.mdx#production-types

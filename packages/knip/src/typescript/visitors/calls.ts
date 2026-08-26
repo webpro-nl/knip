@@ -1,7 +1,7 @@
 import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
-import { getSafeScriptFromArgs, getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
 /**
@@ -196,10 +196,8 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     if (method) {
       const arg = node.arguments[0];
       if (CHILD_PROCESS_COMMAND_METHODS.has(method)) {
-        if (isStringLiteral(arg)) {
-          const command = getStringValue(arg);
-          if (command) s.scripts.add(command);
-        }
+        const command = getScriptFromArg(arg);
+        if (command) s.scripts.add(command);
         return;
       }
       if (CHILD_PROCESS_FILE_METHODS.has(method)) {
@@ -257,7 +255,21 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   };
   for (const arg of node.arguments) {
     if (arg.type === 'Identifier') markRefIfNs(arg.name);
-    else if (arg.type === 'ArrayExpression') {
+    else if (arg.type === 'ArrowFunctionExpression' && arg.expression) {
+      const body = arg.body.type === 'AwaitExpression' ? arg.body.argument : arg.body;
+      if (body.type === 'ImportExpression' && isStringLiteral(body.source)) {
+        s.handledImportExpressions.add(body.start);
+        const specifier = getStringValue(body.source)!;
+        s.addImport(
+          specifier,
+          undefined,
+          undefined,
+          undefined,
+          body.source.start,
+          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.LOADER
+        );
+      }
+    } else if (arg.type === 'ArrayExpression') {
       for (const el of arg.elements ?? []) {
         if (el?.type === 'Identifier') markRefIfNs(el.name);
       }

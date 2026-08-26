@@ -13,7 +13,31 @@ test('Resolve nuxt aliases without a root tsconfig.json', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 8,
+    total: 8,
   });
+});
+
+test('Resolve local nuxt modules in production mode', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 6,
+    total: 6,
+  });
+});
+
+test('Classify package nuxt modules as production dependencies in strict mode', async () => {
+  const options = await createOptions({ cwd, isProduction: true, isStrict: true });
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 1,
+    processed: 6,
+    total: 6,
+  });
+  assert.deepEqual(Object.keys(issues.unlisted['nuxt.config.ts']), ['nuxt-module']);
 });

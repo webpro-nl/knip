@@ -1,11 +1,13 @@
 import {
   parseSync,
   rawTransferSupported,
+  type TemplateLiteral,
   type TSEnumDeclaration,
   type TSEnumMember,
   type TSModuleDeclaration,
+  visitorKeys,
 } from 'oxc-parser';
-import { DEFAULT_EXTENSIONS, FIX_FLAGS, SYMBOL_TYPE } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, FIX_FLAGS, SCRIPT_INTERPOLATION, SYMBOL_TYPE } from '../constants.ts';
 import { extname } from '../util/path.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile } from '../types/config.ts';
 import { timerify } from '../util/Performance.ts';
@@ -27,11 +29,20 @@ const parseFile = (filePath: string, sourceText: string) => {
 
 export const _parseFile = timerify(parseFile);
 
+export const isAmbientDeclarationFile = (filePath: string, sourceText: string): boolean => {
+  try {
+    return _parseFile(filePath, sourceText).module.staticExports.length === 0;
+  } catch {
+    return false;
+  }
+};
+
 export type ResolveModule = (specifier: string, containingFile: string) => ResolvedModule | undefined;
 
 export interface ResolvedModule {
   resolvedFileName: string;
   isExternalLibraryImport: boolean;
+  packageName?: string;
 }
 
 export const buildLineStarts = (sourceText: string): number[] => {
@@ -76,6 +87,16 @@ export const getStringValue = (node: any): string | undefined => {
     return node.quasis[0].value?.cooked ?? node.quasis[0].value?.raw;
   return undefined;
 };
+
+export const getScriptFromTemplate = (template: TemplateLiteral): string => {
+  const { quasis } = template;
+  let script = quasis[0].value.raw;
+  for (let i = 1; i < quasis.length; i++) script += SCRIPT_INTERPOLATION + quasis[i].value.raw;
+  return script;
+};
+
+export const getScriptFromArg = (arg: any): string | undefined =>
+  isStringLiteral(arg) ? getStringValue(arg) : arg?.type === 'TemplateLiteral' ? getScriptFromTemplate(arg) : undefined;
 
 const SAFE_SCRIPT_ARG = /^[\w@.,:/=+~-]+$/;
 
@@ -157,6 +178,46 @@ export function extractNamespaceMembers(
   }
   return members;
 }
+
+export const collectAugmentationRefs = (node: TSModuleDeclaration): string[] => {
+  if (!node.body || node.body.type !== 'TSModuleBlock') return [];
+  const body = node.body.body;
+
+  const declared = new Set<string>();
+  for (const stmt of body) {
+    const decl = stmt.type === 'ExportNamedDeclaration' && stmt.declaration ? stmt.declaration : stmt;
+    if ('id' in decl && decl.id?.type === 'Identifier') declared.add(decl.id.name);
+    else if (decl.type === 'VariableDeclaration')
+      for (const d of decl.declarations) if (d.id.type === 'Identifier') declared.add(d.id.name);
+  }
+
+  const refs: string[] = [];
+  const seen = new Set<string>();
+  const add = (ref: any) => {
+    if (ref?.type === 'Identifier' && !declared.has(ref.name) && !seen.has(ref.name)) {
+      seen.add(ref.name);
+      refs.push(ref.name);
+    }
+  };
+  const visit = (n: any) => {
+    const type = n?.type;
+    if (!type) return;
+    if (type === 'TSTypeReference') add(n.typeName);
+    else if (type === 'TSInterfaceHeritage') add(n.expression);
+    const keys = visitorKeys[type];
+    if (!keys) return;
+    for (const key of keys) {
+      const val = n[key];
+      if (!val) continue;
+      if (Array.isArray(val)) {
+        for (const item of val) if (item) visit(item);
+      } else visit(val);
+    }
+  };
+  for (const stmt of body) visit(stmt);
+
+  return refs;
+};
 
 export function extractEnumMembers(
   decl: TSEnumDeclaration,

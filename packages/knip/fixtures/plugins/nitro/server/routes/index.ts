@@ -1,4 +1,5 @@
 import { eventHandler } from 'h3';
+import '#nitro-internal-pollyfills';
 
 import { fn } from '../utils/fn';
 

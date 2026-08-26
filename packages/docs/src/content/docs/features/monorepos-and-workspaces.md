@@ -124,11 +124,13 @@ knip --workspace @myorg/* --workspace '!@myorg/legacy'
 knip --workspace './apps/*' --workspace '@shared/utils'
 ```
 
-This will include the target workspace(s), but also ancestor and dependent
-workspaces. For two reasons:
+This will include the target workspace(s), but also ancestor, dependency and
+dependent workspaces. For three reasons:
 
 - Ancestor workspaces may list dependencies in `package.json` the linted
   workspace uses.
+- Dependency workspaces may provide configuration and source information used by
+  the linted workspace.
 - Dependent workspaces may reference exports from the linted workspace.
 
 To lint the workspace in isolation, there are two options:

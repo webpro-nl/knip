@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
-import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
+import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
   if (!isStartsLikePackageName(specifier)) return;
@@ -17,11 +18,31 @@ export const getPackageNameFromModuleSpecifier = (specifier: string) => {
 };
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
+const yarnPnpmStorePackageRoot = /^(.*\/node_modules\/\.store\/[^/]+\/package)(?:\/|$)/;
+const yarnPnpmStoreNameCache = new Map<string, string | undefined>();
+
+const getPackageNameFromYarnPnpmStore = (posixPath: string): string | undefined => {
+  const match = posixPath.match(yarnPnpmStorePackageRoot);
+  if (!match) return;
+  const root = match[1];
+  if (yarnPnpmStoreNameCache.has(root)) return yarnPnpmStoreNameCache.get(root);
+  let name: string | undefined;
+  try {
+    name = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name;
+  } catch {}
+  yarnPnpmStoreNameCache.set(root, name);
+  return name;
+};
+
 export const getPackageNameFromFilePath = (value: string) => {
   const name = value.startsWith('file://') ? value.slice(7) : value;
   if (name.includes('node_modules/.bin/')) return extractBinary(name);
-  const match = toPosix(name).match(lastPackageNameMatch);
-  if (match) return match[match.length - 1];
+  const posixPath = toPosix(name);
+  const match = posixPath.match(lastPackageNameMatch);
+  if (match) {
+    const last = match[match.length - 1];
+    return last === '.store' ? (getPackageNameFromYarnPnpmStore(posixPath) ?? last) : last;
+  }
   return name;
 };
 

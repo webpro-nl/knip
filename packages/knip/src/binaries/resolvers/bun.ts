@@ -3,6 +3,7 @@ import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
+import { argsAfter, expandScript } from '../util.ts';
 import { resolveX } from './bunx.ts';
 
 const commands = new Set([
@@ -16,6 +17,7 @@ const commands = new Set([
   'completions',
   'config',
   'create',
+  'dedupe',
   'deploy',
   'discord',
   'exec',
@@ -53,20 +55,24 @@ const commands = new Set([
   'x',
 ]);
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
+export const resolve: BinaryResolver = (_binary, words, options) => {
   const binary = toBinary(_binary);
-  const parsed = parseArgs(args, { string: ['cwd'] });
+  const parsed = parseArgs(words, { string: ['cwd'] });
   const [command, script] = parsed._;
 
   if (command === 'x') {
-    const argsForX = args.filter(arg => arg !== 'x');
-    return [binary, ...resolveX(argsForX, options)];
+    const wordsForX = words.filter(word => word.value !== 'x');
+    return [binary, ...resolveX(wordsForX, options)];
   }
 
   const { manifest, cwd, fromArgs } = options;
 
-  if (command === 'run' && manifest.scriptNames.has(script)) return [binary];
-  if (manifest.scriptNames.has(command)) return [binary];
+  if (command === 'run' && manifest.scriptNames.has(script)) {
+    return [binary, ...(expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? [])];
+  }
+  if (manifest.scriptNames.has(command)) {
+    return [binary, ...(expandScript(command, argsAfter(words, command), manifest.scripts, options) ?? [])];
+  }
   if (command !== 'run' && commands.has(command)) return [binary];
 
   const filePath = command === 'run' ? script : command;
@@ -77,5 +83,9 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  return command === 'run' ? [binary] : [binary, ...fromArgs(args, opts)];
+  if (command !== 'run') return [binary, ...fromArgs(words, opts)];
+
+  const input = toBinary(filePath, { optional: true });
+  if (dir) input.dir = dir;
+  return [binary, input];
 };

@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/catalog-workspace-selection",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

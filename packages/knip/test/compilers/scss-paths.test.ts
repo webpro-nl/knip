@@ -16,7 +16,6 @@ test('SCSS imports resolved via tsconfig `paths` (partial and non-partial)', asy
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     processed: 4,
     total: 4,
   });

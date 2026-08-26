@@ -63,6 +63,8 @@ const packageEntry = () => 'Package entry file not found';
 
 const extensionUnregistered = () => `Extension in ${bright('project')} not registered as a compiler`;
 
+const extensionExcluded = () => `Compiled extension excluded by ${bright('project')} (imports not followed)`;
+
 export const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignore', { print: unused }],
   ['ignoreFiles', { print: unused }],
@@ -74,6 +76,7 @@ export const hintPrinters = new Map<ConfigurationHintType, { print: (options: Pr
   ['entry-empty', { print: empty }],
   ['project-empty', { print: empty }],
   ['project-extension-unregistered', { print: extensionUnregistered }],
+  ['project-extension-excluded', { print: extensionExcluded }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
   ['top-level-unconfigured', { print: add }],
@@ -93,7 +96,7 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['ignoreBinaries'],
   ['ignoreUnresolved'],
   ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
-  ['project-extension-unregistered'],
+  ['project-extension-unregistered', 'project-extension-excluded'],
   ['package-entry'],
 ];
 

@@ -10,6 +10,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['setup.js', './src/setupTests.ts'],
+    snapshotSerializers: ['./src/htmlSnapshotSerializer.ts', 'snapshot-serializer.js'],
     coverage: {
       reporter: ['html', 'lcov'],
       provider: 'istanbul',

@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/subpath-import-alias-workspace",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

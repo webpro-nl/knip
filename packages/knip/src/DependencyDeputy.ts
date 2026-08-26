@@ -31,6 +31,14 @@ import { findMatch, toRegexOrString } from './util/regex.ts';
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
 
+interface DependencyReferenceOptions {
+  specifier: string;
+  isDevOnly?: boolean;
+  isTypeOnly?: boolean;
+  isResolved?: boolean;
+  isPublishedType?: boolean;
+}
+
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
@@ -197,18 +205,17 @@ export class DependencyDeputy {
   public maybeAddReferencedExternalDependency(
     workspace: Workspace,
     packageName: string,
-    isDevOnly?: boolean,
-    isTypeOnly?: boolean
+    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (isBuiltin(packageName)) return true;
+    if (specifier.startsWith('node:') || isBuiltin(specifier)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
     if (packageName === workspace.pkgName) return true;
 
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const isDevOrTypeOnly = isDevOnly || isTypeOnly;
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
+    const isDevOrTypeOnly = isDevOnly || (isTypeOnly && !isPublishedType);
     const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
@@ -232,7 +239,7 @@ export class DependencyDeputy {
       return true;
     }
 
-    if (!this.isStrict) {
+    if (!this.isStrict && isResolved !== false) {
       for (const name of workspaceNames) {
         const hosts = this.getHostDependenciesFor(name, packageName);
         if (hosts.length === 0) continue;
@@ -254,7 +261,7 @@ export class DependencyDeputy {
 
     this.addReferencedBinary(workspace.name, binaryName);
 
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
 
     for (const name of workspaceNames) {
       const binaries = this.installedBinaries.get(name);
@@ -312,8 +319,7 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspace, dependency),
             ...this.getHostDependenciesFor(workspace, typedPackageName),
           ];
-          if (hostDependencies.length)
-            return !!hostDependencies.find(host => isReferencedDependency(host.name, visited));
+          if (hostDependencies.length) return hostDependencies.some(host => isReferencedDependency(host.name, visited));
 
           if (!referencedDependencies?.has(dependency)) return false;
 
@@ -342,7 +348,7 @@ export class DependencyDeputy {
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
-        if (!isReferencedDependency(symbol)) continue;
+        if (!referencedDependencies?.has(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({

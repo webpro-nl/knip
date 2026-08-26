@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getInputsFromHandlers } from './resolveFromAST.ts';
+import { resolveFromAST } from './resolveFromAST.ts';
 
 // https://v2.sst.dev
 // https://sst.dev/docs/
@@ -12,11 +12,6 @@ const enablers = ['sst'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['sst.config.ts'];
-
-const resolveFromAST: ResolveFromAST = (program, options) => {
-  const inputs = getInputsFromHandlers(program, options);
-  return inputs;
-};
 
 const plugin: Plugin = {
   title,

@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/tsconfig-package",
+  "private": true,
+  "dependencies": {
+    "@fixtures/ignored": "workspace:*",
+    "@fixtures/tsconfig-base": "workspace:*"
+  },
+  "exports": {
+    "./app.json": "./app.json"
+  }
+}

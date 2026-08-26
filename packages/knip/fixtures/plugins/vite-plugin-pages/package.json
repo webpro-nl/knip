@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/vite-plugin-pages",
+  "dependencies": {
+    "vue": "*",
+    "vite-plugin-pages": "*"
+  }
+}

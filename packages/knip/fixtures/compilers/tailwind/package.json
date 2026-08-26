@@ -1,5 +1,8 @@
 {
   "name": "@fixtures/compilers-tailwind",
+  "exports": {
+    "./tailwind-theme.css": "./styles.css"
+  },
   "dependencies": {
     "tailwindcss": "*"
   },

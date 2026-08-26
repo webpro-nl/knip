@@ -45,15 +45,19 @@ test('Reference binaries and entry files in node:child_process calls', async () 
   assert(!binaries.phantomdeploy);
   assert(!binaries.phantomgrep);
 
+  assert(binaries.fig);
+  assert(binaries.melon);
+  assert(!binaries.phantomserve);
+
   // dynamic command and a non-child_process `.exec` are not referenced
   assert(!binaries.kiwi);
   assert(!binaries.banana);
 
-  assert.equal(Object.keys(binaries).length, 20);
+  assert.equal(Object.keys(binaries).length, 22);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 20,
+    binaries: 22,
     processed: 3,
     total: 3,
   });

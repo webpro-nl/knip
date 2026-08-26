@@ -1,4 +1,5 @@
 import type { Program, VisitorObject } from 'oxc-parser';
+import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
 import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
@@ -15,6 +16,7 @@ import type { PackageJson } from './package-json.ts';
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   knownBinsOnly?: boolean;
   containingFilePath: string;
+  expandedScripts?: Set<string>;
 }
 
 export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (
@@ -27,13 +29,15 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
-export type FromArgs = (args: string[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
+export type ScriptArg = string | Word;
+
+export type FromArgs = (args: ScriptArg[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
 
 export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
 }
 
-export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
+export type BinaryResolver = (binary: string, words: Word[], options: BinaryResolverOptions) => Input[];
 
 export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
 
@@ -53,6 +57,11 @@ export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, 
 
 export type IgnoreIssues = Record<string, IssueType[]>;
 
+export type CyclesConfig = {
+  allow?: string[][];
+  dynamicImports?: boolean;
+};
+
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
@@ -67,6 +76,7 @@ export interface Configuration {
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreFiles: NormalizedGlob;
+  cycles: CyclesConfig;
   ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
@@ -106,6 +116,7 @@ interface BaseOptions {
   cwd: string;
   manifest: Manifest;
   rootManifest: Manifest | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
 }
 
 type IsPluginEnabledOptions = {
@@ -177,6 +188,7 @@ export type PluginVisitorContext = {
   sourceText: string;
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
+  addImportGlob: (patterns: string[], options?: { base?: string; filter?: RegExp }) => void;
   /**
    * Credit a local export as used by an in-module runtime registration (e.g. a custom element
    * registered through a framework decorator), so it isn't reported as an unused export even

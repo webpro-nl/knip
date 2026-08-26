@@ -2,8 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "project": ["!templates"],
-      "ignoreBinaries": ["tsc"]
+      "project": ["!templates"]
     },
     "packages/knip": {
       "entry": ["test/**/*.ts"],
@@ -11,10 +10,12 @@
       "ignoreDependencies": ["prettier"]
     },
     "packages/docs": {
-      "entry": ["{remark,scripts}/*.ts"]
+      "entry": ["{plugins,scripts}/*.ts"]
     },
     "packages/vscode-knip": {
-      "entry": ["src/index.js!", "scripts/*.js", "test/*.mjs"]
+      "entry": ["src/index.js!", "scripts/*.js", "test/*.mjs"],
+      "project": ["**!", "!test/fixtures"],
+      "ignoreBinaries": ["vsce", "ovsx"]
     }
   }
 }

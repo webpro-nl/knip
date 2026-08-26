@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/jest-transform",
+  "scripts": {
+    "test": "jest --config ./configs/spec.config.json"
+  },
+  "devDependencies": {
+    "@babel/core": "*",
+    "@babel/preset-env": "*",
+    "babel-jest": "*",
+    "babel-plugin-macros": "*",
+    "jest": "*"
+  }
+}

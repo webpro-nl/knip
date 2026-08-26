@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
 
-const extensionAlias = {
+export const extensionAlias: Record<string, string[]> = {
   '.js': ['.js', '.ts', '.tsx', '.d.ts'],
   '.jsx': ['.jsx', '.tsx'],
   '.mjs': ['.mjs', '.mts', '.d.mts'],
@@ -11,6 +11,22 @@ const extensionAlias = {
 };
 
 const resolverInstances: ResolverFactory[] = [];
+
+const declarationResolver = new ResolverFactory({
+  extensions: [...DTS_EXTENSIONS, ...DEFAULT_EXTENSIONS],
+  extensionAlias: {
+    '.ts': ['.d.ts', '.ts'],
+    '.mts': ['.d.mts', '.mts'],
+    '.cts': ['.d.cts', '.cts'],
+    '.js': ['.d.ts', '.js'],
+    '.mjs': ['.d.mts', '.mjs'],
+    '.cjs': ['.d.cts', '.cjs'],
+  },
+  conditionNames: ['types', 'import', 'require', 'node', 'default'],
+  nodePath: false,
+});
+
+resolverInstances.push(declarationResolver);
 
 const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
   const baseOptions = {
@@ -23,7 +39,10 @@ const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =
     tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
     ...baseOptions,
   });
-  const fallbackResolver = new ResolverFactory(baseOptions);
+  const fallbackResolver = new ResolverFactory({
+    ...baseOptions,
+    conditionNames: ['require', 'import', 'browser', 'default'],
+  });
 
   resolverInstances.push(resolver, fallbackResolver);
 
@@ -43,6 +62,17 @@ const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DT
  * Default module resolver (no custom extensions or path aliases).
  */
 export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
+
+const resolveDeclarationSync = (specifier: string, containingFile: string) => {
+  const result = declarationResolver.resolveFileSync(containingFile, specifier);
+  if (!result.path) return;
+  return {
+    path: toPosix(result.path),
+    packageJsonPath: result.packageJsonPath ? toPosix(result.packageJsonPath) : undefined,
+  };
+};
+
+export const _resolveDeclarationSync = timerify(resolveDeclarationSync, 'resolveDeclarationSync');
 
 export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =>
   timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');

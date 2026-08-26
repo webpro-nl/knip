@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/unplugin-auto-import",
+  "dependencies": {
+    "vue": "*",
+    "unplugin-auto-import": "*"
+  }
+}

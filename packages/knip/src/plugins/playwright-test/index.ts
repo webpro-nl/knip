@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
-// https://www.npmjs.com/package/playwright-test
+// https://www.npmx.dev/package/playwright-test
 
 const title = 'playwright-test';
 

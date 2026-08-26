@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/vue-styles",
+  "dependencies": {
+    "vue": "*"
+  },
+  "devDependencies": {
+    "less": "*",
+    "sass": "*",
+    "stylus": "*"
+  }
+}

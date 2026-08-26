@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun7",
+  "devDependencies": {
+    "bun": "*"
+  }
+}

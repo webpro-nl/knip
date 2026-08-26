@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/entry-public-enum-members",
+  "exports": "./index.ts"
+}

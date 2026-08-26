@@ -3,5 +3,8 @@
   "dependencies": {
     "nuxt": "*",
     "vue": "*"
+  },
+  "devDependencies": {
+    "nuxt-module": "*"
   }
 }

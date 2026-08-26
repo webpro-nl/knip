@@ -14,6 +14,7 @@ import { u } from 'unist-builder';
 /** @param {string} text */
 const replaceLessThan = text => text.replace(lessThanMatch, '‹');
 const lessThanMatch = /</g;
+const collator = new Intl.Collator();
 
 /**
  * @param {Export} _export
@@ -38,7 +39,7 @@ export function renderExportHover(_export, root, snippets, maxSnippets) {
   const len = importLocations.length;
   const sortedIndices = new Array(len);
   for (let i = 0; i < len; i++) sortedIndices[i] = i;
-  sortedIndices.sort((a, b) => importLocations[a].filePath.localeCompare(importLocations[b].filePath));
+  sortedIndices.sort((a, b) => collator.compare(importLocations[a].filePath, importLocations[b].filePath));
 
   let lastFilePath = '';
 

@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/nuxt');
 
-test('Find dependencies with the nuxt plugin', async () => {
+test('Find dependencies with the Nuxt plugin without a config file', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -18,7 +18,7 @@ test('Find dependencies with the nuxt plugin', async () => {
     ...baseCounters,
     dependencies: 1,
     exports: 1,
-    processed: 8,
-    total: 8,
+    processed: 7,
+    total: 7,
   });
 });

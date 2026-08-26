@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/unplugin-vue-markdown",
+  "dependencies": {
+    "vue": "*",
+    "unplugin-vue-components": "*",
+    "unplugin-vue-markdown": "*"
+  }
+}

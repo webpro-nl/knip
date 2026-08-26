@@ -22,16 +22,22 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   assert(issues.binaries['.github/workflows/test.yml']['changeset']);
   assert(issues.binaries['.github/workflows/test.yml']['eslint']);
   assert(issues.binaries['.github/workflows/test.yml']['knip']);
+  assert(!issues.binaries['.github/workflows/test.yml']['MIT']);
+  assert(!issues.binaries['.github/workflows/test.yml']['Apache-2.0']);
   assert(issues.binaries['.github/workflows/test.yml']['nyc']);
   assert(issues.binaries['.github/workflows/test.yml']['playwright']);
   assert(issues.binaries['.github/workflows/test.yml']['release-it']);
   assert(issues.binaries['.github/workflows/test.yml']['wait-on']);
 
+  // A composite action's own script, referenced via `$GITHUB_ACTION_PATH`, is
+  // resolved relative to the action directory (not reported as unused).
+  assert(!('.github/actions/composite/helper.mjs' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 8,
     unresolved: 2,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
 });

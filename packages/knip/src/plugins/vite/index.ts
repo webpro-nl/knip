@@ -9,13 +9,13 @@ import { createImportMetaGlobVisitor } from './visitors/importMetaGlob.ts';
 
 const title = 'Vite';
 
-const enablers = ['vite', 'vitest'];
+const enablers = ['vite', 'vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const resolveFromAST: ResolveFromAST = program => getBabelInputs(program);
+const resolveFromAST: ResolveFromAST = getBabelInputs;
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createImportMetaGlobVisitor(ctx));

@@ -1,9 +1,10 @@
+import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
+import starlightBlog from 'starlight-blog';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
-import remarkDirective from 'remark-directive';
-import { fixInternalLinks } from './remark/fixInternalLinks.ts';
-import { transformDirectives } from './remark/transformDirectives.ts';
+import { fixInternalLinks } from './plugins/fixInternalLinks.ts';
+import { transformDirectives } from './plugins/transformDirectives.ts';
 
 const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
@@ -21,7 +22,10 @@ export default defineConfig({
     '/guides/writing-a-plugin': '/writing-a-plugin',
   },
   markdown: {
-    remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
+    processor: satteri({
+      features: { directive: true },
+      mdastPlugins: [fixInternalLinks, transformDirectives],
+    }),
   },
   integrations: [
     starlight({
@@ -34,7 +38,7 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
         { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
-        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/knip' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmx.dev/package/knip' },
       ],
       components: {
         Head: './src/components/Head.astro',
@@ -117,10 +121,6 @@ export default defineConfig({
             },
           ],
         },
-        {
-          label: 'Blog',
-          items: [{ autogenerate: { directory: 'blog' } }],
-        },
       ],
       expressiveCode: {
         emitExternalStylesheet: true,
@@ -146,6 +146,26 @@ export default defineConfig({
           return theme;
         },
       },
+      plugins: [
+        starlightBlog({
+          title: 'Blog',
+          postCount: 7,
+          recentPostCount: 5,
+          prevNextLinksOrder: 'chronological',
+          authors: {
+            lars: {
+              name: 'Lars Kappert',
+              title: 'Knip it before you ship it',
+              picture: '/authors/lars.jpg',
+              url: 'https://webpro.nl/',
+            },
+          },
+          metrics: {
+            readingTime: true,
+            words: 'rounded',
+          },
+        }),
+      ],
     }),
   ],
 });

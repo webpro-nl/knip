@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun6",
+  "scripts": {
+    "test": "bun --config=\"$(git rev-parse --show-toplevel)/bunfig.toml\" test"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/expo5",
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "expo": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "*"
+  }
+}

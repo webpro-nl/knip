@@ -29,6 +29,7 @@ import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './uti
 import {
   type ConfigInput,
   type Input,
+  isCatalog,
   isConfig,
   isDeferResolve,
   isDependency,
@@ -38,7 +39,6 @@ import {
   toProductionEntry,
 } from './util/input.ts';
 import { getPackageNameFromSpecifier } from './util/modules.ts';
-import { getKeysByValue } from './util/object.ts';
 import { timerify } from './util/Performance.ts';
 import { basename, dirname, isInternal, join, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
@@ -56,6 +56,7 @@ type WorkspaceManagerOptions = {
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
@@ -67,12 +68,6 @@ type WorkspaceManagerOptions = {
 type CacheItem = { resolveConfig?: Input[]; resolveFromAST?: Input[]; configFile?: Input };
 
 const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, project: null };
-
-const initEnabledPluginsMap = () =>
-  Object.keys(Plugins).reduce(
-    (enabled, pluginName) => ({ ...enabled, [pluginName]: false }),
-    {} as Record<PluginName, boolean>
-  );
 
 /**
  * - Determines enabled plugins
@@ -88,13 +83,14 @@ export class WorkspaceWorker {
   dependencies: DependencySet;
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
   options: MainOptions;
 
-  enabledPluginsMap = initEnabledPluginsMap();
+  enabledPluginsMap: Partial<Record<PluginName, boolean>> = {};
   enabledPlugins: PluginName[] = [];
   enabledPluginsInAncestors: string[];
 
@@ -114,6 +110,7 @@ export class WorkspaceWorker {
     enabledPluginsInAncestors,
     handleInput,
     findWorkspaceByFilePath,
+    getManifest,
     readFile,
     configFilesMap,
     options,
@@ -131,6 +128,7 @@ export class WorkspaceWorker {
 
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
+    this.getManifest = getManifest;
     this.readFile = readFile;
 
     this.options = options;
@@ -146,12 +144,14 @@ export class WorkspaceWorker {
 
   private async determineEnabledPlugins() {
     const manifest = this.manifest;
+    const enabledPlugins: PluginName[] = [];
 
     for (const [pluginName, plugin] of PluginEntries) {
       if (this.config[pluginName] === false) continue;
       if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
       if (this.config[pluginName]) {
         this.enabledPluginsMap[pluginName] = true;
+        enabledPlugins.push(pluginName);
         continue;
       }
       const isEnabledInAncestor = this.enabledPluginsInAncestors.includes(pluginName);
@@ -161,10 +161,11 @@ export class WorkspaceWorker {
           (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config })))
       ) {
         this.enabledPluginsMap[pluginName] = true;
+        enabledPlugins.push(pluginName);
       }
     }
 
-    return getKeysByValue(this.enabledPluginsMap, true);
+    return enabledPlugins;
   }
 
   private getConfigForPlugin(pluginName: PluginName): EnsuredPluginConfiguration {
@@ -300,7 +301,8 @@ export class WorkspaceWorker {
     const knownBinsOnly = false;
 
     const rootManifest = this.rootManifest;
-    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly };
+    const getManifest = this.getManifest;
+    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly, getManifest };
 
     // Get dependencies from package.json#scripts
     const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };
@@ -317,7 +319,6 @@ export class WorkspaceWorker {
         _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath });
 
     const inputs: Input[] = [];
-    const enabledPlugins = new Set(this.enabledPlugins);
 
     const configFilesMap = this.configFilesMap;
     const seen = new Map<PluginName, Set<string>>();
@@ -357,7 +358,9 @@ export class WorkspaceWorker {
     };
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
-      if (isConfig(input)) {
+      if (isCatalog(input)) {
+        inputs.push({ ...input, containingFilePath });
+      } else if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
       } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
         inputs.push({ ...input, containingFilePath });
@@ -403,7 +406,7 @@ export class WorkspaceWorker {
         for (const id of config.entry) inputs.push(toInput(id));
       } else if (
         (!plugin.resolveConfig && !plugin.resolveFromAST) ||
-        (configFilePaths.filter(path => basename(path) !== 'package.json').length === 0 &&
+        (!configFilePaths.some(path => basename(path) !== 'package.json') &&
           (!this.configFilesMap.get(wsName)?.get(pluginName) ||
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
@@ -527,22 +530,25 @@ export class WorkspaceWorker {
       const configFiles = this.configFilesMap.get(wsName);
       if (configFiles) {
         while (configFiles.size > 0) {
-          const entry = configFiles.entries().next().value;
+          const entry: [PluginName, Set<string>] | undefined = configFiles.entries().next().value;
           if (!entry) break;
 
           const [pluginName, dependencies] = entry;
           configFiles.delete(pluginName);
-          if (enabledPlugins.has(pluginName)) {
-            const seenConfigFiles = getSeenConfigFiles(pluginName);
-            const unprocessed: string[] = [];
-            for (const filePath of dependencies) {
-              if (!seenConfigFiles.has(filePath)) unprocessed.push(filePath);
-            }
-            if (unprocessed.length > 0) {
-              for (const input of await runPlugin(pluginName, unprocessed, true)) inputs.push(input);
-            }
-          } else {
+
+          // Referenced config files are handled by their own plugin, unless it's explicitly disabled
+          if (this.config[pluginName] === false) {
             for (const id of dependencies) inputs.push(toEntry(id));
+            continue;
+          }
+
+          const seenConfigFiles = getSeenConfigFiles(pluginName);
+          const unprocessed: string[] = [];
+          for (const filePath of dependencies) {
+            if (!seenConfigFiles.has(filePath)) unprocessed.push(filePath);
+          }
+          if (unprocessed.length > 0) {
+            for (const input of await runPlugin(pluginName, unprocessed, true)) inputs.push(input);
           }
         }
       }
@@ -610,11 +616,19 @@ export class WorkspaceWorker {
 
     if (type === 'project' && compilerExtensions) {
       const seen = new Set<string>();
+      const patternExtensions = new Set<string>();
       for (const pattern of userDefinedPatterns) {
         for (const ext of extractPatternExtensions(pattern)) {
+          patternExtensions.add(ext);
           if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext) || compilerExtensions.has(ext)) continue;
           seen.add(ext);
           hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
+        }
+      }
+      if (patternExtensions.size > 0) {
+        for (const ext of compilerExtensions) {
+          if (patternExtensions.has(ext)) continue;
+          hints.push({ type: 'project-extension-excluded', identifier: ext, workspaceName });
         }
       }
     }

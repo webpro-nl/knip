@@ -96,4 +96,26 @@ exists, Knip will use that file instead of `dist/index.js`.
 Currently this only works based on `tsconfig.json`, in the future more source
 mappings may be added.
 
+## Example 3: source conditions
+
+Source-first monorepos may expose source files directly through a custom
+condition in `package.json#exports` or `#imports` maps:
+
+```json title="package.json"
+{
+  "name": "@org/shared",
+  "exports": {
+    ".": {
+      "@org/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}
+```
+
+When module resolution fails because the targets aren't built, Knip falls back
+to the first conditional target of the workspace package that exists on disk,
+regardless of the condition's name. No build step or configuration required.
+
 [1]: ../reference/configuration.md#includeentryexports

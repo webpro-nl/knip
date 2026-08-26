@@ -11,9 +11,11 @@ test('import resolved transitively via a declared peer is not flagged unlisted',
   const { issues, counters } = await main(options);
 
   assert(!issues.unlisted['packages/consumer/src/index.ts']?.['transitive-peer']);
+  assert(issues.unlisted['packages/consumer/src/index.ts']?.['uninstalled-peer']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unlisted: 1,
     processed: 1,
     total: 1,
   });
@@ -25,4 +27,5 @@ test('strict mode still flags transitive-peer imports as unlisted', async () => 
   const { issues } = await main(options);
 
   assert(issues.unlisted['packages/consumer/src/index.ts']?.['transitive-peer']);
+  assert(issues.unlisted['packages/consumer/src/index.ts']?.['uninstalled-peer']);
 });

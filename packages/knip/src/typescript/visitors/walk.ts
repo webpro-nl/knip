@@ -18,7 +18,13 @@ import type { Export, ExportMember, ImportMap, ImportMaps } from '../../types/mo
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { timerify } from '../../util/Performance.ts';
-import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from '../ast-nodes.ts';
+import {
+  collectAugmentationRefs,
+  getLineAndCol,
+  getStringValue,
+  isStringLiteral,
+  type ResolveModule,
+} from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import { handleCallExpression, handleNewExpression, trackCustomElementRegistry } from './calls.ts';
 import {
@@ -81,6 +87,7 @@ export interface WalkState extends WalkContext {
   filePath: string;
   sourceText: string;
   isJS: boolean;
+  isModuleFile: boolean;
   handledImportExpressions: Set<number>;
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
@@ -90,6 +97,7 @@ export interface WalkState extends WalkContext {
   currentVarDeclStart: number;
   nsRanges: [number, number][];
   memberRefsInFile: string[];
+  importedRefs: Set<string> | undefined;
   scopeDepth: number;
   scopeStarts: number[];
   scopeEnds: number[];
@@ -276,7 +284,9 @@ export const isShadowed = (name: string, pos: number): boolean => {
 };
 
 const _addLocalRef = (name: string, pos: number) => {
-  if (!state.localImportMap.has(name) && !isShadowed(name, pos)) state.localRefs!.add(name);
+  if (isShadowed(name, pos)) return;
+  if (state.localImportMap.has(name)) (state.importedRefs ??= new Set()).add(name);
+  else state.localRefs!.add(name);
 };
 
 const _addShadowRange = (name: string, range: [number, number]) => {
@@ -327,6 +337,18 @@ const coreVisitorObject: VisitorObject = {
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
+    if (node.kind !== 'global' && state.isModuleFile && isStringLiteral(node.id)) {
+      const specifier = getStringValue(node.id)!;
+      for (const name of collectAugmentationRefs(node))
+        state.addImport(
+          specifier,
+          name,
+          undefined,
+          undefined,
+          node.id.start,
+          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
+        );
+    }
   },
   ClassDeclaration(node) {
     state.classNameStack.push(node.id?.name ?? '');
@@ -750,7 +772,17 @@ export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[], includ
   return new Visitor(merged as VisitorObject);
 }
 
-function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
+const isExternalModule = (program: Program, hasModuleSyntax: boolean) => {
+  if (hasModuleSyntax) return true;
+  for (const node of program.body) {
+    if (node.type === 'TSImportEqualsDeclaration' && node.moduleReference.type === 'TSExternalModuleReference') {
+      return true;
+    }
+  }
+  return false;
+};
+
+function walkAST(program: Program, sourceText: string, filePath: string, hasModuleSyntax: boolean, ctx: WalkContext) {
   const isJS =
     filePath.endsWith('.js') || filePath.endsWith('.mjs') || filePath.endsWith('.cjs') || filePath.endsWith('.jsx');
 
@@ -759,6 +791,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     filePath,
     sourceText,
     isJS,
+    isModuleFile: isExternalModule(program, hasModuleSyntax),
     handledImportExpressions: new Set(),
     bareExprRefs: new Set(),
     accessedAliases: new Set(),
@@ -768,6 +801,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
     currentVarDeclStart: -1,
     nsRanges: [],
     memberRefsInFile: [],
+    importedRefs: undefined,
     scopeDepth: 0,
     scopeStarts: [],
     scopeEnds: [],
@@ -869,6 +903,13 @@ function walkAST(program: Program, sourceText: string, filePath: string, ctx: Wa
         const aliased = state.exports.get(exportName);
         if (aliased) aliased.isRegistered = true;
       }
+    }
+  }
+
+  if (state.localRefs && state.importedRefs) {
+    for (const name of state.importedRefs) {
+      const exportNames = state.localToExports.get(name);
+      if (exportNames) for (const exportName of exportNames) state.localRefs.add(exportName);
     }
   }
 

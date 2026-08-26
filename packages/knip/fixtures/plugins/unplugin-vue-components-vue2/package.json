@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/unplugin-vue-components-vue2",
+  "dependencies": {
+    "vue": "^2.7.16",
+    "unplugin-auto-import": "*",
+    "unplugin-vue-components": "*"
+  }
+}

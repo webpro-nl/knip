@@ -54,6 +54,7 @@ const defaultConfig: Configuration = {
   ignoreBinaries: [],
   ignoreDependencies: [],
   ignoreFiles: [],
+  cycles: {},
   ignoreIssues: {},
   ignoreMembers: [],
   ignoreUnresolved: [],
@@ -145,6 +146,7 @@ export class ConfigurationChief {
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
     const ignoreExportsUsedInFile = rawConfig.ignoreExportsUsedInFile ?? false;
+    const cycles = rawConfig.cycles ?? {};
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
@@ -162,6 +164,7 @@ export class ConfigurationChief {
     return {
       ignore,
       ignoreFiles,
+      cycles,
       ignoreBinaries,
       ignoreDependencies,
       ignoreMembers,
@@ -250,22 +253,17 @@ export class ConfigurationChief {
     const patterns = workspaceKeys.filter(key => key.includes('*'));
     const dirs = workspaceKeys.filter(key => !key.includes('*'));
     const globbedDirs = await _dirGlob({ patterns, cwd: this.cwd });
-    return new Set(
-      [...dirs, ...globbedDirs].filter(
-        name =>
-          name !== ROOT_WORKSPACE_NAME &&
-          !this.workspacePackages.has(name) &&
-          !picomatch.isMatch(name, this.ignoredWorkspacePatterns)
-      )
-    );
+    const isIgnored = picomatch(this.ignoredWorkspacePatterns);
+    return new Set([...dirs, ...globbedDirs].filter(name => name !== ROOT_WORKSPACE_NAME && !isIgnored(name)));
   }
 
   private getAvailableWorkspaceNames(names: Iterable<string>) {
     const availableWorkspaceNames = [];
     const [ignore, patterns] = partition(this.ignoredWorkspacePatterns, pattern => pattern.startsWith('!'));
     const ignoreSliced = ignore.map(pattern => pattern.slice(1));
+    const isIgnored = picomatch(patterns, { ignore: ignoreSliced });
     for (const name of names) {
-      if (!picomatch.isMatch(name, patterns, { ignore: ignoreSliced })) {
+      if (!isIgnored(name)) {
         availableWorkspaceNames.push(name);
       }
     }
@@ -284,32 +282,33 @@ export class ConfigurationChief {
       ? Array.from(selectedWorkspaces).flatMap(name => [...getAncestors(name), name])
       : this.availableWorkspaceNames;
 
-    const ws = new Set<string>();
+    const ws = new Set(selectedWorkspaces && this.isStrict ? selectedWorkspaces : workspaceNames);
 
-    if (selectedWorkspaces && this.isStrict) {
-      for (const name of selectedWorkspaces) ws.add(name);
-    } else if (selectedWorkspaces) {
+    if (selectedWorkspaces && !this.isStrict) {
       const graph = this.workspaceGraph;
-      if (graph) {
-        const seen = new Set<string>();
-        const initialWorkspaces = new Set(workspaceNames.map(name => join(this.cwd, name)));
-        const workspaceDirsWithDependents = new Set(initialWorkspaces);
-        const addDependents = (dir: string) => {
-          seen.add(dir);
-          const dirs = graph.get(dir);
-          if (!dirs || dirs.size === 0) return;
-          for (const d of dirs)
-            if (initialWorkspaces.has(d)) {
-              workspaceDirsWithDependents.add(dir);
-              break;
-            }
-          for (const dir of dirs) if (!seen.has(dir)) addDependents(dir);
-        };
-        for (const dir of this.availableWorkspaceDirs) addDependents(dir);
-        for (const dir of workspaceDirsWithDependents) ws.add(relative(this.cwd, dir));
+      const initialWorkspaceDirs = new Set(workspaceNames.map(name => join(this.cwd, name)));
+      const includedWorkspaceDirs = new Set(initialWorkspaceDirs);
+      const pendingWorkspaceDirs = [...initialWorkspaceDirs];
+
+      for (let index = 0; index < pendingWorkspaceDirs.length; index++) {
+        const dependencies = graph.get(pendingWorkspaceDirs[index]);
+        if (!dependencies) continue;
+        for (const dependency of dependencies) {
+          if (!graph.has(dependency) || includedWorkspaceDirs.has(dependency)) continue;
+          includedWorkspaceDirs.add(dependency);
+          pendingWorkspaceDirs.push(dependency);
+        }
       }
-    } else {
-      for (const name of workspaceNames) ws.add(name);
+
+      for (const [dir, dependencies] of graph) {
+        for (const dependency of dependencies) {
+          if (!initialWorkspaceDirs.has(dependency)) continue;
+          includedWorkspaceDirs.add(dir);
+          break;
+        }
+      }
+
+      for (const dir of includedWorkspaceDirs) ws.add(relative(this.cwd, dir));
     }
 
     return Array.from(ws)

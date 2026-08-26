@@ -11,3 +11,6 @@ jobs:
       - name: Run stylelint check
         run: yarn stylelint
         working-directory: packages/app
+      - name: Generate icons
+        run: yarn icons
+        working-directory: packages/app

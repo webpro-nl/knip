@@ -1,6 +1,6 @@
 ---
-title: Plugins (155)
-description: 'The full list of Knip plugins for frameworks, libraries, build tools, test runners and linters, each linking to its reference page.'
+title: Plugins (177)
+description: 'The full list of Knip plugins for frameworks, build tools, test runners and linters, each linking to its reference page.'
 tableOfContents: false
 ---
 
@@ -9,313 +9,357 @@ tableOfContents: false
 - [Angular][1]
 - [Astro][2]
 - [Astro DB][3]
-- [astro-og-canvas][4]
-- [Ava][5]
-- [Babel][6]
-- [Biome][7]
-- [bumpp][8]
-- [Bun][9]
-- [c8][10]
-- [Capacitor][11]
-- [Catalyst][12]
-- [Changelogen][13]
-- [Changelogithub][14]
-- [Changesets][15]
-- [Commitizen][16]
-- [commitlint][17]
-- [Convex][18]
-- [create-typescript-app][19]
-- [CSpell][20]
-- [Cucumber][21]
-- [Cypress][22]
-- [Danger][23]
-- [dependency-cruiser][24]
-- [Docusaurus][25]
-- [dotenv][26]
-- [Drizzle][27]
-- [Eleventy][28]
-- [ESLint][29]
-- [execa][30]
-- [Expo][31]
-- [Expressive Code][32]
-- [FAST][33]
-- [Gatsby][34]
-- [GitHub Action][35]
-- [GitHub Actions][36]
-- [glob][37]
-- [GraphQL Codegen][38]
-- [Hardhat][39]
-- [husky][40]
-- [i18next Parser][41]
-- [Jest][42]
-- [Karma][43]
-- [Knex][44]
-- [Ladle][45]
-- [Lefthook][46]
-- [lint-staged][47]
-- [LintHTML][48]
-- [Lit][49]
-- [lockfile-lint][50]
-- [Lost Pixel][51]
-- [markdownlint][52]
-- [MDX][53]
-- [mdxlint][54]
-- [Metro][55]
-- [Mocha][56]
-- [moonrepo][57]
-- [Mock Service Worker][58]
-- [nano-spawn][59]
-- [Nano Staged][60]
-- [Nest][61]
-- [Netlify][62]
-- [Next.js][63]
-- [next-intl][64]
-- [Next.js MDX][65]
-- [Nitro][66]
-- [Node.js][67]
-- [node-modules-inspector][68]
-- [nodemon][69]
-- [npm-package-json-lint][70]
-- [Nuxt][71]
-- [Nx][72]
-- [nyc][73]
-- [oclif][74]
-- [openapi-ts][75]
-- [orval][76]
-- [Oxfmt][77]
-- [Oxlint][78]
-- [Panda CSS][79]
-- [Parcel][80]
-- [Payload CMS][81]
-- [pino][82]
-- [Playwright][83]
-- [Playwright for components][84]
-- [playwright-test][85]
-- [Plop][86]
-- [pm2][87]
-- [pnpm][88]
-- [PostCSS][89]
-- [Preconstruct][90]
-- [Prettier][91]
-- [Prisma][92]
-- [Qwik][93]
-- [Raycast][94]
-- [React Cosmos][95]
-- [React Email][96]
-- [React Native][97]
-- [React Router][98]
-- [Relay][99]
-- [Release It!][100]
-- [Remark][101]
-- [Remix][102]
-- [Rolldown][103]
-- [Rollup][104]
-- [Rsbuild][105]
-- [Rslib][106]
-- [Rspack][107]
-- [Rstest][108]
-- [Sanity][109]
-- [Semantic Release][110]
-- [Sentry][111]
-- [Serverless Framework][112]
-- [simple-git-hooks][113]
-- [size-limit][114]
-- [SST][115]
-- [Starlight][116]
-- [Stencil][117]
-- [Storybook][118]
-- [Stryker][119]
-- [Stylelint][120]
-- [Svelte][121]
-- [@sveltejs/package][122]
-- [SvelteKit][123]
-- [SVGO][124]
-- [SVGR][125]
-- [SWC][126]
-- [Syncpack][127]
-- [Tailwind][128]
-- [TanStack Router][129]
-- [Taskfile][130]
-- [Travis CI][131]
-- [ts-node][132]
-- [tsdown][133]
-- [tsup][134]
-- [tsx][135]
-- [TypeDoc][136]
-- [TypeScript][137]
-- [unbuild][138]
-- [UnoCSS][139]
-- [Vercel][140]
-- [Vercel OG][141]
-- [Vike][142]
-- [Vite][143]
-- [VitePress][144]
-- [Vitest][145]
-- [Vue][146]
-- [WebdriverIO][147]
-- [webpack][148]
-- [Wireit][149]
-- [Wrangler][150]
-- [WXT][151]
-- [xo][152]
-- [Yarn][153]
-- [yorkie][154]
-- [zx][155]
+- [Astro Markdoc][4]
+- [astro-og-canvas][5]
+- [Ava][6]
+- [Babel][7]
+- [Biome][8]
+- [bumpp][9]
+- [Bun][10]
+- [c8][11]
+- [Capacitor][12]
+- [Catalyst][13]
+- [Changelogen][14]
+- [Changelogithub][15]
+- [Changesets][16]
+- [Commitizen][17]
+- [commitlint][18]
+- [Convex][19]
+- [create-typescript-app][20]
+- [CSpell][21]
+- [Cucumber][22]
+- [Cypress][23]
+- [Danger][24]
+- [dependency-cruiser][25]
+- [Docusaurus][26]
+- [dotenv][27]
+- [Drizzle][28]
+- [electron-vite][29]
+- [Eleventy][30]
+- [esbuild][31]
+- [ESLint][32]
+- [eve][33]
+- [execa][34]
+- [Expo][35]
+- [Expressive Code][36]
+- [FAST][37]
+- [Fumadocs][38]
+- [Gatsby][39]
+- [GitHub Action][40]
+- [GitHub Actions][41]
+- [glob][42]
+- [GraphQL Codegen][43]
+- [Hardhat][44]
+- [husky][45]
+- [i18next Parser][46]
+- [Jest][47]
+- [Karma][48]
+- [Knex][49]
+- [Ladle][50]
+- [laravel-vite-plugin][51]
+- [Lefthook][52]
+- [lint-staged][53]
+- [LintHTML][54]
+- [Lit][55]
+- [lockfile-lint][56]
+- [Lost Pixel][57]
+- [Lunaria][58]
+- [markdownlint][59]
+- [MDX][60]
+- [mdxlint][61]
+- [Metro][62]
+- [Mocha][63]
+- [moonrepo][64]
+- [Mock Service Worker][65]
+- [nano-spawn][66]
+- [Nano Staged][67]
+- [Nest][68]
+- [Netlify][69]
+- [Next.js][70]
+- [next-intl][71]
+- [Next.js MDX][72]
+- [Nitro][73]
+- [Node.js][74]
+- [node-modules-inspector][75]
+- [nodemon][76]
+- [npm-package-json-lint][77]
+- [Nuxt][78]
+- [@nuxtjs/i18n][79]
+- [Nx][80]
+- [nyc][81]
+- [oclif][82]
+- [openapi-ts][83]
+- [orval][84]
+- [Oxfmt][85]
+- [Oxlint][86]
+- [Panda CSS][87]
+- [Parcel][88]
+- [Payload CMS][89]
+- [pino][90]
+- [Playwright][91]
+- [Playwright for components][92]
+- [playwright-test][93]
+- [Plop][94]
+- [pm2][95]
+- [pnpm][96]
+- [PostCSS][97]
+- [Preconstruct][98]
+- [Prettier][99]
+- [Prisma][100]
+- [Quasar][101]
+- [Qwik][102]
+- [Raycast][103]
+- [React Cosmos][104]
+- [React Email][105]
+- [React Native][106]
+- [React Router][107]
+- [Relay][108]
+- [Release It!][109]
+- [Remark][110]
+- [Remix][111]
+- [Rolldown][112]
+- [Rollup][113]
+- [Rsbuild][114]
+- [Rslib][115]
+- [Rspack][116]
+- [Rstest][117]
+- [Sanity][118]
+- [Semantic Release][119]
+- [Sentry][120]
+- [Serverless Framework][121]
+- [simple-git-hooks][122]
+- [size-limit][123]
+- [SST][124]
+- [Starlight][125]
+- [Stencil][126]
+- [Storybook][127]
+- [Stryker][128]
+- [Stylelint][129]
+- [Svelte][130]
+- [@sveltejs/package][131]
+- [SvelteKit][132]
+- [SVGO][133]
+- [SVGR][134]
+- [SWC][135]
+- [Syncpack][136]
+- [Tailwind][137]
+- [TanStack Router][138]
+- [Taskfile][139]
+- [Tauri][140]
+- [Temporal.io][141]
+- [Travis CI][142]
+- [ts-node][143]
+- [tsdown][144]
+- [tsup][145]
+- [tsx][146]
+- [TypeDoc][147]
+- [TypeScript][148]
+- [unbuild][149]
+- [UnoCSS][150]
+- [unplugin-auto-import][151]
+- [unplugin-icons][152]
+- [unplugin-vue-components][153]
+- [@intlify/unplugin-vue-i18n][154]
+- [unplugin-vue-markdown][155]
+- [unplugin-vue-router][156]
+- [Vercel][157]
+- [Vercel OG][158]
+- [Vike][159]
+- [Vite][160]
+- [vite-plugin-pages][161]
+- [vite-plugin-pwa][162]
+- [vite-plugin-vue-layouts-next][163]
+- [vite-plus][164]
+- [@vite-pwa/assets-generator][165]
+- [VitePress][166]
+- [Vitest][167]
+- [Vue][168]
+- [WebdriverIO][169]
+- [webpack][170]
+- [Wireit][171]
+- [Wrangler][172]
+- [WXT][173]
+- [xo][174]
+- [Yarn][175]
+- [yorkie][176]
+- [zx][177]
 
 :::
 
-[1]: /reference/plugins/angular 'Angular'
-[2]: /reference/plugins/astro 'Astro'
-[3]: /reference/plugins/astro-db 'Astro DB'
-[4]: /reference/plugins/astro-og-canvas 'astro-og-canvas'
-[5]: /reference/plugins/ava 'Ava'
-[6]: /reference/plugins/babel 'Babel'
-[7]: /reference/plugins/biome 'Biome'
-[8]: /reference/plugins/bumpp 'bumpp'
-[9]: /reference/plugins/bun 'Bun'
-[10]: /reference/plugins/c8 'c8'
-[11]: /reference/plugins/capacitor 'Capacitor'
-[12]: /reference/plugins/catalyst 'Catalyst'
-[13]: /reference/plugins/changelogen 'Changelogen'
-[14]: /reference/plugins/changelogithub 'Changelogithub'
-[15]: /reference/plugins/changesets 'Changesets'
-[16]: /reference/plugins/commitizen 'Commitizen'
-[17]: /reference/plugins/commitlint 'commitlint'
-[18]: /reference/plugins/convex 'Convex'
-[19]: /reference/plugins/create-typescript-app 'create-typescript-app'
-[20]: /reference/plugins/cspell 'CSpell'
-[21]: /reference/plugins/cucumber 'Cucumber'
-[22]: /reference/plugins/cypress 'Cypress'
-[23]: /reference/plugins/danger 'Danger'
-[24]: /reference/plugins/dependency-cruiser 'dependency-cruiser'
-[25]: /reference/plugins/docusaurus 'Docusaurus'
-[26]: /reference/plugins/dotenv 'dotenv'
-[27]: /reference/plugins/drizzle 'Drizzle'
-[28]: /reference/plugins/eleventy 'Eleventy'
-[29]: /reference/plugins/eslint 'ESLint'
-[30]: /reference/plugins/execa 'execa'
-[31]: /reference/plugins/expo 'Expo'
-[32]: /reference/plugins/expressive-code 'Expressive Code'
-[33]: /reference/plugins/fast 'FAST'
-[34]: /reference/plugins/gatsby 'Gatsby'
-[35]: /reference/plugins/github-action 'GitHub Action'
-[36]: /reference/plugins/github-actions 'GitHub Actions'
-[37]: /reference/plugins/glob 'glob'
-[38]: /reference/plugins/graphql-codegen 'GraphQL Codegen'
-[39]: /reference/plugins/hardhat 'Hardhat'
-[40]: /reference/plugins/husky 'husky'
-[41]: /reference/plugins/i18next-parser 'i18next Parser'
-[42]: /reference/plugins/jest 'Jest'
-[43]: /reference/plugins/karma 'Karma'
-[44]: /reference/plugins/knex 'Knex'
-[45]: /reference/plugins/ladle 'Ladle'
-[46]: /reference/plugins/lefthook 'Lefthook'
-[47]: /reference/plugins/lint-staged 'lint-staged'
-[48]: /reference/plugins/linthtml 'LintHTML'
-[49]: /reference/plugins/lit 'Lit'
-[50]: /reference/plugins/lockfile-lint 'lockfile-lint'
-[51]: /reference/plugins/lost-pixel 'Lost Pixel'
-[52]: /reference/plugins/markdownlint 'markdownlint'
-[53]: /reference/plugins/mdx 'MDX'
-[54]: /reference/plugins/mdxlint 'mdxlint'
-[55]: /reference/plugins/metro 'Metro'
-[56]: /reference/plugins/mocha 'Mocha'
-[57]: /reference/plugins/moonrepo 'moonrepo'
-[58]: /reference/plugins/msw 'Mock Service Worker'
-[59]: /reference/plugins/nano-spawn 'nano-spawn'
-[60]: /reference/plugins/nano-staged 'Nano Staged'
-[61]: /reference/plugins/nest 'Nest'
-[62]: /reference/plugins/netlify 'Netlify'
-[63]: /reference/plugins/next 'Next.js'
-[64]: /reference/plugins/next-intl 'next-intl'
-[65]: /reference/plugins/next-mdx 'Next.js MDX'
-[66]: /reference/plugins/nitro 'Nitro'
-[67]: /reference/plugins/node 'Node.js'
-[68]: /reference/plugins/node-modules-inspector 'node-modules-inspector'
-[69]: /reference/plugins/nodemon 'nodemon'
-[70]: /reference/plugins/npm-package-json-lint 'npm-package-json-lint'
-[71]: /reference/plugins/nuxt 'Nuxt'
-[72]: /reference/plugins/nx 'Nx'
-[73]: /reference/plugins/nyc 'nyc'
-[74]: /reference/plugins/oclif 'oclif'
-[75]: /reference/plugins/openapi-ts 'openapi-ts'
-[76]: /reference/plugins/orval 'orval'
-[77]: /reference/plugins/oxfmt 'Oxfmt'
-[78]: /reference/plugins/oxlint 'Oxlint'
-[79]: /reference/plugins/panda-css 'Panda CSS'
-[80]: /reference/plugins/parcel 'Parcel'
-[81]: /reference/plugins/payload 'Payload CMS'
-[82]: /reference/plugins/pino 'pino'
-[83]: /reference/plugins/playwright 'Playwright'
-[84]: /reference/plugins/playwright-ct 'Playwright for components'
-[85]: /reference/plugins/playwright-test 'playwright-test'
-[86]: /reference/plugins/plop 'Plop'
-[87]: /reference/plugins/pm2 'pm2'
-[88]: /reference/plugins/pnpm 'pnpm'
-[89]: /reference/plugins/postcss 'PostCSS'
-[90]: /reference/plugins/preconstruct 'Preconstruct'
-[91]: /reference/plugins/prettier 'Prettier'
-[92]: /reference/plugins/prisma 'Prisma'
-[93]: /reference/plugins/qwik 'Qwik'
-[94]: /reference/plugins/raycast 'Raycast'
-[95]: /reference/plugins/react-cosmos 'React Cosmos'
-[96]: /reference/plugins/react-email 'React Email'
-[97]: /reference/plugins/react-native 'React Native'
-[98]: /reference/plugins/react-router 'React Router'
-[99]: /reference/plugins/relay 'Relay'
-[100]: /reference/plugins/release-it 'Release It!'
-[101]: /reference/plugins/remark 'Remark'
-[102]: /reference/plugins/remix 'Remix'
-[103]: /reference/plugins/rolldown 'Rolldown'
-[104]: /reference/plugins/rollup 'Rollup'
-[105]: /reference/plugins/rsbuild 'Rsbuild'
-[106]: /reference/plugins/rslib 'Rslib'
-[107]: /reference/plugins/rspack 'Rspack'
-[108]: /reference/plugins/rstest 'Rstest'
-[109]: /reference/plugins/sanity 'Sanity'
-[110]: /reference/plugins/semantic-release 'Semantic Release'
-[111]: /reference/plugins/sentry 'Sentry'
-[112]: /reference/plugins/serverless-framework 'Serverless Framework'
-[113]: /reference/plugins/simple-git-hooks 'simple-git-hooks'
-[114]: /reference/plugins/size-limit 'size-limit'
-[115]: /reference/plugins/sst 'SST'
-[116]: /reference/plugins/starlight 'Starlight'
-[117]: /reference/plugins/stencil 'Stencil'
-[118]: /reference/plugins/storybook 'Storybook'
-[119]: /reference/plugins/stryker 'Stryker'
-[120]: /reference/plugins/stylelint 'Stylelint'
-[121]: /reference/plugins/svelte 'Svelte'
-[122]: /reference/plugins/sveltejs-package '@sveltejs/package'
-[123]: /reference/plugins/sveltekit 'SvelteKit'
-[124]: /reference/plugins/svgo 'SVGO'
-[125]: /reference/plugins/svgr 'SVGR'
-[126]: /reference/plugins/swc 'SWC'
-[127]: /reference/plugins/syncpack 'Syncpack'
-[128]: /reference/plugins/tailwind 'Tailwind'
-[129]: /reference/plugins/tanstack-router 'TanStack Router'
-[130]: /reference/plugins/taskfile 'Taskfile'
-[131]: /reference/plugins/travis 'Travis CI'
-[132]: /reference/plugins/ts-node 'ts-node'
-[133]: /reference/plugins/tsdown 'tsdown'
-[134]: /reference/plugins/tsup 'tsup'
-[135]: /reference/plugins/tsx 'tsx'
-[136]: /reference/plugins/typedoc 'TypeDoc'
-[137]: /reference/plugins/typescript 'TypeScript'
-[138]: /reference/plugins/unbuild 'unbuild'
-[139]: /reference/plugins/unocss 'UnoCSS'
-[140]: /reference/plugins/vercel 'Vercel'
-[141]: /reference/plugins/vercel-og 'Vercel OG'
-[142]: /reference/plugins/vike 'Vike'
-[143]: /reference/plugins/vite 'Vite'
-[144]: /reference/plugins/vitepress 'VitePress'
-[145]: /reference/plugins/vitest 'Vitest'
-[146]: /reference/plugins/vue 'Vue'
-[147]: /reference/plugins/webdriver-io 'WebdriverIO'
-[148]: /reference/plugins/webpack 'webpack'
-[149]: /reference/plugins/wireit 'Wireit'
-[150]: /reference/plugins/wrangler 'Wrangler'
-[151]: /reference/plugins/wxt 'WXT'
-[152]: /reference/plugins/xo 'xo'
-[153]: /reference/plugins/yarn 'Yarn'
-[154]: /reference/plugins/yorkie 'yorkie'
-[155]: /reference/plugins/zx 'zx'
+[1]: /reference/plugins/angular
+[2]: /reference/plugins/astro
+[3]: /reference/plugins/astro-db
+[4]: /reference/plugins/astro-markdoc
+[5]: /reference/plugins/astro-og-canvas
+[6]: /reference/plugins/ava
+[7]: /reference/plugins/babel
+[8]: /reference/plugins/biome
+[9]: /reference/plugins/bumpp
+[10]: /reference/plugins/bun
+[11]: /reference/plugins/c8
+[12]: /reference/plugins/capacitor
+[13]: /reference/plugins/catalyst
+[14]: /reference/plugins/changelogen
+[15]: /reference/plugins/changelogithub
+[16]: /reference/plugins/changesets
+[17]: /reference/plugins/commitizen
+[18]: /reference/plugins/commitlint
+[19]: /reference/plugins/convex
+[20]: /reference/plugins/create-typescript-app
+[21]: /reference/plugins/cspell
+[22]: /reference/plugins/cucumber
+[23]: /reference/plugins/cypress
+[24]: /reference/plugins/danger
+[25]: /reference/plugins/dependency-cruiser
+[26]: /reference/plugins/docusaurus
+[27]: /reference/plugins/dotenv
+[28]: /reference/plugins/drizzle
+[29]: /reference/plugins/electron-vite
+[30]: /reference/plugins/eleventy
+[31]: /reference/plugins/esbuild
+[32]: /reference/plugins/eslint
+[33]: /reference/plugins/eve
+[34]: /reference/plugins/execa
+[35]: /reference/plugins/expo
+[36]: /reference/plugins/expressive-code
+[37]: /reference/plugins/fast
+[38]: /reference/plugins/fumadocs
+[39]: /reference/plugins/gatsby
+[40]: /reference/plugins/github-action
+[41]: /reference/plugins/github-actions
+[42]: /reference/plugins/glob
+[43]: /reference/plugins/graphql-codegen
+[44]: /reference/plugins/hardhat
+[45]: /reference/plugins/husky
+[46]: /reference/plugins/i18next-parser
+[47]: /reference/plugins/jest
+[48]: /reference/plugins/karma
+[49]: /reference/plugins/knex
+[50]: /reference/plugins/ladle
+[51]: /reference/plugins/laravel-vite-plugin
+[52]: /reference/plugins/lefthook
+[53]: /reference/plugins/lint-staged
+[54]: /reference/plugins/linthtml
+[55]: /reference/plugins/lit
+[56]: /reference/plugins/lockfile-lint
+[57]: /reference/plugins/lost-pixel
+[58]: /reference/plugins/lunaria
+[59]: /reference/plugins/markdownlint
+[60]: /reference/plugins/mdx
+[61]: /reference/plugins/mdxlint
+[62]: /reference/plugins/metro
+[63]: /reference/plugins/mocha
+[64]: /reference/plugins/moonrepo
+[65]: /reference/plugins/msw
+[66]: /reference/plugins/nano-spawn
+[67]: /reference/plugins/nano-staged
+[68]: /reference/plugins/nest
+[69]: /reference/plugins/netlify
+[70]: /reference/plugins/next
+[71]: /reference/plugins/next-intl
+[72]: /reference/plugins/next-mdx
+[73]: /reference/plugins/nitro
+[74]: /reference/plugins/node
+[75]: /reference/plugins/node-modules-inspector
+[76]: /reference/plugins/nodemon
+[77]: /reference/plugins/npm-package-json-lint
+[78]: /reference/plugins/nuxt
+[79]: /reference/plugins/nuxtjs-i18n
+[80]: /reference/plugins/nx
+[81]: /reference/plugins/nyc
+[82]: /reference/plugins/oclif
+[83]: /reference/plugins/openapi-ts
+[84]: /reference/plugins/orval
+[85]: /reference/plugins/oxfmt
+[86]: /reference/plugins/oxlint
+[87]: /reference/plugins/panda-css
+[88]: /reference/plugins/parcel
+[89]: /reference/plugins/payload
+[90]: /reference/plugins/pino
+[91]: /reference/plugins/playwright
+[92]: /reference/plugins/playwright-ct
+[93]: /reference/plugins/playwright-test
+[94]: /reference/plugins/plop
+[95]: /reference/plugins/pm2
+[96]: /reference/plugins/pnpm
+[97]: /reference/plugins/postcss
+[98]: /reference/plugins/preconstruct
+[99]: /reference/plugins/prettier
+[100]: /reference/plugins/prisma
+[101]: /reference/plugins/quasar
+[102]: /reference/plugins/qwik
+[103]: /reference/plugins/raycast
+[104]: /reference/plugins/react-cosmos
+[105]: /reference/plugins/react-email
+[106]: /reference/plugins/react-native
+[107]: /reference/plugins/react-router
+[108]: /reference/plugins/relay
+[109]: /reference/plugins/release-it
+[110]: /reference/plugins/remark
+[111]: /reference/plugins/remix
+[112]: /reference/plugins/rolldown
+[113]: /reference/plugins/rollup
+[114]: /reference/plugins/rsbuild
+[115]: /reference/plugins/rslib
+[116]: /reference/plugins/rspack
+[117]: /reference/plugins/rstest
+[118]: /reference/plugins/sanity
+[119]: /reference/plugins/semantic-release
+[120]: /reference/plugins/sentry
+[121]: /reference/plugins/serverless-framework
+[122]: /reference/plugins/simple-git-hooks
+[123]: /reference/plugins/size-limit
+[124]: /reference/plugins/sst
+[125]: /reference/plugins/starlight
+[126]: /reference/plugins/stencil
+[127]: /reference/plugins/storybook
+[128]: /reference/plugins/stryker
+[129]: /reference/plugins/stylelint
+[130]: /reference/plugins/svelte
+[131]: /reference/plugins/sveltejs-package
+[132]: /reference/plugins/sveltekit
+[133]: /reference/plugins/svgo
+[134]: /reference/plugins/svgr
+[135]: /reference/plugins/swc
+[136]: /reference/plugins/syncpack
+[137]: /reference/plugins/tailwind
+[138]: /reference/plugins/tanstack-router
+[139]: /reference/plugins/taskfile
+[140]: /reference/plugins/tauri
+[141]: /reference/plugins/temporal
+[142]: /reference/plugins/travis
+[143]: /reference/plugins/ts-node
+[144]: /reference/plugins/tsdown
+[145]: /reference/plugins/tsup
+[146]: /reference/plugins/tsx
+[147]: /reference/plugins/typedoc
+[148]: /reference/plugins/typescript
+[149]: /reference/plugins/unbuild
+[150]: /reference/plugins/unocss
+[151]: /reference/plugins/unplugin-auto-import
+[152]: /reference/plugins/unplugin-icons
+[153]: /reference/plugins/unplugin-vue-components
+[154]: /reference/plugins/unplugin-vue-i18n
+[155]: /reference/plugins/unplugin-vue-markdown
+[156]: /reference/plugins/unplugin-vue-router
+[157]: /reference/plugins/vercel
+[158]: /reference/plugins/vercel-og
+[159]: /reference/plugins/vike
+[160]: /reference/plugins/vite
+[161]: /reference/plugins/vite-plugin-pages
+[162]: /reference/plugins/vite-plugin-pwa
+[163]: /reference/plugins/vite-plugin-vue-layouts-next
+[164]: /reference/plugins/vite-plus
+[165]: /reference/plugins/vite-pwa-assets-generator
+[166]: /reference/plugins/vitepress
+[167]: /reference/plugins/vitest
+[168]: /reference/plugins/vue
+[169]: /reference/plugins/webdriver-io
+[170]: /reference/plugins/webpack
+[171]: /reference/plugins/wireit
+[172]: /reference/plugins/wrangler
+[173]: /reference/plugins/wxt
+[174]: /reference/plugins/xo
+[175]: /reference/plugins/yarn
+[176]: /reference/plugins/yorkie
+[177]: /reference/plugins/zx

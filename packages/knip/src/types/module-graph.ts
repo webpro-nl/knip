@@ -45,6 +45,7 @@ export interface Import extends Position {
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
   readonly isTypeOnly: boolean;
+  readonly modifiers: number;
 }
 
 export interface ExternalRef {
@@ -91,9 +92,16 @@ export type FileNode = {
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
+  importGlobs: ImportGlob[];
   /** Aggregation of other files importing this file's exports */
   importedBy: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
+
+export interface ImportGlob {
+  patterns: string[];
+  base?: string;
+  filter?: RegExp;
+}
 
 export type ModuleGraph = Map<FilePath, FileNode>;

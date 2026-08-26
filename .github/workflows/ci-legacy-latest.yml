@@ -5,22 +5,43 @@ name: Tests (against typescript@latest in Node.js v22)
 on:
   workflow_dispatch:
   pull_request:
+    paths: &paths # All package sources (knip lints across the monorepo and analyzes the repo itself)
+      - 'packages/**'
+      - '!packages/docs/**/*.md'
+      - '!packages/docs/**/*.mdx'
+      # Root workspace / dependency / lint / knip-on-self config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'oxlint.config.ts'
+      - '.oxfmtrc.json'
+      - 'knip.json'
+      # This workflow file
+      - '.github/workflows/ci-legacy-latest.yml'
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+    paths: *paths
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     name: Ubuntu/Node v22
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - name: Install dependencies
         run: pnpm install
       - name: Install latest peer dependencies

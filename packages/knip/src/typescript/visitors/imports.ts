@@ -30,14 +30,14 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                 : undefined;
           const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
           const alias = localName !== importedName ? localName : undefined;
-          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.DYNAMIC);
         } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
-          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.DYNAMIC);
         }
       }
     } else if (node.id.type === 'Identifier') {
       if (init.type === 'AwaitExpression') {
-        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.NONE);
+        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC);
         const resolved = s.resolveModule(specifier, s.filePath);
         if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
           s.localImportMap.set(node.id.name, {
@@ -48,10 +48,24 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
           });
         }
       } else {
-        s.addImport(specifier, undefined, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.OPAQUE);
+        s.addImport(
+          specifier,
+          undefined,
+          undefined,
+          undefined,
+          importExpr.source.start,
+          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+        );
       }
     } else {
-      s.addImport(specifier, undefined, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.OPAQUE);
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        importExpr.source.start,
+        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+      );
     }
     return;
   }
@@ -164,9 +178,16 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
             }
           }
         } else if (binding?.type === 'Identifier') {
-          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.DYNAMIC);
         } else {
-          s.addImport(specifier, undefined, undefined, undefined, imp.source.start, IMPORT_FLAGS.SIDE_EFFECTS);
+          s.addImport(
+            specifier,
+            undefined,
+            undefined,
+            undefined,
+            imp.source.start,
+            IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.SIDE_EFFECTS
+          );
         }
       }
     }
@@ -299,6 +320,13 @@ export function handleImportExpression(node: ImportExpression, s: WalkState) {
   if (s.handledImportExpressions.has(node.start)) return;
   const specifier = getStringValue(node.source);
   if (specifier) {
-    s.addImport(specifier, undefined, undefined, undefined, node.source.start, IMPORT_FLAGS.OPAQUE);
+    s.addImport(
+      specifier,
+      undefined,
+      undefined,
+      undefined,
+      node.source.start,
+      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+    );
   }
 }

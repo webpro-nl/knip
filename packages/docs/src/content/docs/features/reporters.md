@@ -10,10 +10,12 @@ Knip provides the following built-in reporters:
 - [`codeclimate`][1]
 - [`codeowners`][2]
 - `compact`
-- [`disclosure`][3]
-- [`github-actions`][4]
-- [`json`][5]
-- [`markdown`][6]
+- [`cycles`][3]
+- [`disclosure`][4]
+- [`github-actions`][5]
+- [`json`][6]
+- [`markdown`][7]
+- [`sarif`](#sarif)
 - `symbols` (default)
 
 Example usage:
@@ -54,15 +56,48 @@ $ knip --reporter codeclimate
 ### CODEOWNERS
 
 When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
-Point the reporter at a different path through [`--reporter-options`][7]:
+Point the reporter at a different path through [`--reporter-options`][8]:
 
 ```sh
 knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 ```
 
-For a typed object instead of JSON to parse, write a [custom reporter][8].
-Coding agents can also call Knip through the [MCP server][9], which returns
-structured results and configuration hints directly.
+### Cycles
+
+A verbose, multi-line tree view of [circular dependencies][9]. Each file path is
+suffixed with the location of the import that continues the cycle. Each edge
+shows the import kind and specifier, descends one file per level, and closes
+(`↩`) back to the file it started from.
+
+Enable the `cycles` issue type **and** select the reporter:
+
+```text
+$ knip --cycles --reporter cycles
+
+Circular dependencies (1)
+
+src/i18n/index.ts:1:28
+└── import ./middleware → src/i18n/middleware.ts:3:15
+    └── re-export ../core/i18n/handler → src/core/i18n/handler.ts:5:10
+        └── import ../../i18n → src/i18n/index.ts:1:28 ↩
+```
+
+Knip reports representative cycle paths found while walking the module graph.
+This is not an exhaustive list of every possible simple cycle in a cyclic
+subgraph, because that can produce a noisy and very large report. If the same
+file participates in multiple distinct reported paths, each path is shown
+separately.
+
+Use [`cycles.allow`][10] to accept known cycle paths.
+
+Dynamic imports are ignored by default because they are commonly used to avoid
+synchronous circular loads. Set [`cycles.dynamicImports`][10] to include them.
+Repeated starting imports are grouped under one heading.
+
+In CI, use `--include cycles` (or `"include": ["cycles"]`) to include the
+`cycles` issue type with the default reporter. This is non-verbose and takes one
+line per cycle path. Set `rules.cycle: "error"` to have Knip exit non-zero for
+any cycle paths found.
 
 ### Disclosure
 
@@ -169,7 +204,7 @@ every issue found in one file:
 | `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
 | _issue type_ | array        | One key per enabled issue type (see below)          |
 
-Each entry carries a key for **every enabled [issue type][10]**, so the keys are
+Each entry carries a key for **every enabled [issue type][9]**, so the keys are
 the same across entries. An array is empty when that file has no issues of that
 type. Drop a type's key by disabling it with [filters or rules][11].
 
@@ -183,7 +218,40 @@ Issue-type items are objects with position info:
 | `col`       | `number?` | 1-based column                                 |
 | `pos`       | `number?` | Character offset                               |
 
-See [Issue types][10] for the full set of issue-type keys.
+See [Issue types][9] for the full set of issue-type keys.
+
+For a typed object instead of JSON to parse, write a [custom reporter][12].
+Coding agents can also call Knip through the [MCP server][13], which returns
+structured results and configuration hints directly.
+
+### SARIF
+
+The `sarif` reporter emits [SARIF 2.1.0][14] for code-scanning integrations:
+
+```sh
+knip --reporter sarif > knip.sarif
+```
+
+For example, upload the report to GitHub Code Scanning after installing project
+dependencies:
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+steps:
+  - uses: actions/checkout@v4
+  - run: pnpm exec knip --reporter sarif > knip.sarif
+  - if: always()
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: knip.sarif
+```
+
+The upload step runs even when Knip finds issues and exits non-zero. GitHub
+Code Scanning availability for private repositories depends on the repository's
+GitHub Code Security plan.
 
 ### Markdown
 
@@ -311,12 +379,15 @@ knip --preprocessor ./preprocess.ts
 
 [1]: #codeclimate
 [2]: #codeowners
-[3]: #disclosure
-[4]: #github-actions
-[5]: #json
-[6]: #markdown
-[7]: ../reference/cli.md#--reporter-options-json
-[8]: #custom-reporters
-[9]: ../reference/integrations.md
-[10]: ../reference/issue-types.md
+[3]: #cycles
+[4]: #disclosure
+[5]: #github-actions
+[6]: #json
+[7]: #markdown
+[8]: ../reference/cli.md#--reporter-options-json
+[9]: ../reference/issue-types.md
+[10]: ../reference/configuration.md#cycles
 [11]: ./rules-and-filters.md
+[12]: #custom-reporters
+[13]: ../reference/integrations.md
+[14]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html

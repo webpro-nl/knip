@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/tsconfig-base",
+  "private": true,
+  "dependencies": {
+    "@fixtures/tsconfig-package": "workspace:*"
+  },
+  "exports": {
+    "./base.json": "./base.json"
+  }
+}

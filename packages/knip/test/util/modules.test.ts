@@ -3,10 +3,14 @@ import { test } from 'node:test';
 import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
+  getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
   isStartsLikePackageName,
   sanitizeSpecifier,
 } from '../../src/util/modules.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const store = resolve('fixtures/yarn-pnpm-store/node_modules/.store');
 
 test('Should return definitely typed package for package name', () => {
   assert.equal(getDefinitelyTypedFor('node'), '@types/node');
@@ -44,6 +48,22 @@ test('Should extract package name from module specifier', () => {
   assert.equal(getPackageNameFromModuleSpecifier('~/something'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('./relative'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('#subpath'), undefined);
+});
+
+test('Should extract package name from file path', () => {
+  assert.equal(getPackageNameFromFilePath('/root/node_modules/lodash/index.js'), 'lodash');
+  assert.equal(getPackageNameFromFilePath('/root/node_modules/@scope/pkg/index.js'), '@scope/pkg');
+  assert.equal(getPackageNameFromFilePath('/root/node_modules/@scope/pkg/node_modules/nested/index.js'), 'nested');
+  assert.equal(getPackageNameFromFilePath('file:///root/node_modules/lodash/index.js'), 'lodash');
+});
+
+test('Should resolve package name from Yarn pnpm-linker store via package.json', () => {
+  assert.equal(
+    getPackageNameFromFilePath(`${store}/@remix-run-router-npm-1.19.2-abc123/package/dist/index.js`),
+    '@remix-run/router'
+  );
+  assert.equal(getPackageNameFromFilePath(`${store}/write-file-atomic-npm-5.0.1-def456/package`), 'write-file-atomic');
+  assert.equal(getPackageNameFromFilePath(`${store}/does-not-exist-npm-1.0.0-000000/package/index.js`), '.store');
 });
 
 test('Should sanitize import specifier', () => {

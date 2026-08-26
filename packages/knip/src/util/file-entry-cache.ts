@@ -47,12 +47,16 @@ export class FileEntryCache<T> {
     const existing = this.normalizedEntries.get(filePath);
     if (existing) return existing;
 
-    let fstat: fs.Stats;
+    let fstat: fs.Stats | undefined;
     try {
-      fstat = fs.statSync(filePath);
+      fstat = fs.statSync(filePath, { throwIfNoEntry: false });
     } catch (error: unknown) {
       this.removeEntry(filePath);
       return { key: filePath, notFound: true, err: error };
+    }
+    if (!fstat) {
+      this.removeEntry(filePath);
+      return { key: filePath, notFound: true };
     }
 
     let meta = this.cache.get(filePath);

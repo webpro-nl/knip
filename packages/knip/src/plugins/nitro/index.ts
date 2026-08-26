@@ -1,6 +1,6 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toIgnore, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NitroConfig } from './types.ts';
@@ -31,6 +31,8 @@ const setup = async () => {
     });
   }
 };
+
+const resolve: Resolve = () => [toIgnore('^#nitro-internal-', 'unresolved')];
 
 const resolveConfig: ResolveConfig<NitroConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
@@ -69,6 +71,7 @@ const plugin: Plugin = {
   config,
   production,
   setup,
+  resolve,
   resolveConfig,
 };
 

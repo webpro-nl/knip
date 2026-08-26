@@ -1,0 +1,5 @@
+{
+  id: 'fixture',
+  configSchema: { type: 'object' },
+  providerCatalogEntry: './provider-discovery.ts',
+}

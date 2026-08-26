@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/gitignore-negated-compiler",
+  "type": "module",
+  "dependencies": {
+    "svelte": "*"
+  }
+}

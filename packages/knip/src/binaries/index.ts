@@ -1,3 +1,4 @@
+import { SCRIPT_INTERPOLATION } from '../constants.ts';
 import type { GetInputsFromScripts } from '../types/config.ts';
 import { fromBinary, type Input, isBinary, isDependency } from '../util/input.ts';
 import { timerify } from '../util/Performance.ts';
@@ -10,6 +11,7 @@ const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
 
   for (const input of results) {
     if (!input.specifier) continue;
+    if (input.specifier.includes(SCRIPT_INTERPOLATION)) continue;
     if (isDependency(input) && input.specifier.startsWith('http')) continue;
     if (isBinary(input) && !/^\b/.test(fromBinary(input))) continue;
     inputs.add(input);

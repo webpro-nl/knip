@@ -19,7 +19,8 @@ export class SourceFileManager {
   }
 
   readFile(filePath: string): string {
-    if (this.sourceTextCache.has(filePath)) return this.sourceTextCache.get(filePath)!;
+    const cachedSourceText = this.sourceTextCache.get(filePath);
+    if (cachedSourceText !== undefined) return cachedSourceText;
     const ext = extname(filePath);
     const compiler = this.syncCompilers.get(ext);
     if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) {

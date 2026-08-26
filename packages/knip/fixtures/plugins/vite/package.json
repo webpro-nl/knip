@@ -9,7 +9,8 @@
     "linked-package": "*",
     "many-components": "*",
     "shared-state": "*",
-    "upstream-esm": "*"
+    "upstream-esm": "*",
+    "native-renderer": "*"
   },
   "devDependencies": {
     "@babel/preset-typescript": "*",

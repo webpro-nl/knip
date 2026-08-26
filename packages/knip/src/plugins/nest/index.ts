@@ -15,7 +15,7 @@ const config = ['nest-cli.json', '.nestcli.json', '.nest-cli.json', 'nest.json']
 
 const resolveConfig: ResolveConfig<NestConfig> = async config => {
   const inputs = config?.collection ? [config.collection] : [];
-  return [...inputs].map(id => toDependency(id));
+  return Array.from(inputs, id => toDependency(id));
 };
 
 const plugin: Plugin = {

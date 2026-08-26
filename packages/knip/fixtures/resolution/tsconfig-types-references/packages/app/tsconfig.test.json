@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "types": ["chrome"]
+  },
+  "include": ["src/**/*.ts"]
+}

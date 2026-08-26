@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/package-entry-points-all-gitignored",
+  "exports": {
+    "./alpha": {
+      "types": "./dist/gen/alpha.d.ts",
+      "default": "./dist/gen/alpha.js"
+    },
+    "./beta": {
+      "types": "./dist/gen/beta.d.ts",
+      "default": "./dist/gen/beta.js"
+    }
+  }
+}

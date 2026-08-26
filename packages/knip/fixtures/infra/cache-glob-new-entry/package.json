@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/cache-glob-new-entry",
+  "knip": {
+    "entry": [
+      "index.ts",
+      "**/*.spec.ts"
+    ],
+    "project": [
+      "**/*.ts"
+    ]
+  }
+}

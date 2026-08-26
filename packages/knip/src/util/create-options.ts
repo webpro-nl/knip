@@ -9,7 +9,13 @@ import { getCatalogContainer } from './catalog.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
 import { findFile, loadJSON } from './fs.ts';
-import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.ts';
+import {
+  getIncludedIssueTypes,
+  shorthandCycles,
+  shorthandDeps,
+  shorthandExports,
+  shorthandFiles,
+} from './get-included-issue-types.ts';
 import { defaultRules } from './issue-initializers.ts';
 import { loadResolvedConfigFile } from './load-config.ts';
 import { _load } from './loader.ts';
@@ -111,6 +117,7 @@ export const createOptions = async (options: CreateOptions) => {
       ...(args.dependencies ? shorthandDeps : []),
       ...(args.exports ? shorthandExports : []),
       ...(args.files ? shorthandFiles : []),
+      ...(args.cycles ? shorthandCycles : []),
     ],
   });
 
@@ -130,6 +137,7 @@ export const createOptions = async (options: CreateOptions) => {
     config: args.config,
     configFilePath,
     cwd,
+    cycles: args.cycles ?? false,
     dependencies: args.dependencies ?? false,
     exports: args.exports ?? false,
     files: args.files ?? false,
@@ -162,6 +170,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.enumMembers ||
       includedIssueTypes.namespaceMembers ||
       includedIssueTypes.duplicates,
+    isReportCycles: includedIssueTypes.cycles,
     isReportFiles: includedIssueTypes.files,
     isReportTypes:
       includedIssueTypes.types ||

@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vite-plugin-pwa",
+  "dependencies": {
+    "vite-plugin-pwa": "*"
+  }
+}

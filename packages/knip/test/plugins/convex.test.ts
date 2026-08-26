@@ -9,11 +9,15 @@ const cwd = resolve('fixtures/plugins/convex');
 
 test('Find dependencies with the convex plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(!('convex/credentials.ts' in issues.files));
+  assert('src/unrelated.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    files: 1,
+    processed: 5,
+    total: 5,
   });
 });

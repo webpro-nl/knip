@@ -1,11 +1,16 @@
 import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
-import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
+import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
-import type { Export, FileNode, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
+import type { Export, FileNode, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
 import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
-import { getPackageNameFromFilePath, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
+import {
+  getPackageNameFromFilePath,
+  getPackageNameFromModuleSpecifier,
+  isStartsLikePackageName,
+  sanitizeSpecifier,
+} from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, isInNodeModules, resolve } from '../util/path.ts';
 import { shouldIgnore } from '../util/tag.ts';
@@ -59,6 +64,7 @@ const getImportsAndExports = (
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const specifierExportNames = new Set<string>();
   const scripts = new Set<string>();
+  const importGlobs: ImportGlob[] = [];
 
   const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
   const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
@@ -89,7 +95,9 @@ const getImportsAndExports = (
 
   const addInternalImport = (opts: AddInternalImportOptions) => {
     const { filePath: importFilePath, namespace, specifier, modifiers } = opts;
-    const identifier = opts.identifier ?? (modifiers & IMPORT_FLAGS.OPAQUE ? OPAQUE : SIDE_EFFECTS);
+    const identifier =
+      opts.identifier ??
+      (modifiers & IMPORT_FLAGS.OPAQUE ? OPAQUE : modifiers & IMPORT_FLAGS.LOADER ? LOADER_DEFAULT : SIDE_EFFECTS);
     const isStar = identifier === IMPORT_STAR;
 
     imports.add({
@@ -100,6 +108,7 @@ const getImportsAndExports = (
       line: opts.line,
       col: opts.col,
       isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+      modifiers,
     });
 
     const file = internal.get(importFilePath);
@@ -144,6 +153,13 @@ const getImportsAndExports = (
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
 
+    if (
+      modifiers & IMPORT_FLAGS.AUGMENT &&
+      (!module || module.isExternalLibraryImport || isInNodeModules(module.resolvedFileName))
+    ) {
+      return;
+    }
+
     if (module) {
       const resolvedFileName = module.resolvedFileName;
       if (resolvedFileName) {
@@ -170,11 +186,16 @@ const getImportsAndExports = (
         if (module.isExternalLibraryImport) {
           if (options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
 
-          const sanitizedSpecifier = sanitizeSpecifier(
-            isInNodeModules(resolvedFileName) || isInNodeModules(specifier)
-              ? getPackageNameFromFilePath(specifier)
-              : specifier
+          let sanitizedSpecifier = sanitizeSpecifier(
+            isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : specifier
           );
+          if (
+            module.packageName &&
+            isStartsLikePackageName(module.packageName) &&
+            getPackageNameFromModuleSpecifier(sanitizedSpecifier) !== module.packageName
+          ) {
+            sanitizedSpecifier = module.packageName;
+          }
 
           if (!isStartsLikePackageName(sanitizedSpecifier)) return;
 
@@ -188,6 +209,7 @@ const getImportsAndExports = (
             line,
             col,
             isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+            modifiers,
           });
         }
       }
@@ -211,6 +233,7 @@ const getImportsAndExports = (
           line,
           col,
           isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+          modifiers,
         });
       }
     }
@@ -357,10 +380,12 @@ const getImportsAndExports = (
     pluginCtx.addScript = (s: string) => scripts.add(s);
     pluginCtx.addImport = (spec: string, pos: number, mod: number) =>
       addImport(spec, undefined, undefined, undefined, pos, mod);
+    pluginCtx.addImportGlob = (patterns, opts) =>
+      importGlobs.push({ patterns, base: opts?.base, filter: opts?.filter });
     pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 
-  const localRefs = _walkAST(result.program, sourceText, filePath, {
+  const localRefs = _walkAST(result.program, sourceText, filePath, result.module.hasModuleSyntax, {
     lineStarts,
     skipExports,
     options,
@@ -399,7 +424,7 @@ const getImportsAndExports = (
 
   for (const [id, item] of exports) {
     item.referencedIn = referencedInExport.get(id);
-    if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && (localRefs.has(id) || item.isReExport)) {
+    if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && localRefs.has(id)) {
       item.hasRefsInFile = true;
     }
   }
@@ -409,6 +434,7 @@ const getImportsAndExports = (
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,
+    importGlobs,
     importedBy: undefined,
     internalImportCache: undefined,
   };

@@ -1,0 +1,3 @@
+{
+  "extends": "@fixtures/tsconfig-base/base.json"
+}

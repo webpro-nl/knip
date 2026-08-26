@@ -5,11 +5,30 @@ name: Tests (against typescript@5.0.4 in Node.js v20)
 on:
   workflow_dispatch:
   pull_request:
+    paths: &paths # All package sources (knip lints across the monorepo and analyzes the repo itself)
+      - 'packages/**'
+      - '!packages/docs/**/*.md'
+      - '!packages/docs/**/*.mdx'
+      # Root workspace / dependency / lint / knip-on-self config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'oxlint.config.ts'
+      - '.oxfmtrc.json'
+      - 'knip.json'
+      # This workflow file
+      - '.github/workflows/ci-legacy-5.0.4.yml'
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+    paths: *paths
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test:
@@ -25,13 +44,15 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} (Node v${{ matrix.node }})
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:
           version: 10
           package_json_file: packages/knip/package.json
@@ -46,7 +67,7 @@ jobs:
         working-directory: packages/knip
       - name: Type-check against TS 5.0.4
         run: |
-          node -e "let f=require('fs'),p='tsconfig.json';f.writeFileSync(p,f.readFileSync(p,'utf8').replace(/.*(?:rewriteRelativeImportExtensions|erasableSyntaxOnly).*\n/g,''))"
+          node -e "const f=require('fs'),p='tsconfig.json',c=JSON.parse(f.readFileSync(p,'utf8'));delete c.compilerOptions.rewriteRelativeImportExtensions;delete c.compilerOptions.erasableSyntaxOnly;c.include.push('./typescript-5.0.d.ts');f.writeFileSync(p,JSON.stringify(c,null,2)+'\n')"
           pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip

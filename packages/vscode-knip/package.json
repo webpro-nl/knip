@@ -1,7 +1,7 @@
 {
   "name": "vscode-knip",
   "displayName": "Knip",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "categories": [
@@ -53,14 +53,14 @@
     "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
-    "vscode-languageclient": "^10.0.0"
+    "vscode-languageclient": "^10.1.0"
   },
   "devDependencies": {
     "@types/mdast": "4.0.4",
-    "@types/vscode": "^1.95.0",
-    "@vscode/test-electron": "^3.0.0",
+    "@types/vscode": "~1.95.0",
+    "@vscode/test-electron": "^3.1.0",
     "knip": "workspace:*",
-    "rolldown": "^1.1.2"
+    "rolldown": "^1.2.1"
   },
   "contributes": {
     "languageModelTools": [

@@ -4,7 +4,7 @@ import type { CompilerOptions } from '../types/project.ts';
 import { compact } from './array.ts';
 import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
-import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
+import { dirname, isAbsolute, join, toAbsolute, toPosix } from './path.ts';
 
 const hasGlobChar = (p: string) => p.includes('*') || p.includes('?');
 const hasExtension = (p: string) => {
@@ -21,7 +21,19 @@ const resolvePatterns = (patterns: string[] | undefined, dir: string, expandDirs
   });
 };
 
-const pathsBaseDir = (baseUrl: string | undefined, dir: string) => (baseUrl ? toAbsolute(baseUrl, dir) : dir);
+const getImplicitBaseUrl = (compilerOptions: object): string | undefined => {
+  for (const symbol of Object.getOwnPropertySymbols(compilerOptions)) {
+    if (symbol.description === 'implicitBaseUrl') {
+      const value = Reflect.get(compilerOptions, symbol);
+      if (typeof value === 'string') return toPosix(value);
+    }
+  }
+};
+
+const pathsBaseDir = (compilerOptions: { baseUrl?: string } | undefined, dir: string) => {
+  if (compilerOptions?.baseUrl) return toAbsolute(compilerOptions.baseUrl, dir);
+  return (compilerOptions && getImplicitBaseUrl(compilerOptions)) ?? dir;
+};
 
 const collectPaths = (acc: Record<string, string[]>, paths: Record<string, string[]> | undefined, baseDir: string) => {
   if (!paths) return;
@@ -94,7 +106,7 @@ const walkReferences = (
     const refConfig = parseTsconfig(refPath);
     const refDir = dirname(refPath);
     const refOpts = refConfig.compilerOptions;
-    collectPaths(paths, refOpts?.paths, pathsBaseDir(refOpts?.baseUrl, refDir));
+    collectPaths(paths, refOpts?.paths, pathsBaseDir(refOpts, refDir));
     const refOutDir = refOpts?.outDir ? absDir(refOpts.outDir, refDir) : undefined;
     const refRootDir = refOpts?.rootDir ? absDir(refOpts.rootDir, refDir) : undefined;
     if (refOutDir && refRootDir && refOutDir !== refRootDir) pairs.push({ srcDir: refRootDir, outDir: refOutDir });
@@ -137,7 +149,7 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     if (compilerOptions.rootDirs) compilerOptions.rootDirs = compilerOptions.rootDirs.map(d => absDir(d, dir));
 
     const tsconfigPaths: Record<string, string[]> = {};
-    collectPaths(tsconfigPaths, compilerOptions.paths, pathsBaseDir(compilerOptions.baseUrl, dir));
+    collectPaths(tsconfigPaths, compilerOptions.paths, pathsBaseDir(compilerOptions, dir));
 
     const sourceMapPairs: SourceMap[] = [];
     if (config.references?.length) {

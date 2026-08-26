@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/unplugin-vue-i18n",
+  "dependencies": {
+    "@intlify/unplugin-vue-i18n": "*"
+  }
+}

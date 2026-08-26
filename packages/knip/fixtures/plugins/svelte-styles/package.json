@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/svelte-styles",
+  "type": "module",
+  "devDependencies": {
+    "less": "*",
+    "sass": "*",
+    "stylus": "*",
+    "svelte": "*"
+  }
+}

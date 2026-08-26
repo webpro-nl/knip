@@ -9,8 +9,6 @@
   },
   "dependencies": {
     "nuxt": "*",
-    "vue": "*",
-    "@pinia/nuxt": "*",
-    "@nuxt/eslint": "*"
+    "vue": "*"
   }
 }

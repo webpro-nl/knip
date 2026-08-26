@@ -1,0 +1,39 @@
+import { formatWeight } from "../../util/format-weight.ts";
+import FruitSummary from "../../fragments/fruit-summary.marko"
+import DiscoveredLabel from "<fruit-label>"
+
+<!-- import ignored from "html-comment-only" -->
+
+export interface Input {
+  weight?: number;
+}
+
+class {
+  declare state: {
+    isOpen: boolean;
+  };
+
+  onCreate() {
+    this.state = { isOpen: false };
+  }
+
+  toggle() {
+    this.state.isOpen = !this.state.isOpen;
+  }
+}
+
+<div.fruit-basket title='import ignored from "attribute-only"' onClick("toggle")>
+  <berry-badge count=input.weight/>
+  <berry-tally berries=input.weight/>
+  <fruit-label label=formatWeight(input.weight ?? 0)/>
+  <legacy-banner/>
+  <FruitSummary/>
+</div>
+
+style.scss {
+  @use "../../styles/palette";
+
+  .fruit-basket {
+    color: palette.$ink;
+  }
+}

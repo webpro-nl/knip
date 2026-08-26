@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/prettier-check-flag",
+  "devDependencies": {
+    "prettier": "*"
+  },
+  "scripts": {
+    "lint": "prettier . --config .prettierrc -c",
+    "lint:fix": "prettier . --config .prettierrc -w"
+  }
+}

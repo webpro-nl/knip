@@ -9,15 +9,20 @@ export type AliasOptions = readonly Alias[] | { [find: string]: string };
 interface VitestConfig {
   test: {
     include: string[];
+    benchmark?: {
+      include?: string[];
+    };
     coverage?: {
       enabled?: boolean;
       provider: string;
     };
     root?: string;
+    dir?: string;
     environment?: string;
     globalSetup?: string | string[];
     reporters?: (string | [string, unknown] | unknown)[];
     setupFiles?: string | string[];
+    snapshotSerializers?: string[];
     workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never } })[];
     projects?: (string | (ViteConfig & { test: VitestConfig['test'] & { projects: never } }))[];
     alias?: AliasOptions;
@@ -25,6 +30,7 @@ interface VitestConfig {
 }
 
 export interface ViteConfig extends VitestConfig {
+  extends?: string | true;
   root?: string;
   plugins?: unknown[];
   build?: {
@@ -35,6 +41,9 @@ export interface ViteConfig extends VitestConfig {
   optimizeDeps?: {
     include?: string[];
   };
+  ssr?: {
+    external?: (string | RegExp)[] | true;
+  };
   resolve?: {
     alias?: AliasOptions;
     dedupe?: string[];
@@ -42,7 +51,7 @@ export interface ViteConfig extends VitestConfig {
   };
 }
 
-export type COMMAND = 'dev' | 'serve' | 'build';
+export type COMMAND = 'serve' | 'build';
 export type MODE = 'development' | 'production';
 
 interface Options {

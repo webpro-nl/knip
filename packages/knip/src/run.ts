@@ -1,4 +1,6 @@
 import { watch } from 'node:fs';
+import { createScriptParserContext } from './binaries/create-script-parser-context.ts';
+import { _getInputsFromScripts } from './binaries/index.ts';
 import { CatalogCounselor } from './CatalogCounselor.ts';
 import { ConfigurationChief } from './ConfigurationChief.ts';
 import { ConsoleStreamer } from './ConsoleStreamer.ts';
@@ -13,7 +15,9 @@ import { debugLogObject } from './util/debug.ts';
 import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
 import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
-import { getModuleSourcePathHandler, getWorkspaceManifestHandler } from './util/to-source-path.ts';
+import { isCatalog } from './util/input.ts';
+import { createManifest } from './util/package-json.ts';
+import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
@@ -36,11 +40,36 @@ export const run = async (options: MainOptions) => {
   streamer.cast('Reading workspace configuration');
 
   const workspaces = await chief.getWorkspaces();
+  const includedWorkspaceNames = new Set(workspaces.map(workspace => workspace.name));
+  const scriptParserContext = createScriptParserContext(chief);
+  const { rootManifest, getManifest } = scriptParserContext;
+
+  for (const name of chief.availableWorkspaceNames) {
+    const workspace = chief.workspacePackages.get(name);
+    if (!workspace) continue;
+    counselor.addWorkspace(workspace);
+    if (includedWorkspaceNames.has(name)) continue;
+
+    const manifest = createManifest(workspace.manifest);
+    const inputs = _getInputsFromScripts(Object.values(manifest.scripts ?? {}), {
+      cwd: workspace.dir,
+      rootCwd: options.cwd,
+      containingFilePath: workspace.manifestPath,
+      manifest,
+      rootManifest,
+      getManifest,
+    });
+    for (const input of inputs) {
+      if (isCatalog(input)) {
+        counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
+      }
+    }
+  }
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
-  const findWorkspaceManifestImports = getWorkspaceManifestHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspaceManifestImports);
+  const findWorkspacePackageTarget = getWorkspacePackageTargetHandler(chief);
+  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspacePackageTarget);
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setSelectedWorkspaces(chief.selectedWorkspaces);
@@ -58,6 +87,7 @@ export const run = async (options: MainOptions) => {
     deputy,
     principal,
     isGitIgnored,
+    scriptParserContext,
     streamer,
     workspaces,
     options,

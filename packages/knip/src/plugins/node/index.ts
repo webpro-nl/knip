@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import { toEntry, toProductionEntry } from '../../util/input.ts';
+import { getScriptCommands } from '../../util/scripts.ts';
 
 const title = 'Node.js';
 
@@ -13,8 +14,22 @@ const patterns = [
   '**/test/**/*.{cjs,mjs,js,cts,mts,ts}',
 ];
 
-const hasNodeTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script));
+const hasNodeTestCache = new WeakMap<Record<string, string>, boolean>();
+
+const hasNodeTest = (scripts: Record<string, string> | undefined) => {
+  if (!scripts) return false;
+  const cached = hasNodeTestCache.get(scripts);
+  if (cached !== undefined) return cached;
+  const result = Object.values(scripts).some(
+    script =>
+      typeof script === 'string' &&
+      getScriptCommands(script).some(
+        ({ binary, args }) => (binary === 'node' || binary === 'nub') && args.includes('--test')
+      )
+  );
+  hasNodeTestCache.set(scripts, result);
+  return result;
+};
 
 const entry = ['server.js'];
 

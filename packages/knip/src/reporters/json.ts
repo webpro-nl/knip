@@ -15,6 +15,8 @@ export interface JSONReportNamedItem {
 
 export interface JSONReportItem extends JSONReportNamedItem {
   namespace?: string;
+  kind?: string;
+  specifier?: string;
   pos?: number;
   line?: number;
   col?: number;
@@ -25,6 +27,8 @@ export type JSONReportEntry = {
   owners?: Array<JSONReportNamedItem>;
   binaries?: Array<JSONReportNamedItem>;
   catalog?: Array<JSONReportItem>;
+  catalogReferences?: Array<JSONReportItem>;
+  cycles?: Array<Array<JSONReportItem>>;
   dependencies?: Array<JSONReportItem>;
   devDependencies?: Array<JSONReportItem>;
   duplicates?: Array<Array<JSONReportItem>>;
@@ -63,6 +67,8 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
       ...(findOwners && { owners: findOwners(file).map(name => ({ name })) }),
       ...(report.binaries && { binaries: [] }),
       ...(report.catalog && { catalog: [] }),
+      ...(report.catalogReferences && { catalogReferences: [] }),
+      ...(report.cycles && { cycles: [] }),
       ...(report.dependencies && { dependencies: [] }),
       ...(report.devDependencies && { devDependencies: [] }),
       ...(report.duplicates && { duplicates: [] }),
@@ -85,7 +91,7 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
       for (const issue of flattenIssues(issues[type] as IssueRecords)) {
         const { filePath, symbol, symbols } = issue;
         json[filePath] = json[filePath] ?? initRow(filePath);
-        if (type === 'duplicates') {
+        if (type === 'duplicates' || type === 'cycles') {
           symbols && json[filePath][type]?.push(symbols.map(convert));
         } else if (type === 'binaries') {
           json[filePath][type]?.push({ name: symbol });

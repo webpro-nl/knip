@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/jest4",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "babel-jest": "*",
+    "@babel/preset-env": "*",
+    "@babel/preset-typescript": "*",
+    "babel-plugin-react-compiler": "*"
+  }
+}

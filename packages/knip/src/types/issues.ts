@@ -5,6 +5,8 @@ export type SymbolType = (typeof SYMBOL_TYPE)[keyof typeof SYMBOL_TYPE];
 
 export interface IssueSymbol {
   symbol: string;
+  kind?: string;
+  specifier?: string;
   pos?: number;
   line?: number;
   col?: number;
@@ -45,6 +47,8 @@ export type Issues = {
   enumMembers: IssueRecords;
   namespaceMembers: IssueRecords;
   catalog: IssueRecords;
+  catalogReferences: IssueRecords;
+  cycles: IssueRecords;
 };
 
 export type IssueType = keyof Issues;
@@ -104,6 +108,7 @@ export type ConfigurationHintType =
   | 'entry-empty'
   | 'project-empty'
   | 'project-extension-unregistered'
+  | 'project-extension-excluded'
   | 'package-entry'
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';

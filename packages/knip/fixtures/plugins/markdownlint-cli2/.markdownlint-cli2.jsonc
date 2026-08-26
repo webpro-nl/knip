@@ -1,0 +1,8 @@
+{
+  "config": {
+    "extends": "markdownlint-config-prettier"
+  },
+  "customRules": ["markdownlint-rule-titlecase"],
+  "markdownItPlugins": [["markdown-it-anchor", { "permalink": true }]],
+  "outputFormatters": [["markdownlint-cli2-formatter-summarize"], ["markdownlint-cli2-formatter-default"]]
+}

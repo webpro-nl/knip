@@ -1,4 +1,5 @@
 import { _getInputsFromScripts } from '../binaries/index.ts';
+import type { ScriptParserContext } from '../binaries/create-script-parser-context.ts';
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
@@ -23,6 +24,7 @@ import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../
 import {
   type Input,
   isAlias,
+  isCatalog,
   isConfig,
   isDeferResolveEntry,
   isDeferResolveProductionEntry,
@@ -32,12 +34,16 @@ import {
   isProject,
   toProductionEntry,
 } from '../util/input.ts';
+import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
+import { resolveImportGlobs } from '../typescript/glob-imports.ts';
+import { createPublishedTypeDependencyAnalyzer } from '../typescript/get-published-type-dependencies.ts';
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
 
@@ -48,6 +54,7 @@ interface BuildOptions {
   deputy: DependencyDeputy;
   principal: ProjectPrincipal;
   isGitIgnored: (path: string) => boolean;
+  scriptParserContext: ScriptParserContext;
   streamer: ConsoleStreamer;
   workspaces: Workspace[];
   options: MainOptions;
@@ -60,6 +67,7 @@ export async function build({
   deputy,
   principal,
   isGitIgnored,
+  scriptParserContext,
   streamer,
   workspaces,
   options,
@@ -76,9 +84,11 @@ export async function build({
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
   const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const getPublishedTypeDependencies = options.isReportDependencies
+    ? createPublishedTypeDependencyAnalyzer()
+    : undefined;
 
-  const rawRootManifest = chief.getManifestForWorkspace('.');
-  const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
+  const { rootManifest, getManifest } = scriptParserContext;
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -94,8 +104,6 @@ export async function build({
       manifest,
       ...chief.getIgnores(name),
     });
-
-    counselor.addWorkspace(manifest);
   }
 
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
@@ -108,7 +116,7 @@ export async function build({
   }
 
   for (const workspace of workspaces) {
-    const { name, dir, ancestors, manifestPath: filePath } = workspace;
+    const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
     streamer.cast('Analyzing workspace', name);
 
@@ -116,7 +124,6 @@ export async function build({
     if (!manifest) continue;
 
     const dependencies = deputy.getDependencies(name);
-    const baseConfig = chief.getConfigForWorkspace(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
     const {
@@ -139,6 +146,7 @@ export async function build({
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
+      getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
@@ -149,7 +157,12 @@ export async function build({
 
     await worker.init();
 
-    const compilers = getIncludedCompilers(chief.config.syncCompilers, chief.config.asyncCompilers, dependencies);
+    const compilers = getIncludedCompilers(
+      new Map(chief.config.syncCompilers),
+      new Map(chief.config.asyncCompilers),
+      dependencies,
+      dep => deputy.addReferencedDependency(name, dep)
+    );
     const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
       const ext = normalizeCompilerExtension(extension);
       if (compilers[0].has(ext)) return;
@@ -185,7 +198,31 @@ export async function build({
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
-      inputs.add(toProductionEntry(filePath));
+      if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
+    }
+
+    if (getPublishedTypeDependencies && !manifest.private && !manifest.publishConfig?.directory) {
+      for (const dependency of getPublishedTypeDependencies(workspace, manifest)) {
+        const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, dependency.packageName, {
+          specifier: dependency.specifier,
+          isTypeOnly: true,
+          isResolved: dependency.isResolved,
+          isPublishedType: true,
+        });
+        if (!isHandled) {
+          addIssue({
+            type: 'unlisted',
+            filePath: dependency.containingFilePath,
+            workspace: name,
+            symbol: dependency.packageName,
+            specifier: dependency.specifier,
+            pos: dependency.pos,
+            line: dependency.line,
+            col: dependency.col,
+            fixes: [],
+          });
+        }
+      }
     }
 
     for (const identifier of entrySpecifiersFromManifest) {
@@ -243,7 +280,9 @@ export async function build({
     for (const input of inputs) {
       if (input.group) groups.add(input.group);
       const specifier = input.specifier;
-      if (isEntry(input)) {
+      if (isCatalog(input)) {
+        counselor.addReference({ catalogName: input.catalogName, packageName: specifier });
+      } else if (isEntry(input)) {
         const targetMap = input.skipExportsAnalysis ? entryPatternsSkipExports : entryPatterns;
         addPattern(targetMap, input, toWorkspaceRelative(specifier));
       } else if (isProductionEntry(input)) {
@@ -420,9 +459,21 @@ export async function build({
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
-          if (!isGitIgnored(join(dirname(filePath), sanitizedSpecifier))) {
-            const ext = extname(sanitizedSpecifier);
-            if (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext))) unresolvedImports.add(unresolvedImport);
+          const candidate = join(dirname(filePath), sanitizedSpecifier);
+          const ext = extname(sanitizedSpecifier);
+          const aliases = extensionAlias[ext];
+          let isIgnored = isGitIgnored(candidate);
+          if (!isIgnored && aliases) {
+            const basePath = candidate.slice(0, -ext.length);
+            for (const alias of aliases) {
+              if (alias !== ext && isGitIgnored(basePath + alias)) {
+                isIgnored = true;
+                break;
+              }
+            }
+          }
+          if (!isIgnored && (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext)))) {
+            unresolvedImports.add(unresolvedImport);
           }
         }
       }
@@ -462,13 +513,25 @@ export async function build({
           dependencies,
           manifest: createManifest(manifest),
           rootManifest,
+          getManifest,
         };
         const inputs = _getInputsFromScripts(file.scripts, opts);
         for (const input of inputs) {
+          if (isCatalog(input)) {
+            counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
+            continue;
+          }
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = handleInput(input, workspace);
           if (specifierFilePath) pp.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+        }
+      }
+
+      if (file.importGlobs.length > 0) {
+        const globbed = resolveImportGlobs(file.importGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of globbed) {
+          if (!isGitIgnored(importedFilePath)) pp.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
         }
       }
 
@@ -483,6 +546,7 @@ export async function build({
         node.exports = file.exports;
         node.duplicates = file.duplicates;
         node.scripts = file.scripts;
+        node.importGlobs = file.importGlobs;
         updateImportMap(node, file.imports.internal, graph);
         node.internalImportCache = file.imports.internal;
       } else {
@@ -513,7 +577,10 @@ export async function build({
     return paths;
   });
 
-  for (const filePath of principal.getUnreferencedFiles()) unreferencedFiles.add(filePath);
+  for (const filePath of principal.getUnreferencedFiles()) {
+    if (IS_DTS.test(filePath) && isAmbientDeclarationFile(filePath, principal.readFile(filePath))) continue;
+    unreferencedFiles.add(filePath);
+  }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
   principal.reconcileCache(graph);

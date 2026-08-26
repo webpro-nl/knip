@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
@@ -9,20 +9,20 @@ import {
   toDependency,
   toEntry,
   toIgnore,
+  toProductionDependency,
   toProductionEntry,
 } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
-  collectIdentifiers,
   collectLocalImportPaths,
-  collectTemplateInfo,
-  getVueSfc,
+  createAutoImportMaps,
+  createTsCompiler,
+  createVueCompiler,
   readAndParseFile,
-  toKebabCase,
-} from './helpers.ts';
+} from '../_vue/auto-import.ts';
 import type { NuxtConfig } from './types.ts';
 
 const title = 'Nuxt';
@@ -63,7 +63,15 @@ const setup = async () => {
   }
 };
 
-// Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
+const resolve: Resolve = () => [
+  toIgnore('^#build/', 'unresolved'),
+  toIgnore('#components', 'unresolved'),
+  toIgnore('#imports', 'unresolved'),
+  toIgnore('^#internal/', 'unresolved'),
+  toIgnore('#spa-template', 'unresolved'),
+];
+
+// Nuxt aliases are unavailable until `nuxt prepare` generates `.nuxt/tsconfig.json`.
 const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
   if (specifier.startsWith('~~/') || specifier.startsWith('@@/')) return join(rootDir, specifier.slice(3));
   if (specifier.startsWith('~/') || specifier.startsWith('@/')) return join(srcDir, specifier.slice(2));
@@ -88,10 +96,7 @@ const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [
 
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
   if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
-    const vueSfc = getVueSfc(cwd);
-
-    const importMap = new Map<string, string>();
-    const componentMap = new Map<string, string[]>();
+    const maps = createAutoImportMaps();
 
     const definitionFiles = [
       '.nuxt/imports.d.ts',
@@ -102,85 +107,29 @@ const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, regist
 
     for (const file of definitionFiles) {
       const path = join(cwd, file);
-      const result = readAndParseFile(path);
-      const maps = buildAutoImportMap(path, result);
-      for (const [id, specifier] of maps.importMap) importMap.set(id, specifier);
-      for (const [id, components] of maps.componentMap) {
-        const store = componentMap.get(id);
-        if (store) store.push(...components);
-        else componentMap.set(id, [...components]);
-      }
+      buildAutoImportMap(path, readAndParseFile(path), maps, file.endsWith('components.d.ts'));
     }
 
-    const getSyntheticImports = (identifiers: Set<string>, templateTags?: Set<string>) => {
-      const syntheticImports: string[] = [];
-
-      for (const [name, specifier] of importMap) {
-        if (identifiers.has(name)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
-      }
-
-      if (templateTags) {
-        for (const [name, specifiers] of componentMap) {
-          const kebab = toKebabCase(name);
-          if (
-            templateTags.has(name) ||
-            templateTags.has(kebab) ||
-            templateTags.has(`Lazy${name}`) ||
-            templateTags.has(`lazy-${kebab}`)
-          ) {
-            syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
-            for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
-          }
-        }
-      }
-
-      return syntheticImports;
-    };
-
-    const compiler = (source: string, path: string) => {
-      const { descriptor } = vueSfc.parse(source, path);
-      const scripts: string[] = [];
-
-      if (descriptor.script?.content) scripts.push(descriptor.script.content);
-      if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
-
-      const identifiers = collectIdentifiers(scripts.join('\n'), path);
-      let templateTags: Set<string> | undefined;
-      if (descriptor.template?.ast) {
-        const info = collectTemplateInfo(descriptor.template.ast);
-        templateTags = info.tags;
-        for (const id of info.identifiers) identifiers.add(id);
-      }
-      const synthetic = getSyntheticImports(identifiers, templateTags);
-      scripts.push(...synthetic);
-
-      return scripts.join(';\n');
-    };
-
-    const tsCompiler = (source: string, path: string) => {
-      // TODO Can we filter out more files that are outside the realm of auto-imports?
-      if (path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
-      const identifiers = collectIdentifiers(source, path);
-      const syntheticImports = getSyntheticImports(identifiers);
-      if (syntheticImports.length === 0) return source;
-      return `${source}\n${syntheticImports.join('\n')}`;
-    };
-
-    registerCompiler({ extension: '.vue', compiler });
-    registerCompiler({ extension: '.ts', compiler: tsCompiler });
+    registerCompiler({ extension: '.vue', compiler: createVueCompiler(maps, cwd) });
+    registerCompiler({ extension: '.ts', compiler: createTsCompiler(maps) });
   }
 };
 
 const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) => {
   const { configFileDir: cwd } = options;
   const hasAppDir = isDirectory(cwd, 'app');
-  const srcDir = localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd);
+  const srcDir = toAbsolute(localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd), cwd);
   const serverDir = localConfig.serverDir ?? 'server';
   const inputs: Input[] = [];
 
+  const addModule = (id: string) => {
+    const specifier = resolveAlias(id, srcDir, cwd);
+    inputs.push(isInternal(specifier) ? toDeferResolveProductionEntry(specifier) : toProductionDependency(specifier));
+  };
+
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
-    if (typeof id === 'string') inputs.push(toDependency(id));
+    if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
+    if (typeof id === 'string') addModule(id);
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
@@ -197,7 +146,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   }
 
   for (const ext of localConfig.extends ?? []) {
-    const resolved = resolveAlias(ext, srcDir, cwd);
+    const target = resolveAlias(ext, srcDir, cwd);
+    const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
     if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
     else inputs.push(toDependency(ext));
@@ -225,9 +175,6 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  inputs.push(toIgnore('#imports', 'unresolved'));
-  inputs.push(toIgnore('#components', 'unresolved'));
-
   return inputs;
 };
 
@@ -239,6 +186,7 @@ const plugin: Plugin = {
   entry,
   production,
   setup,
+  resolve,
   resolveConfig,
   registerCompilers,
 };

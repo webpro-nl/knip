@@ -1,9 +1,11 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { _glob, _dirGlob } from '../../util/glob.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { BabelConfigObj } from '../babel/types.ts';
 import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
 import type { JestConfig, JestInitialOptions } from './types.ts';
 
@@ -23,6 +25,9 @@ const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 const entry = ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/?(*.)+(spec|test).?(c|m)[jt]s?(x)', ...mocks];
 
 const rootDirRe = /<rootDir>/;
+
+const isBabelJest = (transformer: [string, unknown]): transformer is [string, BabelConfigObj] =>
+  transformer[0] === 'babel-jest';
 
 const resolveDependencies = async (
   config: JestInitialOptions,
@@ -76,9 +81,22 @@ const resolveDependencies = async (
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-  const transform = config.transform
-    ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
-    : [];
+  const transform: (string | Input)[] = [];
+  for (const transformer of config.transform ? Object.values(config.transform) : []) {
+    if (typeof transformer === 'string') {
+      transform.push(transformer);
+    } else {
+      transform.push(transformer[0]);
+      if (isBabelJest(transformer)) {
+        transform.push(...getDependenciesFromConfig(transformer[1]));
+        const { configFile } = transformer[1];
+        if (typeof configFile === 'string')
+          transform.push(
+            toConfig('babel', rootDirRe.test(configFile) ? configFile : toAbsolute(configFile, options.cwd))
+          );
+      }
+    }
+  }
   const moduleNameMapper = (
     config.moduleNameMapper
       ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))

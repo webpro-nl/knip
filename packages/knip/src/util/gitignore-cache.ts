@@ -85,7 +85,9 @@ export const setCachedGitignore = (
   for (const file of gitignoreFiles) {
     const abs = path.isAbsolute(file) ? file : path.resolve(cwd, file);
     try {
-      mtimes.push(fs.statSync(abs).mtimeMs);
+      const stat = fs.statSync(abs, { throwIfNoEntry: false });
+      if (!stat) continue;
+      mtimes.push(stat.mtimeMs);
       validFiles.push(file);
     } catch {
       // File was removed between read and stat; skip rather than poison cache

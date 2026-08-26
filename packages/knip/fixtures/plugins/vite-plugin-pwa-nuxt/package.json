@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/vite-plugin-pwa-nuxt",
+  "scripts": {
+    "build": "nuxt build"
+  },
+  "dependencies": {
+    "nuxt": "*",
+    "@vite-pwa/nuxt": "*"
+  }
+}

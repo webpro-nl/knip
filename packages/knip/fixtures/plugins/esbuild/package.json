@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/esbuild",
+  "type": "module",
+  "dependencies": {
+    "esbuild": "*"
+  }
+}

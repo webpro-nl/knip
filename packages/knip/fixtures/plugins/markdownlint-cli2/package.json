@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/markdownlint-cli2",
+  "scripts": {
+    "md": "markdownlint-cli2 \"**/*.md\""
+  },
+  "devDependencies": {
+    "markdown-it-anchor": "*",
+    "markdownlint-cli2": "*",
+    "markdownlint-cli2-formatter-summarize": "*",
+    "markdownlint-config-prettier": "*",
+    "markdownlint-rule-titlecase": "*"
+  }
+}

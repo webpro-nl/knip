@@ -9,6 +9,7 @@ import unresolved from './unresolved';
 import unresolvedPkg from 'unresolved';
 import unresolvedOrg from '@org/unresolved';
 
+import AliasedGithub from '@icons/github.svg';
 import Github from '@svg-icons/fa-brands/github.svg';
 import Briefcase from '@svg-icons/heroicons-outline/briefcase.svg';
 

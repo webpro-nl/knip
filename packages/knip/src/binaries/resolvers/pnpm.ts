@@ -2,6 +2,7 @@ import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary } from '../../util/input.ts';
 import { isValidBinary } from '../../util/modules.ts';
+import { argsAfter, expandScript, toWordArgs } from '../util.ts';
 import { resolveDlx } from './pnpx.ts';
 
 // https://pnpm.io/cli/add
@@ -18,6 +19,7 @@ const commands = [
   'clean-install',
   'clean',
   'config',
+  'create',
   'dedupe',
   'deploy',
   'dlx',
@@ -31,6 +33,7 @@ const commands = [
   'ic',
   'ignored-builds',
   'import',
+  'info',
   'init',
   'install-clean',
   'install-test',
@@ -42,6 +45,8 @@ const commands = [
   'list',
   'll',
   'ln',
+  'login',
+  'logout',
   'ls',
   'outdated',
   'pack-app',
@@ -73,6 +78,7 @@ const commands = [
   'store',
   't',
   'test',
+  'token',
   'tst',
   'un',
   'uninstall',
@@ -81,12 +87,15 @@ const commands = [
   'update',
   'upgrade',
   'version',
+  'view',
   'why',
   'with',
 ];
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
-  const parsed = parseArgs(args, {
+const recursiveCommands = ['recursive', 'multi', 'm'];
+
+export const resolve: BinaryResolver = (_binary, words, options) => {
+  const parsed = parseArgs(words, {
     boolean: ['aggregate-output', 'if-present', 'parallel', 'recursive', 'reverse', 'shell-mode', 'silent', 'stream'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
     '--': true,
@@ -94,22 +103,38 @@ export const resolve: BinaryResolver = (_binary, args, options) => {
   const [command] = parsed._;
 
   if (command === 'dlx') {
-    const argsForDlx = args.filter(arg => arg !== 'dlx');
-    return resolveDlx(argsForDlx, options);
+    const wordsForDlx = words.filter(word => word.value !== 'dlx');
+    return resolveDlx(wordsForDlx, options);
+  }
+
+  if (recursiveCommands.includes(command)) {
+    return resolve(_binary, argsAfter(words, command), options);
   }
 
   const { manifest, fromArgs } = options;
 
   if (parsed.filter && !parsed.recursive) return [];
 
-  const childInputs = parsed['--'] && parsed['--'].length > 0 ? fromArgs(parsed['--'], { knownBinsOnly: true }) : [];
+  const childInputs =
+    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { knownBinsOnly: true }) : [];
 
   if (command === 'exec') {
-    return childInputs.length > 0 ? childInputs : fromArgs(parsed._.slice(1));
+    if (childInputs.length > 0) return childInputs;
+    const rest = parsed._.slice(1);
+    return rest.length === 1 ? fromArgs(rest.map(String)) : fromArgs(toWordArgs(rest, words));
+  }
+
+  if (command === 'run') {
+    const script = parsed._[1];
+    if (script && manifest.scriptNames.has(script)) {
+      return expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? childInputs;
+    }
+    return childInputs;
   }
 
   const isScript = manifest.scriptNames.has(command);
-  if (isScript || commands.includes(command)) return childInputs;
+  if (isScript) return expandScript(command, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
+  if (commands.includes(command)) return childInputs;
 
   return command && isValidBinary(command) ? [toBinary(command)] : [];
 };

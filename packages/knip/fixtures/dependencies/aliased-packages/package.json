@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/aliased-packages",
+  "dependencies": {
+    "styled": "npm:@org/styled-lib@1.0.0",
+    "@deno/doc": "jsr:^0.1.0",
+    "themed": "catalog:",
+    "plotted-v1": "npm:@org/plotted-lib@1.0.0",
+    "plotted-v2": "npm:@org/plotted-lib@2.0.0",
+    "@org/mirror-target": "1.0.0"
+  },
+  "devDependencies": {
+    "tinted": "npm:@org/tinted-lib@1.0.0"
+  }
+}

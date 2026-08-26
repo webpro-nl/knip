@@ -34,11 +34,14 @@ interested in:
 knip --include files --exclude enumMembers,duplicates
 ```
 
-Also see the [list of issue types][2].
+The `nsExports` and `nsTypes` types are [off by default][2]. Including only
+those _adds_ them to the default report, rather than narrowing it to just those.
+
+Also see the [list of issue types][3].
 
 ### Shorthands
 
-Knip has shortcuts to include only specific issue types.
+Knip has shortcuts to report only specific issue types.
 
 1. The `--dependencies` flag includes:
    - `dependencies` (and `devDependencies` + `optionalPeerDependencies`)
@@ -46,6 +49,7 @@ Knip has shortcuts to include only specific issue types.
    - `binaries`
    - `unresolved`
    - `catalog`
+   - `catalogReferences`
 
 2. The `--exports` flag includes:
    - `exports`
@@ -54,7 +58,9 @@ Knip has shortcuts to include only specific issue types.
    - `namespaceMembers`
    - `duplicates`
 
-3. The `--files` flag is a shortcut for `--include files`
+3. The `--files` flag is a shortcut to report only unused files.
+
+4. The `--cycles` flag is a shortcut to report only circular dependencies.
 
 ## Rules
 
@@ -63,7 +69,7 @@ the total error count, or to exclude them altogether.
 
 | Value     | Default | Printed | Counted | Description                       |
 | :-------- | :-----: | :-----: | :-----: | :-------------------------------- |
-| `"error"` |    ✓    |    ✓    |    ✓    | Similar to the `--include` filter |
+| `"error"` |   ✓ ¹   |    ✓    |    ✓    | Similar to the `--include` filter |
 | `"warn"`  |    -    |    ✓    |    -    | Printed in faded/gray color       |
 | `"off"`   |    -    |    -    |    -    | Similar to the `--exclude` filter |
 
@@ -78,13 +84,15 @@ Example:
 }
 ```
 
-Also see the [issue types overview][2].
+Notes:
 
-NOTE: If the `dependencies` issue type is included, the `devDependencies` and
-`optionalPeerDependencies` types can still be set to `"warn"` separately.
+- ¹ Exception: the `cycles` issue type is a warning by default.
+- If the `dependencies` issue type is included, the `devDependencies` and
+  `optionalPeerDependencies` types can still be set to `"warn"` separately.
+- The rules are modeled after the ESLint `rules` configuration, and could be
+  extended in the future.
 
-The rules are modeled after the ESLint `rules` configuration, and could be
-extended in the future.
+Also see the [issue types overview][3].
 
 ## Rules or filters?
 
@@ -98,4 +106,5 @@ fine-grained configuration.
 - Filters have shorthands (rules don't have this).
 
 [1]: ../reference/jsdoc-tsdoc-tags.md
-[2]: ../reference/issue-types.md
+[2]: ../guides/namespace-imports.md
+[3]: ../reference/issue-types.md
