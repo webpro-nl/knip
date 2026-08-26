@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { DEFAULT_SUPPRESSIONS_FILE, ISSUE_TYPES } from '../constants.ts';
 import type { Counters, IssueRecords, Issues, IssueType, Rules } from '../types/issues.ts';
 import type {
+  AnalysisScope,
   ApplyResult,
   SuppressionMeta,
   Suppressions,
@@ -11,7 +12,6 @@ import type {
 } from '../types/suppressions.ts';
 import { timerify } from './Performance.ts';
 import { join } from './path.ts';
-import type { WorkspaceFilePathFilter } from './workspace-file-filter.ts';
 
 const isExpired = (until: string | undefined, now: string) => until !== undefined && until <= now;
 
@@ -191,7 +191,7 @@ const handleSuppressions = async (
   issues: Issues,
   counters: Counters,
   options: HandleSuppressionsOptions,
-  workspaceFilePathFilter: WorkspaceFilePathFilter
+  scope: AnalysisScope
 ): Promise<HandleSuppressionsResult> => {
   const filePath = options.suppressionsFilePath ?? getDefaultSuppressionsFilePath(options.cwd);
 
@@ -211,8 +211,12 @@ const handleSuppressions = async (
   const existing = await loadSuppressions(filePath);
   if (!existing) return { action: 'none' };
 
-  const isInScope: SuppressionScope = (key, issueType) =>
-    options.rules[issueType] === 'error' && workspaceFilePathFilter(join(options.cwd, key));
+  const isInScope: SuppressionScope = (key, issueType) => {
+    if (options.rules[issueType] !== 'error') return false;
+    const entryPath = join(options.cwd, key);
+    if (!scope.workspaceFilePathFilter(entryPath)) return false;
+    return scope.isConsidered(entryPath) || !existsSync(entryPath);
+  };
 
   const updated = pruneSuppressions(issues, existing, isInScope);
   const result = applySuppressions(issues, existing, options.rules);

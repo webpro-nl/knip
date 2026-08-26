@@ -110,6 +110,67 @@ test('Issue-type-scoped run still prunes within its own issue type', async () =>
   assert(after.suppressions['unused.ts']?.files?.['unused.ts']);
 });
 
+test('Config-scoped run leaves the other config suppressions intact', async () => {
+  const cwd = await copyFixture('fixtures/suppressions-configs');
+  await write(cwd, {
+    'client/renderer.ts': { exports: { unusedRenderHook: {} } },
+    'server/listener.ts': { exports: { unusedListenHook: {} } },
+  });
+
+  exec('knip -c knip.client.json', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert(after.suppressions['client/renderer.ts']?.exports?.['unusedRenderHook']);
+  assert(after.suppressions['server/listener.ts']?.exports?.['unusedListenHook']);
+});
+
+test('Config-scoped run still prunes within its own config', async () => {
+  const cwd = await copyFixture('fixtures/suppressions-configs');
+  await write(cwd, {
+    'client/renderer.ts': { exports: { unusedRenderHook: {}, ghostThatNoLongerExists: {} } },
+    'server/listener.ts': { exports: { unusedListenHook: {} } },
+  });
+
+  exec('knip -c knip.client.json', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert(after.suppressions['client/renderer.ts']?.exports?.['unusedRenderHook']);
+  assert(!after.suppressions['client/renderer.ts']?.exports?.['ghostThatNoLongerExists']);
+  assert(after.suppressions['server/listener.ts']?.exports?.['unusedListenHook']);
+});
+
+test('Full run prunes entries for files that no longer exist', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  await write(cwd, {
+    'module.ts': { exports: { unusedExport: {}, anotherUnused: {} } },
+    'package.json': { dependencies: { 'unused-pkg': {}, 'used-pkg': {} } },
+    'unused.ts': { files: { 'unused.ts': {} } },
+    'deleted-file.ts': { exports: { gone: {} } },
+  });
+
+  exec('knip', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert(!after.suppressions['deleted-file.ts']);
+  assert(after.suppressions['module.ts']?.exports?.['unusedExport']);
+  assert(after.suppressions['package.json']?.dependencies?.['unused-pkg']);
+});
+
+test('Full run prunes dependency entries that no longer apply', async () => {
+  const cwd = await copyFixture('fixtures/suppressions');
+  await write(cwd, {
+    'module.ts': { exports: { unusedExport: {}, anotherUnused: {} } },
+    'package.json': { dependencies: { 'unused-pkg': {}, 'used-pkg': {}, 'never-listed-pkg': {} } },
+    'unused.ts': { files: { 'unused.ts': {} } },
+  });
+
+  exec('knip', { cwd });
+
+  const after: Suppressions = JSON.parse(await read(cwd));
+  assert(after.suppressions['package.json']?.dependencies?.['unused-pkg']);
+  assert(!after.suppressions['package.json']?.dependencies?.['never-listed-pkg']);
+});
+
 test('Scope flags filter what --suppress-all writes', async () => {
   const cwd = await copyFixture('fixtures/suppressions');
   await writeFile(join(cwd, FILE), JSON.stringify({ version: 1, suppressions: {} }, null, 2));

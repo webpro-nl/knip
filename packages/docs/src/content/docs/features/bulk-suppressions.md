@@ -35,9 +35,11 @@ issue (or delete the code), the corresponding entry will be automatically
 removed from the file.
 
 A run only prunes what it analyzed. Under a [scope flag][3] such as
-`--workspace` or `--exports`, entries for other workspaces and other issue types
-are left untouched, so a scoped run never discards suppressions it knows nothing
-about. Pruning them takes a full run.
+`--workspace` or `--exports`, or a `--config` that covers part of the project,
+entries outside that scope are left untouched, so a run never discards
+suppressions it knows nothing about. This also means several passes with
+different configuration files can share one suppressions file. Entries for files
+that no longer exist are always pruned.
 
 ### Tackling suppressed issues
 

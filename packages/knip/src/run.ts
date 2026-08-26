@@ -144,6 +144,9 @@ export const run = async (options: MainOptions) => {
     flushGitignoreCache();
   }
 
+  const manifestPaths = new Set<string>();
+  for (const workspace of chief.workspacesByDir.values()) manifestPaths.add(workspace.manifestPath);
+
   return {
     results: {
       issues,
@@ -154,7 +157,11 @@ export const run = async (options: MainOptions) => {
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },
-    workspaceFilePathFilter: chief.workspaceFilePathFilter,
+    scope: {
+      workspaceFilePathFilter: chief.workspaceFilePathFilter,
+      isConsidered: (filePath: string) =>
+        analyzedFiles.has(filePath) || unreferencedFiles.has(filePath) || manifestPaths.has(filePath),
+    },
     session,
     streamer,
   };
