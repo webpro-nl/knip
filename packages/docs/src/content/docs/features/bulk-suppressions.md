@@ -87,7 +87,7 @@ Knip preserves fields it does not recognize, so you can annotate entries with a
 ticket, an owner or a date and they survive `--suppress-all` and
 `--prune-suppressions`. Knip attaches no meaning to them.
 
-A \[preprocessor]\[9] can. This one reports an entry again once its `until` date
+A [preprocessor][6] can. This one reports an entry again once its `until` date
 has passed, by moving it out of `suppressedIssues` and back into the report,
 which also makes the run fail:
 
@@ -138,7 +138,7 @@ export function formatDate() {}
 ```
 
 Tags live next to the code, carry context naturally, and don't rely on an
-external file. See [JSDoc Tags][6] for details.
+external file. See [JSDoc Tags][7] for details.
 
 That said, additional fields in the JSON file are preserved.
 
@@ -147,9 +147,9 @@ That said, additional fields in the JSON file are preserved.
 Use `ignore*` items for false positives (i.e. when Knip is wrong), use
 suppressions for actual issues you want to fix later.
 
-Remember that [ignore][7] patterns are nearly always a bad idea. They might hurt
+Remember that [ignore][8] patterns are nearly always a bad idea. They might hurt
 performance and hide issues that you do want to know about. [Exclude the file
-from analysis][8], use a more specific `ignore*` pattern to get rid of a false
+from analysis][9], use a more specific `ignore*` pattern to get rid of a false
 positive, or suppress a specific issue temporarily.
 
 ## Suppressions file
@@ -186,6 +186,7 @@ keys and one line per item:
 [3]: ../reference/cli.md#scope
 [4]: ../reference/integrations.md
 [5]: ./reporters.md#json
-[6]: ../reference/jsdoc-tsdoc-tags.md
-[7]: ../reference/configuration.md#ignore
-[8]: ../guides/configuring-project-files.md
+[6]: ./reporters.md#preprocessors
+[7]: ../reference/jsdoc-tsdoc-tags.md
+[8]: ../reference/configuration.md#ignore
+[9]: ../guides/configuring-project-files.md
