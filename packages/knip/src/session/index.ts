@@ -1,4 +1,4 @@
-export { IMPORT_STAR, KNIP_CONFIG_LOCATIONS, SIDE_EFFECTS } from '../constants.ts';
+export { IMPORT_STAR, ISSUE_TYPES, KNIP_CONFIG_LOCATIONS, SIDE_EFFECTS } from '../constants.ts';
 export type { DependencyNode, DependencyNodes } from '../graph-explorer/operations/get-dependency-usage.ts';
 export { finalizeConfigurationHints } from '../reporters/util/configuration-hints.ts';
 export { getIssuePrefix } from '../reporters/util/util.ts';

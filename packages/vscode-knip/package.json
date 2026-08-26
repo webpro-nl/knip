@@ -200,6 +200,63 @@
         "displayName": "Editor",
         "order": 2,
         "properties": {
+          "knip.editor.severity": {
+            "type": [
+              "string",
+              "object"
+            ],
+            "default": "default",
+            "markdownDescription": "How Knip issues are shown in the editor. This affects the editor only: `rules` in your Knip configuration still decides what fails a `knip` run.\n\nEither one value for every issue type (`\"warning\"`), or an object keyed by [issue type](https://knip.dev/reference/issue-types) where `*` sets the fallback (`{ \"*\": \"downgrade\", \"unresolved\": \"error\" }`).",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Applies to every issue type",
+                "enum": [
+                  "default",
+                  "error",
+                  "warning",
+                  "information",
+                  "hint",
+                  "downgrade",
+                  "upgrade"
+                ],
+                "enumDescriptions": [
+                  "Follow Knip's own rules",
+                  "Show as an error",
+                  "Show as a warning",
+                  "Show as information",
+                  "Show as a hint, fading the code",
+                  "One step quieter than Knip’s rules: error becomes warning, warning becomes information",
+                  "One step louder than Knip’s rules: warning becomes error"
+                ]
+              },
+              {
+                "type": "object",
+                "description": "Per issue type, where `*` sets the fallback for the rest",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "default",
+                    "error",
+                    "warning",
+                    "information",
+                    "hint",
+                    "downgrade",
+                    "upgrade"
+                  ],
+                  "enumDescriptions": [
+                    "Follow Knip's own rules",
+                    "Show as an error",
+                    "Show as a warning",
+                    "Show as information",
+                    "Show as a hint, fading the code",
+                    "One step quieter than Knip’s rules: error becomes warning, warning becomes information",
+                    "One step louder than Knip’s rules: warning becomes error"
+                  ]
+                }
+              }
+            ]
+          },
           "knip.editor.exports.codelens.enabled": {
             "type": "boolean",
             "default": true,
@@ -252,27 +309,26 @@
           "knip.editor.exports.highlight.dimExports": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused exports (instead of warnings)"
+            "description": "Dim unused exports (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"exports\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimTypes": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused types (instead of warnings)"
+            "description": "Dim unused types (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"types\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimEnumMembers": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused enum members (instead of warnings)"
-          },
-          "knip.editor.exports.highlight.dimClassMembers": {
-            "type": "boolean",
-            "default": false,
-            "description": "Dim unused class members (instead of warnings)"
+            "description": "Dim unused enum members (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"enumMembers\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimDuplicates": {
             "type": "boolean",
             "default": false,
-            "description": "Dim duplicate exports (instead of warnings)"
+            "description": "Dim duplicate exports (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"duplicates\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           }
         }
       },

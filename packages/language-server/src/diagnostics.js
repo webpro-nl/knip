@@ -5,14 +5,14 @@ import { DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver/node';
  * @import { Diagnostic } from 'vscode-languageserver';
  * @import { TextDocument } from 'vscode-languageserver-textdocument';
  * @import { Config } from './types.js';
- * @import { Issue, Rules } from 'knip/session';
+ * @import { Issue, IssueType, Rules } from 'knip/session';
  */
 
+/** Superseded by `editor.severity`; kept until the settings are removed */
 const dimmedIssueTypes = {
   exports: 'dimExports',
   types: 'dimTypes',
   enumMembers: 'dimEnumMembers',
-  classMembers: 'dimClassMembers',
   duplicates: 'dimDuplicates',
 };
 
@@ -23,6 +23,57 @@ const SEVERITY = {
   hint: DiagnosticSeverity.Hint,
 };
 
+const ABSOLUTE_SEVERITY = {
+  error: DiagnosticSeverity.Error,
+  warning: DiagnosticSeverity.Warning,
+  information: DiagnosticSeverity.Information,
+  hint: DiagnosticSeverity.Hint,
+};
+
+/** Loudest to quietest, so `downgrade` and `upgrade` can step along it */
+const SEVERITY_ORDER = [
+  DiagnosticSeverity.Error,
+  DiagnosticSeverity.Warning,
+  DiagnosticSeverity.Information,
+  DiagnosticSeverity.Hint,
+];
+
+/**
+ * @param {DiagnosticSeverity} severity
+ * @param {number} steps
+ * @returns {DiagnosticSeverity}
+ */
+const step = (severity, steps) => {
+  const index = SEVERITY_ORDER.indexOf(severity);
+  if (index === -1) return severity;
+  return SEVERITY_ORDER[Math.min(SEVERITY_ORDER.length - 1, Math.max(0, index + steps))];
+};
+
+/**
+ * Editor-only: `rules` decides what fails a run, this decides how the editor renders it.
+ * Most specific wins — the issue type, then a dim setting, then `*`, then `rules`.
+ * @param {IssueType} type
+ * @param {DiagnosticSeverity} base severity `rules` would give this issue type
+ * @param {Config} config
+ * @returns {DiagnosticSeverity}
+ */
+const resolveSeverity = (type, base, config) => {
+  const configured = config.editor.severity;
+  const isScalar = typeof configured === 'string';
+
+  const dimSetting = dimmedIssueTypes[type];
+  const isDimmed = dimSetting ? config.editor.exports.highlight[dimSetting] === true : false;
+
+  const value =
+    (isScalar ? undefined : configured?.[type]) ??
+    (isDimmed ? 'hint' : undefined) ??
+    (isScalar ? configured : configured?.['*']);
+
+  if (value === 'downgrade') return step(base, 1);
+  if (value === 'upgrade') return step(base, -1);
+  return ABSOLUTE_SEVERITY[value] ?? base;
+};
+
 /**
  * @param {Issue} issue
  * @param {Rules} rules
@@ -31,9 +82,14 @@ const SEVERITY = {
  * @returns {Diagnostic}
  */
 export const issueToDiagnostic = (issue, rules, config, document) => {
+  // unused files are informational by default: the whole file is the finding, not a symbol in it
+  const base = issue.type === 'files' ? DiagnosticSeverity.Information : SEVERITY[rules[issue.type]];
+  const severity = resolveSeverity(issue.type, base, config);
+
   if (issue.type === 'files' && document) {
     return {
-      severity: DiagnosticSeverity.Information,
+      severity,
+      tags: severity === DiagnosticSeverity.Hint ? [DiagnosticTag.Unnecessary] : undefined,
       range: {
         start: { line: 0, character: 0 },
         end: { line: 0, character: 1 },
@@ -44,16 +100,8 @@ export const issueToDiagnostic = (issue, rules, config, document) => {
     };
   }
 
-  /** @type {DiagnosticSeverity} */
-  let severity = SEVERITY[rules[issue.type]];
-
-  /** @type {DiagnosticTag[]} */
-  const tags = [];
-
-  if (dimmedIssueTypes[issue.type] && config.editor.exports.highlight[dimmedIssueTypes[issue.type]]) {
-    severity = DiagnosticSeverity.Hint;
-    tags.push(DiagnosticTag.Unnecessary);
-  }
+  // a hint is nearly invisible without it, and this is what makes `hint` fade the code
+  const tags = severity === DiagnosticSeverity.Hint ? [DiagnosticTag.Unnecessary] : [];
 
   const line = Math.max(0, (issue.line ?? 1) - 1);
   const start = Math.max(0, (issue.col ?? 0) - 1);

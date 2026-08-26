@@ -53,6 +53,9 @@ jobs:
       - name: Test knip
         run: pnpm test --runtime node
         working-directory: packages/knip
+      - name: Test language server
+        run: pnpm test
+        working-directory: packages/language-server
       - name: Run knip
         run: ./packages/knip/bin/knip.js
       - name: Run knip in strict mode

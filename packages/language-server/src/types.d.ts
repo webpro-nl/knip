@@ -1,9 +1,12 @@
 import type { Issue, IssueType } from 'knip/session';
 
+export type EditorSeverity = 'default' | 'error' | 'warning' | 'information' | 'hint' | 'downgrade' | 'upgrade';
+
 export type Config = {
   deferSession: boolean;
   configFilePath?: string;
   editor: {
+    severity: EditorSeverity | Partial<Record<IssueType | '*', EditorSeverity>>;
     exports: {
       codelens: {
         enabled: boolean;
@@ -22,7 +25,6 @@ export type Config = {
         dimExports: boolean;
         dimTypes: boolean;
         dimEnumMembers: boolean;
-        dimClassMembers: boolean;
         dimDuplicates: boolean;
       };
     };
