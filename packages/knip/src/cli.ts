@@ -2,7 +2,7 @@
 import { fix } from './IssueFixer.ts';
 import { run } from './run.ts';
 import type { IssueType, ReporterOptions } from './types/issues.ts';
-import parseArgs, { helpText } from './util/cli-arguments.ts';
+import parseArgs, { helpText, parseNumericOption } from './util/cli-arguments.ts';
 import { createOptions } from './util/create-options.ts';
 import {
   getKnownErrors,
@@ -75,7 +75,7 @@ const main = async () => {
       isShowProgress: options.isShowProgress,
       isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
       isTreatTagHintsAsErrors: options.isTreatTagHintsAsErrors,
-      maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
+      maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
       selectedWorkspaces,
@@ -104,7 +104,7 @@ const main = async () => {
 
     if (
       !args['no-exit-code'] &&
-      (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+      (totalErrorCount > (parseNumericOption(args['max-issues'], 'max-issues') ?? 0) ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {
