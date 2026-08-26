@@ -58,7 +58,7 @@ test('Session reapplies suppressions after file changes', async () => {
   const cwd = await copyFixture('fixtures/suppressions');
   const options = await createOptions({ cwd, isSession: true, isUseTscFiles: false });
   const session = await createSession(options);
-  const filePath = join(cwd, 'module.ts');
+  const filePath = join(options.cwd, 'module.ts');
   const source = await readFile(filePath, 'utf8');
 
   await writeFile(filePath, `${source}\nexport const newlyUnused = 1;\n`);
