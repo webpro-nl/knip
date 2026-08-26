@@ -13,6 +13,9 @@ export interface Suppressions {
   suppressions: Record<string, SuppressionsByType>;
 }
 
+/** Whether this run analyzed the given file for the given issue type, i.e. whether its issues are known */
+export type SuppressionScope = (filePath: string, issueType: IssueType) => boolean;
+
 export interface ApplyResult {
   suppressedCount: number;
   expiredCount: number;

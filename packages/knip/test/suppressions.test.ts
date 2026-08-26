@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../src/index.ts';
 import type { Rules } from '../src/types/issues.ts';
-import type { Suppressions } from '../src/types/suppressions.ts';
+import type { Suppressions, SuppressionScope } from '../src/types/suppressions.ts';
 import { defaultRules } from '../src/util/issue-initializers.ts';
 import {
   applySuppressions,
@@ -15,6 +15,8 @@ import { createOptions } from './helpers/create-options.ts';
 import { resolve } from './helpers/resolve.ts';
 
 const cwd = resolve('fixtures/suppressions');
+
+const allInScope: SuppressionScope = () => true;
 
 test('Baseline: fixture produces expected issues without suppressions', async () => {
   const options = await createOptions({ cwd });
@@ -180,7 +182,7 @@ test('pruneSuppressions removes expired entries', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, suppressions);
+  const updated = pruneSuppressions(issues, suppressions, allInScope);
 
   assert(!updated.suppressions['module.ts']);
 });
@@ -325,7 +327,7 @@ test('Regular run auto-prunes stale suppressions', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, existing);
+  const updated = pruneSuppressions(issues, existing, allInScope);
   const isChanged = JSON.stringify(existing) !== JSON.stringify(updated);
 
   assert(isChanged);
@@ -348,7 +350,7 @@ test('Regular run detects no change when suppressions match', async () => {
     },
   };
 
-  const updated = pruneSuppressions(issues, existing);
+  const updated = pruneSuppressions(issues, existing, allInScope);
   const isChanged = JSON.stringify(existing) !== JSON.stringify(updated);
 
   assert(!isChanged);

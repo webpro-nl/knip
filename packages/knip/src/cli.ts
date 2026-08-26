@@ -45,7 +45,7 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
-    const { results } = await run(options);
+    const { results, workspaceFilePathFilter } = await run(options);
 
     const {
       issues,
@@ -64,7 +64,7 @@ const main = async () => {
     let expiredCount = 0;
 
     if (!options.isProduction) {
-      const suppressionResult = await _handleSuppressions(issues, counters, options);
+      const suppressionResult = await _handleSuppressions(issues, counters, options, workspaceFilePathFilter);
 
       if (suppressionResult.action === 'generated') {
         console.log(suppressionResult.message);

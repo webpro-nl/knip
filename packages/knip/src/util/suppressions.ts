@@ -2,9 +2,16 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { DEFAULT_SUPPRESSIONS_FILE, ISSUE_TYPES } from '../constants.ts';
 import type { Counters, IssueRecords, Issues, IssueType, Rules } from '../types/issues.ts';
-import type { ApplyResult, SuppressionMeta, Suppressions, SuppressionsByType } from '../types/suppressions.ts';
+import type {
+  ApplyResult,
+  SuppressionMeta,
+  Suppressions,
+  SuppressionsByType,
+  SuppressionScope,
+} from '../types/suppressions.ts';
 import { timerify } from './Performance.ts';
 import { join } from './path.ts';
+import type { WorkspaceFilePathFilter } from './workspace-file-filter.ts';
 
 const isExpired = (until: string | undefined, now: string) => until !== undefined && until <= now;
 
@@ -80,7 +87,7 @@ export const applySuppressions = (issues: Issues, bulk: Suppressions, rules?: Ru
 };
 
 /** @internal */
-export const pruneSuppressions = (issues: Issues, bulk: Suppressions): Suppressions => {
+export const pruneSuppressions = (issues: Issues, bulk: Suppressions, isInScope: SuppressionScope): Suppressions => {
   const now = getToday();
   const pruned: Record<string, SuppressionsByType> = {};
 
@@ -91,13 +98,16 @@ export const pruneSuppressions = (issues: Issues, bulk: Suppressions): Suppressi
       const entry = byType[issueType];
       if (!entry) continue;
 
-      const records = getRecords(issues, issueType);
-      if (!records[key]) continue;
+      if (!isInScope(key, issueType)) {
+        prunedByType[issueType] = entry;
+        continue;
+      }
 
+      const records = getRecords(issues, issueType);
       const remaining: Record<string, SuppressionMeta> = {};
       for (const [s, meta] of Object.entries(entry)) {
         if (isExpired(meta.until, now)) continue;
-        if (records[key][s]) remaining[s] = meta;
+        if (records[key]?.[s]) remaining[s] = meta;
       }
       if (Object.keys(remaining).length > 0) {
         prunedByType[issueType] = remaining;
@@ -171,7 +181,8 @@ type HandleSuppressionsResult =
 const handleSuppressions = async (
   issues: Issues,
   counters: Counters,
-  options: HandleSuppressionsOptions
+  options: HandleSuppressionsOptions,
+  workspaceFilePathFilter: WorkspaceFilePathFilter
 ): Promise<HandleSuppressionsResult> => {
   const filePath = options.suppressionsFilePath ?? getDefaultSuppressionsFilePath(options.cwd);
 
@@ -191,7 +202,10 @@ const handleSuppressions = async (
   const existing = await loadSuppressions(filePath);
   if (!existing) return { action: 'none' };
 
-  const updated = pruneSuppressions(issues, existing);
+  const isInScope: SuppressionScope = (key, issueType) =>
+    options.rules[issueType] === 'error' && workspaceFilePathFilter(join(options.cwd, key));
+
+  const updated = pruneSuppressions(issues, existing, isInScope);
   const result = applySuppressions(issues, existing, options.rules);
 
   for (const issueType of ISSUE_TYPES) {

@@ -154,6 +154,7 @@ export const run = async (options: MainOptions) => {
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },
+    workspaceFilePathFilter: chief.workspaceFilePathFilter,
     session,
     streamer,
   };
