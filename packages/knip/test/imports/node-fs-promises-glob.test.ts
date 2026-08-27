@@ -11,4 +11,5 @@ test('Resolve node:fs/promises glob patterns as entry files', async () => {
   const { issues } = await main(options);
 
   assert(!('migrations/one.ts' in issues.files));
+  assert('dynamic/one.ts' in issues.files);
 });
