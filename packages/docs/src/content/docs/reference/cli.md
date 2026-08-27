@@ -36,6 +36,10 @@ Use an alternative path for the configuration file. Default locations:
 - `knip.js`
 - `knip.config.ts`
 - `knip.config.js`
+- `knip.config.mts`
+- `knip.config.mjs`
+- `knip.config.cts`
+- `knip.config.cjs`
 - `package.json#knip`
 
 Shortcut: `-c`

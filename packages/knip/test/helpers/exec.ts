@@ -12,6 +12,7 @@ export const exec = (command: string, options: { cwd: string }) => {
     env: {
       PATH: process.env.PATH,
       NO_COLOR: '1',
+      FORCE_COLOR: '0',
     },
   });
 

@@ -28,6 +28,26 @@ test('Support loading package.json for configuration', async () => {
   assert.equal(exec('knip', { cwd }).stdout, '');
 });
 
+test('Support automatic discovery of mjs config files', async () => {
+  const cwd = resolve('fixtures/config-mjs-auto');
+  assert.equal(exec('knip', { cwd }).stdout, '');
+});
+
+test('Support automatic discovery of mts config files', async () => {
+  const cwd = resolve('fixtures/config-mts-auto');
+  assert.equal(exec('knip', { cwd }).stdout, '');
+});
+
+test('Support automatic discovery of cts config files', async () => {
+  const cwd = resolve('fixtures/config-cts-auto');
+  assert.equal(exec('knip', { cwd }).stdout, '');
+});
+
+test('Support automatic discovery of cjs config files', async () => {
+  const cwd = resolve('fixtures/config-cjs-auto');
+  assert.equal(exec('knip', { cwd }).stdout, '');
+});
+
 test('Support loading ts async function for configuration', async () => {
   const cwd = resolve('fixtures/config-ts-async');
   assert.equal(exec('knip', { cwd }).stdout, '');
