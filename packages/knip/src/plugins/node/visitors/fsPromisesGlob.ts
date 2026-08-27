@@ -1,6 +1,6 @@
 import type { ImportDeclaration, VariableDeclarator } from 'oxc-parser';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { findProperty } from '../../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyKey } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 
 const FS_PROMISES = new Set(['node:fs/promises', 'fs/promises']);
@@ -44,8 +44,7 @@ export function createFsPromisesGlobVisitor(ctx: PluginVisitorContext): PluginVi
         for (const property of node.id.properties) {
           if (
             property.type === 'Property' &&
-            property.key.type === 'Identifier' &&
-            property.key.name === 'glob' &&
+            getPropertyKey(property) === 'glob' &&
             property.value.type === 'Identifier'
           ) {
             globNames.add(property.value.name);
@@ -76,7 +75,8 @@ export function createFsPromisesGlobVisitor(ctx: PluginVisitorContext): PluginVi
       } else if (arg.type === 'ArrayExpression') {
         patterns = [];
         for (const element of arg.elements) {
-          if (element && isStringLiteral(element)) patterns.push(getStringValue(element)!);
+          if (!element || !isStringLiteral(element)) return;
+          patterns.push(getStringValue(element)!);
         }
       }
       if (!patterns?.length) return;
