@@ -12,7 +12,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, isAbsolute, join, relative, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, normalize, relative, toAbsolute, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -281,6 +281,38 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
 const _parseFindGitignores = timerify(findAndParseGitignores);
 
+const withParts = { parts: true } as const;
+
+const relativeToCwd = (pattern: string, cwd: string) => relative(cwd, normalize(toAbsolute(pattern, cwd)));
+
+const escapesCwd = (pattern: string, cwd: string) => {
+  const relativePattern = relativeToCwd(pattern, cwd);
+  return relativePattern === '..' || relativePattern.startsWith('../');
+};
+
+const hasCommonSubdir = (patterns: string[], cwd: string) => {
+  let commonSegment: string | undefined;
+  for (const pattern of patterns) {
+    const parts = picomatch.scan(relativeToCwd(pattern, cwd), withParts).parts;
+    if (!parts || parts.length < 2) return false;
+    const segment = parts[0];
+    if (picomatch.scan(segment).isGlob) return false;
+    if (commonSegment === undefined) commonSegment = segment;
+    else if (segment !== commonSegment) return false;
+  }
+  return true;
+};
+
+const reachesParent = (pattern: string, cwd: string) => relativeToCwd(pattern, cwd).includes('..');
+
+const splitEscapingPatterns = (patterns: string[], cwd: string) => {
+  const [escaping, contained] = partition(patterns, pattern => escapesCwd(pattern, cwd));
+  if (escaping.length === 0 || contained.length === 0) return;
+  for (const pattern of contained) if (reachesParent(pattern, cwd)) return;
+  if (hasCommonSubdir(contained, cwd)) return;
+  return [escaping, contained];
+};
+
 export async function glob(_patterns: string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(_patterns) && _patterns.length === 0) return [];
 
@@ -311,7 +343,10 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
     followSymbolicLinks: false,
   };
 
-  const paths = await tinyGlob(patterns, fgOptions);
+  const groups = splitEscapingPatterns(patterns, options.cwd);
+  const paths = groups
+    ? (await Promise.all(groups.map(group => tinyGlob(group, fgOptions)))).flat()
+    : await tinyGlob(patterns, fgOptions);
 
   debugLogObject(relative(options.cwd, dir), label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
