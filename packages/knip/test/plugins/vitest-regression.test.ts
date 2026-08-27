@@ -5,7 +5,7 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/vitest-regressions');
+const cwd = resolve('fixtures/plugins/vitest-regression');
 
 test('Find entries and setup dependencies in Vitest configurations with arrays, SSR branches, and custom roots', async () => {
   const options = await createOptions({ cwd });
