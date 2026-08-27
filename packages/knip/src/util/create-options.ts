@@ -193,6 +193,7 @@ export const createOptions = async (options: CreateOptions) => {
     isTreatTagHintsAsErrors: args['treat-tag-hints-as-errors'] ?? parsedConfig.treatTagHintsAsErrors ?? false,
     isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
     isWatch: args.watch ?? options.isWatch ?? false,
+    maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
     maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
     parsedConfig,
     rules,
