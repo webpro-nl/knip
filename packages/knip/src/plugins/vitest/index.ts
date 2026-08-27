@@ -30,7 +30,6 @@ const entry = [...testEntry, ...mocks];
 const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
-  const { configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
