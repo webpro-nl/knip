@@ -10,7 +10,7 @@ export const exec = (command: string, options: { cwd: string }) => {
   const output = spawnSync(runtime, [cliPath, ...args], {
     cwd: options.cwd,
     env: {
-      PATH: process.env.PATH,
+      ...process.env,
       NO_COLOR: '1',
     },
   });

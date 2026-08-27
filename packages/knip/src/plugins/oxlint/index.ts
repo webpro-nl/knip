@@ -14,7 +14,7 @@ const enablers = ['oxlint', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['.oxlintrc.json', 'oxlint.config.{ts,mts}', 'vite.config.{js,mjs,ts,cjs,mts,cts}'];
+const config: string[] = ['.oxlintrc.{json,jsonc}', 'oxlint.config.{ts,mts}', 'vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const isViteConfig = (configFileName: string) => configFileName.startsWith('vite.config.');
 

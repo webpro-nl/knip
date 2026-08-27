@@ -97,7 +97,6 @@ export async function build({
 
     deputy.addWorkspace({
       name,
-      cwd: options.cwd,
       dir,
       manifestPath,
       manifestStr,
