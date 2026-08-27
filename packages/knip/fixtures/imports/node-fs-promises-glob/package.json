@@ -1,3 +1,7 @@
 {
-  "name": "@fixtures/node-fs-promises-glob"
+  "name": "@fixtures/node-fs-promises-glob",
+  "scripts": {
+    "test": "node --test"
+  }
 }
+
