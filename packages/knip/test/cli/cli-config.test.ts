@@ -43,6 +43,13 @@ test('Support loading ts function for configuration', async () => {
   assert.equal(exec('knip', { cwd }).stdout, '');
 });
 
+test('Report configuration that is not an object', async () => {
+  const cwd = resolve('fixtures/config-ts-nested-function');
+  const { stderr, status } = exec('knip', { cwd });
+  assert.match(stderr, /Expected an object as configuration/);
+  assert.equal(status, 2);
+});
+
 test('Support loading yaml files for configuration', async () => {
   const cwd = resolve('fixtures/config-yaml');
   assert.equal(exec('knip -c knip.yaml', { cwd }).stdout, '');
