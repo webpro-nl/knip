@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/session-preprocessor-mutation",
+  "knip": {
+    "preprocessor": "./preprocessor.js"
+  }
+}

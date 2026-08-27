@@ -8,6 +8,7 @@ import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/session-preprocessor');
+const mutationCwd = resolve('fixtures/session-preprocessor-mutation');
 
 const getUnusedFilePaths = (issues: Issues) =>
   Object.values(issues.files).flatMap(issue => Object.values(issue).map(i => i.filePath));
@@ -57,6 +58,24 @@ test('session runs configured preprocessors for issues and results', async () =>
     assert.strictEqual(session.getIssues(), updatedResults);
     assert.deepEqual(getUnusedFilePaths(updatedResults.issues), []);
     assert.equal(updatedResults.counters.total, 2);
+  } finally {
+    writeFileSync(filePath, source);
+  }
+});
+
+test('session preprocessors do not mutate collector state', async () => {
+  const options = await createOptions({ cwd: mutationCwd, isSession: true });
+  const session = await createSession(options);
+
+  assert.deepEqual(getUnusedFilePaths(session.getIssues().issues), []);
+
+  const filePath = join(mutationCwd, 'index.ts');
+  const source = readFileSync(filePath, 'utf8');
+  writeFileSync(filePath, `${source}\n`);
+  try {
+    const update = await session.handleFileChanges([{ type: 'modified', filePath }]);
+    assert.ok(update);
+    assert.deepEqual(getUnusedFilePaths(session.getIssues().issues), [join(mutationCwd, 'unused.ts')]);
   } finally {
     writeFileSync(filePath, source);
   }
