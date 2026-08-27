@@ -1,6 +1,6 @@
 import type { ImportDeclaration, VariableDeclarator } from 'oxc-parser';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { getFirstPropertyValue } from '../../../typescript/ast-helpers.ts';
+import { findProperty } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 
 const FS_PROMISES = new Set(['node:fs/promises', 'fs/promises']);
@@ -81,7 +81,9 @@ export function createFsPromisesGlobVisitor(ctx: PluginVisitorContext): PluginVi
       }
       if (!patterns?.length) return;
 
-      const cwd = getFirstPropertyValue(node.arguments[1], 'cwd');
+      const cwdNode = findProperty(node.arguments[1], 'cwd');
+      if (cwdNode && !isStringLiteral(cwdNode)) return;
+      const cwd = cwdNode ? getStringValue(cwdNode) : undefined;
       ctx.addImportGlob(patterns, cwd === undefined ? undefined : { base: cwd });
     },
   };
