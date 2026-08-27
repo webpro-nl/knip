@@ -186,7 +186,7 @@ export async function build({
 
     if (name === ROOT_WORKSPACE_NAME) {
       const containingFilePath = options.configFilePath ?? filePath;
-      for (const specifier of new Set([...options.configuredPreprocessor, ...options.preprocessor])) {
+      for (const specifier of options.preprocessorInputs) {
         inputs.add(toDeferResolve(specifier, { containingFilePath, optional: true, production: true }));
       }
     }

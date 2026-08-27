@@ -136,6 +136,10 @@ export const createOptions = async (options: CreateOptions) => {
   const toPreprocessor = (specifier: string) => toPreprocessorPath(specifier, cwd);
   const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
   const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+  // A configured preprocessor stays referenced by the config file even when --preprocessor overrides which ones run
+  const preprocessorInputs = args.preprocessor
+    ? [...new Set([...configuredPreprocessor, ...preprocessor])]
+    : preprocessor;
   const preprocessorOptions =
     args['preprocessor-options'] ??
     (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
@@ -145,7 +149,6 @@ export const createOptions = async (options: CreateOptions) => {
     catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
     config: args.config,
     configFilePath,
-    configuredPreprocessor,
     cwd,
     cycles: args.cycles ?? false,
     dependencies: args.dependencies ?? false,
@@ -205,6 +208,7 @@ export const createOptions = async (options: CreateOptions) => {
     isWatch: args.watch ?? options.isWatch ?? false,
     parsedConfig,
     preprocessor,
+    preprocessorInputs,
     preprocessorOptions,
     rules,
     tags,
