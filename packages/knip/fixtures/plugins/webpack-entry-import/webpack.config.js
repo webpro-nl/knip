@@ -1,7 +1,11 @@
 module.exports = {
   entry: {
-    main: {
-      import: './src/GsJe.js',
+    app: {
+      import: './src/app.js',
+      filename: 'bundle/[name].js',
+    },
+    vendor: {
+      import: ['./src/polyfill.js', './src/shim.js'],
     },
   },
 };

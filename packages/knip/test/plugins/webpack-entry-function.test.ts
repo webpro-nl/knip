@@ -5,16 +5,16 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/webpack-entry-import');
+const cwd = resolve('fixtures/plugins/webpack-entry-function');
 
-test('Resolve Webpack entry descriptors using the import field', async () => {
+test('Resolve Webpack entry returned from a function', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 4,
-    total: 4,
+    processed: 3,
+    total: 3,
   });
 });
