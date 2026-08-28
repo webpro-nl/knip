@@ -5,7 +5,7 @@ import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '.
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { substringBefore } from '../../util/string.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
-import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated } from './types.ts';
+import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated, Settings } from './types.ts';
 
 export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName);
 
@@ -110,6 +110,9 @@ const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'
     }
   });
 };
+
+export const getInputsFromSettings = (settings?: Settings) =>
+  compact(getDependenciesFromSettings(settings)).map(id => toDeferResolve(id, { optional: true }));
 
 const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
 export const resolveFormatters = (formatters: string | string[]) => {

@@ -4,6 +4,8 @@ import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts
 import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getInputsFromSettings } from '../eslint/helpers.ts';
+import { getInputsFromSettingsAST } from '../eslint/resolveFromAST.ts';
 import type { OxlintConfig } from './types.ts';
 
 // https://oxc.rs/docs/guide/usage/linter/config.html
@@ -39,6 +41,7 @@ const resolveConfig: ResolveConfig<OxlintConfig> = config => {
   for (const override of config.overrides ?? []) {
     for (const input of resolveJsPlugins(override.jsPlugins)) inputs.push(input);
   }
+  for (const input of getInputsFromSettings(config.settings)) inputs.push(input);
   return inputs;
 };
 
@@ -57,7 +60,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
     },
   });
   visitor.visit(program);
-  return resolveJsPlugins([...jsPlugins]);
+  return [...resolveJsPlugins([...jsPlugins]), ...getInputsFromSettingsAST(program)];
 };
 
 const plugin: Plugin = {
