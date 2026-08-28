@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  extends: ['~~/some-layer', 'a-nuxt-theme'],
+  extends: './configs/base',
   modules: ['a-module', '~~/local-module'],
   dir: {
     plugins: 'my-plugins',

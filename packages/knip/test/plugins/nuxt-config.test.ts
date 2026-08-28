@@ -11,9 +11,14 @@ test('Find dependencies with the nuxt plugin (config options)', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
+  assert.equal(counters.unresolved, 0);
+  assert.equal(counters.unlisted, 0);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 8,
-    total: 8,
+    dependencies: 1,
+    files: 1,
+    processed: 9,
+    total: 9,
   });
 });
