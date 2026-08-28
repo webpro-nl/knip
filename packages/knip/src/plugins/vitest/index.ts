@@ -9,6 +9,7 @@ import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import { createVitestMockVisitor } from './visitors/mock.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
@@ -243,6 +244,10 @@ const args: Args = {
   },
 };
 
+const registerVisitors: Plugin['registerVisitors'] = ({ ctx, registerVisitor }) => {
+  registerVisitor(createVitestMockVisitor(ctx));
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -251,6 +256,7 @@ const plugin: Plugin = {
   entry,
   resolveConfig,
   args,
+  registerVisitors,
 };
 
 export default plugin;

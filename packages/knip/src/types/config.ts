@@ -188,6 +188,7 @@ export type PluginVisitorContext = {
   sourceText: string;
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
+  markImportExpressionHandled: (pos: number) => void;
   addImportGlob: (patterns: string[], options?: { base?: string; filter?: RegExp }) => void;
   /**
    * Credit a local export as used by an in-module runtime registration (e.g. a custom element
