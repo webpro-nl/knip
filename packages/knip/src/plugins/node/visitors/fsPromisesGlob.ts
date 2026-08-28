@@ -79,12 +79,21 @@ export function createFsPromisesGlobVisitor(ctx: PluginVisitorContext): PluginVi
           patterns.push(getStringValue(element)!);
         }
       }
-      if (!patterns?.length) return;
+      if (!patterns?.length || patterns.some(pattern => pattern.startsWith('!'))) return;
 
-      const cwdNode = findProperty(node.arguments[1], 'cwd');
+      const options = node.arguments[1];
+      if (options && options.type !== 'ObjectExpression') return;
+      if (
+        options &&
+        (options.properties.length > 1 ||
+          options.properties.some(
+            property => property.type !== 'Property' || property.computed || getPropertyKey(property) !== 'cwd'
+          ))
+      )
+        return;
+      const cwdNode = findProperty(options, 'cwd');
       if (cwdNode && !isStringLiteral(cwdNode)) return;
-      const cwd = cwdNode ? getStringValue(cwdNode) : undefined;
-      ctx.addImportGlob(patterns, cwd === undefined ? undefined : { base: cwd });
+      ctx.addImportGlob(patterns, { cwd: cwdNode ? getStringValue(cwdNode)! : '.' });
     },
   };
 }

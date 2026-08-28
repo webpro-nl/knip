@@ -13,12 +13,23 @@ test('Resolve statically analyzable node:fs/promises glob patterns as entry file
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 6,
-    total: 6,
+    files: 7,
+    processed: 13,
+    total: 13,
   });
+
+  // Unsupported forms remain uncredited
+  assert('bang/!one.ts' in issues.files);
   assert('dynamic/one.ts' in issues.files);
+  assert('extra-options/one.ts' in issues.files);
+  assert('indirect-options/one.ts' in issues.files);
+  assert('nested/one.ts' in issues.files);
+  assert('no-follow/one.ts' in issues.files);
+  assert('spread-options/one.ts' in issues.files);
+
+  // Supported forms are credited
   assert(!('migrations/one.ts' in issues.files));
   assert(!('root/one.ts' in issues.files));
-  assert(!('nested/one.ts' in issues.files));
+  assert(!('workspace-cwd/one.ts' in issues.files));
+  assert(!('workspace-default/one.ts' in issues.files));
 });
