@@ -2,7 +2,7 @@ import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
-import { toConfig, toDeferResolve, toProductionDependency } from '../../util/input.ts';
+import { toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
@@ -30,7 +30,9 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
       ?.filter(reference => reference.path.endsWith('.json'))
       .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
 
-  if (!(compilerOptions && localConfig)) return compact([...extend, ...references]);
+  const contentMappers = localConfig.contentMappers?.map(contentMapper => toDependency(contentMapper.package)) ?? [];
+
+  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
 
   const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(toProductionDependency);
 
@@ -41,6 +43,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = async (localConfig, options) 
   const importHelpers = compilerOptions?.importHelpers ? ['tslib'] : [];
 
   return compact([
+    ...contentMappers,
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),

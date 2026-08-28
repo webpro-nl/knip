@@ -14,6 +14,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   assert(issues.unresolved['tsconfig.json']['typescript-eslint-language-service']);
   assert(issues.unresolved['tsconfig.json']['ts-graphql-plugin']);
   assert(issues.unresolved['tsconfig.json']['tslib']); // resolved up to dep of knip itself
+  assert(issues.unlisted['tsconfig.content-mapper.json']['@mdx-js/content-mapper']);
   assert(issues.unlisted['tsconfig.jsx-import-source-preact.json']['preact']);
   assert(issues.unresolved['tsconfig.jsx-import-source-preact.json']['preact']);
   assert(issues.unresolved['tsconfig.jsx-import-source-react.json']['vitest/globals']);
@@ -22,7 +23,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
-    unlisted: 2,
+    unlisted: 3,
     unresolved: 5,
     processed: 0,
     total: 0,
