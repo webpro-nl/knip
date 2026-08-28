@@ -26,7 +26,7 @@ export type ImportMaps = {
   enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
-  /** Identifiers imported with alias (id → alias → files) */
+  /** Identifiers imported with alias (id → alias → files) */
   importAs: IdToNsToFileMap;
   /** Namespace imports of this file */
   importNs: IdToFileMap;
