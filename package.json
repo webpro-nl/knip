@@ -23,7 +23,7 @@
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
     "lint": "oxlint",
-    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
+    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev && ./scripts/check-line-endings.sh",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
