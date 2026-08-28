@@ -79,6 +79,9 @@ export type ReporterOptions = {
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
+  /** Issues held back by the suppressions file: known debt, not part of the report */
+  suppressedIssues?: Issues;
+  suppressedCount?: number;
 };
 
 export type Reporter = (options: ReporterOptions) => void;

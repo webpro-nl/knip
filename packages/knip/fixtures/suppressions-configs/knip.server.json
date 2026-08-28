@@ -1,0 +1,4 @@
+{
+  "entry": ["server/index.ts"],
+  "project": ["server/**"]
+}

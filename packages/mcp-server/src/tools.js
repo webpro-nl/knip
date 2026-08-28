@@ -3,7 +3,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { CURATED_RESOURCES } from './curated-resources.js';
-import { CLEAN_HINT, CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
+import {
+  CLEAN_BUT_SUPPRESSED_HINT,
+  CLEAN_HINT,
+  CONFIG_REVIEW_HINT,
+  SUPPRESSED_NOTE,
+  UNCONFIGURED_HINT,
+} from './texts.js';
 import { transformForAgent } from './transform.js';
 
 export { ERROR_HINT } from './texts.js';
@@ -30,6 +36,39 @@ const MAX_UNUSED_FILES = 50;
 const MAX_ISSUES_PER_TYPE = 50;
 
 /**
+ * Flattens an issue set into a capped sample: unused files by path, everything else by type.
+ * @param {import('knip/session').Issues} source
+ */
+function sampleIssues(source) {
+  let truncated = false;
+
+  const unusedFiles = Object.keys(source.files);
+  const files = unusedFiles.slice(0, MAX_UNUSED_FILES);
+  if (unusedFiles.length > files.length) truncated = true;
+
+  const issues = {};
+  for (const [type, byFile] of Object.entries(source)) {
+    if (type === 'files' || type === '_files') continue;
+    const items = [];
+    for (const [file, symbols] of Object.entries(byFile)) {
+      for (const issue of Object.values(symbols)) {
+        items.push({
+          file,
+          symbol: issue.symbol,
+          line: issue.line ?? issue.symbols?.[0]?.line,
+          ...(issue.parentSymbol ? { parent: issue.parentSymbol } : {}),
+        });
+      }
+    }
+    if (items.length === 0) continue;
+    if (items.length > MAX_ISSUES_PER_TYPE) truncated = true;
+    issues[type] = items.slice(0, MAX_ISSUES_PER_TYPE);
+  }
+
+  return { files, issues, truncated };
+}
+
+/**
  * @param {import('knip/session').Results} results
  * @param {{ cwd: string, configFilePath: string | undefined }} options
  */
@@ -49,44 +88,26 @@ export function buildResults(results, options) {
   );
 
   const totalIssues = Object.values(counters).reduce((sum, count) => sum + count, 0);
+  const suppressedCount = results.suppressedCount ?? 0;
   const isClean = totalIssues === 0 && configurationHints.length === 0;
   const reviewHint = maybeUnconfigured
     ? UNCONFIGURED_HINT
     : isClean
-      ? CLEAN_HINT
+      ? suppressedCount > 0
+        ? CLEAN_BUT_SUPPRESSED_HINT
+        : CLEAN_HINT
       : options.configFilePath && totalIssues > 0
         ? CONFIG_REVIEW_HINT
         : undefined;
 
-  let truncated = false;
+  const { files, issues, truncated } = sampleIssues(results.issues);
 
-  const unusedFiles = Object.keys(results.issues.files);
-  const files = unusedFiles.slice(0, MAX_UNUSED_FILES);
-  if (unusedFiles.length > files.length) truncated = true;
-
-  const issues = {};
-  for (const [type, byFile] of Object.entries(results.issues)) {
-    if (type === 'files' || type === '_files') continue;
-    const items = [];
-    for (const [file, symbols] of Object.entries(byFile)) {
-      for (const issue of Object.values(symbols)) {
-        items.push({
-          file,
-          symbol: issue.symbol,
-          line: issue.line ?? issue.symbols?.[0]?.line,
-          ...(issue.parentSymbol ? { parent: issue.parentSymbol } : {}),
-        });
-      }
-    }
-    if (items.length === 0) continue;
-    if (items.length > MAX_ISSUES_PER_TYPE) truncated = true;
-    issues[type] = items.slice(0, MAX_ISSUES_PER_TYPE);
-  }
+  const suppressed = suppressedCount > 0 ? sampleIssues(results.suppressedIssues) : undefined;
 
   return {
     reviewHint,
     maybeUnconfigured,
-    truncated,
+    truncated: truncated || Boolean(suppressed?.truncated),
     configurationHints,
     counters,
     totalIssues,
@@ -94,6 +115,14 @@ export function buildResults(results, options) {
     enabledPlugins: results.enabledPlugins,
     files,
     issues,
+    ...(suppressed && {
+      suppressed: {
+        note: SUPPRESSED_NOTE,
+        count: suppressedCount,
+        files: suppressed.files,
+        issues: suppressed.issues,
+      },
+    }),
   };
 }
 

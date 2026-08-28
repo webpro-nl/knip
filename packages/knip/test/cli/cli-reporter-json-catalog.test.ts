@@ -26,6 +26,7 @@ test('knip --reporter json (catalog)', () => {
         unresolved: [],
       },
     ],
+    suppressed: [],
   };
 
   const result: typeof json = JSON.parse(exec('knip --reporter json', { cwd }).stdout);

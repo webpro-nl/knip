@@ -16,6 +16,7 @@ import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
 import { runPreprocessors, runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
+import { writeSuppressions } from './util/suppressions.ts';
 import { version } from './version.ts';
 
 let args: ReturnType<typeof parseArgs> = {};
@@ -44,7 +45,7 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
-    const { results } = await run(options);
+    const { results, scope, suppressionsState } = await run(options);
 
     const {
       issues,
@@ -54,10 +55,25 @@ const main = async () => {
       includedWorkspaceDirs,
       enabledPlugins,
       selectedWorkspaces,
+      suppressedIssues,
+      suppressedCount,
     } = results;
 
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
+
+    let staleSuppressionsCount = 0;
+
+    if (!options.isProduction) {
+      const result = await writeSuppressions(issues, options, scope, suppressionsState);
+
+      if ('message' in result) {
+        console.log(result.message);
+        process.exit(0);
+      }
+
+      staleSuppressionsCount = result.staleCount;
+    }
 
     const initialData: ReporterOptions = {
       report: options.includedIssueTypes,
@@ -79,6 +95,8 @@ const main = async () => {
       options: args['reporter-options'] ?? '',
       preprocessorOptions: args['preprocessor-options'] ?? '',
       selectedWorkspaces,
+      suppressedIssues,
+      suppressedCount,
     };
 
     const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
@@ -86,6 +104,13 @@ const main = async () => {
     if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
     await runReporters(args.reporter ?? ['symbols'], finalData);
+
+    if (staleSuppressionsCount > 0) {
+      const label = staleSuppressionsCount === 1 ? 'suppression no longer applies' : 'suppressions no longer apply';
+      console.log(
+        `\nSuppressions file is out of date: ${staleSuppressionsCount} ${label}. Run \`knip --prune-suppressions\` to update it.`
+      );
+    }
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
@@ -105,6 +130,7 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+        (options.checkSuppressions && staleSuppressionsCount > 0) ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {

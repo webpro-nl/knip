@@ -42,4 +42,8 @@ export default (options: ReporterOptions) => {
   ) {
     console.log('✂️  Excellent, Knip found no issues.');
   }
+
+  if (options.suppressedCount && options.suppressedCount > 0) {
+    console.log(dim(`(${options.suppressedCount} suppressed)`));
+  }
 };

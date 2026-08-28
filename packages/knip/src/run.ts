@@ -7,7 +7,7 @@ import { ConsoleStreamer } from './ConsoleStreamer.ts';
 import { DependencyDeputy } from './DependencyDeputy.ts';
 import { analyze } from './graph/analyze.ts';
 import { build } from './graph/build.ts';
-import { IssueCollector } from './IssueCollector.ts';
+import { type CollectorIssues, IssueCollector } from './IssueCollector.ts';
 import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
@@ -16,7 +16,9 @@ import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.
 import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
 import { isCatalog } from './util/input.ts';
+import { initIssues } from './util/issue-initializers.ts';
 import { createManifest } from './util/package-json.ts';
+import { applySuppressionsToResults, cloneIssues, _readAndApplySuppressions } from './util/suppressions.ts';
 import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
@@ -106,6 +108,25 @@ export const run = async (options: MainOptions) => {
     options,
   });
 
+  const collected = collector.getIssues();
+  let { issues, counters } = collected;
+  const { tagHints, configurationHints } = collected;
+  const isSession = options.isWatch || options.isSession;
+  if (isSession) {
+    issues = cloneIssues(issues);
+    counters = { ...counters };
+  }
+  const suppressionsState = await _readAndApplySuppressions(issues, counters, options);
+  const transformIssues =
+    isSession && suppressionsState
+      ? (collected: CollectorIssues): CollectorIssues => {
+          const issues = cloneIssues(collected.issues);
+          const counters = { ...collected.counters };
+          applySuppressionsToResults(issues, counters, suppressionsState.suppressions, options.rules);
+          return { ...collected, issues, counters };
+        }
+      : undefined;
+
   let session: SessionHandler | undefined;
 
   if (options.isWatch || options.isSession) {
@@ -128,6 +149,7 @@ export const run = async (options: MainOptions) => {
       graph,
       isIgnored,
       onFileChange,
+      transformIssues,
       unreferencedFiles,
       entryPaths,
     });
@@ -135,14 +157,15 @@ export const run = async (options: MainOptions) => {
     if (options.isWatch) watch('.', { recursive: true }, session.listener);
   }
 
-  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
-
   if (!options.isWatch) streamer.clear();
 
   if (options.isCache) {
     flushGlobCache();
     flushGitignoreCache();
   }
+
+  const manifestPaths = new Set<string>();
+  for (const workspace of chief.workspacesByDir.values()) manifestPaths.add(workspace.manifestPath);
 
   return {
     results: {
@@ -153,6 +176,14 @@ export const run = async (options: MainOptions) => {
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
+      suppressedIssues: suppressionsState?.suppressedIssues ?? initIssues(),
+      suppressedCount: suppressionsState?.suppressedCount ?? 0,
+    },
+    suppressionsState,
+    scope: {
+      workspaceFilePathFilter: chief.workspaceFilePathFilter,
+      isConsidered: (filePath: string) =>
+        analyzedFiles.has(filePath) || unreferencedFiles.has(filePath) || manifestPaths.has(filePath),
     },
     session,
     streamer,

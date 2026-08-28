@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/suppressions-configs",
+  "dependencies": {
+    "used-pkg": "*",
+    "unused-pkg": "*"
+  }
+}

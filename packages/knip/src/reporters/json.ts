@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
+import type { IssueRecords, Issues, Report, ReporterOptions } from '../types/issues.ts';
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { isFile } from '../util/fs.ts';
 import { relative, resolve } from '../util/path.ts';
@@ -46,9 +46,11 @@ export type JSONReportEntry = {
 
 export type JSONReport = {
   issues: Array<JSONReportEntry>;
+  /** Issues held back by the suppressions file: known debt, not part of the report */
+  suppressed: Array<JSONReportEntry>;
 };
 
-export default async ({ report, issues, options, cwd }: ReporterOptions) => {
+export default async ({ report, issues, suppressedIssues, options, cwd }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -56,7 +58,6 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
     console.error(error);
   }
 
-  const json: Record<string, JSONReportEntry> = {};
   const codeownersFilePath = resolve(opts.codeowners ?? '.github/CODEOWNERS');
   const findOwners = isFile(codeownersFilePath) && createOwnershipEngine(codeownersFilePath);
 
@@ -86,23 +87,30 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
     return row;
   };
 
-  for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
-    if (isReportType) {
-      for (const issue of flattenIssues(issues[type] as IssueRecords)) {
-        const { filePath, symbol, symbols } = issue;
-        json[filePath] = json[filePath] ?? initRow(filePath);
-        if (type === 'duplicates' || type === 'cycles') {
-          symbols && json[filePath][type]?.push(symbols.map(convert));
-        } else if (type === 'binaries') {
-          json[filePath][type]?.push({ name: symbol });
-        } else {
-          json[filePath][type]?.push(convert(issue));
+  const toEntries = (source: Issues) => {
+    const json: Record<string, JSONReportEntry> = {};
+    for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
+      if (isReportType) {
+        for (const issue of flattenIssues(source[type] as IssueRecords)) {
+          const { filePath, symbol, symbols } = issue;
+          json[filePath] = json[filePath] ?? initRow(filePath);
+          if (type === 'duplicates' || type === 'cycles') {
+            symbols && json[filePath][type]?.push(symbols.map(convert));
+          } else if (type === 'binaries') {
+            json[filePath][type]?.push({ name: symbol });
+          } else {
+            json[filePath][type]?.push(convert(issue));
+          }
         }
       }
     }
-  }
+    return Object.values(json);
+  };
 
-  const jsonReport: JSONReport = { issues: Object.values(json) };
+  const jsonReport: JSONReport = {
+    issues: toEntries(issues),
+    suppressed: suppressedIssues ? toEntries(suppressedIssues) : [],
+  };
   const output = JSON.stringify(jsonReport);
 
   // See: https://github.com/nodejs/node/issues/6379

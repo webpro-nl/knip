@@ -273,6 +273,7 @@ for (const { desc, cwd, expected } of cases) {
     const result = JSON.parse(exec('knip --reporter json', { cwd: resolve(cwd) }).stdout);
     result.issues.sort(byFile);
     expected.issues.sort(byFile);
-    assert.deepEqual(result, expected);
+    // none of these fixtures carry a suppressions file
+    assert.deepEqual(result, { ...expected, suppressed: [] });
   });
 }

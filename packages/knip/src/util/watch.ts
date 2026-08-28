@@ -2,7 +2,7 @@ import type { WatchListener } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
-import type { IssueCollector } from '../IssueCollector.ts';
+import type { CollectorIssues, IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
@@ -34,6 +34,7 @@ type WatchOptions = {
   graph: ModuleGraph;
   isIgnored: (path: string) => boolean;
   onFileChange?: OnFileChange;
+  transformIssues?: (issues: CollectorIssues) => CollectorIssues;
   unreferencedFiles: Set<string>;
   entryPaths: Set<string>;
 };
@@ -56,6 +57,7 @@ export const getSessionHandler = async (
     graph,
     isIgnored,
     onFileChange,
+    transformIssues,
     unreferencedFiles,
     entryPaths,
   }: WatchOptions
@@ -194,7 +196,10 @@ export const getSessionHandler = async (
     }
   };
 
-  const getIssues = () => collector.getIssues();
+  const getIssues = () => {
+    const issues = collector.getIssues();
+    return transformIssues ? transformIssues(issues) : issues;
+  };
 
   const getEntryPaths = () => entryPaths;
 

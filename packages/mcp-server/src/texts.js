@@ -36,6 +36,7 @@ Returns:
 - enabledPlugins: Auto-detected plugins per workspace
 - files: Unused files (sample, might be capped)
 - issues: Issues per type, i.e. dependencies, exports, types, etc. (sample, capped per type)
+- suppressed: Present only when a suppressions file holds issues back. Pre-existing debt, already tracked, excluded from counters and totalIssues. Read it so you don't repeat the patterns it covers; don't fix it as a side quest, and never add suppressions to make a run pass
 - configFile: Config file status (exists:false is normal when plugins auto-configure)
 
 Options:
@@ -81,3 +82,9 @@ export const CONFIG_REVIEW_HINT = `Review the configuration for improvements tha
 
 export const CLEAN_HINT =
   'No issues and no configuration hints: Knip is happy. Many projects need no knip.json (plugins are auto-detected), so this is a complete, successful result with nothing more to configure.';
+
+export const CLEAN_BUT_SUPPRESSED_HINT =
+  'No new issues and no configuration hints, but the suppressions file is still holding issues back. The run passes; the codebase is not clean yet. See `suppressed`.';
+
+export const SUPPRESSED_NOTE =
+  'Pre-existing issues held back by the suppressions file, not new findings. Do not "fix" them as part of an unrelated task, and do not copy the patterns they cover into new code. Never add suppressions to make a failing run pass. To burn them down deliberately, run `knip --no-suppressions` scoped to one issue type or workspace.';

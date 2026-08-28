@@ -21,6 +21,7 @@ export interface Options {
   isStrict: boolean;
   isUseTscFiles: boolean;
   isWatch: boolean;
+  noSuppressions: boolean;
   tags: string[];
   tsConfigFile: string | undefined;
   workspace: string | string[] | undefined;
