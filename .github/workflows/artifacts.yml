@@ -1,0 +1,49 @@
+name: Build artifacts
+
+# Build the npm-publishable packages into artifacts (pnpm pack tarballs) on
+# every push to any branch and on pull requests, so installable .tgz files are
+# available as workflow artifacts.
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    name: pnpm pack
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build packages
+        run: pnpm -r --if-present run build
+      - name: Pack
+        run: |
+          mkdir -p artifacts
+          ( cd packages/knip && pnpm pack --pack-destination ../../artifacts )
+          for pkg in mcp-server language-server create-config; do
+            if [ -f "packages/$pkg/package.json" ]; then
+              ( cd "packages/$pkg" && pnpm pack --pack-destination ../../artifacts )
+            fi
+          done
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: knip-snapshot
+          path: artifacts/*.tgz
+          if-no-files-found: error
