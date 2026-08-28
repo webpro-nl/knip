@@ -1,7 +1,12 @@
 {
   "name": "@plugins/oxlint-js-plugins",
   "scripts": {
-    "lint": "oxlint --config .oxlintrc-0.json"
+    "lint": "oxlint"
+  },
+  "knip": {
+    "oxlint": {
+      "config": "config/.oxlintrc-0.json"
+    }
   },
   "devDependencies": {
     "oxlint": "*",
