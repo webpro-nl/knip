@@ -91,6 +91,35 @@ function extractInlineDirnamePath(node: any, s: WalkState): string | undefined {
   return joined.startsWith('.') || joined.startsWith('/') ? joined : `./${joined}`;
 }
 
+const getMockedExports = (factory: unknown): string[] => {
+  const names: string[] = [];
+  const collect = (obj: unknown) => {
+    if (!obj || typeof obj !== 'object' || (obj as any).type !== 'ObjectExpression') return;
+    for (const prop of (obj as any).properties) {
+      if (prop.type === 'Property' && !prop.computed) {
+        if (prop.key.type === 'Identifier') names.push(prop.key.name);
+        else if (prop.key.type === 'StringLiteral') names.push(String(prop.key.value));
+      }
+    }
+  };
+  if (!factory || typeof factory !== 'object') return names;
+  const node = factory as any;
+  if (node.type === 'ObjectExpression') {
+    collect(node);
+  } else if (node.type === 'ArrowFunctionExpression') {
+    if (node.body.type === 'ObjectExpression') collect(node.body);
+    else if (node.body.type === 'BlockStatement') {
+      for (const stmt of node.body.body) {
+        if (stmt.type === 'ReturnStatement' && stmt.argument?.type === 'ObjectExpression') {
+          collect(stmt.argument);
+          break;
+        }
+      }
+    }
+  }
+  return names;
+};
+
 const CHILD_PROCESS_FILE_METHODS = new Set(['fork', 'spawn', 'spawnSync', 'execFile', 'execFileSync']);
 const CHILD_PROCESS_COMMAND_METHODS = new Set(['exec', 'execSync']);
 
@@ -115,6 +144,30 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       s.registeredCustomElements.add(registered);
       return;
     }
+  }
+
+  if (
+    node.arguments.length >= 2 &&
+    node.callee.type === 'MemberExpression' &&
+    !node.callee.computed &&
+    node.callee.object.type === 'Identifier' &&
+    node.callee.object.name === 'vi' &&
+    node.callee.property.type === 'Identifier' &&
+    node.callee.property.name === 'mock' &&
+    node.arguments[0]?.type === 'ImportExpression' &&
+    isStringLiteral(node.arguments[0].source)
+  ) {
+    const importExpr = node.arguments[0];
+    const specifier = getStringValue(importExpr.source)!;
+    s.handledImportExpressions.add(importExpr.start);
+    // The import() only points Vitest at the module to mock; it does not mean every
+    // real export is used. Register the module (so the file is not reported unused)
+    // and only the exports enumerated by the mock factory.
+    s.addImport(specifier, undefined, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.NONE);
+    for (const name of getMockedExports(node.arguments[1])) {
+      s.addImport(specifier, name, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.NONE);
+    }
+    return;
   }
 
   if (
