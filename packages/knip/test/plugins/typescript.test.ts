@@ -39,7 +39,7 @@ test('Find dependencies with the TypeScript plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 3,
+    unlisted: 2,
     processed: 0,
     total: 0,
   });
