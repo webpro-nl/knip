@@ -22,8 +22,8 @@
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
-    "lint": "node scripts/run-oxlint.mjs",
-    "ci": "pnpm lint && oxfmt --check && installed-check --ignore-dev",
+    "lint": "oxlint",
+    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
