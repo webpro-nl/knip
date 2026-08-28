@@ -10,7 +10,7 @@
 <div align="center">
 
 [![NPM Version][2]][1] [![NPM Downloads][3]][1] [![GitHub Repo stars][5]][4]
-[![License][7]][6] [![Contributors][9]][8] [![PRs welcome][11]][10]
+[![License][7]][6] [![Contributors][9]][8]
 
 </div>
 
