@@ -113,6 +113,7 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
   t('dotenv -- concurrently "npm ci"', [toBinary('dotenv'), toBinary('concurrently')]);
   t('dotenv -- concurrently "next dev" "prisma generate"', [toBinary('dotenv'), toBinary('concurrently'), toBinary('next'), toBinary('prisma')]);
+  t(`dotenv -- concurrently 'echo "next dev"' "prisma generate"`, [toBinary('dotenv'), toBinary('concurrently'), toBinary('echo'), toBinary('prisma')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
