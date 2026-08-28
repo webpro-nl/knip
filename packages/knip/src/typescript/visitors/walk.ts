@@ -184,7 +184,8 @@ const _collectRefsInType = (
   exportName: string,
   signatureOnly: boolean,
   seen = new Set<string>(),
-  inBody = false
+  inBody = false,
+  skipParams = false
 ): void => {
   if (!node) return;
   const type = node.type;
@@ -235,13 +236,13 @@ const _collectRefsInType = (
     case 'TSTypeAssertion':
     case 'TSSatisfiesExpression':
       if (inBody) {
-        if (node.expression) _collectRefsInType(node.expression, exportName, signatureOnly, seen, inBody);
+        if (node.expression) _collectRefsInType(node.expression, exportName, signatureOnly, seen, inBody, skipParams);
         return;
       }
       break;
     case 'VariableDeclarator':
       if (inBody) {
-        if (node.init) _collectRefsInType(node.init, exportName, signatureOnly, seen, inBody);
+        if (node.init) _collectRefsInType(node.init, exportName, signatureOnly, seen, inBody, skipParams);
         return;
       }
       break;
@@ -250,15 +251,19 @@ const _collectRefsInType = (
   const keys = visitorKeys[type];
   if (!keys) return;
   const childInBody = inBody || type === 'FunctionBody' || type === 'BlockStatement';
+  const skipFnParams =
+    skipParams &&
+    (type === 'ArrowFunctionExpression' || type === 'FunctionExpression' || type === 'FunctionDeclaration');
   for (const key of keys) {
+    if (skipFnParams && key === 'params') continue;
     const val = node[key];
     if (!val) continue;
     if (Array.isArray(val)) {
       for (const item of val) {
-        if (item) _collectRefsInType(item, exportName, signatureOnly, seen, childInBody);
+        if (item) _collectRefsInType(item, exportName, signatureOnly, seen, childInBody, skipParams);
       }
     } else {
-      _collectRefsInType(val, exportName, signatureOnly, seen, childInBody);
+      _collectRefsInType(val, exportName, signatureOnly, seen, childInBody, skipParams);
     }
   }
 };
@@ -830,7 +835,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
       const decl = state.localDeclarations.get(name);
       if (!decl) continue;
       seen.add(name);
-      _collectRefsInType(decl, exportName, true, seen);
+      _collectRefsInType(decl, exportName, true, seen, false, true);
     }
     while (state.pendingMemberCallRefs.length > 0) {
       const { objectName, propertyName, exportName, seen } = state.pendingMemberCallRefs.pop()!;
@@ -845,7 +850,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
       const fn = prop.value;
       if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') continue;
       seen.add(key);
-      _collectRefsInType(fn, exportName, true, seen);
+      _collectRefsInType(fn, exportName, true, seen, false, true);
     }
   }
 
