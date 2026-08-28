@@ -1,7 +1,7 @@
 module.exports = {
   entry: {
     main: {
-      import: './src/main.js',
+      import: './src/GsJe.js',
     },
   },
 };
