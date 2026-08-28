@@ -11,13 +11,14 @@ test('Resolve named string-key access precisely and treat numeric-key access as 
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.equal(Object.keys(issues.enumMembers['codes.ts']).length, 2);
+  assert.equal(Object.keys(issues.enumMembers['codes.ts']).length, 3);
   assert(issues.enumMembers['codes.ts']['NamedKey.unusedFirst']);
   assert(issues.enumMembers['codes.ts']['NamedKey.unusedSecond']);
+  assert(issues.enumMembers['codes.ts']['NumberLikeKey.unused']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    enumMembers: 2,
+    enumMembers: 3,
     processed: 2,
     total: 2,
   });

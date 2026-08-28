@@ -9,3 +9,10 @@ export enum NumericKey {
   info = 2000,
   warning = 3000,
 }
+
+export enum NumberLikeKey {
+  Infinity = 1,
+  '0x10' = 2,
+  '1e3' = 3,
+  unused = 4,
+}

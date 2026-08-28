@@ -6,12 +6,11 @@ import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
 function markWholeObjectRead(internalImport: ImportMaps, id: string) {
-  internalImport.refs.add(id);
   (internalImport.enumerated ??= new Set()).add(id);
 }
 
 function isNumericKey(value: string | undefined) {
-  return value != null && value !== '' && !Number.isNaN(Number(value));
+  return value != null && Number.isFinite(Number(value)) && String(Number(value)) === value;
 }
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
