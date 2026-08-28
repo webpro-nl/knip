@@ -60,7 +60,7 @@
     "@types/vscode": "~1.95.0",
     "@vscode/test-electron": "^3.1.0",
     "knip": "workspace:*",
-    "rolldown": "^1.2.1"
+    "rolldown": "^1.2.5"
   },
   "contributes": {
     "languageModelTools": [

@@ -152,7 +152,7 @@ await $`node scripts/parse.js`;
 
 This will add `scripts/parse.js` as an entry file.
 
-### child_process
+### child\_process
 
 If `node:child_process` is imported in source code, Knip parses the command in
 `exec`/`execSync` calls and the executable (with its arguments) in

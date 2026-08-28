@@ -47,7 +47,7 @@ as well:
     ```ts title="knip.ts"
     import type { KnipConfig } from 'knip';
 
-    const config = async (): Promise<KnipConfig> => {
+    const config: KnipConfig = async () => {
       const items = await fetchRepoInfo();
 
       return {

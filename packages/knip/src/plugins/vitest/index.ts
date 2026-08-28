@@ -9,6 +9,7 @@ import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import { createVitestMockVisitor } from './visitors/mock.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
@@ -30,7 +31,6 @@ const entry = [...testEntry, ...mocks];
 const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
-  const { configFileDir: dir } = options;
   const testConfig = localConfig.test;
 
   if (!testConfig) return [];
@@ -58,7 +58,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
     ...toDeferResolve(specifier),
     dir: vitestRoot,
   }));
-  const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => ({ ...toDeferResolve(specifier), dir }));
+  const globalSetup = [testConfig.globalSetup ?? []]
+    .flat()
+    .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
 
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {
@@ -101,12 +103,14 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
       if (typeof config === 'function') {
         for (const command of ['serve', 'build'] as COMMAND[]) {
           for (const mode of ['development', 'production'] as MODE[]) {
-            const cfg = await config({ command, mode, ssrBuild: undefined });
-            configs.push(cfg);
-            if (cfg.test?.projects) {
-              for (const project of cfg.test.projects) {
-                if (typeof project !== 'string') {
-                  configs.push(project);
+            for (const ssrBuild of command === 'build' ? [undefined, false, true] : [undefined]) {
+              const cfg = await config({ command, mode, ssrBuild });
+              configs.push(cfg);
+              if (cfg.test?.projects) {
+                for (const project of cfg.test.projects) {
+                  if (typeof project !== 'string') {
+                    configs.push(project);
+                  }
                 }
               }
             }
@@ -206,9 +210,9 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     }
     for (const dependency of findConfigDependencies(cfg, options, vitestRoot)) inputs.add(dependency);
     const _entry = cfg.build?.lib?.entry ?? [];
-    const deps = (typeof _entry === 'string' ? [_entry] : Object.values(_entry))
-      .map(specifier => join(vitestRoot, specifier))
-      .map(id => toEntry(id));
+    const entries =
+      typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
+    const deps = entries.map(specifier => join(vitestRoot, specifier)).map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
 
@@ -240,6 +244,10 @@ const args: Args = {
   },
 };
 
+const registerVisitors: Plugin['registerVisitors'] = ({ ctx, registerVisitor }) => {
+  registerVisitor(createVitestMockVisitor(ctx));
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -248,6 +256,7 @@ const plugin: Plugin = {
   entry,
   resolveConfig,
   args,
+  registerVisitors,
 };
 
 export default plugin;

@@ -7,6 +7,7 @@ import { getContention } from './operations/get-contention.ts';
 import { getDependencyUsage } from './operations/get-dependency-usage.ts';
 import { getUsage } from './operations/get-usage.ts';
 import { hasStrictlyNsReferences } from './operations/has-strictly-ns-references.ts';
+import { isEnumerated } from './operations/is-enumerated.ts';
 import { isReferenced } from './operations/is-referenced.ts';
 import { resolveDefinition } from './operations/resolve-definition.ts';
 
@@ -23,6 +24,8 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
     ) => isReferenced(graph, entryPaths, filePath, identifier, options),
     hasStrictlyNsReferences: (filePath: string, identifier: string) =>
       hasStrictlyNsReferences(graph, filePath, graph.get(filePath)?.importedBy, identifier),
+    isEnumerated: (filePath: string, identifier: string) =>
+      isEnumerated(graph, filePath, graph.get(filePath)?.importedBy, identifier),
     buildExportsTree: (options: { filePath?: string; identifier?: string }) =>
       buildExportsTree(graph, entryPaths, options),
     getDependencyUsage: (pattern?: string | RegExp) => getDependencyUsage(graph, pattern),

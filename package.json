@@ -23,7 +23,7 @@
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
     "lint": "oxlint",
-    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev",
+    "ci": "oxlint && oxfmt --check && installed-check --ignore-dev && ./scripts/check-line-endings.sh",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
@@ -32,8 +32,8 @@
     "installed-check": "^11.0.0",
     "mdxlint": "^1.0.0",
     "mdxlint-preset-webpro": "^1.2.0",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.77.0",
+    "oxfmt": "^0.65.0",
+    "oxlint": "^1.80.0",
     "release-it": "^21.0.2",
     "remark-cli": "12.0.1",
     "remark-preset-webpro": "^2.2.0"

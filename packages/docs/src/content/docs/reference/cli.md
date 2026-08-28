@@ -72,15 +72,15 @@ This is equal to `bunx --bun knip`
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO_COLOR
+### NO\_COLOR
 
-The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
+The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
 
-### KNIP_DISABLE_RAW_TRANSFER
+### KNIP\_DISABLE\_RAW\_TRANSFER
 
 Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
 normal parser path.
