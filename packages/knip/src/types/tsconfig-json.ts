@@ -11,3 +11,7 @@ export interface TsConfigJson {
   }[];
   references?: Array<{ path: string }>;
 }
+
+export interface ContentMapperManifest {
+  exec?: string[];
+}
