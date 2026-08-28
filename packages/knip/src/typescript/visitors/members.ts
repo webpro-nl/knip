@@ -90,15 +90,20 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.object.type === 'MemberExpression' &&
     !node.object.computed &&
     node.object.object.type === 'Identifier' &&
-    node.object.property.type === 'Identifier' &&
-    (!isStringLiteral(node.property) || isNumericKey(getStringValue(node.property)))
+    node.object.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
     if (!isShadowed(rootName, node.object.object.start)) {
       const _import = s.localImportMap.get(rootName);
       if (_import?.isNamespace) {
         const internalImport = s.internal.get(_import.filePath);
-        if (internalImport) markWholeObjectRead(internalImport, node.object.property.name);
+        if (internalImport) {
+          const mid = node.object.property.name;
+          const value = isStringLiteral(node.property) ? getStringValue(node.property) : undefined;
+          if (value !== undefined && !isNumericKey(value))
+            s.addNsMemberRefs(internalImport, rootName, `${mid}.${value}`);
+          else markWholeObjectRead(internalImport, mid);
+        }
       }
     }
   }

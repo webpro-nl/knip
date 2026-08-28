@@ -10,6 +10,11 @@ export enum NumericKey {
   warning = 3000,
 }
 
+export enum NamespaceNamedKey {
+  used = 1,
+  unused = 2,
+}
+
 export enum NumberLikeKey {
   Infinity = 1,
   '0x10' = 2,
