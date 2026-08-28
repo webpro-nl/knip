@@ -237,7 +237,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
             if (_import.isNamespace) addValue(internalImport.import, OPAQUE, s.filePath);
             else {
               internalImport.refs.add(arg.name);
-              (internalImport.enumerated ??= new Set()).add(arg.name);
+              (internalImport.enumerated ??= new Set()).add(_import.importedName);
             }
           }
         }
