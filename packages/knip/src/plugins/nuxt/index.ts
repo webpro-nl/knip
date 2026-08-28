@@ -145,7 +145,12 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  for (const ext of localConfig.extends ?? []) {
+  const extendsConfigs = localConfig.extends
+    ? Array.isArray(localConfig.extends)
+      ? localConfig.extends
+      : [localConfig.extends]
+    : [];
+  for (const ext of extendsConfigs) {
     const target = resolveAlias(ext, srcDir, cwd);
     const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
