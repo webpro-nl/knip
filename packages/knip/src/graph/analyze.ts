@@ -263,7 +263,7 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.external) {
+        if (file.imports.external) {
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
             const isHandled =
@@ -288,7 +288,7 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.unresolved) {
+        if (file.imports.unresolved) {
           for (const unresolvedImport of file.imports.unresolved) {
             const { specifier, pos, line, col } = unresolvedImport;
             collector.addIssue({
