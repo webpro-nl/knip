@@ -79,6 +79,7 @@ interface WalkContext {
   resolveModule: ResolveModule;
   programFiles: Set<string>;
   entryFiles: Set<string>;
+  handledImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -792,7 +793,6 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     sourceText,
     isJS,
     isModuleFile: isExternalModule(program, hasModuleSyntax),
-    handledImportExpressions: new Set(),
     bareExprRefs: new Set(),
     accessedAliases: new Set(),
     nsContainers: new Map(),

@@ -1,3 +1,5 @@
+type NuxtLayer = string | [string, unknown?] | { source: string };
+
 export interface NuxtConfig {
   srcDir?: string;
   buildDir?: string;
@@ -14,7 +16,7 @@ export interface NuxtConfig {
     autoImport?: boolean;
     dirs?: string[];
   };
-  extends?: string[];
+  extends?: NuxtLayer | NuxtLayer[];
   components?: Array<string | { path: string }> | { dirs?: Array<string | { path: string }> };
   css?: string[];
   alias?: Record<string, string>;

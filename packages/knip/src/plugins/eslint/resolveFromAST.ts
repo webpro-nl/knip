@@ -5,7 +5,7 @@ import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
 
-export const getInputsFromFlatConfigAST = (program: Program): Input[] => {
+export const getInputsFromSettingsAST = (program: Program): Input[] => {
   const inputs: Input[] = [];
 
   const addResolver = (key: string, resolver: string | undefined) => {
@@ -35,7 +35,10 @@ export const getInputsFromFlatConfigAST = (program: Program): Input[] => {
   });
   visitor.visit(program);
 
-  inputs.push(toDeferResolve('eslint-import-resolver-typescript', { optional: true }));
-
   return inputs;
 };
+
+export const getInputsFromFlatConfigAST = (program: Program): Input[] => [
+  ...getInputsFromSettingsAST(program),
+  toDeferResolve('eslint-import-resolver-typescript', { optional: true }),
+];
