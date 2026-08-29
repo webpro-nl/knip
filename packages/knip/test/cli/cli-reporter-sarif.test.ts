@@ -107,6 +107,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 9, startColumn: 27, endColumn: 37 },
           },
+          logicalLocations: [{ name: 'unresolved', fullyQualifiedName: 'unresolved' }],
         },
       },
       {
@@ -119,6 +120,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 10, startColumn: 27, endColumn: 42 },
           },
+          logicalLocations: [{ name: '@org/unresolved', fullyQualifiedName: '@org/unresolved' }],
         },
       },
       {
@@ -131,6 +133,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 8, startColumn: 24, endColumn: 36 },
           },
+          logicalLocations: [{ name: './unresolved', fullyQualifiedName: './unresolved' }],
         },
       },
     ]

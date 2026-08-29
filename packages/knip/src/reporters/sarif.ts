@@ -24,20 +24,28 @@ const getUri = (filePath: string, cwd: string) =>
     .map(segment => encodeURIComponent(segment))
     .join('/');
 
-const getLocation = ({ filePath, line, col, symbol }: Issue, cwd: string) => ({
-  physicalLocation: {
-    artifactLocation: { uri: getUri(filePath, cwd) },
-    ...(line !== undefined && {
-      region: {
-        startLine: Math.max(line, 1),
-        ...(col !== undefined && {
-          startColumn: Math.max(col, 1),
-          endColumn: Math.max(col, 1) + Math.max(symbol.length, 1),
-        }),
-      },
-    }),
-  },
-});
+const getLogicalLocation = ({ type, symbol }: Issue) =>
+  type === 'files' ? [] : [{ name: symbol, fullyQualifiedName: symbol }];
+
+const getLocation = (issue: Issue, cwd: string) => {
+  const { filePath, line, col, symbol } = issue;
+  const logicalLocations = getLogicalLocation(issue);
+  return {
+    physicalLocation: {
+      artifactLocation: { uri: getUri(filePath, cwd) },
+      ...(line !== undefined && {
+        region: {
+          startLine: Math.max(line, 1),
+          ...(col !== undefined && {
+            startColumn: Math.max(col, 1),
+            endColumn: Math.max(col, 1) + Math.max(symbol.length, 1),
+          }),
+        },
+      }),
+    },
+    ...(logicalLocations.length > 0 && { logicalLocations }),
+  };
+};
 
 const sortByLocation = (a: Issue, b: Issue) =>
   a.filePath.localeCompare(b.filePath) ||
