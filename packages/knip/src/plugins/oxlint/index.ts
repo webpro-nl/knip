@@ -2,7 +2,7 @@ import { Visitor } from 'oxc-parser';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { type Input, toDependency, toEntry } from '../../util/input.ts';
-import { isInternal } from '../../util/path.ts';
+import { isInternal, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getInputsFromSettings } from '../eslint/helpers.ts';
 import { getInputsFromSettingsAST } from '../eslint/resolveFromAST.ts';
@@ -24,22 +24,22 @@ const args = {
   config: true,
 };
 
-const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins']): Input[] => {
+const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins'], configFileDir: string): Input[] => {
   const inputs: Input[] = [];
   for (const plugin of jsPlugins ?? []) {
     const specifier = typeof plugin === 'string' ? plugin : plugin.specifier;
     if (!isInternal(specifier)) inputs.push(toDependency(specifier));
-    else inputs.push(toEntry(specifier));
+    else inputs.push(toEntry(toAbsolute(specifier, configFileDir)));
   }
   return inputs;
 };
 
 const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configFileName);
 
-const resolveConfig: ResolveConfig<OxlintConfig> = config => {
-  const inputs = resolveJsPlugins(config.jsPlugins);
+const resolveConfig: ResolveConfig<OxlintConfig> = (config, { configFileDir }) => {
+  const inputs = resolveJsPlugins(config.jsPlugins, configFileDir);
   for (const override of config.overrides ?? []) {
-    for (const input of resolveJsPlugins(override.jsPlugins)) inputs.push(input);
+    for (const input of resolveJsPlugins(override.jsPlugins, configFileDir)) inputs.push(input);
   }
   for (const input of getInputsFromSettings(config.settings)) inputs.push(input);
   return inputs;
@@ -60,7 +60,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
     },
   });
   visitor.visit(program);
-  return [...resolveJsPlugins([...jsPlugins]), ...getInputsFromSettingsAST(program)];
+  return [...resolveJsPlugins([...jsPlugins], options.configFileDir), ...getInputsFromSettingsAST(program)];
 };
 
 const plugin: Plugin = {
