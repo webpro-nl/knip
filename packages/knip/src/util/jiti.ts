@@ -9,6 +9,7 @@ const options = {
     '@rushstack/eslint-config/patch/modern-module-resolution': empty,
     '@rushstack/eslint-patch/modern-module-resolution': empty,
   },
+  jsx: true,
   tsconfigPaths: true,
 };
 

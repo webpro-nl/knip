@@ -40,3 +40,16 @@ test('Find dependencies with the react-router plugin [with custom server entry]'
     total: 5,
   });
 });
+
+test('Find dependencies with the react-router plugin [with JSX in a transitive route import]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-with-jsx');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(issues.files, {});
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
+  });
+});
