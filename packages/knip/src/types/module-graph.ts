@@ -46,6 +46,7 @@ export interface Import extends Position {
   readonly identifier: string | undefined;
   readonly isTypeOnly: boolean;
   readonly modifiers: number;
+  readonly jsDocTags: Tags | undefined;
 }
 
 export interface ExternalRef {

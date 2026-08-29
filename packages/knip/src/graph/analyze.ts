@@ -273,7 +273,7 @@ export const analyze = async ({
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
               });
-            if (!isHandled)
+            if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
                 type: 'unlisted',
                 filePath,

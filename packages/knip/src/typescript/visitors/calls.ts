@@ -302,7 +302,9 @@ export function handleNewExpression(node: NewExpression, s: WalkState) {
         undefined,
         undefined,
         node.arguments[0].start,
-        IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.OPTIONAL
+        IMPORT_FLAGS.ENTRY | IMPORT_FLAGS.OPTIONAL,
+        undefined,
+        s.getJSDocTags(node.start)
       );
     return;
   }
