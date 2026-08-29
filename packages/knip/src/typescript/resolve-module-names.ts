@@ -197,7 +197,11 @@ export function createCustomModuleResolver(
 
   function toResult(specifier: string, containingFile: string, resolvedFileName: string): ResolvedModule {
     const mapped = toSourcePath(resolvedFileName);
-    const isExternalLibraryImport = mapped === resolvedFileName && isInNodeModules(resolvedFileName);
+    // A relative specifier (`./`/`../`) resolves to a local file, so even if it lands inside
+    // `node_modules` (e.g. `new URL('./node_modules/app/index.js', import.meta.url)`) it is not an
+    // external package import.
+    const isExternalLibraryImport =
+      mapped === resolvedFileName && isInNodeModules(resolvedFileName) && !specifier.startsWith('.');
     return {
       resolvedFileName: mapped,
       isExternalLibraryImport,
