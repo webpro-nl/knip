@@ -135,8 +135,21 @@ export const analyze = async ({
                 traverseEntries: isIncludeEntryExports,
               });
 
+              // Don't flag the tag as unused when it's actually suppressing (enum/namespace) member refs,
+              // since those members are skipped at the `isIgnored` continue below.
+              const suppressesMembers = exportedItem.members.some(member => {
+                if (member.hasRefsInFile) return false;
+                if (findMatch(workspace.ignoreMembers, member.identifier)) return false;
+                if (shouldIgnore(member.jsDocTags)) return false;
+                const id = `${identifier}.${member.identifier}`;
+                return !explorer.isReferenced(filePath, id, {
+                  traverseEntries: true,
+                  treatStarAtEntryAsReferenced: true,
+                })[0];
+              });
               if (
                 isIgnored &&
+                !suppressesMembers &&
                 (isReferenced ||
                   isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile))
               ) {
