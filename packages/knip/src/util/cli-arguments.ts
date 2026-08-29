@@ -86,11 +86,10 @@ export type ParsedCLIArgs = ReturnType<typeof parseCLIArgs>;
 
 export const parseNumericOption = (value: string | undefined, option: string) => {
   if (value === undefined) return undefined;
-  const parsed = Number(value);
-  if (value === '' || !Number.isInteger(parsed) || parsed < 0) {
+  if (!/^\d+$/.test(value)) {
     throw new ConfigurationError(`Option --${option} expects a non-negative integer, got: ${value}`);
   }
-  return parsed;
+  return Number(value);
 };
 
 export default function parseCLIArgs() {
