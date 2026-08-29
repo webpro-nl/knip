@@ -14,8 +14,12 @@ import type {
   SyncCompilers,
 } from './types.ts';
 
-// TODO This does not detect functions returning a promise (just the async keyword)
-const isAsyncCompiler = (fn?: CompilerSync | CompilerAsync) => (fn ? fn.constructor.name === 'AsyncFunction' : false);
+const isAsyncCompiler = (fn?: CompilerSync | CompilerAsync) => {
+  if (!fn) return false;
+  if (fn.constructor.name === 'AsyncFunction') return true;
+  const body = Function.prototype.toString.call(fn).replace(/^[^(]*\([^)]*\)\s*(=>\s*)?/, '');
+  return /\bPromise\.(resolve|reject|all|allSettled|any|race)\b|\bnew\s+Promise\(|=>[^=;{}]*\.then\(/.test(body);
+};
 
 export const normalizeCompilerExtension = (ext: string) => ext.replace(/^\.*/, '.');
 

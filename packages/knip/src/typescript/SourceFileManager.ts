@@ -34,6 +34,10 @@ export class SourceFileManager {
       return '';
     }
     const compiled = compiler ? compiler(contents, filePath) : contents;
+    if (compiler && typeof (compiled as unknown as { then?: unknown }).then === 'function') {
+      this.sourceTextCache.set(filePath, contents);
+      return contents;
+    }
     if (compiler) debugLog('*', `Compiled ${filePath}`);
     this.sourceTextCache.set(filePath, compiled);
     return compiled;
