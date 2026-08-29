@@ -78,6 +78,25 @@ const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
   return specifier;
 };
 
+// Layers from these sources are downloaded by c12, they are not dependencies
+const remoteSourcePrefixes = ['gh:', 'github:', 'gitlab:', 'bitbucket:', 'https://', 'http://'];
+
+const toLayerSource = (layer: unknown): unknown => {
+  if (typeof layer === 'string') return layer;
+  if (Array.isArray(layer)) return layer[0];
+  if (layer && typeof layer === 'object' && 'source' in layer) return layer.source;
+};
+
+const toLayerSources = (extend: NuxtConfig['extends']) => {
+  const sources: string[] = [];
+  if (!extend) return sources;
+  for (const layer of Array.isArray(extend) ? extend : [extend]) {
+    const source = toLayerSource(layer);
+    if (typeof source === 'string') sources.push(source);
+  }
+  return sources;
+};
+
 const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, config: NuxtConfig, dir: string) => {
   for (const id of entry) inputs.push(toEntry(join(srcDir, id)));
   for (const id of app) inputs.push(toProductionEntry(join(srcDir, id)));
@@ -134,6 +153,10 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
 
+  const sharedDir = toAbsolute(localConfig.dir?.shared ?? 'shared', cwd);
+  inputs.push(toAlias('#shared', sharedDir));
+  inputs.push(toAlias('#shared/*', join(sharedDir, '*'), { dir: cwd }));
+
   const aliases = localConfig.alias;
   if (aliases) {
     for (const key in aliases) {
@@ -145,12 +168,13 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  for (const ext of localConfig.extends ?? []) {
-    const target = resolveAlias(ext, srcDir, cwd);
+  for (const source of toLayerSources(localConfig.extends)) {
+    if (remoteSourcePrefixes.some(prefix => source.startsWith(prefix))) continue;
+    const target = resolveAlias(source, srcDir, cwd);
     const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
     if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
-    else inputs.push(toDependency(ext));
+    else inputs.push(toDependency(source));
   }
 
   for (const layerConfig of findLayerConfigs(cwd)) {
