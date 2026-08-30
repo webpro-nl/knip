@@ -4,72 +4,80 @@
     <img height="200" width="200" src="https://knip.dev/favicon.svg" alt="Knip" />
   </a>
   <br />
+  Knip
   <br />
 </h1>
 
-<div align="center">
+<p align="center">
+  <b>Find and fix unused files, exports, and dependencies in your project.</b>
+</p>
 
-[![NPM Version][2]][1] [![NPM Downloads][3]][1] [![GitHub Repo stars][5]][4]
+<p align="center">
+  <a href="https://www.npmjs.com/package/knip">
+    <img src="https://img.shields.io/npm/v/knip?style=for-the-badge&color=f56e0f&logo=npm" alt="NPM Version" />
+  </a>
+  <a href="https://www.npmjs.com/package/knip">
+    <img src="https://img.shields.io/npm/dm/knip?style=for-the-badge&color=f56e0f&logo=npm" alt="NPM Downloads" />
+  </a>
+  <a href="https://github.com/webpro-nl/knip">
+    <img src="https://img.shields.io/github/stars/webpro-nl/knip?style=for-the-badge&color=f56e0f&logo=github" alt="GitHub Stars" />
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/github/license/webpro-nl/knip?style=for-the-badge&color=f56e0f" alt="License" />
+  </a>
+</p>
 
-</div>
+<p align="center">
+  <a href="https://knip.dev">
+    <img src="https://img.shields.io/badge/Website-knip.dev-f56e0f?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website" />
+  </a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip">
+    <img src="https://img.shields.io/badge/VS_Code-Extension-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code Extension" />
+  </a>
+  <a href="https://bsky.app/profile/webpro.nl">
+    <img src="https://img.shields.io/badge/Bluesky-Follow-0285FF?style=for-the-badge&logo=bluesky&logoColor=white" alt="Bluesky" />
+  </a>
+  <a href="https://knip.dev/sponsors">
+    <img src="https://img.shields.io/badge/Sponsor-Knip-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor" />
+  </a>
+</p>
 
-Knip finds and fixes **unused dependencies, exports and files** in your
-JavaScript and TypeScript projects. Less code and dependencies lead to improved
-performance, less maintenance and easier refactorings.
+---
 
-- Website: [knip.dev][6]
-- GitHub repo: [webpro-nl/knip][4]
-- Official npm packages: [knip][1], [@knip/create-config][7],
-  [@knip/language-server][8], [@knip/mcp][9]
-- [Knip on the VS Code Marketplace][10], [Knip on the Open VSX Registry][11]
-- [Contributing Guide][12]
-- Follow [@webpro.nl on Bluesky][13] for updates
-- [Sponsor Knip!][14]
+## ✂️ What is Knip?
 
-## Contributors
+**Knip** finds and cleans up **unused dependencies, exports, and files** in your JavaScript and TypeScript projects. Less unused code means faster build times, easier maintenance, and smoother refactoring.
 
-Special thanks to [the wonderful people who have contributed to Knip][15]!
+* **Pronunciation:** /'knɪp/ means "(to) cut" in Dutch and is [pronounced with a hard "K"](https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s) 🇳🇱
 
-## Knip
+---
 
-/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][16] 🇳🇱
+## 🔗 Quick Links
 
-## License
+| Resource | Link |
+| :--- | :--- |
+| **Official Packages** | [`knip`](https://www.npmjs.com/package/knip) • [`@knip/create-config`](https://www.npmjs.com/package/@knip/create-config) • [`@knip/language-server`](https://www.npmjs.com/package/@knip/language-server) • [`@knip/mcp`](https://www.npmjs.com/package/@knip/mcp) |
+| **Extensions** | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip) • [Open VSX Registry](https://open-vsx.org/extension/webpro/vscode-knip) |
+| **Community** | [Contributing Guide](https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md) |
 
-Knip is free and open-source software licensed under the [ISC License][17].
+---
 
-Parts of Knip have been inspired by and/or partially copy code from the
-following projects:
+## 🤝 Contributors
 
-- [@npmcli/package-json][18] ([ISC][19])
-- [@pnpm/deps.graph-sequencer][20] ([MIT][21])
-- [file-entry-cache][22] ([MIT][23])
-- [json-parse-even-better-errors][24] ([MIT][25])
+Thank you to [all the amazing people who have contributed to Knip](https://github.com/webpro-nl/knip/graphs/contributors)!
 
-[1]: https://www.npmx.dev/package/knip
-[2]: https://img.shields.io/npm/v/knip?color=f56e0f
-[3]: https://img.shields.io/npm/dm/knip?color=f56e0f
-[4]: https://github.com/webpro-nl/knip
-[5]:
-  https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f
-[6]: https://knip.dev
-[7]: https://www.npmx.dev/package/@knip/create-config
-[8]: https://www.npmx.dev/package/@knip/language-server
-[9]: https://www.npmx.dev/package/@knip/mcp
-[10]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
-[11]: https://open-vsx.org/extension/webpro/vscode-knip
-[12]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
-[13]: https://bsky.app/profile/webpro.nl
-[14]: https://knip.dev/sponsors
-[15]: https://knip.dev/#created-by-awesome-contributors
-[16]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
-[17]: ./LICENSE
-[18]: https://github.com/npm/package-json
-[19]: https://github.com/npm/package-json/blob/main/LICENSE
-[20]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
-[21]: https://github.com/pnpm/pnpm/blob/main/LICENSE
-[22]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
-[23]:
-  https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
-[24]: https://github.com/npm/json-parse-even-better-errors
-[25]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md
+<a href="https://github.com/webpro-nl/knip/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=webpro-nl/knip&max=2000" alt="Contributors" />
+</a>
+
+---
+
+## 📄 License
+
+Knip is free and open-source software licensed under the [ISC License](./LICENSE).
+
+Parts of Knip are inspired by or use code from:
+* [@npmcli/package-json](https://github.com/npm/package-json) (ISC)
+* [@pnpm/deps.graph-sequencer](https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer) (MIT)
+* [file-entry-cache](https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache) (MIT)
+* [json-parse-even-better-errors](https://github.com/npm/json-parse-even-better-errors) (MIT) 
