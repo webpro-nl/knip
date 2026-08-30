@@ -1,8 +1,6 @@
 ---
 title: Unused exports
 description: Find and remove unused exports with Knip
-prev: false
-next: false
 ---
 
 Finding unused exports in your JavaScript and TypeScript projects is one of

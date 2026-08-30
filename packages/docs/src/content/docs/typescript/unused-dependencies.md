@@ -1,8 +1,6 @@
 ---
 title: Unused dependencies
 description: Find and remove unused dependencies with Knip
-prev: false
-next: false
 ---
 
 One of Knip's core features is finding unused dependencies in your JavaScript

@@ -86,7 +86,10 @@ export default defineConfig({
             'guides/handling-issues',
             'reference/known-issues',
             'features/auto-fix',
-            'reference/faq',
+            {
+              label: 'FAQ',
+              items: ['reference/faq', 'typescript/unused-dependencies', 'typescript/unused-exports'],
+            },
             'reference/related-tooling',
           ],
         },
