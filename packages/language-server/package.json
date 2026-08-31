@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "knip": "workspace:^",
-    "vscode-languageserver": "^10.1.0",
-    "vscode-languageserver-textdocument": "^1.0.13"
+    "vscode-languageserver": "^10.1.1",
+    "vscode-languageserver-textdocument": "^1.0.14"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

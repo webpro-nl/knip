@@ -14,7 +14,6 @@ const manifest = await load(join(cwd, 'package.json'));
 test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   const config = {
     dir: cwd,
-    cwd,
     packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
   };
 

@@ -26,7 +26,7 @@ export type ImportMaps = {
   enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
-  /** Identifiers imported with alias (id → alias → files) */
+  /** Identifiers imported with alias (id → alias → files) */
   importAs: IdToNsToFileMap;
   /** Namespace imports of this file */
   importNs: IdToFileMap;
@@ -46,6 +46,7 @@ export interface Import extends Position {
   readonly identifier: string | undefined;
   readonly isTypeOnly: boolean;
   readonly modifiers: number;
+  readonly jsDocTags: Tags | undefined;
 }
 
 export interface ExternalRef {
@@ -101,6 +102,7 @@ export type FileNode = {
 export interface ImportGlob {
   patterns: string[];
   base?: string;
+  cwd?: string;
   filter?: RegExp;
 }
 

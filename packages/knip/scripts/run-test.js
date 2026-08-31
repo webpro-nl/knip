@@ -32,7 +32,7 @@ const require = createRequire(import.meta.url);
 const tsxBin = nativeTS ? null : resolve(dirname(require.resolve('tsx/package.json')), require('tsx/package.json').bin);
 
 const result = useBun
-  ? spawnSync('bun', ['test', ...files], { stdio: 'inherit' })
+  ? spawnSync('bun', ['test', '--timeout', '30000', ...files], { stdio: 'inherit' })
   : spawnSync(process.execPath, [...(tsxBin ? [tsxBin] : []), '--test', ...files], { stdio: 'inherit' });
 
 process.exit(result.status ?? 1);

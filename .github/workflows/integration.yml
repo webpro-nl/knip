@@ -217,6 +217,7 @@ jobs:
 
           - name: TypeScript
             repo: microsoft/TypeScript
+            ref: b465fdbfe175304d9b977da137b2c178ae1091d3 # Last passing commit before the TypeScript 7 migration
             commands: |
               npm ci
               npm install -D $PKG_URL
@@ -229,6 +230,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ${{ matrix.project.repo }}
+          ref: ${{ matrix.project.ref }}
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
 

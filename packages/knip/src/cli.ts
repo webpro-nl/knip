@@ -74,7 +74,7 @@ const main = async () => {
 
     if (
       !args['no-exit-code'] &&
-      (totalErrorCount > Number(args['max-issues'] ?? 0) ||
+      (totalErrorCount > options.maxIssues ||
         (!options.isDisableConfigHints &&
           options.isTreatConfigHintsAsErrors &&
           results.configurationHints.length > 0) ||

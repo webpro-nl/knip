@@ -113,6 +113,7 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
   t('dotenv -- concurrently "npm ci"', [toBinary('dotenv'), toBinary('concurrently')]);
   t('dotenv -- concurrently "next dev" "prisma generate"', [toBinary('dotenv'), toBinary('concurrently'), toBinary('next'), toBinary('prisma')]);
+  t(`dotenv -- concurrently 'echo "next dev"' "prisma generate"`, [toBinary('dotenv'), toBinary('concurrently'), toBinary('echo'), toBinary('prisma')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
@@ -187,6 +188,7 @@ test('getInputsFromScripts (bun)', () => {
   t('bun run --cwd packages/knip watch', [toBinary('bun'), toBinary('watch', { optional: true, dir: join(cwd, 'packages/knip') })]);
   t('bun test', [toBinary('bun')]);
   t('bun add zod', [toBinary('bun')]);
+  t('bun dedupe', [toBinary('bun')]);
   t('bun install', [toBinary('bun')]);
   t('bun remove webpack', [toBinary('bun')]);
   t('bun update lodash', [toBinary('bun')]);
@@ -284,6 +286,15 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm home lodash', []);
   t('pnpm la', []);
   t('pnpm ll', []);
+  t('pnpm info knip', []);
+  t('pnpm view knip version', []);
+  t('pnpm create vite my-app', []);
+  t('pnpm login --registry https://registry.npmjs.org', []);
+  t('pnpm logout', []);
+  t('pnpm token list', []);
+  t('pnpm recursive run program', [], pkgScripts);
+  t('pnpm multi run program', [], pkgScripts);
+  t('pnpm m run program', [], pkgScripts);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {

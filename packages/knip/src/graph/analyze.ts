@@ -168,7 +168,7 @@ export const analyze = async ({
                   exportedItem.type !== 'enum';
 
                 if ((isEnumMembers || isNsMembers) && exportedItem.members.length > 0) {
-                  if (importsForExport.enumerated?.has(identifier)) continue;
+                  if (explorer.isEnumerated(filePath, identifier)) continue;
                   if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
                   if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) continue;
 
@@ -263,7 +263,7 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.external) {
+        if (file.imports.external) {
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
             const isHandled =
@@ -273,7 +273,7 @@ export const analyze = async ({
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
               });
-            if (!isHandled)
+            if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
                 type: 'unlisted',
                 filePath,
@@ -288,7 +288,7 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.unresolved) {
+        if (file.imports.unresolved) {
           for (const unresolvedImport of file.imports.unresolved) {
             const { specifier, pos, line, col } = unresolvedImport;
             collector.addIssue({

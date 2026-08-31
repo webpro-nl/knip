@@ -15,7 +15,7 @@ Knip provides the following built-in reporters:
 - [`github-actions`][5]
 - [`json`][6]
 - [`markdown`][7]
-- [`sarif`](#sarif)
+- [`sarif`][8]
 - `symbols` (default)
 
 Example usage:
@@ -56,7 +56,7 @@ $ knip --reporter codeclimate
 ### CODEOWNERS
 
 When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
-Point the reporter at a different path through [`--reporter-options`][8]:
+Point the reporter at a different path through [`--reporter-options`][9]:
 
 ```sh
 knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
@@ -64,8 +64,8 @@ knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 
 ### Cycles
 
-A verbose, multi-line tree view of [circular dependencies][9]. Each file path is
-suffixed with the location of the import that continues the cycle. Each edge
+A verbose, multi-line tree view of [circular dependencies][10]. Each file path
+is suffixed with the location of the import that continues the cycle. Each edge
 shows the import kind and specifier, descends one file per level, and closes
 (`↩`) back to the file it started from.
 
@@ -88,10 +88,10 @@ subgraph, because that can produce a noisy and very large report. If the same
 file participates in multiple distinct reported paths, each path is shown
 separately.
 
-Use [`cycles.allow`][10] to accept known cycle paths.
+Use [`cycles.allow`][11] to accept known cycle paths.
 
 Dynamic imports are ignored by default because they are commonly used to avoid
-synchronous circular loads. Set [`cycles.dynamicImports`][10] to include them.
+synchronous circular loads. Set [`cycles.dynamicImports`][11] to include them.
 Repeated starting imports are grouped under one heading.
 
 In CI, use `--include cycles` (or `"include": ["cycles"]`) to include the
@@ -204,9 +204,9 @@ every issue found in one file:
 | `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
 | _issue type_ | array        | One key per enabled issue type (see below)          |
 
-Each entry carries a key for **every enabled [issue type][9]**, so the keys are
+Each entry carries a key for **every enabled [issue type][10]**, so the keys are
 the same across entries. An array is empty when that file has no issues of that
-type. Drop a type's key by disabling it with [filters or rules][11].
+type. Drop a type's key by disabling it with [filters or rules][12].
 
 Issue-type items are objects with position info:
 
@@ -218,15 +218,15 @@ Issue-type items are objects with position info:
 | `col`       | `number?` | 1-based column                                 |
 | `pos`       | `number?` | Character offset                               |
 
-See [Issue types][9] for the full set of issue-type keys.
+See [Issue types][10] for the full set of issue-type keys.
 
-For a typed object instead of JSON to parse, write a [custom reporter][12].
-Coding agents can also call Knip through the [MCP server][13], which returns
+For a typed object instead of JSON to parse, write a [custom reporter][13].
+Coding agents can also call Knip through the [MCP server][14], which returns
 structured results and configuration hints directly.
 
 ### SARIF
 
-The `sarif` reporter emits [SARIF 2.1.0][14] for code-scanning integrations:
+The `sarif` reporter emits [SARIF 2.1.0][15] for code-scanning integrations:
 
 ```sh
 knip --reporter sarif > knip.sarif
@@ -249,8 +249,8 @@ steps:
       sarif_file: knip.sarif
 ```
 
-The upload step runs even when Knip finds issues and exits non-zero. GitHub
-Code Scanning availability for private repositories depends on the repository's
+The upload step runs even when Knip finds issues and exits non-zero. GitHub Code
+Scanning availability for private repositories depends on the repository's
 GitHub Code Security plan.
 
 ### Markdown
@@ -392,10 +392,11 @@ Preprocessors can also be configured in the Knip configuration file:
 [5]: #github-actions
 [6]: #json
 [7]: #markdown
-[8]: ../reference/cli.md#--reporter-options-json
-[9]: ../reference/issue-types.md
-[10]: ../reference/configuration.md#cycles
-[11]: ./rules-and-filters.md
-[12]: #custom-reporters
-[13]: ../reference/integrations.md
-[14]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
+[8]: #sarif
+[9]: ../reference/cli.md#--reporter-options-json
+[10]: ../reference/issue-types.md
+[11]: ../reference/configuration.md#cycles
+[12]: ./rules-and-filters.md
+[13]: #custom-reporters
+[14]: ../reference/integrations.md
+[15]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html

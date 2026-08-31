@@ -74,6 +74,7 @@ for (const name of fixtures) {
 // need; post-fix file content must NOT contain the names in libFixtureRemovals):
 //   as-cast-in-body           — `as T` / `<T>x` / `satisfies T` inside a function body
 //   call-arg-in-body          — Identifier as call argument inside a function body
+//   private-helper-param      - private callee params do not surface through exported inferred returns
 const libFixtures = [
   'e2e-lib-typed-exports',
   'e2e-lib-export-star-as',
@@ -83,6 +84,7 @@ const libFixtures = [
   'e2e-lib-call-arg',
   'e2e-lib-as-cast-in-body',
   'e2e-lib-call-arg-in-body',
+  'e2e-lib-private-helper-param',
 ];
 
 const libFixtureRemovals: Record<string, RegExp[]> = {
@@ -96,6 +98,7 @@ const libFixtureRemovals: Record<string, RegExp[]> = {
     /export interface InternalActionB/,
     /export interface UnusedHelperOptions/,
   ],
+  'e2e-lib-private-helper-param': [/export interface PrivateParam/, /export interface MemberParam/],
 };
 
 for (const name of libFixtures) {

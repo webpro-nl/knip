@@ -1,3 +1,5 @@
+import type { Settings } from '../eslint/types.ts';
+
 type JsPlugin =
   | string
   | {
@@ -12,4 +14,5 @@ type Override = {
 export type OxlintConfig = {
   jsPlugins?: JsPlugin[];
   overrides?: Override[];
+  settings?: Settings;
 };

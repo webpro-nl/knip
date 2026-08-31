@@ -7,7 +7,7 @@ import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
 import { arrayify } from './array.ts';
 import { getCatalogContainer } from './catalog.ts';
-import type { ParsedCLIArgs } from './cli-arguments.ts';
+import { parseNumericOption, type ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
 import { findFile, loadJSON } from './fs.ts';
 import {
@@ -206,6 +206,8 @@ export const createOptions = async (options: CreateOptions) => {
     isTreatTagHintsAsErrors: args['treat-tag-hints-as-errors'] ?? parsedConfig.treatTagHintsAsErrors ?? false,
     isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
     isWatch: args.watch ?? options.isWatch ?? false,
+    maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
+    maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
     parsedConfig,
     preprocessor,
     preprocessorInputs,

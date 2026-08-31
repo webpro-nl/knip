@@ -11,6 +11,8 @@ import {
   applyFilters,
   type DirectlyUsed,
   configure,
+  readAnnotatedHelper,
+  readPrivateParam,
 } from './lib.ts';
 
 connect({ host: '', port: 0 });
@@ -35,3 +37,5 @@ const x: DirectlyUsed = { value: 1 };
 void x;
 
 configure({ timeout: 100 });
+readAnnotatedHelper();
+readPrivateParam();
