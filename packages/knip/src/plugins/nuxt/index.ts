@@ -153,6 +153,10 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
 
+  const sharedDir = toAbsolute(localConfig.dir?.shared ?? 'shared', cwd);
+  inputs.push(toAlias('#shared', sharedDir));
+  inputs.push(toAlias('#shared/*', join(sharedDir, '*'), { dir: cwd }));
+
   const aliases = localConfig.alias;
   if (aliases) {
     for (const key in aliases) {
