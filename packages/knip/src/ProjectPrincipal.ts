@@ -3,7 +3,7 @@ import { extractSpecifiers } from './typescript/follow-imports.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
-import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
+import type { AsyncCompilers, CompilerAsync, CompilerSync, Compilers, SyncCompilers } from './compilers/types.ts';
 import { DEFAULT_EXTENSIONS } from './constants.ts';
 import type {
   GetImportsAndExportsOptions,
@@ -47,6 +47,8 @@ export class ProjectPrincipal {
 
   syncCompilers: SyncCompilers = new Map();
   asyncCompilers: AsyncCompilers = new Map();
+  private scopedSyncCompilers = new Map<string, Map<string, CompilerSync>>();
+  private scopedAsyncCompilers = new Map<string, Map<string, CompilerAsync>>();
   private paths = new Map<string, Record<string, string[]>>();
   private rootDirs = new Map<string, string[]>();
   private tsConfigFile: string | undefined;
@@ -55,6 +57,7 @@ export class ProjectPrincipal {
   cache: CacheConsultant<FileNode>;
   toSourceFilePath: ToSourceFilePath;
   private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
+  private findWorkspaceNameByFilePath: (filePath: string) => string | undefined;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -67,11 +70,13 @@ export class ProjectPrincipal {
   constructor(
     options: MainOptions,
     toSourceFilePath: ToSourceFilePath,
-    findWorkspacePackageTarget?: WorkspacePackageTargetHandler
+    findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined,
+    findWorkspaceNameByFilePath: (filePath: string) => string | undefined
   ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
+    this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -80,16 +85,32 @@ export class ProjectPrincipal {
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
 
-  addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
+  addCompilers(workspaceName: string, compilers: Compilers) {
     for (const [ext, compiler] of compilers[0]) {
-      if (!this.syncCompilers.has(ext)) {
-        this.syncCompilers.set(ext, compiler);
+      const workspaceCompilers = this.scopedSyncCompilers.get(ext);
+      if (workspaceCompilers) {
+        workspaceCompilers.set(workspaceName, compiler);
+      } else {
+        const workspaceCompilers = new Map([[workspaceName, compiler]]);
+        this.scopedSyncCompilers.set(ext, workspaceCompilers);
+        this.syncCompilers.set(ext, (source, filePath) => {
+          const owner = this.findWorkspaceNameByFilePath(filePath);
+          return ((owner ? workspaceCompilers.get(owner) : undefined) ?? compiler)(source, filePath);
+        });
         this.extensions.add(ext);
       }
     }
     for (const [ext, compiler] of compilers[1]) {
-      if (!this.asyncCompilers.has(ext)) {
-        this.asyncCompilers.set(ext, compiler);
+      const workspaceCompilers = this.scopedAsyncCompilers.get(ext);
+      if (workspaceCompilers) {
+        workspaceCompilers.set(workspaceName, compiler);
+      } else {
+        const workspaceCompilers = new Map([[workspaceName, compiler]]);
+        this.scopedAsyncCompilers.set(ext, workspaceCompilers);
+        this.asyncCompilers.set(ext, (source, filePath) => {
+          const owner = this.findWorkspaceNameByFilePath(filePath);
+          return ((owner ? workspaceCompilers.get(owner) : undefined) ?? compiler)(source, filePath);
+        });
         this.extensions.add(ext);
       }
     }

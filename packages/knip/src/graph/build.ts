@@ -170,7 +170,7 @@ export async function build({
 
     await worker.registerCompilers(registerCompiler);
 
-    principal.addCompilers(compilers);
+    principal.addCompilers(name, compilers);
 
     const extensions = getCompilerExtensions(compilers);
     const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
