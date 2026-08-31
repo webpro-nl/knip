@@ -19,7 +19,7 @@ export const toReporterOptions = (options: MainOptions, results: Results, args?:
   isShowProgress: options.isShowProgress,
   isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
   isTreatTagHintsAsErrors: options.isTreatTagHintsAsErrors,
-  maxShowIssues: args?.['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
+  maxShowIssues: options.maxShowIssues,
   options: args?.['reporter-options'] ?? '',
   preprocessorOptions: options.preprocessorOptions,
 });
