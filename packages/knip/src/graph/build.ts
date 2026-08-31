@@ -32,7 +32,8 @@ import {
   isIgnore,
   isProductionEntry,
   isProject,
-  toDeferResolve,
+  toDeferResolveEntry,
+  toDependency,
   toProductionEntry,
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
@@ -43,7 +44,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
@@ -186,7 +187,11 @@ export async function build({
     if (name === ROOT_WORKSPACE_NAME) {
       const containingFilePath = options.configFilePath ?? filePath;
       for (const specifier of options.preprocessorInputs) {
-        inputs.add(toDeferResolve(specifier, { containingFilePath, optional: true, production: true }));
+        inputs.add(
+          isInternal(specifier)
+            ? toDeferResolveEntry(specifier, { containingFilePath })
+            : toDependency(specifier, { containingFilePath, optional: true })
+        );
       }
     }
 

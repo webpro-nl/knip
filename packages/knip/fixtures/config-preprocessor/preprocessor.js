@@ -1,4 +1,6 @@
+import { greeting } from 'preprocessor-helper';
+
 export default function (options) {
-  console.log('hi from config preprocessor');
+  console.log(greeting);
   return options;
 }

@@ -1,5 +1,8 @@
 {
   "name": "@fixtures/config-preprocessor",
+  "devDependencies": {
+    "preprocessor-helper": "1.0.0"
+  },
   "knip": {
     "preprocessor": "./preprocessor.js"
   }
