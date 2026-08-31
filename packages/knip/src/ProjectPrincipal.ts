@@ -70,16 +70,18 @@ export class ProjectPrincipal {
   constructor(
     options: MainOptions,
     toSourceFilePath: ToSourceFilePath,
-    findWorkspacePackageTarget?: WorkspacePackageTargetHandler,
-    findWorkspaceNameByFilePath?: (filePath: string) => string | undefined
+    findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined,
+    findWorkspaceNameByFilePath: (filePath: string) => string | undefined
   ) {
     this.cache = new CacheConsultant('root', options);
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
-    this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath ?? (() => undefined);
+    this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
-    this.fileManager = new SourceFileManager({ compilers: [this.syncCompilers, this.asyncCompilers] });
+    this.fileManager = new SourceFileManager({
+      compilers: [this.syncCompilers, this.asyncCompilers],
+    });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
 
