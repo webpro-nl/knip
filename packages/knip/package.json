@@ -110,7 +110,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@jest/types": "^30.4.1",
+    "@jest/types": "^30.5.0",
     "@types/bun": "^1.4.0",
     "@types/picomatch": "^4.0.3",
     "@types/webpack": "^5.28.5",
