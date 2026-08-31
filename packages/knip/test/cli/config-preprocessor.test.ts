@@ -37,6 +37,12 @@ test('knip with preprocessorOptions in config', () => {
   assert.equal(stdout, 'hi from config preprocessor, you gave me: cupcake');
 });
 
+test('knip exits without error when a preprocessor clears the hints', () => {
+  const { stderr, status } = exec('knip', { cwd: resolve('fixtures/preprocessor-hints') });
+  assert.equal(stderr, '');
+  assert.equal(status, 0);
+});
+
 test('knip with multiple preprocessors in config', () => {
   const { stdout } = exec('knip', { cwd: resolve('fixtures/config-preprocessor-chain') });
   assert.equal(stdout, 'hi from first then second preprocessor');

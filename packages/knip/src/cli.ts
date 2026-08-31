@@ -77,8 +77,8 @@ const main = async () => {
       (totalErrorCount > options.maxIssues ||
         (!options.isDisableConfigHints &&
           options.isTreatConfigHintsAsErrors &&
-          results.configurationHints.length > 0) ||
-        (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && results.tagHints.size > 0))
+          finalData.configurationHints.length > 0) ||
+        (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && finalData.tagHints.size > 0))
     ) {
       process.exitCode = 1;
       return;
