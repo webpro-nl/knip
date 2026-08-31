@@ -1,5 +1,5 @@
 import type { Results } from '../run.ts';
-import type { Issues, IssueType, Preprocessor, ReporterOptions } from '../types/issues.ts';
+import type { IssueRecords, Issues, IssueType, Preprocessor, ReporterOptions } from '../types/issues.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import type { MainOptions } from './create-options.ts';
 import { _load } from './loader.ts';
@@ -28,7 +28,12 @@ export const toReporterOptions = (options: MainOptions, results: Results, args?:
 // receive the collector's own containers: in a session that mutation would persist across refreshes
 const toSnapshot = (data: ReporterOptions): ReporterOptions => {
   const issues = {} as Issues;
-  for (const type in data.issues) issues[type as IssueType] = { ...data.issues[type as IssueType] };
+  for (const type in data.issues) {
+    const issuesForType = data.issues[type as IssueType];
+    const records: IssueRecords = {};
+    for (const filePath in issuesForType) records[filePath] = { ...issuesForType[filePath] };
+    issues[type as IssueType] = records;
+  }
   return { ...data, issues, counters: { ...data.counters }, tagHints: new Set(data.tagHints) };
 };
 
