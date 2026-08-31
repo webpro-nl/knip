@@ -15,6 +15,16 @@ test('knip --strict with preprocessor in config', () => {
   assert.equal(stdout, 'hi from config preprocessor');
 });
 
+test('knip with preprocessor in a workspace', () => {
+  const { stdout } = exec('knip', { cwd: resolve('fixtures/config-preprocessor-workspaces') });
+  assert.equal(stdout, 'hi from workspace preprocessor');
+});
+
+test('knip --strict with preprocessor in a workspace', () => {
+  const { stdout } = exec('knip --strict', { cwd: resolve('fixtures/config-preprocessor-workspaces') });
+  assert.equal(stdout, 'hi from workspace preprocessor');
+});
+
 test('knip --preprocessor overrides config preprocessor', () => {
   const { stdout } = exec('knip --preprocessor ./override.js', {
     cwd: resolve('fixtures/config-preprocessor-override'),

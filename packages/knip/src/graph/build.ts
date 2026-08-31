@@ -116,6 +116,23 @@ export async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
+  const workspaceNames = new Set(workspaces.map(workspace => workspace.name));
+  const preprocessorInputs = new Map<string, Input[]>();
+  for (const specifier of options.preprocessorInputs) {
+    const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
+    const isLocal = isInternal(specifier);
+    const input = isLocal
+      ? toDeferResolveEntry(specifier, { containingFilePath })
+      : toDependency(specifier, { containingFilePath, optional: true });
+    // The negated production entry pattern only applies to its own workspace, so a local
+    // preprocessor must be registered in the workspace holding it, not always in the root
+    const owner = isLocal ? chief.findWorkspaceByFilePath(specifier)?.name : undefined;
+    const name = owner && workspaceNames.has(owner) ? owner : ROOT_WORKSPACE_NAME;
+    const inputs = preprocessorInputs.get(name);
+    if (inputs) inputs.push(input);
+    else preprocessorInputs.set(name, [input]);
+  }
+
   for (const workspace of workspaces) {
     const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
@@ -184,16 +201,7 @@ export async function build({
 
     const inputs = new Set<Input>();
 
-    if (name === ROOT_WORKSPACE_NAME) {
-      const containingFilePath = options.configFilePath ?? filePath;
-      for (const specifier of options.preprocessorInputs) {
-        inputs.add(
-          isInternal(specifier)
-            ? toDeferResolveEntry(specifier, { containingFilePath })
-            : toDependency(specifier, { containingFilePath, optional: true })
-        );
-      }
-    }
+    for (const input of preprocessorInputs.get(name) ?? []) inputs.add(input);
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
