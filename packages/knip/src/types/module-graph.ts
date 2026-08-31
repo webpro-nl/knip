@@ -101,6 +101,7 @@ export type FileNode = {
 export interface ImportGlob {
   patterns: string[];
   base?: string;
+  cwd?: string;
   filter?: RegExp;
 }
 

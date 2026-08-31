@@ -1,6 +1,8 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import { toEntry, toProductionEntry } from '../../util/input.ts';
 import { getScriptCommands } from '../../util/scripts.ts';
+import type { RegisterVisitors } from '../../types/config.ts';
+import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
 
 const title = 'Node.js';
 
@@ -32,6 +34,10 @@ const hasNodeTest = (scripts: Record<string, string> | undefined) => {
 };
 
 const entry = ['server.js'];
+
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createFsPromisesGlobVisitor(ctx));
+};
 
 const resolve: Resolve = options => {
   const entries = entry.map(id => toProductionEntry(id));
@@ -69,6 +75,7 @@ const plugin: Plugin = {
   entry,
   resolve,
   args,
+  registerVisitors,
 };
 
 export default plugin;

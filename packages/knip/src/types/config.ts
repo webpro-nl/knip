@@ -189,7 +189,7 @@ export type PluginVisitorContext = {
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
   markImportExpressionHandled: (pos: number) => void;
-  addImportGlob: (patterns: string[], options?: { base?: string; filter?: RegExp }) => void;
+  addImportGlob: (patterns: string[], options?: { base?: string; cwd?: string; filter?: RegExp }) => void;
   /**
    * Credit a local export as used by an in-module runtime registration (e.g. a custom element
    * registered through a framework decorator), so it isn't reported as an unused export even
