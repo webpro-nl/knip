@@ -15,7 +15,7 @@ test('Compile files with the compiler registered by the owning workspace', async
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

@@ -1,29 +1,28 @@
 import { readFileSync } from 'node:fs';
-import type { AsyncCompilers, CompilerSync } from '../compilers/types.ts';
+import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.ts';
 import { debugLog } from '../util/debug.ts';
 import { extname, isInternal } from '../util/path.ts';
 
 interface SourceFileManagerOptions {
-  asyncCompilers: AsyncCompilers;
-  getSyncCompiler: (ext: string, filePath: string) => CompilerSync | undefined;
+  compilers: [SyncCompilers, AsyncCompilers];
 }
 
 export class SourceFileManager {
   sourceTextCache = new Map<string, string>();
+  syncCompilers: SyncCompilers;
   asyncCompilers: AsyncCompilers;
-  getSyncCompiler: SourceFileManagerOptions['getSyncCompiler'];
 
-  constructor({ asyncCompilers, getSyncCompiler }: SourceFileManagerOptions) {
-    this.asyncCompilers = asyncCompilers;
-    this.getSyncCompiler = getSyncCompiler;
+  constructor({ compilers }: SourceFileManagerOptions) {
+    this.syncCompilers = compilers[0];
+    this.asyncCompilers = compilers[1];
   }
 
   readFile(filePath: string): string {
     const cachedSourceText = this.sourceTextCache.get(filePath);
     if (cachedSourceText !== undefined) return cachedSourceText;
     const ext = extname(filePath);
-    const compiler = this.getSyncCompiler(ext, filePath);
+    const compiler = this.syncCompilers.get(ext);
     if (FOREIGN_FILE_EXTENSIONS.has(ext) && !compiler) {
       this.sourceTextCache.set(filePath, '');
       return '';

@@ -5,6 +5,9 @@
     },
     "packages/app": {
       "entry": ["src/index.marko"]
+    },
+    "packages/fallback": {
+      "entry": ["src/index.marko"]
     }
   }
 }

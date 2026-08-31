@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
-import { isDirectory, isFile } from '../../util/fs.ts';
+import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
 import {
@@ -121,9 +121,8 @@ const definitionFiles = [
 ];
 
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
-  const paths = definitionFiles.map(file => join(cwd, file));
-  const isLayer = paths.some(path => isFile(path));
-  if (hasDependency('nuxt') || hasDependency('nuxt-nightly') || isLayer) {
+  if (hasDependency('nuxt') || hasDependency('nuxt-nightly') || isDirectory(cwd, '.nuxt')) {
+    const paths = definitionFiles.map(file => join(cwd, file));
     const maps = createAutoImportMaps();
 
     for (const path of paths) {
