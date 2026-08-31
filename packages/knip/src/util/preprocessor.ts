@@ -1,5 +1,5 @@
 import type { Results } from '../run.ts';
-import type { IssueRecords, Issues, IssueType, Preprocessor, ReporterOptions } from '../types/issues.ts';
+import type { Issue, IssueRecords, Issues, IssueType, Preprocessor, ReporterOptions } from '../types/issues.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import type { MainOptions } from './create-options.ts';
 import { _load } from './loader.ts';
@@ -31,7 +31,11 @@ const toSnapshot = (data: ReporterOptions): ReporterOptions => {
   for (const type in data.issues) {
     const issuesForType = data.issues[type as IssueType];
     const records: IssueRecords = {};
-    for (const filePath in issuesForType) records[filePath] = { ...issuesForType[filePath] };
+    for (const filePath in issuesForType) {
+      const issuesForFile: Record<string, Issue> = {};
+      for (const symbol in issuesForType[filePath]) issuesForFile[symbol] = { ...issuesForType[filePath][symbol] };
+      records[filePath] = issuesForFile;
+    }
     issues[type as IssueType] = records;
   }
   return { ...data, issues, counters: { ...data.counters }, tagHints: new Set(data.tagHints) };
