@@ -1,0 +1,10 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": ["index.marko"]
+    },
+    "packages/app": {
+      "entry": ["src/index.marko"]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
-import { isDirectory } from '../../util/fs.ts';
+import { isDirectory, isFile } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
 import {
@@ -113,20 +113,21 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
 
 const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
 
+const definitionFiles = [
+  '.nuxt/imports.d.ts',
+  '.nuxt/components.d.ts',
+  '.nuxt/types/nitro-routes.d.ts',
+  '.nuxt/types/nitro-imports.d.ts',
+];
+
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
-  if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
+  const paths = definitionFiles.map(file => join(cwd, file));
+  const isLayer = paths.some(path => isFile(path));
+  if (hasDependency('nuxt') || hasDependency('nuxt-nightly') || isLayer) {
     const maps = createAutoImportMaps();
 
-    const definitionFiles = [
-      '.nuxt/imports.d.ts',
-      '.nuxt/components.d.ts',
-      '.nuxt/types/nitro-routes.d.ts',
-      '.nuxt/types/nitro-imports.d.ts',
-    ];
-
-    for (const file of definitionFiles) {
-      const path = join(cwd, file);
-      buildAutoImportMap(path, readAndParseFile(path), maps, file.endsWith('components.d.ts'));
+    for (const path of paths) {
+      buildAutoImportMap(path, readAndParseFile(path), maps, path.endsWith('components.d.ts'));
     }
 
     registerCompiler({ extension: '.vue', compiler: createVueCompiler(maps, cwd) });

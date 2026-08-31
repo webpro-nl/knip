@@ -3,7 +3,7 @@ import { extractSpecifiers } from './typescript/follow-imports.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { getCompilerExtensions } from './compilers/index.ts';
-import type { AsyncCompilers, SyncCompilers } from './compilers/types.ts';
+import type { AsyncCompilers, CompilerSync, SyncCompilers } from './compilers/types.ts';
 import { DEFAULT_EXTENSIONS } from './constants.ts';
 import type {
   GetImportsAndExportsOptions,
@@ -47,6 +47,7 @@ export class ProjectPrincipal {
 
   syncCompilers: SyncCompilers = new Map();
   asyncCompilers: AsyncCompilers = new Map();
+  private scopedSyncCompilers = new Map<string, [string, CompilerSync][]>();
   private paths = new Map<string, Record<string, string[]>>();
   private rootDirs = new Map<string, string[]>();
   private tsConfigFile: string | undefined;
@@ -75,17 +76,22 @@ export class ProjectPrincipal {
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
-      compilers: [this.syncCompilers, this.asyncCompilers],
+      asyncCompilers: this.asyncCompilers,
+      getSyncCompiler: (ext, filePath) => this.getSyncCompiler(ext, filePath),
     });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
 
-  addCompilers(compilers: [SyncCompilers, AsyncCompilers]) {
+  addCompilers(compilers: [SyncCompilers, AsyncCompilers], dir: string) {
     for (const [ext, compiler] of compilers[0]) {
       if (!this.syncCompilers.has(ext)) {
         this.syncCompilers.set(ext, compiler);
         this.extensions.add(ext);
       }
+      const scoped = this.scopedSyncCompilers.get(ext) ?? [];
+      scoped.push([`${dir}/`, compiler]);
+      scoped.sort((a, b) => b[0].length - a[0].length);
+      this.scopedSyncCompilers.set(ext, scoped);
     }
     for (const [ext, compiler] of compilers[1]) {
       if (!this.asyncCompilers.has(ext)) {
@@ -93,6 +99,12 @@ export class ProjectPrincipal {
         this.extensions.add(ext);
       }
     }
+  }
+
+  getSyncCompiler(ext: string, filePath: string) {
+    const scoped = this.scopedSyncCompilers.get(ext);
+    if (scoped) for (const [prefix, compiler] of scoped) if (filePath.startsWith(prefix)) return compiler;
+    return this.syncCompilers.get(ext);
   }
 
   addPaths(paths: Paths, basePath: string, scope: string) {

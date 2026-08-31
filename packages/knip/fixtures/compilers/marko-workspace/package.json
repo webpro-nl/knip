@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/compilers-marko-workspace",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "marko": "*"
+  }
+}
