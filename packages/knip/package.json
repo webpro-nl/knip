@@ -113,11 +113,11 @@
     "@jest/types": "^30.5.0",
     "@types/bun": "^1.4.0",
     "@types/picomatch": "^4.0.3",
-    "@types/webpack": "^5.28.5",
     "codeclimate-types": "^0.3.1",
     "prettier": "^3.9.6",
     "tsx": "^4.23.12",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "webpack": "^5.110.1"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
