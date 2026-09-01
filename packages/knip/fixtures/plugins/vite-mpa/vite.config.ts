@@ -3,6 +3,7 @@ export default {
     rollupOptions: {
       input: {
         nested: 'nested/index.html',
+        admin: 'pages/admin.html',
       },
     },
   },
