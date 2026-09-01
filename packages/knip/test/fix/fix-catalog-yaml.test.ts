@@ -12,7 +12,7 @@ test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
   const { issues } = await main(options);
 
   assert(issues.catalog['pnpm-workspace.yaml']['default.lodash']);
-  assert(issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
+  assert(!issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
   assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
 
   assert.equal(
@@ -26,8 +26,12 @@ catalog:
 catalogs:
   frontend:
     vue: ^3.0.0
+    "@nu/xt": ^3.0.0
   backend:
     '@ex/press': ^4.18.0
+
+overrides:
+  '@nu/xt@^3': 'catalog:frontend'
 `
   );
 });
