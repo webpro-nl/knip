@@ -12,8 +12,11 @@ export type Directive = {
   allowMissing?: boolean;
 };
 
-const getStaticValue = (value: unknown): unknown =>
-  value instanceof ParsedEnvSpecStaticValue ? value.value : undefined;
+const getStaticString = (node: unknown) =>
+  node instanceof ParsedEnvSpecStaticValue && typeof node.value === 'string' ? node.value : undefined;
+
+const getStaticBoolean = (node: unknown) =>
+  node instanceof ParsedEnvSpecStaticValue && typeof node.value === 'boolean' ? node.value : undefined;
 
 export const parseVarlockFile = (source: string) => {
   const directives: Directive[] = [];
@@ -28,31 +31,31 @@ export const parseVarlockFile = (source: string) => {
       if (decorator.name === 'disable') disabled ||= decorator.simplifiedValue === true;
 
       if (decorator.name === 'currentEnv' && decorator.value instanceof ParsedEnvSpecFunctionCall) {
-        const value = decorator.value.name === 'ref' ? getStaticValue(decorator.value.data.args.values[0]) : undefined;
-        if (typeof value === 'string') environmentKey = value;
+        const value = decorator.value.name === 'ref' ? getStaticString(decorator.value.data.args.values[0]) : undefined;
+        if (value !== undefined) environmentKey = value;
       } else if (decorator.name === 'envFlag') {
-        const value = getStaticValue(decorator.value);
-        if (typeof value === 'string') environmentKey = value;
+        environmentKey = getStaticString(decorator.value) ?? environmentKey;
       }
 
       if (decorator.name !== 'plugin' && decorator.name !== 'import') continue;
       const args = decorator.bareFnArgs?.values;
-      const descriptor = getStaticValue(args?.[0]);
-      if (typeof descriptor !== 'string') continue;
+      const descriptor = getStaticString(args?.[0]);
+      if (descriptor === undefined) continue;
 
       const directive: Directive = { name: decorator.name, descriptor };
       for (const arg of args?.slice(1) ?? []) {
         if (!(arg instanceof ParsedEnvSpecKeyValuePair)) continue;
-        const value = getStaticValue(arg.value);
-        if (arg.key === 'enabled' && typeof value === 'boolean') directive.enabled = value;
-        if (arg.key === 'allowMissing' && typeof value === 'boolean') directive.allowMissing = value;
+        const value = getStaticBoolean(arg.value);
+        if (value === undefined) continue;
+        if (arg.key === 'enabled') directive.enabled = value;
+        if (arg.key === 'allowMissing') directive.allowMissing = value;
       }
       directives.push(directive);
     }
 
     for (const item of file.configItems) {
-      const value = getStaticValue(item.value);
-      if (typeof value === 'string') staticValues.set(item.key, value);
+      const value = getStaticString(item.value);
+      if (value !== undefined) staticValues.set(item.key, value);
     }
   } catch {}
 
