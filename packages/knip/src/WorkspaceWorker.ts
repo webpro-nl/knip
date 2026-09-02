@@ -506,7 +506,7 @@ export class WorkspaceWorker {
 
       if (plugin.resolve) {
         const dependencies = (await plugin.resolve(options)) ?? [];
-        for (const id of dependencies) addInput(id, containingFilePath);
+        for (const id of dependencies) addInput(id, id.containingFilePath ?? containingFilePath);
       }
 
       // Any negated pattern will move all plugin inputs to new group

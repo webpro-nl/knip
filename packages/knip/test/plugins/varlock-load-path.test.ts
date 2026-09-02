@@ -5,19 +5,13 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/varlock');
+const cwd = resolve('fixtures/plugins/varlock-load-path');
 
-test('Find dependencies with the varlock plugin', async () => {
+test('Find dependencies from custom Varlock load paths', async () => {
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert(issues.unlisted['.env.schema']['missing-plugin']);
-  assert.deepEqual(Object.keys(issues.unlisted['.env.schema']), ['missing-plugin']);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
-    processed: 1,
-    total: 1,
   });
 });

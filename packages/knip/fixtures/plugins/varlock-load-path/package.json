@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/varlock-load-path",
+  "scripts": {
+    "check": "varlock load --path cli/.env.custom -p cli/.env.extra"
+  },
+  "devDependencies": {
+    "cli-plugin": "1.0.0",
+    "extra-cli-plugin": "1.0.0",
+    "directory-plugin": "1.0.0",
+    "file-plugin": "1.0.0",
+    "varlock": "1.0.0"
+  },
+  "varlock": {
+    "loadPath": ["config/.env.production", "environment"]
+  }
+}

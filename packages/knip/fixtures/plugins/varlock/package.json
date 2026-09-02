@@ -5,6 +5,7 @@
   },
   "devDependencies": {
     "@varlock/1password-plugin": "1.0.0",
+    "imported-plugin": "1.0.0",
     "quoted-plugin": "1.0.0",
     "unscoped-plugin": "1.0.0",
     "varlock": "1.0.0"
