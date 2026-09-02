@@ -1,173 +1,60 @@
-export type Directive = { name: 'import' | 'plugin'; args: string[] };
+import {
+  parseEnvSpecDotEnvFile,
+  ParsedEnvSpecFunctionCall,
+  ParsedEnvSpecKeyValuePair,
+  ParsedEnvSpecStaticValue,
+} from '@env-spec/parser';
 
-const unquote = (value: string) => {
-  const trimmed = value.trim();
-  const quote = trimmed[0];
-  return (quote === '"' || quote === "'" || quote === '`') && trimmed.at(-1) === quote ? trimmed.slice(1, -1) : trimmed;
+export type Directive = {
+  name: 'import' | 'plugin';
+  descriptor: string;
+  enabled?: boolean;
+  allowMissing?: boolean;
 };
 
-const splitArguments = (value: string) => {
-  const args: string[] = [];
-  let start = 0;
-  let depth = 0;
-  let quote = '';
-  let escaped = false;
+const getStaticValue = (value: unknown): unknown =>
+  value instanceof ParsedEnvSpecStaticValue ? value.value : undefined;
 
-  for (let i = 0; i < value.length; i++) {
-    const char = value[i];
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (char === '\\') escaped = true;
-      else if (char === quote) quote = '';
-    } else if (char === '"' || char === "'" || char === '`') {
-      quote = char;
-    } else if (char === '(' || char === '[' || char === '{') {
-      depth++;
-    } else if (char === ')' || char === ']' || char === '}') {
-      depth--;
-    } else if (char === ',' && depth === 0) {
-      args.push(value.slice(start, i).trim());
-      start = i + 1;
-    }
-  }
-
-  args.push(value.slice(start).trim());
-  return args;
-};
-
-const scanSyntax = (value: string, start: number, stopAtWhitespace: boolean) => {
-  let depth = 0;
-  let quote = '';
-  let escaped = false;
-
-  for (let i = start; i < value.length; i++) {
-    const char = value[i];
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (char === '\\') escaped = true;
-      else if (char === quote) quote = '';
-    } else if (char === '"' || char === "'" || char === '`') {
-      quote = char;
-    } else if (char === '(' || char === '[' || char === '{') {
-      depth++;
-    } else if (char === ')' || char === ']' || char === '}') {
-      depth--;
-      if (depth === 0 && !stopAtWhitespace) return i + 1;
-    } else if (stopAtWhitespace && depth === 0 && /\s/.test(char)) {
-      return i;
-    }
-  }
-  return value.length;
-};
-
-const stripTrailingComment = (value: string) => {
-  let quote = '';
-  let escaped = false;
-  for (let i = 0; i < value.length; i++) {
-    const char = value[i];
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (char === '\\') escaped = true;
-      else if (char === quote) quote = '';
-    } else if (char === '"' || char === "'" || char === '`') {
-      quote = char;
-    } else if (char === '#') {
-      return value.slice(0, i);
-    }
-  }
-  return value;
-};
-
-const getDecoratorSource = (source: string) => {
-  const parts: string[] = [];
-  let depth = 0;
-
-  for (const line of source.split('\n')) {
-    if (!line.trim()) continue;
-    if (!line.startsWith('#')) break;
-    const comment = line.slice(1).trimStart();
-    if (depth === 0 && !comment.startsWith('@')) continue;
-
-    const part = stripTrailingComment(comment);
-    if (part) parts.push(part);
-    let quote = '';
-    let escaped = false;
-    for (const char of part) {
-      if (quote) {
-        if (escaped) escaped = false;
-        else if (char === '\\') escaped = true;
-        else if (char === quote) quote = '';
-      } else if (char === '"' || char === "'" || char === '`') {
-        quote = char;
-      } else if (char === '(' || char === '[' || char === '{') {
-        depth++;
-      } else if (char === ')' || char === ']' || char === '}') {
-        depth--;
-      }
-    }
-  }
-
-  return parts.join(' ');
-};
-
-export const parseVarlockDirectives = (source: string) => {
+export const parseVarlockFile = (source: string) => {
   const directives: Directive[] = [];
-  const value = getDecoratorSource(source);
+  const staticValues = new Map<string, string>();
   let disabled = false;
   let environmentKey: string | undefined;
 
-  for (let index = 0; index < value.length; index++) {
-    const marker = value.indexOf('@', index);
-    if (marker === -1) break;
-    let nameEnd = marker + 1;
-    while (/[a-z\d_]/i.test(value[nameEnd] ?? '')) nameEnd++;
-    const name = value.slice(marker + 1, nameEnd);
-    let cursor = nameEnd;
-    while (value[cursor] === ' ' || value[cursor] === '\t') cursor++;
+  try {
+    const file = parseEnvSpecDotEnvFile(source);
 
-    if (value[cursor] === '=') {
-      cursor++;
-      while (value[cursor] === ' ' || value[cursor] === '\t') cursor++;
-      const end = scanSyntax(value, cursor, true);
-      const decoratorValue = unquote(value.slice(cursor, end));
-      if (name === 'disable' && decoratorValue === 'true') disabled = true;
-      if (name === 'currentEnv' && /^\$[A-Z_][A-Z\d_]*$/i.test(decoratorValue)) {
-        environmentKey = decoratorValue.slice(1);
-      } else if (name === 'envFlag' && /^[A-Z_][A-Z\d_]*$/i.test(decoratorValue)) {
-        environmentKey = decoratorValue;
+    for (const decorator of file.decoratorsArray) {
+      if (decorator.name === 'disable') disabled ||= decorator.simplifiedValue === true;
+
+      if (decorator.name === 'currentEnv' && decorator.value instanceof ParsedEnvSpecFunctionCall) {
+        const value = decorator.value.name === 'ref' ? getStaticValue(decorator.value.data.args.values[0]) : undefined;
+        if (typeof value === 'string') environmentKey = value;
+      } else if (decorator.name === 'envFlag') {
+        const value = getStaticValue(decorator.value);
+        if (typeof value === 'string') environmentKey = value;
       }
-      index = end;
-    } else if (value[cursor] === '(') {
-      const end = scanSyntax(value, cursor, false);
-      if ((name === 'plugin' || name === 'import') && value[end - 1] === ')') {
-        directives.push({ name, args: splitArguments(value.slice(cursor + 1, end - 1)) });
+
+      if (decorator.name !== 'plugin' && decorator.name !== 'import') continue;
+      const args = decorator.bareFnArgs?.values;
+      const descriptor = getStaticValue(args?.[0]);
+      if (typeof descriptor !== 'string') continue;
+
+      const directive: Directive = { name: decorator.name, descriptor };
+      for (const arg of args?.slice(1) ?? []) {
+        if (!(arg instanceof ParsedEnvSpecKeyValuePair)) continue;
+        const value = getStaticValue(arg.value);
+        if (arg.key === 'enabled' && typeof value === 'boolean') directive.enabled = value;
+        if (arg.key === 'allowMissing' && typeof value === 'boolean') directive.allowMissing = value;
       }
-      index = end;
-    } else {
-      if (name === 'disable') disabled = true;
-      index = nameEnd - 1;
+      directives.push(directive);
     }
-  }
 
-  return { directives, disabled, environmentKey };
-};
-
-export const getStaticEnvValue = (source: string, key: string) => {
-  for (const line of source.split('\n').toReversed()) {
-    const match = line.match(/^\s*(?:export\s+)?([A-Z_][A-Z\d_.-]*)\s*=\s*(.*)$/i);
-    if (match?.[1] !== key) continue;
-    const value = unquote(stripTrailingComment(match[2]).trim());
-    if (value && !value.includes('$') && !/^[a-z][a-z\d_]*\(/i.test(value)) return value;
-  }
-};
-
-export const getOption = (args: string[], name: string) => {
-  for (let i = 1; i < args.length; i++) {
-    const separator = args[i].indexOf('=');
-    if (separator !== -1 && args[i].slice(0, separator).trim() === name) {
-      return unquote(args[i].slice(separator + 1));
+    for (const item of file.configItems) {
+      const value = getStaticValue(item.value);
+      if (typeof value === 'string') staticValues.set(item.key, value);
     }
-  }
-};
+  } catch {}
 
-export const getDescriptor = (args: string[]) => unquote(args[0] ?? '');
+  return { directives, disabled, environmentKey, staticValues };
+};

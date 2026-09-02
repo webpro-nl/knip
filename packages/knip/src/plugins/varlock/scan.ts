@@ -5,7 +5,7 @@ import { toDeferResolve, toDependency } from '../../util/input.ts';
 import { isDirectory, isFile, tryRealpath } from '../../util/fs.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
-import { getDescriptor, getOption, getStaticEnvValue, parseVarlockDirectives } from './parse.ts';
+import { parseVarlockFile } from './parse.ts';
 
 const urlSchemeMatcher = /^[a-z][a-z\d+.-]*:/i;
 const exactVersionMatcher = /^\d+\.\d+\.\d+(?:-[\da-z.-]+)?(?:\+[\da-z.-]+)?$/i;
@@ -19,17 +19,17 @@ const isLocalPath = (path: string) => path.startsWith('~/') || isInternal(path);
 
 const getEnvironment = (paths: string[], fallback?: string) => {
   let key: string | undefined;
-  const sources: string[] = [];
+  const sources: Map<string, string>[] = [];
   for (const path of paths) {
     if (!isFile(path)) continue;
     const source = readFileSync(path, 'utf8');
-    sources.push(source);
-    key ??= parseVarlockDirectives(source).environmentKey;
+    const parsed = parseVarlockFile(source);
+    sources.push(parsed.staticValues);
+    key ??= parsed.environmentKey;
   }
   if (!key) return fallback;
   let environment = process.env[key];
-  if (environment === undefined)
-    for (const source of sources) environment = getStaticEnvValue(source, key) ?? environment;
+  if (environment === undefined) for (const values of sources) environment = values.get(key) ?? environment;
   return environment || fallback;
 };
 
@@ -55,11 +55,10 @@ export const scanVarlockFiles = (paths: string[], cwd: string, environment?: str
     if (visited.has(realPath)) continue;
     visited.add(realPath);
 
-    const { directives, disabled } = parseVarlockDirectives(readFileSync(realPath, 'utf8'));
+    const { directives, disabled } = parseVarlockFile(readFileSync(realPath, 'utf8'));
     if (disabled) continue;
 
-    for (const { name, args } of directives) {
-      const descriptor = getDescriptor(args);
+    for (const { name, descriptor, enabled, allowMissing } of directives) {
       if (!descriptor || descriptor.includes('$') || isExternalUrl(descriptor)) continue;
 
       if (name === 'plugin') {
@@ -85,10 +84,10 @@ export const scanVarlockFiles = (paths: string[], cwd: string, environment?: str
         continue;
       }
 
-      if (!isLocalPath(descriptor) || getOption(args, 'enabled') === 'false') continue;
+      if (!isLocalPath(descriptor) || enabled === false) continue;
       const importPath = resolvePath(descriptor, dirname(realPath));
       if (isFile(importPath) || isDirectory(importPath)) queue.push(...expandLoadPath(importPath, environment));
-      else if (getOption(args, 'allowMissing') !== 'true') {
+      else if (allowMissing !== true) {
         inputs.push(toDeferResolve(descriptor, { containingFilePath: realPath }));
       }
     }

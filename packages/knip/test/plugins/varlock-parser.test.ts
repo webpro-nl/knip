@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  getDescriptor,
-  getOption,
-  getStaticEnvValue,
-  parseVarlockDirectives,
-} from '../../src/plugins/varlock/parse.ts';
+import { parseVarlockFile } from '../../src/plugins/varlock/parse.ts';
 
 test('Parse Varlock root directives', () => {
   const source = `# documentation
@@ -18,14 +13,15 @@ test('Parse Varlock root directives', () => {
 
 APP_ENV=production
 `;
-  const { directives, disabled, environmentKey } = parseVarlockDirectives(source);
+  const { directives, disabled, environmentKey, staticValues } = parseVarlockFile(source);
 
   assert.equal(disabled, false);
   assert.equal(environmentKey, 'APP_ENV');
-  assert.equal(getDescriptor(directives[0].args), 'package@1.0.0');
-  assert.equal(getDescriptor(directives[1].args), './.env.shared');
-  assert.equal(getOption(directives[1].args, 'enabled'), 'false');
-  assert.equal(getStaticEnvValue(source, environmentKey), 'production');
+  assert.deepEqual(directives, [
+    { name: 'plugin', descriptor: 'package@1.0.0' },
+    { name: 'import', descriptor: './.env.shared', enabled: false },
+  ]);
+  assert.equal(staticValues.get(environmentKey), 'production');
 });
 
 test('Ignore directives outside the header and detect disabled files', () => {
@@ -35,11 +31,11 @@ test('Ignore directives outside the header and detect disabled files', () => {
 VALUE=
 # @plugin(item-plugin)
 `;
-  const { directives, disabled } = parseVarlockDirectives(source);
+  const { directives, disabled } = parseVarlockFile(source);
 
   assert.equal(disabled, true);
   assert.deepEqual(
-    directives.map(directive => getDescriptor(directive.args)),
+    directives.map(directive => directive.descriptor),
     ['active-plugin']
   );
 });
