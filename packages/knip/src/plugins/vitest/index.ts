@@ -3,11 +3,11 @@ import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getIndexHtmlEntries } from '../vite/helpers.ts';
+import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
@@ -209,6 +209,17 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       }
     }
     for (const dependency of findConfigDependencies(cfg, options, vitestRoot)) inputs.add(dependency);
+    const _input = cfg.build?.rolldownOptions?.input ?? cfg.build?.rollupOptions?.input ?? [];
+    const inputSpecifiers =
+      typeof _input === 'string' ? [_input] : Array.isArray(_input) ? _input : Object.values(_input).flat();
+    for (const specifier of inputSpecifiers) {
+      const resolved = toAbsolute(specifier, viteRoot);
+      inputs.add(toProductionEntry(resolved));
+      if (resolved.endsWith('.html')) {
+        for (const input of await getHtmlScriptEntries(resolved)) inputs.add(input);
+      }
+    }
+
     const _entry = cfg.build?.lib?.entry ?? [];
     const entries =
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();

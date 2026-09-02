@@ -34,6 +34,12 @@ export interface ViteConfig extends VitestConfig {
   root?: string;
   plugins?: unknown[];
   build?: {
+    rolldownOptions?: {
+      input?: string | string[] | { [entryAlias: string]: string | string[] };
+    };
+    rollupOptions?: {
+      input?: string | string[] | { [entryAlias: string]: string | string[] };
+    };
     lib?: {
       entry: string | string[] | { [entryAlias: string]: string | string[] };
     };
