@@ -3,7 +3,6 @@ import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../
 import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
-import { _glob } from '../../util/glob.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { dirname, join } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
@@ -72,11 +71,8 @@ export const getHtmlScriptEntries = async (htmlPath: string): Promise<Input[]> =
   return getModuleScriptSources(html).map(src => toProductionEntry(join(dir, src)));
 };
 
-export const getIndexHtmlEntries = async (rootDir: string): Promise<Input[]> => {
-  const htmlPaths = await _glob({ cwd: rootDir, patterns: ['**/index.html'], gitignore: false });
-  const entries = await Promise.all(htmlPaths.map(getHtmlScriptEntries));
-  return entries.flat();
-};
+export const getIndexHtmlEntries = (rootDir: string): Promise<Input[]> =>
+  getHtmlScriptEntries(join(rootDir, 'index.html'));
 
 export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
   let dirs: string[] | undefined;
