@@ -28,12 +28,12 @@ test('Should track referenced catalog entries (package.json root)', async () => 
   const { issues, counters } = await main(options);
 
   assert(issues.catalog['package.json']['default.lodash']);
-  assert(issues.catalog['package.json']['frontend.@nu/xt']);
+  assert(!issues.catalog['package.json']['frontend.@nu/xt']);
   assert(issues.catalog['package.json']['backend.fastify']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    catalog: 3,
+    catalog: 2,
     processed: 1,
     total: 1,
   });

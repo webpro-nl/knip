@@ -3,5 +3,10 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "pnpm": {
+    "overrides": {
+      "missing-package-json@^1": "catalog:"
+    }
+  }
 }
