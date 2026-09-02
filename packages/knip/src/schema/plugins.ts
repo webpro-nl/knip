@@ -174,6 +174,7 @@ export const pluginsSchema = z.object({
   'unplugin-vue-i18n': pluginSchema,
   'unplugin-vue-markdown': pluginSchema,
   'unplugin-vue-router': pluginSchema,
+  varlock: pluginSchema,
   vercel: pluginSchema,
   'vercel-og': pluginSchema,
   vike: pluginSchema,
