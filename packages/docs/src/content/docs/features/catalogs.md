@@ -34,8 +34,8 @@ the `catalog:` protocol in its `package.json`:
 `catalog:` references the `default` catalog, while `catalog:validation`
 references the named `validation` catalog. References are resolved from
 `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`,
-`resolutions`, `package.json#pnpm.overrides` (pnpm 10 and older), and
-`pnpm-workspace.yaml#overrides`.
+`resolutions`, `pnpm-workspace.yaml#overrides`, and `pnpm.overrides` in the root
+`package.json` (pnpm 10 and older).
 
 Entries defined in a catalog but not referenced anywhere are reported as [unused
 catalog entries][2].
