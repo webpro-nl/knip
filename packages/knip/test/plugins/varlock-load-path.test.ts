@@ -9,9 +9,15 @@ const cwd = resolve('fixtures/plugins/varlock-load-path');
 
 test('Find dependencies from custom Varlock load paths', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(!issues.unresolved['cli/.env.custom']);
+  assert(!issues.unlisted['environment/.env.production']);
+  assert(!issues.unlisted['environment/.env.staging']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    processed: 1,
+    total: 1,
   });
 });

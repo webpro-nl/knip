@@ -22,15 +22,32 @@ const getLoadPaths = (manifest: { varlock?: unknown }) => {
   return getPaths(manifest.varlock.loadPath);
 };
 
+const getEnvironment = (value: unknown) => {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    for (let i = value.length - 1; i >= 0; i--) if (typeof value[i] === 'string') return value[i];
+  }
+};
+
 const resolve: Resolve = options => {
   const loadPaths = getLoadPaths(options.manifest);
-  return scanVarlockFiles(loadPaths.length > 0 ? loadPaths : ['.env.schema'], options.cwd);
+  return scanVarlockFiles(loadPaths.length > 0 ? loadPaths : ['.'], options.cwd);
 };
 
 const args: Args = {
   alias: { path: ['p'] },
-  string: ['path'],
-  resolveInputs: (parsed, { cwd }) => scanVarlockFiles(getPaths(parsed.path), cwd),
+  string: ['path', 'env'],
+  fromArgs: parsed => (parsed._[0] === 'run' ? (parsed['--'] ?? []) : []),
+  resolveInputs: (parsed, { cwd, manifest }) => {
+    const paths = getPaths(parsed.path);
+    const loadPaths = getLoadPaths(manifest);
+    const environment = getEnvironment(parsed.env);
+    return scanVarlockFiles(
+      paths.length > 0 ? paths : environment ? (loadPaths.length > 0 ? loadPaths : ['.']) : [],
+      cwd,
+      environment
+    );
+  },
 };
 
 const plugin: Plugin = {

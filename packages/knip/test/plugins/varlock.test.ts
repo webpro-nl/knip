@@ -11,13 +11,24 @@ test('Find dependencies with the varlock plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unlisted['.env.schema']['missing-plugin']);
-  assert.deepEqual(Object.keys(issues.unlisted['.env.schema']), ['missing-plugin']);
+  assert.deepEqual(Object.keys(issues.unlisted['.env.schema']), ['missing-plugin', 'downloaded-plugin']);
+  assert(issues.unresolved['.env.schema']['./missing.env']);
+  assert(!issues.unresolved['.env.schema']['./optional.env']);
+  assert(!issues.unresolved['.env.schema']['./disabled.env']);
+  assert(!issues.unlisted['.env.schema']['after-header-plugin']);
+  assert(!issues.unlisted['.env.schema']['comment-plugin']);
+  assert(!issues.unlisted['.env.schema']['trailing-comment-plugin']);
+  assert(!issues.unlisted['.env.local']);
+  assert(!issues.unlisted['.env.malformed']);
+  assert(!issues.unlisted['.env.staging']);
+  assert(!issues.files['app.js']);
+  assert(!issues.files['local-plugin/index.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
-    processed: 1,
-    total: 1,
+    unlisted: 2,
+    unresolved: 1,
+    processed: 3,
+    total: 3,
   });
 });
