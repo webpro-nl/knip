@@ -11,7 +11,7 @@ test('Find dependencies with the varlock plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.unlisted['.env.schema']), ['missing-plugin', 'downloaded-plugin']);
+  assert.deepEqual(Object.keys(issues.unlisted['.env.schema']), ['missing-plugin']);
   assert(issues.unresolved['.env.schema']['./missing.env']);
   assert(!issues.unresolved['.env.schema']['./optional.env']);
   assert(!issues.unresolved['.env.schema']['./disabled.env']);
@@ -26,7 +26,7 @@ test('Find dependencies with the varlock plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 2,
+    unlisted: 1,
     unresolved: 1,
     processed: 3,
     total: 3,
