@@ -65,6 +65,7 @@ const getImportsAndExports = (
   const specifierExportNames = new Set<string>();
   const scripts = new Set<string>();
   const importGlobs: ImportGlob[] = [];
+  const handledImportExpressions = new Set<number>();
 
   const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
   const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
@@ -109,6 +110,7 @@ const getImportsAndExports = (
       col: opts.col,
       isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
       modifiers,
+      jsDocTags: undefined,
     });
 
     const file = internal.get(importFilePath);
@@ -210,6 +212,7 @@ const getImportsAndExports = (
             col,
             isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
             modifiers,
+            jsDocTags,
           });
         }
       }
@@ -234,6 +237,7 @@ const getImportsAndExports = (
           col,
           isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
           modifiers,
+          jsDocTags: undefined,
         });
       }
     }
@@ -380,8 +384,9 @@ const getImportsAndExports = (
     pluginCtx.addScript = (s: string) => scripts.add(s);
     pluginCtx.addImport = (spec: string, pos: number, mod: number) =>
       addImport(spec, undefined, undefined, undefined, pos, mod);
+    pluginCtx.markImportExpressionHandled = (pos: number) => handledImportExpressions.add(pos);
     pluginCtx.addImportGlob = (patterns, opts) =>
-      importGlobs.push({ patterns, base: opts?.base, filter: opts?.filter });
+      importGlobs.push({ patterns, base: opts?.base, cwd: opts?.cwd, filter: opts?.filter });
     pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 
@@ -415,6 +420,7 @@ const getImportsAndExports = (
     resolveModule,
     programFiles,
     entryFiles,
+    handledImportExpressions,
     visitor,
     getJSDocTags,
   });

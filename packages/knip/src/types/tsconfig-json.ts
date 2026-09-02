@@ -6,5 +6,12 @@ export interface TsConfigJson {
     plugins?: Array<string | { name: string }>;
     [key: string]: unknown;
   };
+  contentMappers?: {
+    package: string;
+  }[];
   references?: Array<{ path: string }>;
+}
+
+export interface ContentMapperManifest {
+  exec?: string[];
 }

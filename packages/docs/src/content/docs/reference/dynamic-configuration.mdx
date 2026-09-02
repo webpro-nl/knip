@@ -47,7 +47,7 @@ as well:
     ```ts title="knip.ts"
     import type { KnipConfig } from 'knip';
 
-    const config = async (): Promise<KnipConfig> => {
+    const config: KnipConfig = async () => {
       const items = await fetchRepoInfo();
 
       return {
@@ -71,3 +71,29 @@ as well:
     ```
   </TabItem>
 </Tabs>
+
+## defineConfig
+
+Knip also exports a `defineConfig` helper. It returns the configuration
+unchanged, so its only purpose is to type what you pass in:
+
+```ts title="knip.ts"
+import { defineConfig } from 'knip/config';
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  project: ['src/**/*.ts'],
+});
+```
+
+The same works in a JavaScript configuration file, without the JSDoc annotation.
+A function is accepted as well:
+
+```ts title="knip.ts"
+import { defineConfig } from 'knip/config';
+
+export default defineConfig(async () => ({
+  entry: ['src/index.ts', ...(await fetchRepoInfo())],
+  project: ['src/**/*.ts'],
+}));
+```

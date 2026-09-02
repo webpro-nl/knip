@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/compilers-marko-workspace-nested-citrus",
+  "dependencies": {
+    "@orchard/citrus-tags": "*"
+  },
+  "devDependencies": {
+    "marko": "*"
+  }
+}

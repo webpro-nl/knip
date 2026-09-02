@@ -13,7 +13,7 @@ const enablers = ['tsup'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsup.config.{js,ts,cjs,mjs,json}', 'package.json'];
+const config = ['tsup.config.{js,ts,cjs,mjs,cts,mts,json}', 'package.json'];
 
 const isLoadConfig: IsLoadConfig = ({ configFileName }) =>
   configFileName === 'package.json' || configFileName.endsWith('.json');

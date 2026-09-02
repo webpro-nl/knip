@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/yarn-pnp",
+  "private": true,
+  "packageManager": "yarn@4.18.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "host-with-hidden-manifest": "workspace:*",
+    "peer-package": "workspace:*"
+  }
+}

@@ -50,4 +50,5 @@ export const getBaseImport = (filePath: string): Import => ({
   pos: 0,
   line: 0,
   col: 0,
+  jsDocTags: undefined,
 });

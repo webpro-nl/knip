@@ -69,7 +69,12 @@ export const run = async (options: MainOptions) => {
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
   const findWorkspacePackageTarget = getWorkspacePackageTargetHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath, findWorkspacePackageTarget);
+  const principal = new ProjectPrincipal(
+    options,
+    toSourceFilePath,
+    findWorkspacePackageTarget,
+    filePath => chief.findWorkspaceByFilePath(filePath)?.name
+  );
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setSelectedWorkspaces(chief.selectedWorkspaces);

@@ -116,10 +116,16 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     return deepFilterMatcher;
   };
 
+  const seenGitignoreFiles = new Set<string>();
+
   const addFile = (filePath: string, baseDir?: string) => {
+    const absPath = toPosix(filePath);
+    if (seenGitignoreFiles.has(absPath)) return;
+    seenGitignoreFiles.add(absPath);
+
     gitignoreFiles.push(relative(cwd, filePath));
 
-    const dir = baseDir ?? dirname(toPosix(filePath));
+    const dir = baseDir ?? dirname(absPath);
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
@@ -177,6 +183,9 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     const excludePath = join(gitDir, 'info/exclude');
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
+
+  const rootGitignorePath = join(cwd, '.gitignore');
+  if (isFile(rootGitignorePath)) addFile(rootGitignorePath);
 
   // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
   let isRelevantDir: ((absPath: string) => boolean) | undefined;
