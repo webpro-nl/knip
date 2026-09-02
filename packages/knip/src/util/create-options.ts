@@ -5,6 +5,7 @@ import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
+import { arrayify } from './array.ts';
 import { getCatalogContainer } from './catalog.ts';
 import { parseNumericOption, type ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
@@ -22,6 +23,7 @@ import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
 import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { toPreprocessorPath } from './preprocessor.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -131,6 +133,17 @@ export const createOptions = async (options: CreateOptions) => {
 
   const workspace = options.workspace ?? args.workspace;
 
+  const toPreprocessor = (specifier: string) => toPreprocessorPath(specifier, cwd);
+  const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
+  const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+  // A configured preprocessor stays referenced by the config file even when --preprocessor overrides which ones run
+  const preprocessorInputs = args.preprocessor
+    ? [...new Set([...configuredPreprocessor, ...preprocessor])]
+    : preprocessor;
+  const preprocessorOptions =
+    args['preprocessor-options'] ??
+    (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
+
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
     catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
@@ -196,6 +209,9 @@ export const createOptions = async (options: CreateOptions) => {
     maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
     maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
     parsedConfig,
+    preprocessor,
+    preprocessorInputs,
+    preprocessorOptions,
     rules,
     tags,
     traceDependency: args['trace-dependency'],

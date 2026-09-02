@@ -4,7 +4,7 @@ import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS, ROOT_WORKSPACE_NAME } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -32,6 +32,7 @@ import {
   isIgnore,
   isProductionEntry,
   isProject,
+  toDeferResolve,
   toProductionEntry,
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
@@ -181,6 +182,13 @@ export async function build({
     augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
     const inputs = new Set<Input>();
+
+    if (name === ROOT_WORKSPACE_NAME) {
+      const containingFilePath = options.configFilePath ?? filePath;
+      for (const specifier of options.preprocessorInputs) {
+        inputs.add(toDeferResolve(specifier, { containingFilePath, optional: true, production: true }));
+      }
+    }
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);

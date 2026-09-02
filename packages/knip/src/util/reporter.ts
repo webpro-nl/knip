@@ -3,15 +3,6 @@ import type { ReporterOptions } from '../types/issues.ts';
 import { _load } from './loader.ts';
 import { isAbsolute, isInternal, resolve } from './path.ts';
 
-export const runPreprocessors = async (processors: string[], data: ReporterOptions): Promise<ReporterOptions> => {
-  const preprocessors = await Promise.all(
-    processors.map(proc => _load(isInternal(proc) && !isAbsolute(proc) ? resolve(proc) : proc))
-  );
-  let result = data;
-  for (const preprocessor of preprocessors) result = await preprocessor(result);
-  return result;
-};
-
 export const runReporters = async (reporter: string[], options: ReporterOptions) => {
   const reporters = await Promise.all(
     reporter.map(async reporter => {

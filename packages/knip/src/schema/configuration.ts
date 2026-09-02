@@ -418,6 +418,44 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   treatTagHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Preprocess the results before providing them to the reporter(s).
+   * Can be a single preprocessor or an array of preprocessors.
+   * Each value is a path to a local file or an npm package name.
+   *
+   * @default []
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts"
+   * }
+   * ```
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": ["./first.ts", "./second.ts"]
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/features/reporters#preprocessors | Preprocessors}
+   */
+  preprocessor: z.optional(z.union([z.string(), z.array(z.string())])),
+  /**
+   * Extra options to pass to the preprocessor.
+   *
+   * @default {}
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts",
+   *   "preprocessorOptions": { "key": "value" }
+   * }
+   * ```
+   */
+  preprocessorOptions: z.optional(z.record(z.string(), z.unknown())),
 });
 
 const reportConfigSchema = z.object({

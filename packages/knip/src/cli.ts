@@ -1,8 +1,8 @@
 /* oxlint-disable no-console */
 import { fix } from './IssueFixer.ts';
 import { run } from './run.ts';
-import type { IssueType, ReporterOptions } from './types/issues.ts';
-import parseArgs, { helpText } from './util/cli-arguments.ts';
+import type { IssueType } from './types/issues.ts';
+import parseArgs, { helpText, type ParsedCLIArgs } from './util/cli-arguments.ts';
 import { createOptions } from './util/create-options.ts';
 import {
   getKnownErrors,
@@ -14,11 +14,12 @@ import {
 } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
-import { runPreprocessors, runReporters } from './util/reporter.ts';
+import { createPreprocessor, toReporterOptions } from './util/preprocessor.ts';
+import { runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
 import { version } from './version.ts';
 
-let args: ReturnType<typeof parseArgs> = {};
+let args: ParsedCLIArgs = {};
 try {
   args = parseArgs();
 } catch (error: unknown) {
@@ -46,42 +47,11 @@ const main = async () => {
 
     const { results } = await run(options);
 
-    const {
-      issues,
-      counters,
-      tagHints,
-      configurationHints,
-      includedWorkspaceDirs,
-      enabledPlugins,
-      selectedWorkspaces,
-    } = results;
-
     // These modes have their own reporting mechanism
     if (options.isWatch || options.isTrace) return;
 
-    const initialData: ReporterOptions = {
-      report: options.includedIssueTypes,
-      issues,
-      counters,
-      tagHints,
-      configurationHints,
-      enabledPlugins,
-      includedWorkspaceDirs,
-      cwd: options.cwd,
-      configFilePath: options.configFilePath,
-      isDisableConfigHints: options.isDisableConfigHints,
-      isDisableTagHints: options.isDisableTagHints,
-      isProduction: options.isProduction,
-      isShowProgress: options.isShowProgress,
-      isTreatConfigHintsAsErrors: options.isTreatConfigHintsAsErrors,
-      isTreatTagHintsAsErrors: options.isTreatTagHintsAsErrors,
-      maxShowIssues: options.maxShowIssues,
-      options: args['reporter-options'] ?? '',
-      preprocessorOptions: args['preprocessor-options'] ?? '',
-      selectedWorkspaces,
-    };
-
-    const finalData = await runPreprocessors(args.preprocessor ?? [], initialData);
+    const preprocess = await createPreprocessor(options.preprocessor);
+    const finalData = await preprocess(toReporterOptions(options, results, args));
 
     if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
@@ -105,8 +75,10 @@ const main = async () => {
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > options.maxIssues ||
-        (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
-        (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
+        (!options.isDisableConfigHints &&
+          options.isTreatConfigHintsAsErrors &&
+          results.configurationHints.length > 0) ||
+        (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && results.tagHints.size > 0))
     ) {
       process.exitCode = 1;
       return;

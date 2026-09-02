@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/config-preprocessor",
+  "knip": {
+    "preprocessor": "./preprocessor.js"
+  }
+}
