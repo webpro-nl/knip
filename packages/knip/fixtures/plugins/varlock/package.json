@@ -1,0 +1,20 @@
+{
+  "name": "@plugins/varlock",
+  "scripts": {
+    "check": "varlock run -- node app.js"
+  },
+  "devDependencies": {
+    "@varlock/1password-plugin": "1.0.0",
+    "JSONStream": "1.0.0",
+    "backtick-import-plugin": "1.0.0",
+    "backtick-plugin": "1.0.0",
+    "dynamic-import-plugin": "1.0.0",
+    "inactive-environment-plugin": "1.0.0",
+    "imported-directory-plugin": "1.0.0",
+    "imported-plugin": "1.0.0",
+    "multiline-import-plugin": "1.0.0",
+    "root-env-plugin": "1.0.0",
+    "unscoped-plugin": "1.0.0",
+    "varlock": "1.0.0"
+  }
+}

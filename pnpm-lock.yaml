@@ -82,6 +82,9 @@ importers:
 
   packages/knip:
     dependencies:
+      '@env-spec/parser':
+        specifier: ^0.5.1
+        version: 0.5.1
       fdir:
         specifier: ^6.5.0
         version: 6.5.0(picomatch@4.0.7)
@@ -529,6 +532,10 @@ packages:
 
   '@emnapi/wasi-threads@1.2.2':
     resolution: {integrity: sha512-c95qOXkHdydNKhscBTebqEC1CVAZpyqOfVfBzQ1qgzyl3gfeldUjIggDbIZgDKsHLgnsM+igH7TJ/eAasaVuMA==}
+
+  '@env-spec/parser@0.5.1':
+    resolution: {integrity: sha512-/MdmtpCu53QwCpyjmyFxAkB2odBBxIUmNQEQcWYG8KZxUgd7K720/ZDw8Nq7YsCQAtQ60H7OYqMhnhXSK1UPJw==}
+    engines: {node: '>=22'}
 
   '@esbuild/aix-ppc64@0.28.2':
     resolution: {integrity: sha512-XExcO+dvLKvVtNTibSTBej1NCAbaGhWn9Ww1ZPx80qsahhPFe/8jgWP0IchNe0F3HwkU7n8ejhH8bjonqht8mQ==}
@@ -5655,6 +5662,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
     optional: true
+
+  '@env-spec/parser@0.5.1': {}
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true

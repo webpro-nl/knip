@@ -160,6 +160,7 @@ import { default as unpluginVueComponents } from './unplugin-vue-components/inde
 import { default as unpluginVueI18n } from './unplugin-vue-i18n/index.ts';
 import { default as unpluginVueMarkdown } from './unplugin-vue-markdown/index.ts';
 import { default as unpluginVueRouter } from './unplugin-vue-router/index.ts';
+import { default as varlock } from './varlock/index.ts';
 import { default as vercel } from './vercel/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
@@ -344,6 +345,7 @@ export const Plugins = {
   'unplugin-vue-i18n': unpluginVueI18n,
   'unplugin-vue-markdown': unpluginVueMarkdown,
   'unplugin-vue-router': unpluginVueRouter,
+  varlock,
   vercel,
   'vercel-og': vercelOg,
   vike,

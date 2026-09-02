@@ -358,12 +358,13 @@ export class WorkspaceWorker {
     };
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
+      const inputContainingFilePath = input.containingFilePath ?? containingFilePath;
       if (isCatalog(input)) {
-        inputs.push({ ...input, containingFilePath });
+        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       } else if (isConfig(input)) {
-        storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
+        storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
       } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
-        inputs.push({ ...input, containingFilePath });
+        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       }
     }
 
@@ -506,7 +507,7 @@ export class WorkspaceWorker {
 
       if (plugin.resolve) {
         const dependencies = (await plugin.resolve(options)) ?? [];
-        for (const id of dependencies) addInput(id, containingFilePath);
+        for (const id of dependencies) addInput(id, id.containingFilePath ?? containingFilePath);
       }
 
       // Any negated pattern will move all plugin inputs to new group
