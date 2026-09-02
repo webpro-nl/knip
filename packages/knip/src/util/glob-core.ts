@@ -31,6 +31,9 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 const cachedGlobIgnores = new Map<string, string[]>();
 
 let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
+let gitignoreMatcher = (_filePath: string) => false;
+
+export const isGitIgnored = (filePath: string) => gitignoreMatcher(filePath);
 
 // Fingerprint of the resolved ignore set, mixed into glob cache keys so an edited .gitignore
 // (which changes no directory mtime) still invalidates cached glob results.
@@ -340,6 +343,7 @@ export async function getGitIgnoredHandler(
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
   gitignoreReconciler = undefined;
+  gitignoreMatcher = () => false;
   gitignoreFingerprint = '';
 
   if (options.gitignore === false) return () => false;
@@ -359,6 +363,7 @@ export async function getGitIgnoredHandler(
     }
     return result;
   };
+  gitignoreMatcher = isGitIgnored;
 
   if (unignores.size > 0) gitignoreReconciler = isGitIgnored;
 

@@ -12,6 +12,7 @@
     "directory-plugin": "1.0.0",
     "file-plugin": "1.0.0",
     "environment-production-local-plugin": "1.0.0",
+    "inactive-environment-plugin": "1.0.0",
     "varlock": "1.0.0"
   },
   "varlock": {

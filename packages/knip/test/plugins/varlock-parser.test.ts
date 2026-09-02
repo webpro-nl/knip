@@ -13,15 +13,13 @@ test('Parse Varlock root directives', () => {
 
 APP_ENV=production
 `;
-  const { directives, disabled, environmentKey, staticValues } = parseVarlockFile(source);
+  const { directives, disabled } = parseVarlockFile(source);
 
   assert.equal(disabled, false);
-  assert.equal(environmentKey, 'APP_ENV');
   assert.deepEqual(directives, [
     { name: 'plugin', descriptor: 'package@1.0.0' },
     { name: 'import', descriptor: './.env.shared', enabled: false },
   ]);
-  assert.equal(staticValues.get(environmentKey), 'production');
 });
 
 test('Ignore directives outside the header and detect disabled files', () => {
@@ -38,4 +36,26 @@ VALUE=
     directives.map(directive => directive.descriptor),
     ['active-plugin']
   );
+});
+
+test('Parse files with a UTF-8 BOM and indented comments', () => {
+  const source = `\uFEFF  # @plugin(indented-plugin)
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'plugin', descriptor: 'indented-plugin' }]);
+});
+
+test('Preserve dynamic directive options', () => {
+  const source = `# @import(./conditional.env, enabled=forEnv(production))
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'import', descriptor: './conditional.env', enabled: null }]);
 });

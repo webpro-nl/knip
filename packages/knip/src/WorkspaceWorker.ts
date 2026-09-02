@@ -376,8 +376,7 @@ export class WorkspaceWorker {
 
       const inputs: Input[] = [];
       const seenConfigFiles = getSeenConfigFiles(pluginName);
-      const addInput = (input: Input, fallbackContainingFilePath = containingFilePath) => {
-        const containingFilePath = input.containingFilePath ?? fallbackContainingFilePath;
+      const addInput = (input: Input, containingFilePath = input.containingFilePath) => {
         if (isConfig(input)) {
           storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
         } else {
@@ -508,7 +507,7 @@ export class WorkspaceWorker {
 
       if (plugin.resolve) {
         const dependencies = (await plugin.resolve(options)) ?? [];
-        for (const id of dependencies) addInput(id);
+        for (const id of dependencies) addInput(id, id.containingFilePath ?? containingFilePath);
       }
 
       // Any negated pattern will move all plugin inputs to new group

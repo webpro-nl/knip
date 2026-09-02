@@ -4,6 +4,7 @@
     "start": "varlock load --env staging"
   },
   "dependencies": {
+    "inactive-staging-plugin": "1.0.0",
     "production-plugin": "1.0.0",
     "varlock": "1.0.0"
   }
