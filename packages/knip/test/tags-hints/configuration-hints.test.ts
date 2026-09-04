@@ -63,6 +63,17 @@ test('No hints when user overrides plugin entry config', async () => {
   });
 });
 
+test('No redundant entry hint for production entries', async () => {
+  const cwd = resolve('fixtures/tags-hints/configuration-hints-production-entry');
+  const options = await createOptions({ cwd });
+  const { configurationHints } = await main(options);
+
+  assert.deepEqual(
+    configurationHints.filter(hint => hint.type === 'entry-redundant'),
+    []
+  );
+});
+
 test('Hint when project pattern excludes an extension registered as a compiler', async () => {
   const cwd = resolve('fixtures/tags-hints/configuration-hints-extension-excluded');
   const options = await createOptions({ cwd });

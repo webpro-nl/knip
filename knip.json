@@ -5,7 +5,7 @@
       "project": ["!templates"]
     },
     "packages/knip": {
-      "entry": ["test/**/*.ts"],
+      "entry": ["src/cli.ts!", "test/**/*.ts"],
       "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template"],
       "ignoreDependencies": ["prettier"]
     },

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/configuration-hints-production-entry",
+  "scripts": {
+    "check": "node src/cli.js"
+  }
+}

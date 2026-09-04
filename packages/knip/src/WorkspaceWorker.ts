@@ -602,7 +602,7 @@ export class WorkspaceWorker {
     }
 
     for (const pattern of patterns) {
-      if (pattern.startsWith('!')) continue;
+      if (pattern.startsWith('!') || pattern.endsWith('!')) continue;
       const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
       if (includedPaths.has(filePathOrPattern)) {
         hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
