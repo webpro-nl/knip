@@ -227,6 +227,31 @@ const getSyntheticImports = (maps: AutoImportMaps, identifiers: Set<string>, tem
   return syntheticImports;
 };
 
+
+const virtualComponentsMatcher = /import\s+(?:type\s+)?\{([^}]*)\}\s*from\s*['"]#components['"]/g;
+
+/**
+ * Nuxt exposes auto-imported components through the `#components` virtual module.
+ * That specifier resolves to nothing on disk, so imports from it are ignored and
+ * the component files look unused. Map the named imports back to their files.
+ */
+const getVirtualComponentImports = (source: string, componentMap: Map<string, string[]>) => {
+  if (componentMap.size === 0 || !source.includes('#components')) return [];
+  const imports: string[] = [];
+  for (const [, names] of source.matchAll(virtualComponentsMatcher)) {
+    for (const binding of names.split(',')) {
+      const name = binding.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/)[0]?.trim();
+      if (!name) continue;
+      const specifiers = componentMap.get(name);
+      if (!specifiers) continue;
+      // aliased: the original binding is still in scope in the compiled output
+      imports.push(`import { default as ${name}$knip } from '${specifiers[0]}';`);
+      for (let i = 1; i < specifiers.length; i++) imports.push(`import '${specifiers[i]}';`);
+    }
+  }
+  return imports;
+};
+
 const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root: string) => {
   if (maps.importMap.size === 0 && maps.componentMap.size === 0) {
     return [scriptBodies(source, path), stylePreprocessorImports(source, path)].filter(Boolean).join(';\n');
@@ -263,6 +288,7 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
     for (const id of collectVue2TemplateIdentifiers(compiled.code)) identifiers.add(id);
   }
   scripts.push(...getSyntheticImports(maps, identifiers, templateTags));
+  scripts.push(...getVirtualComponentImports(source, maps.componentMap));
 
   const styles = stylePreprocessorImports(source, path);
   if (styles) scripts.push(styles);
@@ -271,8 +297,12 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
 };
 
 const compileTs = (source: string, path: string, maps: AutoImportMaps) => {
-  if (maps.importMap.size === 0 || path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
-  const syntheticImports = getSyntheticImports(maps, collectIdentifiers(source, path));
+  if (path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
+  if (maps.importMap.size === 0 && maps.componentMap.size === 0) return source;
+  const syntheticImports = [
+    ...(maps.importMap.size === 0 ? [] : getSyntheticImports(maps, collectIdentifiers(source, path))),
+    ...getVirtualComponentImports(source, maps.componentMap),
+  ];
   return syntheticImports.length === 0 ? source : `${source}\n${syntheticImports.join('\n')}`;
 };
 
