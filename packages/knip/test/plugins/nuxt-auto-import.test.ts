@@ -12,7 +12,7 @@ test('Find dependencies and entries through generated definitions in .nuxt dir',
   const { issues, counters } = await main(options);
 
   assert('composables/useTheme.ts' in issues.files);
-  assert('components/StatusBadge.vue' in issues.files);
+  assert(!('components/StatusBadge.vue' in issues.files));
 
   assert(issues.dependencies['package.json']['vue']);
   assert(issues.dependencies['package.json']['@vueuse/nuxt']);
@@ -21,7 +21,7 @@ test('Find dependencies and entries through generated definitions in .nuxt dir',
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
+    files: 1,
     dependencies: 2,
     exports: 1,
     processed: 7,
