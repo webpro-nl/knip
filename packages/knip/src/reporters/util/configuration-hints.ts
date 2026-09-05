@@ -108,7 +108,7 @@ const UNCONFIGURED_MIN_FILES = 20;
 const UNCONFIGURED_MIN_RATIO = 0.2;
 
 export const finalizeConfigurationHints = (
-  results: Results,
+  results: Pick<Results, 'counters' | 'issues' | 'includedWorkspaceDirs' | 'configurationHints'>,
   options: { cwd: string; configFilePath?: string }
 ): ProcessedHint[] => {
   const { files, processed } = results.counters;
@@ -172,12 +172,9 @@ export const printConfigurationHints = ({
   cwd,
   counters,
   issues,
-  tagHints,
   configurationHints,
-  enabledPlugins,
   isTreatConfigHintsAsErrors,
   includedWorkspaceDirs,
-  selectedWorkspaces,
   configFilePath,
 }: ReporterOptions) => {
   const rows = finalizeConfigurationHints(
@@ -185,10 +182,7 @@ export const printConfigurationHints = ({
       issues,
       counters,
       configurationHints,
-      tagHints,
       includedWorkspaceDirs,
-      selectedWorkspaces,
-      enabledPlugins,
     },
     { cwd, configFilePath }
   );
