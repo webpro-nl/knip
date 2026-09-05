@@ -528,8 +528,13 @@ export async function build({
       }
 
       if (file.importGlobs.length > 0) {
-        const globbed = resolveImportGlobs(file.importGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
-        for (const importedFilePath of globbed) {
+        const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
+        const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of analyzed) {
+          if (!isGitIgnored(importedFilePath)) pp.addProgramPath(importedFilePath);
+        }
+        const entries = resolveImportGlobs(entryImportGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of entries) {
           if (!isGitIgnored(importedFilePath)) pp.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
         }
       }
