@@ -395,10 +395,10 @@ and internal errors still exit with code `2`.
 
 The default exit codes:
 
-| Code | Description                                                      |
-| :--: | :--------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint issues                            |
-| `1`  | Knip ran successfully, but there is at least one lint issue      |
+| Code | Description                                                                                     |
+| :--: | :---------------------------------------------------------------------------------------------- |
+| `0`  | Knip ran successfully, no lint issues                                                           |
+| `1`  | Knip ran successfully, but there is at least one lint issue                                     |
 | `2`  | Knip did not run successfully due to bad input, a plugin config load error or an internal error |
 
 ## Troubleshooting
