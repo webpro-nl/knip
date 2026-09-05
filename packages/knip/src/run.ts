@@ -85,15 +85,7 @@ export const run = async (options: MainOptions) => {
     workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))
   );
 
-  const {
-    graph,
-    entryPaths,
-    analyzedFiles,
-    unreferencedFiles,
-    analyzeSourceFile,
-    enabledPluginsStore,
-    hasConfigLoadErrors,
-  } = await build({
+  const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } = await build({
     chief,
     collector,
     counselor,
@@ -148,7 +140,7 @@ export const run = async (options: MainOptions) => {
     if (options.isWatch) watch('.', { recursive: true }, session.listener);
   }
 
-  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
+  const { issues, counters, tagHints, configurationHints, hasConfigLoadErrors } = collector.getIssues();
 
   if (!options.isWatch) streamer.clear();
 
@@ -163,12 +155,12 @@ export const run = async (options: MainOptions) => {
       counters,
       tagHints,
       configurationHints,
+      hasConfigLoadErrors,
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),
     },
     session,
     streamer,
-    hasConfigLoadErrors,
   };
 };

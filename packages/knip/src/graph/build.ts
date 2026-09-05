@@ -75,7 +75,6 @@ export async function build({
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
-  let hasConfigLoadErrors = false;
   const registeredVisitorPlugins = new Set<string>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
@@ -145,6 +144,7 @@ export async function build({
       dependencies,
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
+      handleConfigLoadError: () => collector.addConfigLoadError(),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
@@ -248,9 +248,7 @@ export async function build({
     if (tsConfigPaths) principal.addPaths(tsConfigPaths, dir, dir);
     principal.addRootDirs(compilerOptions.rootDirs, dir);
 
-    const pluginResults = await worker.runPlugins();
-    const inputsFromPlugins = pluginResults.inputs;
-    if (pluginResults.hasConfigLoadErrors) hasConfigLoadErrors = true;
+    const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
@@ -604,6 +602,5 @@ export async function build({
     unreferencedFiles,
     analyzeSourceFile,
     enabledPluginsStore,
-    hasConfigLoadErrors,
   };
 }

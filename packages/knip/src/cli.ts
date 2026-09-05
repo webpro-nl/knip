@@ -44,7 +44,7 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
-    const { results, hasConfigLoadErrors } = await run(options);
+    const { results } = await run(options);
 
     const {
       issues,
@@ -102,10 +102,14 @@ const main = async () => {
       perfObserver.reset();
     }
 
+    if (results.hasConfigLoadErrors) {
+      process.exitCode = 2;
+      return;
+    }
+
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > options.maxIssues ||
-        hasConfigLoadErrors ||
         (!options.isDisableConfigHints && options.isTreatConfigHintsAsErrors && configurationHints.length > 0) ||
         (!options.isDisableTagHints && options.isTreatTagHintsAsErrors && tagHints.size > 0))
     ) {

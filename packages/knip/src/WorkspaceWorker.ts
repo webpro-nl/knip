@@ -42,7 +42,7 @@ import { getPackageNameFromSpecifier } from './util/modules.ts';
 import { timerify } from './util/Performance.ts';
 import { basename, dirname, isInternal, join, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
-import { formatCauseMessage, isLoaderError } from './util/errors.ts';
+import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
@@ -55,6 +55,7 @@ type WorkspaceManagerOptions = {
   dependencies: DependencySet;
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
@@ -82,6 +83,7 @@ export class WorkspaceWorker {
   rootManifest: Manifest | undefined;
   dependencies: DependencySet;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
@@ -109,6 +111,7 @@ export class WorkspaceWorker {
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
     handleInput,
+    handleConfigLoadError,
     findWorkspaceByFilePath,
     getManifest,
     readFile,
@@ -127,6 +130,7 @@ export class WorkspaceWorker {
     this.configFilesMap = configFilesMap;
 
     this.handleInput = handleInput;
+    this.handleConfigLoadError = handleConfigLoadError;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getManifest = getManifest;
     this.readFile = readFile;
@@ -319,7 +323,6 @@ export class WorkspaceWorker {
         _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath });
 
     const inputs: Input[] = [];
-    let hasConfigLoadErrors = false;
 
     const configFilesMap = this.configFilesMap;
     const seen = new Map<PluginName, Set<string>>();
@@ -476,7 +479,7 @@ export class WorkspaceWorker {
               } catch (error) {
                 if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
-                if (isLoaderError(error)) hasConfigLoadErrors = true;
+                this.handleConfigLoadError();
                 const relPath = toRelative(configFilePath, this.options.cwd);
                 const cause = formatCauseMessage(error, this.options.cwd);
                 logError(`Error loading ${relPath} (${cause})`);
@@ -558,7 +561,7 @@ export class WorkspaceWorker {
 
     debugLogArray(wsName, 'Plugin dependencies', () => compact(inputs.map(input => toDebugString(input, rootCwd))));
 
-    return { inputs, hasConfigLoadErrors };
+    return inputs;
   }
 
   private filterTransitiveDependencies(inputs: Input[], configFilePath: string) {
