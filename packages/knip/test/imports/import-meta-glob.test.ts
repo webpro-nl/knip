@@ -9,12 +9,15 @@ const cwd = resolve('fixtures/imports/import-meta-glob');
 
 test('Resolve import.meta.glob patterns as entry files', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 8,
-    total: 8,
+    files: 2,
+    exports: 1,
+    processed: 10,
+    total: 10,
   });
+  assert(issues.files['raw/orphan.ts']);
+  assert(issues.exports['raw/used.ts'].unusedExport);
 });
