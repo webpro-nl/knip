@@ -144,6 +144,7 @@ export async function build({
       dependencies,
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
+      handleConfigLoadError: () => collector.addConfigLoadError(),
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),

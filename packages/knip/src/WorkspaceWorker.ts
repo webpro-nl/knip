@@ -55,6 +55,7 @@ type WorkspaceManagerOptions = {
   dependencies: DependencySet;
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
@@ -82,6 +83,7 @@ export class WorkspaceWorker {
   rootManifest: Manifest | undefined;
   dependencies: DependencySet;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
   readFile: (filePath: string) => string;
@@ -109,6 +111,7 @@ export class WorkspaceWorker {
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
     handleInput,
+    handleConfigLoadError,
     findWorkspaceByFilePath,
     getManifest,
     readFile,
@@ -127,6 +130,7 @@ export class WorkspaceWorker {
     this.configFilesMap = configFilesMap;
 
     this.handleInput = handleInput;
+    this.handleConfigLoadError = handleConfigLoadError;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getManifest = getManifest;
     this.readFile = readFile;
@@ -475,6 +479,7 @@ export class WorkspaceWorker {
               } catch (error) {
                 if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
+                this.handleConfigLoadError();
                 const relPath = toRelative(configFilePath, this.options.cwd);
                 const cause = formatCauseMessage(error, this.options.cwd);
                 logError(`Error loading ${relPath} (${cause})`);

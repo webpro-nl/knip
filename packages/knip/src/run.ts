@@ -140,7 +140,7 @@ export const run = async (options: MainOptions) => {
     if (options.isWatch) watch('.', { recursive: true }, session.listener);
   }
 
-  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
+  const { issues, counters, tagHints, configurationHints, hasConfigLoadErrors } = collector.getIssues();
 
   if (!options.isWatch) streamer.clear();
 
@@ -155,6 +155,7 @@ export const run = async (options: MainOptions) => {
       counters,
       tagHints,
       configurationHints,
+      hasConfigLoadErrors,
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),

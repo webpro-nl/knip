@@ -102,6 +102,11 @@ const main = async () => {
       perfObserver.reset();
     }
 
+    if (results.hasConfigLoadErrors) {
+      process.exitCode = 2;
+      return;
+    }
+
     if (
       !args['no-exit-code'] &&
       (totalErrorCount > options.maxIssues ||

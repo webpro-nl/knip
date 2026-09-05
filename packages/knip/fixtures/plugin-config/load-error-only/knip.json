@@ -1,0 +1,8 @@
+{
+  "ignoreDependencies": ["vite"],
+  "ignoreBinaries": ["vite"],
+  "ignoreIssues": {
+    "vite.config.ts": ["unresolved"],
+    "missing-bootstrap-output.js": ["files"]
+  }
+}

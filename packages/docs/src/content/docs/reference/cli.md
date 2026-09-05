@@ -390,15 +390,16 @@ Maximum number of issues per type to display (does not affect exit code).
 
 ### `--no-exit-code`
 
-Always exit with code zero (`0`), even when there are lint issues.
+Exit with code zero (`0`) even when there are lint issues. Config load failures
+and internal errors still exit with code `2`.
 
 The default exit codes:
 
-| Code | Description                                                      |
-| :--: | :--------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint issues                            |
-| `1`  | Knip ran successfully, but there is at least one lint issue      |
-| `2`  | Knip did not run successfully due to bad input or internal error |
+| Code | Description                                                                                     |
+| :--: | :---------------------------------------------------------------------------------------------- |
+| `0`  | Knip ran successfully, no lint issues                                                           |
+| `1`  | Knip ran successfully, but there is at least one lint issue                                     |
+| `2`  | Knip did not run successfully due to bad input, a plugin config load error or an internal error |
 
 ## Troubleshooting
 
