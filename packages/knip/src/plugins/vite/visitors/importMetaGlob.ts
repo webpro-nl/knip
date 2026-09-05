@@ -1,5 +1,8 @@
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
+import { findProperty } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
+
+const RAW_QUERY_RE = /(\?|&)raw(?:&|$)/;
 
 export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   return {
@@ -25,6 +28,12 @@ export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVi
       }
 
       if (!patterns?.length) return;
+
+      const options = node.arguments[1];
+      if (options?.type === 'ObjectExpression') {
+        const query = getStringValue(findProperty(options, 'query'));
+        if (getStringValue(findProperty(options, 'as')) === 'raw' || (query && RAW_QUERY_RE.test(query))) return;
+      }
 
       ctx.addImportGlob(patterns);
     },
