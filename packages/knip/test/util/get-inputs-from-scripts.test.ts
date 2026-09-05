@@ -279,6 +279,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm runtime set node 22 -g', []);
   t('pnpm rt set node lts -g', []);
   t('pnpm sbom --sbom-format cyclonedx', []);
+  t('pnpm stage publish', []);
   t('pnpm pack-app --entry dist/index.cjs --target linux-x64', []);
   t('pnpm peers check', []);
   t('pnpm ping --registry https://registry.npmjs.org', []);
