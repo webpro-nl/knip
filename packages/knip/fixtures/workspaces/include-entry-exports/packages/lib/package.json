@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/workspaces-include-entry-exports__lib"
+  "name": "@fixtures/workspaces-include-entry-exports__lib",
+  "scripts": {
+    "app": "node ../app/index.js"
+  }
 }

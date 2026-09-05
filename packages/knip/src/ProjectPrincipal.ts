@@ -31,6 +31,7 @@ export class ProjectPrincipal {
   projectPaths = new Set<string>();
   programPaths = new Set<string>();
   skipExportsAnalysis = new Set<string>();
+  private includeExportsAnalysis = new Set<string>();
 
   pluginCtx: PluginVisitorContext = {
     filePath: '',
@@ -164,7 +165,14 @@ export class ProjectPrincipal {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
-      if (options?.skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
+      if (options) {
+        if (options.skipExportsAnalysis) {
+          if (!this.includeExportsAnalysis.has(filePath)) this.skipExportsAnalysis.add(filePath);
+        } else {
+          this.includeExportsAnalysis.add(filePath);
+          this.skipExportsAnalysis.delete(filePath);
+        }
+      }
       this.onPathAdded?.(filePath);
     }
   }
@@ -190,6 +198,8 @@ export class ProjectPrincipal {
   removeProjectPath(filePath: string) {
     this.entryPaths.delete(filePath);
     this.projectPaths.delete(filePath);
+    this.skipExportsAnalysis.delete(filePath);
+    this.includeExportsAnalysis.delete(filePath);
     this.invalidateFile(filePath);
     this.deletedFiles.add(filePath);
   }

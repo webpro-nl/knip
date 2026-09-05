@@ -1,7 +1,7 @@
 import { _getInputsFromScripts } from '../binaries/index.ts';
 import type { ScriptParserContext } from '../binaries/create-script-parser-context.ts';
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { isDefaultPattern, type ConfigurationChief, type Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
 import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
@@ -353,11 +353,15 @@ export async function build({
     }
 
     if (!options.isProduction) {
-      const hints = worker.getConfigurationHints('entry', userEntryPatterns, userEntryPaths, principal.entryPaths);
+      const includedPaths = config.isIncludeEntryExports
+        ? new Set([...principal.entryPaths].filter(filePath => !principal.skipExportsAnalysis.has(filePath)))
+        : principal.entryPaths;
+      const hints = worker.getConfigurationHints('entry', userEntryPatterns, userEntryPaths, includedPaths);
       for (const hint of hints) collector.addConfigurationHint(hint);
     }
 
-    principal.addEntryPaths(userEntryPaths);
+    const hasExplicitEntries = config.entry.some(pattern => !isDefaultPattern('entry', pattern));
+    principal.addEntryPaths(userEntryPaths, hasExplicitEntries ? { skipExportsAnalysis: false } : undefined);
 
     if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
