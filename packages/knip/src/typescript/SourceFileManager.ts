@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import type { AsyncCompilers, SyncCompilers } from '../compilers/types.ts';
 import { FOREIGN_FILE_EXTENSIONS } from '../constants.ts';
 import { debugLog } from '../util/debug.ts';
+import { ConfigurationError } from '../util/errors.ts';
 import { extname, isInternal } from '../util/path.ts';
 
 interface SourceFileManagerOptions {
@@ -34,7 +35,13 @@ export class SourceFileManager {
       return '';
     }
     const compiled = compiler ? compiler(contents, filePath) : contents;
-    if (compiler) debugLog('*', `Compiled ${filePath}`);
+    if (compiler) {
+      if (typeof compiled !== 'string')
+        throw new ConfigurationError(
+          `Compiler for ${ext} did not return a string (${filePath}), a compiler returning a promise must use the \`async\` keyword or be set in \`asyncCompilers\``
+        );
+      debugLog('*', `Compiled ${filePath}`);
+    }
     this.sourceTextCache.set(filePath, compiled);
     return compiled;
   }

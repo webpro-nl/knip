@@ -80,7 +80,9 @@ The compiler function interface is straightforward. Text in, text out:
 (source: string, filename: string) => string;
 ```
 
-This may also be an `async` function.
+This may also be an `async` function. Knip uses the `async` keyword to tell sync
+and async compilers apart, so a regular function that returns a promise throws
+an error.
 
 ### Examples
 
