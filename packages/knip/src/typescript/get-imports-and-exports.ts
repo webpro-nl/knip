@@ -385,8 +385,7 @@ const getImportsAndExports = (
     pluginCtx.addImport = (spec: string, pos: number, mod: number) =>
       addImport(spec, undefined, undefined, undefined, pos, mod);
     pluginCtx.markImportExpressionHandled = (pos: number) => handledImportExpressions.add(pos);
-    pluginCtx.addImportGlob = (patterns, opts) =>
-      importGlobs.push({ patterns, base: opts?.base, cwd: opts?.cwd, filter: opts?.filter });
+    pluginCtx.addImportGlob = (patterns, opts) => importGlobs.push({ patterns, ...opts });
     pluginCtx.markExportRegistered = (name: string) => registeredCustomElements.add(name);
   }
 

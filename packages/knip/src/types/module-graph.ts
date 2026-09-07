@@ -105,6 +105,7 @@ export interface ImportGlob {
   base?: string;
   cwd?: string;
   filter?: RegExp;
+  analyzeExports?: boolean;
 }
 
 export type ModuleGraph = Map<FilePath, FileNode>;
