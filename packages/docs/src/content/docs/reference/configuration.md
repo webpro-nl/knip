@@ -453,7 +453,8 @@ entry files when reporting unused exports:
 
 If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
-or `src/routes/+page.svelte`.
+or `src/routes/+page.svelte`. Entry files discovered only through `package.json`
+scripts are also excluded; add them to `entry` to include their exports.
 
 This will also enable reporting unused members of exported enums and namespaces.
 

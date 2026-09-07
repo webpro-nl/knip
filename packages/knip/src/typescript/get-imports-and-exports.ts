@@ -435,6 +435,7 @@ const getImportsAndExports = (
   }
 
   return {
+    skipExports,
     imports: { internal, external, externalRefs: new Set(), programFiles, entryFiles, imports, unresolved },
     exports,
     duplicates: [...aliasedExports.values()],

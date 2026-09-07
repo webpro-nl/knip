@@ -74,6 +74,7 @@ const commands = [
   'self-update',
   'server',
   'setup',
+  'stage',
   'start',
   'store',
   't',

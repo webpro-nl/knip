@@ -9,13 +9,15 @@ const cwd = resolve('fixtures/workspaces/include-entry-exports');
 
 test('Respect includeEntryExports per workspace', async () => {
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
+  const { issues, counters, configurationHints } = await main(options);
 
+  assert(issues.exports['packages/app/index.js']['unused']);
   assert(issues.exports['packages/lib/index.js']['unused']);
+  assert.deepEqual(configurationHints, []);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 1,
+    exports: 2,
     processed: 2,
     total: 2,
   });

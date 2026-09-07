@@ -83,9 +83,9 @@ The solution is to [disable the Nx Daemon][6]:
 NX_DAEMON=false knip
 ```
 
-## Windows raw transfer memory errors
+## Raw transfer memory errors
 
-On Windows with Node.js 22 or newer, oxc-parser raw transfer may fail under
+On machines with low RAM or Windows with Node.js >=22, oxc-parser raw transfer may fail under
 memory pressure:
 
 ```sh

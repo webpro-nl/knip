@@ -1,7 +1,7 @@
 import type { Program, VisitorObject } from 'oxc-parser';
 import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
 import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
@@ -82,8 +82,7 @@ export interface Configuration {
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
-  syncCompilers: SyncCompilers;
-  asyncCompilers: AsyncCompilers;
+  compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
 
@@ -162,7 +161,7 @@ export type HandleInput = (input: Input) => string | undefined;
 
 type RegisterCompilerInput = {
   extension: string;
-  compiler: CompilerSync;
+  compiler: Compiler;
 };
 
 export type RegisterCompiler = (input: RegisterCompilerInput) => void;
