@@ -19,14 +19,14 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
-    "@astrojs/starlight": "0.41.10",
+    "@astrojs/starlight": "0.42.0",
     "sharp": "0.35.4"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@astrojs/markdown-satteri": "0.3.8",
-    "@octokit/graphql": "^9.0.4",
-    "astro": "7.2.9",
+    "@astrojs/markdown-satteri": "0.4.0",
+    "@octokit/graphql": "^9.0.5",
+    "astro": "7.3.1",
     "picocolors": "^1.1.1",
     "satteri": "0.10.5",
     "starlight-blog": "^0.29.0",

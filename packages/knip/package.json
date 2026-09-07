@@ -99,25 +99,25 @@
     "formatly": "^0.7.0",
     "get-tsconfig": "4.14.3",
     "jiti": "^2.7.0",
-    "oxc-parser": "^0.147.0",
+    "oxc-parser": "^0.148.0",
     "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.7",
     "smol-toml": "^1.8.0",
     "strip-json-comments": "5.0.3",
     "tinyglobby": "^0.2.17",
-    "unbash": "^4.0.10",
+    "unbash": "^4.0.11",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@jest/types": "^30.5.0",
-    "@types/bun": "^1.4.0",
+    "@jest/types": "^30.5.1",
+    "@types/bun": "^1.4.1",
     "@types/picomatch": "^4.0.3",
     "codeclimate-types": "^0.3.1",
     "prettier": "^3.9.6",
-    "tsx": "^4.23.12",
+    "tsx": "^4.23.13",
     "typescript": "7.0.2",
-    "webpack": "^5.110.1"
+    "webpack": "^5.110.3"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
