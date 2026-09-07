@@ -545,6 +545,7 @@ export async function build({
 
       const node = graph.get(filePath);
       if (node) {
+        node.skipExports = file.skipExports;
         node.imports = file.imports;
         node.exports = file.exports;
         node.duplicates = file.duplicates;

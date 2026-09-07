@@ -59,6 +59,7 @@ export class ProjectPrincipal {
   toSourceFilePath: ToSourceFilePath;
   private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
   private findWorkspaceNameByFilePath: (filePath: string) => string | undefined;
+  private isReportExports: boolean;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -78,6 +79,7 @@ export class ProjectPrincipal {
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
+    this.isReportExports = options.isReportExports;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -226,7 +228,7 @@ export class ProjectPrincipal {
         const isProjectPath = this.projectPaths.has(filePath);
 
         // Cached project files: skip read+parse and pass the cached FileNode through.
-        const cachedFile = isProjectPath ? this.cache.getCachedFile(filePath) : undefined;
+        const cachedFile = isProjectPath ? this.getCachedFile(filePath) : undefined;
 
         if (cachedFile) {
           const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
@@ -295,6 +297,12 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !this.resolvedFiles.has(filePath));
   }
 
+  private getCachedFile(filePath: string) {
+    const cachedFile = this.cache.getCachedFile(filePath);
+    const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
+    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+  }
+
   analyzeSourceFile(
     filePath: string,
     options: GetImportsAndExportsOptions,
@@ -305,7 +313,7 @@ export class ProjectPrincipal {
   ) {
     if (cachedFile) return cachedFile;
 
-    const cached = this.cache.getCachedFile(filePath);
+    const cached = this.getCachedFile(filePath);
     if (cached) return cached;
 
     sourceText ??= this.fileManager.readFile(filePath);
