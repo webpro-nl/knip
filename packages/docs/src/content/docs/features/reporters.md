@@ -69,7 +69,8 @@ is suffixed with the location of the import that continues the cycle. Each edge
 shows the import kind and specifier, descends one file per level, and closes
 (`↩`) back to the file it started from.
 
-Enable the `cycles` issue type **and** select the reporter:
+Use `--cycles` to report only circular dependencies and `--reporter cycles` to
+display them as a tree:
 
 ```text
 $ knip --cycles --reporter cycles
@@ -94,10 +95,11 @@ Dynamic imports are ignored by default because they are commonly used to avoid
 synchronous circular loads. Set [`cycles.dynamicImports`][11] to include them.
 Repeated starting imports are grouped under one heading.
 
-In CI, use `--include cycles` (or `"include": ["cycles"]`) to include the
-`cycles` issue type with the default reporter. This is non-verbose and takes one
-line per cycle path. Set `rules.cycle: "error"` to have Knip exit non-zero for
-any cycle paths found.
+For one line per cycle path, use `knip --cycles` with the default reporter. To
+report unused code as well, [combine the issue-type shorthands][12].
+
+Cycles are warnings by default. Set `"rules": { "cycles": "error" }` to make
+reported cycles cause a non-zero exit code.
 
 ### Disclosure
 
