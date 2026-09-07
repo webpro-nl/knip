@@ -21,8 +21,7 @@ import { loadResolvedConfigFile } from './load-config.ts';
 import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
-import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
-import { toPreprocessorPath } from './preprocessor.ts';
+import { isAbsolute, isInternal, join, normalize, toAbsolute, toPosix } from './path.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -132,7 +131,7 @@ export const createOptions = async (options: CreateOptions) => {
 
   const workspace = options.workspace ?? args.workspace;
 
-  const toPreprocessor = (specifier: string) => toPreprocessorPath(specifier, cwd);
+  const toPreprocessor = (specifier: string) => (isInternal(specifier) ? toAbsolute(specifier, cwd) : specifier);
   const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
   const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
   // A configured preprocessor stays referenced by the config file even when --preprocessor overrides which ones run

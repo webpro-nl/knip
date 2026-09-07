@@ -116,7 +116,6 @@ export async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
-  const workspaceNames = new Set(workspaces.map(workspace => workspace.name));
   const preprocessorInputs = new Map<string, Input[]>();
   for (const specifier of options.preprocessorInputs) {
     const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
@@ -127,7 +126,7 @@ export async function build({
     // The negated production entry pattern only applies to its own workspace, so a local
     // preprocessor must be registered in the workspace holding it, not always in the root
     const owner = isLocal ? chief.findWorkspaceByFilePath(specifier)?.name : undefined;
-    const name = owner && workspaceNames.has(owner) ? owner : ROOT_WORKSPACE_NAME;
+    const name = owner ?? ROOT_WORKSPACE_NAME;
     const inputs = preprocessorInputs.get(name);
     if (inputs) inputs.push(input);
     else preprocessorInputs.set(name, [input]);
@@ -196,9 +195,7 @@ export async function build({
     const pluginSourceMaps = await worker.resolveSourceMaps();
     augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
-    const inputs = new Set<Input>();
-
-    for (const input of preprocessorInputs.get(name) ?? []) inputs.add(input);
+    const inputs = new Set(preprocessorInputs.get(name));
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);

@@ -68,6 +68,7 @@ test('session preprocessors do not mutate collector state', async () => {
   const session = await createSession(options);
 
   assert.deepEqual(getUnusedFilePaths(session.getIssues().issues), []);
+  assert.deepEqual(session.getIssues().configurationHints, []);
 
   const filePath = join(mutationCwd, 'index.ts');
   const source = readFileSync(filePath, 'utf8');
@@ -76,6 +77,10 @@ test('session preprocessors do not mutate collector state', async () => {
     const update = await session.handleFileChanges([{ type: 'modified', filePath }]);
     assert.ok(update);
     assert.deepEqual(getUnusedFilePaths(session.getIssues().issues), [join(mutationCwd, 'unused.ts')]);
+    assert.deepEqual(
+      session.getIssues().configurationHints.map(hint => hint.identifier),
+      ['unused-package']
+    );
   } finally {
     writeFileSync(filePath, source);
   }

@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/session-preprocessor-mutation",
   "knip": {
+    "ignoreDependencies": ["unused-package"],
     "preprocessor": "./preprocessor.js"
   }
 }

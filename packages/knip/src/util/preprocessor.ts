@@ -1,12 +1,8 @@
 import type { Results } from '../run.ts';
-import type { Issue, IssueRecords, Issues, IssueType, Preprocessor, ReporterOptions } from '../types/issues.ts';
+import type { Preprocessor, ReporterOptions } from '../types/issues.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import type { MainOptions } from './create-options.ts';
 import { _load } from './loader.ts';
-import { isInternal, toAbsolute } from './path.ts';
-
-export const toPreprocessorPath = (specifier: string, cwd: string) =>
-  isInternal(specifier) ? toAbsolute(specifier, cwd) : specifier;
 
 export const toReporterOptions = (options: MainOptions, results: Results, args?: ParsedCLIArgs): ReporterOptions => ({
   ...results,
@@ -24,30 +20,11 @@ export const toReporterOptions = (options: MainOptions, results: Results, args?:
   preprocessorOptions: options.preprocessorOptions,
 });
 
-// Preprocessors are documented to modify `issues` and `counters` in place, so they must not
-// receive the collector's own containers: in a session that mutation would persist across refreshes
-const toSnapshot = (data: ReporterOptions): ReporterOptions => {
-  const issues = {} as Issues;
-  for (const type in data.issues) {
-    const issuesForType = data.issues[type as IssueType];
-    const records: IssueRecords = {};
-    for (const filePath in issuesForType) {
-      const issuesForFile: Record<string, Issue> = {};
-      for (const symbol in issuesForType[filePath]) issuesForFile[symbol] = { ...issuesForType[filePath][symbol] };
-      records[filePath] = issuesForFile;
-    }
-    issues[type as IssueType] = records;
-  }
-  return { ...data, issues, counters: { ...data.counters }, tagHints: new Set(data.tagHints) };
-};
-
 export const createPreprocessor = async (processors: string[]) => {
   const preprocessors: Preprocessor[] = await Promise.all(processors.map(_load));
 
   return async (data: ReporterOptions) => {
-    if (preprocessors.length === 0) return data;
-    let result = toSnapshot(data);
-    for (const preprocessor of preprocessors) result = await preprocessor(result);
-    return result;
+    for (const preprocessor of preprocessors) data = await preprocessor(data);
+    return data;
   };
 };
