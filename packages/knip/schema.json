@@ -658,6 +658,10 @@
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
         },
+        "mise": {
+          "title": "mise plugin configuration (https://knip.dev/reference/plugins/mise)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
           "$ref": "#/definitions/plugin"

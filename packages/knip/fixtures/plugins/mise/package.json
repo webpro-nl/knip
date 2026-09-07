@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/mise",
+  "devDependencies": {
+    "eslint": "*",
+    "vitest": "*",
+    "asset-builder": "*",
+    "formatter-cli": "*",
+    "windows-checker": "*",
+    "unused-package": "*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/mise-workspaces",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "asset-builder": "*",
+    "eslint": "*"
+  }
+}
