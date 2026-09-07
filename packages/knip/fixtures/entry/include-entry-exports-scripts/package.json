@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "index": "tsx ./src/index.ts",
     "module1": "tsx ./src/script1.ts",
     "module2": "tsx ./src/script2.ts",
     "module3": "tsx ./src/script3.ts"

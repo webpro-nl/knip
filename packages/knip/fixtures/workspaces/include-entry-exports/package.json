@@ -1,12 +1,19 @@
 {
   "name": "@fixtures/workspaces-include-entry-exports",
+  "scripts": {
+    "lib": "node packages/lib/index.js"
+  },
   "workspaces": [
     "packages/*"
   ],
   "knip": {
     "workspaces": {
-      "packages/app": {},
+      "packages/app": {
+        "entry": ["index.js"],
+        "includeEntryExports": true
+      },
       "packages/lib": {
+        "entry": ["index.js"],
         "includeEntryExports": true
       }
     }

@@ -1,5 +1,4 @@
 import type { WatchListener } from 'node:fs';
-import { readFileSync } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
@@ -8,7 +7,9 @@ import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
+import { hasErrorCause } from './errors.ts';
 import { isFile } from './fs.ts';
+import { logError } from './log.ts';
 import { updateImportMap } from './module-graph.ts';
 import { toAbsolute, toPosix, toRelative } from './path.ts';
 import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
@@ -26,7 +27,7 @@ export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
 
 type WatchOptions = {
   analyzedFiles: Set<string>;
-  analyzeSourceFile: (filePath: string, principal: ProjectPrincipal) => void;
+  analyzeSourceFile: (filePath: string) => Promise<void>;
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
@@ -60,12 +61,13 @@ export const getSessionHandler = async (
     entryPaths,
   }: WatchOptions
 ) => {
-  const handleFileChanges = async (changes: WatchChange[]) => {
-    const startTime = performance.now();
+  const added = new Set<string>();
+  const deleted = new Set<string>();
+  const modified = new Set<string>();
 
-    const added = new Set<string>();
-    const deleted = new Set<string>();
-    const modified = new Set<string>();
+  const processFileChanges = async (changes: WatchChange[]) => {
+    const startTime = performance.now();
+    let hasRelevantChanges = false;
 
     for (const change of changes) {
       const filePath = toAbsolute(change.filePath, options.cwd);
@@ -78,23 +80,24 @@ export const getSessionHandler = async (
 
       const workspace = chief.findWorkspaceByFilePath(filePath);
       if (!workspace) continue;
+      hasRelevantChanges = true;
 
       switch (change.type) {
         case 'added':
           principal.addProjectPath(filePath);
-          principal.deletedFiles.delete(filePath);
+          deleted.delete(filePath);
           if (principal.projectPaths.has(filePath)) added.add(filePath);
           debugLog(workspace.name, `Watcher: + ${relativePath}`);
           break;
         case 'deleted':
           deleted.add(filePath);
+          added.delete(filePath);
           analyzedFiles.delete(filePath);
           principal.removeProjectPath(filePath);
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
         default: {
-          const cached = principal.fileManager.sourceTextCache.get(filePath);
-          if (cached !== undefined && cached === readFileSync(filePath, 'utf8')) {
+          if (!principal.fileManager.hasChanged(filePath)) {
             debugLog(workspace.name, `Watcher: = ${relativePath}`);
             continue;
           }
@@ -107,12 +110,14 @@ export const getSessionHandler = async (
       principal.invalidateFile(filePath);
     }
 
-    if (added.size === 0 && deleted.size === 0 && modified.size === 0) return;
+    if (!hasRelevantChanges || (added.size === 0 && deleted.size === 0 && modified.size === 0)) return;
 
     clearResolverCache();
     clearModuleResolutionCaches();
     clearGlobCache();
     invalidateCache(graph);
+
+    const filePaths = await principal.getUsedResolvedFiles();
 
     unreferencedFiles.clear();
     const cachedUnusedFiles = collector.purge();
@@ -120,19 +125,17 @@ export const getSessionHandler = async (
     for (const filePath of added) cachedUnusedFiles.add(filePath);
     for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
 
-    const filePaths = principal.getUsedResolvedFiles();
-
     if (added.size > 0 || deleted.size > 0) {
       graph.clear();
       for (const filePath of filePaths) {
         const workspace = chief.findWorkspaceByFilePath(filePath);
         if (workspace) {
-          analyzeSourceFile(filePath, principal);
+          await analyzeSourceFile(filePath);
         }
       }
     } else {
       for (const [filePath, file] of graph) {
-        if (filePaths.includes(filePath)) {
+        if (filePaths.has(filePath)) {
           file.importedBy = undefined;
         } else {
           graph.delete(filePath);
@@ -146,7 +149,7 @@ export const getSessionHandler = async (
         if (!graph.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
-            analyzeSourceFile(filePath, principal);
+            await analyzeSourceFile(filePath);
           }
         }
       }
@@ -156,7 +159,7 @@ export const getSessionHandler = async (
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
             if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
-              analyzeSourceFile(filePath, principal);
+              await analyzeSourceFile(filePath);
             }
           }
         }
@@ -176,10 +179,22 @@ export const getSessionHandler = async (
 
     for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
 
+    added.clear();
+    deleted.clear();
+    modified.clear();
+
     const update = createUpdate({ startTime });
 
     if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
 
+    return update;
+  };
+
+  const clearSourceText = () => principal.fileManager.sourceTextCache.clear();
+  let pending = Promise.resolve();
+  const handleFileChanges = (changes: WatchChange[]) => {
+    const update = pending.then(() => processFileChanges(changes));
+    pending = update.then(clearSourceText, clearSourceText);
     return update;
   };
 
@@ -190,7 +205,12 @@ export const getSessionHandler = async (
       // Normalize to POSIX separators so downstream posix path utilities work correctly.
       const normalizedPath = toPosix(filePath);
       const type = eventType === 'rename' ? (isFile(options.cwd, normalizedPath) ? 'added' : 'deleted') : 'modified';
-      handleFileChanges([{ type, filePath: normalizedPath }]);
+      handleFileChanges([{ type, filePath: normalizedPath }]).catch(error => {
+        const message = error instanceof Error ? error.message : String(error);
+        const reason = error instanceof Error && hasErrorCause(error) ? `\nReason: ${error.cause.message}` : '';
+        logError(message + reason);
+        process.exitCode = 2;
+      });
     }
   };
 

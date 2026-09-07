@@ -10,7 +10,10 @@ export const DEFAULT_CATALOG = 'default';
 export type CatalogReference = {
   catalogName: string;
   packageName: string;
+  selector?: string;
 };
+
+export type OverrideCatalogReference = CatalogReference & { selector: string };
 
 const CATALOG_PROTOCOL = '@catalog:';
 
@@ -50,7 +53,7 @@ export const getCatalogContainer = async (
     manifest.catalogs ??
     ((!Array.isArray(manifest.workspaces) && manifest.workspaces?.catalogs) || {});
 
-  return { filePath, catalog, catalogs };
+  return { filePath, catalog, catalogs, overrides: pnpmWorkspace?.overrides };
 };
 
 const extractEntries = (catalog: unknown): string[] => {
@@ -77,26 +80,48 @@ export const parseCatalog = (container: CatalogContainer) => {
   return entries;
 };
 
+const OVERRIDE_DELIMITER = /[^ |@]>/;
+
+const toCatalogReference = (packageName: string, version: unknown): CatalogReference | undefined => {
+  if (typeof version !== 'string' || !version.startsWith('catalog:')) return;
+  return { catalogName: version.slice('catalog:'.length) || DEFAULT_CATALOG, packageName };
+};
+
+const collectCatalogReferences = (
+  dependencies: Record<string, string> | undefined,
+  catalogReferences: CatalogReference[]
+) => {
+  if (!dependencies) return;
+
+  for (const [packageName, version] of Object.entries(dependencies)) {
+    const reference = toCatalogReference(packageName, version);
+    if (reference) catalogReferences.push(reference);
+  }
+};
+
+export const getOverrideCatalogReferences = (overrides: Record<string, string> | undefined) => {
+  const catalogReferences: OverrideCatalogReference[] = [];
+  if (!overrides) return catalogReferences;
+
+  for (const [selector, version] of Object.entries(overrides)) {
+    const delimiterIndex = selector.search(OVERRIDE_DELIMITER);
+    const target = delimiterIndex === -1 ? selector : selector.slice(delimiterIndex + 2);
+    const packageName = getPackageNameFromModuleSpecifier(target);
+    if (!packageName) continue;
+    const reference = toCatalogReference(packageName, version);
+    if (reference) catalogReferences.push({ ...reference, selector });
+  }
+  return catalogReferences;
+};
+
 export const extractCatalogReferences = (manifest: PackageJson): CatalogReference[] => {
   const catalogReferences: CatalogReference[] = [];
 
-  const checkDependencies = (dependencies: Record<string, string> | undefined) => {
-    if (!dependencies) return;
-
-    for (const [name, version] of Object.entries(dependencies)) {
-      if (typeof version === 'string' && version.startsWith('catalog:')) {
-        const catalogName = version.slice('catalog:'.length) || DEFAULT_CATALOG;
-        catalogReferences.push({ catalogName, packageName: name });
-      }
-    }
-  };
-
-  checkDependencies(manifest.dependencies);
-  checkDependencies(manifest.devDependencies);
-  checkDependencies(manifest.peerDependencies);
-  checkDependencies(manifest.optionalDependencies);
-  checkDependencies(manifest.resolutions);
-  checkDependencies(manifest.pnpm?.overrides);
+  collectCatalogReferences(manifest.dependencies, catalogReferences);
+  collectCatalogReferences(manifest.devDependencies, catalogReferences);
+  collectCatalogReferences(manifest.peerDependencies, catalogReferences);
+  collectCatalogReferences(manifest.optionalDependencies, catalogReferences);
+  collectCatalogReferences(manifest.resolutions, catalogReferences);
 
   return catalogReferences;
 };

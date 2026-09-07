@@ -146,12 +146,14 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
                     }
                     s.accessedAliases.add(name);
                   }
-                } else if (
-                  prop.type === 'Property' &&
-                  prop.value?.type === 'ObjectExpression' &&
-                  prop.key?.type === 'Identifier'
-                ) {
-                  findSpreads(prop.value, [...path, prop.key.name]);
+                } else if (prop.type === 'Property' && prop.value?.type === 'ObjectExpression') {
+                  const key =
+                    prop.key?.type === 'Identifier'
+                      ? prop.key.name
+                      : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
+                        ? prop.key.value
+                        : undefined;
+                  if (key) findSpreads(prop.value, [...path, key]);
                 }
               }
             };
