@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+node --experimental-strip-types ./scripts/git-hooks/pre-commit.ts
