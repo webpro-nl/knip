@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/config-preprocessor-workspaces",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "knip": {
+    "preprocessor": "./packages/reporting/tools/preprocessor.js"
+  }
+}

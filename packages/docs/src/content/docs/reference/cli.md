@@ -322,6 +322,8 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
+Preprocessors can also be configured in the Knip configuration file.
+
 Also see [Reporters & Preprocessors][15].
 
 ### `--preprocessor-options [json]`

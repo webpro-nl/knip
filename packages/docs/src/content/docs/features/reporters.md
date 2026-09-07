@@ -377,6 +377,14 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
+Preprocessors can also be configured in the Knip configuration file:
+
+```json title="knip.json"
+{
+  "preprocessor": "./preprocess.ts"
+}
+```
+
 [1]: #codeclimate
 [2]: #codeowners
 [3]: #cycles
