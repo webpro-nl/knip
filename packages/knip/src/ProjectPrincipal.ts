@@ -31,6 +31,7 @@ export class ProjectPrincipal {
   projectPaths = new Set<string>();
   programPaths = new Set<string>();
   skipExportsAnalysis = new Set<string>();
+  private includeExportsAnalysis = new Set<string>();
 
   pluginCtx: PluginVisitorContext = {
     filePath: '',
@@ -58,6 +59,7 @@ export class ProjectPrincipal {
   toSourceFilePath: ToSourceFilePath;
   private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
   private findWorkspaceNameByFilePath: (filePath: string) => string | undefined;
+  private isReportExports: boolean;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -77,6 +79,7 @@ export class ProjectPrincipal {
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
+    this.isReportExports = options.isReportExports;
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
@@ -164,7 +167,14 @@ export class ProjectPrincipal {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
-      if (options?.skipExportsAnalysis) this.skipExportsAnalysis.add(filePath);
+      if (options) {
+        if (options.skipExportsAnalysis) {
+          if (!this.includeExportsAnalysis.has(filePath)) this.skipExportsAnalysis.add(filePath);
+        } else {
+          this.includeExportsAnalysis.add(filePath);
+          this.skipExportsAnalysis.delete(filePath);
+        }
+      }
       this.onPathAdded?.(filePath);
     }
   }
@@ -190,6 +200,8 @@ export class ProjectPrincipal {
   removeProjectPath(filePath: string) {
     this.entryPaths.delete(filePath);
     this.projectPaths.delete(filePath);
+    this.skipExportsAnalysis.delete(filePath);
+    this.includeExportsAnalysis.delete(filePath);
     this.invalidateFile(filePath);
     this.deletedFiles.add(filePath);
   }
@@ -216,7 +228,7 @@ export class ProjectPrincipal {
         const isProjectPath = this.projectPaths.has(filePath);
 
         // Cached project files: skip read+parse and pass the cached FileNode through.
-        const cachedFile = isProjectPath ? this.cache.getCachedFile(filePath) : undefined;
+        const cachedFile = isProjectPath ? this.getCachedFile(filePath) : undefined;
 
         if (cachedFile) {
           const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
@@ -285,6 +297,12 @@ export class ProjectPrincipal {
     return Array.from(this.projectPaths).filter(filePath => !this.resolvedFiles.has(filePath));
   }
 
+  private getCachedFile(filePath: string) {
+    const cachedFile = this.cache.getCachedFile(filePath);
+    const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
+    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+  }
+
   analyzeSourceFile(
     filePath: string,
     options: GetImportsAndExportsOptions,
@@ -295,7 +313,7 @@ export class ProjectPrincipal {
   ) {
     if (cachedFile) return cachedFile;
 
-    const cached = this.cache.getCachedFile(filePath);
+    const cached = this.getCachedFile(filePath);
     if (cached) return cached;
 
     sourceText ??= this.fileManager.readFile(filePath);

@@ -81,6 +81,7 @@ type ExportMap = Map<Identifier, Export>;
 export type Imports = Set<Import>;
 
 export type FileNode = {
+  skipExports: boolean;
   imports: {
     readonly internal: ImportMap;
     readonly external: Set<Import>;

@@ -36,6 +36,7 @@ export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: Mod
 };
 
 export const createFileNode = (): FileNode => ({
+  skipExports: false,
   imports: {
     internal: new Map(),
     external: new Set(),
