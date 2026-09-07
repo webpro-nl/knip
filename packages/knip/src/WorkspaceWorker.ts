@@ -57,7 +57,7 @@ type WorkspaceManagerOptions = {
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
-  readFile: (filePath: string) => string;
+  readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -84,7 +84,7 @@ export class WorkspaceWorker {
   handleInput: HandleInput;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
-  readFile: (filePath: string) => string;
+  readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -111,7 +111,7 @@ export class WorkspaceWorker {
     handleInput,
     findWorkspaceByFilePath,
     getManifest,
-    readFile,
+    readRawFile,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -129,7 +129,7 @@ export class WorkspaceWorker {
     this.handleInput = handleInput;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getManifest = getManifest;
-    this.readFile = readFile;
+    this.readRawFile = readRawFile;
 
     this.options = options;
 
@@ -436,7 +436,7 @@ export class WorkspaceWorker {
           if (parsedConfigCache.has(configFilePath)) {
             parsed = parsedConfigCache.get(configFilePath);
           } else {
-            const sourceText = this.readFile(configFilePath);
+            const sourceText = this.readRawFile(configFilePath);
             parsed = sourceText ? _parseFile(configFilePath, sourceText) : undefined;
             parsedConfigCache.set(configFilePath, parsed);
           }
@@ -485,7 +485,7 @@ export class WorkspaceWorker {
         }
 
         if (plugin.resolveFromAST && parsed) {
-          const resolveASTOpts = { ...resolveOpts, readFile: this.readFile };
+          const resolveASTOpts = { ...resolveOpts, readFile: this.readRawFile };
           const inputs = plugin.resolveFromAST(parsed.program, resolveASTOpts);
           for (const input of inputs) addInput(input, configFilePath);
           cache.resolveFromAST = inputs;
@@ -565,7 +565,7 @@ export class WorkspaceWorker {
     const collect = (filePath: string) => {
       if (visited.has(filePath)) return;
       visited.add(filePath);
-      const sourceText = this.readFile(filePath);
+      const sourceText = this.readRawFile(filePath);
       if (!sourceText) return;
       for (const literal of collectStringLiterals(sourceText, filePath)) {
         literals.add(literal);

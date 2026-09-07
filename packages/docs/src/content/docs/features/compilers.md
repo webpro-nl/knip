@@ -77,10 +77,10 @@ Since compilers are functions, the Knip configuration file must be a dynamic
 The compiler function interface is straightforward. Text in, text out:
 
 ```ts
-(source: string, filename: string) => string;
+(source: string, filename: string) => string | PromiseLike<string>;
 ```
 
-This may also be an `async` function.
+Return a string or a Promise-like value that resolves to a string. Knip compiles files on demand and awaits asynchronous results; the `async` keyword is optional.
 
 ### Examples
 

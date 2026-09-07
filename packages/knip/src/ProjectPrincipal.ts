@@ -2,8 +2,7 @@ import type { ParseResult, Visitor } from 'oxc-parser';
 import { extractSpecifiers } from './typescript/follow-imports.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
-import { getCompilerExtensions } from './compilers/index.ts';
-import type { AsyncCompilers, CompilerAsync, CompilerSync, Compilers, SyncCompilers } from './compilers/types.ts';
+import type { Compiler, Compilers } from './compilers/types.ts';
 import { DEFAULT_EXTENSIONS } from './constants.ts';
 import type {
   GetImportsAndExportsOptions,
@@ -46,10 +45,8 @@ export class ProjectPrincipal {
   private _visitor: Visitor | undefined;
   private _localRefsVisitor: Visitor | undefined;
 
-  syncCompilers: SyncCompilers = new Map();
-  asyncCompilers: AsyncCompilers = new Map();
-  private scopedSyncCompilers = new Map<string, Map<string, CompilerSync>>();
-  private scopedAsyncCompilers = new Map<string, Map<string, CompilerAsync>>();
+  compilers: Compilers = new Map();
+  private scopedCompilers = new Map<string, Map<string, Compiler>>();
   private paths = new Map<string, Record<string, string[]>>();
   private rootDirs = new Map<string, string[]>();
   private tsConfigFile: string | undefined;
@@ -83,34 +80,21 @@ export class ProjectPrincipal {
     this.tsConfigFile = options.tsConfigFile ? toAbsolute(options.tsConfigFile, options.cwd) : undefined;
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
-      compilers: [this.syncCompilers, this.asyncCompilers],
+      compilers: this.compilers,
+      isSession: options.isSession || options.isWatch,
     });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
 
   addCompilers(workspaceName: string, compilers: Compilers) {
-    for (const [ext, compiler] of compilers[0]) {
-      const workspaceCompilers = this.scopedSyncCompilers.get(ext);
+    for (const [ext, compiler] of compilers) {
+      const workspaceCompilers = this.scopedCompilers.get(ext);
       if (workspaceCompilers) {
         workspaceCompilers.set(workspaceName, compiler);
       } else {
         const workspaceCompilers = new Map([[workspaceName, compiler]]);
-        this.scopedSyncCompilers.set(ext, workspaceCompilers);
-        this.syncCompilers.set(ext, (source, filePath) => {
-          const owner = this.findWorkspaceNameByFilePath(filePath);
-          return ((owner ? workspaceCompilers.get(owner) : undefined) ?? compiler)(source, filePath);
-        });
-        this.extensions.add(ext);
-      }
-    }
-    for (const [ext, compiler] of compilers[1]) {
-      const workspaceCompilers = this.scopedAsyncCompilers.get(ext);
-      if (workspaceCompilers) {
-        workspaceCompilers.set(workspaceName, compiler);
-      } else {
-        const workspaceCompilers = new Map([[workspaceName, compiler]]);
-        this.scopedAsyncCompilers.set(ext, workspaceCompilers);
-        this.asyncCompilers.set(ext, (source, filePath) => {
+        this.scopedCompilers.set(ext, workspaceCompilers);
+        this.compilers.set(ext, (source, filePath) => {
           const owner = this.findWorkspaceNameByFilePath(filePath);
           return ((owner ? workspaceCompilers.get(owner) : undefined) ?? compiler)(source, filePath);
         });
@@ -136,27 +120,18 @@ export class ProjectPrincipal {
   }
 
   init() {
-    this.extensions = new Set([
-      ...DEFAULT_EXTENSIONS,
-      ...getCompilerExtensions([this.syncCompilers, this.asyncCompilers]),
-    ]);
-    const customCompilerExtensions = getCompilerExtensions([this.syncCompilers, this.asyncCompilers]);
     const scopedPaths =
       this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
     const scopedRootDirs =
       this.rootDirs.size > 0 ? Array.from(this.rootDirs, ([scope, rootDirs]) => ({ scope, rootDirs })) : undefined;
     this.resolveModule = createCustomModuleResolver(
       { scopedPaths, scopedRootDirs },
-      customCompilerExtensions,
+      [...this.compilers.keys()],
       this.toSourceFilePath,
       this.findWorkspacePackageTarget,
       this.tsConfigFile
     );
     this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
-  }
-
-  readFile(filePath: string): string {
-    return this.fileManager.readFile(filePath);
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -206,12 +181,7 @@ export class ProjectPrincipal {
     this.deletedFiles.add(filePath);
   }
 
-  async runAsyncCompilers() {
-    const add = timerify(this.fileManager.compileAndAddSourceFile.bind(this.fileManager));
-    for (const filePath of this.projectPaths) if (this.asyncCompilers.has(extname(filePath))) await add(filePath);
-  }
-
-  walkAndAnalyze(
+  async walkAndAnalyze(
     analyzeFile: (
       filePath: string,
       parseResult: ParseResult | undefined,
@@ -236,7 +206,8 @@ export class ProjectPrincipal {
           continue;
         }
 
-        const sourceText = this.fileManager.readFile(filePath);
+        const loaded = this.fileManager.loadSourceText(filePath);
+        const sourceText = typeof loaded === 'string' ? loaded : await loaded;
         if (!sourceText) {
           if (isProjectPath) analyzeFile(filePath, undefined, '');
           continue;
@@ -266,12 +237,13 @@ export class ProjectPrincipal {
     this.resolvedFiles = visited;
   }
 
-  getUsedResolvedFiles() {
+  async getUsedResolvedFiles() {
     this.resolvedFiles.clear();
     const visited = new Set([...this.entryPaths, ...this.programPaths]);
 
     for (const filePath of visited) {
-      const sourceText = this.fileManager.readFile(filePath);
+      const loaded = this.fileManager.loadSourceText(filePath);
+      const sourceText = typeof loaded === 'string' ? loaded : await loaded;
       if (!sourceText) continue;
 
       try {
@@ -286,7 +258,9 @@ export class ProjectPrincipal {
     }
 
     this.resolvedFiles = visited;
-    return Array.from(this.projectPaths).filter(filePath => visited.has(filePath));
+    const usedFiles = new Set<string>();
+    for (const filePath of this.projectPaths) if (visited.has(filePath)) usedFiles.add(filePath);
+    return usedFiles;
   }
 
   private resolveSpecifier(specifier: string, containingFile: string): string | undefined {
@@ -305,10 +279,10 @@ export class ProjectPrincipal {
 
   analyzeSourceFile(
     filePath: string,
+    sourceText: string,
     options: GetImportsAndExportsOptions,
     ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
     parseResult?: ParseResult,
-    sourceText?: string,
     cachedFile?: FileNode
   ) {
     if (cachedFile) return cachedFile;
@@ -316,13 +290,11 @@ export class ProjectPrincipal {
     const cached = this.getCachedFile(filePath);
     if (cached) return cached;
 
-    sourceText ??= this.fileManager.readFile(filePath);
-
     const skipExports = this.skipExportsAnalysis.has(filePath);
 
     if (options.isFixExports || options.isFixTypes) {
       const ext = extname(filePath);
-      if (!DEFAULT_EXTENSIONS.has(ext) && (this.syncCompilers.has(ext) || this.asyncCompilers.has(ext))) {
+      if (!DEFAULT_EXTENSIONS.has(ext) && this.compilers.has(ext)) {
         options = { ...options, isFixExports: false, isFixTypes: false };
       }
     }
@@ -346,6 +318,7 @@ export class ProjectPrincipal {
 
   invalidateFile(filePath: string) {
     this.fileManager.invalidate(filePath);
+    this.cache.removeEntry(filePath);
   }
 
   reconcileCache(graph: ModuleGraph) {

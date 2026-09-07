@@ -1,4 +1,3 @@
-import { partitionCompilers } from '../compilers/index.ts';
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
 import { knipConfigurationSchema } from '../schema/configuration.ts';
 import type { RawConfiguration } from '../types/config.ts';
@@ -84,7 +83,7 @@ export const createOptions = async (options: CreateOptions) => {
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
+  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
