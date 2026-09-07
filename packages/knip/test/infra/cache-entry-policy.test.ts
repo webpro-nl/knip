@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
@@ -7,7 +7,7 @@ import { join } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 test('Cached files respect entry export policy changes', async () => {
-  const cwd = mkdtempSync(join(tmpdir(), 'knip-entry-policy-'));
+  const cwd = realpathSync(mkdtempSync(join(tmpdir(), 'knip-entry-policy-')));
   const cacheLocation = mkdtempSync(join(tmpdir(), 'knip-cache-'));
   const run = async () => main(await createOptions({ cwd, args: { cache: true, 'cache-location': cacheLocation } }));
 
