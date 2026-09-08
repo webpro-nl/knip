@@ -32,6 +32,7 @@ interface VitestConfig {
 export interface ViteConfig extends VitestConfig {
   extends?: string | true;
   root?: string;
+  publicDir?: string | false;
   plugins?: unknown[];
   build?: {
     lib?: {

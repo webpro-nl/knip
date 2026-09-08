@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/vite-public-disabled",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}
