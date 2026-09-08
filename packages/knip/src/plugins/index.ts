@@ -63,6 +63,7 @@ import { default as marko } from './marko/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
+import { default as mise } from './mise/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
 import { default as msw } from './msw/index.ts';
@@ -247,6 +248,7 @@ export const Plugins = {
   mdx,
   mdxlint,
   metro,
+  mise,
   mocha,
   moonrepo,
   msw,

@@ -1,0 +1,36 @@
+[tools]
+"npm:eslint" = "latest"
+"npm:asset-builder" = "latest"
+
+[tasks.lint]
+run = "eslint ."
+
+[tasks.global]
+run = [
+  'concurrently "assets build" "terraform apply"',
+  "mise exec npm:eslint -- eslint .",
+  'echo "pnpm exec assets"',
+  'find . -exec assets {} \;',
+]
+
+[tasks.local]
+run = "cross-env GIT_SHA=$(git rev-parse HEAD) pnpm exec formatter . && assets build"
+
+[tasks.substitution]
+run = 'echo "$(pnpm exec substitute)"'
+
+[tasks.runtime]
+run = "node --version"
+
+[tasks.missing]
+run = [
+  "dotenvx run -- API_URL=https://example.test pnpm exec missing-local-cli",
+  'concurrently "c8 pnpm exec missing-concurrent-cli $(git diff --name-only)" "terraform apply"',
+]
+
+[tasks.template]
+run = "pnpm exec assets {{arg(name='target')}}"
+
+[tasks.dynamic-directory]
+dir = "{{env.TASK_DIR}}"
+run = "pnpm exec assets"
