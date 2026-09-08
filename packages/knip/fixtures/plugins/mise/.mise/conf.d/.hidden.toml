@@ -1,0 +1,2 @@
+[tasks.hidden]
+run = "node scripts/unused.ts"

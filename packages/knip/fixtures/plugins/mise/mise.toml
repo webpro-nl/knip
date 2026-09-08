@@ -3,7 +3,6 @@ node = "24"
 
 [tasks]
 lint = "npx --no-install eslint ."
-format = ["pnpm exec formatter --write .", "node scripts/check.ts"]
 
 [tasks.test]
 run = "npm exec -- vitest run"
@@ -13,7 +12,6 @@ run = [
   { task = "lint" },
   { tasks = ["test", "format"] },
   "yarn exec assets build",
-  "node scripts/release.ts",
 ]
 run_windows = "pnpm exec windows-checker"
 

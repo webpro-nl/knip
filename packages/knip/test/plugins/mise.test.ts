@@ -11,13 +11,13 @@ test('Find package binaries and entry files in mise TOML tasks', async () => {
   const { issues, counters } = await main(await createOptions({ cwd }));
 
   assert.deepEqual(Object.keys(issues.devDependencies['package.json'] ?? {}), ['unused-package']);
-  assert.deepEqual(Object.keys(issues.files), ['scripts/unused.ts']);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['.config/scripts/grouped.ts', 'scripts/unused.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
+    files: 2,
     devDependencies: 1,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

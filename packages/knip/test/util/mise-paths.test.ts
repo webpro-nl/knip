@@ -15,9 +15,9 @@ test('Keep normalized Windows task paths and explicit entry files rooted in thei
       rootManifest: undefined,
       getManifest: () => undefined,
       config: { config: null, entry: null, project: null },
-      configFileDir: 'C:/project',
-      configFileName: 'mise.toml',
-      configFilePath: 'C:/project/mise.toml',
+      configFileDir: 'C:/project/.config/mise',
+      configFileName: 'config.toml',
+      configFilePath: 'C:/project/.config/mise/config.toml',
       isProduction: false,
       enabledPlugins: ['mise'],
       getInputsFromScripts: (_scripts, options) => {

@@ -1,16 +1,35 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import { type Input, isEntry } from '../../util/input.ts';
-import { join, toAbsolute } from '../../util/path.ts';
+import { basename, dirname, join, toAbsolute } from '../../util/path.ts';
 import type { MiseConfig } from './types.ts';
 
 const title = 'mise';
 
 const enablers = 'This plugin is enabled when `mise.toml` or `.mise.toml` is found.';
 
-const config = ['mise.toml', '.mise.toml'];
+const config = [
+  '{mise,.mise}{,.*}.toml',
+  '{mise,.mise}/config{,.*}.toml',
+  '.config/mise{,.*}.toml',
+  '.config/mise/config{,.*}.toml',
+  '.config/mise/mise{,.local}.toml',
+  '{mise,.mise}/conf.d/[!.]*.toml',
+  '.config/mise/conf.d/[!.]*.toml',
+];
 
-const isEnabled: IsPluginEnabled = ({ cwd }) => config.some(file => isFile(cwd, file));
+const isEnabled: IsPluginEnabled = ({ cwd }) => isFile(cwd, 'mise.toml') || isFile(cwd, '.mise.toml');
+
+const getConfigRoot = (configFileDir: string, configFileName: string) => {
+  const isFragment = basename(configFileDir) === 'conf.d';
+  const groupedDir = isFragment ? dirname(configFileDir) : configFileDir;
+  const name = basename(groupedDir);
+  const root =
+    (isFragment || configFileName.startsWith('config.')) && (name === 'mise' || name === '.mise')
+      ? dirname(groupedDir)
+      : configFileDir;
+  return basename(root) === '.config' ? dirname(root) : root;
+};
 
 const hasTemplate = (value: string) => value.includes('{{') || value.includes('{%');
 
@@ -22,12 +41,13 @@ const resolvePath = (value: string, root: string) => {
 
 const resolveConfig: ResolveConfig<MiseConfig> = async (localConfig, options) => {
   const { getInputsFromMiseScript } = await import('./scripts.ts');
-  const { configFileDir, getManifest, isProduction } = options;
+  const { configFileDir, configFileName, getManifest, isProduction } = options;
+  const configRoot = getConfigRoot(configFileDir, configFileName);
   const inputs: Input[] = [];
 
   for (const task of Object.values(localConfig.tasks ?? {})) {
     const taskConfig = typeof task === 'string' || Array.isArray(task) ? { run: task } : task;
-    const dir = resolvePath(taskConfig.dir ?? localConfig.task_config?.dir ?? '.', configFileDir);
+    const dir = resolvePath(taskConfig.dir ?? localConfig.task_config?.dir ?? '.', configRoot);
     if (!dir) continue;
 
     let hasLocalBinPath = false;
@@ -35,7 +55,7 @@ const resolveConfig: ResolveConfig<MiseConfig> = async (localConfig, options) =>
       if (Object.hasOwn(env, 'PATH')) hasLocalBinPath = false;
       const paths = env._?.path;
       for (const path of typeof paths === 'string' ? [paths] : Array.isArray(paths) ? paths : []) {
-        if (typeof path === 'string' && resolvePath(path, configFileDir) === join(dir, 'node_modules/.bin')) {
+        if (typeof path === 'string' && resolvePath(path, configRoot) === join(dir, 'node_modules/.bin')) {
           hasLocalBinPath = true;
         }
       }
