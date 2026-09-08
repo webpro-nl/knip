@@ -18,6 +18,7 @@
     "./constants": "./src/constants.js"
   },
   "scripts": {
+    "test": "node --test",
     "release": "release-it -c ../../.release-it.json"
   },
   "dependencies": {
