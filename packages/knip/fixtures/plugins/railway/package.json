@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/railway",
+  "dependencies": {
+    "railway": "*"
+  }
+}
