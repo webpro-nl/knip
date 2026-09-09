@@ -75,6 +75,24 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     const toRel = (path: string) => toRelative(path, options.cwd);
 
     if (nodes.length === 0) {
+      const traceFile = options.traceFile;
+      const traceExport = options.traceExport;
+      const collision = traceFile && traceExport ? explorer.getAmbiguousStarExport(traceFile, traceExport) : undefined;
+      if (collision) {
+        collision.origins.sort((a, b) => compareStrings(a.filePath, b.filePath));
+        const namespaces = collision.namespaces.join(' and ');
+        const namespaceLabel =
+          collision.namespaces.length === 1 ? `${namespaces} namespace` : `${namespaces} namespaces`;
+        console.log(
+          `Ambiguous export ${st.cyanBright(traceExport ?? '')} in ${toRel(traceFile ?? '')}: competing export * origins in the ${namespaceLabel}`
+        );
+        for (let i = 0; i < collision.origins.length; i++) {
+          const origin = collision.origins[i];
+          const connector = i === collision.origins.length - 1 ? '└──' : '├──';
+          console.log(`${st.dim(connector)} ${toRel(origin.filePath)}:${st.cyanBright(origin.identifier)}`);
+        }
+        return;
+      }
       if (options.traceFile && !graph.has(options.traceFile)) {
         console.log(`File not found in module graph: ${toRel(options.traceFile)}`);
       } else {
