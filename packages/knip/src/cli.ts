@@ -65,6 +65,7 @@ const main = async () => {
       counters,
       tagHints,
       configurationHints,
+      hasConfigLoadErrors: results.hasConfigLoadErrors,
       enabledPlugins,
       includedWorkspaceDirs,
       cwd: options.cwd,
