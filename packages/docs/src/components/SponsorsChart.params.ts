@@ -7,7 +7,7 @@ export function buildParams(data: ChartData): URLSearchParams {
   const params = new URLSearchParams();
   params.set('type', 'line');
   params.set('pivot', '1');
-  params.set('lp', 'tr');
+  params.set('lp', 'tl');
   params.set('br', '0');
   params.set('labelX', 'month');
   params.set('labelY', 'amount ($)');
