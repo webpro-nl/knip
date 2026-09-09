@@ -1,11 +1,11 @@
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
-import { _createSyncModuleResolver, _resolveModuleSync } from '../util/resolve.ts';
+import { _createSyncModuleResolver, _resolveModuleSync, resolvePackageManifestPath } from '../util/resolve.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
@@ -75,38 +75,19 @@ interface PathMapping {
 }
 
 const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
-const installedPackageRootCache = new Map<string, string | undefined>();
 
 export function clearModuleResolutionCaches() {
   for (const cache of moduleResolutionCaches) cache.clear();
-  installedPackageRootCache.clear();
-}
-
-function getInstalledPackageRoot(candidate: string) {
-  if (installedPackageRootCache.has(candidate)) return installedPackageRootCache.get(candidate);
-  let packageRoot: string | undefined;
-  try {
-    packageRoot = toPosix(realpathSync(candidate));
-  } catch {}
-  installedPackageRootCache.set(candidate, packageRoot);
-  return packageRoot;
 }
 
 function getAttributedPackageName(specifier: string, containingFile: string, resolvedFileName: string) {
   const packageName = getPackageNameFromFilePath(resolvedFileName);
   const specifierPackageName = getPackageNameFromModuleSpecifier(specifier);
   if (!specifierPackageName || specifierPackageName === packageName) return packageName;
-  let dir = dirname(containingFile);
-  while (true) {
-    const packageRoot = getInstalledPackageRoot(join(dir, 'node_modules', specifierPackageName));
-    if (packageRoot) {
-      const isResolvedInstall = resolvedFileName === packageRoot || resolvedFileName.startsWith(`${packageRoot}/`);
-      return isResolvedInstall ? specifierPackageName : packageName;
-    }
-    const parent = dirname(dir);
-    if (parent === dir) return packageName;
-    dir = parent;
-  }
+  const manifestPath = resolvePackageManifestPath(specifierPackageName, dirname(containingFile));
+  if (!manifestPath) return packageName;
+  const packageRoot = dirname(manifestPath);
+  return resolvedFileName.startsWith(`${packageRoot}/`) ? specifierPackageName : packageName;
 }
 
 function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[] | undefined {

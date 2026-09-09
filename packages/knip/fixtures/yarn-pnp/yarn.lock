@@ -10,6 +10,8 @@ __metadata:
   resolution: "@fixtures/yarn-pnp@workspace:."
   dependencies:
     host-with-hidden-manifest: "workspace:*"
+    isarray: "npm:2.0.5"
+    isarray-alias: "npm:isarray@2.0.5"
     peer-package: "workspace:*"
   languageName: unknown
   linkType: soft
@@ -21,6 +23,13 @@ __metadata:
     peer-package: "*"
   languageName: unknown
   linkType: soft
+
+"isarray-alias@npm:isarray@2.0.5, isarray@npm:2.0.5":
+  version: 2.0.5
+  resolution: "isarray@npm:2.0.5"
+  checksum: 10c0/4199f14a7a13da2177c66c31080008b7124331956f47bca57dd0b6ea9f11687aa25e565a2c7a2b519bc86988d10398e3049a1f5df13c9f6b7664154690ae79fd
+  languageName: node
+  linkType: hard
 
 "peer-package@workspace:*, peer-package@workspace:packages/peer-package":
   version: 0.0.0-use.local
