@@ -1,5 +1,5 @@
 import picomatch from 'picomatch';
-import type { SyncCompilers } from './compilers/types.ts';
+import { normalizeCompilers } from './compilers/index.ts';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
@@ -61,8 +61,7 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   ignoreExportsUsedInFile: false,
   isIncludeEntryExports: false,
-  syncCompilers: new Map(),
-  asyncCompilers: new Map(),
+  compilers: new Map(),
   rootPluginConfigs: {},
 };
 
@@ -151,8 +150,6 @@ export class ConfigurationChief {
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
-    const { syncCompilers, asyncCompilers } = rawConfig;
-
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
     for (const [pluginName, pluginConfig] of Object.entries(rawConfig)) {
@@ -173,8 +170,7 @@ export class ConfigurationChief {
       ignoreIssues,
       ignoreWorkspaces,
       isIncludeEntryExports,
-      syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
-      asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
+      compilers: normalizeCompilers(rawConfig),
       rootPluginConfigs,
     };
   }

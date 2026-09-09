@@ -1,10 +1,10 @@
 import { _getInputsFromScripts } from '../binaries/index.ts';
 import type { ScriptParserContext } from '../binaries/create-script-parser-context.ts';
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
-import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { isDefaultPattern, type ConfigurationChief, type Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
-import { getCompilerExtensions, getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
-import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS } from '../constants.ts';
+import { getIncludedCompilers, normalizeCompilerExtension } from '../compilers/index.ts';
+import { DEFAULT_EXTENSIONS, FOREIGN_FILE_EXTENSIONS, IS_DTS, ROOT_WORKSPACE_NAME } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -32,6 +32,8 @@ import {
   isIgnore,
   isProductionEntry,
   isProject,
+  toDeferResolveEntry,
+  toDependency,
   toProductionEntry,
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
@@ -42,7 +44,7 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join, relative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
@@ -114,6 +116,22 @@ export async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
+  const preprocessorInputs = new Map<string, Input[]>();
+  for (const specifier of options.preprocessorInputs) {
+    const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
+    const isLocal = isInternal(specifier);
+    const input = isLocal
+      ? toDeferResolveEntry(specifier, { containingFilePath })
+      : toDependency(specifier, { containingFilePath, optional: true });
+    // The negated production entry pattern only applies to its own workspace, so a local
+    // preprocessor must be registered in the workspace holding it, not always in the root
+    const owner = isLocal ? chief.findWorkspaceByFilePath(specifier)?.name : undefined;
+    const name = owner ?? ROOT_WORKSPACE_NAME;
+    const inputs = preprocessorInputs.get(name);
+    if (inputs) inputs.push(input);
+    else preprocessorInputs.set(name, [input]);
+  }
+
   for (const workspace of workspaces) {
     const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
@@ -150,30 +168,27 @@ export async function build({
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
       ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
-      readFile: (filePath: string) => principal.readFile(filePath),
+      readRawFile: (filePath: string) => principal.fileManager.readRawFile(filePath) ?? '',
       configFilesMap,
       options,
     });
 
     await worker.init();
 
-    const compilers = getIncludedCompilers(
-      new Map(chief.config.syncCompilers),
-      new Map(chief.config.asyncCompilers),
-      dependencies,
-      dep => deputy.addReferencedDependency(name, dep)
+    const compilers = getIncludedCompilers(chief.config.compilers, dependencies, dep =>
+      deputy.addReferencedDependency(name, dep)
     );
-    const registerCompiler: RegisterCompiler = async ({ extension, compiler }) => {
+    const registerCompiler: RegisterCompiler = ({ extension, compiler }) => {
       const ext = normalizeCompilerExtension(extension);
-      if (compilers[0].has(ext)) return;
-      compilers[0].set(ext, compiler);
+      if (compilers.has(ext)) return;
+      compilers.set(ext, compiler);
     };
 
     await worker.registerCompilers(registerCompiler);
 
     principal.addCompilers(name, compilers);
 
-    const extensions = getCompilerExtensions(compilers);
+    const extensions = [...compilers.keys()];
     const extensionGlobStr = `.{${[...DEFAULT_EXTENSIONS, ...extensions].map(ext => ext.slice(1)).join(',')}}`;
     const config = chief.getConfigForWorkspace(name, extensions);
     worker.config = config;
@@ -181,7 +196,7 @@ export async function build({
     const pluginSourceMaps = await worker.resolveSourceMaps();
     augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
-    const inputs = new Set<Input>();
+    const inputs = new Set(preprocessorInputs.get(name));
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
@@ -354,11 +369,15 @@ export async function build({
     }
 
     if (!options.isProduction) {
-      const hints = worker.getConfigurationHints('entry', userEntryPatterns, userEntryPaths, principal.entryPaths);
+      const includedPaths = config.isIncludeEntryExports
+        ? new Set([...principal.entryPaths].filter(filePath => !principal.skipExportsAnalysis.has(filePath)))
+        : principal.entryPaths;
+      const hints = worker.getConfigurationHints('entry', userEntryPatterns, userEntryPaths, includedPaths);
       for (const hint of hints) collector.addConfigurationHint(hint);
     }
 
-    principal.addEntryPaths(userEntryPaths);
+    const hasExplicitEntries = config.entry.some(pattern => !isDefaultPattern('entry', pattern));
+    principal.addEntryPaths(userEntryPaths, hasExplicitEntries ? { skipExportsAnalysis: false } : undefined);
 
     if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
@@ -429,9 +448,8 @@ export async function build({
 
   const analyzeSourceFile = (
     filePath: string,
-    pp: ProjectPrincipal,
+    sourceText: string,
     parseResult?: import('oxc-parser').ParseResult,
-    sourceText?: string,
     cachedFile?: FileNode
   ) => {
     if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
@@ -440,12 +458,12 @@ export async function build({
     const workspace = chief.findWorkspaceByFilePath(filePath);
 
     if (workspace) {
-      const file = pp.analyzeSourceFile(
+      const file = principal.analyzeSourceFile(
         filePath,
+        sourceText,
         analyzeOpts,
         workspace.config.ignoreExportsUsedInFile,
         parseResult,
-        sourceText,
         cachedFile
       );
 
@@ -480,12 +498,12 @@ export async function build({
 
       for (const filePath of file.imports.programFiles) {
         const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) pp.addProgramPath(filePath);
+        if (!isIgnored) principal.addProgramPath(filePath);
       }
 
       for (const filePath of file.imports.entryFiles) {
         const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) pp.addEntryPath(filePath, { skipExportsAnalysis: true });
+        if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
       const wsDependencies = deputy.getDependencies(workspace.name);
@@ -497,7 +515,7 @@ export async function build({
         if (isWorkspace || wsDependencies.has(packageName)) {
           file.imports.external.add({ ..._import, specifier: packageName });
           if (isWorkspace && !isGitIgnored(_import.filePath)) {
-            pp.addProgramPath(_import.filePath);
+            principal.addProgramPath(_import.filePath);
           }
         }
       }
@@ -524,14 +542,19 @@ export async function build({
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           const specifierFilePath = handleInput(input, workspace);
-          if (specifierFilePath) pp.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+          if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }
 
       if (file.importGlobs.length > 0) {
-        const globbed = resolveImportGlobs(file.importGlobs, filePath, pp.resolveGlobPattern, workspace.dir);
-        for (const importedFilePath of globbed) {
-          if (!isGitIgnored(importedFilePath)) pp.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
+        const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
+        const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of analyzed) {
+          if (!isGitIgnored(importedFilePath)) principal.addProgramPath(importedFilePath);
+        }
+        const entries = resolveImportGlobs(entryImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
+        for (const importedFilePath of entries) {
+          if (!isGitIgnored(importedFilePath)) principal.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
         }
       }
 
@@ -542,6 +565,7 @@ export async function build({
 
       const node = graph.get(filePath);
       if (node) {
+        node.skipExports = file.skipExports;
         node.imports = file.imports;
         node.exports = file.exports;
         node.duplicates = file.duplicates;
@@ -559,15 +583,10 @@ export async function build({
 
   principal.init();
 
-  if (principal.asyncCompilers.size > 0) {
-    streamer.cast('Running async compilers');
-    await principal.runAsyncCompilers();
-  }
-
   streamer.cast('Analyzing source files');
 
-  principal.walkAndAnalyze((filePath, parseResult, sourceText, cachedFile) => {
-    analyzeSourceFile(filePath, principal, parseResult, sourceText, cachedFile);
+  await principal.walkAndAnalyze((filePath, parseResult, sourceText, cachedFile) => {
+    analyzeSourceFile(filePath, sourceText, parseResult, cachedFile);
     const node = graph.get(filePath);
     if (!node) return;
     const paths: string[] = [];
@@ -578,7 +597,12 @@ export async function build({
   });
 
   for (const filePath of principal.getUnreferencedFiles()) {
-    if (IS_DTS.test(filePath) && isAmbientDeclarationFile(filePath, principal.readFile(filePath))) continue;
+    if (IS_DTS.test(filePath)) {
+      const loaded = principal.fileManager.loadSourceText(filePath);
+      const sourceText = typeof loaded === 'string' ? loaded : await loaded;
+      principal.fileManager.sourceTextCache.delete(filePath);
+      if (isAmbientDeclarationFile(filePath, sourceText)) continue;
+    }
     unreferencedFiles.add(filePath);
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
@@ -600,7 +624,11 @@ export async function build({
     entryPaths,
     analyzedFiles,
     unreferencedFiles,
-    analyzeSourceFile,
+    analyzeSourceFile: async (filePath: string) => {
+      const loaded = principal.fileManager.loadSourceText(filePath);
+      const sourceText = typeof loaded === 'string' ? loaded : await loaded;
+      analyzeSourceFile(filePath, sourceText);
+    },
     enabledPluginsStore,
   };
 }

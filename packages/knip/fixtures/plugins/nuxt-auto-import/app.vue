@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { StatusBadge } from '#components';
+
 const { count } = useCounter();
 const date = ref(formatDate(new Date()));
 const theme = { default: 'system' };

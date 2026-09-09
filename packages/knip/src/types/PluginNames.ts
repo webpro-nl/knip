@@ -64,6 +64,7 @@ export type PluginName =
   | 'mdx'
   | 'mdxlint'
   | 'metro'
+  | 'mise'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
@@ -248,6 +249,7 @@ export const pluginNames = [
   'mdx',
   'mdxlint',
   'metro',
+  'mise',
   'mocha',
   'moonrepo',
   'msw',

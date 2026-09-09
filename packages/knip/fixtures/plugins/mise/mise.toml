@@ -1,0 +1,22 @@
+[tools]
+node = "24"
+
+[tasks]
+lint = "npx --no-install eslint ."
+
+[tasks.test]
+run = "npm exec -- vitest run"
+
+[tasks.build]
+run = [
+  { task = "lint" },
+  { tasks = ["test", "format"] },
+  "yarn exec assets build",
+]
+run_windows = "pnpm exec windows-checker"
+
+[tasks.ci]
+description = "unused-package"
+depends = ["build"]
+sources = ["scripts/unused.ts"]
+outputs = ["dist/unused.ts"]

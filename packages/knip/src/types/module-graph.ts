@@ -81,6 +81,7 @@ type ExportMap = Map<Identifier, Export>;
 export type Imports = Set<Import>;
 
 export type FileNode = {
+  skipExports: boolean;
   imports: {
     readonly internal: ImportMap;
     readonly external: Set<Import>;
@@ -104,6 +105,7 @@ export interface ImportGlob {
   base?: string;
   cwd?: string;
   filter?: RegExp;
+  analyzeExports?: boolean;
 }
 
 export type ModuleGraph = Map<FilePath, FileNode>;

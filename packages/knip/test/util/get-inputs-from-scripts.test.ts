@@ -118,6 +118,8 @@ test('getInputsFromScripts (dotenv)', () => {
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
   t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env API_URL=https://example.test program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env program', [toBinary('cross-env')], knownOnly);
   t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', [toBinary('cross-env'), toBinary('program')]);
@@ -279,6 +281,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm runtime set node 22 -g', []);
   t('pnpm rt set node lts -g', []);
   t('pnpm sbom --sbom-format cyclonedx', []);
+  t('pnpm stage publish', []);
   t('pnpm pack-app --entry dist/index.cjs --target linux-x64', []);
   t('pnpm peers check', []);
   t('pnpm ping --registry https://registry.npmjs.org', []);
@@ -366,6 +369,7 @@ test('getInputsFromScripts ("positionals")', () => {
 });
 
 test('getInputsFromScripts (c8)', () => {
+  t('c8 program', [toBinary('c8'), toBinary('program')], knownOnly);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);

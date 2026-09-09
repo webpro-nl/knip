@@ -5,7 +5,7 @@ import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../.
 import { _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
+import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
@@ -167,7 +167,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
     if (!seenRoots.has(viteRoot)) {
       seenRoots.add(viteRoot);
-      for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
+      const publicDir =
+        cfg.publicDir === false || cfg.publicDir === ''
+          ? undefined
+          : toAbsolute(toPosix(cfg.publicDir ?? 'public'), viteRoot);
+      for (const entry of await getIndexHtmlEntries(viteRoot, publicDir)) inputs.add(entry);
     }
 
     const vitestRoot = toAbsolute(cfg.test?.root ?? '.', options.cwd);

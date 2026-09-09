@@ -1,10 +1,10 @@
-import { partitionCompilers } from '../compilers/index.ts';
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
 import { knipConfigurationSchema } from '../schema/configuration.ts';
 import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
+import { arrayify } from './array.ts';
 import { getCatalogContainer } from './catalog.ts';
 import { parseNumericOption, type ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
@@ -21,7 +21,7 @@ import { loadResolvedConfigFile } from './load-config.ts';
 import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
-import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { isAbsolute, isInternal, join, normalize, toAbsolute, toPosix } from './path.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -84,7 +84,7 @@ export const createOptions = async (options: CreateOptions) => {
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
+  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
@@ -130,6 +130,17 @@ export const createOptions = async (options: CreateOptions) => {
   const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? []);
 
   const workspace = options.workspace ?? args.workspace;
+
+  const toPreprocessor = (specifier: string) => (isInternal(specifier) ? toAbsolute(specifier, cwd) : specifier);
+  const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
+  const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+  // A configured preprocessor stays referenced by the config file even when --preprocessor overrides which ones run
+  const preprocessorInputs = args.preprocessor
+    ? [...new Set([...configuredPreprocessor, ...preprocessor])]
+    : preprocessor;
+  const preprocessorOptions =
+    args['preprocessor-options'] ??
+    (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
 
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
@@ -196,6 +207,9 @@ export const createOptions = async (options: CreateOptions) => {
     maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
     maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
     parsedConfig,
+    preprocessor,
+    preprocessorInputs,
+    preprocessorOptions,
     rules,
     tags,
     traceDependency: args['trace-dependency'],

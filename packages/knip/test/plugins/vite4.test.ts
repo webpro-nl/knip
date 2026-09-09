@@ -11,12 +11,16 @@ test('Find entry from Vite index.html with custom root', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(!('app/main.ts' in issues.files));
-  assert(!('app/component.ts' in issues.files));
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'app/module.js',
+    'app/public/missing.ts',
+    'app/public/unused.js',
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    files: 3,
+    processed: 9,
+    total: 9,
   });
 });

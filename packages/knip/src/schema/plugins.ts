@@ -77,6 +77,7 @@ export const pluginsSchema = z.object({
   mdx: pluginSchema,
   mdxlint: pluginSchema,
   metro: pluginSchema,
+  mise: pluginSchema,
   mocha: pluginSchema,
   moonrepo: pluginSchema,
   msw: pluginSchema,
