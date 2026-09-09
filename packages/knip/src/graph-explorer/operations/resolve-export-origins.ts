@@ -90,23 +90,13 @@ export const createExportOriginResolver = (graph: ModuleGraph) => {
         for (const [sourcePath, imports] of node.imports.internal) {
           if (getPassThroughReExportSources(imports, identifier)) {
             addResolution(
-              resolve(
-                sourcePath,
-                identifier,
-                isTypeOnly || isTypeOnlyEdge(node, sourcePath, identifier),
-                seen
-              )
+              resolve(sourcePath, identifier, isTypeOnly || isTypeOnlyEdge(node, sourcePath, identifier), seen)
             );
           }
           forEachAliasReExport(imports, (sourceId, alias) => {
             if (alias !== identifier) return;
             addResolution(
-              resolve(
-                sourcePath,
-                sourceId,
-                isTypeOnly || isTypeOnlyEdge(node, sourcePath, sourceId),
-                seen
-              )
+              resolve(sourcePath, sourceId, isTypeOnly || isTypeOnlyEdge(node, sourcePath, sourceId), seen)
             );
           });
         }
@@ -126,12 +116,7 @@ export const createExportOriginResolver = (graph: ModuleGraph) => {
       for (const [sourcePath, imports] of node.imports.internal) {
         if (!getStarReExportSources(imports)) continue;
         addResolution(
-          resolve(
-            sourcePath,
-            identifier,
-            isTypeOnly || isTypeOnlyEdge(node, sourcePath, IMPORT_STAR),
-            seen
-          )
+          resolve(sourcePath, identifier, isTypeOnly || isTypeOnlyEdge(node, sourcePath, IMPORT_STAR), seen)
         );
       }
     }
