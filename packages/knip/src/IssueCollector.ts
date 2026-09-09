@@ -35,6 +35,7 @@ export class IssueCollector {
   private referencedFiles = new Set<string>();
   private configurationHints: ConfigurationHints = new Map();
   private tagHints = new Set<TagHint>();
+  private hasConfigLoadErrors = false;
   private ignorePatterns = new Set<string>();
   private ignoreFilesPatterns = new Set<string>();
   private isMatch: (filePath: string) => boolean;
@@ -190,6 +191,10 @@ export class IssueCollector {
     this.tagHints.add(issue);
   }
 
+  addConfigLoadError() {
+    this.hasConfigLoadErrors = true;
+  }
+
   purge() {
     const unusedFiles = new Set<string>();
     for (const issues of Object.values(this.issues.files)) {
@@ -206,6 +211,7 @@ export class IssueCollector {
       counters: this.counters,
       tagHints: this.tagHints,
       configurationHints: Array.from(this.configurationHints.values()),
+      hasConfigLoadErrors: this.hasConfigLoadErrors,
     };
   }
 

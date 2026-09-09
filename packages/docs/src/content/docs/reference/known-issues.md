@@ -17,6 +17,9 @@ $ knip
 ERROR: Error loading vite.config.ts
 ```
 
+Knip exits with code `2` when a plugin config file fails to load.
+`--no-exit-code` does not suppress this error.
+
 Knip may load such files differently, in a different environment, with missing
 environment variables, missing path aliases, etcetera. Use `--debug` to locate
 the cause of the issue with more details.

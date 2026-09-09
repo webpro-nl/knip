@@ -35,6 +35,7 @@ test('session runs configured preprocessors for issues and results', async () =>
     'configurationHints',
     'counters',
     'enabledPlugins',
+    'hasConfigLoadErrors',
     'includedWorkspaceDirs',
     'issues',
     'selectedWorkspaces',
