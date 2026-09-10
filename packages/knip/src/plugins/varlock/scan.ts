@@ -47,7 +47,7 @@ export const scanVarlockFiles = (paths: string[], cwd: string) => {
       debugLog('Varlock', `Unable to read ${realPath} (${error instanceof Error ? error.message : error})`);
       continue;
     }
-    const { directives, disabled } = parseVarlockFile(source, realPath);
+    const { directives, disabled } = parseVarlockFile(source);
     if (disabled) continue;
 
     for (const { name, descriptor, enabled, allowMissing } of directives) {

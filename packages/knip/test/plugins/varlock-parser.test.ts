@@ -59,3 +59,45 @@ VALUE=
 
   assert.deepEqual(directives, [{ name: 'import', descriptor: './conditional.env', enabled: null }]);
 });
+
+test('Parse nested expressions and quoted delimiters', () => {
+  const source = `# @plugin("./plugins/a,@b#c.js") @import(
+#   './.env.shared',
+#   enabled=eq(fallback($APP_ENV, development), production),
+#   allowMissing=true,
+# ) # @plugin(ignored-plugin)
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [
+    { name: 'plugin', descriptor: './plugins/a,@b#c.js' },
+    { name: 'import', descriptor: './.env.shared', enabled: null, allowMissing: true },
+  ]);
+});
+
+test('Keep valid directives when a later directive is malformed', () => {
+  const source = `# @plugin(valid-plugin)
+# @import(./.env.broken
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'plugin', descriptor: 'valid-plugin' }]);
+});
+
+test('Ignore dynamic descriptors and non-boolean option literals', () => {
+  const source = `# @plugin(resolvePlugin(production))
+# @import(./.env.shared, enabled="false", allowMissing=$ALLOW_MISSING)
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'import', descriptor: './.env.shared', enabled: null, allowMissing: null }]);
+});
