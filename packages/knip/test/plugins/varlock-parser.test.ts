@@ -38,6 +38,18 @@ VALUE=
   );
 });
 
+test('Ignore decorators attached to the first item', () => {
+  const source = `# @plugin(root-plugin)
+# ---
+# @plugin(item-plugin)
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'plugin', descriptor: 'root-plugin' }]);
+});
+
 test('Parse files with a UTF-8 BOM and indented comments', () => {
   const source = `\uFEFF  # @plugin(indented-plugin)
 
@@ -100,4 +112,22 @@ VALUE=
   const { directives } = parseVarlockFile(source);
 
   assert.deepEqual(directives, [{ name: 'import', descriptor: './.env.shared', enabled: null, allowMissing: null }]);
+});
+
+test('Parse static scalar descriptors strictly', () => {
+  const source = `# @plugin('plugin\\'s.js')
+# @plugin("a" + "b")
+# @plugin(foo bar)
+# @plugin(01)
+# @plugin(-0)
+
+VALUE=
+`;
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(
+    directives.map(directive => directive.descriptor),
+    ["plugin's.js", '01', '-0']
+  );
 });
