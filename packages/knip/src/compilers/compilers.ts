@@ -10,7 +10,17 @@ export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
-export const importMatcher = /import(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
+export const javascriptNonCodeMatcher =
+  /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\$]|\$(?!\{))*`|\/\/[^\r\n\u2028\u2029]*|\/\*[\s\S]*?(?:\*\/|$)/g;
+export const importMatcher = /\bimport\b(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
+
+// Blank out comments and string contents (keeping quote characters and length so
+// offsets stay aligned), so keywords inside them are never mistaken for imports.
+const maskNonCode = (match: string) => {
+  const quote = match[0];
+  const isQuoted = (quote === '"' || quote === "'" || quote === '`') && match.length > 1 && match.endsWith(quote);
+  return isQuoted ? `${quote}${' '.repeat(match.length - 2)}${quote}` : ' '.repeat(match.length);
+};
 
 export const collectImports: CompilerSync = text => {
   if (!text.includes('import')) return '';
@@ -27,10 +37,14 @@ export const importsWithinScripts: CompilerSync = (text: string) => {
   let scriptMatch: RegExpExecArray | null;
   while ((scriptMatch = scriptExtractor.exec(text))) {
     const scriptBody = scriptMatch[2];
-    const body = scriptBody.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
+    if (!scriptBody) continue;
+    const masked = scriptBody.replace(javascriptNonCodeMatcher, maskNonCode);
     let importMatch: RegExpExecArray | null;
     importMatcher.lastIndex = 0;
-    while ((importMatch = importMatcher.exec(body))) scripts.push(importMatch[0]);
+    while ((importMatch = importMatcher.exec(masked))) {
+      const start = importMatch.index;
+      scripts.push(scriptBody.slice(start, start + importMatch[0].length));
+    }
   }
   return scripts.join(';\n');
 };
