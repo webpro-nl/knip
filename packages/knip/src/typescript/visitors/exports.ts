@@ -286,7 +286,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   let members: ExportMember[] = [];
   let binding = 'default';
 
-  if (decl.type === 'FunctionDeclaration') {
+  if (decl.type === 'FunctionDeclaration' || decl.type === 'TSDeclareFunction') {
     type = SYMBOL_TYPE.FUNCTION;
     pos = decl.id?.start ?? decl.start;
     binding = decl.id?.name ?? binding;

@@ -80,12 +80,7 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
       const collision = traceFile && traceExport ? explorer.getAmbiguousStarExport(traceFile, traceExport) : undefined;
       if (collision) {
         collision.origins.sort((a, b) => compareStrings(a.filePath, b.filePath));
-        const namespaces = collision.namespaces.join(' and ');
-        const namespaceLabel =
-          collision.namespaces.length === 1 ? `${namespaces} namespace` : `${namespaces} namespaces`;
-        console.log(
-          `Ambiguous export ${st.cyanBright(traceExport ?? '')} in ${toRel(traceFile ?? '')}: competing export * origins in the ${namespaceLabel}`
-        );
+        console.log(`${toRel(traceFile ?? '')}:${st.cyanBright(traceExport ?? '')} [ambiguous]`);
         for (let i = 0; i < collision.origins.length; i++) {
           const origin = collision.origins[i];
           const connector = i === collision.origins.length - 1 ? '└──' : '├──';

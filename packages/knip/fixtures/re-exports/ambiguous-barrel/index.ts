@@ -2,8 +2,8 @@ import { CrossNamespace, Entity, foo, type Model } from './barrel';
 import copied from './default-fruits';
 import copiedAgain from './default-vegetables';
 import './default-barrel';
-import { same } from './copy-barrel';
-import { converged, expressionDefault, namedDefault, split } from './alias-barrel';
+import { namespaceCopy, same } from './copy-barrel';
+import { converged, declaredDefault, expressionDefault, namedDefault, split } from './alias-barrel';
 import { Produce } from './namespace-barrel';
 import { Produce as DistinctProduce } from './namespace-distinct-barrel';
 import { fruit as FruitNamespace } from './namespace-explicit-barrel';
@@ -21,9 +21,11 @@ console.log(
   copied,
   copiedAgain,
   same,
+  namespaceCopy,
   converged,
   split,
   namedDefault,
+  declaredDefault,
   expressionDefault,
   Produce,
   DistinctProduce.vegetable,

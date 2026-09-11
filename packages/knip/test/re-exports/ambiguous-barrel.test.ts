@@ -13,7 +13,7 @@ test('Keep exports behind ambiguous barrels alive', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 32,
-    total: 32,
+    processed: 33,
+    total: 33,
   });
 });
