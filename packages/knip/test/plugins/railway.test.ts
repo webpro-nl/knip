@@ -7,13 +7,13 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/railway');
 
-test('Find the Railway IaC entry file and dependency', async () => {
+test('Find Railway IaC entries and dependencies', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 6,
+    total: 6,
   });
 });

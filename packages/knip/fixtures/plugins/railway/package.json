@@ -1,6 +1,10 @@
 {
   "name": "@plugins/railway",
+  "scripts": {
+    "plan": "railway config plan --file infra/provision.ts --runner tools/iac-runner.js"
+  },
   "dependencies": {
+    "drizzle-kit": "*",
     "railway": "*"
   }
 }
