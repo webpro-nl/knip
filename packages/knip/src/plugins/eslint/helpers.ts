@@ -49,20 +49,24 @@ const getInputsDeprecated = (
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, ...parsers, ...settings, ...rules]).map(id =>
-    toDeferResolve(id)
-  );
-  return [...extendConfigs, ...deferred, ...babelDependencies, ...overrides];
+  const deferred = compact([...extendsSpecifiers, ...plugins, ...settings, ...rules]).map(id => toDeferResolve(id));
+  return [...extendConfigs, ...deferred, ...parsers, ...babelDependencies, ...overrides];
 };
 
+const isParserObject = (value: Record<string, unknown>) =>
+  typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
+
+const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+
 const getParsers = ({ parser, parserOptions }: BaseConfig) => {
-  const parsers: string[] = [];
+  const inputs: Input[] = [];
   for (const value of [parser, parserOptions?.parser]) {
-    for (const name of value && typeof value === 'object' ? Object.values(value) : [value]) {
-      if (typeof name === 'string' && name !== 'espree') parsers.push(name);
+    if (typeof value === 'string') inputs.push(toParser(value));
+    else if (value && typeof value === 'object' && !isParserObject(value)) {
+      for (const name of Object.values(value)) if (typeof name === 'string') inputs.push(toParser(name));
     }
   }
-  return parsers;
+  return inputs;
 };
 
 const isQualifiedSpecifier = (specifier: string) =>
