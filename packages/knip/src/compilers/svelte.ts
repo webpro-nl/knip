@@ -1,12 +1,10 @@
-import { scriptExtractor, styleExtractor } from './compilers.ts';
+import { javascriptNonCodeMatcher, scriptExtractor, styleExtractor } from './compilers.ts';
 import type { CompilerSync } from './types.ts';
 
 const htmlCommentMatcher = /<!--[\s\S]*?-->/g;
 const dynamicImportMatcher =
   /(?<![.\w$#])import(?:\s|\/\/[^\r\n\u2028\u2029]*(?:[\r\n\u2028\u2029]|$)|\/\*[\s\S]*?(?:\*\/|$))*\((?:\s|\/\/[^\r\n\u2028\u2029]*(?:[\r\n\u2028\u2029]|$)|\/\*[\s\S]*?(?:\*\/|$))*(?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\$]|\$(?!\{))*`)[^)]*\)/g;
 const svelteExpressionMatcher = /{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/g;
-const javascriptNonCodeMatcher =
-  /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\$]|\$(?!\{))*`|\/\/[^\r\n\u2028\u2029]*|\/\*[\s\S]*?(?:\*\/|$)/g;
 
 export const dynamicImportsWithinTemplate: CompilerSync = text => {
   const template = text.replace(scriptExtractor, '').replace(styleExtractor, '').replace(htmlCommentMatcher, '');
