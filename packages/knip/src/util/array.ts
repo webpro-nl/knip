@@ -4,8 +4,12 @@ type Collection<T> = Array<T> | Set<T>;
 export const compact = <T>(collection: Collection<T | undefined>) =>
   Array.from(new Set(collection)).filter((value): value is T => Boolean(value));
 
-export const arrayify = (value?: string[] | string) =>
-  Array.isArray(value) ? value : typeof value === 'string' ? [value] : [];
+export const arrayify = (value: unknown): string[] =>
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : typeof value === 'string'
+      ? [value]
+      : [];
 
 export const partition = <T>(collection: Collection<T>, predicate: (item: T) => unknown) => {
   const results: [T[], T[]] = [[], []];

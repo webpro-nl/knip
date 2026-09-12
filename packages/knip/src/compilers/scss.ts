@@ -1,5 +1,6 @@
 import { ensureRelative, isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync } from './types.ts';
+import { hasUrlScheme } from '../util/url.ts';
 
 // https://sass-lang.com/documentation/at-rules/
 
@@ -8,15 +9,13 @@ const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 const dependencyMatcher =
   /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]|url\(\s*(?:["']([^"']*)["']|([^'")\s]+))\s*\)/g;
 
-const urlSchemeMatcher = /^[a-z][a-z\d+.-]*:/i;
-
 const getUrlSpecifier = (url: string): string | undefined => {
   if (
     !url ||
     url.startsWith('//') ||
     url.startsWith('/') ||
     url.startsWith('#') ||
-    urlSchemeMatcher.test(url) ||
+    hasUrlScheme(url) ||
     url.includes('$') ||
     url.includes('#{')
   )

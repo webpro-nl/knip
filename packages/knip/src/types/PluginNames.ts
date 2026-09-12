@@ -162,6 +162,7 @@ export type PluginName =
   | 'unplugin-vue-i18n'
   | 'unplugin-vue-markdown'
   | 'unplugin-vue-router'
+  | 'varlock'
   | 'vercel'
   | 'vercel-og'
   | 'vike'
@@ -347,6 +348,7 @@ export const pluginNames = [
   'unplugin-vue-i18n',
   'unplugin-vue-markdown',
   'unplugin-vue-router',
+  'varlock',
   'vercel',
   'vercel-og',
   'vike',
