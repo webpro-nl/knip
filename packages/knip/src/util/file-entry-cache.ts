@@ -39,7 +39,7 @@ export class FileEntryCache<T> {
 
   constructor(cacheId: string, _path: string) {
     this.filePath = path.resolve(_path, cacheId);
-    if (isFile(this.filePath)) this.cache = create(this.filePath);
+    if (isFile(this.filePath)) this.cache = create(this.filePath) ?? this.cache;
   }
 
   getFileDescriptor(filePath: string): FileDescriptor<T> {
