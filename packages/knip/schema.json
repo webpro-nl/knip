@@ -826,6 +826,10 @@
           "title": "qwik plugin configuration (https://knip.dev/reference/plugins/qwik)",
           "$ref": "#/definitions/plugin"
         },
+        "railway": {
+          "title": "railway plugin configuration (https://knip.dev/reference/plugins/railway)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
           "$ref": "#/definitions/plugin"

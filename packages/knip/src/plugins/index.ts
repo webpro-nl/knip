@@ -106,6 +106,7 @@ import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
 import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
+import { default as railway } from './railway/index.ts';
 import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
 import { default as reactEmail } from './react-email/index.ts';
@@ -291,6 +292,7 @@ export const Plugins = {
   prisma,
   quasar,
   qwik,
+  railway,
   raycast,
   'react-cosmos': reactCosmos,
   'react-email': reactEmail,
