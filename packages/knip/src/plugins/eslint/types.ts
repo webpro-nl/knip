@@ -1,6 +1,6 @@
 type ParserOptions = {
   project?: string;
-  parser?: string;
+  parser?: string | Record<string, unknown>;
   babelOptions?: {
     plugins: string[];
     presets: string[];
@@ -11,7 +11,7 @@ export type Settings = Record<string, Record<string, unknown> | string>;
 
 type Rules = Record<string, string | number>;
 
-type BaseConfig = {
+export type BaseConfig = {
   extends?: string | string[];
   parser?: string;
   parserOptions?: ParserOptions;

@@ -5,7 +5,7 @@ import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '.
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { substringBefore } from '../../util/string.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
-import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated, Settings } from './types.ts';
+import type { BaseConfig, ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated, Settings } from './types.ts';
 
 export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName);
 
@@ -41,7 +41,7 @@ const getInputsDeprecated = (
     toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
   );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
-  const parser = config.parser ?? config.parserOptions?.parser;
+  const parsers = getParsers(config);
   const babelDependencies = config.parserOptions?.babelOptions
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
@@ -49,10 +49,20 @@ const getInputsDeprecated = (
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(id =>
+  const deferred = compact([...extendsSpecifiers, ...plugins, ...parsers, ...settings, ...rules]).map(id =>
     toDeferResolve(id)
   );
   return [...extendConfigs, ...deferred, ...babelDependencies, ...overrides];
+};
+
+const getParsers = ({ parser, parserOptions }: BaseConfig) => {
+  const parsers: string[] = [];
+  for (const value of [parser, parserOptions?.parser]) {
+    for (const name of value && typeof value === 'object' ? Object.values(value) : [value]) {
+      if (typeof name === 'string' && name !== 'espree') parsers.push(name);
+    }
+  }
+  return parsers;
 };
 
 const isQualifiedSpecifier = (specifier: string) =>
