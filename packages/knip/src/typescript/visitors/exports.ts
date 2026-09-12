@@ -54,7 +54,17 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
             : undefined;
         const specTags = s.getJSDocTags(spec.start);
         const tags = specTags.size ? new Set([...declTags, ...specTags]) : declTags;
-        s.addExport(exportedName, type, spec.exported?.start ?? spec.start, [], fix as Fix, true, tags);
+        s.addExport(
+          exportedName,
+          type,
+          spec.exported?.start ?? spec.start,
+          [],
+          fix as Fix,
+          true,
+          tags,
+          exportedName,
+          true
+        );
       }
     }
     return;
@@ -229,6 +239,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
 
       const _import = localName ? s.localImportMap.get(localName) : undefined;
       const isReExport = !!_import;
+      const isBindingReExport = !!_import && !_import.isDynamicImport;
 
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
@@ -250,7 +261,9 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         [],
         fix as Fix,
         isReExport,
-        s.getJSDocTags(node.start)
+        s.getJSDocTags(node.start),
+        localName,
+        isBindingReExport
       );
       if (exportedName) s.specifierExportNames.add(exportedName);
       if (localName && exportedName) addLocalToExport(s, localName, exportedName);
@@ -272,20 +285,24 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   let type: SymbolType = SYMBOL_TYPE.UNKNOWN;
   let pos = decl.start;
   let members: ExportMember[] = [];
+  let binding = 'default';
 
-  if (decl.type === 'FunctionDeclaration') {
+  if (decl.type === 'FunctionDeclaration' || decl.type === 'TSDeclareFunction') {
     type = SYMBOL_TYPE.FUNCTION;
     pos = decl.id?.start ?? decl.start;
+    binding = decl.id?.name ?? binding;
     s.collectRefsInType(decl, 'default', hasExplicitFunctionReturnType(decl));
   } else if (decl.type === 'ClassDeclaration') {
     type = SYMBOL_TYPE.CLASS;
     pos = decl.id?.start ?? decl.start;
+    binding = decl.id?.name ?? binding;
     members = [];
     s.collectRefsInType(decl, 'default', true);
     if (decl.id) addLocalToExport(s, decl.id.name, 'default');
   } else if (decl.type === 'TSInterfaceDeclaration') {
     type = SYMBOL_TYPE.INTERFACE;
     pos = decl.id.start;
+    binding = decl.id.name;
     s.collectRefsInType(decl.body, 'default', false);
   } else if (decl.type === 'Identifier') {
     type = s.localDeclarationTypes.get(decl.name) ?? SYMBOL_TYPE.UNKNOWN;
@@ -321,7 +338,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
     }
   }
 
-  s.addExport('default', type, pos, members, fix, false, s.getJSDocTags(node.start));
+  s.addExport('default', type, pos, members, fix, false, s.getJSDocTags(node.start), binding);
 }
 
 export function handleExportAssignment(node: TSExportAssignment, s: WalkState) {

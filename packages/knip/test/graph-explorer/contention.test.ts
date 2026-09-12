@@ -110,7 +110,7 @@ test('should return empty map when no contention exists', () => {
 
   graph.set(filePath2, {
     ...baseFileNode,
-    exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
+    exports: new Map([['identifier', { ...baseExport, isReExport: true, isBindingReExport: true }]]),
     imports: {
       ...baseFileNode.imports,
       internal: new Map([
@@ -253,7 +253,7 @@ test('should detect conflict from source file aggregated by consumer', () => {
 
   graph.set(indexFile, {
     ...baseFileNode,
-    exports: new Map([['identifier', { ...baseExport, isReExport: true }]]),
+    exports: new Map(),
     imports: {
       ...baseFileNode.imports,
       internal: new Map([

@@ -29,6 +29,7 @@ export const baseFileNode: FileNode = {
 
 export const baseExport: Export = {
   identifier: 'identifier',
+  binding: 'identifier',
   pos: 0,
   line: 1,
   col: 0,
@@ -38,6 +39,7 @@ export const baseExport: Export = {
   hasRefsInFile: false,
   referencedIn: new Set(),
   isReExport: false,
+  isBindingReExport: false,
   fixes: [],
 };
 
