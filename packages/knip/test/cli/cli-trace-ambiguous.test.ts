@@ -109,6 +109,18 @@ test('knip --trace-export keeps copied namespace imports as distinct local bindi
   }
 });
 
+test('knip --trace-export keeps dynamic import results as distinct local bindings', () => {
+  const actual = exec('knip --trace-export dynamicCopy --trace-file dynamic-barrel.ts', { cwd }).stdout;
+  const expected = `dynamic-barrel.ts:dynamicCopy [ambiguous]
+├── dynamic-left.ts:source
+└── dynamic-right.ts:source`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
 test('knip --trace-export converges aliases of one local binding through a diamond', () => {
   assert.equal(
     exec('knip --trace-export converged --trace-file alias-barrel.ts', { cwd }).stdout,
@@ -170,6 +182,32 @@ test('knip --trace-export gives explicit namespace exports precedence over expor
 
 test('knip --trace-export distinguishes namespace exports of different modules', () => {
   const actual = exec('knip --trace-export Produce --trace-file namespace-distinct-barrel.ts', { cwd }).stdout;
+  const expected = `namespace-distinct-barrel.ts:Produce [ambiguous]
+├── namespace-origin-two.ts:*
+└── origin.ts:*`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export prioritizes exact ambiguous exports over matching enum members', () => {
+  const actual = exec('knip --trace-export fruit --trace-file member-barrel.ts', { cwd }).stdout;
+  const expected = `member-barrel.ts:fruit [ambiguous]
+├── shadowed.ts:fruit
+└── winner.ts:fruit`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export resolves dotted namespace traces through the namespace root', () => {
+  const actual = exec('knip --trace-export Produce.vegetable --trace-file namespace-distinct-barrel.ts', {
+    cwd,
+  }).stdout;
   const expected = `namespace-distinct-barrel.ts:Produce [ambiguous]
 ├── namespace-origin-two.ts:*
 └── origin.ts:*`;

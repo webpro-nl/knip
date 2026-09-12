@@ -43,6 +43,24 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     else for (const line of rows) console.log(line);
   } else {
     let nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
+    const traceFile = options.traceFile;
+    const traceExport = options.traceExport;
+    const dotIndex = traceExport?.indexOf('.') ?? -1;
+    const resolvedTraceExport = dotIndex === -1 ? traceExport : traceExport?.slice(0, dotIndex);
+    const collision =
+      traceFile && resolvedTraceExport ? explorer.getAmbiguousStarExport(traceFile, resolvedTraceExport) : undefined;
+    const toRel = (path: string) => toRelative(path, options.cwd);
+
+    if (collision) {
+      collision.origins.sort((a, b) => compareStrings(a.filePath, b.filePath));
+      console.log(`${toRel(traceFile ?? '')}:${st.cyanBright(resolvedTraceExport ?? '')} [ambiguous]`);
+      for (let i = 0; i < collision.origins.length; i++) {
+        const origin = collision.origins[i];
+        const connector = i === collision.origins.length - 1 ? '└──' : '├──';
+        console.log(`${st.dim(connector)} ${toRel(origin.filePath)}:${st.cyanBright(origin.identifier)}`);
+      }
+      return;
+    }
 
     // Fallback: resolve dotted name as namespace member (e.g. Fruits.apple → Fruits)
     if (nodes.length === 0 && options.traceExport?.includes('.')) {
@@ -72,22 +90,8 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     }
 
     nodes.sort((a, b) => compareStrings(a.filePath, b.filePath) || compareStrings(a.identifier, b.identifier));
-    const toRel = (path: string) => toRelative(path, options.cwd);
 
     if (nodes.length === 0) {
-      const traceFile = options.traceFile;
-      const traceExport = options.traceExport;
-      const collision = traceFile && traceExport ? explorer.getAmbiguousStarExport(traceFile, traceExport) : undefined;
-      if (collision) {
-        collision.origins.sort((a, b) => compareStrings(a.filePath, b.filePath));
-        console.log(`${toRel(traceFile ?? '')}:${st.cyanBright(traceExport ?? '')} [ambiguous]`);
-        for (let i = 0; i < collision.origins.length; i++) {
-          const origin = collision.origins[i];
-          const connector = i === collision.origins.length - 1 ? '└──' : '├──';
-          console.log(`${st.dim(connector)} ${toRel(origin.filePath)}:${st.cyanBright(origin.identifier)}`);
-        }
-        return;
-      }
       if (options.traceFile && !graph.has(options.traceFile)) {
         console.log(`File not found in module graph: ${toRel(options.traceFile)}`);
       } else {

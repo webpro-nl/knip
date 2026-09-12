@@ -239,6 +239,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
 
       const _import = localName ? s.localImportMap.get(localName) : undefined;
       const isReExport = !!_import;
+      const isBindingReExport = !!_import && !_import.isDynamicImport;
 
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
@@ -262,7 +263,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         isReExport,
         s.getJSDocTags(node.start),
         localName,
-        isReExport
+        isBindingReExport
       );
       if (exportedName) s.specifierExportNames.add(exportedName);
       if (localName && exportedName) addLocalToExport(s, localName, exportedName);
