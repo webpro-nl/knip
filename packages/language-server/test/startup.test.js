@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -60,6 +60,7 @@ test('falls back to bundled knip when the project has no local knip', async () =
     await done;
   } finally {
     server.kill();
+    rmSync(cwd, { recursive: true, force: true });
   }
 
   assert.ok(
