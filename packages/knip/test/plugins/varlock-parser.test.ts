@@ -61,6 +61,14 @@ VALUE=
   assert.deepEqual(directives, [{ name: 'plugin', descriptor: 'indented-plugin' }]);
 });
 
+test('Parse files with CRLF line endings', () => {
+  const source = '# @plugin(windows-plugin)\r\n\r\nVALUE=\r\n';
+
+  const { directives } = parseVarlockFile(source);
+
+  assert.deepEqual(directives, [{ name: 'plugin', descriptor: 'windows-plugin' }]);
+});
+
 test('Preserve dynamic directive options', () => {
   const source = `# @import(./conditional.env, enabled=forEnv(production))
 

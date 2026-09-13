@@ -12,7 +12,7 @@ const getRootComments = (source: string) => {
   let block: string[] = [];
   let hasConfigItem = false;
 
-  for (const line of source.replace(/^\uFEFF/, '').split('\n')) {
+  for (const line of source.replace(/^\uFEFF/, '').split(/\r?\n/)) {
     if (!line.trim()) {
       comments.push(...block);
       block = [];
