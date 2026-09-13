@@ -41,9 +41,22 @@ jobs:
         node:
           - 20
           - 22
+        exclude:
+          - os: windows-latest
+            node: 20
+        include:
+          - os: windows-latest
+            node: 20
+            shard: 1/3
+          - os: windows-latest
+            node: 20
+            shard: 2/3
+          - os: windows-latest
+            node: 20
+            shard: 3/3
 
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} (Node v${{ matrix.node }})
+    name: ${{ matrix.os }} (Node v${{ matrix.node }})${{ matrix.shard && format(' (shard {0})', matrix.shard) || '' }}
     permissions:
       contents: read
 
@@ -71,7 +84,7 @@ jobs:
           pnpm tsc --noEmit
         working-directory: packages/knip
       - name: Test knip
-        run: pnpm test --runtime node --smoke
+        run: pnpm test --runtime node --smoke --shard=${{ matrix.shard || '1/1' }}
         working-directory: packages/knip
       - name: Run knip
         run: ./packages/knip/bin/knip.js --reporter github-actions
