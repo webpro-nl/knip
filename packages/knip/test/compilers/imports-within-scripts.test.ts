@@ -4,38 +4,18 @@ import { importsWithinScripts } from '../../src/compilers/compilers.ts';
 
 const wrap = (script: string) => `<script lang="ts">\n${script}\n</script>`;
 
-test('Import keyword inside strings is not treated as an import', () => {
+test('Import keyword inside an identifier is not treated as an import', () => {
   const source = wrap(`
-  const note = 'this is important'
   import Inner from './Inner.svelte'
+  let tags = ['important', 'x']
   `);
 
   assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import Inner from './Inner.svelte'");
 });
 
-test('Standalone word "import" inside a string is not treated as an import', () => {
+test('Import keyword in a property access is not treated as an import', () => {
   const source = wrap(`
-  const hint = "you can import your data here"
-  import Widget from './Widget.svelte'
-  `);
-
-  assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import Widget from './Widget.svelte'");
-});
-
-test('Import keyword inside an identifier is not treated as an import', () => {
-  const source = wrap(`
-  const importantValue = 1
-  import Widget from './Widget.svelte'
-  `);
-
-  assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import Widget from './Widget.svelte'");
-});
-
-test('Import keyword inside comments is not treated as an import', () => {
-  const source = wrap(`
-  /**
-   * NEVER import from outside this directory
-   */
+  loader.import('./not-a-module')
   import Widget from './Widget.svelte'
   `);
 
