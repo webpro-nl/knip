@@ -56,6 +56,7 @@ export interface ExternalRef {
 
 export interface Export extends Position {
   readonly identifier: Identifier;
+  readonly binding: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
   jsDocTags: Tags;
@@ -65,6 +66,7 @@ export interface Export extends Position {
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
   isReExport: boolean;
+  isBindingReExport: boolean;
 }
 
 export interface ExportMember extends Position {
