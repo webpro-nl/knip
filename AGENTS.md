@@ -36,6 +36,7 @@ JavaScript and TypeScript projects.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE-GRAPH.md][4] first.
 - For issues re. exported identifiers (following refs, shadowing, `ignoreExportsUsedInFile`), see [EXPORTS.md][5].
 - Before any significant performance tuning, consult [PERFORMANCE.md][6].
+- When modifying or reviewing built-in compilers, read [COMPILERS.md][10].
 - For test/fixture structure, conventions, and where a new test goes, see [TESTS.md][7].
 
 ## Issues and Pull Requests
@@ -135,3 +136,4 @@ pnpm build
 [7]: ./.agents/TESTS.md
 [8]: ./packages/knip/src/util/debug.ts
 [9]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[10]: ./.agents/COMPILERS.md
