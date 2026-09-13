@@ -39,7 +39,7 @@ export const getDependenciesFromCommand = (
 
   if (binary in KnownResolvers) {
     const resolver = KnownResolvers[binary as KnownResolver];
-    return resolver(binary, words, options);
+    return [...resolver(binary, words, options), ...fromNodeOptions];
   }
 
   if (pluginArgsMap.has(binary)) {
