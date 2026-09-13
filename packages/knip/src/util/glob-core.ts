@@ -12,7 +12,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, isAbsolute, join, relative, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -62,7 +62,7 @@ const getGitDir = (cwd: string): string | undefined => {
   if (isFile(dotGit)) {
     const content = readFileSync(dotGit, 'utf8').trim();
     const match = content.match(/^gitdir:\s*(.+)$/);
-    if (match) return join(cwd, match[1]);
+    if (match) return toAbsolute(toPosix(match[1]), cwd);
   }
   return undefined;
 };
@@ -180,7 +180,11 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
   const gitDir = getGitDir(cwd);
   if (gitDir) {
-    const excludePath = join(gitDir, 'info/exclude');
+    const commonDirPath = join(gitDir, 'commondir');
+    const commonDir = isFile(commonDirPath)
+      ? toAbsolute(toPosix(readFileSync(commonDirPath, 'utf8').trim()), gitDir)
+      : gitDir;
+    const excludePath = join(commonDir, 'info/exclude');
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
 
