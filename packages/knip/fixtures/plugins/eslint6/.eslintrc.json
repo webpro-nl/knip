@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "extends": ["eslint:recommended"],
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@babel/eslint-parser"
+  },
+  "overrides": [
+    {
+      "files": ["*.vue"],
+      "parserOptions": {
+        "parser": {
+          "js": "espree",
+          "ts": "@typescript-eslint/parser",
+          "<template>": "espree"
+        }
+      }
+    }
+  ]
+}

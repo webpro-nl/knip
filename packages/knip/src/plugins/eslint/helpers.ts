@@ -5,7 +5,7 @@ import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '.
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { substringBefore } from '../../util/string.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
-import type { ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated, Settings } from './types.ts';
+import type { BaseConfig, ESLintConfig, ESLintConfigDeprecated, OverrideConfigDeprecated, Settings } from './types.ts';
 
 export const isFlatConfig = (fileName: string) => /eslint\.config/.test(fileName);
 
@@ -41,7 +41,7 @@ const getInputsDeprecated = (
     toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
   );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
-  const parser = config.parser ?? config.parserOptions?.parser;
+  const parsers = getParsers(config);
   const babelDependencies = config.parserOptions?.babelOptions
     ? getDependenciesFromConfig(config.parserOptions.babelOptions)
     : [];
@@ -49,10 +49,24 @@ const getInputsDeprecated = (
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, parser, ...settings, ...rules]).map(id =>
-    toDeferResolve(id)
-  );
-  return [...extendConfigs, ...deferred, ...babelDependencies, ...overrides];
+  const deferred = compact([...extendsSpecifiers, ...plugins, ...settings, ...rules]).map(id => toDeferResolve(id));
+  return [...extendConfigs, ...deferred, ...parsers, ...babelDependencies, ...overrides];
+};
+
+const isParserObject = (value: Record<string, unknown>) =>
+  typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
+
+const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+
+const getParsers = ({ parser, parserOptions }: BaseConfig) => {
+  const inputs: Input[] = [];
+  for (const value of [parser, parserOptions?.parser]) {
+    if (typeof value === 'string') inputs.push(toParser(value));
+    else if (value && typeof value === 'object' && !isParserObject(value)) {
+      for (const name of Object.values(value)) if (typeof name === 'string') inputs.push(toParser(name));
+    }
+  }
+  return inputs;
 };
 
 const isQualifiedSpecifier = (specifier: string) =>
