@@ -27,6 +27,7 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert(issues.unresolved['.eslintrc.cjs']['eslint-config-airbnb']);
   assert(issues.unresolved['.eslintrc.cjs']['eslint-config-next']);
   assert(issues.unresolved['.eslintrc.cjs']['eslint-plugin-import']);
+  assert(issues.unresolved['.eslintrc.cjs']['eslint-import-resolver-webpack']);
   assert(issues.unresolved['.eslintrc.js']['eslint-config-airbnb']);
   assert(issues.unresolved['.eslintrc.js']['eslint-config-next']);
   assert(issues.unresolved['.eslintrc.js']['eslint-import-resolver-exports']);
@@ -39,7 +40,7 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 12,
-    unresolved: 11,
+    unresolved: 12,
     processed: 3,
     total: 3,
   });
