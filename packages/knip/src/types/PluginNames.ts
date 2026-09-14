@@ -146,6 +146,7 @@ export type PluginName =
   | 'taskfile'
   | 'tauri'
   | 'temporal'
+  | 'textlint'
   | 'travis'
   | 'ts-node'
   | 'tsd'
@@ -332,6 +333,7 @@ export const pluginNames = [
   'taskfile',
   'tauri',
   'temporal',
+  'textlint',
   'travis',
   'ts-node',
   'tsd',

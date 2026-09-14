@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "no-todo": true,
+    "textlint-rule-max-comma": { "max": 3 },
+    "@textlint-rule/no-unmatched-pair": true,
+    "preset-ja-technical-writing": { "sentence-length": false },
+    "@textlint-ja/preset-ai-writing": true,
+    "write-good": false,
+    "terminology": true
+  },
+  "filters": {
+    "comments": true
+  },
+  "plugins": {
+    "@textlint/markdown": true,
+    "html": true
+  }
+}

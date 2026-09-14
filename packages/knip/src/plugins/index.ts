@@ -145,6 +145,7 @@ import { default as tanstackRouter } from './tanstack-router/index.ts';
 import { default as taskfile } from './taskfile/index.ts';
 import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
+import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
@@ -331,6 +332,7 @@ export const Plugins = {
   taskfile,
   tauri,
   temporal,
+  textlint,
   travis,
   'ts-node': tsNode,
   tsd,
