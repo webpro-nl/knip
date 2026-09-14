@@ -403,6 +403,7 @@ export class WorkspaceWorker {
         configFilePath: containingFilePath,
         configFileDir: cwd,
         configFileName: '',
+        isResolvedConfigFile: isResolvedConfigFiles,
         getInputsFromScripts: createGetInputsFromScripts(containingFilePath),
       };
 
