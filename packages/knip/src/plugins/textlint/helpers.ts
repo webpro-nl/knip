@@ -1,5 +1,6 @@
-import { toDependency } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import type { Manifest } from '../../util/package-json.ts';
+import { isInternal, toAbsolute } from '../../util/path.ts';
 
 // https://github.com/textlint/textlint/blob/3fd08dc7d6ce40f366bd5a5bb1899fec2892441a/packages/@textlint/config-loader/src/package-prefix.ts
 
@@ -52,10 +53,15 @@ const toPresetDependency = (key: string, manifest: Manifest) => {
 const toModuleDependency = (prefix: string, key: string, manifest: Manifest) =>
   toPackageDependency(prefix, key, [createFullPackageName(prefix, key), key], manifest);
 
-export const toRuleDependency = (key: string, manifest: Manifest) =>
-  isPresetRuleKey(key) ? toPresetDependency(key, manifest) : toModuleDependency(RULE_PREFIX, key, manifest);
+const toLocalEntry = (key: string, cwd: string) => toEntry(toAbsolute(key, cwd));
 
-export const toFilterRuleDependency = (key: string, manifest: Manifest) =>
-  toModuleDependency(FILTER_RULE_PREFIX, key, manifest);
+export const toRuleDependency = (key: string, manifest: Manifest, cwd: string) => {
+  if (isInternal(key)) return toLocalEntry(key, cwd);
+  return isPresetRuleKey(key) ? toPresetDependency(key, manifest) : toModuleDependency(RULE_PREFIX, key, manifest);
+};
 
-export const toPluginDependency = (key: string, manifest: Manifest) => toModuleDependency(PLUGIN_PREFIX, key, manifest);
+export const toFilterRuleDependency = (key: string, manifest: Manifest, cwd: string) =>
+  isInternal(key) ? toLocalEntry(key, cwd) : toModuleDependency(FILTER_RULE_PREFIX, key, manifest);
+
+export const toPluginDependency = (key: string, manifest: Manifest, cwd: string) =>
+  isInternal(key) ? toLocalEntry(key, cwd) : toModuleDependency(PLUGIN_PREFIX, key, manifest);

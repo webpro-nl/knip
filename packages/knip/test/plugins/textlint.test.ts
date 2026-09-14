@@ -14,11 +14,13 @@ test('Find dependencies with the textlint plugin', async () => {
   assert(issues.unlisted['.textlintrc.json']['textlint-rule-terminology']);
   assert(issues.unlisted['config/docs.textlintrc.json']['@textlint-ja/textlint-rule-no-synonyms']);
   assert.equal(issues.unlisted['.textlintrc.json']['textlint-rule-write-good'], undefined);
+  assert.equal(issues.unlisted['.textlintrc.cjs'], undefined);
+  assert.equal(issues.unlisted['package.json'], undefined);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 2,
-    processed: 0,
-    total: 0,
+    processed: 2,
+    total: 2,
   });
 });
