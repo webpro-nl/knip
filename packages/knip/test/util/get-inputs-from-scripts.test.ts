@@ -128,6 +128,9 @@ test('getInputsFromScripts (cross-env/env vars)', () => {
   t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", [toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
   t("NODE_OPTIONS='--require pkg-a' npm run script", [toDeferResolve('pkg-a')]);
   t("NODE_OPTIONS='--import ./instrumentation.mjs' pnpm exec next dev", [toBinary('next'), toDeferResolve('./instrumentation.mjs')]);
+  t("NODE_OPTIONS='--require pkg-a --require pkg-b' cross-env program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
+  t("NODE_OPTIONS='--require pkg-a' retry-cli program", [toBinary('retry-cli'), toBinary('program'), toDeferResolve('pkg-a')]);
+  t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-b'), toDeferResolve('pkg-a')]);
 });
 
 test('getInputsFromScripts (cross-env/node)', () => {
