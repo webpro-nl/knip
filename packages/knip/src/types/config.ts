@@ -132,6 +132,8 @@ export interface PluginOptions extends BaseOptions {
   configFileDir: string;
   configFileName: string;
   configFilePath: string;
+  /** True when this config file was discovered as a dependency of another config file of the same plugin (e.g. a project matched through a glob in `test.projects`), rather than found directly through the plugin's own config patterns or a script reference. */
+  isResolvedConfigFile: boolean;
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
