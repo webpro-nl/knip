@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/typedoc2",
+  "devDependencies": {
+    "typedoc": "*",
+    "typedoc-github-theme": "*",
+    "typedoc-material-theme": "*",
+    "typedoc-plugin-mdn-links": "*",
+    "typedoc-plugin-zod": "*"
+  }
+}
