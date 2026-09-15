@@ -83,6 +83,8 @@ test('getInputsFromScripts (node -r)', () => {
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
   t('node --experimental-vm-modules node_modules/.bin/jest --runInBand', [toBinary('node'), toBinary('jest')]);
   t('node --enable-source-maps --expose-gc node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --experimental-detect-module --experimental-json-modules node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --openssl-legacy-provider node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
   t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toDeferResolve('dotenv-flow/config')]);
 });
