@@ -103,10 +103,17 @@ const getDependenciesFromRules = (rules: ESLintConfigDeprecated['rules'] = {}) =
     ruleKey.includes('/') ? [resolveSpecifier('eslint-plugin', ruleKey.split('/').slice(0, -1).join('/'))] : []
   );
 
+const getResolverNames = (value: unknown): string[] => {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(getResolverNames);
+  if (value && typeof value === 'object') return Object.keys(value);
+  return [];
+};
+
 const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'] = {}) => {
   return Object.entries(settings).flatMap(([settingKey, settings]) => {
     if (settingKey === 'import/resolver') {
-      return (typeof settings === 'string' ? [settings] : Object.keys(settings))
+      return getResolverNames(settings)
         .filter(key => key !== 'node')
         .map(key => {
           // TODO Resolve properly

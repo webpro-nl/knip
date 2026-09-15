@@ -6,6 +6,7 @@
   "devDependencies": {
     "eslint": "*",
     "eslint-formatter-codeframe": "*",
+    "eslint-import-resolver-webpack": "*",
     "@eslint/js": "*"
   }
 }

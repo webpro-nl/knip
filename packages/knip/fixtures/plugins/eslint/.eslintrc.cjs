@@ -8,4 +8,7 @@ module.exports = {
     'next',
   ],
   plugins: ['eslint-plugin-import', '@scope/name', '@scope'],
+  settings: {
+    'import/resolver': ['node', { webpack: { config: 'webpack.config.js' } }],
+  },
 };
