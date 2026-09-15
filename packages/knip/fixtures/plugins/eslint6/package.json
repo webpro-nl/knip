@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/eslint6",
+  "devDependencies": {
+    "eslint": "*",
+    "vue-eslint-parser": "*",
+    "@typescript-eslint/parser": "*"
+  }
+}

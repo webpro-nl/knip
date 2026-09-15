@@ -88,8 +88,8 @@ NX_DAEMON=false knip
 
 ## Raw transfer memory errors
 
-On machines with low RAM or Windows with Node.js >=22, oxc-parser raw transfer may fail under
-memory pressure:
+On machines with low RAM or Windows with Node.js >=22, oxc-parser raw transfer
+may fail under memory pressure:
 
 ```sh
 RangeError: Array buffer allocation failed

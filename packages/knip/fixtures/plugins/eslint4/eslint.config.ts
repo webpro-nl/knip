@@ -8,4 +8,9 @@ export default [
       'no-console': [0],
     },
   },
+  {
+    settings: {
+      'import/resolver': ['node', { webpack: { config: 'webpack.config.js' } }],
+    },
+  },
 ] satisfies Linter.Config[];
