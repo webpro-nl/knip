@@ -9,11 +9,25 @@ const cwd = resolve('fixtures/plugins/railway');
 
 test('Find Railway IaC entries and dependencies', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(!('infra/provision.ts' in issues.files));
+  assert(!('infra/jobs/process.ts' in issues.files));
+  assert(!('tools/iac-runner.js' in issues.files));
+  assert(!('services/inventory/scripts/deploy.ts' in issues.files));
+  assert('scripts/deploy.ts' in issues.files);
+  assert('services/storefront/scripts/build.ts' in issues.files);
+  assert('services/storefront/src/serve.ts' in issues.files);
+  assert('scripts/build.ts' in issues.files);
+  assert('dashboard/start.ts' in issues.files);
+  assert(issues.dependencies['package.json']['external-tool']);
+  assert(!issues.dependencies['package.json']?.['drizzle-kit']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    dependencies: 1,
+    files: 5,
+    processed: 10,
+    total: 10,
   });
 });

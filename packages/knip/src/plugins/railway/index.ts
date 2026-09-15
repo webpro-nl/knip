@@ -1,11 +1,12 @@
+import type { Expression } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getFirstPropertyValue, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
-import type { Input } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { isEntry, type Input } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 
 // https://docs.railway.com/infrastructure-as-code
 
@@ -18,7 +19,8 @@ const isEnabled: IsPluginEnabled = ({ cwd }) => isFile(cwd, '.railway/railway.ts
 const config = ['.railway/railway.ts'];
 
 const args: Args = {
-  resolve: ['file', 'runner'],
+  config: ['file'],
+  resolve: ['runner'],
 };
 
 const getCommands = (node: unknown): string[] => {
@@ -26,21 +28,38 @@ const getCommands = (node: unknown): string[] => {
   return command ? [command] : [...getStringValues(node)];
 };
 
+const isExternalSourceType = (type: string | undefined) => type === 'github' || type === 'image' || type === 'template';
+
 const resolveFromAST: ResolveFromAST = (program, options) => {
   const serviceNames = new Set<string>();
+  const externalSourceNames = new Set<string>();
+  const bindings = new Map<string, Expression>();
 
   for (const node of program.body) {
-    if (node.type !== 'ImportDeclaration' || getStringValue(node.source) !== 'railway/iac') continue;
-    for (const specifier of node.specifiers) {
-      if (
-        specifier.type === 'ImportSpecifier' &&
-        specifier.imported.type === 'Identifier' &&
-        specifier.imported.name === 'service'
-      ) {
-        serviceNames.add(specifier.local.name);
+    if (node.type === 'ImportDeclaration' && getStringValue(node.source) === 'railway/iac') {
+      for (const specifier of node.specifiers) {
+        if (specifier.type !== 'ImportSpecifier' || specifier.imported.type !== 'Identifier') continue;
+        if (specifier.imported.name === 'service') serviceNames.add(specifier.local.name);
+        if (isExternalSourceType(specifier.imported.name)) {
+          externalSourceNames.add(specifier.local.name);
+        }
+      }
+    } else if (node.type === 'VariableDeclaration') {
+      for (const declaration of node.declarations) {
+        if (declaration.id.type === 'Identifier' && declaration.init)
+          bindings.set(declaration.id.name, declaration.init);
       }
     }
   }
+
+  const resolveBinding = (node: Expression | undefined): Expression | undefined => {
+    const seen = new Set<string>();
+    while (node?.type === 'Identifier' && bindings.has(node.name) && !seen.has(node.name)) {
+      seen.add(node.name);
+      node = bindings.get(node.name);
+    }
+    return node;
+  };
 
   const inputs: Input[] = [];
   const visitor = new Visitor({
@@ -50,7 +69,16 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
       const serviceConfig = node.arguments[1];
       if (serviceConfig?.type !== 'ObjectExpression') return;
 
-      const source = findProperty(serviceConfig, 'source');
+      const source = resolveBinding(findProperty(serviceConfig, 'source'));
+      if (
+        (source?.type === 'CallExpression' &&
+          source.callee.type === 'Identifier' &&
+          externalSourceNames.has(source.callee.name)) ||
+        isExternalSourceType(getFirstPropertyValue(source, 'type'))
+      ) {
+        return;
+      }
+
       const sourceConfig = source?.type === 'CallExpression' ? source.arguments[1] : source;
       const rootDirectory =
         getFirstPropertyValue(sourceConfig, 'rootDirectory') ??
@@ -69,6 +97,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
       ];
 
       for (const input of options.getInputsFromScripts(commands, { knownBinsOnly: true, cwd, manifest })) {
+        if (isEntry(input)) input.specifier = toAbsolute(input.specifier, cwd);
         inputs.push({ ...input, dir: cwd });
       }
     },

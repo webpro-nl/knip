@@ -1,16 +1,22 @@
-import { defineRailway, github, project, service } from 'railway/iac';
+import { defineRailway, github, image, project, service } from 'railway/iac';
+
+const storefrontSource = github('fruit-stand/storefront', { rootDirectory: 'services/storefront' });
 
 export default defineRailway(() => {
   const storefront = service('storefront', {
-    source: github('fruit-stand/storefront', { rootDirectory: 'services/storefront' }),
+    source: storefrontSource,
     build: 'node scripts/build.ts',
     start: 'node src/serve.ts',
-    preDeploy: 'npx drizzle-kit migrate',
   });
   const inventory = service('inventory', {
     root: 'services/inventory',
-    deploy: { preDeployCommand: ['node scripts/deploy.ts'] },
+    start: './scripts/deploy.ts',
+  });
+  const dashboard = service('dashboard', {
+    source: image('nginx:latest'),
+    start: 'node dashboard/start.ts',
+    preDeploy: 'npx external-tool prepare',
   });
 
-  return project('fruit-stand', { resources: [storefront, inventory] });
+  return project('fruit-stand', { resources: [storefront, inventory, dashboard] });
 });
