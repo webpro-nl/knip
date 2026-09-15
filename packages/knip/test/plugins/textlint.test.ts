@@ -17,10 +17,12 @@ test('Find dependencies with the textlint plugin', async () => {
   assert.equal(issues.unlisted['.textlintrc.cjs'], undefined);
   assert.equal(issues.unlisted['package.json'], undefined);
 
+  assert.equal(Object.keys(issues.files).length, 0);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 2,
-    processed: 2,
-    total: 2,
+    processed: 4,
+    total: 4,
   });
 });

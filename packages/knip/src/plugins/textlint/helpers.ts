@@ -1,4 +1,4 @@
-import { toDependency, toEntry } from '../../util/input.ts';
+import { toDependency, toDeferResolveEntry } from '../../util/input.ts';
 import type { Manifest } from '../../util/package-json.ts';
 import { isInternal, toAbsolute } from '../../util/path.ts';
 
@@ -53,7 +53,7 @@ const toPresetDependency = (key: string, manifest: Manifest) => {
 const toModuleDependency = (prefix: string, key: string, manifest: Manifest) =>
   toPackageDependency(prefix, key, [createFullPackageName(prefix, key), key], manifest);
 
-const toLocalEntry = (key: string, cwd: string) => toEntry(toAbsolute(key, cwd));
+const toLocalEntry = (key: string, cwd: string) => toDeferResolveEntry(toAbsolute(key, cwd));
 
 export const toRuleDependency = (key: string, manifest: Manifest, cwd: string) => {
   if (isInternal(key)) return toLocalEntry(key, cwd);
