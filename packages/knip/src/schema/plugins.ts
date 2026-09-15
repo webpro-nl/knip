@@ -159,6 +159,7 @@ export const pluginsSchema = z.object({
   taskfile: pluginSchema,
   tauri: pluginSchema,
   temporal: pluginSchema,
+  textlint: pluginSchema,
   travis: pluginSchema,
   'ts-node': pluginSchema,
   tsd: pluginSchema,
