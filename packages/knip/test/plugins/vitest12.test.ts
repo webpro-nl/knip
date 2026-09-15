@@ -12,10 +12,11 @@ test('Find dependencies with the Vitest plugin when project config is nested in 
   const { issues, counters } = await main(options);
 
   assert(!issues.files['test/unit/setup.ts']);
+  assert(!issues.files['test/unit/global-setup.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
