@@ -23,6 +23,7 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert(issues.unlisted['.eslintrc.json']['@babel/plugin-syntax-import-assertions']);
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-config']);
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-plugin-no-prototype-methods']);
+  assert(issues.unlisted['base.eslint.js']['@babel/eslint-parser']);
 
   assert(issues.unresolved['.eslintrc.cjs']['eslint-config-airbnb']);
   assert(issues.unresolved['.eslintrc.cjs']['eslint-config-next']);
@@ -36,12 +37,13 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-comments']);
   assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-plugin']);
   assert(issues.unresolved['.eslintrc.json']['eslint-config-airbnb']);
+  assert(issues.unresolved['base.eslint.json']['eslint-plugin-import']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 12,
-    unresolved: 12,
-    processed: 3,
-    total: 3,
+    unlisted: 13,
+    unresolved: 13,
+    processed: 4,
+    total: 4,
   });
 });

@@ -33,11 +33,12 @@ const getInputsDeprecated = (
   config: ESLintConfigDeprecated | OverrideConfigDeprecated,
   options: PluginOptions
 ): (Input | ConfigInput)[] => {
-  const extendsSpecifiers = config.extends ? compact([config.extends].flat().map(resolveExtendSpecifier)) : [];
+  const extendsList = config.extends ? [config.extends].flat() : [];
+  const extendsSpecifiers = compact(extendsList.map(resolveExtendSpecifier));
   // https://github.com/prettier/eslint-plugin-prettier#recommended-configuration
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
-  const extendConfigs = extendsSpecifiers.map(specifier =>
+  const extendConfigs = [...extendsList.filter(isInternal), ...extendsSpecifiers].map(specifier =>
     toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
   );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
