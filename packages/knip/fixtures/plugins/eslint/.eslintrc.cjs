@@ -6,6 +6,7 @@ module.exports = {
     'eslint-config-airbnb',
     'plugin:@shopify/esnext',
     'next',
+    './base.eslint.js',
   ],
   plugins: ['eslint-plugin-import', '@scope/name', '@scope'],
   settings: {
