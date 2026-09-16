@@ -45,7 +45,8 @@
   "scripts": {
     "package": "node scripts/publish.js",
     "release": "release-it",
-    "test": "pnpm package && node test/run.mjs",
+    "test": "pnpm test:unit && pnpm package && node test/run.mjs",
+    "test:unit": "node --test test/tree-view-exports.test.js",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {
@@ -371,7 +372,7 @@
           "knip.exports.contention.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "Report export contention (branching and conflicts)"
+            "description": "Report export contention: ambiguous star re-exports, exports shadowed by an explicit export, and converged (diamond-shaped) re-export paths"
           }
         }
       }

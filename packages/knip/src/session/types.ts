@@ -17,9 +17,41 @@ export interface Export extends SourceLocation {
   exports: Export[] | undefined;
 }
 
+export type ContentionKind = 'ambiguous' | 'shadowed' | 'converged';
+
+export interface ContentionOrigin {
+  /** Defining module. A bare package specifier for an external origin. */
+  filePath: string;
+  /** Local binding in filePath, or '*' for an `export * as` target. */
+  identifier: string;
+  /** Position of the export entry in filePath. Absent for '*' and non-graph origins. */
+  line?: number;
+  col?: number;
+}
+
+export interface ContentionSite {
+  kind: ContentionKind;
+  /** File whose export statements combine the paths. */
+  filePath: string;
+  /** Exported name at filePath; differs from the described name after `export { a as b }`. */
+  identifier: string;
+  line?: number;
+  col?: number;
+  /** ambiguous: competing origins. shadowed: hidden origins. converged: the single origin. */
+  origins: ContentionOrigin[];
+  /** shadowed only: the binding selected by the explicit export. */
+  winner?: ContentionOrigin;
+  /** Direct sources at filePath that delivered the origins, or hid the candidates. */
+  sources: string[];
+}
+
 export interface ContentionDetails {
+  /** Legacy summary: file paths of converged sites. */
   branching: string[];
+  /** Legacy summary: file paths of origins and winners of ambiguous and shadowed sites. */
   conflict: string[];
+  /** Own site first when the described file has one, then by severity, then by path. */
+  sites: ContentionSite[];
 }
 
 export interface FileMetrics {

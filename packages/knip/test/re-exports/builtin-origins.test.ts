@@ -57,6 +57,24 @@ test('preserves builtin binding identity without introducing dependency referenc
     ]);
   }
 
+  const converged = explorer.getContention(join(options.cwd, 'converged.ts'));
+  for (const identifier of ['readFile', 'readAlias', 'fsNamespace', 'fsDefault']) {
+    assert.equal(converged.get(identifier)?.sites[0].kind, 'converged');
+  }
+
+  const ambiguous = explorer.getContention(join(options.cwd, 'ambiguous.ts')).get('readFile');
+  assert.equal(ambiguous?.sites[0].kind, 'ambiguous');
+  assert.deepEqual(
+    ambiguous?.sites[0].origins.map(origin => [origin.filePath, origin.identifier]),
+    [
+      [join(options.cwd, 'local.ts'), 'readFile'],
+      ['node:fs', 'readFile'],
+    ]
+  );
+  assert.equal(
+    explorer.getContention(join(options.cwd, 'copied-barrel.ts')).get('fsNamespace')?.sites[0].kind,
+    'ambiguous'
+  );
   assert.deepEqual([...explorer.getDependencyUsage()], []);
   assert.deepEqual(results.counters, { ...baseCounters, processed: 12, total: 12 });
 });
@@ -93,4 +111,5 @@ test('resolves direct and forwarded type-only builtin namespaces to one origin',
     origins: [{ filePath: 'node:fs', identifier: '*' }],
     hasExplicitExport: false,
   });
+  assert.equal(explorer.getContention(barrel).get('fsTypes')?.sites[0].kind, 'converged');
 });
