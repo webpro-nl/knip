@@ -1,17 +1,14 @@
-import type { ModuleGraph } from '../../types/module-graph.ts';
-import { createExportOriginResolver } from './resolve-export-origins.ts';
+import type { ExportOriginResolution } from './resolve-export-origins.ts';
 
 export interface AmbiguousStarExport {
   origins: { filePath: string; identifier: string }[];
 }
 
 export const getAmbiguousStarExport = (
-  graph: ModuleGraph,
-  filePath: string,
+  resolution: ExportOriginResolution,
   identifier: string
 ): AmbiguousStarExport | undefined => {
   if (identifier === 'default') return;
-  const resolution = createExportOriginResolver(graph)(filePath, identifier);
   if (resolution.hasExplicitExport || resolution.origins.length < 2) return;
 
   const origins = [];

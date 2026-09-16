@@ -122,24 +122,54 @@ test('knip --trace-export keeps dynamic import results as distinct local binding
 });
 
 test('knip --trace-export converges aliases of one local binding through a diamond', () => {
-  assert.equal(
-    exec('knip --trace-export converged --trace-file alias-barrel.ts', { cwd }).stdout,
-    'No export converged found in alias-barrel.ts'
-  );
+  const actual = exec('knip --trace-export converged --trace-file alias-barrel.ts', { cwd }).stdout;
+  const expected = `bindings.ts:leftShared
+└── alias-left.ts:reExportAs[leftShared → converged]
+    └── alias-barrel.ts:reExportStar[converged]
+        └── index.ts:import[converged] ⎆ ✓
+bindings.ts:rightShared
+└── alias-right.ts:reExportAs[rightShared → converged]
+    └── alias-barrel.ts:reExportStar[converged]
+        └── index.ts:import[converged] ⎆ ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
 });
 
 test('knip --trace-export converges named default declarations with their local binding', () => {
-  assert.equal(
-    exec('knip --trace-export namedDefault --trace-file alias-barrel.ts', { cwd }).stdout,
-    'No export namedDefault found in alias-barrel.ts'
-  );
+  const actual = exec('knip --trace-export namedDefault --trace-file alias-barrel.ts', { cwd }).stdout;
+  const expected = `named-default.ts:apple
+└── alias-right.ts:reExportAs[apple → namedDefault]
+    └── alias-barrel.ts:reExportStar[namedDefault]
+        └── index.ts:import[namedDefault] ⎆ ✓
+named-default.ts:default
+└── alias-left.ts:reExportAs[default → namedDefault]
+    └── alias-barrel.ts:reExportStar[namedDefault]
+        └── index.ts:import[namedDefault] ⎆ ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
 });
 
 test('knip --trace-export converges declared default functions with their local binding', () => {
-  assert.equal(
-    exec('knip --trace-export declaredDefault --trace-file alias-barrel.ts', { cwd }).stdout,
-    'No export declaredDefault found in alias-barrel.ts'
-  );
+  const actual = exec('knip --trace-export declaredDefault --trace-file alias-barrel.ts', { cwd }).stdout;
+  const expected = `declared-default.d.ts:apple
+└── alias-right.ts:reExportAs[apple → declaredDefault]
+    └── alias-barrel.ts:reExportStar[declaredDefault]
+        └── index.ts:import[declaredDefault] ⎆ ✓
+declared-default.d.ts:default
+└── alias-left.ts:reExportAs[default → declaredDefault]
+    └── alias-barrel.ts:reExportStar[declaredDefault]
+        └── index.ts:import[declaredDefault] ⎆ ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
 });
 
 test('knip --trace-export keeps expression defaults distinct from their referenced binding', () => {
@@ -170,6 +200,13 @@ test('knip --trace-export converges namespace exports of one module', () => {
   assert.equal(
     exec('knip --trace-export Produce --trace-file namespace-barrel.ts', { cwd }).stdout,
     'No export Produce found in namespace-barrel.ts'
+  );
+});
+
+test('knip --trace-export keeps the no-match message for members of a converged namespace export', () => {
+  assert.equal(
+    exec('knip --trace-export Produce.vegetable --trace-file namespace-barrel.ts', { cwd }).stdout,
+    'No export Produce.vegetable found in namespace-barrel.ts'
   );
 });
 
@@ -234,6 +271,44 @@ test('knip --trace-export terminates on ambiguous re-export cycles', () => {
   const expected = `cycle-a.ts:cycleName [ambiguous]
 ├── cycle-left.ts:cycleName
 └── cycle-right.ts:cycleName`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export traces the left origin of an export star cycle', () => {
+  const actual = exec('knip --trace-export cycleName --trace-file cycle-left.ts', { cwd }).stdout;
+  const expected = `cycle-left.ts:cycleName
+└── cycle-a.ts:reExportStar[cycleName]
+    └── index.ts:import[cycleName] ⎆ ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export traces the right origin of an export star cycle', () => {
+  const actual = exec('knip --trace-export cycleName --trace-file cycle-right.ts', { cwd }).stdout;
+  const expected = `cycle-right.ts:cycleName
+└── cycle-b.ts:reExportStar[cycleName]
+    └── cycle-a.ts:reExportStar[cycleName]
+        └── index.ts:import[cycleName] ⎆ ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export traces a star-only re-export from its origin through a re-export cycle', () => {
+  const actual = exec('knip --trace-export loopName --trace-file loop-b.ts', { cwd }).stdout;
+  const expected = `loop-origin.ts:loopName
+└── loop-a.ts:reExportStar[loopName]
+    └── loop-b.ts:reExportStar[loopName]
+        └── index.ts:import[loopName] ⎆ ✓`;
 
   if (actual !== expected) {
     showDiff(actual, expected);

@@ -10,6 +10,7 @@ import { Produce as DistinctProduce } from './namespace-distinct-barrel';
 import { fruit as FruitNamespace } from './namespace-explicit-barrel';
 import { fruit as winner } from './explicit-barrel';
 import { cycleName } from './cycle-a';
+import { loopName } from './loop-b';
 import { Basket } from './member-barrel';
 import type { TypeEntity } from './type-barrel';
 
@@ -35,5 +36,6 @@ console.log(
   FruitNamespace,
   winner,
   cycleName,
+  loopName,
   Basket.fruit
 );

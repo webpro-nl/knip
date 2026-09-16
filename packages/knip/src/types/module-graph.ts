@@ -44,6 +44,7 @@ export interface Import extends Position {
   readonly specifier: string;
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
+  readonly alias: string | undefined;
   readonly isTypeOnly: boolean;
   readonly modifiers: number;
   readonly jsDocTags: Tags | undefined;

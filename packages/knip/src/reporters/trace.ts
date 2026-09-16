@@ -1,5 +1,7 @@
+import { IMPORT_STAR } from '../constants.ts';
 import type { GraphExplorer } from '../graph-explorer/explorer.ts';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
+import { getAmbiguousStarExport } from '../graph-explorer/operations/get-ambiguous-star-export.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import st from '../util/colors.ts';
@@ -47,8 +49,10 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     const traceExport = options.traceExport;
     const dotIndex = traceExport?.indexOf('.') ?? -1;
     const resolvedTraceExport = dotIndex === -1 ? traceExport : traceExport?.slice(0, dotIndex);
+    const resolution =
+      traceFile && resolvedTraceExport ? explorer.resolveExportOrigins(traceFile, resolvedTraceExport) : undefined;
     const collision =
-      traceFile && resolvedTraceExport ? explorer.getAmbiguousStarExport(traceFile, resolvedTraceExport) : undefined;
+      resolution && resolvedTraceExport ? getAmbiguousStarExport(resolution, resolvedTraceExport) : undefined;
     const toRel = (path: string) => toRelative(path, options.cwd);
 
     if (collision) {
@@ -60,6 +64,17 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
         console.log(`${st.dim(connector)} ${toRel(origin.filePath)}:${st.cyanBright(origin.identifier)}`);
       }
       return;
+    }
+
+    if (nodes.length === 0 && resolution && !resolution.hasExplicitExport && resolution.origins.length === 1) {
+      const [origin] = resolution.origins;
+      const originFile = graph.get(origin.filePath);
+      if (originFile && origin.identifier !== IMPORT_STAR && origin.identifier !== 'default') {
+        for (const [exportId, exp] of originFile.exports) {
+          if (exp.binding !== origin.identifier) continue;
+          nodes.push(...explorer.buildExportsTree({ filePath: origin.filePath, identifier: exportId }));
+        }
+      }
     }
 
     // Fallback: resolve dotted name as namespace member (e.g. Fruits.apple → Fruits)

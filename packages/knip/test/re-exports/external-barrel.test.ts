@@ -5,15 +5,15 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/re-exports/ambiguous-barrel');
+const cwd = resolve('fixtures/re-exports/external-barrel');
 
-test('Keep exports behind ambiguous barrels alive', async () => {
+test('Keep exports behind barrels mixing external and local origins alive', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 40,
-    total: 40,
+    processed: 13,
+    total: 13,
   });
 });

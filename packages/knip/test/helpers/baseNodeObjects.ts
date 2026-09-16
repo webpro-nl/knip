@@ -47,6 +47,7 @@ export const getBaseImport = (filePath: string): Import => ({
   specifier: './module-1',
   filePath,
   identifier: 'identifier',
+  alias: undefined,
   isTypeOnly: false,
   modifiers: 0,
   pos: 0,

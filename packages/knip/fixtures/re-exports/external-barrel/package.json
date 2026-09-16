@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/re-exports-external-barrel",
+  "dependencies": {
+    "orchard-pkg": "*",
+    "produce-pkg": "*"
+  }
+}
