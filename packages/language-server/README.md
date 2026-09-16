@@ -105,8 +105,10 @@ with direct links to their usage locations.
 Optionally, the client can implement:
 
 - Follow cursor between open document and highlight export in view
-- Show contention: naming conflicts through re-exports
-- Show contention: branched/diamond-shaped re-export structures
+- Show contention: ambiguous or shadowed exports behind re-exports
+- Show contention: converged (diamond-shaped) re-export paths
+
+Each `File.contention[name].sites` entry describes where contention occurs, its kind, and the originating bindings.
 
 Example:
 
