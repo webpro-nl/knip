@@ -23,12 +23,16 @@ test('Mark only the near-operation-file preset outputs as entries, not the docum
   assert(!('operations/GetUser.generated.ts' in issues.files));
   assert(!issues.exports['operations/GetUser.generated.ts']?.['GetUserDocument']);
 
+  // `folder: 'cache/../__generated__'` normalizes to `__generated__` before the parent segments are dropped
+  assert(!('normalized/deep/__generated__/Op.generated.ts' in issues.files));
+  assert(!issues.exports['normalized/deep/__generated__/Op.generated.ts']?.['OpDocument']);
+
   assert('src/unused.ts' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 9,
-    total: 9,
+    processed: 11,
+    total: 11,
   });
 });

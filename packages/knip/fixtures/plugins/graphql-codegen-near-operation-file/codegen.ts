@@ -29,5 +29,14 @@ export default {
       },
       plugins: ['typescript-operations'],
     },
+    './normalized/': {
+      documents: 'normalized/**/*.ts',
+      preset: 'near-operation-file',
+      presetConfig: {
+        baseTypesPath: 'types.ts',
+        folder: 'cache/../__generated__',
+      },
+      plugins: ['typescript-operations'],
+    },
   },
 };

@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
-import { isInternal, join } from '../../util/path.ts';
+import { isInternal, join, normalize } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type {
   ConfiguredOutput,
@@ -62,8 +62,10 @@ const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | Confi
     const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
     const { folder = '', extension = '.generated.ts', fileName = '*', filePerOperation = false } = presetConfig;
     // The preset resolves `folder` against each document's own directory, so a parent-relative folder still
-    // lands below the output directory: keep the recursive match and drop the `..` segments
-    const subfolder = folder.split('/').filter(segment => segment !== '' && segment !== '.' && segment !== '..');
+    // lands below the output directory: keep the recursive match and drop the leading `..` segments
+    const subfolder = normalize(folder)
+      .split('/')
+      .filter(segment => segment !== '' && segment !== '.' && segment !== '..');
     return join(output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`);
   }
   return output.endsWith('/') ? `${output}**` : output;
