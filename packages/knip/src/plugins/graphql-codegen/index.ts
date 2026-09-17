@@ -4,13 +4,20 @@ import { get } from '../../util/object.ts';
 import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type {
+  ConfiguredOutput,
   ConfiguredPlugin,
   GraphqlCodegenTypes,
   GraphqlConfigTypes,
   GraphqlProjectsConfigTypes,
+  NearOperationFilePresetConfig,
   PresetNames,
 } from './types.ts';
-import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.ts';
+import {
+  isConfigurationOutput,
+  isGraphqlConfigTypes,
+  isGraphqlProjectsConfigTypes,
+  isNearOperationFilePreset,
+} from './types.ts';
 
 // Both use Cosmiconfig with custom searchPlaces - not using helper as a result
 // Codegen:
@@ -49,6 +56,22 @@ const getPluginPackageName = (name: string) => {
   return `@graphql-codegen/${name}`;
 };
 
+// The near-operation-file preset writes one file next to each document, so its output key is the documents' base
+// directory, not a location of generated files. Marking the whole directory as entries would hide every unused file
+// under it; only the generated files (`<folder>/<name><extension>`, defaults '' and '.generated.ts') are entries.
+// https://the-guild.dev/graphql/codegen/docs/presets/near-operation-file
+const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
+  if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
+    const {
+      folder = '',
+      extension = '.generated.ts',
+      fileName,
+    } = (outputConfig.presetConfig ?? {}) as NearOperationFilePresetConfig;
+    return join(output, '**', folder, `${fileName ?? '*'}${extension}`);
+  }
+  return output.endsWith('/') ? `${output}**` : output;
+};
+
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = (
   config,
   options
@@ -62,8 +85,10 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
   const generateSet = generateConfigs.flatMap(config => Object.values(config.generates));
 
   const outputs = generateConfigs
-    .flatMap(config => Object.keys(config.generates))
-    .map(output => toProductionEntry(join(options.configFileDir, output.endsWith('/') ? `${output}**` : output)));
+    .flatMap(config => Object.entries(config.generates))
+    .map(([output, outputConfig]) =>
+      toProductionEntry(join(options.configFileDir, getOutputPattern(output, outputConfig)))
+    );
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 
