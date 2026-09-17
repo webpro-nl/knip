@@ -57,10 +57,7 @@ export interface ConfiguredOutput {
    * List of available presets: https://graphql-code-generator.com/docs/presets/presets-index
    */
   preset?: PresetNames | OutputPreset;
-  /**
-   * @description Options for the preset, if any.
-   */
-  presetConfig?: NearOperationFilePresetConfig | Record<string, unknown>;
+  presetConfig?: NearOperationFilePresetConfig;
 }
 // Extracted from https://github.com/dotansimha/graphql-code-generator/blob/master/packages/utils/plugins-helpers/src/types.ts
 export interface GraphqlCodegenTypes {

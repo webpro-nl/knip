@@ -56,18 +56,12 @@ const getPluginPackageName = (name: string) => {
   return `@graphql-codegen/${name}`;
 };
 
-// The near-operation-file preset writes one file next to each document, so its output key is the documents' base
-// directory, not a location of generated files. Marking the whole directory as entries would hide every unused file
-// under it; only the generated files (`<folder>/<name><extension>`, defaults '' and '.generated.ts') are entries.
 // https://the-guild.dev/graphql/codegen/docs/presets/near-operation-file
 const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
   if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
-    const {
-      folder = '',
-      extension = '.generated.ts',
-      fileName,
-    } = (outputConfig.presetConfig ?? {}) as NearOperationFilePresetConfig;
-    return join(output, '**', folder, `${fileName ?? '*'}${extension}`);
+    const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
+    const { folder = '', extension = '.generated.ts', fileName = '*' } = presetConfig;
+    return join(output, '**', folder, `${fileName}${extension}`);
   }
   return output.endsWith('/') ? `${output}**` : output;
 };
