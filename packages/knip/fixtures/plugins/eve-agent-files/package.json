@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/eve-agent-files",
+  "dependencies": {
+    "eve": "*"
+  }
+}

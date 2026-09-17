@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
-// https://eve.dev/docs/reference/project-layout
+// https://eve.dev/docs/reference/agent-files
 
 const title = 'eve';
 
@@ -11,23 +11,38 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const extensions = '{js,jsx,ts,tsx,mjs,cjs,mts,cts}';
 
-const rootAgentFileNames = '{agent,instructions,instrumentation,sandbox}';
+const agentRoots = '{,agent/,agents/*/,agents/*/agent/}';
 
-const subagentFileNames = '{agent,instructions,sandbox}';
+const rootAgentFileNames = '{agent,instructions,instrumentation,memory,sandbox}';
+
+const rootAgentDirectories = '{channels,connections,extensions,hooks,skills,tools,schedules}';
+
+const subagentFileNames = '{agent,instructions,memory,sandbox}';
+
+const subagentDirectories = '{connections,extensions,hooks,skills,tools}';
+
+const entry = ['{evals,agents/*/evals}/evals.config.ts', '{evals,agents/*/evals}/**/*.eval.ts'];
 
 const production = [
-  `{,agent/}${rootAgentFileNames}.${extensions}`,
-  `{,agent/}sandbox/sandbox.${extensions}`,
-  `{,agent/}{channels,connections,hooks,skills,tools,schedules}/**/*.${extensions}`,
-  `{,agent/}subagents/**/${subagentFileNames}.${extensions}`,
-  `{,agent/}subagents/**/sandbox/sandbox.${extensions}`,
-  `{,agent/}subagents/**/{connections,hooks,skills,tools}/**/*.${extensions}`,
+  `${agentRoots}${rootAgentFileNames}.${extensions}`,
+  `${agentRoots}{instructions,instrumentation,memory}/*.${extensions}`,
+  `${agentRoots}sandbox/sandbox.${extensions}`,
+  `${agentRoots}sandbox/workspace/**/*.${extensions}`,
+  `${agentRoots}${rootAgentDirectories}/**/*.${extensions}`,
+  `${agentRoots}subagents/*.${extensions}`,
+  `${agentRoots}subagents/**/subagents/*.${extensions}`,
+  `${agentRoots}subagents/**/${subagentFileNames}.${extensions}`,
+  `${agentRoots}subagents/**/{instructions,memory}/*.${extensions}`,
+  `${agentRoots}subagents/**/sandbox/sandbox.${extensions}`,
+  `${agentRoots}subagents/**/sandbox/workspace/**/*.${extensions}`,
+  `${agentRoots}subagents/**/${subagentDirectories}/**/*.${extensions}`,
 ];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
+  entry,
   production,
 };
 
