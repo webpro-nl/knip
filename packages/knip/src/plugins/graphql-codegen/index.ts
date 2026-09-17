@@ -60,8 +60,11 @@ const getPluginPackageName = (name: string) => {
 const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
   if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
     const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
-    const { folder = '', extension = '.generated.ts', fileName = '*' } = presetConfig;
-    return join(output, '**', folder, `${fileName}${extension}`);
+    const { folder = '', extension = '.generated.ts', fileName = '*', filePerOperation = false } = presetConfig;
+    // The preset resolves `folder` against each document's own directory, so a parent-relative folder still
+    // lands below the output directory: keep the recursive match and drop the `..` segments
+    const subfolder = folder.split('/').filter(segment => segment !== '' && segment !== '.' && segment !== '..');
+    return join(output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`);
   }
   return output.endsWith('/') ? `${output}**` : output;
 };

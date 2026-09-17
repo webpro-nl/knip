@@ -18,6 +18,7 @@ export interface NearOperationFilePresetConfig {
   baseTypesPath?: string;
   extension?: string;
   fileName?: string;
+  filePerOperation?: boolean;
   folder?: string;
   [key: string]: unknown;
 }
