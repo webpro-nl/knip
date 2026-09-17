@@ -1,4 +1,5 @@
 import type { PluginOptions } from '../../types/config.ts';
+import type { Manifest } from '../../util/package-json.ts';
 import { compact } from '../../util/array.ts';
 import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
@@ -72,11 +73,11 @@ const getParsers = ({ parser, parserOptions }: BaseConfig) => {
 
 const isQualifiedSpecifier = (specifier: string) =>
   specifier === 'eslint' ||
-  /\/eslint-(config|plugin)$/.test(specifier) ||
-  /.+eslint-(config|plugin)\//.test(specifier) ||
-  /eslint-(config|plugin)-/.test(specifier);
+  /\/eslint-(config|plugin|formatter)$/.test(specifier) ||
+  /.+eslint-(config|plugin|formatter)\//.test(specifier) ||
+  /eslint-(config|plugin|formatter)-/.test(specifier);
 
-const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpecifier: string) => {
+const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config' | 'eslint-formatter', rawSpecifier: string) => {
   const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
   if (isQualifiedSpecifier(specifier)) return specifier;
   if (!specifier.startsWith('@')) {
@@ -137,12 +138,26 @@ export const getInputsFromSettings = (settings?: Settings) =>
   compact(getDependenciesFromSettings(settings)).map(id => toDeferResolve(id, { optional: true }));
 
 const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
-export const resolveFormatters = (formatters: string | string[]) => {
+const builtinFormattersUntilV8 = new Set([
+  'checkstyle',
+  'compact',
+  'jslint-xml',
+  'junit',
+  'tap',
+  'unix',
+  'visualstudio',
+]);
+
+export const resolveFormatters = (formatters: string | string[], manifest: Manifest) => {
   const inputs: Set<Input> = new Set();
+  const isBeforeV9 = (manifest.getMajor('eslint') ?? 9) < 9;
   for (const formatter of [formatters].flat()) {
-    if (builtinFormatters.has(formatter)) continue;
-    else if (isInternal(formatter)) inputs.add(toDeferResolve(formatter));
-    else inputs.add(toDependency(`eslint-formatter-${formatter}`));
+    if (builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter))) continue;
+    if (!formatter.startsWith('@') && formatter.includes('/')) {
+      inputs.add(toDeferResolve(isInternal(formatter) ? formatter : `./${formatter}`));
+    } else {
+      inputs.add(toDependency(resolveSpecifier('eslint-formatter', formatter)));
+    }
   }
   return inputs;
 };

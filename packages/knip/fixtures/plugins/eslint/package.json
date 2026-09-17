@@ -1,11 +1,14 @@
 {
   "name": "@plugins/eslint",
   "devDependencies": {
-    "eslint": "*",
+    "eslint": "8.57.0",
     "@nrwl/eslint-plugin-nx": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint-config-prettier": "*",
     "eslint-plugin-prettier": "*"
+  },
+  "scripts": {
+    "lint": "eslint --format compact ."
   }
 }
