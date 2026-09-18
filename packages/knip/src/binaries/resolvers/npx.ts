@@ -5,11 +5,14 @@ import { stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
 import { argsFrom } from '../util.ts';
 
+const noInstallFlags = new Set(['--no', '--no-install', '--yes=false', '--no-yes']);
+
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs } = options;
   const parsed = parseArgs(words, {
+    isStorePositions: true,
     boolean: ['yes', 'no', 'quiet'],
-    alias: { yes: 'y', no: 'no-install', package: 'p', call: 'c' },
+    alias: { yes: 'y', package: 'p', call: 'c' },
   });
 
   const packageSpecifier = parsed._[0];
@@ -19,7 +22,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const command = parsed.call ? fromArgs([parsed.call]) : [];
 
   const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
-  const opts = parsed.no ? undefined : { optional: true };
+  const commandIndex = parsed.positionalIndices![0] ?? words.length;
+  const noInstall = words.slice(0, commandIndex).some(word => noInstallFlags.has(word.value));
+  const opts = noInstall ? undefined : { optional: true };
   const dependency = isBinary ? toBinary(specifier, opts) : toDependency(specifier, opts);
   const specifiers = dependency ? [dependency] : [];
 
