@@ -5,6 +5,7 @@ const ENVIRONMENT = import.meta.env.ENVIRONMENT;
 const GITHUB_TOKEN = import.meta.env.GITHUB_TOKEN;
 
 const isFetch = ENVIRONMENT !== 'development' && Boolean(GITHUB_TOKEN);
+const agentLogins = new Set(['claude', 'codex', 'copilot', 'cursoragent', 'gemini-cli', 'openhands-agent']);
 
 export interface Contributor {
   html_url: string;
@@ -94,14 +95,14 @@ const getAllContributors = async () => {
 };
 
 const load = async (): Promise<Contributor[]> => {
-  const contributors = isFetch
+  const contributors: Contributor[] = isFetch
     ? await getAllContributors()
     : JSON.parse(await readFile('mock/contributors.json', 'utf-8'));
   if (!Array.isArray(contributors)) {
     console.log(contributors);
     return [];
   }
-  return contributors;
+  return contributors.filter(({ login }) => !login.endsWith('[bot]') && !agentLogins.has(login.toLowerCase()));
 };
 
 let contributors: Promise<Contributor[]> | undefined;
