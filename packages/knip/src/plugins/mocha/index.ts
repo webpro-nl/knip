@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDeferResolveEntry, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -21,10 +21,12 @@ const defaultExtensions = ['js', 'cjs', 'mjs'];
 
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
+  const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
+  inputs.push(...files.map(id => toDeferResolveEntry(id)));
   inputs.push(...require.map(id => toDeferResolve(id)));
   return inputs;
 };
