@@ -27,21 +27,15 @@ test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   assert.deepEqual(
     installedBinaries,
     new Map([
-      ['pm2', new Set(['pm2', 'pm2-dev', 'pm2-docker', 'pm2-runtime'])],
+      ['pm2', new Set(['pm2'])],
       ['pm2-dev', new Set(['pm2'])],
       ['pm2-docker', new Set(['pm2'])],
       ['pm2-runtime', new Set(['pm2'])],
       ['runnable', new Set(['@org/runnable'])],
       ['nx', new Set(['nx'])],
       ['package', new Set(['package-cli'])],
-      ['package-cli', new Set(['package'])],
       ['unused', new Set(['unused'])],
       ['eslint', new Set(['eslint', 'eslint-v6', 'eslint-v7', 'eslint-v8'])],
-      ['eslint-v6', new Set(['eslint'])],
-      ['eslint-v7', new Set(['eslint'])],
-      ['eslint-v8', new Set(['eslint'])],
-      ['@commitlint/cli', new Set(['commitlint'])],
-      ['@org/runnable', new Set(['runnable'])],
       ['tsup', new Set(['tsup'])],
       ['commitlint', new Set(['@commitlint/cli'])],
     ])

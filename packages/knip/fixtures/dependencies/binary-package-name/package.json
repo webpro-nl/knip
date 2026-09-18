@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/binary-package-name",
+  "scripts": {
+    "build": "custom-builder"
+  },
+  "devDependencies": {
+    "custom-builder": "*"
+  }
+}
