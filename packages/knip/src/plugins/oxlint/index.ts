@@ -1,8 +1,10 @@
 import { Visitor } from 'oxc-parser';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { type Input, toDependency, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDependency, toEntry } from '../../util/input.ts';
+import { _load } from '../../util/loader.ts';
 import { isInternal } from '../../util/path.ts';
+import { _resolveModuleSync } from '../../util/resolve.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getInputsFromSettings } from '../eslint/helpers.ts';
 import { getInputsFromSettingsAST } from '../eslint/resolveFromAST.ts';
@@ -36,14 +38,32 @@ const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins']): Input[] => {
 
 const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configFileName);
 
-const resolveConfig: ResolveConfig<OxlintConfig> = config => {
-  const inputs = resolveJsPlugins(config.jsPlugins);
+const resolveExtendedConfig = async (config: OxlintConfig, configFilePath: string): Promise<Input[]> => {
+  const inputs: Input[] = [];
+  for (const specifier of config.extends ?? []) {
+    if (isInternal(specifier)) {
+      inputs.push(toConfig('oxlint', specifier, { containingFilePath: configFilePath }));
+    } else {
+      inputs.push(toDependency(specifier));
+      const resolvedPath = _resolveModuleSync(specifier, configFilePath);
+      if (resolvedPath) {
+        const extendedConfig = (await _load(resolvedPath)) as OxlintConfig;
+        if (extendedConfig) {
+          for (const input of await resolveExtendedConfig(extendedConfig, resolvedPath)) inputs.push(input);
+        }
+      }
+    }
+  }
+  for (const input of resolveJsPlugins(config.jsPlugins)) inputs.push(input);
   for (const override of config.overrides ?? []) {
     for (const input of resolveJsPlugins(override.jsPlugins)) inputs.push(input);
   }
   for (const input of getInputsFromSettings(config.settings)) inputs.push(input);
   return inputs;
 };
+
+const resolveConfig: ResolveConfig<OxlintConfig> = (config, options) =>
+  resolveExtendedConfig(config, options.configFilePath);
 
 const resolveFromAST: ResolveFromAST = (program, options) => {
   if (!isViteConfig(options.configFileName)) return [];

@@ -12,6 +12,7 @@ type Override = {
 };
 
 export type OxlintConfig = {
+  extends?: string[];
   jsPlugins?: JsPlugin[];
   overrides?: Override[];
   settings?: Settings;
