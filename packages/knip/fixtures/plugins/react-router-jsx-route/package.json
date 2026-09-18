@@ -2,7 +2,8 @@
   "name": "@plugins/react-router-jsx-route",
   "dependencies": {
     "@react-router/node": "*",
-    "isbot": "*"
+    "isbot": "*",
+    "react": "*"
   },
   "devDependencies": {
     "@react-router/dev": "*"
