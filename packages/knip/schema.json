@@ -914,6 +914,10 @@
           "title": "simple-git-hooks plugin configuration (https://knip.dev/reference/plugins/simple-git-hooks)",
           "$ref": "#/definitions/plugin"
         },
+        "sitelo": {
+          "title": "sitelo plugin configuration (https://knip.dev/reference/plugins/sitelo)",
+          "$ref": "#/definitions/plugin"
+        },
         "size-limit": {
           "title": "size-limit plugin configuration (https://knip.dev/reference/plugins/size-limit)",
           "$ref": "#/definitions/plugin"

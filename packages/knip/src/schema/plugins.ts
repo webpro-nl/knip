@@ -140,6 +140,7 @@ export const pluginsSchema = z.object({
   sentry: pluginSchema,
   'serverless-framework': pluginSchema,
   'simple-git-hooks': pluginSchema,
+  sitelo: pluginSchema,
   'size-limit': pluginSchema,
   sst: pluginSchema,
   starlight: pluginSchema,

@@ -126,6 +126,7 @@ import { default as semanticRelease } from './semantic-release/index.ts';
 import { default as sentry } from './sentry/index.ts';
 import { default as serverlessFramework } from './serverless-framework/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
+import { default as sitelo } from './sitelo/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
@@ -313,6 +314,7 @@ export const Plugins = {
   sentry,
   'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
+  sitelo,
   'size-limit': sizeLimit,
   sst,
   starlight,

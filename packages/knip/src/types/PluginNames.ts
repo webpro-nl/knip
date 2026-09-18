@@ -127,6 +127,7 @@ export type PluginName =
   | 'sentry'
   | 'serverless-framework'
   | 'simple-git-hooks'
+  | 'sitelo'
   | 'size-limit'
   | 'sst'
   | 'starlight'
@@ -314,6 +315,7 @@ export const pluginNames = [
   'sentry',
   'serverless-framework',
   'simple-git-hooks',
+  'sitelo',
   'size-limit',
   'sst',
   'starlight',

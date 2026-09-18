@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/sitelo",
+  "type": "module",
+  "scripts": {
+    "dev": "sitelo",
+    "build": "sitelo build"
+  },
+  "dependencies": {
+    "sitelo": "*"
+  }
+}
