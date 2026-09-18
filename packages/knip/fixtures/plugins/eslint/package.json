@@ -6,9 +6,11 @@
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint-config-prettier": "*",
+    "eslint-formatter-compact": "*",
     "eslint-plugin-prettier": "*"
   },
   "scripts": {
-    "lint": "eslint --format compact ."
+    "lint": "eslint --format compact .",
+    "lint:junit": "eslint --format junit ."
   }
 }

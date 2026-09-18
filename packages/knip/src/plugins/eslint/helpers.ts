@@ -73,11 +73,11 @@ const getParsers = ({ parser, parserOptions }: BaseConfig) => {
 
 const isQualifiedSpecifier = (specifier: string) =>
   specifier === 'eslint' ||
-  /\/eslint-(config|plugin|formatter)$/.test(specifier) ||
-  /.+eslint-(config|plugin|formatter)\//.test(specifier) ||
-  /eslint-(config|plugin|formatter)-/.test(specifier);
+  /\/eslint-(config|plugin)$/.test(specifier) ||
+  /.+eslint-(config|plugin)\//.test(specifier) ||
+  /eslint-(config|plugin)-/.test(specifier);
 
-const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config' | 'eslint-formatter', rawSpecifier: string) => {
+const resolveSpecifier = (namespace: 'eslint-plugin' | 'eslint-config', rawSpecifier: string) => {
   const specifier = rawSpecifier.replace(/(^plugin:|:.+$)/, '');
   if (isQualifiedSpecifier(specifier)) return specifier;
   if (!specifier.startsWith('@')) {
@@ -148,15 +148,23 @@ const builtinFormattersUntilV8 = new Set([
   'visualstudio',
 ]);
 
+const normalizeFormatterName = (name: string) => {
+  if (!name.startsWith('@')) return name.startsWith('eslint-formatter-') ? name : `eslint-formatter-${name}`;
+  const [scope, id] = name.split('/');
+  if (!id) return `${scope}/eslint-formatter`;
+  return /^eslint-formatter(-|$)/.test(id) ? name : name.replace('/', '/eslint-formatter-');
+};
+
 export const resolveFormatters = (formatters: string | string[], manifest: Manifest) => {
   const inputs: Set<Input> = new Set();
   const isBeforeV9 = (manifest.getMajor('eslint') ?? 9) < 9;
-  for (const formatter of [formatters].flat()) {
-    if (builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter))) continue;
+  for (const rawFormatter of [formatters].flat()) {
+    const formatter = rawFormatter.replace(/\\/g, '/');
     if (!formatter.startsWith('@') && formatter.includes('/')) {
       inputs.add(toDeferResolve(isInternal(formatter) ? formatter : `./${formatter}`));
     } else {
-      inputs.add(toDependency(resolveSpecifier('eslint-formatter', formatter)));
+      const isBuiltin = builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter));
+      inputs.add(toDependency(normalizeFormatterName(formatter), isBuiltin ? { optional: true } : {}));
     }
   }
   return inputs;

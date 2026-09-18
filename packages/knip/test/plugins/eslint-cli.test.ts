@@ -24,7 +24,10 @@ test('Parse ESLint CLI formatter arguments', () => {
   const options = getOptions('*');
 
   for (const builtin of ['stylish', 'json', 'json-with-metadata', 'html']) {
-    assert.deepEqual(_getInputsFromScripts(`eslint --format ${builtin} .`, options), [toBinary('eslint')]);
+    assert.deepEqual(_getInputsFromScripts(`eslint --format ${builtin} .`, options), [
+      toBinary('eslint'),
+      toDependency(`eslint-formatter-${builtin}`, { optional: true }),
+    ]);
   }
 
   assert.deepEqual(_getInputsFromScripts('eslint --format codeframe .', options), [
@@ -35,6 +38,10 @@ test('Parse ESLint CLI formatter arguments', () => {
     toBinary('eslint'),
     toDependency('eslint-formatter-codeframe'),
   ]);
+  assert.deepEqual(_getInputsFromScripts('eslint --format eslint-plugin-summary .', options), [
+    toBinary('eslint'),
+    toDependency('eslint-formatter-eslint-plugin-summary'),
+  ]);
   assert.deepEqual(_getInputsFromScripts('eslint -f @microsoft/sarif -o results.sarif .', options), [
     toBinary('eslint'),
     toDependency('@microsoft/eslint-formatter-sarif'),
@@ -43,6 +50,18 @@ test('Parse ESLint CLI formatter arguments', () => {
     toBinary('eslint'),
     toDependency('@scope/eslint-formatter-custom'),
   ]);
+  assert.deepEqual(_getInputsFromScripts('eslint -f @scope/eslint-plugin-custom .', options), [
+    toBinary('eslint'),
+    toDependency('@scope/eslint-formatter-eslint-plugin-custom'),
+  ]);
+  assert.deepEqual(_getInputsFromScripts('eslint -f @scope .', options), [
+    toBinary('eslint'),
+    toDependency('@scope/eslint-formatter'),
+  ]);
+  assert.deepEqual(_getInputsFromScripts('eslint -f @scope/eslint-formatter .', options), [
+    toBinary('eslint'),
+    toDependency('@scope/eslint-formatter'),
+  ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format ./formatters/custom.js .', options), [
     toBinary('eslint'),
     toDeferResolve('./formatters/custom.js'),
@@ -50,6 +69,14 @@ test('Parse ESLint CLI formatter arguments', () => {
   assert.deepEqual(_getInputsFromScripts('eslint --format formatters/custom.js .', options), [
     toBinary('eslint'),
     toDeferResolve('./formatters/custom.js'),
+  ]);
+  assert.deepEqual(_getInputsFromScripts("eslint --format '.\\formatters\\custom.cjs' .", options), [
+    toBinary('eslint'),
+    toDeferResolve('./formatters/custom.cjs'),
+  ]);
+  assert.deepEqual(_getInputsFromScripts('eslint --format ".\\formatters\\custom.cjs" .', options), [
+    toBinary('eslint'),
+    toDeferResolve('./formatters/custom.cjs'),
   ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format compact .', options), [
     toBinary('eslint'),
@@ -61,7 +88,10 @@ test('Parse ESLint CLI formatter arguments (built-in formatters removed in v9)',
   const options = getOptions('8.57.0');
 
   for (const builtin of ['checkstyle', 'compact', 'jslint-xml', 'junit', 'tap', 'unix', 'visualstudio']) {
-    assert.deepEqual(_getInputsFromScripts(`eslint --format ${builtin} .`, options), [toBinary('eslint')]);
+    assert.deepEqual(_getInputsFromScripts(`eslint --format ${builtin} .`, options), [
+      toBinary('eslint'),
+      toDependency(`eslint-formatter-${builtin}`, { optional: true }),
+    ]);
   }
 
   assert.deepEqual(_getInputsFromScripts('eslint --format codeframe .', options), [

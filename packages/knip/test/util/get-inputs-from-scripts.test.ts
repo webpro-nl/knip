@@ -416,7 +416,7 @@ test('getInputsFromScripts (advanced bash syntax)', () => {
   t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
   t('var=$(node ./script.js)', [toBinary('node'), js]);
   t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js', opt)]);
-  t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint')]);
+  t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint'), toDependency('eslint-formatter-json', { optional: true })]);
   t('until curl -s localhost:3000; do sleep 1; done', [toBinary('curl'), toBinary('sleep')]);
   t('coproc eslint .', [toBinary('eslint')]);
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged', opt), toBinary('dirname')]);
