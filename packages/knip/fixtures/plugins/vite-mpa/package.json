@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/vite-mpa",
+  "devDependencies": {
+    "vite": "*"
+  },
+  "scripts": {
+    "build": "vite build"
+  }
+}
