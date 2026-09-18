@@ -1,20 +1,13 @@
 import { type Command, parse, type Script, type Statement, type Word } from 'unbash';
-import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
-import { type Input, toBinary, toDeferResolve } from '../util/input.ts';
+import type { Input } from '../util/input.ts';
 import { extractBinary, isValidBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { substringBefore, truncate } from '../util/string.ts';
 import { walkCommands } from '../util/scripts.ts';
-import { resolve as fallbackResolve } from './fallback.ts';
-import KnownResolvers from './resolvers/index.ts';
-import { resolve as resolverFromPlugins } from './plugins.ts';
-import { parseNodeArgs } from './util.ts';
-
-type KnownResolver = keyof typeof KnownResolvers;
-
-const spawningBinaries = ['cross-env', 'retry-cli'];
+import { getDependenciesFromCommand } from './command.ts';
+import { toScript } from './util.ts';
 
 const collectExpansionScripts = (word: Word, out: Script[]) => {
   if (!word.parts) return;
@@ -37,17 +30,19 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (args.length === 0) return [];
     const first = typeof args[0] === 'string' ? args[0] : args[0].value;
     if (!isValidBinary(substringBefore(first, ' '))) return [];
-    const parts: string[] = [];
-    for (const arg of args) {
-      if (typeof arg === 'string') {
-        if (arg !== '--') parts.push(arg);
-      } else if (arg.value !== '--') parts.push(arg.text);
-    }
-    return getDependenciesFromScript(parts.join(' '), {
+    return getDependenciesFromScript(toScript(args), {
       ...options,
       knownBinsOnly: false,
       ...opts,
     });
+  };
+
+  const fromWords = (words: Word[], opts: GetInputsFromScriptsOptions): Input[] => {
+    const script = words
+      .filter(word => word.text !== '--')
+      .map(word => word.text)
+      .join(' ');
+    return getDependenciesFromScript(script, opts);
   };
 
   const definedFunctions = new Set<string>();
@@ -67,59 +62,13 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   };
 
   const processCommand = (node: Command, pending: Script[]): Input[] => {
-    const text = node.name?.value;
-    const binary = text ? extractBinary(text) : text;
-
     if (node.name) collectExpansionScripts(node.name, pending);
     for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
     for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
 
-    // Bunch of early bail outs for things we can't or don't want to resolve
-    if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
-    if (binary.startsWith('-') || binary.startsWith('..')) return [];
-    if (definedFunctions.has(binary)) return [];
+    if (definedFunctions.size && node.name && definedFunctions.has(extractBinary(node.name.value))) return [];
 
-    const words = node.suffix;
-
-    // Commands that precede other commands, try again with the rest
-    if (binary === '!' || binary === 'test') return fromArgs(words);
-
-    const fromNodeOptions = node.prefix
-      .filter(a => a.name === 'NODE_OPTIONS' && a.value)
-      .map(a => a.value!.value)
-      .map(arg => parseNodeArgs(arg.split(' ')))
-      .filter(args => args.require)
-      .flatMap(arg => arg.require)
-      .map(id => toDeferResolve(id));
-
-    if (binary in KnownResolvers) {
-      const resolver = KnownResolvers[binary as KnownResolver];
-      return resolver(binary, words, { ...options, fromArgs });
-    }
-
-    if (pluginArgsMap.has(binary)) {
-      return [...resolverFromPlugins(binary, words, { ...options, fromArgs }), ...fromNodeOptions];
-    }
-
-    if (spawningBinaries.includes(binary)) {
-      const rest = node.suffix
-        .filter(w => w.text !== '--')
-        .map(w => w.text)
-        .join(' ');
-      return [toBinary(binary), ...getDependenciesFromScript(rest, options)];
-    }
-
-    if (binary in Plugins) {
-      const inputs = fallbackResolve(binary, words, { ...options, fromArgs });
-      if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
-      return [...inputs, ...fromNodeOptions];
-    }
-
-    // Before using the fallback resolver, we need a way to bail out for scripts in CI environments like GitHub
-    // Actions, which are provisioned with lots of unknown global binaries.
-    if (options.knownBinsOnly && !text?.startsWith('.')) return [];
-
-    return [...fallbackResolve(binary, words, { ...options, fromArgs }), ...fromNodeOptions];
+    return getDependenciesFromCommand(node, { ...options, fromArgs }, fromWords);
   };
 
   try {

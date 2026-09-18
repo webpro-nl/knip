@@ -3,5 +3,10 @@
   "dependencies": {
     "lodash": "catalog:",
     "express": "catalog:backend"
+  },
+  "pnpm": {
+    "overrides": {
+      "debug>react": "catalog:"
+    }
   }
 }

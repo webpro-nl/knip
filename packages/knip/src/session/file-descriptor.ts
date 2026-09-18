@@ -47,7 +47,6 @@ export const buildFileDescriptor = (
     for (const identifier of exportsMap.keys()) {
       const details = contentionMap.get(identifier);
       if (!details) continue;
-      if (details.branching.length === 0 && details.conflict.length === 0) continue;
       contention[identifier] = details;
     }
   }

@@ -134,14 +134,16 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
         }
       }
 
-      if (typeof opts.entry === 'string') entries.push(opts.entry);
-      else if (Array.isArray(opts.entry)) entries.push(...opts.entry);
-      else if (typeof opts.entry === 'object') {
-        for (const entry of Object.values(opts.entry)) {
-          if (typeof entry === 'string') entries.push(entry);
-          else if (Array.isArray(entry)) entries.push(...entry);
-          else if (typeof entry === 'function') entries.push((entry as () => string)());
-          else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
+      const entry = typeof opts.entry === 'function' ? await opts.entry() : opts.entry;
+
+      if (typeof entry === 'string') entries.push(entry);
+      else if (Array.isArray(entry)) entries.push(...entry);
+      else if (typeof entry === 'object') {
+        for (const item of Object.values(entry)) {
+          if (typeof item === 'string') entries.push(item);
+          else if (Array.isArray(item)) entries.push(...item);
+          else if (typeof item === 'function') entries.push((item as () => string)());
+          else if (item && typeof item === 'object' && 'import' in item) entries.push(...[item.import].flat());
         }
       }
 

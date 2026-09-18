@@ -9,10 +9,15 @@ interface ErrorWithCause extends Error {
 
 export class ConfigurationError extends Error {}
 
+export class CompilerError extends Error {}
+
 export class LoaderError extends Error {}
 
 export const isKnownError = (error: Error) =>
-  error instanceof ConfigurationError || error instanceof LoaderError || isZodErrorLike(error);
+  error instanceof ConfigurationError ||
+  error instanceof CompilerError ||
+  error instanceof LoaderError ||
+  isZodErrorLike(error);
 
 export const hasErrorCause = (error: Error): error is ErrorWithCause =>
   !isZodErrorLike(error) && error.cause instanceof Error;

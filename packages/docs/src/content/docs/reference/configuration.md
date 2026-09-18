@@ -213,6 +213,31 @@ letters and avoid snake-case.
 
 Also see [JSDoc & TSDoc Tags][8].
 
+### `preprocessor`
+
+Preprocess the results before providing them to the reporter(s). Can be a single
+preprocessor or an array of preprocessors. Each value is a path to a local file
+or an npm package name.
+
+```json title="knip.json"
+{
+  "preprocessor": ["./first.ts", "./second.ts"]
+}
+```
+
+Also see [Preprocessors][9].
+
+### `preprocessorOptions`
+
+Extra options to pass to the preprocessor.
+
+```json title="knip.json"
+{
+  "preprocessor": "./my-preprocessor.ts",
+  "preprocessorOptions": { "key": "value" }
+}
+```
+
 ### `treatConfigHintsAsErrors`
 
 Exit with non-zero code (1) if there are any configuration hints.
@@ -239,7 +264,7 @@ Exit with non-zero code (1) if there are any tag hints.
 
 :::tip
 
-Please read [configuring project files][9] before using the `ignore` option.
+Please read [configuring project files][10] before using the `ignore` option.
 
 :::
 
@@ -247,7 +272,7 @@ Avoid `ignore` patterns. There is almost always a better solution:
 
 - Follow up on configuration hints (if there are any).
 - Fine-tune `entry` and `project` patterns.
-- Use [production mode][10].
+- Use [production mode][11].
 - Other `ignore*` options.
 
 **NOTE**: An exception to the rule: to _temporarily_ report only issues in files
@@ -318,7 +343,7 @@ export default {
 
 Suffix an item with `!` to enable it only in production mode.
 
-Also see [Unused dependencies][11].
+Also see [Unused dependencies][12].
 
 ### `ignoreMembers`
 
@@ -453,7 +478,8 @@ entry files when reporting unused exports:
 
 If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
-or `src/routes/+page.svelte`.
+or `src/routes/+page.svelte`. Entry files discovered only through `package.json`
+scripts are also excluded; add them to `entry` to include their exports.
 
 This will also enable reporting unused members of exported enums and namespaces.
 
@@ -475,7 +501,7 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 Override built-in compilers or add custom compilers for additional file types.
 
-Also see [Compilers][12].
+Also see [Compilers][13].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -485,7 +511,8 @@ Also see [Compilers][12].
 [6]: ../explanations/plugins.md
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
-[9]: ../guides/configuring-project-files.md
-[10]: ../features/production-mode.md
-[11]: ../guides/handling-issues.mdx#unused-dependencies
-[12]: ../features/compilers.md
+[9]: ../features/reporters.md#preprocessors
+[10]: ../guides/configuring-project-files.md
+[11]: ../features/production-mode.md
+[12]: ../guides/handling-issues.mdx#unused-dependencies
+[13]: ../features/compilers.md

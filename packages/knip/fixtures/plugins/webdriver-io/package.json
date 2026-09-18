@@ -7,6 +7,11 @@
     "@wdio/cli": "*",
     "@wdio/mocha-framework": "*",
     "@wdio/concise-reporter": "*",
-    "@wdio/browser-runner": "*"
+    "@wdio/browser-runner": "*",
+    "@wdio/spec-reporter": "*",
+    "@wdio/dot-reporter": "*",
+    "@wdio/junit-reporter": "*",
+    "@wdio/allure-reporter": "*",
+    "@wdio/json-reporter": "*"
   }
 }

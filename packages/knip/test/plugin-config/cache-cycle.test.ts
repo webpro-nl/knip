@@ -66,7 +66,7 @@ test('Cached plugin config cycles terminate', async () => {
         return isAbsolute(input.specifier) ? input.specifier : join(dirname(input.containingFilePath), input.specifier);
       },
       findWorkspaceByFilePath: filePath => (filePath.startsWith(cwd) ? workspace : undefined),
-      readFile: filePath => readFileSync(filePath, 'utf8'),
+      readRawFile: filePath => readFileSync(filePath, 'utf8'),
       negatedWorkspacePatterns: [],
       ignoredWorkspacePatterns: [],
       enabledPluginsInAncestors: [],

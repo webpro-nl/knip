@@ -8,6 +8,10 @@ export interface ScriptCommand {
 
 const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 
+// Argv arrays are spawned without a shell, so single-quote each element to keep the script parser from splitting on
+// spaces or acting on operators, globs and expansions the process would have received literally
+export const toShellCommand = (argv: string[]) => argv.map(arg => `'${arg.replaceAll("'", `'\\''`)}'`).join(' ');
+
 export function* walkCommands(node: Node): Generator<Command> {
   switch (node.type) {
     case 'Command':

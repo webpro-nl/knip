@@ -26,6 +26,8 @@ export class YamlCatalogPeeker {
         this.sections.catalog = i;
       } else if (line.startsWith('catalogs:')) {
         this.sections.catalogs = i;
+      } else if (line.startsWith('overrides:')) {
+        this.sections.overrides = i;
       }
     }
     this.ready = true;
@@ -65,6 +67,19 @@ export class YamlCatalogPeeker {
           }
         }
       }
+    }
+  }
+
+  public getOverrideCatalogReferenceLocation(selector: string) {
+    if (!this.ready) this.init();
+
+    const startLine = this.sections.overrides;
+    if (typeof startLine === 'undefined') return;
+
+    for (let i = startLine + 1; i < this.lines.length; i++) {
+      const line = this.lines[i];
+      if (!line.startsWith('  ')) break;
+      if (matchesKey(line, '  ', selector)) return { line: i + 1, col: line.indexOf(selector) + 1 };
     }
   }
 }

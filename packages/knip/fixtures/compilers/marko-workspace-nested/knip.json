@@ -1,0 +1,11 @@
+{
+  "workspaces": {
+    ".": {},
+    "packages/app": {
+      "entry": ["src/index.marko"]
+    },
+    "packages/app/nested": {
+      "entry": ["src/index.marko"]
+    }
+  }
+}

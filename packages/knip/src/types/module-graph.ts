@@ -26,7 +26,7 @@ export type ImportMaps = {
   enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
-  /** Identifiers imported with alias (id → alias → files) */
+  /** Identifiers imported with alias (id → alias → files) */
   importAs: IdToNsToFileMap;
   /** Namespace imports of this file */
   importNs: IdToFileMap;
@@ -44,8 +44,10 @@ export interface Import extends Position {
   readonly specifier: string;
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
+  readonly alias: string | undefined;
   readonly isTypeOnly: boolean;
   readonly modifiers: number;
+  readonly jsDocTags: Tags | undefined;
 }
 
 export interface ExternalRef {
@@ -55,6 +57,7 @@ export interface ExternalRef {
 
 export interface Export extends Position {
   readonly identifier: Identifier;
+  readonly binding: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
   jsDocTags: Tags;
@@ -64,6 +67,7 @@ export interface Export extends Position {
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
   isReExport: boolean;
+  isBindingReExport: boolean;
 }
 
 export interface ExportMember extends Position {
@@ -80,6 +84,7 @@ type ExportMap = Map<Identifier, Export>;
 export type Imports = Set<Import>;
 
 export type FileNode = {
+  skipExports: boolean;
   imports: {
     readonly internal: ImportMap;
     readonly external: Set<Import>;
@@ -101,7 +106,9 @@ export type FileNode = {
 export interface ImportGlob {
   patterns: string[];
   base?: string;
+  cwd?: string;
   filter?: RegExp;
+  analyzeExports?: boolean;
 }
 
 export type ModuleGraph = Map<FilePath, FileNode>;

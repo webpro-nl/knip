@@ -1,0 +1,8 @@
+{
+  "name": "webpack-entry-import",
+  "private": true,
+  "devDependencies": {
+    "webpack": "1.0.0",
+    "webpack-cli": "1.0.0"
+  }
+}

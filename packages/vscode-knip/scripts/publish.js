@@ -58,7 +58,7 @@ rmSync(dist, { recursive: true, force: true });
  */
 const bundle = async (input, output, external = ext, paths) => {
   const build = await rolldown({ input: join(root, input), external, platform: 'node' });
-  await build.write({ format: 'cjs', minify: true, file: join(dist, output), paths });
+  await build.write({ format: 'cjs', minify: true, codeSplitting: false, file: join(dist, output), paths });
 };
 
 const paths = { 'knip/session': '../../knip/session.js' };

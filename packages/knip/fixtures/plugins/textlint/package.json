@@ -1,0 +1,24 @@
+{
+  "name": "@plugins/textlint",
+  "scripts": {
+    "lint:docs": "textlint --config config/docs.textlintrc.json --rule no-dead-link,no-empty-section --preset jtf-style,ja-spacing --plugin review,latex2e docs"
+  },
+  "devDependencies": {
+    "@textlint-ja/textlint-rule-preset-ai-writing": "*",
+    "@textlint-rule/textlint-rule-no-unmatched-pair": "*",
+    "@textlint/textlint-plugin-markdown": "*",
+    "textlint": "*",
+    "textlint-filter-rule-comments": "*",
+    "textlint-plugin-html": "*",
+    "textlint-plugin-latex2e": "*",
+    "textlint-plugin-review": "*",
+    "textlint-rule-max-comma": "*",
+    "textlint-rule-no-dead-link": "*",
+    "textlint-rule-no-empty-section": "*",
+    "textlint-rule-no-todo": "*",
+    "textlint-rule-preset-ja-spacing": "*",
+    "textlint-rule-preset-ja-technical-writing": "*",
+    "textlint-rule-preset-jtf-style": "*",
+    "textlint-rule-spelling": "*"
+  }
+}

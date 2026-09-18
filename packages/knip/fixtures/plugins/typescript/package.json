@@ -2,12 +2,14 @@
   "name": "@plugins/typescript",
   "scripts": {
     "build-base": "tsc -p tsconfig.base.json",
+    "build-content-mapper": "tsc -p tsconfig.content-mapper.json",
     "build-ext": "tsc -p tsconfig.ext.json",
     "build-preact": "tsc -p tsconfig.jsx-import-source-preact.json",
     "build-react": "tsc -p tsconfig.jsx-import-source-react.json",
     "build-jsx": "tsc -p tsconfig.jsx-preserve.json"
   },
   "devDependencies": {
+    "ember-content-mapper": "*",
     "@tsconfig/node16": "*",
     "@tsconfig/node20": "*",
     "@tsconfig/node22": "*",

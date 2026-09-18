@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/mise-removed-task",
+  "devDependencies": {
+    "eslint": "*",
+    "vitest": "*"
+  }
+}

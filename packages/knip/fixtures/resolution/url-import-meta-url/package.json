@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/url-import-meta-url"
+  "name": "@fixtures/url-import-meta-url",
+  "devDependencies": {
+    "declared-url-package": "*"
+  }
 }

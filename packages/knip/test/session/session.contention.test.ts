@@ -22,18 +22,108 @@ test('reports branching contention for all files in chain', async () => {
     left.file.contention.DIAMOND.branching.includes(join(left.cwd, 'diamond-top.ts')),
     'diamond-left.ts should include diamond-top.ts in branching'
   );
+
+  assert.equal(left.file.contention.DIAMOND.sites[0].kind, 'converged');
+  assert.deepEqual(left.file.contention.DIAMOND.sites, [
+    {
+      kind: 'converged',
+      filePath: join(cwd, 'diamond-top.ts'),
+      identifier: 'DIAMOND',
+      origins: [{ filePath: join(cwd, 'diamond-base.ts'), identifier: 'DIAMOND', line: 1, col: 14 }],
+      sources: [join(cwd, 'diamond-left.ts'), join(cwd, 'diamond-right.ts')],
+    },
+  ]);
+  assert.deepEqual(base.file.contention.DIAMOND.sites, left.file.contention.DIAMOND.sites);
 });
 
-test('identifies conflict contention', async () => {
+test('identifies shadowed contention with a winner', async () => {
   const { file } = await describeFile(cwd, 'overload-1.ts');
 
   const overload = file.contention.OVERLOAD;
   assert.ok(overload, 'missing OVERLOAD contention summary');
 
-  const expected = [join(cwd, 'overload-1.ts'), join(cwd, 'overload-2.ts'), join(cwd, 'overload-3.ts')];
+  const expected = [join(cwd, 'overload-1.ts'), join(cwd, 'overload-2.ts')];
 
   assert.deepEqual(overload.conflict, expected);
   assert.deepEqual(overload.branching, []);
+  assert.equal(overload.sites[0].kind, 'shadowed');
+  assert.deepEqual(overload.sites, [
+    {
+      kind: 'shadowed',
+      filePath: join(cwd, 'overload-1.ts'),
+      identifier: 'OVERLOAD',
+      origins: [{ filePath: join(cwd, 'overload-2.ts'), identifier: 'OVERLOAD', line: 1, col: 14 }],
+      sources: [join(cwd, 'overload-2.ts')],
+      line: 1,
+      col: 14,
+      winner: { filePath: join(cwd, 'overload-1.ts'), identifier: 'OVERLOAD', line: 1, col: 14 },
+    },
+  ]);
+});
+
+test('reports the shadowing site from the shadowed definition', async () => {
+  const { file } = await describeFile(cwd, 'overload-3.ts');
+
+  const overload = file.contention.OVERLOAD;
+  assert.ok(overload, 'missing OVERLOAD contention summary');
+
+  assert.equal(overload.sites[0].kind, 'shadowed');
+  assert.deepEqual(overload.conflict, [join(cwd, 'overload-2.ts'), join(cwd, 'overload-3.ts')]);
+  assert.deepEqual(overload.sites, [
+    {
+      kind: 'shadowed',
+      filePath: join(cwd, 'overload-2.ts'),
+      identifier: 'OVERLOAD',
+      origins: [{ filePath: join(cwd, 'overload-3.ts'), identifier: 'OVERLOAD', line: 1, col: 14 }],
+      sources: [join(cwd, 'overload-3.ts')],
+      line: 1,
+      col: 14,
+      winner: { filePath: join(cwd, 'overload-2.ts'), identifier: 'OVERLOAD', line: 1, col: 14 },
+    },
+  ]);
+});
+
+test('orders the described file own site before the site it shadows in turn', async () => {
+  const { file } = await describeFile(cwd, 'overload-2.ts');
+
+  const overload = file.contention.OVERLOAD;
+  assert.ok(overload, 'missing OVERLOAD contention summary');
+
+  assert.equal(overload.sites[0].kind, 'shadowed');
+  assert.deepEqual(overload.sites, [
+    {
+      kind: 'shadowed',
+      filePath: join(cwd, 'overload-2.ts'),
+      identifier: 'OVERLOAD',
+      origins: [{ filePath: join(cwd, 'overload-3.ts'), identifier: 'OVERLOAD', line: 1, col: 14 }],
+      sources: [join(cwd, 'overload-3.ts')],
+      line: 1,
+      col: 14,
+      winner: { filePath: join(cwd, 'overload-2.ts'), identifier: 'OVERLOAD', line: 1, col: 14 },
+    },
+    {
+      kind: 'shadowed',
+      filePath: join(cwd, 'overload-1.ts'),
+      identifier: 'OVERLOAD',
+      origins: [{ filePath: join(cwd, 'overload-2.ts'), identifier: 'OVERLOAD', line: 1, col: 14 }],
+      sources: [join(cwd, 'overload-2.ts')],
+      line: 1,
+      col: 14,
+      winner: { filePath: join(cwd, 'overload-1.ts'), identifier: 'OVERLOAD', line: 1, col: 14 },
+    },
+  ]);
+});
+
+test('reports the fan-in from the barrel that combines the paths, not from its consumer', async () => {
+  const barrel = await describeFile(cwd, 'src/types/public/index.ts');
+  const consumer = await describeFile(cwd, 'src/index.ts');
+
+  assert.equal(barrel.file.contention.SSRManifest?.sites[0].kind, 'converged');
+  assert.deepEqual(barrel.file.contention.SSRManifest?.sites[0].sources, [
+    join(cwd, 'src/core/app/types.ts'),
+    join(cwd, 'src/types/public/internal.ts'),
+  ]);
+  assert.equal(consumer.file.contention.SSRManifest, undefined);
 });
 
 test('propagates star re-exports for diamond-top.ts', async () => {

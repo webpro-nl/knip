@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/typescript-content-mapper",
+  "typescript": {
+    "contentMapper": {
+      "exec": ["node", "lib/transform-server.js"],
+      "compilerOptions": ["jsxImportSource"],
+      "dynamicConfig": false
+    }
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

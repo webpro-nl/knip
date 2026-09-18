@@ -1,4 +1,4 @@
-import { IMPORT_STAR } from '../constants.ts';
+import { IMPORT_FLAGS, IMPORT_STAR } from '../constants.ts';
 import type { GraphExplorer } from '../graph-explorer/explorer.ts';
 import type { UsageLocation } from '../graph-explorer/operations/get-usage.ts';
 import { getExportedIdentifiers } from '../graph-explorer/utils.ts';
@@ -80,6 +80,17 @@ export const buildExportsMap = (
 
   for (const _export of fileNode.exports.values()) {
     addExport(_export.identifier, filePath, _export.pos, _export.line, _export.col, undefined);
+  }
+
+  for (const _import of fileNode.imports.imports) {
+    if (
+      !_import.filePath &&
+      _import.modifiers & IMPORT_FLAGS.RE_EXPORT &&
+      _import.identifier === IMPORT_STAR &&
+      _import.alias
+    ) {
+      addExport(_import.alias, filePath, _import.pos, _import.line, _import.col, undefined);
+    }
   }
 
   for (const [importedFilePath, importMaps] of fileNode.imports.internal) {

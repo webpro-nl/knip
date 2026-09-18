@@ -37,18 +37,18 @@ test('ignores added file without compiler outside project glob', async () => {
   }
 });
 
-test('reports added markdown file when compiler is enabled', async () => {
+test('reports added MDX file when compiler is enabled', async () => {
   const options = await createOptions({ cwd, isSession: true });
   const session = await createSession(options);
 
-  const mdFilePath = join(cwd, 'notes.md');
+  const mdFilePath = join(cwd, 'notes.mdx');
   writeFileSync(mdFilePath, '# Notes');
 
   try {
     await session.handleFileChanges([{ type: 'added', filePath: mdFilePath }]);
 
     const unusedFiles = getUnusedFilePaths(session.getIssues().issues);
-    assert.ok(unusedFiles.includes(mdFilePath), 'Markdown file with compiler should be reported as unused');
+    assert.ok(unusedFiles.includes(mdFilePath), 'MDX file with compiler should be reported as unused');
   } finally {
     cleanup([mdFilePath]);
   }

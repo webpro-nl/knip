@@ -1,0 +1,3 @@
+[tasks.nested]
+dir = "../../.."
+run = "node scripts/unused.ts"

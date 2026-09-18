@@ -46,49 +46,50 @@ RTFM so you don't have to. Using a newer model results in an optimized
 - [Imports & Exports][7]
 - [Contention][8]
   - [Circular Dependencies][9]
-  - [Conflicts][10]
-  - [Branching][11]
-- [VS Code Extension Settings][12]
+  - [Ambiguous][10]
+  - [Shadowed][11]
+  - [Converged][12]
+- [VS Code Extension Settings][13]
 
 ### Lint Findings
 
-![Lint Findings][13]
+![Lint Findings][14]
 
 ### Imports & Exports
 
-![hover][14]
+![hover][15]
 
 ### Contention
 
-The IDE extension shows extra issues in the tree views like circular
-dependencies. We're starting out with some extra novelties like conflicting and
-branched/diamond-shaped import chains.
+The extension shows circular dependencies and three kinds of export contention: ambiguous, shadowed, and converged.
 
 #### Circular Dependencies
 
 If an import is part of a circular dependency, Knip will display:
 
-![Circular Dependencies][15]
+![Circular Dependencies][16]
 
-#### Conflicts
+#### Ambiguous
 
-TypeScript shows direct conflicts when importing or re-exporting the same named
-export from different files. Except when the problem is more subtle and the
-chain spans more than one file. Knip warns:
+Different bindings compete for the same name, with no winner. Knip lists the competing bindings.
 
-![Conflicts][16]
+![Ambiguous][17]
 
-#### Branching
+#### Shadowed
 
-Branched or diamond-shaped imports chains indicate unnecessary re-exports and
-complexity. They help to untangle large codebases and shrink or get rid of
-barrel files. Knip warns:
+An explicit export hides bindings from `export *`. Knip labels the site as "shadowing" and lists the winning and hidden bindings.
 
-![Branching][17]
+![Shadowed][18]
+
+#### Converged
+
+The same binding arrives through multiple re-export paths. Knip shows where those paths meet and the binding they share.
+
+![Converged][19]
 
 ### VS Code Extension Settings
 
-![VS Code Extension Settings][18]
+![VS Code Extension Settings][20]
 
 [1]: https://knip.dev
 [2]: https://github.com/webpro-nl/knip
@@ -99,13 +100,15 @@ barrel files. Knip warns:
 [7]: #imports--exports
 [8]: #contention
 [9]: #circular-dependencies
-[10]: #conflicts
-[11]: #branching
-[12]: #vs-code-extension-settings
-[13]: https://knip.dev/screenshots/editors-and-agents/diagnostics.webp
-[14]: https://knip.dev/screenshots/editors-and-agents/imports-exports.webp
-[15]: https://knip.dev/screenshots/editors-and-agents/circular-dependency.webp
-[16]: https://knip.dev/screenshots/editors-and-agents/conflict.webp
-[17]: https://knip.dev/screenshots/editors-and-agents/branch.webp
-[18]:
+[10]: #ambiguous
+[11]: #shadowed
+[12]: #converged
+[13]: #vs-code-extension-settings
+[14]: https://knip.dev/screenshots/editors-and-agents/diagnostics.webp
+[15]: https://knip.dev/screenshots/editors-and-agents/imports-exports.webp
+[16]: https://knip.dev/screenshots/editors-and-agents/circular-dependency.webp
+[17]: https://knip.dev/screenshots/editors-and-agents/ambiguous.webp
+[18]: https://knip.dev/screenshots/editors-and-agents/shadow.webp
+[19]: https://knip.dev/screenshots/editors-and-agents/branch.webp
+[20]:
   https://knip.dev/screenshots/editors-and-agents/vscode-extension-settings.webp

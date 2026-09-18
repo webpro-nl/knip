@@ -7,3 +7,6 @@ catalog:
 catalogs:
   frontend:
     vue: ^3.0.0
+
+overrides:
+  missing@^1: 'catalog:'

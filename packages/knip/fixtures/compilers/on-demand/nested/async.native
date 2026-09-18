@@ -1,0 +1,2 @@
+@import '../async.ts';
+@import '../shared.sync';

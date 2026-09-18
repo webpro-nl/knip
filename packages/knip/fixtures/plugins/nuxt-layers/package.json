@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/nuxt-layers",
+  "workspaces": ["layers/*"],
+  "dependencies": {
+    "nuxt": "*"
+  }
+}

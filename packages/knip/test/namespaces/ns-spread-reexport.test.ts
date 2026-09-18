@@ -17,12 +17,13 @@ test('Should report members of re-exported spread namespace', async () => {
 
   assert(!issues.exports['hello.resolver.ts']);
   assert(!issues.exports['utils.ts']);
+  assert(!issues.exports['queues.ts']);
 
   assert.deepStrictEqual(counters, {
     ...baseCounters,
     exports: 3,
-    processed: 14,
-    total: 14,
+    processed: 15,
+    total: 15,
   });
 });
 
@@ -36,12 +37,13 @@ test('Should report members of re-exported spread namespace (with nsExports)', a
 
   assert(issues.nsExports['hello.resolver.ts']['resolverBarrel.Hello']);
   assert(issues.nsExports['utils.ts']['Utils.helper']);
+  assert(!issues.nsExports['queues.ts']);
 
   assert.deepStrictEqual(counters, {
     ...baseCounters,
     exports: 3,
     nsExports: 2,
-    processed: 14,
-    total: 14,
+    processed: 15,
+    total: 15,
   });
 });

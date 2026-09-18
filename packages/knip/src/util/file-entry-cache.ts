@@ -10,7 +10,7 @@ import { deserialize, serialize } from 'node:v8';
 import { debugLog } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
 import { timerify } from './Performance.ts';
-import { dirname, isAbsolute, resolve } from './path.ts';
+import { isAbsolute, resolve } from './path.ts';
 
 type MetaData<T> = { size: number; mtime: number; data?: T };
 
@@ -39,7 +39,7 @@ export class FileEntryCache<T> {
 
   constructor(cacheId: string, _path: string) {
     this.filePath = path.resolve(_path, cacheId);
-    if (isFile(this.filePath)) this.cache = create(this.filePath);
+    if (isFile(this.filePath)) this.cache = create(this.filePath) ?? this.cache;
   }
 
   getFileDescriptor(filePath: string): FileDescriptor<T> {
@@ -90,7 +90,7 @@ export class FileEntryCache<T> {
 
   reconcile() {
     try {
-      const dir = dirname(this.filePath);
+      const dir = path.dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(this.filePath, serialize(this.cache));
     } catch (_err) {

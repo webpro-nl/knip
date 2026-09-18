@@ -39,12 +39,20 @@ are allowed.
 ## toDependency
 
 The `dependency` indicates the entry is a dependency, belonging in either the
-`"dependencies"` or `"devDependencies"` section of `package.json`.
+`"dependencies"` or `"devDependencies"` section of `package.json`. Use it for
+package names referenced from configuration, such as a plugin or transformer a
+tool loads at build time.
+
+Knip marks the package as referenced, and reports it as an unlisted dependency
+if it isn't listed at all. Such a reference is development-only: in [production
+mode][12] the package is still marked as referenced, but an unlisted one is no
+longer reported.
 
 ## toProductionDependency
 
 The production `dependency` indicates the entry is a production dependency,
-expected to be listed in `"dependencies"`.
+expected to be listed in `"dependencies"`. Unlike [toDependency][4] it's also
+reported as unlisted in production mode.
 
 ## toDeferResolve
 
@@ -66,19 +74,17 @@ different from `toEntry` as glob patterns are not supported.
 ## toConfig
 
 The `config` input type is a way for plugins to reference a configuration file
-that should be handled by a different plugin. For instance, Angular
-configurations might contain references to `tsConfig` and `karmaConfig` files,
-so these `config` files can then be handled by the TypeScript and Karma plugins,
-respectively.
+that should be handled by a different plugin. The specifier is a path to that
+file.
 
-Example:
+For instance, `angular.json` has `tsConfig` and `karmaConfig` options pointing
+to files the TypeScript and Karma plugins know how to handle, so the Angular
+plugin hands them over:
 
 ```ts
-toConfig('typescript', './path/to/tsconfig.json');
+toConfig('typescript', 'tsconfig.app.json');
+toConfig('karma', 'karma.conf.js');
 ```
-
-For instance, the Angular plugin uses this to tell Knip about its `tsConfig`
-value in `angular.json` projects.
 
 ## toBinary
 
@@ -127,6 +133,13 @@ Knip now understands `esbuild` is a dependency of the workspace in the
 Use the `optional` flag to indicate the dependency is optional. Then, a
 dependency won't be flagged as unlisted if it isn't.
 
+### isTypeOnly
+
+Use `isTypeOnly` when only the types of a package are used, such as the packages
+listed in `compilerOptions.types`. A `@types/pkg` dependency then satisfies the
+reference on its own, without `pkg` itself being installed. Don't use it for
+packages the tool actually loads, even if it does so only at build time.
+
 ### allowIncludeExports
 
 By default, exports of entry files such as `src/index.ts` or the files in
@@ -159,3 +172,4 @@ toProductionEntry('./entry.ts', { allowIncludeExports: true });
 [9]: #tobinary
 [10]: #toalias
 [11]: #options
+[12]: ../features/production-mode.md

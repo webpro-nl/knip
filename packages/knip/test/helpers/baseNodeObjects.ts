@@ -29,6 +29,7 @@ export const baseFileNode: FileNode = {
 
 export const baseExport: Export = {
   identifier: 'identifier',
+  binding: 'identifier',
   pos: 0,
   line: 1,
   col: 0,
@@ -38,6 +39,7 @@ export const baseExport: Export = {
   hasRefsInFile: false,
   referencedIn: new Set(),
   isReExport: false,
+  isBindingReExport: false,
   fixes: [],
 };
 
@@ -45,9 +47,11 @@ export const getBaseImport = (filePath: string): Import => ({
   specifier: './module-1',
   filePath,
   identifier: 'identifier',
+  alias: undefined,
   isTypeOnly: false,
   modifiers: 0,
   pos: 0,
   line: 0,
   col: 0,
+  jsDocTags: undefined,
 });

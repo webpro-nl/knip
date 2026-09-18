@@ -3,6 +3,8 @@
   "devDependencies": {
     "vite-plus": "*",
     "eslint-plugin-regexp": "*",
-    "@e18e/eslint-plugin": "*"
+    "@e18e/eslint-plugin": "*",
+    "eslint-import-resolver-typescript": "*",
+    "@typescript-eslint/parser": "*"
   }
 }

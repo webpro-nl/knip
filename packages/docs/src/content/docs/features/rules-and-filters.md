@@ -37,7 +37,11 @@ knip --include files --exclude enumMembers,duplicates
 The `nsExports` and `nsTypes` types are [off by default][2]. Including only
 those _adds_ them to the default report, rather than narrowing it to just those.
 
-Also see the [list of issue types][3].
+`cycles` is also off by default. `--include cycles` (or `"include": ["cycles"]`
+in configuration) reports only circular dependencies. Use it with the [cycles
+reporter][3] for a detailed tree view.
+
+Also see the [list of issue types][4].
 
 ### Shorthands
 
@@ -61,6 +65,12 @@ Knip has shortcuts to report only specific issue types.
 3. The `--files` flag is a shortcut to report only unused files.
 
 4. The `--cycles` flag is a shortcut to report only circular dependencies.
+
+Combine shorthands to report the default issue types plus circular dependencies:
+
+```sh
+knip --dependencies --exports --files --cycles
+```
 
 ## Rules
 
@@ -92,7 +102,7 @@ Notes:
 - The rules are modeled after the ESLint `rules` configuration, and could be
   extended in the future.
 
-Also see the [issue types overview][3].
+Also see the [issue types overview][4].
 
 ## Rules or filters?
 
@@ -107,4 +117,5 @@ fine-grained configuration.
 
 [1]: ../reference/jsdoc-tsdoc-tags.md
 [2]: ../guides/namespace-imports.md
-[3]: ../reference/issue-types.md
+[3]: ./reporters.md#cycles
+[4]: ../reference/issue-types.md

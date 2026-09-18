@@ -42,6 +42,17 @@ export const getExportedIdentifiers = (
     addIdentifier(identifier);
   }
 
+  for (const _import of node.imports.imports) {
+    if (
+      !_import.filePath &&
+      _import.modifiers & IMPORT_FLAGS.RE_EXPORT &&
+      _import.identifier === IMPORT_STAR &&
+      _import.alias
+    ) {
+      addIdentifier(_import.alias, true);
+    }
+  }
+
   if (node.imports?.internal) {
     for (const [importedPath, importDetails] of node.imports.internal) {
       forEachPassThroughReExport(importDetails, (id, _sources) => {

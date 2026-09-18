@@ -81,6 +81,10 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r @scope/package/register ./dir', [toBinary('node'), toDeferResolveEntry('./dir', opt), toDeferResolve('@scope/package/register')]);
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index', opt), toDeferResolve('@scope/package/register')]);
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
+  t('node --experimental-vm-modules node_modules/.bin/jest --runInBand', [toBinary('node'), toBinary('jest')]);
+  t('node --enable-source-maps --expose-gc node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --experimental-detect-module --experimental-json-modules node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --openssl-legacy-provider node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
   t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toDeferResolve('dotenv-flow/config')]);
 });
@@ -113,16 +117,24 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
   t('dotenv -- concurrently "npm ci"', [toBinary('dotenv'), toBinary('concurrently')]);
   t('dotenv -- concurrently "next dev" "prisma generate"', [toBinary('dotenv'), toBinary('concurrently'), toBinary('next'), toBinary('prisma')]);
+  t(`dotenv -- concurrently 'echo "next dev"' "prisma generate"`, [toBinary('dotenv'), toBinary('concurrently'), toBinary('echo'), toBinary('prisma')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
   t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env API_URL=https://example.test program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env program', [toBinary('cross-env')], knownOnly);
   t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS="--loader pkg" knex', [toBinary('cross-env'), toBinary('knex'), toDeferResolve('pkg')]);
   t('NODE_ENV=production cross-env -- program --cache', [toBinary('cross-env'), toBinary('program')]);
   t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", [toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
+  t("NODE_OPTIONS='--require pkg-a' npm run script", [toDeferResolve('pkg-a')]);
+  t("NODE_OPTIONS='--import ./instrumentation.mjs' pnpm exec next dev", [toBinary('next'), toDeferResolve('./instrumentation.mjs')]);
+  t("NODE_OPTIONS='--require pkg-a --require pkg-b' cross-env program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
+  t("NODE_OPTIONS='--require pkg-a' retry-cli program", [toBinary('retry-cli'), toBinary('program'), toDeferResolve('pkg-a')]);
+  t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-b'), toDeferResolve('pkg-a')]);
 });
 
 test('getInputsFromScripts (cross-env/node)', () => {
@@ -187,6 +199,7 @@ test('getInputsFromScripts (bun)', () => {
   t('bun run --cwd packages/knip watch', [toBinary('bun'), toBinary('watch', { optional: true, dir: join(cwd, 'packages/knip') })]);
   t('bun test', [toBinary('bun')]);
   t('bun add zod', [toBinary('bun')]);
+  t('bun dedupe', [toBinary('bun')]);
   t('bun install', [toBinary('bun')]);
   t('bun remove webpack', [toBinary('bun')]);
   t('bun update lodash', [toBinary('bun')]);
@@ -277,6 +290,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm runtime set node 22 -g', []);
   t('pnpm rt set node lts -g', []);
   t('pnpm sbom --sbom-format cyclonedx', []);
+  t('pnpm stage publish', []);
   t('pnpm pack-app --entry dist/index.cjs --target linux-x64', []);
   t('pnpm peers check', []);
   t('pnpm ping --registry https://registry.npmjs.org', []);
@@ -284,6 +298,15 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm home lodash', []);
   t('pnpm la', []);
   t('pnpm ll', []);
+  t('pnpm info knip', []);
+  t('pnpm view knip version', []);
+  t('pnpm create vite my-app', []);
+  t('pnpm login --registry https://registry.npmjs.org', []);
+  t('pnpm logout', []);
+  t('pnpm token list', []);
+  t('pnpm recursive run program', [], pkgScripts);
+  t('pnpm multi run program', [], pkgScripts);
+  t('pnpm m run program', [], pkgScripts);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -355,6 +378,7 @@ test('getInputsFromScripts ("positionals")', () => {
 });
 
 test('getInputsFromScripts (c8)', () => {
+  t('c8 program', [toBinary('c8'), toBinary('program')], knownOnly);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);

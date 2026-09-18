@@ -33,8 +33,8 @@ Real compilers recover those exports, but bring their own challenges. The Svelte
 compiler, for instance, keeps `exports` intact even when they represent
 component properties, so Knip reports them as unused. When you need that
 fidelity, override any built-in with the framework's own compiler (see the
-[Svelte][2] and [Vue][3] examples below). For example, to report unused exports
-in [`.tsrx`][1] files.
+[Svelte][1] and [Vue][2] examples below). For example, to report unused exports
+in [`.tsrx`][3] files.
 
 Compilers are enabled only when a related dependency is found. The `.tsrx`
 compiler when a `@tsrx/*` package is installed, for example. If that detection
@@ -77,17 +77,19 @@ Since compilers are functions, the Knip configuration file must be a dynamic
 The compiler function interface is straightforward. Text in, text out:
 
 ```ts
-(source: string, filename: string) => string;
+(source: string, filename: string) => string | PromiseLike<string>;
 ```
 
-This may also be an `async` function.
+Return a string or a Promise-like value that resolves to a string. Knip compiles
+files on demand and awaits asynchronous results; the `async` keyword is
+optional.
 
 ### Examples
 
 - [CSS][4]
 - [MDX][5]
-- [Svelte][2]
-- [Vue][3]
+- [Svelte][1]
+- [Vue][2]
 
 #### CSS
 
@@ -192,8 +194,8 @@ export default {
 };
 ```
 
-[1]: https://tsrx.dev
-[2]: #svelte
-[3]: #vue
+[1]: #svelte
+[2]: #vue
+[3]: https://tsrx.dev
 [4]: #css
 [5]: #mdx

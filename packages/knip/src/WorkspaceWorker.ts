@@ -55,9 +55,10 @@ type WorkspaceManagerOptions = {
   dependencies: DependencySet;
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
-  readFile: (filePath: string) => string;
+  readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
@@ -82,9 +83,10 @@ export class WorkspaceWorker {
   rootManifest: Manifest | undefined;
   dependencies: DependencySet;
   handleInput: HandleInput;
+  handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
   getManifest: (dir: string) => Manifest | undefined;
-  readFile: (filePath: string) => string;
+  readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
   ignoredWorkspacePatterns: string[] = [];
 
@@ -109,9 +111,10 @@ export class WorkspaceWorker {
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
     handleInput,
+    handleConfigLoadError,
     findWorkspaceByFilePath,
     getManifest,
-    readFile,
+    readRawFile,
     configFilesMap,
     options,
   }: WorkspaceManagerOptions) {
@@ -127,9 +130,10 @@ export class WorkspaceWorker {
     this.configFilesMap = configFilesMap;
 
     this.handleInput = handleInput;
+    this.handleConfigLoadError = handleConfigLoadError;
     this.findWorkspaceByFilePath = findWorkspaceByFilePath;
     this.getManifest = getManifest;
-    this.readFile = readFile;
+    this.readRawFile = readRawFile;
 
     this.options = options;
 
@@ -358,12 +362,13 @@ export class WorkspaceWorker {
     };
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
+      const inputContainingFilePath = input.containingFilePath ?? containingFilePath;
       if (isCatalog(input)) {
-        inputs.push({ ...input, containingFilePath });
+        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       } else if (isConfig(input)) {
-        storeConfigFilePath(input.pluginName, { ...input, containingFilePath });
+        storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
       } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
-        inputs.push({ ...input, containingFilePath });
+        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       }
     }
 
@@ -398,6 +403,7 @@ export class WorkspaceWorker {
         configFilePath: containingFilePath,
         configFileDir: cwd,
         configFileName: '',
+        isResolvedConfigFile: isResolvedConfigFiles,
         getInputsFromScripts: createGetInputsFromScripts(containingFilePath),
       };
 
@@ -436,7 +442,7 @@ export class WorkspaceWorker {
           if (parsedConfigCache.has(configFilePath)) {
             parsed = parsedConfigCache.get(configFilePath);
           } else {
-            const sourceText = this.readFile(configFilePath);
+            const sourceText = this.readRawFile(configFilePath);
             parsed = sourceText ? _parseFile(configFilePath, sourceText) : undefined;
             parsedConfigCache.set(configFilePath, parsed);
           }
@@ -475,6 +481,7 @@ export class WorkspaceWorker {
               } catch (error) {
                 if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
+                this.handleConfigLoadError();
                 const relPath = toRelative(configFilePath, this.options.cwd);
                 const cause = formatCauseMessage(error, this.options.cwd);
                 logError(`Error loading ${relPath} (${cause})`);
@@ -485,7 +492,7 @@ export class WorkspaceWorker {
         }
 
         if (plugin.resolveFromAST && parsed) {
-          const resolveASTOpts = { ...resolveOpts, readFile: this.readFile };
+          const resolveASTOpts = { ...resolveOpts, readFile: this.readRawFile };
           const inputs = plugin.resolveFromAST(parsed.program, resolveASTOpts);
           for (const input of inputs) addInput(input, configFilePath);
           cache.resolveFromAST = inputs;
@@ -506,7 +513,7 @@ export class WorkspaceWorker {
 
       if (plugin.resolve) {
         const dependencies = (await plugin.resolve(options)) ?? [];
-        for (const id of dependencies) addInput(id, containingFilePath);
+        for (const id of dependencies) addInput(id, id.containingFilePath ?? containingFilePath);
       }
 
       // Any negated pattern will move all plugin inputs to new group
@@ -565,7 +572,7 @@ export class WorkspaceWorker {
     const collect = (filePath: string) => {
       if (visited.has(filePath)) return;
       visited.add(filePath);
-      const sourceText = this.readFile(filePath);
+      const sourceText = this.readRawFile(filePath);
       if (!sourceText) return;
       for (const literal of collectStringLiterals(sourceText, filePath)) {
         literals.add(literal);

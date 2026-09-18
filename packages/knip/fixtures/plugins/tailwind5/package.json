@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/tailwind5",
+  "type": "module",
+  "dependencies": {
+    "tw-animate-css": "*"
+  },
+  "devDependencies": {
+    "@tailwindcss/webpack": "*"
+  }
+}

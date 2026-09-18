@@ -4,6 +4,8 @@ import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts
 import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getInputsFromSettings } from '../eslint/helpers.ts';
+import { getInputsFromSettingsAST } from '../eslint/resolveFromAST.ts';
 import type { OxlintConfig } from './types.ts';
 
 // https://oxc.rs/docs/guide/usage/linter/config.html
@@ -14,7 +16,7 @@ const enablers = ['oxlint', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['.oxlintrc.json', 'oxlint.config.{ts,mts}', 'vite.config.{js,mjs,ts,cjs,mts,cts}'];
+const config: string[] = ['.oxlintrc.{json,jsonc}', 'oxlint.config.{ts,mts}', 'vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
 const isViteConfig = (configFileName: string) => configFileName.startsWith('vite.config.');
 
@@ -39,6 +41,7 @@ const resolveConfig: ResolveConfig<OxlintConfig> = config => {
   for (const override of config.overrides ?? []) {
     for (const input of resolveJsPlugins(override.jsPlugins)) inputs.push(input);
   }
+  for (const input of getInputsFromSettings(config.settings)) inputs.push(input);
   return inputs;
 };
 
@@ -57,7 +60,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
     },
   });
   visitor.visit(program);
-  return resolveJsPlugins([...jsPlugins]);
+  return [...resolveJsPlugins([...jsPlugins]), ...getInputsFromSettingsAST(program)];
 };
 
 const plugin: Plugin = {

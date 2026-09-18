@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getScriptCommands } from '../../src/util/scripts.ts';
+import { getScriptCommands, toShellCommand } from '../../src/util/scripts.ts';
 
 test('getScriptCommands splits chained commands', () => {
   assert.deepEqual(getScriptCommands('bun run build && bun test'), [
@@ -33,4 +33,16 @@ test('getScriptCommands normalizes binary paths', () => {
 
 test('getScriptCommands returns an empty array for empty or unparseable scripts', () => {
   assert.deepEqual(getScriptCommands(''), []);
+});
+
+test('toShellCommand round-trips argv through the script parser', () => {
+  const t = (argv: string[]) =>
+    assert.deepEqual(getScriptCommands(toShellCommand(argv)), [{ binary: argv[0], args: argv.slice(1) }]);
+
+  t(['node', 'lib/server.js']);
+  t(['node', '--title=mdx content mapper', 'lib/server.js']);
+  t(['node', 'lib/server.js; rm -rf tmp']);
+  t(['node', '$HOME/server.js']);
+  t(['node', "it's/server.js"]);
+  t(['node', 'lib/*.js']);
 });

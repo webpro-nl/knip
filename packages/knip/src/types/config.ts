@@ -1,7 +1,7 @@
 import type { Program, VisitorObject } from 'oxc-parser';
 import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
 import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
@@ -82,8 +82,7 @@ export interface Configuration {
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
-  syncCompilers: SyncCompilers;
-  asyncCompilers: AsyncCompilers;
+  compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
 
@@ -133,6 +132,8 @@ export interface PluginOptions extends BaseOptions {
   configFileDir: string;
   configFileName: string;
   configFilePath: string;
+  /** True when this config file was discovered as a dependency of another config file of the same plugin (e.g. a project matched through a glob in `test.projects`), rather than found directly through the plugin's own config patterns or a script reference. */
+  isResolvedConfigFile: boolean;
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
@@ -162,7 +163,7 @@ export type HandleInput = (input: Input) => string | undefined;
 
 type RegisterCompilerInput = {
   extension: string;
-  compiler: CompilerSync;
+  compiler: Compiler;
 };
 
 export type RegisterCompiler = (input: RegisterCompilerInput) => void;
@@ -188,7 +189,11 @@ export type PluginVisitorContext = {
   sourceText: string;
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
-  addImportGlob: (patterns: string[], options?: { base?: string; filter?: RegExp }) => void;
+  markImportExpressionHandled: (pos: number) => void;
+  addImportGlob: (
+    patterns: string[],
+    options?: { base?: string; cwd?: string; filter?: RegExp; analyzeExports?: boolean }
+  ) => void;
   /**
    * Credit a local export as used by an in-module runtime registration (e.g. a custom element
    * registered through a framework decorator), so it isn't reported as an unused export even

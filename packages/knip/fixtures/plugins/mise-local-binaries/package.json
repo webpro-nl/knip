@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/mise-local-binaries",
+  "devDependencies": {
+    "eslint": "*",
+    "asset-builder": "*",
+    "assets": "*",
+    "formatter-cli": "*",
+    "overridden-cli": "*",
+    "inline-override-cli": "*"
+  }
+}

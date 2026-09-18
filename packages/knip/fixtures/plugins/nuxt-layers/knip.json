@@ -1,0 +1,6 @@
+{
+  "workspaces": {
+    ".": {},
+    "layers/orchard": {}
+  }
+}

@@ -12,7 +12,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, isAbsolute, join, relative, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -31,6 +31,9 @@ const cachedGitIgnores = new Map<string, Gitignores>();
 const cachedGlobIgnores = new Map<string, string[]>();
 
 let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
+let gitignoreMatcher = (_filePath: string) => false;
+
+export const isGitIgnored = (filePath: string) => gitignoreMatcher(filePath);
 
 // Fingerprint of the resolved ignore set, mixed into glob cache keys so an edited .gitignore
 // (which changes no directory mtime) still invalidates cached glob results.
@@ -62,7 +65,7 @@ const getGitDir = (cwd: string): string | undefined => {
   if (isFile(dotGit)) {
     const content = readFileSync(dotGit, 'utf8').trim();
     const match = content.match(/^gitdir:\s*(.+)$/);
-    if (match) return join(cwd, match[1]);
+    if (match) return toAbsolute(toPosix(match[1]), cwd);
   }
   return undefined;
 };
@@ -116,10 +119,16 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     return deepFilterMatcher;
   };
 
+  const seenGitignoreFiles = new Set<string>();
+
   const addFile = (filePath: string, baseDir?: string) => {
+    const absPath = toPosix(filePath);
+    if (seenGitignoreFiles.has(absPath)) return;
+    seenGitignoreFiles.add(absPath);
+
     gitignoreFiles.push(relative(cwd, filePath));
 
-    const dir = baseDir ?? dirname(toPosix(filePath));
+    const dir = baseDir ?? dirname(absPath);
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
@@ -174,9 +183,16 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
   const gitDir = getGitDir(cwd);
   if (gitDir) {
-    const excludePath = join(gitDir, 'info/exclude');
+    const commonDirPath = join(gitDir, 'commondir');
+    const commonDir = isFile(commonDirPath)
+      ? toAbsolute(toPosix(readFileSync(commonDirPath, 'utf8').trim()), gitDir)
+      : gitDir;
+    const excludePath = join(commonDir, 'info/exclude');
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
+
+  const rootGitignorePath = join(cwd, '.gitignore');
+  if (isFile(rootGitignorePath)) addFile(rootGitignorePath);
 
   // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
   let isRelevantDir: ((absPath: string) => boolean) | undefined;
@@ -331,6 +347,7 @@ export async function getGitIgnoredHandler(
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
   gitignoreReconciler = undefined;
+  gitignoreMatcher = () => false;
   gitignoreFingerprint = '';
 
   if (options.gitignore === false) return () => false;
@@ -350,6 +367,7 @@ export async function getGitIgnoredHandler(
     }
     return result;
   };
+  gitignoreMatcher = isGitIgnored;
 
   if (unignores.size > 0) gitignoreReconciler = isGitIgnored;
 

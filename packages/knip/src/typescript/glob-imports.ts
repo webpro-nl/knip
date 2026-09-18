@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { ImportGlob } from '../types/module-graph.ts';
 import { _syncGlob } from '../util/glob.ts';
-import { dirname, isAbsolute, join, toRelative } from '../util/path.ts';
+import { dirname, isAbsolute, join, toAbsolute, toRelative } from '../util/path.ts';
 import type { ResolveGlobPattern } from './resolve-module-names.ts';
 
 function resolveBaseDir(base: string, dir: string, resolveGlobPattern: ResolveGlobPattern) {
@@ -22,8 +22,12 @@ export function resolveImportGlobs(
   const filePaths: string[] = [];
   const dir = dirname(containingFile);
 
-  for (const { patterns, base, filter } of items) {
-    if (base !== undefined) {
+  for (const { patterns, base, cwd, filter } of items) {
+    if (cwd !== undefined) {
+      for (const filePath of _syncGlob({ patterns, cwd: toAbsolute(cwd, workspaceRoot) })) {
+        filePaths.push(filePath);
+      }
+    } else if (base !== undefined) {
       const cwd = resolveBaseDir(base, dir, resolveGlobPattern);
       if (!cwd) continue;
       for (const filePath of _syncGlob({ patterns, cwd })) {

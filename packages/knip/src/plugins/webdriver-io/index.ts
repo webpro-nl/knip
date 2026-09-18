@@ -11,7 +11,7 @@ const enablers = ['@wdio/cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['wdio.conf.{js,ts}'];
+const config = ['wdio.conf.{js,cjs,mjs,ts,cts,mts}'];
 
 const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
   const cfg = config?.config;

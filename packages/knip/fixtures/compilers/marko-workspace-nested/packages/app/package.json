@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/compilers-marko-workspace-nested-app",
+  "workspaces": ["nested"],
+  "dependencies": {
+    "@orchard/fruit-tags": "*"
+  },
+  "devDependencies": {
+    "marko": "*"
+  }
+}

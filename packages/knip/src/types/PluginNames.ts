@@ -64,6 +64,7 @@ export type PluginName =
   | 'mdx'
   | 'mdxlint'
   | 'metro'
+  | 'mise'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
@@ -145,6 +146,7 @@ export type PluginName =
   | 'taskfile'
   | 'tauri'
   | 'temporal'
+  | 'textlint'
   | 'travis'
   | 'ts-node'
   | 'tsd'
@@ -161,6 +163,7 @@ export type PluginName =
   | 'unplugin-vue-i18n'
   | 'unplugin-vue-markdown'
   | 'unplugin-vue-router'
+  | 'varlock'
   | 'vercel'
   | 'vercel-og'
   | 'vike'
@@ -248,6 +251,7 @@ export const pluginNames = [
   'mdx',
   'mdxlint',
   'metro',
+  'mise',
   'mocha',
   'moonrepo',
   'msw',
@@ -329,6 +333,7 @@ export const pluginNames = [
   'taskfile',
   'tauri',
   'temporal',
+  'textlint',
   'travis',
   'ts-node',
   'tsd',
@@ -345,6 +350,7 @@ export const pluginNames = [
   'unplugin-vue-i18n',
   'unplugin-vue-markdown',
   'unplugin-vue-router',
+  'varlock',
   'vercel',
   'vercel-og',
   'vike',

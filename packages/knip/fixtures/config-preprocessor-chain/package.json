@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/config-preprocessor-chain",
+  "knip": {
+    "preprocessor": ["./first.js", "./second.js"]
+  }
+}

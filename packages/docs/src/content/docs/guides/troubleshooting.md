@@ -103,7 +103,9 @@ Each child node is prefixed with how the export is consumed: `import`,
 `importAs` (shown as `original → alias`), `importNS`, or a re-export
 (`reExport`, `reExportAs`, `reExportNS`, `reExportStar`). A `refs:` line lists
 the references found in that file; a `members:` line shows per-member status for
-namespaces and enums.
+namespaces and enums. An `[ambiguous]` line lists the competing definitions when
+a name reaches the file through more than one `export *`. A name that reaches
+the file only through `export *` is traced from its definition.
 
 ## Opening an issue
 

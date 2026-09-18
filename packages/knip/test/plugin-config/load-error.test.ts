@@ -17,16 +17,16 @@ test('Plugin config that throws on load should not be fatal', async () => {
   assert.equal(counters.processed, 2);
 });
 
-test('Plugin config that throws on load exits non-zero via CLI', () => {
+test('Plugin config that throws on load exits 2 via CLI', () => {
   const result = exec('knip --no-progress', { cwd });
   assert.match(result.stderr, /^ERROR: Error loading vite\.config\.ts /m);
-  assert.equal(result.status, 1);
+  assert.equal(result.status, 2);
 });
 
-test('Plugin config that throws on load exits zero with --no-exit-code', () => {
+test('Plugin config that throws on load exits 2 even with --no-exit-code', () => {
   const result = exec('knip --no-progress --no-exit-code', { cwd });
   assert.match(result.stderr, /^ERROR: Error loading vite\.config\.ts /m);
-  assert.equal(result.status, 0);
+  assert.equal(result.status, 2);
 });
 
 test('Plugin config load errors are not cached, and recovery is cached', () => {
@@ -41,8 +41,8 @@ test('Plugin config load errors are not cached, and recovery is cached', () => {
     const warm = exec(command, { cwd: fixtureCopy });
     assert.match(cold.stderr, /^ERROR: Error loading vite\.config\.ts /m);
     assert.match(warm.stderr, /^ERROR: Error loading vite\.config\.ts /m);
-    assert.equal(cold.status, 1);
-    assert.equal(warm.status, 1);
+    assert.equal(cold.status, 2);
+    assert.equal(warm.status, 2);
 
     writeFileSync(join(fixtureCopy, 'missing-bootstrap-output.js'), "process.stderr.write('bootstrap-loaded\\n');\n");
 

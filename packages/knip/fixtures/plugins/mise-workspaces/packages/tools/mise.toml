@@ -1,0 +1,2 @@
+[tasks.format]
+run = "pnpm exec formatter ."

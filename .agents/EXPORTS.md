@@ -150,9 +150,24 @@ forward-declared helpers exist in `localDeclarations`. There are two queues:
   `ObjectExpression`. Resolution requires the selected property to contain a
   function and covers one-level patterns such as `helpers.recurse()`.
 
-The drain walks each resolved helper with `signatureOnly = true`. A per-chain
-`seen` set terminates cycles. Items queued during the drain are processed
-before it ends.
+The drain treats identifier callees as result projections:
+
+- Callable annotations and explicit function returns contribute their type
+  parameters and return type, not their parameters.
+- For an unannotated direct `param.member` return, a unique, non-generic local
+  interface declaration supplies the member's declared type. The private
+  parameter wrapper is omitted, while names required by the member result stay
+  protected. A polymorphic `this` adds the containing interface itself.
+- All unresolved, indirect, generic, merged, or otherwise ambiguous shapes
+  fall back to the full helper signature with `signatureOnly = true`.
+
+`localInterfaces` owns the direct-member lookup. Duplicate interface
+declarations are marked ambiguous rather than partially merged.
+
+Identifier arguments always use the conservative full-signature walk. A
+per-chain `seen` set terminates cycles; its identifier keys include the callee
+or argument role so resolving one cannot suppress the other. Items queued
+during the drain are processed before it ends.
 
 Member-call resolution checks the initializer shape, not the declaration kind;
 it does not require `const`.
@@ -263,6 +278,8 @@ Keep coverage:
 - `e2e-lib-call-forward-decl`: forward-declared identifier callee
 - `e2e-lib-member-call`: member callee such as `obj.method()`
 - `e2e-lib-call-arg`: top-level identifier argument such as `wrap(inner)`
+- `e2e-lib-private-helper-param`: inferred parameter passthroughs, nominal
+  direct-member results, callable constraints, and dual callee/argument roles
 
 Removal coverage:
 
@@ -270,6 +287,8 @@ Removal coverage:
   `satisfies T`
 - `e2e-lib-call-arg-in-body`: body-local call argument such as
   `useReducer(reducer, …)`, gated by `!inBody`
+- `e2e-lib-private-helper-param`: a type used only as the private wrapper for a
+  direct primitive-member result
 
 Before changing export liveness:
 

@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { arrayify } from '../../util/array.ts';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -26,8 +27,9 @@ const config = [
 
 const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConfig }> = (config, options) => {
   const cfg = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
-  const plugins = cfg?.plugin ?? [];
-  const themes = cfg?.theme ?? [];
+  // TypeDoc accepts a single string for both options, spreading one yields an input per character
+  const plugins = arrayify(cfg?.plugin);
+  const themes = arrayify(cfg?.theme);
   const inputs: Input[] = [...plugins, ...themes].map(id => toDeferResolve(id));
   for (const file of [cfg?.customCss, cfg?.customJs]) {
     if (file) inputs.push(toEntry(join(options.configFileDir, file)));

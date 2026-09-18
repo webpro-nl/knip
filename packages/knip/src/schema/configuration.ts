@@ -1,14 +1,12 @@
 import { z } from 'zod/mini';
-import type { CompilerAsync, CompilerSync } from '../compilers/types.ts';
+import type { Compiler } from '../compilers/types.ts';
 import { SYMBOL_TYPE } from '../constants.ts';
 import { globSchema, pluginsSchema } from './plugins.ts';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-const syncCompilerSchema = z.union([z.literal(true), z.custom<CompilerSync>()]);
-const asyncCompilerSchema = z.custom<CompilerAsync>();
-const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
-const compilersSchema = z.record(z.string(), compilerSchema);
+const compilerSchema = z.custom<Compiler>();
+const compilersSchema = z.record(z.string(), z.union([z.literal(true), compilerSchema]));
 
 const stringOrRegexSchema = z.array(z.union([z.string(), z.instanceof(RegExp)]));
 
@@ -345,9 +343,7 @@ const rootConfigurationSchema = z.object({
    */
   compilers: z.optional(compilersSchema),
   /** @internal */
-  syncCompilers: z.optional(z.record(z.string(), syncCompilerSchema)),
-  /** @internal */
-  asyncCompilers: z.optional(z.record(z.string(), asyncCompilerSchema)),
+  asyncCompilers: z.optional(z.record(z.string(), compilerSchema)),
   /**
    * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
    *
@@ -418,6 +414,44 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   treatTagHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Preprocess the results before providing them to the reporter(s).
+   * Can be a single preprocessor or an array of preprocessors.
+   * Each value is a path to a local file or an npm package name.
+   *
+   * @default []
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts"
+   * }
+   * ```
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": ["./first.ts", "./second.ts"]
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/features/reporters#preprocessors | Preprocessors}
+   */
+  preprocessor: z.optional(z.union([z.string(), z.array(z.string())])),
+  /**
+   * Extra options to pass to the preprocessor.
+   *
+   * @default {}
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts",
+   *   "preprocessorOptions": { "key": "value" }
+   * }
+   * ```
+   */
+  preprocessorOptions: z.optional(z.record(z.string(), z.unknown())),
 });
 
 const reportConfigSchema = z.object({

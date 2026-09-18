@@ -6,12 +6,22 @@ import { extname } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://github.com/evilmartians/lefthook
+// https://lefthook.dev/configuration/#config-file-name
 
 const title = 'Lefthook';
 
 const enablers = ['lefthook', '@arkweid/lefthook', '@evilmartians/lefthook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const configFiles = [
+  'lefthook.{yml,yaml,json,jsonc,toml}',
+  '.lefthook.{yml,yaml,json,jsonc,toml}',
+  '.config/lefthook.{yml,yaml,json,jsonc,toml}',
+  'lefthook-local.{yml,yaml,json,jsonc,toml}',
+  '.lefthook-local.{yml,yaml,json,jsonc,toml}',
+  '.config/lefthook-local.{yml,yaml,json,jsonc,toml}',
+];
 
 type Command = {
   run: string;
@@ -25,7 +35,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   const inputs = manifest.devDependencies ? Object.keys(manifest.devDependencies).map(id => toDependency(id)) : [];
 
-  if (extname(configFileName) === '.yml') {
+  if (extname(configFileName) !== '') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
       const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
       const dir = command.root ?? cwd;
@@ -52,7 +62,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config: options => ['lefthook.yml', ...getGitHookPaths('.git/hooks', true, options.cwd)],
+  config: options => [...configFiles, ...getGitHookPaths('.git/hooks', true, options.cwd)],
   resolveConfig,
 };
 

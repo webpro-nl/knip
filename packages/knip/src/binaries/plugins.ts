@@ -5,13 +5,15 @@ import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
 import { extractBinary } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { resolve as fallbackResolve } from './fallback.ts';
+import { isWrapper as isFallbackWrapper, resolve as fallbackResolve } from './fallback.ts';
 import { toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+
+export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
 export const resolve: BinaryResolver = (binary, words, options) => {
   const { cwd, fromArgs, containingFilePath, manifest } = options;

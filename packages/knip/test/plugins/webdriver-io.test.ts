@@ -13,7 +13,7 @@ test('Find dependencies with the webdriver-io plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 6,
+    total: 6,
   });
 });

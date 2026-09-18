@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/mise-global-binaries",
+  "devDependencies": {
+    "eslint": "*",
+    "asset-builder": "*",
+    "formatter-cli": "*",
+    "substitution-cli": "*",
+    "node": "*",
+    "find": "*"
+  }
+}

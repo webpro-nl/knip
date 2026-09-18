@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/nuxt-config-string",
+  "dependencies": {
+    "nuxt": "*"
+  }
+}

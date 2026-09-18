@@ -8,6 +8,8 @@ import { argsAfter } from './util.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
+export const spawningBinaries = ['cross-env', 'retry-cli'];
+
 // Binaries that have a new script behind the double-dash/end-of-command
 const endOfCommandBinaries = ['dotenvx', 'env-cmd', 'op'];
 
@@ -16,6 +18,9 @@ const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode',
 
 // Binaries where each positional arg is a separate script
 const positionalBinaries = new Set(['concurrently']);
+
+export const isWrapper = (binary: string) =>
+  spawningBinaries.includes(binary) || endOfCommandBinaries.includes(binary) || positionalBinaries.has(binary);
 
 export const resolve: BinaryResolver = (binary, words, { fromArgs }) => {
   const parsed = parseArgs(words, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });

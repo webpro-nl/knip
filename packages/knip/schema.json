@@ -173,6 +173,14 @@
         }
       }
     },
+    "preprocessor": {
+      "title": "Preprocess the results before providing them to the reporter(s)",
+      "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/list" }]
+    },
+    "preprocessorOptions": {
+      "title": "Extra options to pass to the preprocessor",
+      "type": "object"
+    },
     "treatConfigHintsAsErrors": {
       "title": "Exit with non-zero code (1) if there are any configuration hints",
       "type": "boolean"
@@ -650,6 +658,10 @@
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
         },
+        "mise": {
+          "title": "mise plugin configuration (https://knip.dev/reference/plugins/mise)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
           "$ref": "#/definitions/plugin"
@@ -966,6 +978,10 @@
           "title": "temporal plugin configuration (https://knip.dev/reference/plugins/temporal)",
           "$ref": "#/definitions/plugin"
         },
+        "textlint": {
+          "title": "textlint plugin configuration (https://knip.dev/reference/plugins/textlint)",
+          "$ref": "#/definitions/plugin"
+        },
         "travis": {
           "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
           "$ref": "#/definitions/plugin"
@@ -1028,6 +1044,10 @@
         },
         "unplugin-vue-router": {
           "title": "unplugin-vue-router plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-router)",
+          "$ref": "#/definitions/plugin"
+        },
+        "varlock": {
+          "title": "varlock plugin configuration (https://knip.dev/reference/plugins/varlock)",
           "$ref": "#/definitions/plugin"
         },
         "vercel": {

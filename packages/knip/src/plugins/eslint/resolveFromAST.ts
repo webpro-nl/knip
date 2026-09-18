@@ -1,17 +1,29 @@
-import type { Program } from 'oxc-parser';
+import type { Expression, Program, SpreadElement } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import { type Input, toDeferResolve } from '../../util/input.ts';
 import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
 
-export const getInputsFromFlatConfigAST = (program: Program): Input[] => {
+export const getInputsFromSettingsAST = (program: Program): Input[] => {
   const inputs: Input[] = [];
 
   const addResolver = (key: string, resolver: string | undefined) => {
     if (!resolver || resolver === 'node' || isInternal(resolver)) return;
     const dep = key === 'import/resolver' ? `eslint-import-resolver-${resolver}` : resolver;
     inputs.push(toDeferResolve(dep, { optional: true }));
+  };
+
+  const addResolvers = (key: string, node: Expression | SpreadElement | null) => {
+    if (node?.type === 'ArrayExpression') {
+      for (const element of node.elements) addResolvers(key, element);
+    } else if (node?.type === 'ObjectExpression') {
+      for (const prop of node.properties) {
+        if (prop.type === 'Property') addResolver(key, getPropertyKey(prop));
+      }
+    } else {
+      addResolver(key, getStringValue(node));
+    }
   };
 
   const visitor = new Visitor({
@@ -22,20 +34,16 @@ export const getInputsFromFlatConfigAST = (program: Program): Input[] => {
       for (const prop of settingsNode.properties ?? []) {
         if (prop.type !== 'Property') continue;
         const key = getPropertyKey(prop);
-        if (key !== 'import/resolver' && key !== 'import/parsers') continue;
-        if (prop.value?.type === 'ObjectExpression') {
-          for (const p of prop.value.properties ?? []) {
-            if (p.type === 'Property') addResolver(key, getPropertyKey(p));
-          }
-        } else {
-          addResolver(key, getStringValue(prop.value));
-        }
+        if (key === 'import/resolver' || key === 'import/parsers') addResolvers(key, prop.value);
       }
     },
   });
   visitor.visit(program);
 
-  inputs.push(toDeferResolve('eslint-import-resolver-typescript', { optional: true }));
-
   return inputs;
 };
+
+export const getInputsFromFlatConfigAST = (program: Program): Input[] => [
+  ...getInputsFromSettingsAST(program),
+  toDeferResolve('eslint-import-resolver-typescript', { optional: true }),
+];

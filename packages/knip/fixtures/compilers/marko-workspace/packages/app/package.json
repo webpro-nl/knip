@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/compilers-marko-workspace-app",
+  "dependencies": {
+    "@orchard/fruit-tags": "*"
+  },
+  "devDependencies": {
+    "marko": "*"
+  }
+}

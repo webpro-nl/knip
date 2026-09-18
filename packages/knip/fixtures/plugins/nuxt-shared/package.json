@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/nuxt-shared",
+  "scripts": {
+    "dev": "nuxt dev"
+  },
+  "dependencies": {
+    "nuxt": "*"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/nuxt-config-extends",
+  "dependencies": {
+    "nuxt": "*",
+    "a-nuxt-theme": "*"
+  }
+}

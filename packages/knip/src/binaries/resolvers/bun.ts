@@ -17,6 +17,7 @@ const commands = new Set([
   'completions',
   'config',
   'create',
+  'dedupe',
   'deploy',
   'discord',
   'exec',
