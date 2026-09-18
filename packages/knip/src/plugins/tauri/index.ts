@@ -35,7 +35,7 @@ const resolveConfig: ResolveConfig<TauriConfig> = async (localConfig, options) =
     if (!script) continue;
     const dir = typeof command === 'string' || !command.cwd ? options.cwd : join(options.cwd, command.cwd);
     const manifest = options.getManifest(dir) ?? options.manifest;
-    for (const input of options.getInputsFromScripts(script, { knownBinsOnly: true, cwd: dir, manifest })) {
+    for (const input of options.getInputsFromScripts(script, { optionalBinaries: true, cwd: dir, manifest })) {
       inputs.push({ ...input, dir });
     }
   }

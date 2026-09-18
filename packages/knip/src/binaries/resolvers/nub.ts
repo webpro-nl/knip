@@ -1,8 +1,9 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toBinary, toEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
+import { toCommandBinary } from '../util.ts';
 import { resolveX } from './bunx.ts';
 
 const runtimes = new Set(['x', 'dlx', 'exec']);
@@ -29,7 +30,7 @@ const commands = new Set([
 ]);
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
-  const binary = toBinary(_binary);
+  const binary = toCommandBinary(_binary, options);
   const { manifest, cwd, fromArgs } = options;
   const parsed = parseArgs(words, { string: ['filter'], boolean: ['recursive'], alias: { recursive: 'r' } });
   const [command, script] = parsed._;

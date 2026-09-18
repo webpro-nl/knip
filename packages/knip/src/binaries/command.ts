@@ -1,12 +1,12 @@
 import type { Command, Word } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions } from '../types/config.ts';
-import { type Input, toBinary, toDeferResolve } from '../util/input.ts';
-import { extractBinary } from '../util/modules.ts';
+import { type Input, toDeferResolve } from '../util/input.ts';
+import { extractBinary, isInNodeModulesBin, isRelativeNodeModulesBin } from '../util/modules.ts';
 import { resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
-import KnownResolvers from './resolvers/index.ts';
+import KnownResolvers, { isPackageManager } from './resolvers/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
-import { parseNodeArgs } from './util.ts';
+import { parseNodeArgs, toCommandBinary } from './util.ts';
 
 type KnownResolver = keyof typeof KnownResolvers;
 
@@ -25,11 +25,23 @@ export const getDependenciesFromCommand = (
   fromWords: (words: Word[], options: GetInputsFromScriptsOptions) => Input[] = options.fromArgs
 ): Input[] => {
   const text = node.name?.value;
-  const binary = text ? extractBinary(text) : text;
-  const { fromArgs } = options;
+  if (!text) return [];
+  const binary = extractBinary(text);
 
   if (!binary || binary === '.' || binary === 'source' || binary === '[') return [];
   if (binary.startsWith('-') || binary.startsWith('..')) return [];
+
+  const isExplicitBin = isInNodeModulesBin(text) || text.startsWith('.bin/');
+  if (options.optionalBinaries && (isExplicitBin || isPackageManager(binary))) {
+    const { fromArgs } = options;
+    options = {
+      ...options,
+      optionalBinaries: !isExplicitBin,
+      fromArgs: (args, opts) => fromArgs(args, { optionalBinaries: false, ...opts }),
+    };
+  }
+
+  const { fromArgs } = options;
 
   const words = node.suffix;
 
@@ -47,16 +59,16 @@ export const getDependenciesFromCommand = (
   }
 
   if (spawningBinaries.includes(binary)) {
-    return [toBinary(binary), ...fromWords(words, options), ...fromNodeOptions];
+    return [toCommandBinary(binary, options), ...fromWords(words, options), ...fromNodeOptions];
   }
 
   if (binary in Plugins) {
     const inputs = fallbackResolve(binary, words, options);
-    if (options.knownBinsOnly) for (const input of inputs) input.optional = true;
+    if (options.isForwardedArgs) for (const input of inputs) input.optional = true;
     return [...inputs, ...fromNodeOptions];
   }
 
-  if (options.knownBinsOnly && !text?.startsWith('.') && !text?.startsWith('node_modules/.bin/')) return [];
+  if (options.isForwardedArgs && !text.startsWith('.') && !isRelativeNodeModulesBin(text)) return [];
 
   return [...fallbackResolve(binary, words, options), ...fromNodeOptions];
 };

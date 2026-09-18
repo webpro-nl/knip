@@ -50,7 +50,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
         const manifest = getManifest(dir) ?? options.manifest;
         const actionPath = relative(dir, configFileDir);
         const run = step.run.replace(ACTION_PATH_VAR, actionPath ? `./${actionPath}` : '.');
-        for (const input of getInputsFromScripts([run], { knownBinsOnly: true, manifest })) {
+        for (const input of getInputsFromScripts([run], { optionalBinaries: true, manifest })) {
           if (isDeferResolveEntry(input) && path && !workingDir) {
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
           }

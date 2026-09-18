@@ -4,7 +4,6 @@ import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
-  IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
@@ -260,8 +259,6 @@ export class DependencyDeputy {
       }
     }
 
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
-
     return;
   }
 
@@ -396,11 +393,6 @@ export class DependencyDeputy {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
         const issue = issueSet[issueKey];
-        if (IGNORED_GLOBAL_BINARIES.has(issue.symbol)) {
-          delete issueSet[issueKey];
-          counters[type]--;
-          continue;
-        }
         const manifest = this.getWorkspaceManifest(issue.workspace);
         if (manifest) {
           const ignoreItem = findMatch(manifest.ignoreBinaries, issue.symbol);

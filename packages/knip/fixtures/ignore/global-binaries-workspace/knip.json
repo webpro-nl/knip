@@ -1,0 +1,13 @@
+{
+  "ignoreGlobalBinaries": false,
+  "ignoreBinaries": ["git"],
+  "workspaces": {
+    ".": {},
+    "packages/checked": {
+      "ignoreBinaries": ["docker"]
+    },
+    "packages/exempt": {
+      "ignoreGlobalBinaries": true
+    }
+  }
+}

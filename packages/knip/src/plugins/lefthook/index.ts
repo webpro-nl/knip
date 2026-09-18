@@ -37,7 +37,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
 
   if (extname(configFileName) !== '') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
-      const deps = getInputsFromScripts([command.run], { ...options, knownBinsOnly: true });
+      const deps = getInputsFromScripts([command.run], { ...options, optionalBinaries: true });
       const dir = command.root ?? cwd;
       return deps.flatMap(dependency => ({ ...dependency, dir }));
     });

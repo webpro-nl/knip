@@ -32,7 +32,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (!isValidBinary(substringBefore(first, ' '))) return [];
     return getDependenciesFromScript(toScript(args), {
       ...options,
-      knownBinsOnly: false,
+      isForwardedArgs: false,
       ...opts,
     });
   };

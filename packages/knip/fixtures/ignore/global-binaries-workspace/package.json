@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/global-binaries-workspace",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "cloud-cli": "*"
+  }
+}

@@ -15,7 +15,7 @@ const inputs = (script: string) =>
     manifest: createManifest({}),
     rootManifest: undefined,
     getManifest: () => undefined,
-    knownBinsOnly: true,
+    isForwardedArgs: true,
   });
 const optional = { optional: true };
 

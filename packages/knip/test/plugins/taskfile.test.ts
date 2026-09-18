@@ -12,7 +12,7 @@ test('Find dependencies with the taskfile plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.unresolved['Taskfile.yml']['esbuild-register']);
-  assert(issues.binaries['Taskfile.yml']['eslint']);
+  assert(!issues.binaries['Taskfile.yml']['eslint']);
   assert(issues.binaries['Taskfile.yml']['knip']);
   assert(issues.binaries['Taskfile.yml']['prettier']);
   assert(issues.binaries['Taskfile.yml']['test-command-object-binary']);
@@ -24,7 +24,7 @@ test('Find dependencies with the taskfile plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 9,
+    binaries: 8,
     unresolved: 1,
     processed: 7,
     total: 7,

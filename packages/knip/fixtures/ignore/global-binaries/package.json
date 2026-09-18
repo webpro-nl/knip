@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/global-binaries",
+  "scripts": {
+    "build": "git status && docker build . && aws && node -v && npx on-demand-cli"
+  },
+  "devDependencies": {
+    "cloud-cli": "*"
+  }
+}

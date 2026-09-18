@@ -14,7 +14,8 @@ import type { PluginName } from './PluginNames.ts';
 import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
-  knownBinsOnly?: boolean;
+  isForwardedArgs?: boolean;
+  optionalBinaries?: boolean;
   containingFilePath: string;
   expandedScripts?: Set<string>;
 }
@@ -73,6 +74,7 @@ export type GetImportsAndExportsOptions = {
 export interface Configuration {
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
+  ignoreGlobalBinaries: boolean;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreFiles: NormalizedGlob;
@@ -100,6 +102,7 @@ interface BaseWorkspaceConfiguration {
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
   ignoreFiles: NormalizedGlob;
+  ignoreGlobalBinaries: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   isIncludeEntryExports: boolean;
 }

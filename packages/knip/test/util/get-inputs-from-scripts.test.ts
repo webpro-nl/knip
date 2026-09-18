@@ -13,7 +13,7 @@ const containingFilePath = join(cwd, 'package.json');
 const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
-const knownOnly = { cwd, knownBinsOnly: true };
+const forwardedArgs = { cwd, isForwardedArgs: true };
 const opt = { optional: true };
 
 const js = toDeferResolveEntry('./script.js', opt);
@@ -109,11 +109,11 @@ test('getInputsFromScripts (.bin)', () => {
   t('node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
   t('$(npm bin)/tsc --noEmit', [toBinary('tsc')]);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
-  t('./node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], knownOnly);
-  t('node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], knownOnly);
-  t('../../../scripts/node_modules/.bin/custom-build-cli', [], knownOnly);
-  t('/opt/node_modules/.bin/custom-build-cli', [], knownOnly);
-  t('scripts/check.sh', [], knownOnly);
+  t('./node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], forwardedArgs);
+  t('node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], forwardedArgs);
+  t('../../../scripts/node_modules/.bin/custom-build-cli', [], forwardedArgs);
+  t('/opt/node_modules/.bin/custom-build-cli', [], forwardedArgs);
+  t('scripts/check.sh', [], forwardedArgs);
 });
 
 test('getInputsFromScripts (dotenv)', () => {
@@ -130,7 +130,7 @@ test('getInputsFromScripts (dotenv)', () => {
 test('getInputsFromScripts (cross-env/env vars)', () => {
   t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env API_URL=https://example.test program', [toBinary('cross-env'), toBinary('program')]);
-  t('cross-env program', [toBinary('cross-env')], knownOnly);
+  t('cross-env program', [toBinary('cross-env')], forwardedArgs);
   t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', [toBinary('cross-env'), toBinary('program')]);
@@ -400,7 +400,7 @@ test('getInputsFromScripts ("positionals")', () => {
 });
 
 test('getInputsFromScripts (c8)', () => {
-  t('c8 program', [toBinary('c8'), toBinary('program')], knownOnly);
+  t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
@@ -443,8 +443,8 @@ test('getInputsFromScripts (advanced bash syntax)', () => {
   t('coproc eslint .', [toBinary('eslint')]);
   t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged', opt), toBinary('dirname')]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toDependency('rc', opt), toDependency('@scope/rc', opt)]);
-  t('curl', [], knownOnly);
-  t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
+  t('curl', [], forwardedArgs);
+  t('program -- mvn exec:java -Dexec.args="-g -f"', [], forwardedArgs);
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', [toBinary('node'), toBinary('node')]);
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, [toBinary('cat'), toBinary('jq')]);
 });

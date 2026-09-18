@@ -34,7 +34,7 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
 
   const inputs: Input[] = [];
   for (const command of commands) {
-    for (const input of options.getInputsFromScripts(command, { knownBinsOnly: true })) inputs.push(input);
+    for (const input of options.getInputsFromScripts(command, { optionalBinaries: true })) inputs.push(input);
   }
   return inputs;
 };

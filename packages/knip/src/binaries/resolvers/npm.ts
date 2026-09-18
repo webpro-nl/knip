@@ -53,7 +53,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   }
 
   const _childArgs =
-    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { knownBinsOnly: true }) : [];
+    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
   if (command === 'run' && manifest.scriptNames.has(script)) {
     return expandScript(script, argsAfter(words, '--'), manifest.scripts, options) ?? _childArgs;
   }

@@ -302,11 +302,10 @@ export class WorkspaceWorker {
     const manifest = this.manifest;
     const containingFilePath = join(cwd, 'package.json');
     const isProduction = this.options.isProduction;
-    const knownBinsOnly = false;
 
     const rootManifest = this.rootManifest;
     const getManifest = this.getManifest;
-    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, knownBinsOnly, getManifest };
+    const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, getManifest };
 
     // Get dependencies from package.json#scripts
     const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };

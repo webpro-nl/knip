@@ -2,12 +2,12 @@ import { parse, type Script, type Word, type WordPart } from 'unbash';
 import { getDependenciesFromCommand, getInputsFromNodeOptions } from '../../binaries/command.ts';
 import { spawningBinaries } from '../../binaries/fallback.ts';
 import { isWrapper } from '../../binaries/plugins.ts';
-import KnownResolvers from '../../binaries/resolvers/index.ts';
+import { isPackageManager } from '../../binaries/resolvers/index.ts';
 import { toScript } from '../../binaries/util.ts';
 import { SCRIPT_INTERPOLATION } from '../../constants.ts';
 import type { FromArgs, GetInputsFromScriptsOptions, GetInputsFromScriptsPartial } from '../../types/config.ts';
 import { type Input, isBinary } from '../../util/input.ts';
-import { extractBinary } from '../../util/modules.ts';
+import { extractBinary, isRelativeNodeModulesBin } from '../../util/modules.ts';
 import { walkCommands } from '../../util/scripts.ts';
 
 type Options = GetInputsFromScriptsOptions & {
@@ -66,10 +66,10 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
         if (!name || !word || definedFunctions.has(name)) continue;
 
         const binary = extractBinary(name);
-        const isPackageManager = binary in KnownResolvers && binary !== 'find';
-        const isExplicit = isPackageManager || name.startsWith('./') || /^(?:\.\.?\/)*node_modules\/\.bin\//.test(name);
+        const isPackageCommand = isPackageManager(binary);
+        const isExplicit = isPackageCommand || name.startsWith('./') || isRelativeNodeModulesBin(name);
         const isLocal = hasLocalBinPath && !command.prefix.some(assignment => assignment.name === 'PATH');
-        const isWrapperCommand = !isPackageManager && isWrapper(binary);
+        const isWrapperCommand = !isPackageCommand && isWrapper(binary);
         if (!isExplicit && !isLocal && !isWrapperCommand && binary !== 'node' && binary !== 'find') continue;
 
         let commandInputs: Input[];

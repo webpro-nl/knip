@@ -130,7 +130,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (parsed.filter && !parsed.recursive) return [];
 
   const childInputs =
-    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { knownBinsOnly: true }) : [];
+    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
 
   if (command === 'run') {
     const script = parsed._[1];

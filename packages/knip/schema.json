@@ -24,6 +24,9 @@
     "ignoreBinaries": {
       "$ref": "#/definitions/ignoreBinaries"
     },
+    "ignoreGlobalBinaries": {
+      "$ref": "#/definitions/ignoreGlobalBinaries"
+    },
     "ignoreDependencies": {
       "$ref": "#/definitions/ignoreDependencies"
     },
@@ -203,6 +206,12 @@
       "examples": ["rm", "docker-compose", "curl"],
       "$ref": "#/definitions/list"
     },
+    "ignoreGlobalBinaries": {
+      "title": "Ignore common global binaries",
+      "description": "Set to false to report required binaries otherwise excluded by Knip's default list. Explicit ignoreBinaries entries still apply.",
+      "type": "boolean",
+      "default": true
+    },
     "ignoreDependencies": {
       "title": "Dependencies to exclude from the report (regex allowed)",
       "examples": ["husky", "lint-staged"],
@@ -346,6 +355,9 @@
         },
         "ignoreBinaries": {
           "$ref": "#/definitions/ignoreBinaries"
+        },
+        "ignoreGlobalBinaries": {
+          "$ref": "#/definitions/ignoreGlobalBinaries"
         },
         "ignoreDependencies": {
           "$ref": "#/definitions/ignoreDependencies"
