@@ -40,18 +40,22 @@ const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configF
 
 const resolveExtendedConfig = async (config: OxlintConfig, configFilePath: string): Promise<Input[]> => {
   const inputs: Input[] = [];
-  for (const specifier of config.extends ?? []) {
-    if (isInternal(specifier)) {
-      inputs.push(toConfig('oxlint', specifier, { containingFilePath: configFilePath }));
-    } else {
-      inputs.push(toDependency(specifier));
-      const resolvedPath = _resolveModuleSync(specifier, configFilePath);
-      if (resolvedPath) {
-        const extendedConfig = (await _load(resolvedPath)) as OxlintConfig;
-        if (extendedConfig) {
-          for (const input of await resolveExtendedConfig(extendedConfig, resolvedPath)) inputs.push(input);
+  for (const entry of config.extends ?? []) {
+    if (typeof entry === 'string') {
+      if (isInternal(entry)) {
+        inputs.push(toConfig('oxlint', entry, { containingFilePath: configFilePath }));
+      } else {
+        inputs.push(toDependency(entry));
+        const resolvedPath = _resolveModuleSync(entry, configFilePath);
+        if (resolvedPath) {
+          const extendedConfig = (await _load(resolvedPath)) as OxlintConfig;
+          if (extendedConfig) {
+            for (const input of await resolveExtendedConfig(extendedConfig, resolvedPath)) inputs.push(input);
+          }
         }
       }
+    } else {
+      for (const input of await resolveExtendedConfig(entry, configFilePath)) inputs.push(input);
     }
   }
   for (const input of resolveJsPlugins(config.jsPlugins)) inputs.push(input);
