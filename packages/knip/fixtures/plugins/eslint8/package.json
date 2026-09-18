@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/eslint8",
+  "devDependencies": {
+    "@eslint/js": "*",
+    "@typescript-eslint/parser": "*",
+    "eslint-import-resolver-typescript": "*",
+    "eslint-import-resolver-webpack": "*",
+    "eslint-plugin-import-x": "*"
+  }
+}
