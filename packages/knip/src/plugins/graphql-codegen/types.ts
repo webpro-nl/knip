@@ -13,11 +13,30 @@ type OutputPreset = {
   prepareDocuments?: (outputFilePath: string, outputSpecificDocuments: unknown) => Promise<unknown>;
 };
 
+// https://github.com/dotansimha/graphql-code-generator-community/blob/main/packages/presets/near-operation-file/src/index.ts
+export interface NearOperationFilePresetConfig {
+  baseTypesPath?: string;
+  extension?: string;
+  fileName?: string;
+  filePerOperation?: boolean;
+  folder?: string;
+  [key: string]: unknown;
+}
+
+const nearOperationFilePresetNames = new Set([
+  'near-operation-file',
+  'near-operation-file-preset',
+  '@graphql-codegen/near-operation-file-preset',
+]);
+
+export const isNearOperationFilePreset = (preset: ConfiguredOutput['preset']): preset is PresetNames =>
+  typeof preset === 'string' && nearOperationFilePresetNames.has(preset);
+
 export function isConfigurationOutput(config: ConfiguredOutput | ConfiguredPlugin[]): config is ConfiguredOutput {
   return 'preset' in config || 'plugins' in config;
 }
 
-interface ConfiguredOutput {
+export interface ConfiguredOutput {
   /**
    * @type array
    * @items { "$ref": "#/definitions/GeneratedPluginsMap" }
@@ -39,6 +58,7 @@ interface ConfiguredOutput {
    * List of available presets: https://graphql-code-generator.com/docs/presets/presets-index
    */
   preset?: PresetNames | OutputPreset;
+  presetConfig?: NearOperationFilePresetConfig;
 }
 // Extracted from https://github.com/dotansimha/graphql-code-generator/blob/master/packages/utils/plugins-helpers/src/types.ts
 export interface GraphqlCodegenTypes {
