@@ -21,10 +21,12 @@ const defaultExtensions = ['js', 'cjs', 'mjs'];
 
 const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
+  const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
+  inputs.push(...files.map(id => toEntry(id)));
   inputs.push(...require.map(id => toDeferResolve(id)));
   return inputs;
 };

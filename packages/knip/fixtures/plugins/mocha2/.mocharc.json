@@ -1,0 +1,4 @@
+{
+  "spec": ["specs/*.test.js"],
+  "file": ["hooks/*.setup.js"]
+}
