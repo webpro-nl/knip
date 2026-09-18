@@ -15,13 +15,13 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const packageSpecifier = parsed._[0];
   const specifier = packageSpecifier ? stripVersionFromSpecifier(packageSpecifier) : '';
 
-  const packages = parsed.package && !parsed.yes ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
+  const packages = parsed.package ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
   const command = parsed.call ? fromArgs([parsed.call]) : [];
 
   const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
   const opts = parsed.no ? undefined : { optional: true };
   const dependency = isBinary ? toBinary(specifier, opts) : toDependency(specifier, opts);
-  const specifiers = dependency && !parsed.yes ? [dependency] : [];
+  const specifiers = dependency ? [dependency] : [];
 
   return [
     ...specifiers,

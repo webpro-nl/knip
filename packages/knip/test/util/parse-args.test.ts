@@ -8,6 +8,17 @@ test('parseArgs (positionals)', () => {
   assert.deepEqual(parseArgs(['a', '--flag', 'b'])._, ['a']);
 });
 
+test('parseArgs (positional indices)', () => {
+  assert.deepEqual(
+    parseArgs(['--package', 'exec', '-qr', 'exec', 'custom-build-cli', '--', 'node'], {
+      boolean: ['q', 'r'],
+      isStorePositions: true,
+      '--': true,
+    }),
+    { _: ['exec', 'custom-build-cli'], package: 'exec', q: true, r: true, '--': ['node'], positionalIndices: [3, 4] }
+  );
+});
+
 test('parseArgs (greedy value consumption for undeclared options)', () => {
   assert.deepEqual(parseArgs(['--package', '@scope/pkg', 'cmd']), { _: ['cmd'], package: '@scope/pkg' });
   assert.deepEqual(parseArgs(['-p', 'pkg'], { alias: { package: 'p' } }), { _: [], p: 'pkg', package: 'pkg' });

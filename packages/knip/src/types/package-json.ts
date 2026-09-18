@@ -19,7 +19,7 @@ type WithPackageJsonPathAsKey<T> = {
 };
 
 type PluginConfig<P> = {
-  [K in keyof P as WithPackageJsonPathAsKey<P>[K]]: unknown;
+  [K in keyof P as WithPackageJsonPathAsKey<P>[K]]?: unknown;
 };
 
 type Plugins = PluginConfig<PluginMap>;

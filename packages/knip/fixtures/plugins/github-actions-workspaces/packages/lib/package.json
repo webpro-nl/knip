@@ -1,3 +1,6 @@
 {
-  "name": "@plugins/github-actions-workspaces__lib"
+  "name": "@plugins/github-actions-workspaces__lib",
+  "devDependencies": {
+    "site-build-tools": "*"
+  }
 }

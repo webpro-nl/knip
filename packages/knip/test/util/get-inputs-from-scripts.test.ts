@@ -24,8 +24,10 @@ type T = (script: string | string[], dependencies: Input[], options?: { cwd?: st
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getInputsFromScripts(script, {
+      cwd,
       rootCwd: cwd,
       manifest: toManifest(),
+      rootManifest: undefined,
       getManifest: () => undefined,
       containingFilePath,
       ...options,
@@ -107,6 +109,11 @@ test('getInputsFromScripts (.bin)', () => {
   t('node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
   t('$(npm bin)/tsc --noEmit', [toBinary('tsc')]);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
+  t('./node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], knownOnly);
+  t('node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], knownOnly);
+  t('../../../scripts/node_modules/.bin/custom-build-cli', [], knownOnly);
+  t('/opt/node_modules/.bin/custom-build-cli', [], knownOnly);
+  t('scripts/check.sh', [], knownOnly);
 });
 
 test('getInputsFromScripts (dotenv)', () => {
@@ -152,7 +159,7 @@ test('getInputsFromScripts (nx)', () => {
 test('getInputsFromScripts (npm)', () => {
   t('npm run script', []);
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
-  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
+  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest', opt), toConfig('vitest', 'vitest.e2e.config.mts')]);
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('npm run program -- run --coverage.enabled', [], pkgScripts);
   t('npm run with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
@@ -163,8 +170,10 @@ test('getInputsFromScripts (npx)', () => {
   t('npx prisma migrate reset --force', [toBinary('prisma', opt)]);
   t('npx @scope/pkg', [toDependency('@scope/pkg', opt)]);
   t('npx tsx watch main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
-  t('npx -y pkg', []);
-  t('npx --yes pkg', []);
+  t('npx -y pkg', [toBinary('pkg', opt)]);
+  t('npx --yes pkg', [toBinary('pkg', opt)]);
+  t('npx --yes pkg@1.0.0', [toDependency('pkg', opt)]);
+  t('npx --yes --package pkg@1.0.0 custom-build-cli', [toBinary('custom-build-cli', opt), toDependency('pkg', opt)]);
   t('npx --no pkg --edit ${1}', [toBinary('pkg')]);
   t('npx --no -- pkg --edit ${1}', [toBinary('pkg')]);
   t('npx pkg install --with-deps', [toBinary('pkg', opt)]);
@@ -251,6 +260,13 @@ test('getInputsFromScripts (nub)', () => {
 
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
+  t('pnpm exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm exec custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
+  t('pnpm exec -- custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
+  t('pnpm exec node --import tsx ./main.ts', [toBinary('node'), ts, toDeferResolve('tsx')]);
+  t('pnpm exec node ./script.js -- --import tsx', [toBinary('node'), js]);
   t('pnpm exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('program')]);
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
@@ -309,6 +325,12 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm m run program', [], pkgScripts);
 });
 
+test('getInputsFromScripts (pnpm exec child options)', () => {
+  t('pnpm exec custom-build-cli --filter other-workspace', [toBinary('custom-build-cli')]);
+  t('pnpm --filter other-workspace exec custom-build-cli --recursive', []);
+  t('pnpm --filter other-workspace --recursive exec custom-build-cli', [toBinary('custom-build-cli')]);
+});
+
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
@@ -327,7 +349,7 @@ test('getInputsFromScripts (pn/pnx aliases)', () => {
   t('pn run program', [], pkgScripts);
   t('pn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('pn run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
-  t('pn exec program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)]);
+  t('pn exec program -- node script.js', [toBinary('program')]);
   const dlxInputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnx --package cowsay --package lolcatjs -c \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
   t('pn --package cowsay --package lolcatjs -c dlx \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
@@ -365,15 +387,15 @@ test('getInputsFromScripts (rollup)', () => {
 
 test('getInputsFromScripts ("positionals")', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toDeferResolve('./script.js')]);
-  t('npx --yes execa --quiet ./script.js', [toDeferResolve('./script.js')]);
+  t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toDeferResolve('./script.js')]);
   t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
-  t('npx --yes zx --quiet script.js', [toDeferResolve('script.js')]);
+  t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toDeferResolve('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
   t('npx jiti script.js', [toBinary('jiti', opt), toDeferResolve('script.js')]);
-  t('npx --yes jiti script.js', [toDeferResolve('script.js')]);
+  t('npx --yes jiti script.js', [toBinary('jiti', opt), toDeferResolve('script.js')]);
   t('npx --no jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
 });
 

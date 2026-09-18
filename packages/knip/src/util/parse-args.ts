@@ -10,10 +10,12 @@ const coerce = (value: string): string | number => (isHex.test(value) || isDecim
 export interface ParsedArgs {
   _: string[];
   '--'?: string[];
+  positionalIndices?: number[];
   [key: string]: ParsedValue;
 }
 
 interface Opts {
+  isStorePositions?: boolean;
   string?: string[];
   boolean?: string[];
   alias?: Record<string, string | string[]>;
@@ -69,6 +71,7 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
   const { tokens } = nodeParseArgs({ args, strict: false, allowPositionals: true, tokens: true });
 
   const positionals: ParsedValue[] = [];
+  const positionalIndices: number[] | undefined = opts.isStorePositions ? [] : undefined;
   const dd: string[] = [];
   const store = new Map<string, ParsedValue>();
   const consumed = new Set<number>();
@@ -89,7 +92,10 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
       terminated = true;
     } else if (token.kind === 'positional') {
       if (terminated && opts['--']) dd.push(token.value);
-      else if (!consumed.has(i)) positionals.push(coerce(token.value));
+      else if (!consumed.has(i)) {
+        positionals.push(coerce(token.value));
+        positionalIndices?.push(token.index);
+      }
     } else if (token.value === undefined && token.rawName.startsWith('--no-')) {
       set(token.name.slice(3), false);
     } else {
@@ -120,6 +126,7 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
     for (const name of groups.get(key) ?? [key]) setNested(result, name, value);
   }
   if (opts['--']) result['--'] = dd;
+  if (positionalIndices) result.positionalIndices = positionalIndices;
 
   return result;
 };

@@ -14,3 +14,6 @@ jobs:
       - name: Generate icons
         run: yarn icons
         working-directory: packages/app
+      - name: Build site
+        run: node_modules/.bin/site-build
+        working-directory: packages/lib

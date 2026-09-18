@@ -56,7 +56,7 @@ export const getDependenciesFromCommand = (
     return [...inputs, ...fromNodeOptions];
   }
 
-  if (options.knownBinsOnly && !text?.startsWith('.')) return [];
+  if (options.knownBinsOnly && !text?.startsWith('.') && !text?.startsWith('node_modules/.bin/')) return [];
 
   return [...fallbackResolve(binary, words, options), ...fromNodeOptions];
 };

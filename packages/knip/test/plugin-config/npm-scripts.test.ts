@@ -55,6 +55,7 @@ test('Unused dependencies in npm scripts', async () => {
   assert(!issues.devDependencies['package.json']['eslint-v6']);
   assert(!issues.devDependencies['package.json']['eslint-v7']);
   assert(!issues.devDependencies['package.json']['eslint-v8']);
+  assert(!issues.devDependencies['package.json']['@commitlint/cli']);
 
   assert(issues.binaries['package.json']['nodemon']);
   assert(issues.binaries['package.json']['dotenv']);

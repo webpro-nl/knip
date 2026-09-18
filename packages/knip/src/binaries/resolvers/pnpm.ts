@@ -2,7 +2,7 @@ import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary } from '../../util/input.ts';
 import { isValidBinary } from '../../util/modules.ts';
-import { argsAfter, expandScript, toWordArgs } from '../util.ts';
+import { argsAfter, expandScript } from '../util.ts';
 import { resolveDlx } from './pnpx.ts';
 
 // https://pnpm.io/cli/add
@@ -96,11 +96,13 @@ const commands = [
 const recursiveCommands = ['recursive', 'multi', 'm'];
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
-  const parsed = parseArgs(words, {
+  const parseOptions = {
+    isStorePositions: true,
     boolean: ['aggregate-output', 'if-present', 'parallel', 'recursive', 'reverse', 'shell-mode', 'silent', 'stream'],
     alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
     '--': true,
-  });
+  };
+  const parsed = parseArgs(words, parseOptions);
   const [command] = parsed._;
 
   if (command === 'dlx') {
@@ -114,16 +116,21 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const { manifest, fromArgs } = options;
 
+  if (command === 'exec') {
+    const commandIndex = parsed.positionalIndices![0];
+    if (commandIndex > 0) {
+      const execOptions = parseArgs(words.slice(0, commandIndex), parseOptions);
+      if (execOptions.filter && !execOptions.recursive) return [];
+    }
+    const index = commandIndex + 1;
+    const rest = words.slice(words[index]?.value === '--' ? index + 1 : index);
+    return fromArgs([rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ')]);
+  }
+
   if (parsed.filter && !parsed.recursive) return [];
 
   const childInputs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { knownBinsOnly: true }) : [];
-
-  if (command === 'exec') {
-    if (childInputs.length > 0) return childInputs;
-    const rest = parsed._.slice(1);
-    return rest.length === 1 ? fromArgs(rest.map(String)) : fromArgs(toWordArgs(rest, words));
-  }
 
   if (command === 'run') {
     const script = parsed._[1];
