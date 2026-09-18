@@ -1,4 +1,5 @@
 import type { PluginOptions } from '../../types/config.ts';
+import type { Manifest } from '../../util/package-json.ts';
 import { compact } from '../../util/array.ts';
 import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
@@ -137,12 +138,34 @@ export const getInputsFromSettings = (settings?: Settings) =>
   compact(getDependenciesFromSettings(settings)).map(id => toDeferResolve(id, { optional: true }));
 
 const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
-export const resolveFormatters = (formatters: string | string[]) => {
+const builtinFormattersUntilV8 = new Set([
+  'checkstyle',
+  'compact',
+  'jslint-xml',
+  'junit',
+  'tap',
+  'unix',
+  'visualstudio',
+]);
+
+const normalizeFormatterName = (name: string) => {
+  if (!name.startsWith('@')) return name.startsWith('eslint-formatter-') ? name : `eslint-formatter-${name}`;
+  const [scope, id] = name.split('/');
+  if (!id) return `${scope}/eslint-formatter`;
+  return /^eslint-formatter(-|$)/.test(id) ? name : name.replace('/', '/eslint-formatter-');
+};
+
+export const resolveFormatters = (formatters: string | string[], manifest: Manifest) => {
   const inputs: Set<Input> = new Set();
-  for (const formatter of [formatters].flat()) {
-    if (builtinFormatters.has(formatter)) continue;
-    else if (isInternal(formatter)) inputs.add(toDeferResolve(formatter));
-    else inputs.add(toDependency(`eslint-formatter-${formatter}`));
+  const isBeforeV9 = (manifest.getMajor('eslint') ?? 9) < 9;
+  for (const rawFormatter of [formatters].flat()) {
+    const formatter = rawFormatter.replace(/\\/g, '/');
+    if (!formatter.startsWith('@') && formatter.includes('/')) {
+      inputs.add(toDeferResolve(isInternal(formatter) ? formatter : `./${formatter}`));
+    } else {
+      const isBuiltin = builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter));
+      inputs.add(toDependency(normalizeFormatterName(formatter), isBuiltin ? { optional: true } : {}));
+    }
   }
   return inputs;
 };

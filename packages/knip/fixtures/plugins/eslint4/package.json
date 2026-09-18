@@ -1,12 +1,14 @@
 {
   "name": "@plugins/eslint4",
   "scripts": {
-    "lint": "eslint --fix --format codeframe ."
+    "lint": "eslint --fix --format codeframe .",
+    "lint:sarif": "eslint -f @microsoft/sarif -o results.sarif ."
   },
   "devDependencies": {
     "eslint": "*",
     "eslint-formatter-codeframe": "*",
     "eslint-import-resolver-webpack": "*",
-    "@eslint/js": "*"
+    "@eslint/js": "*",
+    "@microsoft/eslint-formatter-sarif": "*"
   }
 }
