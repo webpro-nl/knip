@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/sitelo-defaults",
+  "type": "module",
+  "scripts": {
+    "build": "sitelo build"
+  },
+  "dependencies": {
+    "sitelo": "*"
+  }
+}
