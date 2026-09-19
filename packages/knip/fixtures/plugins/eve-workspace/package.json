@@ -1,6 +1,8 @@
 {
   "name": "@plugins/eve-workspace",
   "dependencies": {
-    "eve": "*"
+    "eve": "*",
+    "stale-support-client": "*",
+    "stale-research-client": "*"
   }
 }

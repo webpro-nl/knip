@@ -11,6 +11,13 @@ test('Find files in nested and flat Eve workspace members', async () => {
   const options = await createOptions({ cwd });
   const { counters, issues } = await main(options);
 
+  for (const agentRoot of ['agents/support/agent', 'agents/research']) {
+    assert(`${agentRoot}/extensions/search/lib/unused.ts` in issues.files);
+    for (const file of ['extension.ts', 'tools/search.ts', 'lib/used.ts']) {
+      assert(!(`${agentRoot}/extensions/search/${file}` in issues.files));
+    }
+  }
+
   for (const file of [
     'agents/support/agent/agent.ts',
     'agents/support/agent/instructions/brief.ts',
@@ -34,9 +41,13 @@ test('Find files in nested and flat Eve workspace members', async () => {
   }
 
   assert(!issues.dependencies['package.json']?.eve);
+  assert(issues.dependencies['package.json']['stale-support-client']);
+  assert(issues.dependencies['package.json']['stale-research-client']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 17,
-    total: 17,
+    files: 2,
+    dependencies: 2,
+    processed: 25,
+    total: 25,
   });
 });

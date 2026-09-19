@@ -13,6 +13,11 @@ test('Find files with the current Eve agent conventions', async () => {
 
   for (const file of [
     'agent/lib/unused.ts',
+    'agent/extensions/support/lib/unused.ts',
+    'agent/extensions/support/subagents/reviewer/lib/unused.ts',
+    'agent/extensions/support/subagents/reviewer/channels/webhook.ts',
+    'agent/subagents/researcher/extensions/search/lib/unused.ts',
+    'agent/subagents/researcher/extensions/search/memory.ts',
     'agent/subagents/researcher/channels/slack.ts',
     'agent/subagents/researcher/instrumentation.ts',
     'agent/subagents/researcher/schedules/daily.ts',
@@ -25,6 +30,23 @@ test('Find files with the current Eve agent conventions', async () => {
     'agent/instructions/brief.ts',
     'agent/instrumentation/audit.ts',
     'agent/extensions/crm.ts',
+    'agent/extensions/support/extension.ts',
+    'agent/extensions/support/tools/search.ts',
+    'agent/extensions/support/lib/used.ts',
+    'agent/extensions/support/instructions/brief.ts',
+    'agent/extensions/support/channels/webhook.ts',
+    'agent/extensions/support/connections/crm.ts',
+    'agent/extensions/support/hooks/audit.ts',
+    'agent/extensions/support/skills/search.ts',
+    'agent/extensions/support/schedules/daily.ts',
+    'agent/extensions/support/subagents/remote.ts',
+    'agent/extensions/support/subagents/reviewer/agent.ts',
+    'agent/extensions/support/subagents/reviewer/memory/profile.ts',
+    'agent/extensions/support/subagents/reviewer/sandbox/sandbox.ts',
+    'agent/extensions/support/subagents/reviewer/sandbox/workspace/bootstrap.ts',
+    'agent/extensions/support/subagents/reviewer/tools/review.ts',
+    'agent/extensions/support/subagents/reviewer/subagents/assistant/agent.ts',
+    'agent/extensions/support/subagents/reviewer/extensions/lookup.ts',
     'agent/memory/profile.ts',
     'agent/sandbox/sandbox.ts',
     'agent/sandbox/workspace/bootstrap.ts',
@@ -32,6 +54,11 @@ test('Find files with the current Eve agent conventions', async () => {
     'agent/subagents/researcher/agent.ts',
     'agent/subagents/researcher/instructions/brief.ts',
     'agent/subagents/researcher/extensions/crm.ts',
+    'agent/subagents/researcher/extensions/search/extension.ts',
+    'agent/subagents/researcher/extensions/search/instructions.ts',
+    'agent/subagents/researcher/extensions/search/tools/search.ts',
+    'agent/subagents/researcher/extensions/search/lib/used.ts',
+    'agent/subagents/researcher/extensions/search/subagents/reviewer/agent.ts',
     'agent/subagents/researcher/memory/profile.ts',
     'agent/subagents/researcher/sandbox/sandbox.ts',
     'agent/subagents/researcher/sandbox/workspace/bootstrap.ts',
@@ -44,10 +71,13 @@ test('Find files with the current Eve agent conventions', async () => {
   }
 
   assert(!issues.dependencies['package.json']?.eve);
+  assert(issues.dependencies['package.json']['stale-client']);
+  assert(issues.dependencies['package.json']['stale-subagent-client']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 4,
-    processed: 22,
-    total: 22,
+    files: 9,
+    dependencies: 2,
+    processed: 49,
+    total: 49,
   });
 });

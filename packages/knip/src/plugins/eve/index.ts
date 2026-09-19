@@ -13,13 +13,17 @@ const extensions = '{js,jsx,ts,tsx,mjs,cjs,mts,cts}';
 
 const agentRoots = '{,agent/,agents/*/,agents/*/agent/}';
 
+const subagentRoots = `${agentRoots}+(subagents/*/|extensions/*/subagents/*/)`;
+
+const extensionMounts = `{${agentRoots},${subagentRoots}}extensions/*`;
+
 const rootAgentFileNames = '{agent,instructions,instrumentation,memory,sandbox}';
 
-const rootAgentDirectories = '{channels,connections,extensions,hooks,skills,tools,schedules}';
+const rootAgentDirectories = '{channels,connections,hooks,skills,tools,schedules}';
 
 const subagentFileNames = '{agent,instructions,memory,sandbox}';
 
-const subagentDirectories = '{connections,extensions,hooks,skills,tools}';
+const subagentDirectories = '{connections,hooks,skills,tools}';
 
 const entry = ['{evals,agents/*/evals}/evals.config.ts', '{evals,agents/*/evals}/**/*.eval.ts'];
 
@@ -30,12 +34,17 @@ const production = [
   `${agentRoots}sandbox/workspace/**/*.${extensions}`,
   `${agentRoots}${rootAgentDirectories}/**/*.${extensions}`,
   `${agentRoots}subagents/*.${extensions}`,
-  `${agentRoots}subagents/**/subagents/*.${extensions}`,
-  `${agentRoots}subagents/**/${subagentFileNames}.${extensions}`,
-  `${agentRoots}subagents/**/{instructions,memory}/*.${extensions}`,
-  `${agentRoots}subagents/**/sandbox/sandbox.${extensions}`,
-  `${agentRoots}subagents/**/sandbox/workspace/**/*.${extensions}`,
-  `${agentRoots}subagents/**/${subagentDirectories}/**/*.${extensions}`,
+  `${subagentRoots}subagents/*.${extensions}`,
+  `${subagentRoots}${subagentFileNames}.${extensions}`,
+  `${subagentRoots}{instructions,memory}/*.${extensions}`,
+  `${subagentRoots}sandbox/sandbox.${extensions}`,
+  `${subagentRoots}sandbox/workspace/**/*.${extensions}`,
+  `${subagentRoots}${subagentDirectories}/**/*.${extensions}`,
+  `${extensionMounts}.${extensions}`,
+  `${extensionMounts}/{extension,instructions}.${extensions}`,
+  `${extensionMounts}/instructions/*.${extensions}`,
+  `${extensionMounts}/${rootAgentDirectories}/**/*.${extensions}`,
+  `${extensionMounts}/subagents/*.${extensions}`,
 ];
 
 const plugin: Plugin = {
