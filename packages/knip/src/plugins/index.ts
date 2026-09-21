@@ -152,6 +152,7 @@ import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
+import { default as turbo } from './turbo/index.ts';
 import { default as typedoc } from './typedoc/index.ts';
 import { default as typescript } from './typescript/index.ts';
 import { default as unbuild } from './unbuild/index.ts';
@@ -339,6 +340,7 @@ export const Plugins = {
   tsdown,
   tsup,
   tsx,
+  turbo,
   typedoc,
   typescript,
   unbuild,

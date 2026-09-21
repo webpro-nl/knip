@@ -153,6 +153,7 @@ export type PluginName =
   | 'tsdown'
   | 'tsup'
   | 'tsx'
+  | 'turbo'
   | 'typedoc'
   | 'typescript'
   | 'unbuild'
@@ -340,6 +341,7 @@ export const pluginNames = [
   'tsdown',
   'tsup',
   'tsx',
+  'turbo',
   'typedoc',
   'typescript',
   'unbuild',

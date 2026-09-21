@@ -166,6 +166,7 @@ export const pluginsSchema = z.object({
   tsdown: pluginSchema,
   tsup: pluginSchema,
   tsx: pluginSchema,
+  turbo: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,
   unbuild: pluginSchema,
