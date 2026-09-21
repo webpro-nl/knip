@@ -108,13 +108,27 @@ const getDependenciesFromRules = (rules: ESLintConfigDeprecated['rules'] = {}) =
 const getResolverNames = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(getResolverNames);
-  if (value && typeof value === 'object') return Object.keys(value);
+  if (value && typeof value === 'object') {
+    if ('name' in value && 'resolver' in value) return [];
+    return Object.keys(value);
+  }
   return [];
 };
 
+export type ImportSettingKind = 'resolver' | 'parsers';
+
+export const importSettingKinds = new Map<string, ImportSettingKind>([
+  ['import/resolver', 'resolver'],
+  ['import-x/resolver', 'resolver'],
+  ['import-x/resolver-legacy', 'resolver'],
+  ['import/parsers', 'parsers'],
+  ['import-x/parsers', 'parsers'],
+]);
+
 const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'] = {}) => {
   return Object.entries(settings).flatMap(([settingKey, settings]) => {
-    if (settingKey === 'import/resolver') {
+    const kind = importSettingKinds.get(settingKey);
+    if (kind === 'resolver') {
       return getResolverNames(settings)
         .filter(key => key !== 'node')
         .map(key => {
@@ -124,7 +138,7 @@ const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'
           return `eslint-import-resolver-${key}`;
         });
     }
-    if (settingKey === 'import/parsers') {
+    if (kind === 'parsers') {
       return (typeof settings === 'string' ? [settings] : Object.keys(settings)).map(key => {
         // TODO Resolve properly
         if (isAbsolute(key)) return getPackageNameFromFilePath(key);
