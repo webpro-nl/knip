@@ -9,7 +9,20 @@ executables. Argument parsing in plugins help Knip identify dependencies and
 entry files from scripts.
 
 Knip parses these arguments with a built-in parser. The options below customize
-how a tool's scripts are parsed.
+how a tool's scripts are parsed. Here's an example:
+
+```ts
+const args = {
+  args: (args) => args  // modify/filter the array of raw args
+  config: true,         // shorthand to add `--config [config file]` (and shortcut `-c`) as a `config` file
+  fromArgs: ['exec'],   // re-parse what's behind `exec` as a new script
+};
+
+export default {
+  title: 'my-plugin',
+  args
+}
+```
 
 Also see [type definitions][1] and [examples in existing plugins][2].
 
