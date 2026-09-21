@@ -108,7 +108,10 @@ const getDependenciesFromRules = (rules: ESLintConfigDeprecated['rules'] = {}) =
 const getResolverNames = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(getResolverNames);
-  if (value && typeof value === 'object') return Object.keys(value);
+  if (value && typeof value === 'object') {
+    if ('name' in value && 'resolver' in value) return [];
+    return Object.keys(value);
+  }
   return [];
 };
 

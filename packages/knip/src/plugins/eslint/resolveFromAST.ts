@@ -19,6 +19,7 @@ export const getInputsFromSettingsAST = (program: Program): Input[] => {
     if (node?.type === 'ArrayExpression') {
       for (const element of node.elements) addResolvers(kind, element);
     } else if (node?.type === 'ObjectExpression') {
+      if (kind === 'resolver' && findProperty(node, 'name') && findProperty(node, 'resolver')) return;
       for (const prop of node.properties) {
         if (prop.type === 'Property') addResolver(kind, getPropertyKey(prop));
       }
