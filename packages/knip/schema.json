@@ -1018,6 +1018,10 @@
           "title": "tsx plugin configuration (https://knip.dev/reference/plugins/tsx)",
           "$ref": "#/definitions/plugin"
         },
+        "turbo": {
+          "title": "turbo plugin configuration (https://knip.dev/reference/plugins/turbo)",
+          "$ref": "#/definitions/plugin"
+        },
         "typedoc": {
           "title": "typedoc plugin configuration (https://knip.dev/reference/plugins/typedoc)",
           "$ref": "#/definitions/plugin"
