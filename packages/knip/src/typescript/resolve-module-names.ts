@@ -66,6 +66,7 @@ function pickExistingPackageTarget(
 
 type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
 type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;
+type ScopedModuleSuffixes = Array<{ scope: string; moduleSuffixes: string[] }>;
 
 interface PathMapping {
   prefix: string;
@@ -106,6 +107,11 @@ function compilePathMappings(scopedPaths: ScopedPaths | undefined): PathMapping[
   if (mappings.length === 0) return undefined;
   mappings.sort((a, b) => b.scope.length - a.scope.length);
   return mappings;
+}
+
+function compileModuleSuffixes(scoped: ScopedModuleSuffixes | undefined): ScopedModuleSuffixes | undefined {
+  if (!scoped?.length) return undefined;
+  return scoped.toSorted((a, b) => b.scope.length - a.scope.length);
 }
 
 function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRootDirs | undefined {
@@ -154,7 +160,11 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
 }
 
 export function createCustomModuleResolver(
-  compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
+  compilerOptions: {
+    scopedPaths?: ScopedPaths;
+    scopedRootDirs?: ScopedRootDirs;
+    scopedModuleSuffixes?: ScopedModuleSuffixes;
+  },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspacePackageTarget?: WorkspacePackageTargetHandler,
@@ -168,6 +178,7 @@ export function createCustomModuleResolver(
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
   const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
+  const moduleSuffixMappings = compileModuleSuffixes(compilerOptions.scopedModuleSuffixes);
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -205,12 +216,33 @@ export function createCustomModuleResolver(
     return result;
   }
 
+  // Fallback for tsconfig#compilerOptions.moduleSuffixes (e.g. React Native `.ios`/`.android`), scoped per workspace.
+  // oxc-resolver doesn't support moduleSuffixes.
+  function resolveWithSuffixes(specifier: string, containingFile: string) {
+    if (moduleSuffixMappings) {
+      const dir = dirname(containingFile);
+      for (const { scope, moduleSuffixes } of moduleSuffixMappings) {
+        if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
+        for (const suffix of moduleSuffixes) {
+          const resolved = suffix
+            ? (resolveSync(specifier + suffix, containingFile) ??
+              resolveSync(`${specifier}/index${suffix}`, containingFile))
+            : resolveSync(specifier, containingFile);
+          if (resolved) return resolved;
+        }
+        if (moduleSuffixes.includes('')) return;
+        break;
+      }
+    }
+    return resolveSync(specifier, containingFile);
+  }
+
   function resolveModuleNameUncached(name: string, containingFile: string): ResolvedModule | undefined {
     const specifier = sanitizeSpecifier(name);
 
     if (isBuiltin(specifier)) return undefined;
 
-    const resolvedFileName = resolveSync(specifier, containingFile);
+    const resolvedFileName = resolveWithSuffixes(specifier, containingFile);
     if (resolvedFileName) return toResult(specifier, containingFile, resolvedFileName);
 
     // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths, scoped per workspace

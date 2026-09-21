@@ -49,6 +49,7 @@ export class ProjectPrincipal {
   private scopedCompilers = new Map<string, Map<string, Compiler>>();
   private paths = new Map<string, Record<string, string[]>>();
   private rootDirs = new Map<string, string[]>();
+  private moduleSuffixes = new Map<string, string[]>();
   private tsConfigFile: string | undefined;
   private extensions = new Set(DEFAULT_EXTENSIONS);
 
@@ -119,13 +120,21 @@ export class ProjectPrincipal {
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
   }
 
+  addModuleSuffixes(moduleSuffixes: string[] | undefined, scope: string) {
+    if (moduleSuffixes?.length) this.moduleSuffixes.set(scope, moduleSuffixes);
+  }
+
   init() {
     const scopedPaths =
       this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
     const scopedRootDirs =
       this.rootDirs.size > 0 ? Array.from(this.rootDirs, ([scope, rootDirs]) => ({ scope, rootDirs })) : undefined;
+    const scopedModuleSuffixes =
+      this.moduleSuffixes.size > 0
+        ? Array.from(this.moduleSuffixes, ([scope, moduleSuffixes]) => ({ scope, moduleSuffixes }))
+        : undefined;
     this.resolveModule = createCustomModuleResolver(
-      { scopedPaths, scopedRootDirs },
+      { scopedPaths, scopedRootDirs, scopedModuleSuffixes },
       [...this.compilers.keys()],
       this.toSourceFilePath,
       this.findWorkspacePackageTarget,
