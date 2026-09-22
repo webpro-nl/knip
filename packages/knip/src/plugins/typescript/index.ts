@@ -19,6 +19,9 @@ const config = ['tsconfig.json', 'package.json'];
 
 const packageJsonPath = 'typescript.contentMapper';
 
+const mdxContentMappers = ['mdx-content-mapper', '@mdx-js/content-mapper'];
+const mdxTransformerPlugins = ['remark-mdx-frontmatter'];
+
 const resolveContentMapper = ({ exec }: ContentMapperManifest, options: PluginOptions) => {
   if (!Array.isArray(exec) || exec.some(arg => typeof arg !== 'string')) return [];
   return options
@@ -42,7 +45,15 @@ const resolveTsConfig = (localConfig: TsConfigJson, options: PluginOptions) => {
       ?.filter(reference => reference.path.endsWith('.json'))
       .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
 
-  const contentMappers = localConfig.contentMappers?.map(contentMapper => toDependency(contentMapper.package)) ?? [];
+  const contentMappers = [];
+  for (const { package: name, options: mapperOptions } of localConfig.contentMappers ?? []) {
+    contentMappers.push(toDependency(name));
+    if (!mdxContentMappers.includes(name)) continue;
+    for (const plugin of mapperOptions?.remarkPlugins ?? []) {
+      const id = typeof plugin === 'string' ? plugin : plugin[0];
+      if (typeof id === 'string' && !mdxTransformerPlugins.includes(id)) contentMappers.push(toDependency(id));
+    }
+  }
 
   if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
 
