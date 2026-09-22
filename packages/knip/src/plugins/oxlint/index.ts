@@ -2,9 +2,7 @@ import { Visitor } from 'oxc-parser';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { type Input, toConfig, toDependency, toEntry } from '../../util/input.ts';
-import { _load } from '../../util/loader.ts';
-import { isInternal } from '../../util/path.ts';
-import { _resolveModuleSync } from '../../util/resolve.ts';
+import { dirname, isInternal, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getInputsFromSettings } from '../eslint/helpers.ts';
 import { getInputsFromSettingsAST } from '../eslint/resolveFromAST.ts';
@@ -38,24 +36,14 @@ const resolveJsPlugins = (jsPlugins: OxlintConfig['jsPlugins']): Input[] => {
 
 const isLoadConfig: IsLoadConfig = ({ configFileName }) => !isViteConfig(configFileName);
 
-const resolveExtendedConfig = async (config: OxlintConfig, configFilePath: string): Promise<Input[]> => {
+const resolveExtendedConfig = (config: OxlintConfig, configFilePath: string): Input[] => {
   const inputs: Input[] = [];
   for (const entry of config.extends ?? []) {
     if (typeof entry === 'string') {
-      if (isInternal(entry)) {
-        inputs.push(toConfig('oxlint', entry, { containingFilePath: configFilePath }));
-      } else {
-        inputs.push(toDependency(entry));
-        const resolvedPath = _resolveModuleSync(entry, configFilePath);
-        if (resolvedPath) {
-          const extendedConfig = (await _load(resolvedPath)) as OxlintConfig;
-          if (extendedConfig) {
-            for (const input of await resolveExtendedConfig(extendedConfig, resolvedPath)) inputs.push(input);
-          }
-        }
-      }
+      const filePath = toAbsolute(entry, dirname(configFilePath));
+      inputs.push(toConfig('oxlint', filePath, { containingFilePath: configFilePath }));
     } else {
-      for (const input of await resolveExtendedConfig(entry, configFilePath)) inputs.push(input);
+      for (const input of resolveExtendedConfig(entry, configFilePath)) inputs.push(input);
     }
   }
   for (const input of resolveJsPlugins(config.jsPlugins)) inputs.push(input);

@@ -1,11 +1,10 @@
 {
   "name": "@plugins/oxlint-extends",
   "scripts": {
-    "lint": "oxlint"
+    "lint": "oxlint --config .oxlintrc-0.json"
   },
   "devDependencies": {
     "oxlint": "*",
-    "oxlint-config-shared": "*",
     "eslint-plugin-security": "*"
   }
 }
