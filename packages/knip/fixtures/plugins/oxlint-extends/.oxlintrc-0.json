@@ -1,3 +1,3 @@
 {
-  "extends": ["base.json"]
+  "extends": ["base.json", "./configs/shared.json"]
 }
