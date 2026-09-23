@@ -11,3 +11,10 @@ export namespace Basket {
   export const size = 1;
   export const color = 'red';
 }
+
+/** @knipignore */
+export enum Vegetable {
+  /** @knipignore */
+  carrot = 'carrot',
+  pea = 'pea',
+}

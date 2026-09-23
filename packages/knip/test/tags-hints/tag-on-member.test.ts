@@ -17,6 +17,7 @@ test('Flag a tag on a referenced member', async () => {
     new Set([
       { type: 'tag', filePath: join(cwd, 'status.ts'), identifier: 'Fruit.apple', tagName: '@knipignore' },
       { type: 'tag', filePath: join(cwd, 'status.ts'), identifier: 'Basket.size', tagName: '@knipignore' },
+      { type: 'tag', filePath: join(cwd, 'status.ts'), identifier: 'Vegetable.carrot', tagName: '@knipignore' },
     ])
   );
 

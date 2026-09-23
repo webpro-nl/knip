@@ -126,8 +126,7 @@ export const analyze = async ({
       if (shouldIgnore(member.jsDocTags)) continue;
       if (member.hasRefsInFile) continue;
 
-      const id = `${identifier}.${member.identifier}`;
-      const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
+      const [isMemberReferenced] = explorer.isReferenced(filePath, `${identifier}.${member.identifier}`, {
         traverseEntries: true,
         treatStarAtEntryAsReferenced: true,
       });
@@ -141,6 +140,16 @@ export const analyze = async ({
     }
 
     return { issueType, unusedMembers, ignoredMembers };
+  };
+
+  const addMemberTagHints = (members: ExportMember[], filePath: string, identifier: string) => {
+    for (const member of members) {
+      for (const tagName of member.jsDocTags) {
+        if (options.tags[1].includes(tagName)) {
+          collector.addTagHint({ type: 'tag', filePath, identifier: `${identifier}.${member.identifier}`, tagName });
+        }
+      }
+    }
   };
 
   const analyzeGraph = async () => {
@@ -187,6 +196,8 @@ export const analyze = async ({
                     ? getMemberIssues(exportedItem, filePath, identifier, workspace, importsForExport)
                     : undefined;
 
+                  if (memberIssues) addMemberTagHints(memberIssues.ignoredMembers, filePath, identifier);
+
                   if (!memberIssues || memberIssues.unusedMembers.length === 0) {
                     for (const tagName of exportedItem.jsDocTags) {
                       if (options.tags[1].includes(tagName) || (isInternalProd && tagName === INTERNAL_TAG)) {
@@ -228,14 +239,7 @@ export const analyze = async ({
                     });
                   }
 
-                  for (const member of memberIssues.ignoredMembers) {
-                    const id = `${identifier}.${member.identifier}`;
-                    for (const tagName of member.jsDocTags) {
-                      if (options.tags[1].includes(tagName)) {
-                        collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
-                      }
-                    }
-                  }
+                  addMemberTagHints(memberIssues.ignoredMembers, filePath, identifier);
                 }
 
                 // This id was imported, so we bail out early
