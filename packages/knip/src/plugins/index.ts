@@ -155,6 +155,7 @@ import { default as tsx } from './tsx/index.ts';
 import { default as turbo } from './turbo/index.ts';
 import { default as typedoc } from './typedoc/index.ts';
 import { default as typescript } from './typescript/index.ts';
+import { default as typescriptContentMapper } from './typescript-content-mapper/index.ts';
 import { default as unbuild } from './unbuild/index.ts';
 import { default as unocss } from './unocss/index.ts';
 import { default as unpluginAutoImport } from './unplugin-auto-import/index.ts';
@@ -343,6 +344,7 @@ export const Plugins = {
   turbo,
   typedoc,
   typescript,
+  'typescript-content-mapper': typescriptContentMapper,
   unbuild,
   unocss,
   'unplugin-auto-import': unpluginAutoImport,

@@ -11,22 +11,29 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['tsconfig.json'];
 
-const takeDependencies = (config: MdxConfig) => {
+const takeDependencies = (plugins: unknown) => {
   const inputs: Input[] = [];
-  if (Array.isArray(config.plugins)) {
-    for (const plugin of config.plugins) {
+  if (Array.isArray(plugins)) {
+    for (const plugin of plugins) {
       if (typeof plugin === 'string') inputs.push(toDependency(plugin));
-      else if (typeof plugin[0] === 'string') inputs.push(toDependency(plugin[0]));
+      else if (Array.isArray(plugin) && typeof plugin[0] === 'string') inputs.push(toDependency(plugin[0]));
     }
   }
   return inputs;
 };
 
+export const contentMappers = ['mdx-content-mapper', '@mdx-js/content-mapper'];
+
+const bundledPlugins = ['remark-mdx-frontmatter'];
+
+export const resolveContentMapperOptions = (options: Record<string, unknown>) =>
+  takeDependencies(options.remarkPlugins).filter(input => !bundledPlugins.includes(input.specifier));
+
 const resolveConfig: ResolveConfig<MdxConfig | { mdx: MdxConfig }> = async (config, options) => {
   const { configFileName } = options;
 
   // read by @mdx-js/typescript-plugin (https://github.com/mdx-js/mdx-analyzer#plugins)
-  if (configFileName === 'tsconfig.json' && 'mdx' in config) return takeDependencies(config.mdx);
+  if (configFileName === 'tsconfig.json' && 'mdx' in config) return takeDependencies(config.mdx.plugins);
 
   return [];
 };

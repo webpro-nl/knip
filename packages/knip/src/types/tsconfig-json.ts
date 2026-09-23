@@ -8,11 +8,7 @@ export interface TsConfigJson {
   };
   contentMappers?: {
     package: string;
-    options?: { remarkPlugins?: Array<string | [string, ...unknown[]]> };
+    options?: Record<string, unknown>;
   }[];
   references?: Array<{ path: string }>;
-}
-
-export interface ContentMapperManifest {
-  exec?: string[];
 }

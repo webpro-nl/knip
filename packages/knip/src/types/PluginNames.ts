@@ -156,6 +156,7 @@ export type PluginName =
   | 'turbo'
   | 'typedoc'
   | 'typescript'
+  | 'typescript-content-mapper'
   | 'unbuild'
   | 'unocss'
   | 'unplugin-auto-import'
@@ -344,6 +345,7 @@ export const pluginNames = [
   'turbo',
   'typedoc',
   'typescript',
+  'typescript-content-mapper',
   'unbuild',
   'unocss',
   'unplugin-auto-import',

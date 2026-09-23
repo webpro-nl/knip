@@ -9,7 +9,10 @@
     },
     {
       "package": "ember-content-mapper",
-      "extensions": [".gjs", ".gts"]
+      "extensions": [".gjs", ".gts"],
+      "options": {
+        "additionalGlobals": ["t"]
+      }
     }
   ]
 }

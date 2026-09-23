@@ -169,6 +169,7 @@ export const pluginsSchema = z.object({
   turbo: pluginSchema,
   typedoc: pluginSchema,
   typescript: pluginSchema,
+  'typescript-content-mapper': pluginSchema,
   unbuild: pluginSchema,
   unocss: pluginSchema,
   'unplugin-auto-import': pluginSchema,

@@ -1030,6 +1030,10 @@
           "title": "TypeScript plugin configuration (https://knip.dev/reference/plugins/typescript)",
           "$ref": "#/definitions/plugin"
         },
+        "typescript-content-mapper": {
+          "title": "typescript-content-mapper plugin configuration (https://knip.dev/reference/plugins/typescript-content-mapper)",
+          "$ref": "#/definitions/plugin"
+        },
         "unbuild": {
           "title": "unbuild plugin configuration (https://knip.dev/reference/plugins/unbuild)",
           "$ref": "#/definitions/plugin"
