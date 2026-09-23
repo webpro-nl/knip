@@ -49,7 +49,9 @@ const resolveTsConfig = (localConfig: TsConfigJson, options: PluginOptions) => {
   for (const { package: name, options: mapperOptions } of localConfig.contentMappers ?? []) {
     contentMappers.push(toDependency(name));
     if (!mdxContentMappers.includes(name)) continue;
-    for (const plugin of mapperOptions?.remarkPlugins ?? []) {
+    const remarkPlugins = mapperOptions?.remarkPlugins;
+    if (!Array.isArray(remarkPlugins)) continue;
+    for (const plugin of remarkPlugins) {
       const id = typeof plugin === 'string' ? plugin : plugin[0];
       if (typeof id === 'string' && !mdxTransformerPlugins.includes(id)) contentMappers.push(toDependency(id));
     }
