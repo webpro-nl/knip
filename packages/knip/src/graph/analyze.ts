@@ -19,7 +19,7 @@ import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
-import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, isAlwaysIgnored } from '../util/tag.ts';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
 import { INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
@@ -217,7 +217,11 @@ export const analyze = async ({
                 // Skip exports if re-exported from entry file and tagged
                 if (!isReferenced) {
                   const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
-                  if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
+                  if (
+                    reExportedItem &&
+                    (shouldIgnore(reExportedItem.jsDocTags) || hasTag(options.tags[1], reExportedItem.jsDocTags))
+                  )
+                    continue;
                 }
               }
 
