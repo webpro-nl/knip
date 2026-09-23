@@ -49,3 +49,21 @@ test('Dynamic imports are still extracted', () => {
 
   assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import('./lazy.svelte')");
 });
+
+test('import.meta is not treated as an import', () => {
+  const source = wrap(`
+  const load = () => import('./lazy.svelte')
+  if (import.meta.env.DEV) console.log('dev')
+  `);
+
+  assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import('./lazy.svelte')");
+});
+
+test('import.meta does not swallow the import after it', () => {
+  const source = wrap(`
+  const url = import.meta.url
+  import Widget from './Widget.svelte'
+  `);
+
+  assert.equal(importsWithinScripts(source, 'Widget.svelte'), "import Widget from './Widget.svelte'");
+});

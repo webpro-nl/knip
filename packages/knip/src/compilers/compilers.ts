@@ -10,7 +10,8 @@ export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
-export const importMatcher = /(?<![.\w$#])import\b(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
+export const importMatcher =
+  /(?<![.\w$#])import\b(?!\s*\.)(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
 
 export const collectImports: CompilerSync = text => {
   if (!text.includes('import')) return '';
