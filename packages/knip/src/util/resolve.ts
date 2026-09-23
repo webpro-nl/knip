@@ -10,6 +10,19 @@ export const extensionAlias: Record<string, string[]> = {
   '.cjs': ['.cjs', '.cts', '.d.cts'],
 };
 
+const addModuleSuffixes = (extensions: string[], moduleSuffixes: string[] | undefined) =>
+  moduleSuffixes?.length ? extensions.flatMap(ext => moduleSuffixes.map(suffix => `${suffix}${ext}`)) : extensions;
+
+const addModuleSuffixAliases = (moduleSuffixes: string[] | undefined) => {
+  if (!moduleSuffixes?.length) return extensionAlias;
+  return Object.fromEntries(
+    Object.entries(extensionAlias).map(([ext, aliases]) => [
+      ext,
+      aliases.flatMap(alias => moduleSuffixes.map(suffix => `${suffix}${alias}`)),
+    ])
+  );
+};
+
 const resolverInstances: ResolverFactory[] = [];
 
 const declarationResolver = new ResolverFactory({
@@ -41,10 +54,10 @@ export const resolvePackageManifestPath = (packageName: string, baseDir: string)
   if (resolved.path) return toPosix(resolved.path);
 };
 
-const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
+const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string, moduleSuffixes?: string[]) => {
   const baseOptions = {
-    extensions,
-    extensionAlias,
+    extensions: addModuleSuffixes(extensions, moduleSuffixes),
+    extensionAlias: addModuleSuffixAliases(moduleSuffixes),
     conditionNames: ['require', 'import', 'node', 'default'],
     nodePath: false,
   };
@@ -87,8 +100,8 @@ const resolveDeclarationSync = (specifier: string, containingFile: string) => {
 
 export const _resolveDeclarationSync = timerify(resolveDeclarationSync, 'resolveDeclarationSync');
 
-export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =>
-  timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');
+export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string, moduleSuffixes?: string[]) =>
+  timerify(createSyncModuleResolver(extensions, tsConfigFile, moduleSuffixes), 'resolveModuleSync');
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({

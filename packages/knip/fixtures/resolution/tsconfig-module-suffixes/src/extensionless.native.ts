@@ -1,0 +1,1 @@
+export const extensionless = 'native';

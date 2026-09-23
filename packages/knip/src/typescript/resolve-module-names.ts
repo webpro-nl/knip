@@ -66,6 +66,7 @@ function pickExistingPackageTarget(
 
 type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
 type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;
+type ScopedModuleSuffixes = Array<{ scope: string; moduleSuffixes: string[] }>;
 
 interface PathMapping {
   prefix: string;
@@ -116,6 +117,16 @@ function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRoot
   return scoped;
 }
 
+function compileModuleSuffixes(
+  scopedModuleSuffixes: ScopedModuleSuffixes | undefined
+): ScopedModuleSuffixes | undefined {
+  if (!scopedModuleSuffixes) return undefined;
+  const scoped = scopedModuleSuffixes.filter(({ moduleSuffixes }) => moduleSuffixes.length > 0);
+  if (scoped.length === 0) return undefined;
+  scoped.sort((a, b) => b.scope.length - a.scope.length);
+  return scoped;
+}
+
 export type ResolveGlobPattern = (pattern: string, dir: string) => string[];
 
 export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): ResolveGlobPattern {
@@ -154,7 +165,11 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
 }
 
 export function createCustomModuleResolver(
-  compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
+  compilerOptions: {
+    scopedPaths?: ScopedPaths;
+    scopedRootDirs?: ScopedRootDirs;
+    scopedModuleSuffixes?: ScopedModuleSuffixes;
+  },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspacePackageTarget?: WorkspacePackageTargetHandler,
@@ -168,6 +183,20 @@ export function createCustomModuleResolver(
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
   const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
+  const moduleSuffixMappings = compileModuleSuffixes(compilerOptions.scopedModuleSuffixes);
+  const moduleSuffixResolvers = moduleSuffixMappings?.map(({ scope, moduleSuffixes }) => ({
+    scope,
+    resolve: _createSyncModuleResolver(extensions, tsConfigFile, moduleSuffixes),
+  }));
+
+  const getResolveSync = (containingFile: string) => {
+    if (!moduleSuffixResolvers) return resolveSync;
+    const dir = dirname(containingFile);
+    for (const mapping of moduleSuffixResolvers) {
+      if (dir === mapping.scope || dir.startsWith(`${mapping.scope}/`)) return mapping.resolve;
+    }
+    return resolveSync;
+  };
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -210,6 +239,7 @@ export function createCustomModuleResolver(
 
     if (isBuiltin(specifier)) return undefined;
 
+    const resolveSync = getResolveSync(containingFile);
     const resolvedFileName = resolveSync(specifier, containingFile);
     if (resolvedFileName) return toResult(specifier, containingFile, resolvedFileName);
 

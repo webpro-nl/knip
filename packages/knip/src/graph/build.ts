@@ -262,6 +262,7 @@ export async function build({
     principal.addPaths(config.paths, dir, dir);
     if (tsConfigPaths) principal.addPaths(tsConfigPaths, dir, dir);
     principal.addRootDirs(compilerOptions.rootDirs, dir);
+    principal.addModuleSuffixes(compilerOptions.moduleSuffixes, dir);
 
     const inputsFromPlugins = await worker.runPlugins();
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));

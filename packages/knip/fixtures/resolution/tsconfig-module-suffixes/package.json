@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/tsconfig-module-suffixes",
+  "main": "src/index.ts"
+}
