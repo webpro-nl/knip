@@ -10,8 +10,6 @@ export const styleExtractor = /<style\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<
 const langAttrMatcher = /\blang\s*=\s*["']([^"']+)["']/i;
 export const blockCommentMatcher = /\/\*[\s\S]*?\*\//g;
 export const lineCommentMatcher = /^[ \t]*\/\/.*$/gm;
-// `(?!\s*\.)` skips `import.meta`: it is the one `import` that takes no specifier, so without this the
-// second alternative runs on to the next quoted string in the file and eats whatever sits in between.
 export const importMatcher =
   /(?<![.\w$#])import\b(?!\s*\.)(?:\s*\(\s*['"][^'"]+['"][^)]*\)|(?!\s*\()[^'"]+['"][^'"]+['"])/g;
 
