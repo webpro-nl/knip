@@ -1,0 +1,12 @@
+{
+  "compilerOptions": { "jsx": "react-jsx" },
+  "contentMappers": [
+    {
+      "package": "mdx-content-mapper",
+      "extensions": [".mdx"],
+      "options": {
+        "providerImportSource": "#mdx-components"
+      }
+    }
+  ]
+}

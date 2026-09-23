@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/mdx-content-mapper",
+  "type": "module",
+  "imports": {
+    "#mdx-components": "./mdx-components.tsx"
+  },
+  "scripts": {
+    "build-next": "tsc -p tsconfig.next.json"
+  },
+  "devDependencies": {
+    "mdx-content-mapper": "*",
+    "typescript": "*"
+  }
+}
