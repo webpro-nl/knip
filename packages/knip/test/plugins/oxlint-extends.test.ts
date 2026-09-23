@@ -9,11 +9,14 @@ const cwd = resolve('fixtures/plugins/oxlint-extends');
 
 test('Find dependencies from oxlint extends config', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert(issues.unlisted['oxlint-shared.config.ts']['eslint-plugin-missing']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
+    unlisted: 1,
   });
 });

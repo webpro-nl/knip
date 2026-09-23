@@ -76,6 +76,8 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
   return [...resolveJsPlugins([...jsPlugins], options.configFilePath), ...getInputsFromSettingsAST(program)];
 };
 
+const isFilterTransitiveDependencies = true;
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -84,6 +86,7 @@ const plugin: Plugin = {
   isLoadConfig,
   resolveConfig,
   resolveFromAST,
+  isFilterTransitiveDependencies,
   args,
 };
 
