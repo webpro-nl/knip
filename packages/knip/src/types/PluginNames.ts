@@ -107,6 +107,7 @@ export type PluginName =
   | 'prisma'
   | 'quasar'
   | 'qwik'
+  | 'railway'
   | 'raycast'
   | 'react-cosmos'
   | 'react-email'
@@ -296,6 +297,7 @@ export const pluginNames = [
   'prisma',
   'quasar',
   'qwik',
+  'railway',
   'raycast',
   'react-cosmos',
   'react-email',

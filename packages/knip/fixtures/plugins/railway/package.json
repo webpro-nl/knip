@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/railway",
+  "repository": "https://github.com/fruit-stand/storefront.git",
+  "scripts": {
+    "plan": "railway config plan --file infra/provision.ts --runner tools/iac-runner.js"
+  },
+  "dependencies": {
+    "drizzle-kit": "*",
+    "external-tool": "*",
+    "railway": "*",
+    "storefront-tool": "*"
+  }
+}
