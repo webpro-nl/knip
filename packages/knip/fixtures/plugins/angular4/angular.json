@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "projects": {
+    "without-architect": {
+      "projectType": "library",
+      "root": "projects/without-architect"
+    },
+    "with-architect": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "browser": "src/app.ts"
+          }
+        }
+      }
+    }
+  }
+}
