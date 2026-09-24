@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/angular4",
+  "devDependencies": {
+    "@angular-devkit/build-angular": "*",
+    "@angular/cli": "*"
+  }
+}
