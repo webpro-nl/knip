@@ -7,10 +7,15 @@ export default defineRailway(() => {
     source: storefrontSource,
     build: 'node scripts/build.ts',
     start: 'node src/serve.ts',
+    preDeploy: 'npx storefront-tool prepare',
   });
   const inventory = service('inventory', {
     root: 'services/inventory',
     start: './scripts/deploy.ts',
+  });
+  const analytics = service('analytics', {
+    source: github('other-stand/analytics'),
+    start: 'node scripts/build.ts',
   });
   const dashboard = service('dashboard', {
     source: image('nginx:latest'),
@@ -18,5 +23,5 @@ export default defineRailway(() => {
     preDeploy: 'npx external-tool prepare',
   });
 
-  return project('fruit-stand', { resources: [storefront, inventory, dashboard] });
+  return project('fruit-stand', { resources: [storefront, inventory, analytics, dashboard] });
 });

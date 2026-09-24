@@ -5,6 +5,7 @@ import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config
 import { findProperty, getFirstPropertyValue, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
+import { getGitRemoteUrls } from '../../util/git.ts';
 import { isEntry, type Input } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 
@@ -30,10 +31,29 @@ const getCommands = (node: unknown): string[] => {
 
 const isExternalSourceType = (type: string | undefined) => type === 'github' || type === 'image' || type === 'template';
 
+const getGitHubRepository = (value: string | undefined) => {
+  const normalized = value
+    ?.trim()
+    .replace(/^git\+/, '')
+    .replace(/\.git\/?$/, '')
+    .replace(/\/$/, '');
+  return normalized?.match(/(?:^|github(?:\.com)?[/:])([^/:]+\/[^/]+)$/i)?.[1].toLowerCase();
+};
+
 const resolveFromAST: ResolveFromAST = (program, options) => {
   const serviceNames = new Set<string>();
-  const externalSourceNames = new Set<string>();
+  const sourceTypes = new Map<string, string>();
   const bindings = new Map<string, Expression>();
+  const localRepositories = new Set<string>();
+
+  for (const repository of [options.manifest.repository, options.rootManifest?.repository]) {
+    const name = getGitHubRepository(typeof repository === 'string' ? repository : repository?.url);
+    if (name) localRepositories.add(name);
+  }
+  for (const url of getGitRemoteUrls(options.rootCwd)) {
+    const name = getGitHubRepository(url);
+    if (name) localRepositories.add(name);
+  }
 
   for (const node of program.body) {
     if (node.type === 'ImportDeclaration' && getStringValue(node.source) === 'railway/iac') {
@@ -41,7 +61,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
         if (specifier.type !== 'ImportSpecifier' || specifier.imported.type !== 'Identifier') continue;
         if (specifier.imported.name === 'service') serviceNames.add(specifier.local.name);
         if (isExternalSourceType(specifier.imported.name)) {
-          externalSourceNames.add(specifier.local.name);
+          sourceTypes.set(specifier.local.name, specifier.imported.name);
         }
       }
     } else if (node.type === 'VariableDeclaration') {
@@ -70,11 +90,25 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
       if (serviceConfig?.type !== 'ObjectExpression') return;
 
       const source = resolveBinding(findProperty(serviceConfig, 'source'));
+      const repository = getFirstPropertyValue(source, 'repo');
+      const image = getFirstPropertyValue(source, 'image');
+      const template = getFirstPropertyValue(source, 'template');
+      const sourceType =
+        (source?.type === 'CallExpression' && source.callee.type === 'Identifier'
+          ? sourceTypes.get(source.callee.name)
+          : undefined) ??
+        getFirstPropertyValue(source, 'type') ??
+        (repository ? 'github' : image ? 'image' : template ? 'template' : undefined);
+      const sourceRepository = getGitHubRepository(
+        source?.type === 'CallExpression' ? getStringValue(source.arguments[0]) : repository
+      );
       if (
-        (source?.type === 'CallExpression' &&
-          source.callee.type === 'Identifier' &&
-          externalSourceNames.has(source.callee.name)) ||
-        isExternalSourceType(getFirstPropertyValue(source, 'type'))
+        sourceType === 'image' ||
+        sourceType === 'template' ||
+        (sourceType === 'github' &&
+          sourceRepository !== undefined &&
+          localRepositories.size > 0 &&
+          !localRepositories.has(sourceRepository))
       ) {
         return;
       }
