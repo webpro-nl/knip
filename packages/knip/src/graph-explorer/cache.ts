@@ -1,12 +1,14 @@
 import type { Import, ModuleGraph } from '../types/module-graph.ts';
 import type { UsageResult } from './operations/get-usage.ts';
 import type { DefinitionResult } from './operations/resolve-definition.ts';
+import type { ExportTableCache } from './operations/resolve-export-origins.ts';
 
 interface ExplorerCache {
   definitions: Map<string, Map<string, DefinitionResult | null>>;
   usage: Map<string, Map<string, UsageResult>>;
   importLookup: Map<string, Map<string, Map<string, Import>>>;
   exportedIdentifiers: Map<string, Map<string, boolean>>;
+  exportTables: Map<string, ExportTableCache>;
   generation: number;
 }
 
@@ -17,6 +19,7 @@ const createEmptyCache = (): ExplorerCache => ({
   usage: new Map(),
   importLookup: new Map(),
   exportedIdentifiers: new Map(),
+  exportTables: new Map(),
   generation: 0,
 });
 
@@ -36,6 +39,7 @@ export const invalidateCache = (graph: ModuleGraph): void => {
     cache.usage.clear();
     cache.importLookup.clear();
     cache.exportedIdentifiers.clear();
+    cache.exportTables.clear();
     cache.generation++;
   }
 };
@@ -101,4 +105,11 @@ export const setCachedExportedIdentifiers = (
 ): void => {
   const cache = getCache(graph);
   cache.exportedIdentifiers.set(filePath, result);
+};
+
+export const getCachedExportTable = (graph: ModuleGraph, filePath: string): ExportTableCache | undefined =>
+  caches.get(graph)?.exportTables.get(filePath);
+
+export const setCachedExportTable = (graph: ModuleGraph, filePath: string, table: ExportTableCache): void => {
+  getCache(graph).exportTables.set(filePath, table);
 };

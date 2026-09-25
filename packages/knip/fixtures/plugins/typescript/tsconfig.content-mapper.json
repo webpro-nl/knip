@@ -2,11 +2,17 @@
   "contentMappers": [
     {
       "package": "@mdx-js/content-mapper",
-      "extensions": [".mdx"]
+      "extensions": [".mdx"],
+      "options": {
+        "remarkPlugins": ["remark-gfm", ["remark-math", {}], "remark-mdx-frontmatter"]
+      }
     },
     {
       "package": "ember-content-mapper",
-      "extensions": [".gjs", ".gts"]
+      "extensions": [".gjs", ".gts"],
+      "options": {
+        "additionalGlobals": ["t"]
+      }
     }
   ]
 }

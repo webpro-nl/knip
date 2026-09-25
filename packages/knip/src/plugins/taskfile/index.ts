@@ -112,7 +112,7 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
     for (const task of Object.values(localConfig.tasks)) {
       for (const script of extractScriptsFromTask(task)) {
         for (const input of getInputsFromScripts([script], {
-          knownBinsOnly: true,
+          optionalBinaries: true,
           containingFilePath: configFilePath,
         })) {
           if (isProduction) Object.assign(input, { optional: true });

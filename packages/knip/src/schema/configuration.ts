@@ -180,6 +180,7 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   ignoreBinaries: z.optional(stringOrRegexSchema),
+  ignoreGlobalBinaries: z.optional(z.boolean()),
   /**
    * Array of package names to exclude from the report. Regular expressions allowed.
    *
@@ -476,6 +477,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignore: z.optional(globSchema),
   ignoreFiles: z.optional(globSchema),
   ignoreBinaries: z.optional(stringOrRegexSchema),
+  ignoreGlobalBinaries: z.optional(z.boolean()),
   ignoreDependencies: z.optional(stringOrRegexSchema),
   ignoreMembers: z.optional(stringOrRegexSchema),
   ignoreUnresolved: z.optional(stringOrRegexSchema),

@@ -131,7 +131,9 @@ export interface WalkState extends WalkContext {
     members: ExportMember[],
     fix: Fix,
     isReExport: boolean,
-    jsDocTags: Set<string>
+    jsDocTags: Set<string>,
+    binding?: string,
+    isBindingReExport?: boolean
   ) => void;
   getFix: (start: number, end: number, flags?: number) => Fix;
   getTypeFix: (start: number, end: number) => Fix;
@@ -155,7 +157,9 @@ const _addExport = (
   members: ExportMember[],
   fix: Fix,
   isReExport: boolean,
-  jsDocTags: Set<string>
+  jsDocTags: Set<string>,
+  binding = identifier,
+  isBindingReExport = false
 ) => {
   const item = state.exports.get(identifier);
   if (item) {
@@ -169,10 +173,12 @@ const _addExport = (
       }
     }
     item.isReExport = isReExport;
+    item.isBindingReExport = isBindingReExport;
   } else {
     const { line, col } = getLineAndCol(state.lineStarts, pos);
     state.exports.set(identifier, {
       identifier,
+      binding,
       type,
       members,
       jsDocTags,
@@ -184,6 +190,7 @@ const _addExport = (
       referencedIn: undefined,
       fixes: fix ? [fix] : [],
       isReExport,
+      isBindingReExport,
     });
   }
 };

@@ -1,0 +1,6 @@
+{
+  "typedocOptions": {
+    "plugin": ["typedoc-plugin-zod"],
+    "theme": ["typedoc-material-theme"]
+  }
+}

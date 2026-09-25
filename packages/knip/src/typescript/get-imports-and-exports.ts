@@ -3,7 +3,7 @@ import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
 import type { IssueSymbol, SymbolType } from '../types/issues.ts';
-import type { Export, FileNode, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
+import type { Export, FileNode, Import, ImportGlob, ImportMap, ImportMaps, Imports } from '../types/module-graph.ts';
 import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import {
   getPackageNameFromFilePath,
@@ -78,6 +78,7 @@ const getImportsAndExports = (
     string,
     { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
   >();
+  let builtinImports: Map<string, Import> | undefined;
   const localDeclarationTypes = new Map<string, SymbolType>();
   const referencedInExport = new Map<string, Set<string>>();
   const destructuredExports = new Set<string>();
@@ -105,6 +106,7 @@ const getImportsAndExports = (
       filePath: importFilePath,
       specifier,
       identifier: namespace ?? opts.identifier,
+      alias: opts.alias,
       pos: opts.pos,
       line: opts.line,
       col: opts.col,
@@ -151,7 +153,24 @@ const getImportsAndExports = (
     jsDocTags?: Set<string>,
     preResolvedModule?: ResolvedModule | undefined
   ) => {
-    if (!specifier || isBuiltin(specifier)) return;
+    if (!specifier) return;
+    if (isBuiltin(specifier)) {
+      const { line, col } = getLineAndCol(lineStarts, pos);
+      const _import: Import = {
+        filePath: undefined,
+        specifier: specifier.startsWith('node:') ? specifier : `node:${specifier}`,
+        identifier: identifier ?? SIDE_EFFECTS,
+        alias: namespace ?? alias,
+        pos,
+        line,
+        col,
+        isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+        modifiers,
+        jsDocTags,
+      };
+      if (modifiers & IMPORT_FLAGS.RE_EXPORT) imports.add(_import);
+      return _import;
+    }
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
 
@@ -207,6 +226,7 @@ const getImportsAndExports = (
             filePath: resolvedFileName,
             specifier: sanitizedSpecifier,
             identifier: identifier ?? SIDE_EFFECTS,
+            alias,
             pos: ePos,
             line,
             col,
@@ -232,6 +252,7 @@ const getImportsAndExports = (
           filePath: undefined,
           specifier,
           identifier: identifier ?? SIDE_EFFECTS,
+          alias,
           pos: uPos,
           line,
           col,
@@ -278,11 +299,12 @@ const getImportsAndExports = (
 
     for (const entry of _imports.entries) {
       const modifiers = entry.isType ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE;
+      const localName = entry.localName.value;
+      let builtinImport: Import | undefined;
 
       if (entry.importName.kind === 'NamespaceObject') {
-        const localName = entry.localName.value;
         if (isChildProcessImport) (childProcessNamespaces ??= new Set()).add(localName);
-        addImport(
+        builtinImport = addImport(
           specifier,
           IMPORT_STAR,
           localName,
@@ -296,22 +318,30 @@ const getImportsAndExports = (
         if (internalPath)
           localImportMap.set(localName, { importedName: IMPORT_STAR, filePath: internalPath, isNamespace: true });
       } else if (entry.importName.kind === 'Default') {
-        const localName = entry.localName.value;
         if (isChildProcessImport) (childProcessNamespaces ??= new Set()).add(localName);
         const alias = localName !== 'default' ? localName : undefined;
-        addImport(specifier, 'default', alias, undefined, entry.localName.start, modifiers, pos, jsdocTags, resolved);
+        builtinImport = addImport(
+          specifier,
+          'default',
+          alias,
+          undefined,
+          entry.localName.start,
+          modifiers,
+          pos,
+          jsdocTags,
+          resolved
+        );
         if (internalPath)
           localImportMap.set(localName, { importedName: 'default', filePath: internalPath, isNamespace: false });
       } else {
         const importedName = entry.importName.name!;
-        const localName = entry.localName.value;
         const alias = localName !== importedName ? localName : undefined;
         if (isChildProcessImport) (childProcessMethods ??= new Map()).set(localName, importedName);
         if (isPathImport && !alias) {
           if (importedName === 'join') hasPathJoinImport = true;
           else if (importedName === 'resolve') hasPathResolveImport = true;
         }
-        addImport(
+        builtinImport = addImport(
           specifier,
           importedName,
           alias,
@@ -324,6 +354,7 @@ const getImportsAndExports = (
         );
         if (internalPath) localImportMap.set(localName, { importedName, filePath: internalPath, isNamespace: false });
       }
+      if (builtinImport) (builtinImports ??= new Map()).set(localName, builtinImport);
     }
   }
 
@@ -357,19 +388,13 @@ const getImportsAndExports = (
           addImport(specifier, IMPORT_STAR, undefined, ns, entry.start, modifiers, pos, jsdocTags, reExportResolved);
         } else if (entry.importName.kind === 'Name') {
           const importedName = entry.importName.name!;
+          const builtinImport = builtinImports?.get(importedName);
+          // Forwarded default entries point at the import's local binding.
+          const sourceName =
+            builtinImport && builtinImport.pos === entry.importName.start ? builtinImport.identifier : importedName;
           const exportedName = entry.exportName.name;
-          const alias = exportedName && exportedName !== importedName ? exportedName : undefined;
-          addImport(
-            specifier,
-            importedName,
-            alias,
-            undefined,
-            entry.start,
-            modifiers,
-            pos,
-            undefined,
-            reExportResolved
-          );
+          const alias = exportedName && exportedName !== sourceName ? exportedName : undefined;
+          addImport(specifier, sourceName, alias, undefined, entry.start, modifiers, pos, undefined, reExportResolved);
         }
         continue;
       }
@@ -428,6 +453,22 @@ const getImportsAndExports = (
   extractImportsFromComments(result.comments, firstStmtStart, addImport);
 
   for (const [id, item] of exports) {
+    const builtinImport = specifierExportNames.has(id) ? builtinImports?.get(item.binding) : undefined;
+    if (builtinImport) {
+      item.isReExport = true;
+      item.isBindingReExport = true;
+      if (builtinImport.identifier === IMPORT_STAR) {
+        const isTypeOnly = builtinImport.isTypeOnly || item.type === 'type';
+        addImport(
+          builtinImport.specifier,
+          IMPORT_STAR,
+          id,
+          undefined,
+          item.pos,
+          IMPORT_FLAGS.RE_EXPORT | (isTypeOnly ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE)
+        );
+      }
+    }
     item.referencedIn = referencedInExport.get(id);
     if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && localRefs.has(id)) {
       item.hasRefsInFile = true;

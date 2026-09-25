@@ -41,6 +41,20 @@ string.ts:truncate
   }
 });
 
+test('knip --trace-export traces a star-only re-export from its origin', () => {
+  const actual = exec('knip --trace-export resolve --trace-file barrel.ts', { cwd }).stdout;
+  const expected = `require.ts:resolve
+└── barrel.ts:reExportStar[resolve]
+    ├── module.ts:importNS[NS.resolve] ✓
+    │     refs: [NS.resolve]
+    └── shared.ts:reExport[resolve] ✓`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
 test('knip --trace-export shows namespace member statuses', () => {
   const actual = exec('knip --trace-export Fruits --trace-file members.ts', { cwd: nsCwd }).stdout;
   const expected = `members.ts:Fruits

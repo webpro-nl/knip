@@ -24,6 +24,9 @@
     "ignoreBinaries": {
       "$ref": "#/definitions/ignoreBinaries"
     },
+    "ignoreGlobalBinaries": {
+      "$ref": "#/definitions/ignoreGlobalBinaries"
+    },
     "ignoreDependencies": {
       "$ref": "#/definitions/ignoreDependencies"
     },
@@ -203,6 +206,12 @@
       "examples": ["rm", "docker-compose", "curl"],
       "$ref": "#/definitions/list"
     },
+    "ignoreGlobalBinaries": {
+      "title": "Ignore common global binaries",
+      "description": "Set to false to report required binaries otherwise excluded by Knip's default list. Explicit ignoreBinaries entries still apply.",
+      "type": "boolean",
+      "default": true
+    },
     "ignoreDependencies": {
       "title": "Dependencies to exclude from the report (regex allowed)",
       "examples": ["husky", "lint-staged"],
@@ -346,6 +355,9 @@
         },
         "ignoreBinaries": {
           "$ref": "#/definitions/ignoreBinaries"
+        },
+        "ignoreGlobalBinaries": {
+          "$ref": "#/definitions/ignoreGlobalBinaries"
         },
         "ignoreDependencies": {
           "$ref": "#/definitions/ignoreDependencies"
@@ -982,6 +994,10 @@
           "title": "temporal plugin configuration (https://knip.dev/reference/plugins/temporal)",
           "$ref": "#/definitions/plugin"
         },
+        "textlint": {
+          "title": "textlint plugin configuration (https://knip.dev/reference/plugins/textlint)",
+          "$ref": "#/definitions/plugin"
+        },
         "travis": {
           "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
           "$ref": "#/definitions/plugin"
@@ -1006,12 +1022,20 @@
           "title": "tsx plugin configuration (https://knip.dev/reference/plugins/tsx)",
           "$ref": "#/definitions/plugin"
         },
+        "turbo": {
+          "title": "turbo plugin configuration (https://knip.dev/reference/plugins/turbo)",
+          "$ref": "#/definitions/plugin"
+        },
         "typedoc": {
           "title": "typedoc plugin configuration (https://knip.dev/reference/plugins/typedoc)",
           "$ref": "#/definitions/plugin"
         },
         "typescript": {
           "title": "TypeScript plugin configuration (https://knip.dev/reference/plugins/typescript)",
+          "$ref": "#/definitions/plugin"
+        },
+        "typescript-content-mapper": {
+          "title": "typescript-content-mapper plugin configuration (https://knip.dev/reference/plugins/typescript-content-mapper)",
           "$ref": "#/definitions/plugin"
         },
         "unbuild": {
@@ -1044,6 +1068,10 @@
         },
         "unplugin-vue-router": {
           "title": "unplugin-vue-router plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-router)",
+          "$ref": "#/definitions/plugin"
+        },
+        "varlock": {
+          "title": "varlock plugin configuration (https://knip.dev/reference/plugins/varlock)",
           "$ref": "#/definitions/plugin"
         },
         "vercel": {

@@ -1,0 +1,10 @@
+name: check
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pnpm exec docker && pnpm exec git && pnpm exec node && pnpm exec aws
+        working-directory: packages/checked
+      - run: pnpm exec docker && pnpm exec node
+        working-directory: packages/exempt

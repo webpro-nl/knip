@@ -67,7 +67,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const dirManifest = (dir && getManifest(dir)) || manifest;
   const _childArgs =
-    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { knownBinsOnly: true }) : [];
+    parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
 
   if (command === 'run') {
     if (dirManifest.scriptNames.has(binary)) {

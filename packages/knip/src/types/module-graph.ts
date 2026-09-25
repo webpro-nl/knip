@@ -44,6 +44,7 @@ export interface Import extends Position {
   readonly specifier: string;
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
+  readonly alias: string | undefined;
   readonly isTypeOnly: boolean;
   readonly modifiers: number;
   readonly jsDocTags: Tags | undefined;
@@ -56,6 +57,7 @@ export interface ExternalRef {
 
 export interface Export extends Position {
   readonly identifier: Identifier;
+  readonly binding: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
   jsDocTags: Tags;
@@ -65,6 +67,7 @@ export interface Export extends Position {
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
   isReExport: boolean;
+  isBindingReExport: boolean;
 }
 
 export interface ExportMember extends Position {

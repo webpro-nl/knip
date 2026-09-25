@@ -52,6 +52,7 @@ const isPluginName = (name: string): name is PluginName => pluginNames.includes(
 const defaultConfig: Configuration = {
   ignore: [],
   ignoreBinaries: [],
+  ignoreGlobalBinaries: true,
   ignoreDependencies: [],
   ignoreFiles: [],
   cycles: {},
@@ -141,6 +142,7 @@ export class ConfigurationChief {
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
     const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
+    const ignoreGlobalBinaries = rawConfig.ignoreGlobalBinaries ?? defaultConfig.ignoreGlobalBinaries;
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
@@ -163,6 +165,7 @@ export class ConfigurationChief {
       ignoreFiles,
       cycles,
       ignoreBinaries,
+      ignoreGlobalBinaries,
       ignoreDependencies,
       ignoreMembers,
       ignoreUnresolved,
@@ -430,6 +433,7 @@ export class ConfigurationChief {
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
+    const ignoreGlobalBinaries = workspaceConfig.ignoreGlobalBinaries ?? this.config.ignoreGlobalBinaries;
     const ignoreExportsUsedInFile = workspaceConfig.ignoreExportsUsedInFile ?? this.config.ignoreExportsUsedInFile;
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
@@ -445,7 +449,17 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, ignoreFiles, ignoreExportsUsedInFile, isIncludeEntryExports, ...plugins };
+    return {
+      entry,
+      project,
+      paths,
+      ignore,
+      ignoreFiles,
+      ignoreGlobalBinaries,
+      ignoreExportsUsedInFile,
+      isIncludeEntryExports,
+      ...plugins,
+    };
   }
 
   public findWorkspaceByFilePath(filePath: string) {

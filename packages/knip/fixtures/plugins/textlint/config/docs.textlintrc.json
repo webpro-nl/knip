@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "spelling": true,
+    "@textlint-ja/no-synonyms": true
+  }
+}

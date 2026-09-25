@@ -1,7 +1,13 @@
 import type { Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
-import type { Input } from '../util/input.ts';
+import { type Input, toBinary } from '../util/input.ts';
+
+export const toCommandBinary = (
+  binary: string,
+  { optionalBinaries }: GetInputsFromScriptsOptions,
+  inputOptions: { dir?: string } = {}
+) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 

@@ -24,13 +24,15 @@ Use what fits your workflow best, but make sure [QA][1] passes.
 - [Tests][7]
 - [QA][1]
 - [GitHub Action][8]
+- [Test Preview Packages][9]
+- [Test VS Code Extension][10]
 
 ## Getting started
 
-This guide assumes familiarity with concepts like [forking][9], [cloning a
-repo][10] and working with a package manager.
+This guide assumes familiarity with concepts like [forking][11], [cloning a
+repo][12] and working with a package manager.
 
-- Fork the project using the [GitHub website][11] or the [`gh` CLI][12]
+- Fork the project using the [GitHub website][13] or the [`gh` CLI][14]
 - Clone the repository
 - Install dependencies
 
@@ -57,14 +59,14 @@ Note that Git `core.symlinks=true` is required for some tests.
 
 ## Agents
 
-Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][13]. Take
+Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][15]. Take
 responsibility and make sure to not cause unnecessary review and "wall of text"
-overhead to maintainers. Also [consider this before opening a pull request][14].
+overhead to maintainers. Also [consider this before opening a pull request][16].
 
 ## Contributing a plugin?
 
 In addition to the generic guidelines in this document, there's a guide for
-[writing a plugin][15].
+[writing a plugin][17].
 
 ## Running Knip
 
@@ -97,7 +99,7 @@ Assuming you've created `test/feature.test.ts` and `fixtures/feature` (the
 plugin create command does for you), here's a few ideas to run and debug Knip
 from a test.
 
-Creating a new plugin? The [plugin guide][16] has a command to set up a test
+Creating a new plugin? The [plugin guide][18] has a command to set up a test
 with fixtures for you.
 
 ### Run single test file
@@ -115,7 +117,7 @@ knip --directory fixtures/feature
 
 ### Attach debugger to Node.js
 
-To debug Knip in an IDE (e.g. [VS Code][17] or [WebStorm][18]), open the
+To debug Knip in an IDE (e.g. [VS Code][19] or [WebStorm][20]), open the
 built-in terminal and allow the debugger to connect:
 
 ```shell
@@ -134,8 +136,8 @@ great way to debug almost anything in Knip.
 - Using Node.js
   - From any test file, run the "Debug test with tsx/Node.js" launch config
 - Using Bun
-  - VS Code: ensure the [Bun extension][19] is enabled
-  - WebStorm: ensure the [Bun plugin][20] is enabled
+  - VS Code: ensure the [Bun extension][21] is enabled
+  - WebStorm: ensure the [Bun plugin][22] is enabled
   - From any test file, run the "Debug test with Bun" launch config
 
 From now on, just set a breakpoint and hit `F5` (Code) or `ctrl-r` (WS) from any
@@ -166,16 +168,48 @@ pnpm test
 
 ## GitHub Action
 
-The [ci.yml][21] workflow runs the tests across Bun, recent Node.js versions,
+The [ci.yml][23] workflow runs the tests across Bun, recent Node.js versions,
 Ubuntu, macOS and Windows. QA in CI must be all green before a pull request can
-be merged. The [integration.yml][22] workflow runs Knip in multiple repositories
+be merged. The [integration.yml][24] workflow runs Knip in multiple repositories
 using Knip, against the latest version of the code.
 
-## Previews
+## Test Preview Packages
 
-Thanks to [pkg.pr.new][23] pull requests can be previewed by installing it as a
-regular package. Every push is published to their registry. Look for the
-`pkg-pr-new` bot in your pull request.
+For pull requests and on each push, the [pkg.pr.new][25] bot posts preview URLs
+for Knip, the language server, and MCP. Replace `PR_NUMBER` below with the pull
+request number, or a published commit hash to test a specific revision.
+
+Install the preview in the affected project with your package manager, for
+example:
+
+```shell
+npm i -D https://pkg.pr.new/knip@PR_NUMBER
+```
+
+For a standalone language server, configure the LSP client to launch:
+
+```shell
+npm exec --yes --allow-remote=all --package=https://pkg.pr.new/@knip/language-server@PR_NUMBER -- knip-language-server --stdio
+```
+
+Use the client's usual transport. The server prefers project-local Knip; to test
+its bundled fallback, use a project without a locally resolvable Knip.
+
+## Test VS Code Extension
+
+With Node.js v24+, pnpm, and [vsce][26] installed, check out the branch or pull
+request to test, then run from the repository root:
+
+```shell
+pnpm install
+pnpm --dir packages/mcp-server run prepack
+pnpm --dir packages/vscode-knip package
+```
+
+Install the generated platform-specific `.vsix` from `packages/vscode-knip/`
+using VS Code's "Extensions: Install from VSIX..." command, then reload the
+window. This replaces the Marketplace version. To return to it, uninstall the
+preview and reinstall Knip from the Marketplace.
 
 [1]: #qa
 [2]: #attach-debugger-from-inside-a-test-file
@@ -185,18 +219,21 @@ regular package. Every push is published to their registry. Look for the
 [6]: #running-knip
 [7]: #tests
 [8]: #github-action
-[9]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[10]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
-[11]: https://github.com/webpro-nl/knip
-[12]: https://cli.github.com/
-[13]: ../AGENTS.md
-[14]: ./CONTRIBUTING.md#open-a-pull-request
-[15]: https://knip.dev/guides/writing-a-plugin/
-[16]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
-[17]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
-[18]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
-[19]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
-[20]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
-[21]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
-[22]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
-[23]: https://pkg.pr.new
+[9]: #test-preview-packages
+[10]: #test-vs-code-extension
+[11]: https://docs.github.com/get-started/quickstart/fork-a-repo
+[12]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
+[13]: https://github.com/webpro-nl/knip
+[14]: https://cli.github.com/
+[15]: ../AGENTS.md
+[16]: ./CONTRIBUTING.md#open-a-pull-request
+[17]: https://knip.dev/guides/writing-a-plugin/
+[18]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
+[19]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
+[20]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
+[21]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
+[22]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
+[23]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
+[24]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
+[25]: https://pkg.pr.new
+[26]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#vsce

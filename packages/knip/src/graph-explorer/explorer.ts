@@ -10,6 +10,7 @@ import { hasStrictlyNsReferences } from './operations/has-strictly-ns-references
 import { isEnumerated } from './operations/is-enumerated.ts';
 import { isReferenced } from './operations/is-referenced.ts';
 import { resolveDefinition } from './operations/resolve-definition.ts';
+import { resolveExportOrigins } from './operations/resolve-export-origins.ts';
 
 export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>) => {
   return {
@@ -28,6 +29,11 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
       isEnumerated(graph, filePath, graph.get(filePath)?.importedBy, identifier),
     buildExportsTree: (options: { filePath?: string; identifier?: string }) =>
       buildExportsTree(graph, entryPaths, options),
+    /**
+     * Which bindings does exported `identifier` resolve to?
+     * @returns `{ origins, hasExplicitExport }` → [defining module + local binding, explicit export beats `export *`]
+     */
+    resolveExportOrigins: (filePath: string, identifier: string) => resolveExportOrigins(graph, filePath, identifier),
     getDependencyUsage: (pattern?: string | RegExp) => getDependencyUsage(graph, pattern),
     resolveDefinition: (filePath: string, identifier: string) => resolveDefinition(graph, filePath, identifier),
     getUsage: (filePath: string, identifier: string) => getUsage(graph, entryPaths, filePath, identifier),

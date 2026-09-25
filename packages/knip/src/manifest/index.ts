@@ -28,10 +28,7 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
       // Read and store installed binaries
       const defaultBinaryName = packageName.replace(/^@[^/]+\//, '');
       const binaries = typeof manifest.bin === 'string' ? [defaultBinaryName] : Object.keys(manifest.bin ?? {});
-      for (const binaryName of binaries) {
-        addBinary(binaryName, packageName);
-        addBinary(packageName, binaryName);
-      }
+      for (const binaryName of binaries) addBinary(binaryName, packageName);
 
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});

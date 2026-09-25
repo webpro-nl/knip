@@ -30,7 +30,7 @@ const resolveConfig: ResolveConfig = (script, options) => {
     }
   }
 
-  return options.getInputsFromScripts(String(script), { knownBinsOnly: true });
+  return options.getInputsFromScripts(String(script), { optionalBinaries: true });
 };
 
 const plugin: Plugin = {

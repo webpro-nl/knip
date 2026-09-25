@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "extends": ["eslint:recommended", "plugin:import-x/recommended", "plugin:import-x/typescript"],
+  "plugins": ["import-x"],
+  "settings": {
+    "import-x/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import-x/resolver": {
+      "typescript": { "project": "tsconfig.json" },
+      "node": true
+    }
+  }
+}

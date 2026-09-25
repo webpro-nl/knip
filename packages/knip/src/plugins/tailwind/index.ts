@@ -9,7 +9,13 @@ import compiler from './compiler.ts';
 
 const title = 'Tailwind';
 
-const enablers = ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/postcss', '@tailwindcss/cli'];
+const enablers = [
+  'tailwindcss',
+  '@tailwindcss/vite',
+  '@tailwindcss/webpack',
+  '@tailwindcss/postcss',
+  '@tailwindcss/cli',
+];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 

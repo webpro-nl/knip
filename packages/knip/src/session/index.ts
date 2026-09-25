@@ -9,4 +9,12 @@ export { createOptions, type MainOptions } from '../util/create-options.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 export { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
 export { createSession, type Session } from './session.ts';
-export type { ContentionDetails, Export, File, SourceLocation } from './types.ts';
+export type {
+  ContentionDetails,
+  ContentionKind,
+  ContentionOrigin,
+  ContentionSite,
+  Export,
+  File,
+  SourceLocation,
+} from './types.ts';

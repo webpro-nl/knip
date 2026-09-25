@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/typescript-content-mapper');
 
-test('Find content mapper process with the TypeScript plugin', async () => {
+test('Find dependencies with the TypeScript Content Mapper plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -21,7 +21,7 @@ test('Find content mapper process with the TypeScript plugin', async () => {
   });
 });
 
-test('Find content mapper process with the TypeScript plugin (production)', async () => {
+test('Find dependencies with the TypeScript Content Mapper plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 

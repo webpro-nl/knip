@@ -4,7 +4,6 @@ import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
-  IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
@@ -53,7 +52,6 @@ export class DependencyDeputy {
   _manifests: WorkspaceManifests = new Map();
   workspacePkgNames: Set<string> = new Set();
   referencedDependencies: Map<string, Set<string>>;
-  referencedBinaries: Map<string, Set<string>>;
   hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
@@ -63,7 +61,6 @@ export class DependencyDeputy {
     this.isStrict = isStrict;
     this.isReportDependencies = isReportDependencies;
     this.referencedDependencies = new Map();
-    this.referencedBinaries = new Map();
     this.hostDependencies = new Map();
     this.installedBinaries = new Map();
     this.hasTypesIncluded = new Map();
@@ -176,13 +173,6 @@ export class DependencyDeputy {
     this.referencedDependencies.get(workspaceName)?.add(packageName);
   }
 
-  addReferencedBinary(workspaceName: string, binaryName: string) {
-    if (!this.referencedBinaries.has(workspaceName)) {
-      this.referencedBinaries.set(workspaceName, new Set());
-    }
-    this.referencedBinaries.get(workspaceName)?.add(binaryName);
-  }
-
   setHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
     this.hostDependencies.set(workspaceName, hostDependencies);
   }
@@ -256,8 +246,6 @@ export class DependencyDeputy {
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
     if (!this.isReportDependencies) return new Set();
 
-    this.addReferencedBinary(workspace.name, binaryName);
-
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
 
     for (const name of workspaceNames) {
@@ -270,8 +258,6 @@ export class DependencyDeputy {
         }
       }
     }
-
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
     return;
   }
@@ -407,11 +393,6 @@ export class DependencyDeputy {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
         const issue = issueSet[issueKey];
-        if (IGNORED_GLOBAL_BINARIES.has(issue.symbol)) {
-          delete issueSet[issueKey];
-          counters[type]--;
-          continue;
-        }
         const manifest = this.getWorkspaceManifest(issue.workspace);
         if (manifest) {
           const ignoreItem = findMatch(manifest.ignoreBinaries, issue.symbol);

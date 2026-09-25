@@ -1,12 +1,14 @@
 import { multiply } from '@knip-ls/shared';
 import './circular-a.ts';
-import { DIAMOND } from './branch.ts';
-import { OVERLOAD } from './overload-1.ts';
+import { CONVERGED } from './converged.ts';
+import { SHADOWED_CHAIN } from './shadowed-chain-1.ts';
+import { SHADOWED } from './shadowed.ts';
 
-export * from './conflict-1.ts';
-export * from './conflict-2.ts';
-export * from './conflict-3.ts';
+export * from './ambiguous-1.ts';
+export * from './ambiguous-2.ts';
+export * from './ambiguous-3.ts';
 
 multiply;
-DIAMOND;
-OVERLOAD;
+CONVERGED;
+SHADOWED_CHAIN;
+SHADOWED;

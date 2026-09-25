@@ -1,8 +1,10 @@
+import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toConfig, toProductionEntry } from '../../util/input.ts';
+import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
@@ -53,10 +55,36 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 const production = getEntryFilePatterns();
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
-  const pageExtensions = [...collectPropertyValues(program, 'pageExtensions')];
-  const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
+  const pageExtensions = new Set<string>();
+  const loaders = new Set<string>();
+  const collectLoaders = (node: Expression | SpreadElement | null) => {
+    if (node?.type === 'ArrayExpression') {
+      for (const element of node.elements) collectLoaders(element);
+    } else {
+      const loader = getStringValue(node) ?? getStringValue(findProperty(node, 'loader'));
+      if (loader) loaders.add(loader);
+      const nested = findProperty(node, 'loaders');
+      if (nested?.type === 'ArrayExpression') collectLoaders(nested);
+    }
+  };
+
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
+      const rules = findProperty(findProperty(node, 'turbopack'), 'rules');
+      if (rules?.type !== 'ObjectExpression') return;
+      for (const rule of rules.properties) {
+        if (rule.type === 'Property') collectLoaders(rule.value);
+      }
+    },
+  });
+  visitor.visit(program);
+
+  const extensions = pageExtensions.size > 0 ? [...pageExtensions] : defaultPageExtensions;
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
-  return patterns.map(id => toProductionEntry(join(configFileDir, id)));
+  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
+  for (const loader of loaders) inputs.push(toDeferResolve(loader));
+  return inputs;
 };
 
 const commands = new Set(['dev', 'build', 'start']);

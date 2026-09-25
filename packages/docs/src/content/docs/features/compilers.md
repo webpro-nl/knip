@@ -80,7 +80,9 @@ The compiler function interface is straightforward. Text in, text out:
 (source: string, filename: string) => string | PromiseLike<string>;
 ```
 
-Return a string or a Promise-like value that resolves to a string. Knip compiles files on demand and awaits asynchronous results; the `async` keyword is optional.
+Return a string or a Promise-like value that resolves to a string. Knip compiles
+files on demand and awaits asynchronous results; the `async` keyword is
+optional.
 
 ### Examples
 
