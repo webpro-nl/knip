@@ -4,18 +4,18 @@ import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getFirstPropertyValue, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { isFile } from '../../util/fs.ts';
 import { getGitRemoteUrls } from '../../util/git.ts';
 import { isEntry, type Input } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://docs.railway.com/infrastructure-as-code
 
 const title = 'Railway';
 
-const enablers = 'This plugin is enabled when `.railway/railway.ts` is found.';
+const enablers = ['railway'];
 
-const isEnabled: IsPluginEnabled = ({ cwd }) => isFile(cwd, '.railway/railway.ts');
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['.railway/railway.ts'];
 
