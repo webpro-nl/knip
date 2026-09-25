@@ -130,8 +130,7 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
         ...getCommands(findProperty(findProperty(serviceConfig, 'deploy'), 'preDeployCommand')),
       ];
 
-      const scriptOptions = { optionalBinaries: true, cwd, manifest };
-      for (const input of options.getInputsFromScripts(commands, scriptOptions)) {
+      for (const input of options.getInputsFromScripts(commands, { optionalBinaries: true, cwd, manifest })) {
         if (isEntry(input)) input.specifier = toAbsolute(input.specifier, cwd);
         inputs.push({ ...input, dir: cwd });
       }
