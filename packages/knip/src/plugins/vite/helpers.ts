@@ -36,7 +36,7 @@ const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)([
 const isFilePath = (specifier: string) =>
   specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
 
-const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, '');
+const normalizeModuleScriptSrc = (value: string) => value.trim();
 
 const getModuleScriptSources = (html: string): string[] => {
   const sources: string[] = [];
@@ -63,16 +63,18 @@ const getModuleScriptSources = (html: string): string[] => {
   return sources;
 };
 
-export const getHtmlScriptEntries = async (htmlPath: string): Promise<Input[]> => {
+export const getHtmlScriptEntries = async (htmlPath: string, rootDir = dirname(htmlPath)): Promise<Input[]> => {
   if (!isFile(htmlPath)) return [];
 
   const html = await loadFile(htmlPath);
   const dir = dirname(htmlPath);
-  return getModuleScriptSources(html).map(src => toProductionEntry(join(dir, src)));
+  return getModuleScriptSources(html).map(src =>
+    toProductionEntry(join(src.startsWith('/') ? rootDir : dir, src.replace(/^\//, '')))
+  );
 };
 
 export const getIndexHtmlEntries = (rootDir: string): Promise<Input[]> =>
-  getHtmlScriptEntries(join(rootDir, 'index.html'));
+  getHtmlScriptEntries(join(rootDir, 'index.html'), rootDir);
 
 export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
   let dirs: string[] | undefined;

@@ -12,11 +12,14 @@ test('Find module entries from nested Vite multi-page index.html files', async (
 
   assert.equal(issues.files['nested/nested-entry.ts'], undefined);
   assert.equal(issues.files['pages/admin.ts'], undefined);
+  assert.equal(issues.files['src/root-entry.ts'], undefined);
+  assert('unconfigured.ts' in issues.files);
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     devDependencies: 1,
     binaries: 1,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

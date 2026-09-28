@@ -216,7 +216,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       const resolved = toAbsolute(specifier, viteRoot);
       inputs.add(toProductionEntry(resolved));
       if (resolved.endsWith('.html')) {
-        for (const input of await getHtmlScriptEntries(resolved)) inputs.add(input);
+        for (const input of await getHtmlScriptEntries(resolved, viteRoot)) inputs.add(input);
       }
     }
 
