@@ -18,13 +18,14 @@ test('Find dependencies and entries through generated definitions in .nuxt dir',
   assert(issues.dependencies['package.json']['@vueuse/nuxt']);
 
   assert(issues.exports['utils/format.ts']['formatNumber']);
+  assert(issues.exports['server/utils/releases.ts']['releaseZipName']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
     dependencies: 2,
-    exports: 1,
-    processed: 7,
-    total: 7,
+    exports: 2,
+    processed: 9,
+    total: 9,
   });
 });
