@@ -8,6 +8,7 @@ import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import { dirname, isInNodeModules, join } from '../../util/path.ts';
+import { _createSyncModuleResolver } from '../../util/resolve.ts';
 import type { AutoImportMaps, TemplateAstNode, VueSfc } from './types.ts';
 
 const getVueSfc = (cwd: string): VueSfc => {
@@ -126,13 +127,7 @@ const toKebabCase = (s: string) => s.replace(/[A-Z]/g, (m, i) => (i ? '-' : '') 
 
 const isLocalSpecifier = (specifier: string) => specifier.startsWith('.') && !isInNodeModules(specifier);
 
-const targetExtensions = [...DEFAULT_EXTENSIONS, '.vue'];
-const toTargetPath = (dir: string, specifier: string) => {
-  const target = join(dir, specifier);
-  if (isFile(target)) return target;
-  for (const ext of targetExtensions) if (isFile(target + ext)) return target + ext;
-  return target;
-};
+const resolveModule = _createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.vue']);
 
 export const collectLocalImportPaths = (filePath: string, result: ParseResult) => {
   const dir = dirname(filePath);
@@ -161,7 +156,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
   const addEntry = (name: string, start: number, end: number) => {
     const importType = importTypes.find(it => it.start >= start && it.end <= end);
     if (!importType || !isLocalSpecifier(importType.specifier)) return;
-    const absSpecifier = toTargetPath(dir, importType.specifier);
+    const absSpecifier = resolveModule(importType.specifier, filePath) ?? join(dir, importType.specifier);
     if (isComponents) {
       const components = maps.componentMap.get(name);
       if (components) {
@@ -187,7 +182,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
       if (!node.source) return;
       const specifier = node.source.value;
       if (!isLocalSpecifier(specifier)) return;
-      const absSpecifier = toTargetPath(dir, specifier);
+      const absSpecifier = resolveModule(specifier, filePath) ?? join(dir, specifier);
       for (const s of node.specifiers) {
         const name = s.exported.type === 'Identifier' ? s.exported.name : s.exported.value;
         if (name) maps.importMap.set(name, absSpecifier);
