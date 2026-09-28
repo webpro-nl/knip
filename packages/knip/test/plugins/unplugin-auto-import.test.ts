@@ -16,6 +16,9 @@ test('Resolve auto-imported composables with the unplugin-auto-import plugin', a
   assert(!('composables/useTheme.ts' in issues.files));
   // useUnused is registered but never referenced → still reported.
   assert('composables/useUnused.ts' in issues.files);
+  assert(!('components/Card.ts' in issues.files));
+  assert(!issues.exports['components/Card.ts']);
+  assert(issues.exports['composables/useCounter.ts']['resetCounter']);
 
   assert(issues.dependencies['package.json']['unplugin-auto-import']);
 
@@ -23,7 +26,8 @@ test('Resolve auto-imported composables with the unplugin-auto-import plugin', a
     ...baseCounters,
     files: 1,
     dependencies: 2,
-    processed: 6,
-    total: 6,
+    exports: 1,
+    processed: 8,
+    total: 8,
   });
 });

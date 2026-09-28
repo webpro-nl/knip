@@ -3,10 +3,11 @@ import { createRequire } from 'node:module';
 import { type ParseResult, Visitor } from 'oxc-parser';
 import { scriptBodies } from '../../compilers/compilers.ts';
 import { stylePreprocessorImports } from '../../compilers/style-preprocessors.ts';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
-import { dirname, extname, isInNodeModules, join } from '../../util/path.ts';
+import { dirname, isInNodeModules, join } from '../../util/path.ts';
 import type { AutoImportMaps, TemplateAstNode, VueSfc } from './types.ts';
 
 const getVueSfc = (cwd: string): VueSfc => {
@@ -125,6 +126,14 @@ const toKebabCase = (s: string) => s.replace(/[A-Z]/g, (m, i) => (i ? '-' : '') 
 
 const isLocalSpecifier = (specifier: string) => specifier.startsWith('.') && !isInNodeModules(specifier);
 
+const targetExtensions = [...DEFAULT_EXTENSIONS, '.vue'];
+const toTargetPath = (dir: string, specifier: string) => {
+  const target = join(dir, specifier);
+  if (isFile(target)) return target;
+  for (const ext of targetExtensions) if (isFile(target + ext)) return target + ext;
+  return target;
+};
+
 export const collectLocalImportPaths = (filePath: string, result: ParseResult) => {
   const dir = dirname(filePath);
   const paths = new Set<string>();
@@ -152,7 +161,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
   const addEntry = (name: string, start: number, end: number) => {
     const importType = importTypes.find(it => it.start >= start && it.end <= end);
     if (!importType || !isLocalSpecifier(importType.specifier)) return;
-    const absSpecifier = join(dir, importType.specifier);
+    const absSpecifier = toTargetPath(dir, importType.specifier);
     if (isComponents) {
       const components = maps.componentMap.get(name);
       if (components) {
@@ -178,7 +187,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
       if (!node.source) return;
       const specifier = node.source.value;
       if (!isLocalSpecifier(specifier)) return;
-      const absSpecifier = join(dir, specifier);
+      const absSpecifier = toTargetPath(dir, specifier);
       for (const s of node.specifiers) {
         const name = s.exported.type === 'Identifier' ? s.exported.name : s.exported.value;
         if (name) maps.importMap.set(name, absSpecifier);
@@ -219,14 +228,12 @@ const getSyntheticImports = (
   const { importMap, componentMap } = maps;
   if (importMap.size === 0 && (!templateTags || componentMap.size === 0)) return [];
 
-  const ext = extname(filePath);
-  const stem = ext ? filePath.slice(0, -ext.length) : filePath;
-  const isSelf = (specifier: string) => specifier === filePath || specifier === stem;
-
   const syntheticImports: string[] = [];
 
   for (const [name, specifier] of importMap) {
-    if (identifiers.has(name) && !isSelf(specifier)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
+    if (identifiers.has(name) && specifier !== filePath) {
+      syntheticImports.push(`import { ${name} } from '${specifier}';`);
+    }
   }
 
   if (templateTags) {
@@ -238,7 +245,7 @@ const getSyntheticImports = (
         templateTags.has(`Lazy${name}`) ||
         templateTags.has(`lazy-${kebab}`)
       ) {
-        const targets = specifiers.filter(specifier => !isSelf(specifier));
+        const targets = specifiers.filter(specifier => specifier !== filePath);
         if (targets.length === 0) continue;
         syntheticImports.push(`import { default as ${name} } from '${targets[0]}';`);
         for (let i = 1; i < targets.length; i++) syntheticImports.push(`import '${targets[i]}';`);
