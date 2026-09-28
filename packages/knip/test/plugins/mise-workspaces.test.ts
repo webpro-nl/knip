@@ -12,7 +12,7 @@ test('Resolve mise task directories and workspace-local configuration', async ()
 
   assert.deepEqual(Object.keys(issues.devDependencies), ['package.json']);
   assert.deepEqual(Object.keys(issues.devDependencies['package.json']), ['asset-builder']);
-  assert.deepEqual(Object.keys(issues.files), ['scripts/direct-entry.ts', 'scripts/package-entry.ts']);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['scripts/direct-entry.ts', 'scripts/package-entry.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

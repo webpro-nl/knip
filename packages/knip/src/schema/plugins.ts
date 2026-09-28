@@ -120,6 +120,7 @@ export const pluginsSchema = z.object({
   prisma: pluginSchema,
   quasar: pluginSchema,
   qwik: pluginSchema,
+  railway: pluginSchema,
   raycast: pluginSchema,
   'react-cosmos': pluginSchema,
   'react-email': pluginSchema,

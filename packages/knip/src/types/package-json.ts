@@ -44,6 +44,7 @@ export type PackageJson = {
   name?: string;
   main?: string;
   bin?: string | Record<string, string>;
+  repository?: string | { type?: string; url?: string; directory?: string };
   version?: string;
   private?: boolean;
   workspaces?: string[] | { packages?: string[]; catalog?: Catalog; catalogs?: Catalogs };

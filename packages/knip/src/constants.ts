@@ -132,6 +132,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'python',
   'python3',
   'raft',
+  'railway',
   'rm',
   'rmdir',
   'rsync',
