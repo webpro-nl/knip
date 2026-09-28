@@ -13,11 +13,12 @@ test('Ignore re-exports from included entry files', async () => {
 
   assert(issues.exports['index.ts']['Button']);
   assert(issues.exports['button.ts']['default']);
+  assert(issues.exports['index.ts']['fruit']);
   assert(!issues.exports['module.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
+    exports: 3,
     processed: 3,
     total: 3,
   });

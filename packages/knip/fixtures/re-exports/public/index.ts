@@ -15,3 +15,8 @@ export { default as Button } from './button.js';
 
 /** @public */
 export default function App() {}
+
+/** @public */
+export { pear } from './module.js';
+
+export { pear as fruit } from './module.js';

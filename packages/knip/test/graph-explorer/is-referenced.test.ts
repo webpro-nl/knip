@@ -40,7 +40,7 @@ test('returns an entry re-export alongside an internal reference', () => {
   assert.deepEqual(isReferenced(graph, new Set([entryPath]), sourcePath, 'identifier', { traverseEntries: false }), [
     true,
     entryPath,
-    'identifier',
+    new Set(['identifier']),
   ]);
 });
 
