@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/rstest-workspaces",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@rstest/core": "*"
+  }
+}

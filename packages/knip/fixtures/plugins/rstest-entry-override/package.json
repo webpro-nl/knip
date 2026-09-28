@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/rstest-entry-override",
+  "devDependencies": {
+    "@rstest/core": "*"
+  }
+}

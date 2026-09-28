@@ -1,0 +1,5 @@
+{
+  "rstest": {
+    "entry": ["specs/**/*.check.ts"]
+  }
+}
