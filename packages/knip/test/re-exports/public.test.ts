@@ -9,11 +9,16 @@ const cwd = resolve('fixtures/re-exports/public');
 
 test('Ignore re-exports from included entry files', async () => {
   const options = await createOptions({ cwd, isIncludeEntryExports: true });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(issues.exports['index.ts']['Button']);
+  assert(issues.exports['button.ts']['default']);
+  assert(!issues.exports['module.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    exports: 2,
+    processed: 3,
+    total: 3,
   });
 });

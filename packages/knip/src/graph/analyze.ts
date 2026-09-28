@@ -183,7 +183,7 @@ export const analyze = async ({
             const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags) || isInternalProd;
 
             if (importsForExport) {
-              const [isReferenced, reExportingEntryFile] = explorer.isReferenced(filePath, identifier, {
+              const [isReferenced, reExportingEntryFile, reExportedId] = explorer.isReferenced(filePath, identifier, {
                 traverseEntries: isIncludeEntryExports,
               });
 
@@ -215,8 +215,8 @@ export const analyze = async ({
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
-                if (!isReferenced) {
-                  const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
+                if (!isReferenced && reExportedId) {
+                  const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(reExportedId);
                   if (
                     reExportedItem &&
                     (shouldIgnore(reExportedItem.jsDocTags) || hasTag(options.tags[1], reExportedItem.jsDocTags))

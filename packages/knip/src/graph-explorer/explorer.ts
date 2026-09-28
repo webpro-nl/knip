@@ -16,7 +16,7 @@ export const createGraphExplorer = (graph: ModuleGraph, entryPaths: Set<string>)
   return {
     /**
      * Is exported `identifier` imported/referenced in the module graph?
-     * @returns `[isReferenced, reExportingEntryFile]` → [is export used, entry path reached through re-exports]
+     * @returns `[isReferenced, reExportingEntryFile, reExportedId]` → [is export used, entry path reached through re-exports, id at that entry]
      */
     isReferenced: (
       filePath: string,
