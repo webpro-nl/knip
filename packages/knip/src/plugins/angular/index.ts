@@ -27,7 +27,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
   const inputs = new Set<Input>();
 
   for (const project of Object.values(config.projects)) {
-    if (!project.architect) return [];
+    if (!project.architect) continue;
     for (const [targetName, target] of Object.entries(project.architect)) {
       const { options: opts, configurations: configs } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
