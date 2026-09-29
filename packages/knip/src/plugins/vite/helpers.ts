@@ -36,10 +36,9 @@ const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)([
 const isFilePath = (specifier: string) =>
   specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
 
-const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, '');
-
-const getScriptSources = (html: string, publicDir?: string): string[] => {
+const getScriptSources = (html: string, htmlDir: string, rootDir: string, publicDir?: string): string[] => {
   const sources: string[] = [];
+  const resolveSource = (src: string) => (src.startsWith('/') ? join(rootDir, src) : toAbsolute(src, htmlDir));
 
   for (const [, attrs, body] of html.matchAll(scriptExtractor)) {
     const srcMatch = attrs.match(srcAttrPattern);
@@ -53,7 +52,7 @@ const getScriptSources = (html: string, publicDir?: string): string[] => {
           continue;
         }
       }
-      if (moduleTypePattern.test(attrs)) sources.push(normalizeModuleScriptSrc(src));
+      if (moduleTypePattern.test(attrs)) sources.push(resolveSource(src));
       continue;
     }
 
@@ -61,7 +60,7 @@ const getScriptSources = (html: string, publicDir?: string): string[] => {
       const code = body.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
       for (const importMatch of code.matchAll(importSpecPattern)) {
         const specifier = importMatch[2];
-        if (isFilePath(specifier)) sources.push(normalizeModuleScriptSrc(specifier));
+        if (isFilePath(specifier)) sources.push(resolveSource(specifier));
       }
     }
   }
@@ -69,16 +68,19 @@ const getScriptSources = (html: string, publicDir?: string): string[] => {
   return sources;
 };
 
-export const getHtmlScriptEntries = async (htmlPath: string, publicDir?: string): Promise<Input[]> => {
+export const getHtmlScriptEntries = async (
+  htmlPath: string,
+  rootDir = dirname(htmlPath),
+  publicDir?: string
+): Promise<Input[]> => {
   if (!isFile(htmlPath)) return [];
 
   const html = await loadFile(htmlPath);
-  const dir = dirname(htmlPath);
-  return getScriptSources(html, publicDir).map(src => toProductionEntry(toAbsolute(src, dir)));
+  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toProductionEntry(src));
 };
 
 export const getIndexHtmlEntries = (rootDir: string, publicDir?: string): Promise<Input[]> =>
-  getHtmlScriptEntries(join(rootDir, 'index.html'), publicDir);
+  getHtmlScriptEntries(join(rootDir, 'index.html'), rootDir, publicDir);
 
 export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
   let dirs: string[] | undefined;
