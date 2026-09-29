@@ -47,10 +47,11 @@ const resolveProfile = (config?: CucumberConfig) => {
   return [...imports, ...requires, ...formatters];
 };
 
-const resolveConfig: ResolveConfig<CucumberConfig | Record<string, CucumberConfig>> = (config, options) => {
-  // Every config file holds named profiles, but an ESM default export arrives here already unwrapped
-  const isProfiles = !/\.m?js$/.test(options.configFileName) || 'default' in config;
-  const profiles = isProfiles ? Object.values(config) : [config];
+const resolveConfig: ResolveConfig<CucumberConfig | Record<string, CucumberConfig> | string> = (config, options) => {
+  if (typeof config !== 'object' || config === null) return resolveProfile();
+  const isProfiles = /\.(json|ya?ml)$/.test(options.configFileName) || 'default' in config;
+  if (!isProfiles) return resolveProfile(config);
+  const profiles = 'default' in config ? Object.values(config) : [undefined, ...Object.values(config)];
   return profiles.flatMap(resolveProfile);
 };
 
