@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/compilers-promise-sync",
+  "dependencies": {
+    "dep": "*"
+  }
+}

@@ -1,0 +1,2 @@
+Duplicate exports (1)
+plugin|default  packages/eslint-plugin-query/src/index.ts

@@ -1,0 +1,38 @@
+Unused exports (23)
+app/composables/usePackageComparison.ts: NoDependencyDisplay
+app/utils/chart-data-correction.ts: movingAverage, smoothing
+app/utils/charts.ts: createAltTextForCompareFacetBarChart, createAltTextForCompareScatterChart
+app/utils/install-scripts.ts: extractNpxDependencies
+app/utils/package-name.ts: levenshteinDistance
+app/utils/versions.ts: TAG_PRIORITY, getTagPriority
+server/utils/atproto/oauth.ts: handleResolver
+server/utils/compare.ts: flattenTree, compareFileTrees, compareDependencies, countFiles
+server/utils/docs/format.ts: formatParam
+server/utils/embed-downloads-svg.ts: parsePackageNames, parseFetchGranularity, toChartGranularity, parseLocale, parseAccent, parseSafeText, parseDateQuery, clampNumber, parseMetric
+server/utils/likes-leaderboard.ts: LIKES_LEADERBOARD_MAX_ENTRIES
+server/utils/mdKit.ts: calculateSemanticDepth, getHeadingPlainText, getHeadingSlugSource, extractHeadingAttrs, ALLOWED_TAGS
+server/utils/npm.ts: resolveVersionConstraint
+server/utils/skills.ts: parseFrontmatter, countSkillFiles, validateSkill
+server/utils/version-downloads.ts: filterLowUsageVersions, groupByMajor, groupByMinor
+shared/utils/constants.ts: ERROR_PACKAGE_REQUIREMENTS_FAILED, ERROR_BLUESKY_URL_FAILED, BLOG_META_TAG_REGEX, META_TAG_TITLE_REGEX
+shared/utils/diff.ts: parseUnifiedDiff
+shared/utils/fetch-cache-config.ts: FETCH_CACHE_ALLOWED_DOMAINS
+shared/utils/git-providers.ts: GITLAB_HOSTS, FORGEJO_HOSTS, GITEA_HOSTS, getProviderConfig, isKnownGitProvider
+shared/utils/npm.ts: assertValidUsername
+shared/utils/repository-meta.ts: getRepoMetaLinks
+shared/utils/spdx.ts: SPDX_LICENSE_IDS
+shared/utils/trends-chart.ts: LARGE_PACKAGE_DAILY_DOWNLOADS_THRESHOLD, DAYS_PER_GRANULARITY
+Unused exported types (13)
+app/utils/charts.ts: TrendTranslateKey, TrendTranslateFunction, TimelineSizeDependencyBreakdown, ConvertedTimelineSizeCacheEntry
+app/utils/download-anomalies.ts: DownloadAnomalyBound
+server/utils/code-highlight.ts: ResolvedDependency, DependencyVersions, RelativeImportResolver
+server/utils/import-resolver.ts: PackageExportTarget
+shared/types/dependency-analysis.ts: SeverityCounts, VulnerabilityCounts, OsvSeverity, OsvReference, OsvRangeEvent, OsvBatchVulnRef, OsvBatchResult, PackageVulnerabilities
+shared/types/docs.ts: DocsStatus, DocsSearchResponse
+shared/types/i18n-status.ts: FileStatus, FileEntryStatus
+shared/types/jsr.ts: JsrVersionMeta
+shared/types/npm-registry.ts: Manifest, ManifestVersion, PackageJSON, NpmPerson, NpmSearchTrustedPublisher, NpmSearchPublisher, NpmSearchPackage, NpmVersionAttestations, NpmDownloadRange, NpmOrgMember, NpmTeam, NpmPackageAccess, NpmTrustedPublisher, MinimalPackument
+shared/utils/constellation.ts: BacklinksResponse, LinksDistinctDidsResponse, AllLinksResponse
+shared/utils/dev-dependency.ts: DevDependencySuggestionReason
+shared/utils/package-analysis.ts: PackageExports, RelatedPackageInfo
+shared/utils/repository-meta.ts: RepoMetaLinks

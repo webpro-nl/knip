@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/turbo2",
+  "scripts": {
+    "generate": "turbo gen component --config tools/generator.ts",
+    "generate:run": "turbo generate run scaffold --config tools/generator.ts"
+  },
+  "devDependencies": {
+    "@turbo/gen": "*",
+    "turbo": "*"
+  }
+}

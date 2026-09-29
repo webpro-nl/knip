@@ -1,9 +1,25 @@
 import type { Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
-import type { Input } from '../util/input.ts';
+import { type Input, toBinary } from '../util/input.ts';
+
+export const toCommandBinary = (
+  binary: string,
+  { optionalBinaries }: GetInputsFromScriptsOptions,
+  inputOptions: { dir?: string } = {}
+) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
+
+export const toScript = (args: ScriptArg[]): string => {
+  const parts: string[] = [];
+  for (const arg of args) {
+    if (typeof arg === 'string') {
+      if (arg !== '--') parts.push(arg);
+    } else if (arg.value !== '--') parts.push(arg.text);
+  }
+  return parts.join(' ');
+};
 
 export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) =>
   args.slice(args.findIndex(arg => valueOf(arg) === from));

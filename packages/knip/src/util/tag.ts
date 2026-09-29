@@ -13,7 +13,7 @@ export const splitTags = (rawTags: string[]) => {
   );
 };
 
-const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(tag));
+export const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(tag));
 
 export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
   const [includeJSDocTags, excludeJSDocTags] = tags;

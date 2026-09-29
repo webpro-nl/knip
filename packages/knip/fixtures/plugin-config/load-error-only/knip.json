@@ -1,0 +1,7 @@
+{
+  "ignoreDependencies": ["vite"],
+  "ignoreBinaries": ["vite"],
+  "ignoreIssues": {
+    "vite.config.ts": ["unresolved"]
+  }
+}

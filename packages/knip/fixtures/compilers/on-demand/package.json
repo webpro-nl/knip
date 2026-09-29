@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/compilers-on-demand",
+  "dependencies": {
+    "sync-dependency": "*",
+    "thenable-dependency": "*",
+    "async-dependency": "*"
+  }
+}

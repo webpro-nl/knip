@@ -9,18 +9,20 @@ const cliPath = resolve('src/cli.ts');
 const reporterPath = resolve('test/e2e/yarn-pnp-reporter.mjs');
 const pnpCjsPath = join(resolve('fixtures/yarn-pnp'), '.pnp.cjs');
 
-test('Resolve package manifests under Yarn PnP', () => {
+test('Resolve package manifests and attribute npm aliases under Yarn PnP', () => {
   const cwd = resolve('fixtures/yarn-pnp');
-  const { stdout } = spawnSync('node', ['--require', pnpCjsPath, cliPath, '--reporter', reporterPath], {
+  const { stdout, stderr, status } = spawnSync('node', ['--require', pnpCjsPath, cliPath, '--reporter', reporterPath], {
     cwd,
     env: { PATH: process.env.PATH },
     encoding: 'utf8',
   });
 
+  assert.equal(status, 1, stderr);
   const result: Results = JSON.parse(stdout);
-  assert.deepEqual(result.issues.dependencies, {});
+  assert.deepEqual(Object.keys(result.issues.dependencies), ['package.json']);
+  assert.deepEqual(Object.keys(result.issues.dependencies['package.json']), ['isarray']);
   assert.deepEqual(result.counters, {
-    dependencies: 0,
+    dependencies: 1,
     processed: 3,
     total: 4,
   });

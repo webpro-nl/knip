@@ -49,6 +49,8 @@ Please consider this before opening a pull request:
 - Open an issue before starting the work if for any reason you're not 100% sure
   about it. We can optimize both your and our time if we discuss ideas and
   choose a direction upfront.
+- One issue or feature per pull request. Unrelated changes are harder to review
+  and keep track of.
 - Pull requests may not align with the general philosophy, or may not be
   affordable to maintain, and therefore rejected.
 - Generated ("vibe-coded") pull requests may be rejected without explanation.

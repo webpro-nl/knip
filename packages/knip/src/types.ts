@@ -1,3 +1,4 @@
+export type { Compiler, CompilerResult } from './compilers/types.ts';
 export type {
   RawConfigurationOrFn as KnipConfig,
   RawConfiguration as KnipConfiguration,

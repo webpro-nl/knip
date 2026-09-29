@@ -21,8 +21,6 @@ test('Handle re-exported webpack config', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
-    binaries: 1,
     processed: 2,
     total: 2,
   });

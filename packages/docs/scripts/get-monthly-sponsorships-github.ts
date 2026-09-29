@@ -94,11 +94,12 @@ const getMonthlyTotals = async (options: Options) => {
         monthlyTotals.set(monthYear, (monthlyTotals.get(monthYear) || 0) + amount);
       }
     } else {
+      const previousAmount = activeRecurring.get(sponsor.login) || 0;
       if (action === 'NEW_SPONSORSHIP') activeRecurring.set(sponsor.login, amount);
       if (action === 'CANCELLED_SPONSORSHIP') activeRecurring.delete(sponsor.login);
-      const total = Array.from(activeRecurring.values()).reduce((sum, a) => sum + a, 0);
-      for (const month of monthlyTotals.keys()) {
-        if (month >= monthYear) monthlyTotals.set(month, total);
+      const change = (activeRecurring.get(sponsor.login) || 0) - previousAmount;
+      for (const [month, total] of monthlyTotals) {
+        if (month >= monthYear) monthlyTotals.set(month, total + change);
       }
     }
   }

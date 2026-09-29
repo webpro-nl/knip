@@ -6,8 +6,5 @@
       "compilerOptions": ["jsxImportSource"],
       "dynamicConfig": false
     }
-  },
-  "devDependencies": {
-    "typescript": "*"
   }
 }

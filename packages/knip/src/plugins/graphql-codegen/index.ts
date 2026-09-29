@@ -1,16 +1,23 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
-import { isInternal, join } from '../../util/path.ts';
+import { isInternal, join, normalize } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type {
+  ConfiguredOutput,
   ConfiguredPlugin,
   GraphqlCodegenTypes,
   GraphqlConfigTypes,
   GraphqlProjectsConfigTypes,
+  NearOperationFilePresetConfig,
   PresetNames,
 } from './types.ts';
-import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.ts';
+import {
+  isConfigurationOutput,
+  isGraphqlConfigTypes,
+  isGraphqlProjectsConfigTypes,
+  isNearOperationFilePreset,
+} from './types.ts';
 
 // Both use Cosmiconfig with custom searchPlaces - not using helper as a result
 // Codegen:
@@ -49,6 +56,21 @@ const getPluginPackageName = (name: string) => {
   return `@graphql-codegen/${name}`;
 };
 
+// https://the-guild.dev/graphql/codegen/docs/presets/near-operation-file
+const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
+  if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
+    const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
+    const { folder = '', extension = '.generated.ts', fileName = '*', filePerOperation = false } = presetConfig;
+    // The preset resolves `folder` against each document's own directory, so a parent-relative folder still
+    // lands below the output directory: keep the recursive match and drop the leading `..` segments
+    const subfolder = normalize(folder)
+      .split('/')
+      .filter(segment => segment !== '' && segment !== '.' && segment !== '..');
+    return join(output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`);
+  }
+  return output.endsWith('/') ? `${output}**` : output;
+};
+
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = (
   config,
   options
@@ -62,8 +84,10 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
   const generateSet = generateConfigs.flatMap(config => Object.values(config.generates));
 
   const outputs = generateConfigs
-    .flatMap(config => Object.keys(config.generates))
-    .map(output => toProductionEntry(join(options.configFileDir, output.endsWith('/') ? `${output}**` : output)));
+    .flatMap(config => Object.entries(config.generates))
+    .map(([output, outputConfig]) =>
+      toProductionEntry(join(options.configFileDir, getOutputPattern(output, outputConfig)))
+    );
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 

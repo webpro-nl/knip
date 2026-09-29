@@ -5,7 +5,7 @@ import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../.
 import { _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { isAbsolute, isInternal, join, toAbsolute } from '../../util/path.ts';
+import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
@@ -165,12 +165,19 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
   for (const cfg of configs) {
     const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
+    const publicDir =
+      cfg.publicDir === false || cfg.publicDir === ''
+        ? undefined
+        : toAbsolute(toPosix(cfg.publicDir ?? 'public'), viteRoot);
     if (!seenRoots.has(viteRoot)) {
       seenRoots.add(viteRoot);
-      for (const entry of await getIndexHtmlEntries(viteRoot)) inputs.add(entry);
+      for (const entry of await getIndexHtmlEntries(viteRoot, publicDir)) inputs.add(entry);
     }
 
-    const vitestRoot = toAbsolute(cfg.test?.root ?? '.', options.cwd);
+    const vitestRoot =
+      cfg.test?.root || !options.isResolvedConfigFile
+        ? toAbsolute(cfg.test?.root ?? '.', options.cwd)
+        : toAbsolute('.', options.configFileDir);
     const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, vitestRoot) : vitestRoot;
 
     if (cfg.test) {
@@ -216,14 +223,14 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       const resolved = toAbsolute(specifier, viteRoot);
       inputs.add(toProductionEntry(resolved));
       if (resolved.endsWith('.html')) {
-        for (const input of await getHtmlScriptEntries(resolved, viteRoot)) inputs.add(input);
+        for (const input of await getHtmlScriptEntries(resolved, viteRoot, publicDir)) inputs.add(input);
       }
     }
 
     const _entry = cfg.build?.lib?.entry ?? [];
     const entries =
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
-    const deps = entries.map(specifier => join(vitestRoot, specifier)).map(id => toEntry(id));
+    const deps = entries.map(specifier => join(viteRoot, specifier)).map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
 

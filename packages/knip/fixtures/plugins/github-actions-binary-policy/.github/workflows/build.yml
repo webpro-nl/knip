@@ -1,0 +1,13 @@
+name: Build
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: custom-build-cli
+      - run: eslint .
+      - run: missing-ambient-cli
+      - run: pnpm exec missing-project-cli
+      - run: node --import missing-import-hook ./scripts/task.js

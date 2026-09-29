@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/eslint10",
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-import-resolver-oxc": "*",
+    "eslint-plugin-import-x": "*"
+  }
+}

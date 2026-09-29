@@ -26,6 +26,18 @@ const readFirstBytes = (filePath, length = 128) => {
   return buffer.subarray(0, bytesRead).toString('utf-8');
 };
 
+const detectPackageManager = dir => {
+  if (fileExists(path.join(dir, 'bun.lock'))) return 'bun';
+  if (fileExists(path.join(dir, 'bun.lockb'))) return 'bun';
+  if (hasAccess(path.join(dir, 'yarn.lock'))) {
+    const yarnLock = readFirstBytes(path.join(dir, 'yarn.lock'), 128);
+    return yarnLock.includes('yarn lockfile v1') ? 'yarn' : 'yarn-berry';
+  }
+  if (fileExists(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
+  if (fileExists(path.join(dir, 'package-lock.json'))) return 'npm';
+  if (fileExists(path.join(dir, 'npm-shrinkwrap.json'))) return 'npm';
+};
+
 const getPackageManager = () => {
   // get the root of the repository
   let repositoryRoot = '';
@@ -35,14 +47,14 @@ const getPackageManager = () => {
       .trim();
   } catch {}
 
-  if (fileExists(path.join(repositoryRoot, 'bun.lock'))) return 'bun';
-  if (fileExists(path.join(repositoryRoot, 'bun.lockb'))) return 'bun';
-  if (hasAccess(path.join(repositoryRoot, 'yarn.lock'))) {
-    const yarnLock = readFirstBytes(path.join(repositoryRoot, 'yarn.lock'), 128);
-    return yarnLock.includes('yarn lockfile v1') ? 'yarn' : 'yarn-berry';
+  const cwd = process.cwd();
+
+  if (repositoryRoot && path.resolve(repositoryRoot) !== cwd) {
+    const pm = detectPackageManager(repositoryRoot);
+    if (pm) return pm;
   }
-  if (fileExists(path.join(repositoryRoot, 'pnpm-lock.yaml'))) return 'pnpm';
-  return 'npm';
+
+  return detectPackageManager(cwd) ?? 'npm';
 };
 
 const getBinX = pm => {

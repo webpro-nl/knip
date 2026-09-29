@@ -12,11 +12,12 @@ test('Find entry files when next is started in a subdirectory', async () => {
   const { issues, counters } = await main(options);
 
   assert('web/src/app/unused.ts' in issues.files);
+  assert('loader.cjs' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 5,
-    total: 5,
+    files: 2,
+    processed: 7,
+    total: 7,
   });
 });

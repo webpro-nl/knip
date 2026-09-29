@@ -1,5 +1,5 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
-import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
+import { IGNORED_GLOBAL_BINARIES, IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { Issue } from '../types/issues.ts';
 import type { ExternalRef } from '../types/module-graph.ts';
@@ -65,12 +65,13 @@ export const createInputHandler =
         return;
       }
 
-      if (dependencies || input.optional) return;
+      if (input.optional || (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName)))
+        return;
 
       addIssue({
         type: 'binaries',
         filePath: containingFilePath,
-        workspace: workspace.name,
+        workspace: inputWorkspace.name,
         symbol: binaryName,
         specifier,
         fixes: [],

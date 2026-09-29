@@ -1,5 +1,7 @@
+import { IMPORT_STAR } from '../constants.ts';
 import type { GraphExplorer } from '../graph-explorer/explorer.ts';
 import type { ExportsTreeNode } from '../graph-explorer/operations/build-exports-tree.ts';
+import { getAmbiguousStarExport } from '../graph-explorer/operations/get-ambiguous-star-export.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import st from '../util/colors.ts';
@@ -43,6 +45,37 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     else for (const line of rows) console.log(line);
   } else {
     let nodes = explorer.buildExportsTree({ filePath: options.traceFile, identifier: options.traceExport });
+    const traceFile = options.traceFile;
+    const traceExport = options.traceExport;
+    const dotIndex = traceExport?.indexOf('.') ?? -1;
+    const resolvedTraceExport = dotIndex === -1 ? traceExport : traceExport?.slice(0, dotIndex);
+    const resolution =
+      traceFile && resolvedTraceExport ? explorer.resolveExportOrigins(traceFile, resolvedTraceExport) : undefined;
+    const collision =
+      resolution && resolvedTraceExport ? getAmbiguousStarExport(resolution, resolvedTraceExport) : undefined;
+    const toRel = (path: string) => toRelative(path, options.cwd);
+
+    if (collision) {
+      collision.origins.sort((a, b) => compareStrings(a.filePath, b.filePath));
+      console.log(`${toRel(traceFile ?? '')}:${st.cyanBright(resolvedTraceExport ?? '')} [ambiguous]`);
+      for (let i = 0; i < collision.origins.length; i++) {
+        const origin = collision.origins[i];
+        const connector = i === collision.origins.length - 1 ? '└──' : '├──';
+        console.log(`${st.dim(connector)} ${toRel(origin.filePath)}:${st.cyanBright(origin.identifier)}`);
+      }
+      return;
+    }
+
+    if (nodes.length === 0 && resolution && !resolution.hasExplicitExport && resolution.origins.length === 1) {
+      const [origin] = resolution.origins;
+      const originFile = graph.get(origin.filePath);
+      if (originFile && origin.identifier !== IMPORT_STAR && origin.identifier !== 'default') {
+        for (const [exportId, exp] of originFile.exports) {
+          if (exp.binding !== origin.identifier) continue;
+          nodes.push(...explorer.buildExportsTree({ filePath: origin.filePath, identifier: exportId }));
+        }
+      }
+    }
 
     // Fallback: resolve dotted name as namespace member (e.g. Fruits.apple → Fruits)
     if (nodes.length === 0 && options.traceExport?.includes('.')) {
@@ -72,7 +105,6 @@ export default ({ graph, explorer, options, workspaceFilePathFilter, issues }: T
     }
 
     nodes.sort((a, b) => compareStrings(a.filePath, b.filePath) || compareStrings(a.identifier, b.identifier));
-    const toRel = (path: string) => toRelative(path, options.cwd);
 
     if (nodes.length === 0) {
       if (options.traceFile && !graph.has(options.traceFile)) {

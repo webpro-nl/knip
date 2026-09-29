@@ -1,0 +1,5 @@
+[env]
+_.path = "node_modules/.bin"
+
+[tasks.test]
+run = "vitest run"

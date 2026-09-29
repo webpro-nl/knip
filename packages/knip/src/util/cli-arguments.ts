@@ -1,4 +1,5 @@
 import { parseArgs } from 'node:util';
+import { ConfigurationError } from './errors.ts';
 
 export const helpText = `✂️  Find unused dependencies, exports and files in your JavaScript and TypeScript projects
 
@@ -82,6 +83,14 @@ $ knip --tags=-lintignore
 Website: https://knip.dev`;
 
 export type ParsedCLIArgs = ReturnType<typeof parseCLIArgs>;
+
+export const parseNumericOption = (value: string | undefined, option: string) => {
+  if (value === undefined) return undefined;
+  if (!/^\d+$/.test(value)) {
+    throw new ConfigurationError(`Option --${option} expects a non-negative integer, got: ${value}`);
+  }
+  return Number(value);
+};
 
 export default function parseCLIArgs() {
   return parseArgs({

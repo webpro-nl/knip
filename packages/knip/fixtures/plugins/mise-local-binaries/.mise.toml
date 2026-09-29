@@ -1,0 +1,23 @@
+[env]
+_.path = ["{{ config_root }}/node_modules/.bin/"]
+
+[tasks.lint]
+run = "eslint ."
+
+[tasks.build]
+run = ["NODE_OPTIONS='--require ./preload.ts' cross-env c8 assets build", "c8 terraform apply"]
+
+[tasks.override]
+env.PATH = "/usr/bin"
+run = "overridden"
+
+[tasks.inline]
+run = 'cross-env PATH=/usr/bin inline-override'
+
+[tasks.format]
+run = "formatter ."
+env.PATH = "/usr/bin"
+env._.path = "node_modules/.bin"
+
+[tasks.nested]
+run = 'find . -exec c8 pnpm exec -- missing-local-cli {} \;'

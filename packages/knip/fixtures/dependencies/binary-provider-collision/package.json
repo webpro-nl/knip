@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/binary-provider-collision",
+  "scripts": {
+    "build": "custom-build-cli"
+  },
+  "devDependencies": {
+    "custom-builder": "*",
+    "@scope/custom-builder": "*",
+    "custom-build-cli": "*",
+    "other-build-cli": "*"
+  }
+}

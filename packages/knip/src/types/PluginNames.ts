@@ -64,6 +64,7 @@ export type PluginName =
   | 'mdx'
   | 'mdxlint'
   | 'metro'
+  | 'mise'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
@@ -106,6 +107,7 @@ export type PluginName =
   | 'prisma'
   | 'quasar'
   | 'qwik'
+  | 'railway'
   | 'raycast'
   | 'react-cosmos'
   | 'react-email'
@@ -145,14 +147,17 @@ export type PluginName =
   | 'taskfile'
   | 'tauri'
   | 'temporal'
+  | 'textlint'
   | 'travis'
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
   | 'tsup'
   | 'tsx'
+  | 'turbo'
   | 'typedoc'
   | 'typescript'
+  | 'typescript-content-mapper'
   | 'unbuild'
   | 'unocss'
   | 'unplugin-auto-import'
@@ -161,6 +166,7 @@ export type PluginName =
   | 'unplugin-vue-i18n'
   | 'unplugin-vue-markdown'
   | 'unplugin-vue-router'
+  | 'varlock'
   | 'vercel'
   | 'vercel-og'
   | 'vike'
@@ -248,6 +254,7 @@ export const pluginNames = [
   'mdx',
   'mdxlint',
   'metro',
+  'mise',
   'mocha',
   'moonrepo',
   'msw',
@@ -290,6 +297,7 @@ export const pluginNames = [
   'prisma',
   'quasar',
   'qwik',
+  'railway',
   'raycast',
   'react-cosmos',
   'react-email',
@@ -329,14 +337,17 @@ export const pluginNames = [
   'taskfile',
   'tauri',
   'temporal',
+  'textlint',
   'travis',
   'ts-node',
   'tsd',
   'tsdown',
   'tsup',
   'tsx',
+  'turbo',
   'typedoc',
   'typescript',
+  'typescript-content-mapper',
   'unbuild',
   'unocss',
   'unplugin-auto-import',
@@ -345,6 +356,7 @@ export const pluginNames = [
   'unplugin-vue-i18n',
   'unplugin-vue-markdown',
   'unplugin-vue-router',
+  'varlock',
   'vercel',
   'vercel-og',
   'vike',

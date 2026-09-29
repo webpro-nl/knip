@@ -1,0 +1,9 @@
+{
+  "name": "@mise/tools",
+  "scripts": {
+    "invoke": "node"
+  },
+  "devDependencies": {
+    "formatter-cli": "*"
+  }
+}

@@ -1,0 +1,5 @@
+[env]
+_.path = "node_modules/.bin"
+
+[tasks.format]
+run = "formatter --write ."

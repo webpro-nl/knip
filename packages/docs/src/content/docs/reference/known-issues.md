@@ -17,6 +17,9 @@ $ knip
 ERROR: Error loading vite.config.ts
 ```
 
+Knip exits with code `2` when a plugin config file fails to load.
+`--no-exit-code` does not suppress this error.
+
 Knip may load such files differently, in a different environment, with missing
 environment variables, missing path aliases, etcetera. Use `--debug` to locate
 the cause of the issue with more details.
@@ -83,10 +86,10 @@ The solution is to [disable the Nx Daemon][6]:
 NX_DAEMON=false knip
 ```
 
-## Windows raw transfer memory errors
+## Raw transfer memory errors
 
-On Windows with Node.js 22 or newer, oxc-parser raw transfer may fail under
-memory pressure:
+On machines with low RAM or Windows with Node.js >=22, oxc-parser raw transfer
+may fail under memory pressure:
 
 ```sh
 RangeError: Array buffer allocation failed

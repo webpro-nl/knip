@@ -63,6 +63,7 @@ import { default as marko } from './marko/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
+import { default as mise } from './mise/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
 import { default as msw } from './msw/index.ts';
@@ -105,6 +106,7 @@ import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
 import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
+import { default as railway } from './railway/index.ts';
 import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
 import { default as reactEmail } from './react-email/index.ts';
@@ -144,14 +146,17 @@ import { default as tanstackRouter } from './tanstack-router/index.ts';
 import { default as taskfile } from './taskfile/index.ts';
 import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
+import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
+import { default as turbo } from './turbo/index.ts';
 import { default as typedoc } from './typedoc/index.ts';
 import { default as typescript } from './typescript/index.ts';
+import { default as typescriptContentMapper } from './typescript-content-mapper/index.ts';
 import { default as unbuild } from './unbuild/index.ts';
 import { default as unocss } from './unocss/index.ts';
 import { default as unpluginAutoImport } from './unplugin-auto-import/index.ts';
@@ -160,6 +165,7 @@ import { default as unpluginVueComponents } from './unplugin-vue-components/inde
 import { default as unpluginVueI18n } from './unplugin-vue-i18n/index.ts';
 import { default as unpluginVueMarkdown } from './unplugin-vue-markdown/index.ts';
 import { default as unpluginVueRouter } from './unplugin-vue-router/index.ts';
+import { default as varlock } from './varlock/index.ts';
 import { default as vercel } from './vercel/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
@@ -247,6 +253,7 @@ export const Plugins = {
   mdx,
   mdxlint,
   metro,
+  mise,
   mocha,
   moonrepo,
   msw,
@@ -289,6 +296,7 @@ export const Plugins = {
   prisma,
   quasar,
   qwik,
+  railway,
   raycast,
   'react-cosmos': reactCosmos,
   'react-email': reactEmail,
@@ -328,14 +336,17 @@ export const Plugins = {
   taskfile,
   tauri,
   temporal,
+  textlint,
   travis,
   'ts-node': tsNode,
   tsd,
   tsdown,
   tsup,
   tsx,
+  turbo,
   typedoc,
   typescript,
+  'typescript-content-mapper': typescriptContentMapper,
   unbuild,
   unocss,
   'unplugin-auto-import': unpluginAutoImport,
@@ -344,6 +355,7 @@ export const Plugins = {
   'unplugin-vue-i18n': unpluginVueI18n,
   'unplugin-vue-markdown': unpluginVueMarkdown,
   'unplugin-vue-router': unpluginVueRouter,
+  varlock,
   vercel,
   'vercel-og': vercelOg,
   vike,

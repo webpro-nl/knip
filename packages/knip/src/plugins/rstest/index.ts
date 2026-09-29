@@ -21,8 +21,10 @@ const mocks = ['**/__mocks__/**/*.?(c|m)[jt]s?(x)'];
 const entry = ['**/*.{test,spec}.?(c|m)[jt]s?(x)'];
 
 function testEnvironment(config: RstestConfig) {
-  if (!config.testEnvironment || config.testEnvironment === 'node') return [];
-  return [config.testEnvironment];
+  const environment =
+    typeof config.testEnvironment === 'string' ? config.testEnvironment : config.testEnvironment?.name;
+  if (!environment || environment === 'node') return [];
+  return [environment];
 }
 
 const resolveConfig: ResolveConfig<RstestConfig> = async config => {

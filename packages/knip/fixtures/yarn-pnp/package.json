@@ -7,6 +7,8 @@
   ],
   "dependencies": {
     "host-with-hidden-manifest": "workspace:*",
+    "isarray": "2.0.5",
+    "isarray-alias": "npm:isarray@2.0.5",
     "peer-package": "workspace:*"
   }
 }

@@ -42,9 +42,15 @@ test('Keep types referenced in exported value signatures alive (declaration emit
   // Genuinely unused
   assert(issues.types['src/lib.ts']['CompletelyUnused']);
 
+  // A non-exported function cannot expose its parameter type
+  assert(issues.types['src/lib.ts']['PrivateParam']);
+
+  // A non-exported function's annotated return still determines the exported return
+  assert(!issues.types['src/lib.ts']?.['AnnotatedHelperResult']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    types: 8,
+    types: 9,
     processed: 2,
     total: 2,
   });

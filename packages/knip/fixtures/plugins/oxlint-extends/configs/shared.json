@@ -1,0 +1,9 @@
+{
+  "jsPlugins": ["./rules-plugin.cjs"],
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "jsPlugins": ["./override-plugin.cjs"]
+    }
+  ]
+}

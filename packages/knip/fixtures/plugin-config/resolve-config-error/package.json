@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/plugin-config-resolve-config-error",
+  "devDependencies": {
+    "vite": "*"
+  }
+}

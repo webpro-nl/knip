@@ -36,7 +36,7 @@ const getPackageNameFromYarnPnpmStore = (posixPath: string): string | undefined 
 
 export const getPackageNameFromFilePath = (value: string) => {
   const name = value.startsWith('file://') ? value.slice(7) : value;
-  if (name.includes('node_modules/.bin/')) return extractBinary(name);
+  if (isInNodeModulesBin(name)) return extractBinary(name);
   const posixPath = toPosix(name);
   const match = posixPath.match(lastPackageNameMatch);
   if (match) {
@@ -57,6 +57,10 @@ export const isStartsLikePackageName = (specifier: string) => {
 };
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
+
+export const isInNodeModulesBin = (value: string) => value.includes('node_modules/.bin/');
+
+export const isRelativeNodeModulesBin = (value: string) => /^(?:\.\.?\/)*node_modules\/\.bin\//.test(value);
 
 const stripNodeModulesFromPath = (command: string) => command.replace(/(?:\.{0,2}\/)*node_modules\//, '');
 

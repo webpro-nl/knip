@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/mocha2",
+  "mocha": {
+    "file": "hooks/globals.js"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}

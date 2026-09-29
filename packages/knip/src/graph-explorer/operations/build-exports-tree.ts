@@ -73,7 +73,8 @@ const buildExportTree = (
       const key = `${importingFile}:${id}`;
       const isRenamed = via.endsWith('As') && sourceId !== ns;
       const refs = filterRefs(importRefs, id);
-      const childNode = nodeMap.get(key) ?? {
+      const existingNode = nodeMap.get(key);
+      const childNode = existingNode ?? {
         filePath: importingFile,
         identifier: id,
         originalId: isRenamed ? sourceId : undefined,
@@ -92,7 +93,9 @@ const buildExportTree = (
           }
         }
       }
-      (parentNode ?? rootNode).children.push(childNode);
+      const parent = parentNode ?? rootNode;
+      if (existingNode && reaches(existingNode, parent)) return CONTINUE;
+      parent.children.push(childNode);
       return CONTINUE;
     },
     entryPaths
@@ -101,6 +104,12 @@ const buildExportTree = (
   pruneReExportStarOnlyBranches(rootNode);
 
   return rootNode;
+};
+
+const reaches = (node: ExportsTreeNode, target: ExportsTreeNode): boolean => {
+  if (node === target) return true;
+  for (const child of node.children) if (reaches(child, target)) return true;
+  return false;
 };
 
 const filterRefs = (refs: Set<string> | undefined, id: string): string[] => {

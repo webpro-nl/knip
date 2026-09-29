@@ -1,4 +1,4 @@
-export { IMPORT_STAR, KNIP_CONFIG_LOCATIONS, SIDE_EFFECTS } from '../constants.ts';
+export { IMPORT_STAR, ISSUE_TYPES, KNIP_CONFIG_LOCATIONS, SIDE_EFFECTS } from '../constants.ts';
 export type { DependencyNode, DependencyNodes } from '../graph-explorer/operations/get-dependency-usage.ts';
 export { finalizeConfigurationHints } from '../reporters/util/configuration-hints.ts';
 export { getIssuePrefix } from '../reporters/util/util.ts';
@@ -9,4 +9,12 @@ export { createOptions, type MainOptions } from '../util/create-options.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 export { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
 export { createSession, type Session } from './session.ts';
-export type { ContentionDetails, Export, File, SourceLocation } from './types.ts';
+export type {
+  ContentionDetails,
+  ContentionKind,
+  ContentionOrigin,
+  ContentionSite,
+  Export,
+  File,
+  SourceLocation,
+} from './types.ts';

@@ -19,7 +19,7 @@ type WithPackageJsonPathAsKey<T> = {
 };
 
 type PluginConfig<P> = {
-  [K in keyof P as WithPackageJsonPathAsKey<P>[K]]: unknown;
+  [K in keyof P as WithPackageJsonPathAsKey<P>[K]]?: unknown;
 };
 
 type Plugins = PluginConfig<PluginMap>;
@@ -44,6 +44,7 @@ export type PackageJson = {
   name?: string;
   main?: string;
   bin?: string | Record<string, string>;
+  repository?: string | { type?: string; url?: string; directory?: string };
   version?: string;
   private?: boolean;
   workspaces?: string[] | { packages?: string[]; catalog?: Catalog; catalogs?: Catalogs };

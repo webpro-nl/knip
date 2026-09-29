@@ -3,10 +3,12 @@ import { createRequire } from 'node:module';
 import { type ParseResult, Visitor } from 'oxc-parser';
 import { scriptBodies } from '../../compilers/compilers.ts';
 import { stylePreprocessorImports } from '../../compilers/style-preprocessors.ts';
+import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import { dirname, isInNodeModules, join } from '../../util/path.ts';
+import { _createSyncModuleResolver } from '../../util/resolve.ts';
 import type { AutoImportMaps, TemplateAstNode, VueSfc } from './types.ts';
 
 const getVueSfc = (cwd: string): VueSfc => {
@@ -50,11 +52,22 @@ const readFile = (filePath: string): string => {
 
 export const readAndParseFile = (filePath: string) => _parseFile(filePath, readFile(filePath));
 
-const collectIdentifiers = (source: string, fileName: string) => {
+const collectIdentifiers = (source: string, fileName: string, importedComponents?: Set<string>) => {
   const identifiers = new Set<string>();
   const visitor = new Visitor({
     Identifier(node) {
       identifiers.add(node.name);
+    },
+    ImportDeclaration(node) {
+      if (importedComponents && node.source.value === '#components') {
+        for (const specifier of node.specifiers) {
+          if (specifier.type === 'ImportSpecifier') {
+            importedComponents.add(
+              specifier.imported.type === 'Identifier' ? specifier.imported.name : specifier.imported.value
+            );
+          }
+        }
+      }
     },
   });
   visitor.visit(_parseFile(fileName, source).program);
@@ -114,6 +127,8 @@ const toKebabCase = (s: string) => s.replace(/[A-Z]/g, (m, i) => (i ? '-' : '') 
 
 const isLocalSpecifier = (specifier: string) => specifier.startsWith('.') && !isInNodeModules(specifier);
 
+const resolveModule = _createSyncModuleResolver([...DEFAULT_EXTENSIONS, '.vue']);
+
 export const collectLocalImportPaths = (filePath: string, result: ParseResult) => {
   const dir = dirname(filePath);
   const paths = new Set<string>();
@@ -141,7 +156,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
   const addEntry = (name: string, start: number, end: number) => {
     const importType = importTypes.find(it => it.start >= start && it.end <= end);
     if (!importType || !isLocalSpecifier(importType.specifier)) return;
-    const absSpecifier = join(dir, importType.specifier);
+    const absSpecifier = resolveModule(importType.specifier, filePath) ?? join(dir, importType.specifier);
     if (isComponents) {
       const components = maps.componentMap.get(name);
       if (components) {
@@ -167,7 +182,7 @@ export function buildAutoImportMap(filePath: string, result: ParseResult, maps: 
       if (!node.source) return;
       const specifier = node.source.value;
       if (!isLocalSpecifier(specifier)) return;
-      const absSpecifier = join(dir, specifier);
+      const absSpecifier = resolveModule(specifier, filePath) ?? join(dir, specifier);
       for (const s of node.specifiers) {
         const name = s.exported.type === 'Identifier' ? s.exported.name : s.exported.value;
         if (name) maps.importMap.set(name, absSpecifier);
@@ -199,14 +214,21 @@ const getVueAutoImportMaps = (cwd: string): AutoImportMaps => {
   return maps;
 };
 
-const getSyntheticImports = (maps: AutoImportMaps, identifiers: Set<string>, templateTags?: Set<string>) => {
+const getSyntheticImports = (
+  maps: AutoImportMaps,
+  identifiers: Set<string>,
+  filePath: string,
+  templateTags?: Set<string>
+) => {
   const { importMap, componentMap } = maps;
   if (importMap.size === 0 && (!templateTags || componentMap.size === 0)) return [];
 
   const syntheticImports: string[] = [];
 
   for (const [name, specifier] of importMap) {
-    if (identifiers.has(name)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
+    if (identifiers.has(name) && specifier !== filePath) {
+      syntheticImports.push(`import { ${name} } from '${specifier}';`);
+    }
   }
 
   if (templateTags) {
@@ -218,13 +240,24 @@ const getSyntheticImports = (maps: AutoImportMaps, identifiers: Set<string>, tem
         templateTags.has(`Lazy${name}`) ||
         templateTags.has(`lazy-${kebab}`)
       ) {
-        syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
-        for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
+        const targets = specifiers.filter(specifier => specifier !== filePath);
+        if (targets.length === 0) continue;
+        syntheticImports.push(`import { default as ${name} } from '${targets[0]}';`);
+        for (let i = 1; i < targets.length; i++) syntheticImports.push(`import '${targets[i]}';`);
       }
     }
   }
 
   return syntheticImports;
+};
+
+const getImportedComponentImports = (maps: AutoImportMaps, names: Set<string>) => {
+  const imports: string[] = [];
+  for (const importedName of names) {
+    const name = importedName.startsWith('Lazy') ? importedName.slice(4) : importedName;
+    for (const specifier of maps.componentMap.get(name) ?? []) imports.push(`import '${specifier}';`);
+  }
+  return imports;
 };
 
 const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root: string) => {
@@ -238,7 +271,9 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
   if (descriptor.script?.content) scripts.push(descriptor.script.content);
   if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
 
-  const identifiers = scripts.length === 0 ? new Set<string>() : collectIdentifiers(scripts.join('\n'), path);
+  const importedComponents = new Set<string>();
+  const identifiers =
+    scripts.length === 0 ? new Set<string>() : collectIdentifiers(scripts.join('\n'), path, importedComponents);
   const template = descriptor.template;
   const compiled =
     template && !template.ast && sfc.compileTemplate
@@ -262,7 +297,8 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
   if (compiled?.code) {
     for (const id of collectVue2TemplateIdentifiers(compiled.code)) identifiers.add(id);
   }
-  scripts.push(...getSyntheticImports(maps, identifiers, templateTags));
+  scripts.push(...getSyntheticImports(maps, identifiers, path, templateTags));
+  scripts.push(...getImportedComponentImports(maps, importedComponents));
 
   const styles = stylePreprocessorImports(source, path);
   if (styles) scripts.push(styles);
@@ -271,8 +307,15 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
 };
 
 const compileTs = (source: string, path: string, maps: AutoImportMaps) => {
-  if (maps.importMap.size === 0 || path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
-  const syntheticImports = getSyntheticImports(maps, collectIdentifiers(source, path));
+  if (
+    (maps.importMap.size === 0 && maps.componentMap.size === 0) ||
+    path.endsWith('.d.ts') ||
+    path.endsWith('.config.ts')
+  )
+    return source;
+  const importedComponents = new Set<string>();
+  const syntheticImports = getSyntheticImports(maps, collectIdentifiers(source, path, importedComponents), path);
+  syntheticImports.push(...getImportedComponentImports(maps, importedComponents));
   return syntheticImports.length === 0 ? source : `${source}\n${syntheticImports.join('\n')}`;
 };
 
@@ -289,7 +332,7 @@ const compileMarkdown = (source: string, path: string, maps: AutoImportMaps) => 
   const tags = new Set<string>();
   for (const [, tag] of code.matchAll(tagMatcher)) tags.add(tag);
   const identifiers = scripts ? collectIdentifiers(scripts, path) : new Set<string>();
-  return [scripts, ...getSyntheticImports(maps, identifiers, tags)].filter(Boolean).join(';\n');
+  return [scripts, ...getSyntheticImports(maps, identifiers, path, tags)].filter(Boolean).join(';\n');
 };
 
 export const createVueCompiler = (maps: AutoImportMaps, cwd: string) => (source: string, path: string) =>

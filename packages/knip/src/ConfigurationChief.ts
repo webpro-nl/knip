@@ -1,5 +1,5 @@
 import picomatch from 'picomatch';
-import type { SyncCompilers } from './compilers/types.ts';
+import { normalizeCompilers } from './compilers/index.ts';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
 import type {
   Configuration,
@@ -52,6 +52,7 @@ const isPluginName = (name: string): name is PluginName => pluginNames.includes(
 const defaultConfig: Configuration = {
   ignore: [],
   ignoreBinaries: [],
+  ignoreGlobalBinaries: true,
   ignoreDependencies: [],
   ignoreFiles: [],
   cycles: {},
@@ -61,8 +62,7 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   ignoreExportsUsedInFile: false,
   isIncludeEntryExports: false,
-  syncCompilers: new Map(),
-  asyncCompilers: new Map(),
+  compilers: new Map(),
   rootPluginConfigs: {},
 };
 
@@ -142,6 +142,7 @@ export class ConfigurationChief {
     const ignore = arrayify(rawConfig.ignore ?? defaultConfig.ignore);
     const ignoreFiles = arrayify(rawConfig.ignoreFiles ?? defaultConfig.ignoreFiles);
     const ignoreBinaries = rawConfig.ignoreBinaries ?? [];
+    const ignoreGlobalBinaries = rawConfig.ignoreGlobalBinaries ?? defaultConfig.ignoreGlobalBinaries;
     const ignoreDependencies = rawConfig.ignoreDependencies ?? [];
     const ignoreMembers = rawConfig.ignoreMembers ?? [];
     const ignoreUnresolved = rawConfig.ignoreUnresolved ?? [];
@@ -150,8 +151,6 @@ export class ConfigurationChief {
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
-
-    const { syncCompilers, asyncCompilers } = rawConfig;
 
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
@@ -166,6 +165,7 @@ export class ConfigurationChief {
       ignoreFiles,
       cycles,
       ignoreBinaries,
+      ignoreGlobalBinaries,
       ignoreDependencies,
       ignoreMembers,
       ignoreUnresolved,
@@ -173,8 +173,7 @@ export class ConfigurationChief {
       ignoreIssues,
       ignoreWorkspaces,
       isIncludeEntryExports,
-      syncCompilers: new Map(Object.entries(syncCompilers ?? {})) as SyncCompilers,
-      asyncCompilers: new Map(Object.entries(asyncCompilers ?? {})),
+      compilers: normalizeCompilers(rawConfig),
       rootPluginConfigs,
     };
   }
@@ -434,6 +433,7 @@ export class ConfigurationChief {
     const paths = workspaceConfig.paths ?? {};
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
+    const ignoreGlobalBinaries = workspaceConfig.ignoreGlobalBinaries ?? this.config.ignoreGlobalBinaries;
     const ignoreExportsUsedInFile = workspaceConfig.ignoreExportsUsedInFile ?? this.config.ignoreExportsUsedInFile;
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
@@ -449,7 +449,17 @@ export class ConfigurationChief {
       }
     }
 
-    return { entry, project, paths, ignore, ignoreFiles, ignoreExportsUsedInFile, isIncludeEntryExports, ...plugins };
+    return {
+      entry,
+      project,
+      paths,
+      ignore,
+      ignoreFiles,
+      ignoreGlobalBinaries,
+      ignoreExportsUsedInFile,
+      isIncludeEntryExports,
+      ...plugins,
+    };
   }
 
   public findWorkspaceByFilePath(filePath: string) {

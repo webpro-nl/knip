@@ -1,0 +1,5 @@
+[task_config]
+dir = "{{ config_root }}/scripts"
+
+[tasks.release]
+run = "node release.ts"

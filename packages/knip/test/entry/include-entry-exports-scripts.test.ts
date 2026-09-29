@@ -13,8 +13,8 @@ test('Skip unused exports in entry source files and scripts', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -25,7 +25,7 @@ test('Report unused exports in source files (skip for scripts and plugin entry f
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 0, // skip for scripts and plugin entry files
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });

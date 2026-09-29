@@ -54,7 +54,8 @@ Non-JS/TS files (`.css`, `.mdx`, `.vue`) are invisible until a compiler
 registers their extension: it makes `**/*.<ext>` project files (unreferenced →
 unused) and extracts imports so refs are followed. Built-ins (`src/compilers/`:
 mdx/scss/less/ stylus) auto-enable on a known dependency; plugins gate on
-`hasDependency`. Regex extractors, not parsers.
+`hasDependency`. Regex extractors, not parsers. The same scope and tradeoffs
+apply when adding new compilers; read [COMPILERS.md][4] first.
 
 ## Visitors (`registerVisitors`)
 
@@ -75,3 +76,4 @@ shared in `_custom-elements/`.
 [1]: ../packages/docs/src/content/docs/writing-a-plugin/index.md
 [2]: ../packages/docs/src/content/docs/writing-a-plugin/inputs.md
 [3]: ../packages/docs/src/content/docs/writing-a-plugin/argument-parsing.md
+[4]: ./COMPILERS.md

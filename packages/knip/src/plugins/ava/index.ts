@@ -34,7 +34,7 @@ const resolveConfig: ResolveConfig<AvaConfig> = async (localConfig, options) => 
   const requireArgs = (localConfig.require ?? []).map(require => `--require ${require}`);
   const fakeCommand = `node ${nodeArgs.join(' ')} ${requireArgs.join(' ')}`;
 
-  return files.concat(options.getInputsFromScripts(fakeCommand, { knownBinsOnly: true }));
+  return files.concat(options.getInputsFromScripts(fakeCommand, { optionalBinaries: true }));
 };
 
 const plugin: Plugin = {

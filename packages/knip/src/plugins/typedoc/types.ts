@@ -1,6 +1,6 @@
 export type TypeDocConfig = {
-  plugin?: string[];
-  theme?: string[];
+  plugin?: string | string[];
+  theme?: string | string[];
   customCss?: string;
   customJs?: string;
 };

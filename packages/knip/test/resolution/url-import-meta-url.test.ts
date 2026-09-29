@@ -8,11 +8,14 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/resolution/url-import-meta-url');
 
 test('Support URL constructor using import.meta.url', async () => {
-  const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const options = await createOptions({ cwd, tags: ['-knipignore'] });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.unlisted['index.ts']), ['unlisted-url-package']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unlisted: 1,
     processed: 4,
     total: 4,
   });

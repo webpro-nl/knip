@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/graphql-codegen-near-operation-file",
+  "main": "src/index.ts",
+  "devDependencies": {
+    "@graphql-codegen/near-operation-file-preset": "*",
+    "@graphql-codegen/typescript-operations": "*"
+  }
+}

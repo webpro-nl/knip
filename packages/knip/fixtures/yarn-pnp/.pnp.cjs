@@ -40,6 +40,11 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@fixtures/yarn-pnp", "workspace:."],\
           ["host-with-hidden-manifest", "virtual:4869f580a1a51d36d5abb1d9081eb793f6d17f1ff940c1320c28ee280519366d7824dd5a30e64addb91690d2d3a921ec212b3cf0d6e829f69c579b43b002b775#workspace:packages/host-with-hidden-manifest"],\
+          ["isarray", "npm:2.0.5"],\
+          ["isarray-alias", [\
+            "isarray",\
+            "npm:2.0.5"\
+          ]],\
           ["peer-package", "workspace:packages/peer-package"]\
         ],\
         "linkType": "SOFT"\
@@ -51,6 +56,11 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@fixtures/yarn-pnp", "workspace:."],\
           ["host-with-hidden-manifest", "virtual:4869f580a1a51d36d5abb1d9081eb793f6d17f1ff940c1320c28ee280519366d7824dd5a30e64addb91690d2d3a921ec212b3cf0d6e829f69c579b43b002b775#workspace:packages/host-with-hidden-manifest"],\
+          ["isarray", "npm:2.0.5"],\
+          ["isarray-alias", [\
+            "isarray",\
+            "npm:2.0.5"\
+          ]],\
           ["peer-package", "workspace:packages/peer-package"]\
         ],\
         "linkType": "SOFT"\
@@ -76,6 +86,15 @@ const RAW_RUNTIME_STATE =
           ["host-with-hidden-manifest", "workspace:packages/host-with-hidden-manifest"]\
         ],\
         "linkType": "SOFT"\
+      }]\
+    ]],\
+    ["isarray", [\
+      ["npm:2.0.5", {\
+        "packageLocation": "./.yarn/cache/isarray-npm-2.0.5-4ba522212d-4199f14a7a.zip/node_modules/isarray/",\
+        "packageDependencies": [\
+          ["isarray", "npm:2.0.5"]\
+        ],\
+        "linkType": "HARD"\
       }]\
     ]],\
     ["peer-package", [\

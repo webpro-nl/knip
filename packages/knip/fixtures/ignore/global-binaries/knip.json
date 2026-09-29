@@ -1,0 +1,6 @@
+{
+  "entry": [],
+  "project": [],
+  "ignoreGlobalBinaries": false,
+  "ignoreBinaries": ["git", "unused-ignore"]
+}

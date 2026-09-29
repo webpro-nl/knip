@@ -1,6 +1,10 @@
 {
   "name": "@fixtures/cli-preprocessor",
+  "devDependencies": {
+    "knip-preprocessor": "1.0.0"
+  },
   "knip": {
+    "preprocessor": "knip-preprocessor",
     "entry": ["index.{js,ts}", "chain-{async,sync}.js"]
   }
 }

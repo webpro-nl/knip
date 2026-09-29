@@ -106,3 +106,17 @@ export type AppConfig = { shared: SharedConfig };
 export function configure(config: SharedConfig): void {
   void config;
 }
+
+// Case 14: type used only by a non-exported function signature
+export interface PrivateParam {
+  value: string;
+}
+const privateFn = (param: PrivateParam) => param.value;
+export const readPrivateParam = () => privateFn({ value: '' });
+
+// Case 15: type used by a non-exported function's annotated return
+export interface AnnotatedHelperResult {
+  value: string;
+}
+const getAnnotatedHelper: () => AnnotatedHelperResult = () => ({ value: '' });
+export const readAnnotatedHelper = () => getAnnotatedHelper();

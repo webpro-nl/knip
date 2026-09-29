@@ -4,7 +4,7 @@ import { findImportedCalls, findProperty, getStringValues } from '../../typescri
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
-import { dirname, join } from '../../util/path.ts';
+import { dirname, join, toAbsolute } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 
 const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
@@ -36,26 +36,31 @@ const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)([
 const isFilePath = (specifier: string) =>
   specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
 
-const normalizeModuleScriptSrc = (value: string) => value.trim();
-
-const getModuleScriptSources = (html: string): string[] => {
+const getScriptSources = (html: string, htmlDir: string, rootDir: string, publicDir?: string): string[] => {
   const sources: string[] = [];
+  const resolveSource = (src: string) => (src.startsWith('/') ? join(rootDir, src) : toAbsolute(src, htmlDir));
 
   for (const [, attrs, body] of html.matchAll(scriptExtractor)) {
-    if (!moduleTypePattern.test(attrs)) continue;
-
     const srcMatch = attrs.match(srcAttrPattern);
     if (srcMatch) {
-      const src = normalizeModuleScriptSrc(srcMatch[1]);
-      if (src) sources.push(src);
+      const src = srcMatch[1].trim();
+      if (!src || /^(?:[\w+.-]+:|\/\/)/.test(src)) continue;
+      if (publicDir && src.startsWith('/')) {
+        const publicPath = join(publicDir, src.split(/[?#]/, 1)[0]);
+        if (publicPath.startsWith(join(publicDir, '/')) && isFile(publicPath)) {
+          sources.push(publicPath);
+          continue;
+        }
+      }
+      if (moduleTypePattern.test(attrs)) sources.push(resolveSource(src));
       continue;
     }
 
-    if (body) {
+    if (moduleTypePattern.test(attrs) && body) {
       const code = body.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
       for (const importMatch of code.matchAll(importSpecPattern)) {
         const specifier = importMatch[2];
-        if (isFilePath(specifier)) sources.push(normalizeModuleScriptSrc(specifier));
+        if (isFilePath(specifier)) sources.push(resolveSource(specifier));
       }
     }
   }
@@ -63,18 +68,19 @@ const getModuleScriptSources = (html: string): string[] => {
   return sources;
 };
 
-export const getHtmlScriptEntries = async (htmlPath: string, rootDir = dirname(htmlPath)): Promise<Input[]> => {
+export const getHtmlScriptEntries = async (
+  htmlPath: string,
+  rootDir = dirname(htmlPath),
+  publicDir?: string
+): Promise<Input[]> => {
   if (!isFile(htmlPath)) return [];
 
   const html = await loadFile(htmlPath);
-  const dir = dirname(htmlPath);
-  return getModuleScriptSources(html).map(src =>
-    toProductionEntry(join(src.startsWith('/') ? rootDir : dir, src.replace(/^\//, '')))
-  );
+  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toProductionEntry(src));
 };
 
-export const getIndexHtmlEntries = (rootDir: string): Promise<Input[]> =>
-  getHtmlScriptEntries(join(rootDir, 'index.html'), rootDir);
+export const getIndexHtmlEntries = (rootDir: string, publicDir?: string): Promise<Input[]> =>
+  getHtmlScriptEntries(join(rootDir, 'index.html'), rootDir, publicDir);
 
 export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
   let dirs: string[] | undefined;

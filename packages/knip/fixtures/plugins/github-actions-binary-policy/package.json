@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/github-actions-binary-policy",
+  "devDependencies": {
+    "custom-provider": "*",
+    "unused-provider": "*"
+  }
+}
