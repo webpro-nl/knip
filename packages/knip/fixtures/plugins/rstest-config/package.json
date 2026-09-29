@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/rstest-config",
+  "devDependencies": {
+    "@rstest/core": "*",
+    "@rstest/coverage-istanbul": "*"
+  }
+}

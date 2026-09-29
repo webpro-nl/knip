@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/rstest-projects",
+  "devDependencies": {
+    "@rstest/browser": "*",
+    "@rstest/core": "*",
+    "@rstest/coverage-istanbul": "*",
+    "@rstest/coverage-v8": "*",
+    "happy-dom": "*",
+    "jsdom": "*",
+    "playwright": "*"
+  }
+}
