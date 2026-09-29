@@ -13,3 +13,8 @@ export { default as Button } from './button.js';
 
 /** @lintignore */
 export default function App() {}
+
+/** @lintignore */
+export { plum } from './barrel.js';
+
+export { prune } from './barrel.js';

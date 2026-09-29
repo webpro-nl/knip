@@ -3,3 +3,4 @@ export const somethingToIgnore = 1;
 export const somethingIgnoredAnyway = 1;
 export const apple = 1;
 export const pear = 1;
+export const plum = 1;

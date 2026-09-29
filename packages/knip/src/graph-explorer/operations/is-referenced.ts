@@ -38,11 +38,12 @@ export const isReferenced = (
     if (path === reExportingEntryFile) (reExportedIds ??= new Set()).add(id);
     if (hasCompleteResult()) return true;
 
-    if (seen.has(path)) return false;
-    seen.add(path);
-
     const restIds = id.split('.');
     const identifier = restIds.shift();
+
+    const key = `${path}:${identifier}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
 
     if (options.treatStarAtEntryAsReferenced && isEntryFile && viaStar && restIds.length > 0) {
       isReferenced = true;

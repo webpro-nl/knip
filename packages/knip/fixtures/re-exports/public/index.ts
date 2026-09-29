@@ -20,3 +20,8 @@ export default function App() {}
 export { pear } from './module.js';
 
 export { pear as fruit } from './module.js';
+
+/** @public */
+export { plum } from './barrel.js';
+
+export { prune } from './barrel.js';
