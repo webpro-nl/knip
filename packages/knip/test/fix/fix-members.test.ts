@@ -29,6 +29,8 @@ export enum Fruits {
 
   assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
   assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.Base']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.Sizes.Size']);
   assert.equal(
     await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
     `export namespace Animals {
@@ -38,6 +40,18 @@ export enum Fruits {
   export namespace Birds {
     export const eagle = 'eagle';
     }
+}
+
+export namespace Shapes {
+  abstract class Base {}
+  export class Circle extends Base {}
+
+  export namespace Sizes {
+    export type Size = number;
+    export const small: Size = 1;
+  }
+
+  export const area = (size: Sizes.Size) => size;
 }
 `
   );

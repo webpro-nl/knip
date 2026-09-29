@@ -120,17 +120,65 @@ export const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile
   ignoreExportsUsedInFile === true ||
   (typeof ignoreExportsUsedInFile === 'object' && type !== 'unknown' && ignoreExportsUsedInFile[type]);
 
+const collectRefs = (node: any, local: Set<string>, qualified: Set<string>) => {
+  const type = node?.type;
+  if (!type) return;
+  if (type === 'Identifier') local.add(node.name);
+  else if (type === 'TSQualifiedName' && node.right?.type === 'Identifier') qualified.add(node.right.name);
+  else if (type === 'MemberExpression' && !node.computed && node.property?.type === 'Identifier')
+    qualified.add(node.property.name);
+  const keys = visitorKeys[type];
+  if (!keys) return;
+  for (const key of keys) {
+    if (key === 'id') continue;
+    if (key === 'right' && type === 'TSQualifiedName') continue;
+    if (key === 'property' && type === 'MemberExpression' && !node.computed) continue;
+    const val = node[key];
+    if (!val) continue;
+    if (Array.isArray(val)) {
+      for (const item of val) if (item) collectRefs(item, local, qualified);
+    } else collectRefs(val, local, qualified);
+  }
+};
+
 export function extractNamespaceMembers(
   decl: TSModuleDeclaration,
   options: GetImportsAndExportsOptions,
   lineStarts: number[],
   getJSDocTags: (start: number) => Set<string>,
-  prefix?: string
+  prefix?: string,
+  outerQualifiedRefs?: Set<string>
 ): ExportMember[] {
   if (!decl.body || decl.body.type !== 'TSModuleBlock') return [];
   const members: ExportMember[] = [];
+  const body = decl.body.body;
 
-  const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number) => {
+  const localRefs: Set<string>[] = [];
+  const qualifiedRefs = new Set(outerQualifiedRefs);
+  if (options.isFixExports) {
+    for (const stmt of body) {
+      const local = new Set<string>();
+      collectRefs(stmt, local, qualifiedRefs);
+      localRefs.push(local);
+    }
+  }
+
+  const getFix = (name: string, index: number, stmtStart: number, stmtEnd: number, declStart: number): Fix => {
+    if (!options.isFixExports || qualifiedRefs.has(name)) return;
+    for (let i = 0; i < localRefs.length; i++) {
+      if (i !== index && localRefs[i].has(name)) return [stmtStart, declStart, FIX_FLAGS.NONE];
+    }
+    return [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE];
+  };
+
+  const addMember = (
+    name: string,
+    pos: number,
+    stmtStart: number,
+    stmtEnd: number,
+    index: number,
+    declStart: number
+  ) => {
     const fullName = prefix ? `${prefix}.${name}` : name;
     const tags = getJSDocTags(stmtStart);
     const existing = members.find(m => m.identifier === fullName);
@@ -142,9 +190,7 @@ export function extractNamespaceMembers(
       return;
     }
     const { line, col } = getLineAndCol(lineStarts, pos);
-    const fix: Fix = options.isFixExports
-      ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
-      : undefined;
+    const fix = getFix(name, index, stmtStart, stmtEnd, declStart);
     members.push({
       identifier: fullName,
       type: SYMBOL_TYPE.MEMBER as SymbolType,
@@ -158,22 +204,30 @@ export function extractNamespaceMembers(
     });
   };
 
-  for (const stmt of decl.body.body) {
+  for (let index = 0; index < body.length; index++) {
+    const stmt = body[index];
     if (stmt.type !== 'ExportNamedDeclaration' || !stmt.declaration) continue;
     const d = stmt.declaration;
 
     if (d.type === 'VariableDeclaration') {
       for (const declarator of d.declarations) {
         if (declarator.id.type === 'Identifier') {
-          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
+          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end, index, d.start);
         }
       }
     } else if (d.type === 'TSModuleDeclaration' && d.kind !== 'global' && d.id.type === 'Identifier') {
       const nestedPrefix = prefix ? `${prefix}.${d.id.name}` : d.id.name;
-      const nested = extractNamespaceMembers(d as TSModuleDeclaration, options, lineStarts, getJSDocTags, nestedPrefix);
+      const nested = extractNamespaceMembers(
+        d as TSModuleDeclaration,
+        options,
+        lineStarts,
+        getJSDocTags,
+        nestedPrefix,
+        qualifiedRefs
+      );
       for (const m of nested) members.push(m);
     } else if (d.id && 'name' in d.id) {
-      addMember(d.id.name, d.id.start, stmt.start, stmt.end);
+      addMember(d.id.name, d.id.start, stmt.start, stmt.end, index, d.start);
     }
   }
   return members;
