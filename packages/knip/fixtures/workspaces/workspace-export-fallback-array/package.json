@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/workspaces-export-fallback-array",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "knip": {
+    "workspaces": {
+      "packages/library": {
+        "includeEntryExports": true
+      }
+    }
+  }
+}
