@@ -1,6 +1,11 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 
+const workerConfig = {
+  entry: './worker-entry.ts',
+  resolve: { alias: { '@shared$': './entry-1.ts' } },
+};
+
 export default defineConfig({
   plugins: [pluginReact()],
   source: {
@@ -12,6 +17,12 @@ export default defineConfig({
     },
     preEntry: 'pre-entry-1.ts',
   },
+  tools: {
+    rspack: {
+      entry: './app-entry.ts',
+      module: { rules: [{ loader: 'raw-loader' }, { loader: 'builtin:swc-loader' }] },
+    },
+  },
   environments: {
     test: {
       source: {
@@ -22,6 +33,9 @@ export default defineConfig({
           entry8: { import: ['entry-8.ts'] },
         },
         preEntry: ['pre-entry-2.ts', 'pre-entry-3.ts'],
+      },
+      tools: {
+        rspack: async config => ({ ...config, ...workerConfig }),
       },
     },
   },

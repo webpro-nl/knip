@@ -1,6 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
 import type { RsbuildConfig } from './types.ts';
 
 // https://rsbuild.rs/config/
@@ -13,8 +14,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
+const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
   const entries = new Set<string>();
+  const inputs: Input[] = [];
 
   const checkSource = (source: RsbuildConfig['source']) => {
     if (source?.entry) {
@@ -35,15 +37,28 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
     }
   };
 
-  checkSource(config.source);
+  const checkConfig = async (config: RsbuildConfig) => {
+    checkSource(config.source);
+
+    const rspack = config.tools?.rspack;
+    if (!rspack) return;
+
+    const baseConfig = {};
+    const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig) : rspack;
+    const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, options);
+    for (const input of resolvedInputs) inputs.push(input);
+  };
+
+  await checkConfig(config);
 
   if (config.environments) {
     for (const environment of Object.values(config.environments)) {
-      checkSource(environment.source);
+      await checkConfig(environment);
     }
   }
 
-  return Array.from(entries).map(input => toProductionEntry(input));
+  for (const entry of entries) inputs.push(toProductionEntry(entry));
+  return inputs;
 };
 
 const plugin: Plugin = {
