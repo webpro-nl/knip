@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/playwright3",
+  "knip": {
+    "playwright": {
+      "config": ["e2e/playwright.config.ts"]
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}
