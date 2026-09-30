@@ -1,0 +1,11 @@
+service: TestService
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+plugins: ${file(./shared.yml):plugins}
+
+functions:
+  - ${file(./functions.yml)}
+  - hello: ${file(./shared.yml):functions.hello}
