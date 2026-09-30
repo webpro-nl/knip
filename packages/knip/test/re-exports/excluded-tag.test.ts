@@ -12,12 +12,18 @@ test('Ignore re-exports with excluded tag from included entry files', async () =
   const { issues, counters } = await main(options);
 
   assert(issues.exports['index.ts']['somethingUnused']);
+  assert(issues.exports['index.ts']['Button']);
   assert(issues.exports['module.ts']['somethingUnused']);
+  assert(!issues.exports['module.ts']['apple']);
+  assert(!issues.exports['module.ts']['plum']);
+  assert(issues.exports['index.ts']['prune']);
+  assert(issues.exports['barrel.ts']['prune']);
+  assert(issues.exports['button.ts']['default']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
-    processed: 2,
-    total: 2,
+    exports: 6,
+    processed: 4,
+    total: 4,
   });
 });

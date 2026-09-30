@@ -40,6 +40,7 @@ test('returns an entry re-export alongside an internal reference', () => {
   assert.deepEqual(isReferenced(graph, new Set([entryPath]), sourcePath, 'identifier', { traverseEntries: false }), [
     true,
     entryPath,
+    new Set(['identifier']),
   ]);
 });
 
@@ -60,6 +61,7 @@ test('does not treat an ordinary entry import as a public export', () => {
 
   assert.deepEqual(isReferenced(graph, new Set([entryPath]), sourcePath, 'identifier', { traverseEntries: false }), [
     true,
+    undefined,
     undefined,
   ]);
 });

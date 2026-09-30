@@ -28,19 +28,22 @@ export const isReferenced = (
   const seen = new Set<string>();
   let isReferenced = false;
   let reExportingEntryFile: string | undefined;
+  let reExportedIds: Set<string> | undefined;
 
   const hasCompleteResult = () => isReferenced && (options.traverseEntries || reExportingEntryFile !== undefined);
 
   const walkDown = (path: string, id: string, viaStar = false): boolean => {
     const isEntryFile = entryPaths.has(path);
     if (isEntryFile && !reExportingEntryFile) reExportingEntryFile = path;
+    if (path === reExportingEntryFile) (reExportedIds ??= new Set()).add(id);
     if (hasCompleteResult()) return true;
-
-    if (seen.has(path)) return false;
-    seen.add(path);
 
     const restIds = id.split('.');
     const identifier = restIds.shift();
+
+    const key = `${path}:${identifier}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
 
     if (options.treatStarAtEntryAsReferenced && isEntryFile && viaStar && restIds.length > 0) {
       isReferenced = true;
@@ -134,5 +137,5 @@ export const isReferenced = (
   };
 
   walkDown(filePath, id);
-  return [isReferenced, reExportingEntryFile] as const;
+  return [isReferenced, reExportingEntryFile, reExportedIds] as const;
 };
