@@ -19,4 +19,22 @@ export namespace Shapes {
   }
 
   export const area = (size: Sizes.Size) => size;
+
+  export interface Options {
+    sides: number;
+  }
+  export const options: Options = { sides: 4 };
+
+  export function scale(value: number): number;
+  export function scale(value: number) {
+    return value;
+  }
+  export const double = () => scale(2);
+
+  export const length = 1;
+  export const perimeter = () => [1, 2].length;
+
+  export function spin(): void {
+    spin();
+  }
 }

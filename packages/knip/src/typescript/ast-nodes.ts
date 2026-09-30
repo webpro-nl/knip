@@ -120,65 +120,17 @@ export const shouldCountRefs = (ignoreExportsUsedInFile: IgnoreExportsUsedInFile
   ignoreExportsUsedInFile === true ||
   (typeof ignoreExportsUsedInFile === 'object' && type !== 'unknown' && ignoreExportsUsedInFile[type]);
 
-const collectRefs = (node: any, local: Set<string>, qualified: Set<string>) => {
-  const type = node?.type;
-  if (!type) return;
-  if (type === 'Identifier') local.add(node.name);
-  else if (type === 'TSQualifiedName' && node.right?.type === 'Identifier') qualified.add(node.right.name);
-  else if (type === 'MemberExpression' && !node.computed && node.property?.type === 'Identifier')
-    qualified.add(node.property.name);
-  const keys = visitorKeys[type];
-  if (!keys) return;
-  for (const key of keys) {
-    if (key === 'id') continue;
-    if (key === 'right' && type === 'TSQualifiedName') continue;
-    if (key === 'property' && type === 'MemberExpression' && !node.computed) continue;
-    const val = node[key];
-    if (!val) continue;
-    if (Array.isArray(val)) {
-      for (const item of val) if (item) collectRefs(item, local, qualified);
-    } else collectRefs(val, local, qualified);
-  }
-};
-
 export function extractNamespaceMembers(
   decl: TSModuleDeclaration,
   options: GetImportsAndExportsOptions,
   lineStarts: number[],
   getJSDocTags: (start: number) => Set<string>,
-  prefix?: string,
-  outerQualifiedRefs?: Set<string>
+  prefix?: string
 ): ExportMember[] {
   if (!decl.body || decl.body.type !== 'TSModuleBlock') return [];
   const members: ExportMember[] = [];
-  const body = decl.body.body;
 
-  const localRefs: Set<string>[] = [];
-  const qualifiedRefs = new Set(outerQualifiedRefs);
-  if (options.isFixExports) {
-    for (const stmt of body) {
-      const local = new Set<string>();
-      collectRefs(stmt, local, qualifiedRefs);
-      localRefs.push(local);
-    }
-  }
-
-  const getFix = (name: string, index: number, stmtStart: number, stmtEnd: number, declStart: number): Fix => {
-    if (!options.isFixExports || qualifiedRefs.has(name)) return;
-    for (let i = 0; i < localRefs.length; i++) {
-      if (i !== index && localRefs[i].has(name)) return [stmtStart, declStart, FIX_FLAGS.NONE];
-    }
-    return [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE];
-  };
-
-  const addMember = (
-    name: string,
-    pos: number,
-    stmtStart: number,
-    stmtEnd: number,
-    index: number,
-    declStart: number
-  ) => {
+  const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number) => {
     const fullName = prefix ? `${prefix}.${name}` : name;
     const tags = getJSDocTags(stmtStart);
     const existing = members.find(m => m.identifier === fullName);
@@ -190,7 +142,9 @@ export function extractNamespaceMembers(
       return;
     }
     const { line, col } = getLineAndCol(lineStarts, pos);
-    const fix = getFix(name, index, stmtStart, stmtEnd, declStart);
+    const fix: Fix = options.isFixExports
+      ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
+      : undefined;
     members.push({
       identifier: fullName,
       type: SYMBOL_TYPE.MEMBER as SymbolType,
@@ -204,34 +158,198 @@ export function extractNamespaceMembers(
     });
   };
 
-  for (let index = 0; index < body.length; index++) {
-    const stmt = body[index];
+  for (const stmt of decl.body.body) {
     if (stmt.type !== 'ExportNamedDeclaration' || !stmt.declaration) continue;
     const d = stmt.declaration;
 
     if (d.type === 'VariableDeclaration') {
       for (const declarator of d.declarations) {
         if (declarator.id.type === 'Identifier') {
-          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end, index, d.start);
+          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
         }
       }
     } else if (d.type === 'TSModuleDeclaration' && d.kind !== 'global' && d.id.type === 'Identifier') {
       const nestedPrefix = prefix ? `${prefix}.${d.id.name}` : d.id.name;
-      const nested = extractNamespaceMembers(
-        d as TSModuleDeclaration,
-        options,
-        lineStarts,
-        getJSDocTags,
-        nestedPrefix,
-        qualifiedRefs
-      );
+      const nested = extractNamespaceMembers(d as TSModuleDeclaration, options, lineStarts, getJSDocTags, nestedPrefix);
       for (const m of nested) members.push(m);
     } else if (d.id && 'name' in d.id) {
-      addMember(d.id.name, d.id.start, stmt.start, stmt.end, index, d.start);
+      addMember(d.id.name, d.id.start, stmt.start, stmt.end);
     }
   }
+  if (!prefix && members.length > 0) markNamespaceMemberRefs(decl.body.body, members);
   return members;
 }
+
+type NamespaceScope = { prefix: string; names: Set<string>; own: Set<string>; isShadow?: boolean };
+
+const addBindingNames = (pattern: any, names: Set<string>) => {
+  if (!pattern) return;
+  if (pattern.type === 'Identifier') names.add(pattern.name);
+  else if (pattern.type === 'ObjectPattern')
+    for (const p of pattern.properties) addBindingNames(p.value ?? p.argument, names);
+  else if (pattern.type === 'ArrayPattern') for (const el of pattern.elements) addBindingNames(el, names);
+  else if (pattern.type === 'AssignmentPattern') addBindingNames(pattern.left, names);
+  else if (pattern.type === 'RestElement') addBindingNames(pattern.argument, names);
+};
+
+const markNamespaceMemberRefs = (body: any[], members: ExportMember[]) => {
+  const byIdentifier = new Map<string, ExportMember>();
+  for (const member of members) byIdentifier.set(member.identifier, member);
+  const scopes: NamespaceScope[] = [];
+
+  const addRef = (name: string, path: string[]) => {
+    for (let i = scopes.length - 1; i >= 0; i--) {
+      const scope = scopes[i];
+      if (!scope.names.has(name)) continue;
+      if (scope.isShadow) return;
+      let id = scope.prefix ? `${scope.prefix}.${name}` : name;
+      for (let j = 0; j <= path.length; j++) {
+        if (!scope.own.has(id)) {
+          const member = byIdentifier.get(id);
+          if (member) member.hasRefsInFile = true;
+        }
+        if (j < path.length) id = `${id}.${path[j]}`;
+      }
+      return;
+    }
+  };
+
+  const visitBinding = (node: any) => {
+    if (!node) return;
+    switch (node.type) {
+      case 'Identifier':
+        visit(node.typeAnnotation);
+        return;
+      case 'ObjectPattern':
+        for (const p of node.properties) {
+          if (p.type === 'RestElement') visitBinding(p);
+          else {
+            if (p.computed) visit(p.key);
+            visitBinding(p.value);
+          }
+        }
+        visit(node.typeAnnotation);
+        return;
+      case 'ArrayPattern':
+        for (const el of node.elements) visitBinding(el);
+        visit(node.typeAnnotation);
+        return;
+      case 'AssignmentPattern':
+        visitBinding(node.left);
+        visit(node.right);
+        return;
+      case 'RestElement':
+        visitBinding(node.argument);
+        visit(node.typeAnnotation);
+        return;
+      case 'TSParameterProperty':
+        visit(node.decorators);
+        visitBinding(node.parameter);
+        return;
+    }
+    visit(node);
+  };
+
+  const visit = (node: any): void => {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      for (const item of node) visit(item);
+      return;
+    }
+    const type = node.type;
+    if (!type) return;
+    if (type === 'Identifier') {
+      addRef(node.name, []);
+      visit(node.typeAnnotation);
+      return;
+    }
+    if (type === 'JSXIdentifier') {
+      addRef(node.name, []);
+      return;
+    }
+    if (type === 'JSXMemberExpression') {
+      visit(node.object);
+      return;
+    }
+    if (type === 'JSXAttribute') {
+      visit(node.value);
+      return;
+    }
+    if (type === 'TSModuleDeclaration' && node.body?.type === 'TSModuleBlock') {
+      visitNamespace(node.body.body, node.id.type === 'Identifier' ? node.id.name : undefined);
+      return;
+    }
+    if (type === 'MemberExpression' || type === 'TSQualifiedName') {
+      const path: string[] = [];
+      let object = node;
+      while (
+        (object.type === 'MemberExpression' && !object.computed && object.property.type === 'Identifier') ||
+        (object.type === 'TSQualifiedName' && object.right.type === 'Identifier')
+      ) {
+        path.unshift(object.type === 'MemberExpression' ? object.property.name : object.right.name);
+        object = object.type === 'MemberExpression' ? object.object : object.left;
+      }
+      if (path.length > 0) {
+        if (object.type === 'Identifier') addRef(object.name, path);
+        else visit(object);
+        return;
+      }
+    }
+    const keys = visitorKeys[type];
+    if (!keys) return;
+    const params = node.params;
+    let shadow: NamespaceScope | undefined;
+    if (params) {
+      shadow = { prefix: '', names: new Set(), own: new Set(), isShadow: true };
+      for (const param of Array.isArray(params) ? params : (params.items ?? [])) {
+        addBindingNames(param.type === 'TSParameterProperty' ? param.parameter : param, shadow.names);
+      }
+      scopes.push(shadow);
+    }
+    for (const key of keys) {
+      const val = node[key];
+      if (!val || key === 'label') continue;
+      if (key === 'key' && !node.computed) continue;
+      if (key === 'id' || (key === 'name' && type === 'TSTypeParameter') || key.startsWith('param')) {
+        if (Array.isArray(val)) for (const item of val) visitBinding(item);
+        else visitBinding(val);
+      } else visit(val);
+    }
+    if (shadow) scopes.pop();
+  };
+
+  const visitNamespace = (statements: any[], name?: string) => {
+    const parent = scopes.at(-1);
+    const prefix = !parent ? '' : parent.prefix ? `${parent.prefix}.${name}` : (name ?? '');
+    const scope: NamespaceScope = { prefix, names: new Set(), own: new Set() };
+    for (const stmt of statements) {
+      const d = stmt.type === 'ExportNamedDeclaration' ? stmt.declaration : stmt;
+      if (d?.type === 'VariableDeclaration') for (const v of d.declarations) addBindingNames(v.id, scope.names);
+      else if (d?.id?.type === 'Identifier') scope.names.add(d.id.name);
+    }
+    scopes.push(scope);
+    for (const stmt of statements) {
+      const d = stmt.type === 'ExportNamedDeclaration' && stmt.declaration ? stmt.declaration : stmt;
+      if (d.type === 'VariableDeclaration') {
+        for (const declarator of d.declarations) {
+          const names = new Set<string>();
+          addBindingNames(declarator.id, names);
+          scope.own = new Set();
+          for (const n of names) scope.own.add(prefix ? `${prefix}.${n}` : n);
+          visitBinding(declarator.id);
+          visit(declarator.init);
+        }
+      } else {
+        scope.own = new Set();
+        if (d.id?.type === 'Identifier') scope.own.add(prefix ? `${prefix}.${d.id.name}` : d.id.name);
+        visit(d);
+      }
+    }
+    scopes.pop();
+  };
+
+  visitNamespace(body);
+};
 
 export const collectAugmentationRefs = (node: TSModuleDeclaration): string[] => {
   if (!node.body || node.body.type !== 'TSModuleBlock') return [];

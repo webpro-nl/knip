@@ -16,3 +16,6 @@ rect.area();
 new Shapes.Circle();
 Shapes.Sizes.small;
 Shapes.area(1);
+Shapes.options;
+Shapes.double();
+Shapes.perimeter();

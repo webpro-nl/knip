@@ -29,8 +29,9 @@ export enum Fruits {
 
   assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
   assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
-  assert(issues.namespaceMembers['namespaces.ts']['Shapes.Base']);
-  assert(issues.namespaceMembers['namespaces.ts']['Shapes.Sizes.Size']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.length']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.spin']);
+  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 4);
   assert.equal(
     await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
     `export namespace Animals {
@@ -43,7 +44,7 @@ export enum Fruits {
 }
 
 export namespace Shapes {
-  abstract class Base {}
+  export abstract class Base {}
   export class Circle extends Base {}
 
   export namespace Sizes {
@@ -52,7 +53,21 @@ export namespace Shapes {
   }
 
   export const area = (size: Sizes.Size) => size;
-}
+
+  export interface Options {
+    sides: number;
+  }
+  export const options: Options = { sides: 4 };
+
+  export function scale(value: number): number;
+  export function scale(value: number) {
+    return value;
+  }
+  export const double = () => scale(2);
+
+  export const perimeter = () => [1, 2].length;
+
+  }
 `
   );
 });
