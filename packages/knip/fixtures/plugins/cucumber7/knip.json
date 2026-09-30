@@ -1,0 +1,5 @@
+{
+  "cucumber": {
+    "config": ["cucumber.ts"]
+  }
+}
