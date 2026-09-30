@@ -26,9 +26,11 @@ export const augmentWorkspace = (
   workspace: Workspace,
   dir: string,
   compilerOptions: CompilerOptions | undefined,
-  pluginSourceMaps: SourceMap[] = []
+  pluginSourceMaps: SourceMap[] = [],
+  compilerExtensions: string[] = []
 ) => {
   const all = compilerOptions ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions)] : pluginSourceMaps;
+  workspace.compilerExtensions = compilerExtensions;
   if (all.length === 0) return;
   const seen = new Set<string>();
   const unique: SourceMap[] = [];
@@ -94,7 +96,8 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
       for (const { srcDir, outDir } of workspace.sourceMaps) {
         if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
         const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
-        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        const extensions = [...sourceExtensions, ...(workspace.compilerExtensions ?? [])];
+        const srcFilePath = findFileWithExtensions(basePath, extensions);
         if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
           result = srcFilePath;
