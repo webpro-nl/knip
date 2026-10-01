@@ -1,0 +1,6 @@
+plugins:
+  - serverless-offline
+
+functions:
+  hello:
+    handler: src/hello.handler
