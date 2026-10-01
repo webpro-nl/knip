@@ -10,13 +10,14 @@ const typescriptPluginsCwd = resolve('fixtures/plugins/serverless-framework-type
 
 test('Find dependencies with the Serverless Framework plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 2,
     total: 2,
   });
+  assert(!issues.files['function/handler.js']);
 });
 
 test('Find dependencies from Serverless Framework TypeScript plugins', async () => {
