@@ -3,7 +3,7 @@ import { arrayify } from '../../util/array.ts';
 import { toDependency, toProductionEntry } from '../../util/input.ts';
 import { _load } from '../../util/loader.ts';
 import { get } from '../../util/object.ts';
-import { isInternal, join } from '../../util/path.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { EsbuildConfig, PluginConfig } from './types.ts';
 
@@ -24,8 +24,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 const resolveFileVariable = async (value: unknown, dir: string): Promise<unknown> => {
   const match = typeof value === 'string' && value.match(fileVariable);
   if (!match) return value;
-  const content = await _load(join(dir, match[1].trim()));
-  return match[2] ? get(content, match[2]) : content;
+  try {
+    const content = await _load(toAbsolute(match[1].trim(), dir));
+    return match[2] ? get(content, match[2]) : content;
+  } catch {
+    return undefined;
+  }
 };
 
 const handlerToEntry = (handler: string) => {

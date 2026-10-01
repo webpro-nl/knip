@@ -9,3 +9,4 @@ plugins: ${file(./shared.yml):plugins}
 functions:
   - ${file(./functions.yml)}
   - hello: ${file(./shared.yml):functions.hello}
+  - optional: ${file(./optional.yml):function, self:custom.fallback}
