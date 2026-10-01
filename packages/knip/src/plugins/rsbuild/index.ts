@@ -43,10 +43,15 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
     const rspack = config.tools?.rspack;
     if (!rspack) return;
 
-    const baseConfig = {};
-    const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig) : rspack;
-    const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, options);
-    for (const input of resolvedInputs) inputs.push(input);
+    const passes = typeof rspack === 'function' ? [false, true] : [options.isProduction];
+
+    for (const isProduction of passes) {
+      const baseConfig = { resolve: { alias: {} } };
+      const utils = { env: process.env.NODE_ENV ?? '', isDev: !isProduction, isProd: isProduction };
+      const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
+      const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, { ...options, isProduction });
+      for (const input of resolvedInputs) inputs.push(input);
+    }
   };
 
   await checkConfig(config);

@@ -3,7 +3,6 @@ import { pluginReact } from '@rsbuild/plugin-react';
 
 const workerConfig = {
   entry: './worker-entry.ts',
-  resolve: { alias: { '@shared$': './entry-1.ts' } },
 };
 
 export default defineConfig({
@@ -35,7 +34,18 @@ export default defineConfig({
         preEntry: ['pre-entry-2.ts', 'pre-entry-3.ts'],
       },
       tools: {
-        rspack: async config => ({ ...config, ...workerConfig }),
+        rspack: async (config, { isProd }) => ({
+          ...config,
+          ...workerConfig,
+          module: { rules: [{ loader: isProd ? 'production-loader' : 'development-loader' }] },
+        }),
+      },
+    },
+    aliases: {
+      tools: {
+        rspack: config => {
+          config.resolve.alias['@shared$'] = './entry-1.ts';
+        },
       },
     },
   },
