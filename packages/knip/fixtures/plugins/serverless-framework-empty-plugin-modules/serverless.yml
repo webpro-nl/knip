@@ -1,0 +1,6 @@
+service: EmptyPluginModules
+plugins:
+  modules: []
+functions:
+  registeredHandler:
+    handler: src/registered-handler.handler
