@@ -1,0 +1,2 @@
+users:
+  handler: src/users.handler

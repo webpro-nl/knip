@@ -5,9 +5,13 @@ export type PluginConfig = {
   custom?: {
     esbuild?: EsbuildConfig;
   };
-  functions?: Record<string, ServerlessFunction>;
-  plugins?: unknown[];
+  functions?: Functions | Array<Functions | FileVariable> | FileVariable;
+  plugins?: unknown[] | FileVariable;
 };
+
+type FileVariable = string;
+
+type Functions = Record<string, ServerlessFunction | FileVariable>;
 
 export type EsbuildConfig =
   | {
