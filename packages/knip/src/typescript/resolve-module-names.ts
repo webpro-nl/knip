@@ -9,16 +9,19 @@ import { _createSyncModuleResolver, _resolveModuleSync, resolvePackageManifestPa
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
-function pickStringTarget(value: unknown): string | undefined {
+function pickStringTarget(value: unknown, isTypeOnly: boolean): string | undefined {
   if (typeof value === 'string') return value;
   if (!value || typeof value !== 'object' || Array.isArray(value)) return;
   const obj = value as Record<string, unknown>;
-  for (const key of ['default', 'node', 'import', 'require']) {
-    const v = pickStringTarget(obj[key]);
+  const conditions = isTypeOnly
+    ? ['types', 'default', 'node', 'import', 'require']
+    : ['default', 'node', 'import', 'require'];
+  for (const key of conditions) {
+    const v = pickStringTarget(obj[key], isTypeOnly);
     if (v) return v;
   }
   for (const v of Object.values(obj)) {
-    const s = pickStringTarget(v);
+    const s = pickStringTarget(v, isTypeOnly);
     if (s) return s;
   }
 }
@@ -41,25 +44,37 @@ function pickExistingPackageTarget(
   value: unknown,
   dir: string,
   patternMatch: string | undefined,
-  moduleExtensions: Set<string>
+  moduleExtensions: Set<string>,
+  isTypeOnly: boolean
 ): string | undefined {
   if (typeof value === 'string') {
     const target = expandPackageTarget(value, patternMatch);
-    if (!target || IS_DTS.test(target) || !moduleExtensions.has(extname(target))) return;
+    if (!target || (!isTypeOnly && IS_DTS.test(target)) || !moduleExtensions.has(extname(target))) return;
     const candidate = toPackagePath(dir, target);
     return candidate && isFile(candidate) ? candidate : undefined;
   }
   if (!value || typeof value !== 'object') return;
   if (Array.isArray(value)) {
     for (const item of value) {
-      const target = pickExistingPackageTarget(item, dir, patternMatch, moduleExtensions);
+      const target = pickExistingPackageTarget(item, dir, patternMatch, moduleExtensions, isTypeOnly);
       if (target) return target;
     }
     return;
   }
+  if (isTypeOnly) {
+    const typesTarget = pickExistingPackageTarget(
+      (value as Record<string, unknown>).types,
+      dir,
+      patternMatch,
+      moduleExtensions,
+      isTypeOnly
+    );
+    if (typesTarget) return typesTarget;
+  }
+
   for (const [condition, child] of Object.entries(value)) {
     if (condition === 'types') continue;
-    const target = pickExistingPackageTarget(child, dir, patternMatch, moduleExtensions);
+    const target = pickExistingPackageTarget(child, dir, patternMatch, moduleExtensions, isTypeOnly);
     if (target) return target;
   }
 }
@@ -161,7 +176,13 @@ export function createCustomModuleResolver(
   tsConfigFile?: string
 ): ResolveModule {
   const customCompilerExtensionsSet = new Set(customCompilerExtensions);
-  const moduleExtensions = new Set([...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.json', '.jsonc']);
+  const moduleExtensions = new Set([
+    ...DEFAULT_EXTENSIONS,
+    ...customCompilerExtensions,
+    ...DTS_EXTENSIONS,
+    '.json',
+    '.jsonc',
+  ]);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
   const resolveSync =
@@ -191,26 +212,31 @@ export function createCustomModuleResolver(
   const cache = new Map<string, Map<string, ResolvedModule | undefined>>();
   moduleResolutionCaches.push(cache);
 
-  function resolveModuleName(name: string, containingFile: string): ResolvedModule | undefined {
+  function resolveModuleName(name: string, containingFile: string, isTypeOnly = false): ResolvedModule | undefined {
     const dir = dirname(containingFile);
     let byName = cache.get(dir);
     if (byName) {
-      if (byName.has(name)) return byName.get(name);
+      const cacheKey = isTypeOnly ? `${name}\0types` : name;
+      if (byName.has(cacheKey)) return byName.get(cacheKey);
     } else {
       byName = new Map();
       cache.set(dir, byName);
     }
-    const result = resolveModuleNameUncached(name, containingFile);
-    byName.set(name, result);
+    const result = resolveModuleNameUncached(name, containingFile, isTypeOnly);
+    byName.set(isTypeOnly ? `${name}\0types` : name, result);
     return result;
   }
 
-  function resolveModuleNameUncached(name: string, containingFile: string): ResolvedModule | undefined {
+  function resolveModuleNameUncached(
+    name: string,
+    containingFile: string,
+    isTypeOnly: boolean
+  ): ResolvedModule | undefined {
     const specifier = sanitizeSpecifier(name);
 
     if (isBuiltin(specifier)) return undefined;
 
-    const resolvedFileName = resolveSync(specifier, containingFile);
+    const resolvedFileName = resolveSync(specifier, containingFile, isTypeOnly);
     if (resolvedFileName) return toResult(specifier, containingFile, resolvedFileName);
 
     // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths, scoped per workspace
@@ -223,7 +249,7 @@ export function createCustomModuleResolver(
           for (const value of values) {
             const starIdx = value.indexOf('*');
             const mapped = starIdx >= 0 ? value.slice(0, starIdx) + captured + value.slice(starIdx + 1) : value;
-            const resolved = resolveSync(mapped, containingFile);
+            const resolved = resolveSync(mapped, containingFile, isTypeOnly);
             if (resolved) return toResult(specifier, containingFile, resolved);
           }
         }
@@ -241,7 +267,7 @@ export function createCustomModuleResolver(
           const relPath = dir === rootDir ? '' : dir.slice(rootDir.length + 1);
           for (const targetRoot of rootDirs) {
             if (targetRoot === rootDir) continue;
-            const resolved = resolveSync(join(targetRoot, relPath, specifier), containingFile);
+            const resolved = resolveSync(join(targetRoot, relPath, specifier), containingFile, isTypeOnly);
             if (resolved) return toResult(specifier, containingFile, resolved);
           }
         }
@@ -250,7 +276,10 @@ export function createCustomModuleResolver(
 
     const workspaceTarget = findWorkspacePackageTarget?.(specifier, containingFile);
     if (workspaceTarget) {
-      const target = expandPackageTarget(pickStringTarget(workspaceTarget.target), workspaceTarget.patternMatch);
+      const target = expandPackageTarget(
+        pickStringTarget(workspaceTarget.target, isTypeOnly),
+        workspaceTarget.patternMatch
+      );
       if (target) {
         const targetPath = toPackagePath(workspaceTarget.dir, target);
         const sourcePath = targetPath && toSourceFilePath(targetPath);
@@ -261,7 +290,8 @@ export function createCustomModuleResolver(
         workspaceTarget.target,
         workspaceTarget.dir,
         workspaceTarget.patternMatch,
-        moduleExtensions
+        moduleExtensions,
+        isTypeOnly
       );
       if (existingTarget) return toResult(specifier, containingFile, existingTarget);
     }

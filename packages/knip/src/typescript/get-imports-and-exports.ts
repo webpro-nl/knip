@@ -172,7 +172,7 @@ const getImportsAndExports = (
       return _import;
     }
 
-    const module = preResolvedModule ?? resolveModule(specifier, filePath);
+    const module = preResolvedModule ?? resolveModule(specifier, filePath, !!(modifiers & IMPORT_FLAGS.TYPE_ONLY));
 
     if (
       modifiers & IMPORT_FLAGS.AUGMENT &&
@@ -291,14 +291,13 @@ const getImportsAndExports = (
       continue;
     }
 
-    const resolved = resolveModule(specifier, filePath);
-    const internalPath =
-      resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)
-        ? resolved.resolvedFileName
-        : undefined;
-
     for (const entry of _imports.entries) {
       const modifiers = entry.isType ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE;
+      const resolved = resolveModule(specifier, filePath, entry.isType);
+      const internalPath =
+        resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)
+          ? resolved.resolvedFileName
+          : undefined;
       const localName = entry.localName.value;
       let builtinImport: Import | undefined;
 
@@ -362,14 +361,17 @@ const getImportsAndExports = (
     const jsdocTags = getJSDocTags(se.start);
     let reExportResolved: ResolvedModule | undefined;
     let reExportSpecifier: string | undefined;
+    let reExportIsTypeOnly: boolean | undefined;
     for (const entry of se.entries) {
       if (entry.moduleRequest) {
         const specifier = entry.moduleRequest.value;
-        const modifiers = IMPORT_FLAGS.RE_EXPORT | (entry.isType ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE);
+        const isTypeOnly = entry.isType;
+        const modifiers = IMPORT_FLAGS.RE_EXPORT | (isTypeOnly ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE);
         const pos = entry.moduleRequest.start;
-        if (specifier !== reExportSpecifier) {
+        if (specifier !== reExportSpecifier || isTypeOnly !== reExportIsTypeOnly) {
           reExportSpecifier = specifier;
-          reExportResolved = resolveModule(specifier, filePath);
+          reExportIsTypeOnly = isTypeOnly;
+          reExportResolved = resolveModule(specifier, filePath, isTypeOnly);
         }
         if (entry.importName.kind === 'AllButDefault') {
           addImport(

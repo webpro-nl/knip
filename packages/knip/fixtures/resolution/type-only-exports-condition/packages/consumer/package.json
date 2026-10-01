@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/type-only-exports-condition-consumer",
+  "private": true,
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@fixtures/type-only-exports-condition-contracts": "workspace:*"
+  }
+}
