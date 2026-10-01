@@ -60,9 +60,12 @@ const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
 const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
   const functions = await getFunctionEntries(config.functions, options.configFileDir);
   const resolvedPlugins = await resolveFileVariable(config.plugins, options.configFileDir);
-  const plugins = Array.isArray(resolvedPlugins)
-    ? resolvedPlugins.filter((plugin): plugin is string => typeof plugin === 'string')
-    : [];
+  const pluginModules = Array.isArray(resolvedPlugins)
+    ? resolvedPlugins
+    : isRecord(resolvedPlugins) && Array.isArray(resolvedPlugins.modules)
+      ? resolvedPlugins.modules
+      : [];
+  const plugins = pluginModules.filter((plugin): plugin is string => typeof plugin === 'string');
   const esbuild = config.custom?.esbuild || config.build?.esbuild ? [toDependency('esbuild', { optional: true })] : [];
   const injectEntries = [
     ...getInjectEntries(config.custom?.esbuild, options.configFileDir),

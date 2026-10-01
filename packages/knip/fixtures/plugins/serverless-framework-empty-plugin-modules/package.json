@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/serverless-framework-empty-plugin-modules",
+  "dependencies": {
+    "serverless": "*"
+  }
+}
