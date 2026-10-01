@@ -157,6 +157,39 @@ export const getPackageMapTarget = (map: unknown, key: string) => {
   if (best) return { target: best.target, patternMatch: best.patternMatch };
 };
 
+const isMoreSpecificSubpath = (subpath: string, other: string) => {
+  const starIndex = subpath.indexOf('*');
+  if (starIndex === -1) return true;
+  const otherStarIndex = other.indexOf('*');
+  return starIndex > otherStarIndex || (starIndex === otherStarIndex && subpath.length > other.length);
+};
+
+const getNullSubpathTargets = (exports: PackageJson['exports']) => {
+  if (!exports || typeof exports !== 'object' || Array.isArray(exports)) return [];
+  const map = exports as Record<string, unknown>;
+  const subpaths = Object.keys(map).filter(subpath => subpath.startsWith('./'));
+  const targets: string[] = [];
+  for (const subpath of subpaths) {
+    const starIndex = subpath.indexOf('*');
+    if (map[subpath] !== null || starIndex === -1) continue;
+    const prefix = subpath.slice(0, starIndex);
+    const isReExported = subpaths.some(
+      other => map[other] !== null && other.startsWith(prefix) && isMoreSpecificSubpath(other, subpath)
+    );
+    if (isReExported) continue;
+    const match = getPackageMapTarget(
+      Object.fromEntries(Object.entries(map).filter(([key]) => key !== subpath)),
+      subpath
+    );
+    if (!match?.patternMatch) continue;
+    for (const target of getEntriesFromExports(match.target)) {
+      if (target.startsWith('./') && target.includes('*'))
+        targets.push(`!${target.replaceAll('*', match.patternMatch)}`);
+    }
+  }
+  return targets;
+};
+
 const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
   const parts = pattern.split('*');
   if (parts.length === 1) return pattern === candidate ? { patternMatch: undefined } : undefined;
@@ -219,7 +252,7 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   if (typeof typings === 'string' && typings) entryPaths.add(typings);
 
   if (exports) {
-    for (const item of getEntriesFromExports(exports)) {
+    for (const item of [...getEntriesFromExports(exports), ...getNullSubpathTargets(exports)]) {
       if (item === './*' || item.trim() === '') continue;
       const expanded = item
         .replace(/\/\*$/, '/**') // /* → /**
