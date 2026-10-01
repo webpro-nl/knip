@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/package-entry-points-null-subpath",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./internal/*": null
+  }
+}
