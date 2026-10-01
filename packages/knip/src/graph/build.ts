@@ -351,6 +351,7 @@ export async function build({
           ...((!options.isProduction && entryPatterns.get(group)) || []),
           ...((!options.isProduction && group === DEFAULT_GROUP && worker.getPluginConfigPatterns()) || []),
           ...(productionPatterns.get(group) ?? []),
+          ...negatedEntryPatterns,
         ]);
         const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
