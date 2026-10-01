@@ -113,6 +113,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           if (typeof entry === 'string') entries.push(entry);
           else if (Array.isArray(entry)) entries.push(...entry);
           else if (typeof entry === 'function') entries.push((entry as () => string)());
+          else if (entry && typeof entry === 'object' && 'import' in entry) entries.push(...[entry.import].flat());
           else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
         }
       }

@@ -8,17 +8,24 @@ type RspackConfigUtils = {
   env: string;
   isDev: boolean;
   isProd: boolean;
+  target: 'web' | 'node' | 'web-worker';
+  isServer: boolean;
+  isWebWorker: boolean;
 };
+
+type RspackConfig =
+  | Configuration
+  | ((config: Configuration, utils: RspackConfigUtils) => Configuration | void | Promise<Configuration | void>);
 
 export type RsbuildConfig = {
   plugins?: unknown[];
+  mode?: 'development' | 'production' | 'none';
+  output?: { target?: RspackConfigUtils['target'] };
   source?: { entry?: Entry; preEntry?: string | string[] };
   tools?: {
-    rspack?:
-      | Configuration
-      | ((config: Configuration, utils: RspackConfigUtils) => Configuration | void | Promise<Configuration | void>);
+    rspack?: RspackConfig | RspackConfig[];
   };
   environments?: {
-    [k: string]: Pick<RsbuildConfig, 'plugins' | 'source' | 'tools'>;
+    [k: string]: Omit<RsbuildConfig, 'environments'>;
   };
 };

@@ -1,4 +1,6 @@
+import type { Configuration } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { debugLogObject } from '../../util/debug.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
@@ -37,20 +39,42 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
     }
   };
 
-  const checkConfig = async (config: RsbuildConfig) => {
-    checkSource(config.source);
+  const checkConfig = async (localConfig: RsbuildConfig) => {
+    checkSource(localConfig.source);
 
-    const rspack = config.tools?.rspack;
-    if (!rspack) return;
+    if (!localConfig.tools?.rspack) return;
+    const target = localConfig.output?.target ?? config.output?.target ?? 'web';
+    const mode = localConfig.mode ?? config.mode;
+    const passes = mode ? [mode === 'production'] : options.isProduction ? [true] : [false, true];
 
-    const passes = typeof rspack === 'function' ? [false, true] : [options.isProduction];
-
-    for (const isProduction of passes) {
-      const baseConfig = { resolve: { alias: {} } };
-      const utils = { env: process.env.NODE_ENV ?? '', isDev: !isProduction, isProd: isProduction };
-      const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
-      const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, { ...options, isProduction });
-      for (const input of resolvedInputs) inputs.push(input);
+    for (const rspack of [localConfig.tools.rspack].flat()) {
+      for (const isProduction of typeof rspack === 'function' ? passes : [options.isProduction]) {
+        const baseConfig = {
+          mode: mode ?? (isProduction ? 'production' : 'development'),
+          entry: {},
+          resolve: { alias: {} },
+          module: { rules: [] },
+          plugins: [],
+        } satisfies Configuration;
+        const utils = {
+          env: process.env.NODE_ENV ?? '',
+          isDev: baseConfig.mode === 'development',
+          isProd: baseConfig.mode === 'production',
+          target,
+          isServer: target === 'node',
+          isWebWorker: target === 'web-worker',
+        };
+        try {
+          const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
+          const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, {
+            ...options,
+            isProduction: options.isProduction || isProduction,
+          });
+          for (const input of resolvedInputs) inputs.push(input);
+        } catch (error) {
+          debugLogObject('rsbuild', 'Could not resolve tools.rspack', error);
+        }
+      }
     }
   };
 
