@@ -6,7 +6,7 @@ import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
-import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
+import { getReportersDependencies, resolveExtensibleConfig, resolveWithPrefix } from './helpers.ts';
 import type { JestConfig, JestInitialOptions } from './types.ts';
 
 // https://jestjs.io/docs/configuration
@@ -34,7 +34,7 @@ const resolveDependencies = async (
   rootDir: string,
   options: PluginOptions
 ): Promise<Input[]> => {
-  const { configFileDir } = options;
+  const { configFileDir, manifest } = options;
 
   if (config?.preset) {
     const { preset } = config;
@@ -69,18 +69,28 @@ const resolveDependencies = async (
     }
   }
 
-  const runner = config.runner ? [typeof config.runner === 'string' ? config.runner : config.runner[0]] : [];
+  const runner = config.runner
+    ? [
+        resolveWithPrefix(
+          'jest-runner-',
+          typeof config.runner === 'string' ? config.runner : config.runner[0],
+          manifest
+        ),
+      ]
+    : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
   const environments =
     config.testEnvironment === 'jsdom'
       ? ['jest-environment-jsdom']
       : config.testEnvironment
-        ? [config.testEnvironment]
+        ? [resolveWithPrefix('jest-environment-', config.testEnvironment, manifest)]
         : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =
-    config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
+    config.watchPlugins?.map(watchPlugin =>
+      resolveWithPrefix('jest-watch-', typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0], manifest)
+    ) ?? [];
   const transform: (string | Input)[] = [];
   for (const transformer of config.transform ? Object.values(config.transform) : []) {
     if (typeof transformer === 'string') {
@@ -106,7 +116,9 @@ const resolveDependencies = async (
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const snapshotSerializers = config.snapshotSerializers ?? [];
-  const testSequencer = config.testSequencer ? [config.testSequencer] : [];
+  const testSequencer = config.testSequencer
+    ? [resolveWithPrefix('jest-sequencer-', config.testSequencer, manifest)]
+    : [];
 
   const setupFiles = config.setupFiles ?? [];
   const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
