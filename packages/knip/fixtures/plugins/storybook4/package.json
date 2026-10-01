@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/storybook4",
+  "scripts": {
+    "storybook": "storybook"
+  },
+  "devDependencies": {
+    "@storybook/addon-docs": "*",
+    "@storybook/react-vite": "*",
+    "storybook": "*"
+  }
+}

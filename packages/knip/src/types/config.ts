@@ -1,10 +1,12 @@
 import type { Program, VisitorObject } from 'oxc-parser';
+import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
-import type { AsyncCompilers, CompilerSync, HasDependency, SyncCompilers } from '../compilers/types.ts';
+import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
 import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
 import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
 import type { Input } from '../util/input.ts';
+import type { Manifest } from '../util/package-json.ts';
 import type { Args } from './args.ts';
 import type { IssueType, SymbolType } from './issues.ts';
 import type { Tags } from './options.ts';
@@ -12,8 +14,10 @@ import type { PluginName } from './PluginNames.ts';
 import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
-  knownBinsOnly?: boolean;
+  isForwardedArgs?: boolean;
+  optionalBinaries?: boolean;
   containingFilePath: string;
+  expandedScripts?: Set<string>;
 }
 
 export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (
@@ -26,13 +30,15 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
-export type FromArgs = (args: string[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
+export type ScriptArg = string | Word;
+
+export type FromArgs = (args: ScriptArg[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
 
 export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
   fromArgs: FromArgs;
 }
 
-export type BinaryResolver = (binary: string, args: string[], options: BinaryResolverOptions) => Input[];
+export type BinaryResolver = (binary: string, words: Word[], options: BinaryResolverOptions) => Input[];
 
 export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
 
@@ -52,6 +58,11 @@ export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, 
 
 export type IgnoreIssues = Record<string, IssueType[]>;
 
+export type CyclesConfig = {
+  allow?: string[][];
+  dynamicImports?: boolean;
+};
+
 export type GetImportsAndExportsOptions = {
   skipTypeOnly: boolean;
   isFixExports: boolean;
@@ -63,16 +74,17 @@ export type GetImportsAndExportsOptions = {
 export interface Configuration {
   ignore: NormalizedGlob;
   ignoreBinaries: IgnorePatterns;
+  ignoreGlobalBinaries: boolean;
   ignoreDependencies: IgnorePatterns;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   ignoreFiles: NormalizedGlob;
+  cycles: CyclesConfig;
   ignoreIssues: IgnoreIssues;
   ignoreMembers: IgnorePatterns;
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
-  syncCompilers: SyncCompilers;
-  asyncCompilers: AsyncCompilers;
+  compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
 
@@ -90,6 +102,8 @@ interface BaseWorkspaceConfiguration {
   paths: Record<string, string[]>;
   ignore: NormalizedGlob;
   ignoreFiles: NormalizedGlob;
+  ignoreGlobalBinaries: boolean;
+  ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   isIncludeEntryExports: boolean;
 }
 
@@ -102,13 +116,14 @@ export interface WorkspaceConfiguration extends BaseWorkspaceConfiguration, Part
 interface BaseOptions {
   rootCwd: string;
   cwd: string;
-  manifestScriptNames: Set<string>;
-  rootManifest: PackageJson | undefined;
+  manifest: Manifest;
+  rootManifest: Manifest | undefined;
+  getManifest: (dir: string) => Manifest | undefined;
 }
 
 type IsPluginEnabledOptions = {
   cwd: string;
-  manifest: PackageJson;
+  manifest: Manifest;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
 };
@@ -116,11 +131,12 @@ type IsPluginEnabledOptions = {
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
 
 export interface PluginOptions extends BaseOptions {
-  manifest: PackageJson;
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
   configFilePath: string;
+  /** True when this config file was discovered as a dependency of another config file of the same plugin (e.g. a project matched through a glob in `test.projects`), rather than found directly through the plugin's own config patterns or a script reference. */
+  isResolvedConfigFile: boolean;
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
@@ -134,11 +150,23 @@ export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Prom
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
 
+export type SourceMap = { srcDir: string; outDir: string };
+
+interface ResolveSourceMapOptions {
+  cwd: string;
+  manifest: Manifest;
+  dependencies: Set<string>;
+  rootCwd: string;
+  rootManifest: Manifest | undefined;
+}
+
+export type ResolveSourceMap = (options: ResolveSourceMapOptions) => Promise<SourceMap[]> | SourceMap[];
+
 export type HandleInput = (input: Input) => string | undefined;
 
-export type RegisterCompilerInput = {
+type RegisterCompilerInput = {
   extension: string;
-  compiler: CompilerSync;
+  compiler: Compiler;
 };
 
 export type RegisterCompiler = (input: RegisterCompilerInput) => void;
@@ -150,7 +178,7 @@ export type ResolveFromAST = (
   }
 ) => Input[];
 
-export type RegisterCompilersOptions = {
+type RegisterCompilersOptions = {
   cwd: string;
   hasDependency: HasDependency;
   registerCompiler: RegisterCompiler;
@@ -164,6 +192,17 @@ export type PluginVisitorContext = {
   sourceText: string;
   addScript: (script: string) => void;
   addImport: (specifier: string, pos: number, modifiers: number) => void;
+  markImportExpressionHandled: (pos: number) => void;
+  addImportGlob: (
+    patterns: string[],
+    options?: { base?: string; cwd?: string; filter?: RegExp; analyzeExports?: boolean }
+  ) => void;
+  /**
+   * Credit a local export as used by an in-module runtime registration (e.g. a custom element
+   * registered through a framework decorator), so it isn't reported as an unused export even
+   * when no other file imports it by name. Pass the local binding name (or `'default'`).
+   */
+  markExportRegistered: (name: string) => void;
 };
 
 export type PluginVisitorObject = VisitorObject;
@@ -191,6 +230,13 @@ export interface Plugin {
   isLoadConfig?: IsLoadConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
+  /**
+   * Contributes src↔out mappings so knip can rewire files in the emitted output tree back to
+   * their source counterparts (e.g. `package.json#exports` pointing into `dist/`). Runs per
+   * workspace, before any other plugin hook, so it cannot depend on state populated by
+   * `resolveConfig`/`resolveFromAST`/`resolve`.
+   */
+  resolveSourceMap?: ResolveSourceMap;
   resolveFromAST?: ResolveFromAST;
   isFilterTransitiveDependencies?: boolean;
   registerCompilers?: RegisterCompilers;

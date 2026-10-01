@@ -1,4 +1,5 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
+import type { Manifest } from '../../util/package-json.ts';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -33,14 +34,7 @@ const config = [
 const isLoadConfig: IsLoadConfig = ({ configFileName, manifest }, dependencies) => {
   // Flat configs (eslint.config.*) are handled by resolveFromAST — skip loading
   if (isFlatConfig(configFileName)) return false;
-
-  const version = manifest.devDependencies?.['eslint'] || manifest.dependencies?.['eslint'];
-  if (version) {
-    const major = version.match(/\d+/);
-    if (major && Number.parseInt(major[0], 10) === 9 && dependencies.has('eslint-config-next')) {
-      return false;
-    }
-  }
+  if (manifest.getMajor('eslint') === 9 && dependencies.has('eslint-config-next')) return false;
   return true;
 };
 
@@ -76,10 +70,10 @@ const args = {
   config: true,
   alias: { format: ['f'] },
   boolean: ['inspect-config'],
-  resolveInputs: (parsed: ParsedArgs) => {
+  resolveInputs: (parsed: ParsedArgs, { manifest }: { manifest: Manifest }) => {
     const inputs: Input[] = [];
     if (parsed['inspect-config']) inputs.push(toDependency('@eslint/config-inspector', { optional: true }));
-    if (parsed['format']) for (const input of resolveFormatters(parsed['format'])) inputs.push(input);
+    if (parsed['format']) for (const input of resolveFormatters(parsed['format'], manifest)) inputs.push(input);
     return inputs;
   },
 };

@@ -1,5 +1,5 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
-import { IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
+import { IGNORED_GLOBAL_BINARIES, IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { Issue } from '../types/issues.ts';
 import type { ExternalRef } from '../types/module-graph.ts';
@@ -49,7 +49,7 @@ export const createInputHandler =
   (input: Input, workspace: Workspace) => {
     const { specifier, containingFilePath } = input;
 
-    if (!containingFilePath || IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
+    if (!containingFilePath) return;
 
     if (isBinary(input)) {
       const binaryName = fromBinary(input);
@@ -65,12 +65,13 @@ export const createInputHandler =
         return;
       }
 
-      if (dependencies || input.optional) return;
+      if (input.optional || (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName)))
+        return;
 
       addIssue({
         type: 'binaries',
         filePath: containingFilePath,
-        workspace: workspace.name,
+        workspace: inputWorkspace.name,
         symbol: binaryName,
         specifier,
         fixes: [],
@@ -78,6 +79,8 @@ export const createInputHandler =
 
       return;
     }
+
+    if (IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
 
     const packageName = getPackageNameFromSpecifier(specifier);
 
@@ -93,7 +96,23 @@ export const createInputHandler =
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {
-        const isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, isConfig(input));
+        let isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, {
+          specifier,
+          isDevOnly: isConfig(input),
+          isTypeOnly: input.isTypeOnly,
+        });
+
+        if (input.isTypeOnly && input.containingFilePath) {
+          const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
+          if (owningWorkspace && owningWorkspace !== inputWorkspace) {
+            const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owningWorkspace, packageName, {
+              specifier,
+              isDevOnly: isConfig(input),
+              isTypeOnly: input.isTypeOnly,
+            });
+            isHandled = isHandled || isOwnerHandled;
+          }
+        }
 
         if (externalRefs && !isWorkspace) {
           addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });

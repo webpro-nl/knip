@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/hoisted-dependencies",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

@@ -3,7 +3,7 @@ import { toDeferResolve } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NycConfig } from './types.ts';
 
-// https://www.npmjs.com/package/nyc
+// https://www.npmx.dev/package/nyc
 
 const title = 'nyc';
 

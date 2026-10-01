@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/glob-symlinks-out-of-scope",
+  "knip": {
+    "entry": ["src/index.ts"],
+    "project": ["src/**/*.ts"]
+  }
+}

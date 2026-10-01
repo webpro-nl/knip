@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import type * as codeclimate from 'codeclimate-types';
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueSeverity, IssueSymbol, IssueType, Report, ReporterOptions } from '../types/issues.ts';
+import type { IssueSeverity, IssueSymbol, IssueType, Report, ReporterOptions } from '../types/issues.ts';
 import { toRelative } from '../util/path.ts';
-import { flattenIssues, getIssuePrefix, getIssueTypeTitle } from './util/util.ts';
+import { flattenIssues, getIssueDescription, getIssuePrefix, getIssueTypeTitle } from './util/util.ts';
 
 export default async ({ report, issues, cwd }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
@@ -59,11 +59,6 @@ function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
     default:
       return 'info';
   }
-}
-
-function getIssueDescription({ type, symbol, symbols, parentSymbol }: Issue) {
-  const symbolDescription = symbols ? `${symbols.map(s => s.symbol).join(', ')}` : symbol;
-  return `${getIssuePrefix(type)}: ${symbolDescription}${parentSymbol ? ` (${parentSymbol})` : ''}`;
 }
 
 function getSymbolDescription({

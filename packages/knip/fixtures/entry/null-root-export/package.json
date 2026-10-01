@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/null-root-export",
+  "main": "./index.js",
+  "exports": {
+    ".": null
+  }
+}

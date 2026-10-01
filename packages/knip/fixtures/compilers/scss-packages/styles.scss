@@ -1,0 +1,10 @@
+@use '@fontsource/lato/scss/mixins' as Lato;
+@use '~@fontsource/roboto/scss/mixins' as Roboto;
+@use '~bootstrap/scss/bootstrap';
+@use 'pkg:bulma/sass/utilities';
+@use 'foundation-sites/scss/foundation';
+@use './variables' as vars;
+
+.text {
+  color: vars.$primary;
+}

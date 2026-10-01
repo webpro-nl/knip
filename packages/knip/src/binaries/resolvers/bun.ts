@@ -1,8 +1,9 @@
-import parseArgs from 'minimist';
+import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toEntry } from '../../util/input.ts';
+import { toBinary, toEntry } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
+import { argsAfter, expandScript, toCommandBinary } from '../util.ts';
 import { resolveX } from './bunx.ts';
 
 const commands = new Set([
@@ -16,6 +17,7 @@ const commands = new Set([
   'completions',
   'config',
   'create',
+  'dedupe',
   'deploy',
   'discord',
   'exec',
@@ -53,28 +55,37 @@ const commands = new Set([
   'x',
 ]);
 
-export const resolve: BinaryResolver = (_binary, args, options) => {
-  const parsed = parseArgs(args, { string: ['cwd'] });
+export const resolve: BinaryResolver = (_binary, words, options) => {
+  const binary = toCommandBinary(_binary, options);
+  const parsed = parseArgs(words, { string: ['cwd'] });
   const [command, script] = parsed._;
 
   if (command === 'x') {
-    const argsForX = args.filter(arg => arg !== 'x');
-    return resolveX(argsForX, options);
+    const wordsForX = words.filter(word => word.value !== 'x');
+    return [binary, ...resolveX(wordsForX, options)];
   }
 
-  const { manifestScriptNames, cwd, fromArgs } = options;
+  const { manifest, cwd, fromArgs } = options;
 
-  if (command === 'run' && manifestScriptNames.has(script)) return [];
-  if (manifestScriptNames.has(command)) return [];
-  if (command !== 'run' && commands.has(command)) return [];
+  if (command === 'run' && manifest.scriptNames.has(script)) {
+    return [binary, ...(expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? [])];
+  }
+  if (manifest.scriptNames.has(command)) {
+    return [binary, ...(expandScript(command, argsAfter(words, command), manifest.scripts, options) ?? [])];
+  }
+  if (command !== 'run' && commands.has(command)) return [binary];
 
   const filePath = command === 'run' ? script : command;
-  if (!filePath) return [];
+  if (!filePath) return [binary];
   const _cwd = parsed.cwd ? join(cwd, parsed.cwd) : cwd;
   const resolved = _resolveSync(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
-  if (resolved) return [toEntry(resolved)];
+  if (resolved) return [binary, toEntry(resolved)];
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  return command === 'run' ? [] : fromArgs(args, opts);
+  if (command !== 'run') return [binary, ...fromArgs(words, opts)];
+
+  const input = toBinary(filePath, { optional: true });
+  if (dir) input.dir = dir;
+  return [binary, input];
 };

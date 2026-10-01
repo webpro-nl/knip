@@ -19,6 +19,7 @@
     "docusaurus-plugin-awesome": "*"
   },
   "devDependencies": {
-    "@docusaurus/types": "*"
+    "@docusaurus/types": "*",
+    "babel-plugin-module-resolver": "*"
   }
 }

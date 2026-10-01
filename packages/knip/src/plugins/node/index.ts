@@ -1,5 +1,8 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import { toEntry, toProductionEntry } from '../../util/input.ts';
+import { getScriptCommands } from '../../util/scripts.ts';
+import type { RegisterVisitors } from '../../types/config.ts';
+import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
 
 const title = 'Node.js';
 
@@ -13,10 +16,28 @@ const patterns = [
   '**/test/**/*.{cjs,mjs,js,cts,mts,ts}',
 ];
 
-const hasNodeTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => /(?<=^|\s)node\s(.*)--test/.test(script));
+const hasNodeTestCache = new WeakMap<Record<string, string>, boolean>();
+
+const hasNodeTest = (scripts: Record<string, string> | undefined) => {
+  if (!scripts) return false;
+  const cached = hasNodeTestCache.get(scripts);
+  if (cached !== undefined) return cached;
+  const result = Object.values(scripts).some(
+    script =>
+      typeof script === 'string' &&
+      getScriptCommands(script).some(
+        ({ binary, args }) => (binary === 'node' || binary === 'nub') && args.includes('--test')
+      )
+  );
+  hasNodeTestCache.set(scripts, result);
+  return result;
+};
 
 const entry = ['server.js'];
+
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createFsPromisesGlobVisitor(ctx));
+};
 
 const resolve: Resolve = options => {
   const entries = entry.map(id => toProductionEntry(id));
@@ -34,12 +55,18 @@ const args = {
   resolve: ['test-reporter'],
   boolean: [
     'deprecation',
+    'enable-source-maps',
+    'experimental-detect-module',
+    'experimental-json-modules',
     'experimental-strip-types',
     'experimental-transform-types',
+    'experimental-vm-modules',
+    'expose-gc',
     'harmony',
     'inspect-brk',
     'inspect-wait',
     'inspect',
+    'openssl-legacy-provider',
     'test-only',
     'test',
     'warnings',
@@ -54,6 +81,7 @@ const plugin: Plugin = {
   entry,
   resolve,
   args,
+  registerVisitors,
 };
 
 export default plugin;

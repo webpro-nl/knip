@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/remark-local-path",
+  "scripts": {
+    "format": "remark README.md -o"
+  },
+  "devDependencies": {
+    "remark-cli": "*"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "./index.js"
+    ]
+  }
+}

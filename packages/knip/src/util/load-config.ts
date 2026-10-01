@@ -15,11 +15,16 @@ const unwrapFunction = async (maybeFunction: unknown, options: ParsedCLIArgs) =>
   return maybeFunction;
 };
 
+const isObject = (value: unknown) => typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export async function loadResolvedConfigFile(configPath: string, options: ParsedCLIArgs) {
   const loadedValue = await _load(configPath);
+  let config;
   try {
-    return await unwrapFunction(loadedValue, options);
+    config = await unwrapFunction(loadedValue, options);
   } catch (_error) {
     throw new ConfigurationError(`Error running the function from ${configPath}`);
   }
+  if (!isObject(config)) throw new ConfigurationError(`Expected an object as configuration from ${configPath}`);
+  return config;
 }

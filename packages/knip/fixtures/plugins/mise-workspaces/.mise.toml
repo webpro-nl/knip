@@ -1,0 +1,22 @@
+[task_config]
+dir = "packages/web"
+
+[tasks.build]
+run = "pnpm exec assets build"
+
+[tasks.check]
+run = "node scripts/package-entry.ts"
+
+[tasks.direct]
+run = "./scripts/direct-entry.ts"
+
+[tasks.lint]
+run = "../../node_modules/.bin/eslint ."
+
+[tasks.root]
+dir = "."
+run = "node scripts/root-entry.ts"
+
+[tasks.explicit]
+dir = "packages/tools"
+run = "yarn run invoke -- scripts/extra-entry.ts"

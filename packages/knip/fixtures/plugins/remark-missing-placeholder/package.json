@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/remark-missing-placeholder",
+  "scripts": {
+    "format": "remark README.md -o"
+  },
+  "devDependencies": {
+    "remark-cli": "*"
+  },
+  "remarkConfig": {
+    "plugins": [
+      "pkg-c"
+    ]
+  }
+}

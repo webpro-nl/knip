@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/gitignored-binary-path",
+  "scripts": {
+    "cli": "target/release/mytool run",
+    "external-tool": "/opt/example-tool --batch",
+    "greet": "say-hello"
+  }
+}

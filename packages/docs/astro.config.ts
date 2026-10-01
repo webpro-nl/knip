@@ -1,9 +1,10 @@
+import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
+import starlightBlog from 'starlight-blog';
 import type { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code';
 import { defineConfig } from 'astro/config';
-import remarkDirective from 'remark-directive';
-import { fixInternalLinks } from './remark/fixInternalLinks.ts';
-import { transformDirectives } from './remark/transformDirectives.ts';
+import { fixInternalLinks } from './plugins/fixInternalLinks.ts';
+import { transformDirectives } from './plugins/transformDirectives.ts';
 
 const setForeground = (theme: ExpressiveCodeTheme, scope: string, value: string) => {
   const settings = theme.settings.find(setting => setting.scope?.includes(scope));
@@ -21,7 +22,10 @@ export default defineConfig({
     '/guides/writing-a-plugin': '/writing-a-plugin',
   },
   markdown: {
-    remarkPlugins: [fixInternalLinks, transformDirectives, remarkDirective],
+    processor: satteri({
+      features: { directive: true },
+      mdastPlugins: [fixInternalLinks, transformDirectives],
+    }),
   },
   integrations: [
     starlight({
@@ -34,7 +38,7 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/webpro-nl/knip' },
         { icon: 'blueSky', label: 'Bluesky', href: 'https://bsky.app/profile/webpro.nl' },
-        { icon: 'npm', label: 'npm', href: 'https://www.npmjs.com/package/knip' },
+        { icon: 'npm', label: 'npm', href: 'https://www.npmx.dev/package/knip' },
       ],
       components: {
         Head: './src/components/Head.astro',
@@ -46,37 +50,76 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Overview',
-          autogenerate: { directory: 'overview' },
+          label: 'Start here',
+          items: [
+            'overview/getting-started',
+            'explanations/how-knip-works',
+            'overview/first-cleanup',
+            'overview/configuration',
+            'explanations/why-use-knip',
+          ],
         },
         {
-          label: 'Understanding Knip',
-          autogenerate: { directory: 'explanations' },
+          label: 'Configuration & discovery',
+          items: [
+            'explanations/entry-files',
+            'explanations/plugins',
+            'guides/configuring-project-files',
+            'features/production-mode',
+            'reference/configuration-hints',
+            'features/compilers',
+            'features/script-parser',
+            'features/source-mapping',
+            'features/custom-elements',
+            'guides/namespace-imports',
+            'guides/working-with-commonjs',
+          ],
         },
         {
-          label: 'Features',
-          autogenerate: { directory: 'features' },
+          label: 'Monorepos',
+          items: ['features/monorepos-and-workspaces', 'features/integrated-monorepos', 'features/catalogs'],
         },
         {
-          label: 'Guides',
-          autogenerate: { directory: 'guides' },
+          label: 'Troubleshooting',
+          items: [
+            'guides/troubleshooting',
+            'guides/handling-issues',
+            'reference/known-issues',
+            'features/auto-fix',
+            'reference/faq',
+            'reference/related-tooling',
+          ],
         },
         {
-          label: 'Writing a Plugin',
-          autogenerate: { directory: 'writing-a-plugin' },
+          label: 'Integration',
+          items: ['guides/adopt-gradually', 'guides/using-knip-in-ci', 'guides/performance', 'reference/integrations'],
         },
         {
           label: 'Reference',
-          autogenerate: { directory: 'reference' },
+          items: [
+            'reference/cli',
+            'reference/configuration',
+            'reference/dynamic-configuration',
+            'reference/issue-types',
+            'features/rules-and-filters',
+            'reference/jsdoc-tsdoc-tags',
+            'features/reporters',
+            'reference/plugins',
+            'overview/features',
+            'explanations/comparison-and-migration',
+            'playground',
+          ],
         },
         {
-          label: 'Blog',
-          autogenerate: { directory: 'blog' },
-        },
-        {
-          label: 'Read more',
-          collapsed: true,
-          autogenerate: { directory: 'typescript' },
+          label: 'Contributing',
+          items: [
+            'guides/contributing',
+            'guides/issue-reproduction',
+            {
+              label: 'Writing A Plugin',
+              items: ['writing-a-plugin', 'writing-a-plugin/inputs', 'writing-a-plugin/argument-parsing'],
+            },
+          ],
         },
       ],
       expressiveCode: {
@@ -103,6 +146,26 @@ export default defineConfig({
           return theme;
         },
       },
+      plugins: [
+        starlightBlog({
+          title: 'Blog',
+          postCount: 7,
+          recentPostCount: 5,
+          prevNextLinksOrder: 'chronological',
+          authors: {
+            lars: {
+              name: 'Lars Kappert',
+              title: 'Knip it before you ship it',
+              picture: '/authors/lars.jpg',
+              url: 'https://webpro.nl/',
+            },
+          },
+          metrics: {
+            readingTime: true,
+            words: 'rounded',
+          },
+        }),
+      ],
     }),
   ],
 });

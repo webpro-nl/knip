@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/electron-vite",
+  "type": "module",
+  "dependencies": {
+    "electron-vite": "*"
+  }
+}

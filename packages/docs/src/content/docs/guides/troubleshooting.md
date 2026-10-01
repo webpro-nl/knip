@@ -1,7 +1,6 @@
 ---
 title: Troubleshooting
-sidebar:
-  order: 2
+description: Troubleshoot Knip lint issues and exceptions using exit codes, `--debug`, and `--trace` to see where exports and dependencies are used.
 ---
 
 We can distinguish two types of issues:
@@ -94,11 +93,19 @@ Use [--workspace \[filter\]][8] to filter accordingly.
 
 #### Legend
 
-|     | Description                                 |
-| --- | :------------------------------------------ |
-| `✓` | Contains import and reference to the export |
-| `x` | Is not imported                             |
-| `◯` | Entry file                                  |
+| Marker | Description                         |
+| ------ | :---------------------------------- |
+| `✓`    | Referenced (not reported as unused) |
+| `✗`    | Reported as unused                  |
+| `⎆`    | Entry file                          |
+
+Each child node is prefixed with how the export is consumed: `import`,
+`importAs` (shown as `original → alias`), `importNS`, or a re-export
+(`reExport`, `reExportAs`, `reExportNS`, `reExportStar`). A `refs:` line lists
+the references found in that file; a `members:` line shows per-member status for
+namespaces and enums. An `[ambiguous]` line lists the competing definitions when
+a name reaches the file through more than one `export *`. A name that reaches
+the file only through `export *` is traced from its definition.
 
 ## Opening an issue
 

@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDeferResolve, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import type { CucumberConfig } from './types.ts';
+import type { CucumberConfig, Format } from './types.ts';
 
 // https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md
 
@@ -15,11 +15,44 @@ const config = ['cucumber.{json,yaml,yml,js,cjs,mjs}'];
 
 const entry = ['features/**/*.@(js|cjs|mjs)'];
 
-const resolveConfig: ResolveConfig<CucumberConfig> = config => {
+const builtinFormatters = new Set([
+  'html',
+  'json',
+  'junit',
+  'message',
+  'pretty',
+  'progress',
+  'progress-bar',
+  'rerun',
+  'snippets',
+  'summary',
+  'usage',
+  'usage-json',
+]);
+
+const toFormatterName = (format: Format) => {
+  if (Array.isArray(format)) return format[0];
+  // "name:target" where either side may be wrapped in double quotes
+  const [name, quotedName] = format.match(/^"([^"]*)"|^[^:]*/) ?? [format];
+  return quotedName ?? name;
+};
+
+const resolveProfile = (config?: CucumberConfig) => {
   const imports = (config?.import ? config.import : entry).map(id => toEntry(id));
-  const formatters = config?.format ? config.format : [];
-  const requires = config?.require ? config.require : [];
-  return imports.concat([...formatters, ...requires].map(id => toDeferResolve(id)));
+  const requires = (config?.require ? config.require : []).map(id => toEntry(id));
+  const formatters = (config?.format ? config.format : [])
+    .map(toFormatterName)
+    .filter(name => !builtinFormatters.has(name))
+    .map(id => toDeferResolve(id));
+  return [...imports, ...requires, ...formatters];
+};
+
+const resolveConfig: ResolveConfig<CucumberConfig | Record<string, CucumberConfig> | string> = (config, options) => {
+  if (typeof config !== 'object' || config === null) return resolveProfile();
+  const isProfiles = /\.(json|ya?ml)$/.test(options.configFileName) || 'default' in config;
+  if (!isProfiles) return resolveProfile(config);
+  const profiles = 'default' in config ? Object.values(config) : [undefined, ...Object.values(config)];
+  return profiles.flatMap(resolveProfile);
 };
 
 const plugin: Plugin = {

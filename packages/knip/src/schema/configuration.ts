@@ -1,16 +1,12 @@
 import { z } from 'zod/mini';
+import type { Compiler } from '../compilers/types.ts';
 import { SYMBOL_TYPE } from '../constants.ts';
 import { globSchema, pluginsSchema } from './plugins.ts';
 
 const pathsSchema = z.record(z.string(), z.array(z.string()));
 
-type SyncCompiler = (filename: string, contents: string) => string;
-type AsyncCompiler = (filename: string, contents: string) => Promise<string>;
-
-const syncCompilerSchema = z.union([z.literal(true), z.custom<SyncCompiler>()]);
-const asyncCompilerSchema = z.custom<AsyncCompiler>();
-const compilerSchema = z.union([syncCompilerSchema, asyncCompilerSchema]);
-const compilersSchema = z.record(z.string(), compilerSchema);
+const compilerSchema = z.custom<Compiler>();
+const compilersSchema = z.record(z.string(), z.union([z.literal(true), compilerSchema]));
 
 const stringOrRegexSchema = z.array(z.union([z.string(), z.instanceof(RegExp)]));
 
@@ -30,6 +26,8 @@ const issueTypeSchema = z.union([
   z.literal('enumMembers'),
   z.literal('namespaceMembers'),
   z.literal('catalog'),
+  z.literal('catalogReferences'),
+  z.literal('cycles'),
 ]);
 
 const rulesSchema = z.partialRecord(issueTypeSchema, z.enum(['error', 'warn', 'off']));
@@ -43,6 +41,11 @@ const ignoreExportsUsedInFileObjectSchema = z.strictObject(
 const ignoreExportsUsedInFileSchema = z.union([z.boolean(), ignoreExportsUsedInFileObjectSchema]);
 
 const ignoreIssuesSchema = z.record(z.string(), z.array(issueTypeSchema));
+
+const cyclesSchema = z.strictObject({
+  allow: z.optional(z.array(z.array(z.string()))),
+  dynamicImports: z.optional(z.boolean()),
+});
 
 const rootConfigurationSchema = z.object({
   /**
@@ -177,6 +180,7 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   ignoreBinaries: z.optional(stringOrRegexSchema),
+  ignoreGlobalBinaries: z.optional(z.boolean()),
   /**
    * Array of package names to exclude from the report. Regular expressions allowed.
    *
@@ -255,6 +259,10 @@ const rootConfigurationSchema = z.object({
    *   }
    * }
    * ```
+   *
+   * @remarks
+   * Set this option at root level to enable this globally, or within workspace
+   * configurations individually.
    */
   ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
   /**
@@ -263,9 +271,31 @@ const rootConfigurationSchema = z.object({
    * This allows ignoring specific issues (like unused exports) in generated
    * files while still reporting other issues in those same files.
    *
+   * @remarks
+   * Set this option at root level to apply globally, or within workspace
+   * configurations individually. Workspace-level patterns are relative to the
+   * workspace root.
+   *
    * @see {@link https://knip.dev/reference/configuration#ignoreissues}
    */
   ignoreIssues: z.optional(ignoreIssuesSchema),
+  /**
+   * Configure circular dependency (`cycles`) detection: allow (accept) specific
+   * cycles by exact path, or include dynamic `import()` edges (excluded by default).
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "cycles": {
+   *     "dynamicImports": true,
+   *     "allow": [["src/a.ts", "src/b.ts"]]
+   *   }
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/reference/configuration#cycles}
+   */
+  cycles: z.optional(cyclesSchema),
   /**
    * Array of workspaces to ignore, globs allowed.
    *
@@ -314,9 +344,7 @@ const rootConfigurationSchema = z.object({
    */
   compilers: z.optional(compilersSchema),
   /** @internal */
-  syncCompilers: z.optional(z.record(z.string(), syncCompilerSchema)),
-  /** @internal */
-  asyncCompilers: z.optional(z.record(z.string(), asyncCompilerSchema)),
+  asyncCompilers: z.optional(z.record(z.string(), compilerSchema)),
   /**
    * Exports can be tagged with known or arbitrary JSDoc/TSDoc tags.
    *
@@ -374,6 +402,57 @@ const rootConfigurationSchema = z.object({
    * ```
    */
   treatConfigHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Exit with non-zero code (1) if there are any tag hints.
+   *
+   * @default false
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "treatTagHintsAsErrors": true
+   * }
+   * ```
+   */
+  treatTagHintsAsErrors: z.optional(z.boolean()),
+  /**
+   * Preprocess the results before providing them to the reporter(s).
+   * Can be a single preprocessor or an array of preprocessors.
+   * Each value is a path to a local file or an npm package name.
+   *
+   * @default []
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts"
+   * }
+   * ```
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": ["./first.ts", "./second.ts"]
+   * }
+   * ```
+   *
+   * @see {@link https://knip.dev/features/reporters#preprocessors | Preprocessors}
+   */
+  preprocessor: z.optional(z.union([z.string(), z.array(z.string())])),
+  /**
+   * Extra options to pass to the preprocessor.
+   *
+   * @default {}
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "preprocessor": "./my-preprocessor.ts",
+   *   "preprocessorOptions": { "key": "value" }
+   * }
+   * ```
+   */
+  preprocessorOptions: z.optional(z.record(z.string(), z.unknown())),
 });
 
 const reportConfigSchema = z.object({
@@ -398,9 +477,12 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignore: z.optional(globSchema),
   ignoreFiles: z.optional(globSchema),
   ignoreBinaries: z.optional(stringOrRegexSchema),
+  ignoreGlobalBinaries: z.optional(z.boolean()),
   ignoreDependencies: z.optional(stringOrRegexSchema),
   ignoreMembers: z.optional(stringOrRegexSchema),
   ignoreUnresolved: z.optional(stringOrRegexSchema),
+  ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
+  ignoreIssues: z.optional(ignoreIssuesSchema),
   includeEntryExports: z.optional(z.boolean()),
 });
 

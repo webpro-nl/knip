@@ -3,7 +3,7 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
 
-const extensionAlias = {
+export const extensionAlias: Record<string, string[]> = {
   '.js': ['.js', '.ts', '.tsx', '.d.ts'],
   '.jsx': ['.jsx', '.tsx'],
   '.mjs': ['.mjs', '.mts', '.d.mts'],
@@ -12,17 +12,50 @@ const extensionAlias = {
 
 const resolverInstances: ResolverFactory[] = [];
 
-const createSyncModuleResolver = (extensions: string[], alias?: Record<string, string[]>) => {
-  const aliasOpt = alias && { alias };
+const declarationResolver = new ResolverFactory({
+  extensions: [...DTS_EXTENSIONS, ...DEFAULT_EXTENSIONS],
+  extensionAlias: {
+    '.ts': ['.d.ts', '.ts'],
+    '.mts': ['.d.mts', '.mts'],
+    '.cts': ['.d.cts', '.cts'],
+    '.js': ['.d.ts', '.js'],
+    '.mjs': ['.d.mts', '.mjs'],
+    '.cjs': ['.d.cts', '.cjs'],
+  },
+  conditionNames: ['types', 'import', 'require', 'node', 'default'],
+  nodePath: false,
+});
+
+resolverInstances.push(declarationResolver);
+
+const packageManifestResolver = new ResolverFactory({
+  extensions: ['.json'],
+  exportsFields: [],
+  nodePath: false,
+});
+
+resolverInstances.push(packageManifestResolver);
+
+export const resolvePackageManifestPath = (packageName: string, baseDir: string) => {
+  const resolved = packageManifestResolver.sync(baseDir, `${packageName}/package.json`);
+  if (resolved.path) return toPosix(resolved.path);
+};
+
+const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
   const baseOptions = {
     extensions,
     extensionAlias,
     conditionNames: ['require', 'import', 'node', 'default'],
     nodePath: false,
-    ...aliasOpt,
   };
-  const resolver = new ResolverFactory({ tsconfig: 'auto', ...baseOptions });
-  const fallbackResolver = new ResolverFactory(baseOptions);
+  const resolver = new ResolverFactory({
+    tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
+    ...baseOptions,
+  });
+  const fallbackResolver = new ResolverFactory({
+    ...baseOptions,
+    conditionNames: ['require', 'import', 'browser', 'default'],
+  });
 
   resolverInstances.push(resolver, fallbackResolver);
 
@@ -43,8 +76,19 @@ const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DT
  */
 export const _resolveModuleSync = timerify(resolveModuleSync, 'resolveModuleSync');
 
-export const _createSyncModuleResolver = (extensions: string[]) =>
-  timerify(createSyncModuleResolver(extensions), 'resolveModuleSync');
+const resolveDeclarationSync = (specifier: string, containingFile: string) => {
+  const result = declarationResolver.resolveFileSync(containingFile, specifier);
+  if (!result.path) return;
+  return {
+    path: toPosix(result.path),
+    packageJsonPath: result.packageJsonPath ? toPosix(result.packageJsonPath) : undefined,
+  };
+};
+
+export const _resolveDeclarationSync = timerify(resolveDeclarationSync, 'resolveDeclarationSync');
+
+export const _createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =>
+  timerify(createSyncModuleResolver(extensions, tsConfigFile), 'resolveModuleSync');
 
 const createSyncResolver = (extensions: string[]) => {
   const resolver = new ResolverFactory({

@@ -9,5 +9,5 @@ tasks:
   shared-task:
     cmd: node ../scripts/shared.js
   shared-binary:
-    cmd: npx another-nonexistent-binary
+    cmd: npx --no another-nonexistent-binary
 

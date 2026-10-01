@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/tsconfig-types-references",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

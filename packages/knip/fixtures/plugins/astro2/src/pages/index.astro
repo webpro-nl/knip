@@ -1,0 +1,10 @@
+---
+import { connect } from '@/lib/database';
+import { login } from '@/lib/auth';
+import { send } from '@/lib/mailer';
+
+const db = connect();
+login();
+send();
+---
+<h1>{db.name}</h1>

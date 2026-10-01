@@ -6,6 +6,7 @@ import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/graphql-codegen');
+const scriptConfigCwd = resolve('fixtures/plugins/graphql-codegen-script-config');
 
 test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', async () => {
   const options = await createOptions({ cwd });
@@ -35,5 +36,22 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
     unlisted: 16,
     processed: 1,
     total: 1,
+  });
+});
+
+test('Find dependencies from a graphql-codegen script config', async () => {
+  const options = await createOptions({ cwd: scriptConfigCwd });
+  const { issues, counters } = await main(options);
+
+  assert(!issues.files['src/codegen.ts']);
+  assert(!issues.files['src/codegen-helpers.ts']);
+  assert(!issues.dependencies['package.json']?.['@graphql-codegen/typescript']);
+  assert(!issues.dependencies['package.json']?.['@graphql-codegen/typescript-operations']);
+  assert(!issues.dependencies['package.json']?.['@graphql-codegen/typescript-graphql-request']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
   });
 });

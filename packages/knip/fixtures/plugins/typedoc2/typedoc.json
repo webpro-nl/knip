@@ -1,0 +1,4 @@
+{
+  "plugin": "typedoc-plugin-mdn-links",
+  "theme": "typedoc-github-theme"
+}

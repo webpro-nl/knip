@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@icons/*": ["node_modules/@svg-icons/fa-brands/*"],
+      "common/*": ["src/common/*"],
+      "styles/*": ["src/styles/*"],
+      "~/*": ["src/*"]
+    }
+  }
+}

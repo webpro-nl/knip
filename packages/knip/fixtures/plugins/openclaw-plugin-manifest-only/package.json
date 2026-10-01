@@ -1,0 +1,4 @@
+{
+  "name": "@plugins/openclaw-plugin-manifest-only",
+  "openclaw": { "schemaVersions": {} }
+}

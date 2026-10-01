@@ -4,7 +4,6 @@ import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
-  IGNORED_GLOBAL_BINARIES,
   IGNORED_RUNTIME_DEPENDENCIES,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
@@ -31,6 +30,14 @@ import { findMatch, toRegexOrString } from './util/regex.ts';
 const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
   typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
 
+interface DependencyReferenceOptions {
+  specifier: string;
+  isDevOnly?: boolean;
+  isTypeOnly?: boolean;
+  isResolved?: boolean;
+  isPublishedType?: boolean;
+}
+
 /**
  * - Stores manifests
  * - Stores referenced external dependencies
@@ -43,8 +50,8 @@ export class DependencyDeputy {
   isStrict;
   isReportDependencies;
   _manifests: WorkspaceManifests = new Map();
+  workspacePkgNames: Set<string> = new Set();
   referencedDependencies: Map<string, Set<string>>;
-  referencedBinaries: Map<string, Set<string>>;
   hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
@@ -54,7 +61,6 @@ export class DependencyDeputy {
     this.isStrict = isStrict;
     this.isReportDependencies = isReportDependencies;
     this.referencedDependencies = new Map();
-    this.referencedBinaries = new Map();
     this.hostDependencies = new Map();
     this.installedBinaries = new Map();
     this.hasTypesIncluded = new Map();
@@ -62,7 +68,6 @@ export class DependencyDeputy {
 
   public addWorkspace({
     name,
-    cwd,
     dir,
     manifestPath,
     manifestStr,
@@ -72,7 +77,6 @@ export class DependencyDeputy {
     ignoreUnresolved: iu,
   }: {
     name: string;
-    cwd: string;
     dir: string;
     manifestPath: string;
     manifestStr: string;
@@ -94,22 +98,17 @@ export class DependencyDeputy {
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
 
-    const packageNames = [
-      ...dependencies,
-      ...(this.isStrict ? peerDependencies : []),
-      ...(this.isProduction ? [] : devDependencies),
-    ];
+    const packageNames = [...dependencies, ...peerDependencies, ...(this.isProduction ? [] : devDependencies)];
 
     if (this.isReportDependencies) {
       const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
         packageNames,
         dir,
-        cwd,
       });
 
       this.setHostDependencies(name, hostDependencies);
-      this.setInstalledBinaries(name, installedBinaries);
-      this.setHasTypesIncluded(name, hasTypesIncluded);
+      this.installedBinaries.set(name, installedBinaries);
+      this.hasTypesIncluded.set(name, hasTypesIncluded);
     }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
@@ -132,11 +131,17 @@ export class DependencyDeputy {
       optionalPeerDependencies,
       requiredPeerDependencies,
       allDependencies: new Set(allDependencies),
+      engines: manifest.engines ?? {},
+      isPrivate: Boolean(manifest.private),
     });
   }
 
   getWorkspaceManifest(workspaceName: string) {
     return this._manifests.get(workspaceName);
+  }
+
+  public setWorkspacePkgNames(pkgNames: Iterable<string>) {
+    this.workspacePkgNames = new Set(pkgNames);
   }
 
   getProductionDependencies(workspaceName: string): DependencyArray {
@@ -150,26 +155,15 @@ export class DependencyDeputy {
     return this._manifests.get(workspaceName)?.devDependencies ?? [];
   }
 
+  private dependencyCache = new Map<string, DependencySet>();
+
   getDependencies(workspaceName: string): DependencySet {
+    let deps = this.dependencyCache.get(workspaceName);
+    if (deps) return deps;
     const manifest = this._manifests.get(workspaceName);
-    if (!manifest) return new Set();
-    return new Set([...manifest.dependencies, ...manifest.devDependencies]);
-  }
-
-  setInstalledBinaries(workspaceName: string, installedBinaries: Map<string, Set<string>>) {
-    this.installedBinaries.set(workspaceName, installedBinaries);
-  }
-
-  getInstalledBinaries(workspaceName: string) {
-    return this.installedBinaries.get(workspaceName);
-  }
-
-  setHasTypesIncluded(workspaceName: string, hasTypesIncluded: Set<string>) {
-    this.hasTypesIncluded.set(workspaceName, hasTypesIncluded);
-  }
-
-  getHasTypesIncluded(workspaceName: string) {
-    return this.hasTypesIncluded.get(workspaceName);
+    deps = manifest ? new Set([...manifest.dependencies, ...manifest.devDependencies]) : new Set();
+    this.dependencyCache.set(workspaceName, deps);
+    return deps;
   }
 
   addReferencedDependency(workspaceName: string, packageName: string) {
@@ -177,13 +171,6 @@ export class DependencyDeputy {
       this.referencedDependencies.set(workspaceName, new Set());
     }
     this.referencedDependencies.get(workspaceName)?.add(packageName);
-  }
-
-  addReferencedBinary(workspaceName: string, binaryName: string) {
-    if (!this.referencedBinaries.has(workspaceName)) {
-      this.referencedBinaries.set(workspaceName, new Set());
-    }
-    this.referencedBinaries.get(workspaceName)?.add(binaryName);
   }
 
   setHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
@@ -202,28 +189,55 @@ export class DependencyDeputy {
    * Returns `true` to indicate the external dependency has been handled properly. When `false`, the call-site probably
    * wants to mark the dependency as "unlisted".
    */
-  public maybeAddReferencedExternalDependency(workspace: Workspace, packageName: string, isDevOnly?: boolean): boolean {
+  public maybeAddReferencedExternalDependency(
+    workspace: Workspace,
+    packageName: string,
+    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions
+  ): boolean {
     if (!this.isReportDependencies) return true;
-    if (isBuiltin(packageName)) return true;
+    if (specifier.startsWith('node:') || isBuiltin(specifier)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
     if (packageName === workspace.pkgName) return true;
 
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
-    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOnly));
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
+    const isDevOrTypeOnly = isDevOnly || (isTypeOnly && !isPublishedType);
+    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
     const closestWorkspaceNameForTypes =
-      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOnly));
+      typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOrTypeOnly));
 
-    if (closestWorkspaceName || closestWorkspaceNameForTypes) {
-      if (closestWorkspaceName) this.addReferencedDependency(closestWorkspaceName, packageName);
-      if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
-        this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+    if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
+      this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+
+    if (closestWorkspaceName) {
+      this.addReferencedDependency(closestWorkspaceName, packageName);
       return true;
     }
+    if (closestWorkspaceNameForTypes && isTypeOnly) return true;
+
+    if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
+
+    if (!this.isStrict && this.workspacePkgNames.has(packageName) && this._manifests.get(workspace.name)?.isPrivate) {
+      this.addReferencedDependency(workspace.name, packageName);
+      return true;
+    }
+
+    if (!this.isStrict && isResolved !== false) {
+      for (const name of workspaceNames) {
+        const hosts = this.getHostDependenciesFor(name, packageName);
+        if (hosts.length === 0) continue;
+        const m = this._manifests.get(name);
+        if (m && hosts.some(h => m.allDependencies.has(h.name))) {
+          this.addReferencedDependency(name, packageName);
+          return true;
+        }
+      }
+    }
+
     this.addReferencedDependency(workspace.name, packageName);
 
     return false;
@@ -231,14 +245,11 @@ export class DependencyDeputy {
 
   public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
     if (!this.isReportDependencies) return new Set();
-    if (IGNORED_GLOBAL_BINARIES.has(binaryName)) return new Set();
 
-    this.addReferencedBinary(workspace.name, binaryName);
-
-    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...[...workspace.ancestors].reverse()];
+    const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
 
     for (const name of workspaceNames) {
-      const binaries = this.getInstalledBinaries(name);
+      const binaries = this.installedBinaries.get(name);
       if (binaries?.has(binaryName)) {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
@@ -265,7 +276,7 @@ export class DependencyDeputy {
 
     for (const [workspace, { manifestPath: filePath, manifestStr }] of this._manifests) {
       const referencedDependencies = this.referencedDependencies.get(workspace);
-      const hasTypesIncluded = this.getHasTypesIncluded(workspace);
+      const hasTypesIncluded = this.hasTypesIncluded.get(workspace);
       const peeker = new PackagePeeker(manifestStr);
 
       const isReferencedDependency = (dependency: string, visited = new Set<string>()): boolean => {
@@ -291,8 +302,7 @@ export class DependencyDeputy {
             ...this.getHostDependenciesFor(workspace, dependency),
             ...this.getHostDependenciesFor(workspace, typedPackageName),
           ];
-          if (hostDependencies.length)
-            return !!hostDependencies.find(host => isReferencedDependency(host.name, visited));
+          if (hostDependencies.length) return hostDependencies.some(host => isReferencedDependency(host.name, visited));
 
           if (!referencedDependencies?.has(dependency)) return false;
 
@@ -321,7 +331,7 @@ export class DependencyDeputy {
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
-        if (!isReferencedDependency(symbol)) continue;
+        if (!referencedDependencies?.has(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
         const pos = peeker.getLocation('optionalPeerDependencies', symbol);
         optionalPeerDependencyIssues.push({
@@ -383,11 +393,6 @@ export class DependencyDeputy {
       const issueSet = issues[type][key];
       for (const issueKey in issueSet) {
         const issue = issueSet[issueKey];
-        if (IGNORED_GLOBAL_BINARIES.has(issue.symbol)) {
-          delete issueSet[issueKey];
-          counters[type]--;
-          continue;
-        }
         const manifest = this.getWorkspaceManifest(issue.workspace);
         if (manifest) {
           const ignoreItem = findMatch(manifest.ignoreBinaries, issue.symbol);

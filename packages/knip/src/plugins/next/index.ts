@@ -1,7 +1,12 @@
+import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
+import { isDirectory } from '../../util/fs.ts';
+import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { getPageExtensions } from './resolveFromAST.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -11,7 +16,7 @@ const enablers = ['next'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['next.config.{js,ts,cjs,mjs}'];
+const config = ['next.config.{js,ts,cjs,mjs,mts}'];
 
 const defaultPageExtensions = ['{js,jsx,ts,tsx}'];
 
@@ -21,25 +26,76 @@ const productionEntryFilePatterns = [
   'app/**/{icon,apple-icon,opengraph-image,twitter-image}.{js,jsx,ts,tsx}',
 ];
 
-const getEntryFilePatterns = (pageExtensions = defaultPageExtensions) => {
+const rootOrSrc = '{,src/}';
+
+// Next.js resolves the pages and app directories independently: the root dir wins, src/ is used when it's absent
+// (up to v15 the two can live in different locations, e.g. root pages/ with src/app; v16 requires the same parent)
+// https://nextjs.org/docs/app/api-reference/file-conventions/src-folder
+const getRouterDirPrefix = (cwd: string | undefined, name: 'pages' | 'app') => {
+  if (!cwd) return rootOrSrc;
+  if (isDirectory(cwd, name)) return '';
+  if (isDirectory(cwd, `src/${name}`)) return 'src/';
+  return rootOrSrc;
+};
+
+const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: string) => {
   const ext = pageExtensions.length === 1 ? pageExtensions[0] : `{${pageExtensions.join(',')}}`;
+  const appDirPrefix = getRouterDirPrefix(cwd, 'app');
+  const pagesDirPrefix = getRouterDirPrefix(cwd, 'pages');
   return [
-    ...productionEntryFilePatterns,
-    `{instrumentation,instrumentation-client,middleware,proxy}.${ext}`,
-    `app/global-{error,not-found}.${ext}`,
-    `app/**/{default,error,forbidden,loading,not-found,unauthorized}.${ext}`,
-    `app/**/{layout,page,route,template}.${ext}`,
-    `pages/**/*.${ext}`,
-  ].flatMap(pattern => [pattern, `src/${pattern}`]);
+    ...productionEntryFilePatterns.map(pattern => `${appDirPrefix}${pattern}`),
+    `${rootOrSrc}{instrumentation,instrumentation-client,middleware,proxy}.${ext}`,
+    `${appDirPrefix}app/global-{error,not-found}.${ext}`,
+    `${appDirPrefix}app/**/{default,error,forbidden,loading,not-found,unauthorized}.${ext}`,
+    `${appDirPrefix}app/**/{layout,page,route,template}.${ext}`,
+    `${pagesDirPrefix}pages/**/*.${ext}`,
+  ];
 };
 
 const production = getEntryFilePatterns();
 
-const resolveFromAST: ResolveFromAST = program => {
-  const pageExtensions = getPageExtensions(program);
-  const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
-  const patterns = getEntryFilePatterns(extensions);
-  return patterns.map(id => toProductionEntry(id));
+const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
+  const pageExtensions = new Set<string>();
+  const loaders = new Set<string>();
+  const collectLoaders = (node: Expression | SpreadElement | null) => {
+    if (node?.type === 'ArrayExpression') {
+      for (const element of node.elements) collectLoaders(element);
+    } else {
+      const loader = getStringValue(node) ?? getStringValue(findProperty(node, 'loader'));
+      if (loader) loaders.add(loader);
+      const nested = findProperty(node, 'loaders');
+      if (nested?.type === 'ArrayExpression') collectLoaders(nested);
+    }
+  };
+
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
+      const rules = findProperty(findProperty(node, 'turbopack'), 'rules');
+      if (rules?.type !== 'ObjectExpression') return;
+      for (const rule of rules.properties) {
+        if (rule.type === 'Property') collectLoaders(rule.value);
+      }
+    },
+  });
+  visitor.visit(program);
+
+  const extensions = pageExtensions.size > 0 ? [...pageExtensions] : defaultPageExtensions;
+  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
+  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
+  for (const loader of loaders) inputs.push(toDeferResolve(loader));
+  return inputs;
+};
+
+const commands = new Set(['dev', 'build', 'start']);
+
+const args: Args = {
+  boolean: ['turbo', 'turbopack'],
+  resolveInputs: parsed => {
+    const dir = commands.has(parsed._[0]) ? parsed._[1] : undefined;
+    if (!dir) return [];
+    return [toConfig('next', join(dir, 'next.config'))];
+  },
 };
 
 const plugin: Plugin = {
@@ -49,6 +105,7 @@ const plugin: Plugin = {
   config,
   production,
   resolveFromAST,
+  args,
 };
 
 export default plugin;

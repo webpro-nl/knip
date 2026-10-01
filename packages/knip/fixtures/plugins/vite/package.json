@@ -5,9 +5,17 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "linked-package": "*",
+    "many-components": "*",
+    "shared-state": "*",
+    "upstream-esm": "*",
+    "native-renderer": "*"
+  },
   "devDependencies": {
-    "@vitejs/plugin-react": "*",
+    "@babel/preset-typescript": "*",
     "@emotion/babel-plugin": "*",
+    "@vitejs/plugin-react": "*",
     "vite": "*"
   }
 }

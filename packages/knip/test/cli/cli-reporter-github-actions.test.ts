@@ -4,7 +4,7 @@ import { resolve } from '../../src/util/path.ts';
 import { showDiff } from '../helpers/diff.ts';
 import { exec } from '../helpers/exec.ts';
 
-const moduleCwd = resolve('fixtures/module-resolution-non-std');
+const moduleCwd = resolve('fixtures/resolution/module-resolution-non-std');
 
 test('knip --reporter github-actions (files, unlisted & unresolved)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: moduleCwd }).stdout;
@@ -19,7 +19,7 @@ Unresolved imports (1)
   assert.equal(actual, expected);
 });
 
-const rulesCwd = resolve('fixtures/rules');
+const rulesCwd = resolve('fixtures/tags-hints/rules');
 
 test('knip --reporter github-actions (rules: unused export, unused dep, unresolved)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: rulesCwd }).stdout;
@@ -51,7 +51,7 @@ Duplicate exports (1)
   assert.equal(actual, expected);
 });
 
-const workspacesCwd = resolve('fixtures/workspaces');
+const workspacesCwd = resolve('fixtures/workspaces/basic');
 
 test('knip --reporter github-actions (workspaces: unused export, unused dep, unlisted dep)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: workspacesCwd }).stdout;
@@ -141,7 +141,7 @@ Unused exports (1)
   assert.equal(actual, expected);
 });
 
-const configHintsCwd = resolve('fixtures/configuration-hints');
+const configHintsCwd = resolve('fixtures/tags-hints/configuration-hints');
 
 test('knip --reporter github-actions (configuration hints)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: configHintsCwd }).stdout;
@@ -162,7 +162,7 @@ test('knip --reporter github-actions --no-config-hints', () => {
   assert.equal(actual, expected);
 });
 
-const configHints2Cwd = resolve('fixtures/configuration-hints2');
+const configHints2Cwd = resolve('fixtures/tags-hints/configuration-hints2');
 
 test('knip --reporter github-actions (configuration hints 2)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: configHints2Cwd }).stdout;
@@ -193,6 +193,28 @@ test('knip --reporter github-actions (treatConfigHintsAsErrors: true)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: treatConfigHintsAsErrors2Cwd }).stdout;
   const expected = `Configuration hints (1)
 ::error file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove from ignoreDependencies: bananas in package.json`;
+  if (actual !== expected) showDiff(actual, expected);
+  assert.equal(actual, expected);
+});
+
+const treatTagHintsAsErrorsCwd = resolve('fixtures/treat-tag-hints-as-errors');
+
+test('knip --reporter github-actions --treat-tag-hints-as-errors', () => {
+  const actual = exec('knip --reporter github-actions --treat-tag-hints-as-errors', {
+    cwd: treatTagHintsAsErrorsCwd,
+  }).stdout;
+  const expected = `Tag hints (1)
+::error file=module.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Tag hints::Unused tag in module.ts: greeting → @internal`;
+  if (actual !== expected) showDiff(actual, expected);
+  assert.equal(actual, expected);
+});
+
+const treatTagHintsAsErrors2Cwd = resolve('fixtures/treat-tag-hints-as-errors2');
+
+test('knip --reporter github-actions (treatTagHintsAsErrors: true)', () => {
+  const actual = exec('knip --reporter github-actions', { cwd: treatTagHintsAsErrors2Cwd }).stdout;
+  const expected = `Tag hints (1)
+::error file=module.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Tag hints::Unused tag in module.ts: greeting → @internal`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });

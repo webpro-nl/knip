@@ -1,18 +1,21 @@
 ---
 title: Reporters & Preprocessors
+description: Knip's built-in reporters (including the shape of `knip --reporter json` for scripts, CI and coding agents), plus custom reporters and preprocessors.
 ---
 
 ## Built-in Reporters
 
 Knip provides the following built-in reporters:
 
-- `codeowners`
+- [`codeclimate`][1]
+- [`codeowners`][2]
 - `compact`
-- [`disclosure`][1]
-- [`github-actions`][2]
-- [`json`][3]
-- [`markdown`][4]
-- [`codeclimate`][5]
+- [`cycles`][3]
+- [`disclosure`][4]
+- [`github-actions`][5]
+- [`json`][6]
+- [`markdown`][7]
+- [`sarif`][8]
 - `symbols` (default)
 
 Example usage:
@@ -21,105 +24,82 @@ Example usage:
 knip --reporter compact
 ```
 
-### JSON
+### CodeClimate
 
-The built-in `json` reporter output is meant to be consumed by other tools. It
-reports in JSON format with unused `files` and `issues` as an array with one
-object per file structured like this:
+The built-in `codeclimate` reporter generates output in the Code Climate Report
+JSON format. Example usage:
 
-```json
-{
-  "issues": [
-    {
-      "file": "package.json",
-      "owners": ["@org/admin"],
-      "dependencies": [{ "name": "jquery", "line": 5, "col": 6, "pos": 71 }],
-      "devDependencies": [{ "name": "lodash", "line": 9, "col": 6, "pos": 99 }],
-      "unlisted": [{ "name": "react" }, { "name": "@org/unresolved" }],
-      "exports": [],
-      "types": [],
-      "duplicates": []
-    },
-    {
-      "file": "src/Registration.tsx",
-      "owners": ["@org/owner"],
-      "dependencies": [],
-      "devDependencies": [],
-      "binaries": [],
-      "unresolved": [
-        { "name": "./unresolved", "line": 8, "col": 23, "pos": 407 }
-      ],
-      "exports": [{ "name": "unusedExport", "line": 1, "col": 14, "pos": 13 }],
-      "types": [
-        { "name": "unusedEnum", "line": 3, "col": 13, "pos": 71 },
-        { "name": "unusedType", "line": 8, "col": 14, "pos": 145 }
-      ],
-      "enumMembers": [
-        {
-          "namespace": "MyEnum",
-          "name": "unusedMember",
-          "line": 13,
-          "col": 3,
-          "pos": 167
-        },
-        {
-          "namespace": "MyEnum",
-          "name": "unusedKey",
-          "line": 15,
-          "col": 3,
-          "pos": 205
+```text
+$ knip --reporter codeclimate
+
+[
+  {
+    "type": "issue",
+    "check_name": "Unused exports",
+    "description": "isUnused",
+    "categories": ["Bug Risk"],
+    "location": {
+      "path": "path/to/file.ts",
+      "positions": {
+        "begin": {
+          "line": 6,
+          "column": 1
         }
-      ],
-      "duplicates": ["Registration", "default"]
-    }
-  ]
-}
+      }
+    },
+    "severity": "major",
+    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84"
+  }
+]
 ```
 
-The keys match the [reported issue types][6]. Example usage:
+### CODEOWNERS
+
+When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
+Point the reporter at a different path through [`--reporter-options`][9]:
 
 ```sh
-knip --reporter json
+knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 ```
 
-### GitHub Actions
+### Cycles
 
-Use the GitHub Actions reporter in a workflow for annotations in pull requests.
-Example usage:
+A verbose, multi-line tree view of [circular dependencies][10]. Each file path
+is suffixed with the location of the import that continues the cycle. Each edge
+shows the import kind and specifier, descends one file per level, and closes
+(`↩`) back to the file it started from.
 
-```sh
-knip --reporter github-actions
+Use `--cycles` to report only circular dependencies and `--reporter cycles` to
+display them as a tree:
+
+```text
+$ knip --cycles --reporter cycles
+
+Circular dependencies (1)
+
+src/i18n/index.ts:1:28
+└── import ./middleware → src/i18n/middleware.ts:3:15
+    └── re-export ../core/i18n/handler → src/core/i18n/handler.ts:5:10
+        └── import ../../i18n → src/i18n/index.ts:1:28 ↩
 ```
 
-Changed files in pull requests will now contain inline annotations for lint
-findings.
+Knip reports representative cycle paths found while walking the module graph.
+This is not an exhaustive list of every possible simple cycle in a cyclic
+subgraph, because that can produce a noisy and very large report. If the same
+file participates in multiple distinct reported paths, each path is shown
+separately.
 
-### Markdown
+Use [`cycles.allow`][11] to accept known cycle paths.
 
-The built-in `markdown` reporter output is meant to be saved to a Markdown file.
-This allows following the changes in issues over time. It reports issues in
-Markdown tables separated by issue types as headings, for example:
+Dynamic imports are ignored by default because they are commonly used to avoid
+synchronous circular loads. Set [`cycles.dynamicImports`][11] to include them.
+Repeated starting imports are grouped under one heading.
 
-```md
-# Knip report
+For one line per cycle path, use `knip --cycles` with the default reporter. To
+report unused code as well, [combine the issue-type shorthands][12].
 
-## Unused files (1)
-
-- src/unused.ts
-
-## Unlisted dependencies (2)
-
-| Name            | Location          | Severity |
-| :-------------- | :---------------- | :------- |
-| unresolved      | src/index.ts:8:23 | error    |
-| @org/unresolved | src/index.ts:9:23 | error    |
-
-## Unresolved imports (1)
-
-| Name         | Location           | Severity |
-| :----------- | :----------------- | :------- |
-| ./unresolved | src/index.ts:10:12 | error    |
-```
+Cycles are warnings by default. Set `"rules": { "cycles": "error" }` to make
+reported cycles cause a non-zero exit code.
 
 ### Disclosure
 
@@ -173,33 +153,133 @@ unused-dep     package.json:20:5
 
 </details>
 
-### CodeClimate
+### GitHub Actions
 
-The built-in `codeclimate` reporter generates output in the Code Climate Report
-JSON format. Example usage:
+Use the GitHub Actions reporter in a workflow for annotations in pull requests.
+Example usage:
 
-```text
-$ knip --reporter codeclimate
+```sh
+knip --reporter github-actions
+```
 
-[
-  {
-    "type": "issue",
-    "check_name": "Unused exports",
-    "description": "isUnused",
-    "categories": ["Bug Risk"],
-    "location": {
-      "path": "path/to/file.ts",
-      "positions": {
-        "begin": {
-          "line": 6,
-          "column": 1
-        }
-      }
+Changed files in pull requests will now contain inline annotations for lint
+findings.
+
+### JSON
+
+The `json` reporter prints machine-readable results for scripts, CI, and tools
+(including coding agents) to consume:
+
+```sh
+knip --reporter json
+```
+
+Output is one line of JSON. Formatted here for readability:
+
+```json
+{
+  "issues": [
+    {
+      "file": "src/legacy.ts",
+      "files": [{ "name": "src/legacy.ts" }]
+    },
+    {
+      "file": "src/math.ts",
+      "exports": [{ "name": "factorial", "line": 12, "col": 14, "pos": 256 }],
+      "types": [{ "name": "Radians", "line": 20, "col": 13, "pos": 410 }]
+    },
+    {
+      "file": "package.json",
+      "dependencies": [{ "name": "lodash" }],
+      "unlisted": [{ "name": "rimraf" }]
     }
-    "severity": "major",
-    "fingerprint": "e9789995c1fe9f7d75eed6a0c0f89e84",
-  }
-]
+  ]
+}
+```
+
+The top level is an object with a single `issues` array. Each element groups
+every issue found in one file:
+
+| Field        | Type         | Notes                                               |
+| :----------- | :----------- | :-------------------------------------------------- |
+| `file`       | `string`     | Path relative to the working directory              |
+| `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
+| _issue type_ | array        | One key per enabled issue type (see below)          |
+
+Each entry carries a key for **every enabled [issue type][10]**, so the keys are
+the same across entries. An array is empty when that file has no issues of that
+type. Drop a type's key by disabling it with [filters or rules][12].
+
+Issue-type items are objects with position info:
+
+| Field       | Type      | Notes                                          |
+| :---------- | :-------- | :--------------------------------------------- |
+| `name`      | `string`  | The unused symbol, dependency, file, or import |
+| `namespace` | `string?` | Set for namespace members                      |
+| `line`      | `number?` | 1-based line                                   |
+| `col`       | `number?` | 1-based column                                 |
+| `pos`       | `number?` | Character offset                               |
+
+See [Issue types][10] for the full set of issue-type keys.
+
+For a typed object instead of JSON to parse, write a [custom reporter][13].
+Coding agents can also call Knip through the [MCP server][14], which returns
+structured results and configuration hints directly.
+
+### SARIF
+
+The `sarif` reporter emits [SARIF 2.1.0][15] for code-scanning integrations:
+
+```sh
+knip --reporter sarif > knip.sarif
+```
+
+For example, upload the report to GitHub Code Scanning after installing project
+dependencies:
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+steps:
+  - uses: actions/checkout@v4
+  - run: pnpm exec knip --reporter sarif > knip.sarif
+  - if: always()
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: knip.sarif
+```
+
+The upload step runs even when Knip finds issues and exits non-zero. GitHub Code
+Scanning availability for private repositories depends on the repository's
+GitHub Code Security plan.
+
+### Markdown
+
+The built-in `markdown` reporter output is meant to be saved to a Markdown file.
+This allows following the changes in issues over time. It reports issues in
+Markdown tables separated by issue types as headings, for example:
+
+```md
+# Knip report
+
+## Unused files (1)
+
+- src/unused.ts
+
+## Unlisted dependencies (2)
+
+| Name            | Location          | Severity |
+| :-------------- | :---------------- | :------- |
+| unresolved      | src/index.ts:8:23 | error    |
+| @org/unresolved | src/index.ts:9:23 | error    |
+
+## Unresolved imports (1)
+
+| Name         | Location           | Severity |
+| :----------- | :----------------- | :------- |
+| ./unresolved | src/index.ts:10:12 | error    |
 ```
 
 ## Custom Reporters
@@ -217,7 +297,7 @@ supports a local JavaScript or TypeScript file or an external dependency.
 The default export of the reporter should be a function with this interface:
 
 ```ts
-type Reporter = async (options: ReporterOptions): void;
+type Reporter = (options: ReporterOptions) => void;
 
 type ReporterOptions = {
   report: Report;
@@ -274,7 +354,7 @@ reporters. There are no built-in preprocessors. Just like reporters, use e.g.
 The default export of the preprocessor should be a function with this interface:
 
 ```ts
-type Preprocessor = async (options: ReporterOptions) => ReporterOptions;
+type Preprocessor = (options: ReporterOptions) => ReporterOptions;
 ```
 
 Like reporters, you can use local JavaScript or TypeScript files and external
@@ -299,9 +379,26 @@ Example usage:
 knip --preprocessor ./preprocess.ts
 ```
 
-[1]: #disclosure
-[2]: #github-actions
-[3]: #json
-[4]: #markdown
-[5]: #codeclimate
-[6]: ../reference/issue-types.md
+Preprocessors can also be configured in the Knip configuration file:
+
+```json title="knip.json"
+{
+  "preprocessor": "./preprocess.ts"
+}
+```
+
+[1]: #codeclimate
+[2]: #codeowners
+[3]: #cycles
+[4]: #disclosure
+[5]: #github-actions
+[6]: #json
+[7]: #markdown
+[8]: #sarif
+[9]: ../reference/cli.md#--reporter-options-json
+[10]: ../reference/issue-types.md
+[11]: ../reference/configuration.md#cycles
+[12]: ./rules-and-filters.md
+[13]: #custom-reporters
+[14]: ../reference/integrations.md
+[15]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html

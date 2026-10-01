@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/turbo3",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/symbol-reporter-directory",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "knip": {
+    "entry": ["src/index.ts"],
+    "project": ["src/**/*.ts", "packages/client/src/**/*.ts"]
+  }
+}

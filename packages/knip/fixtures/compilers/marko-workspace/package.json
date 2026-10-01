@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/compilers-marko-workspace",
+  "workspaces": ["packages/*"],
+  "dependencies": {
+    "@orchard/basket-tags": "*"
+  },
+  "devDependencies": {
+    "marko": "*"
+  }
+}

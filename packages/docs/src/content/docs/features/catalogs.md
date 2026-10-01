@@ -1,0 +1,69 @@
+---
+title: Catalogs
+description: How Knip finds unused pnpm, Yarn and Bun catalog entries referenced through the `catalog:` protocol, and removes them with auto-fix.
+---
+
+Catalogs let you define dependency version ranges once and reference them across
+workspaces in a monorepo. Knip reports catalog entries that are defined but no
+longer referenced, and references to entries that do not exist. It can remove
+unused entries with [auto-fix][1].
+
+## Supported catalogs
+
+Knip reads catalogs from the first applicable location:
+
+- `pnpm-workspace.yaml` — the `catalog` (default) and `catalogs` (named) keys
+- `.yarnrc.yml` — the `catalog` and `catalogs` keys
+- `package.json` — the `catalog` and `catalogs` keys
+- `package.json#workspaces` — the `catalog` and `catalogs` keys (Bun)
+
+## Unused catalog entries
+
+A catalog entry is reported as unused when no workspace references it through
+the `catalog:` protocol in its `package.json`:
+
+```json title="packages/app/package.json"
+{
+  "dependencies": {
+    "react": "catalog:",
+    "zod": "catalog:validation"
+  }
+}
+```
+
+`catalog:` references the `default` catalog, while `catalog:validation`
+references the named `validation` catalog. References are resolved from
+`dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`,
+`resolutions`, `pnpm-workspace.yaml#overrides`, and `pnpm.overrides` in the root
+`package.json` (pnpm 10 and older).
+
+Entries defined in a catalog but not referenced anywhere are reported as [unused
+catalog entries][2].
+
+## Unresolved catalog references
+
+A `catalog:` reference is reported when the selected catalog does not define
+that package. These issues point to the consuming `package.json` or
+`pnpm-workspace.yaml`, where package managers would otherwise fail to resolve
+the version.
+
+## Filter and fix
+
+The `catalog` and `catalogReferences` issue types are included by the
+[`--dependencies`][3] shortcut. Focus on them (or exclude them) like any other
+issue type:
+
+```sh
+knip --include catalog,catalogReferences
+knip --exclude catalog,catalogReferences
+```
+
+[Auto-fix][1] removes unused catalog entries from the catalog file:
+
+```sh
+knip --fix --fix-type catalog
+```
+
+[1]: ./auto-fix.mdx#catalog-entries
+[2]: ../reference/issue-types.md
+[3]: ./rules-and-filters.md#shorthands

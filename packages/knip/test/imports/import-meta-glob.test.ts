@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const cwd = resolve('fixtures/imports/import-meta-glob');
+
+test('Resolve import.meta.glob patterns as entry files', async () => {
+  const options = await createOptions({ cwd });
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    exports: 2,
+    processed: 10,
+    total: 10,
+  });
+  assert(!issues.files['raw/orphan.ts']);
+  assert(issues.exports['raw/orphan.ts'].orphan);
+  assert(issues.exports['raw/used.ts'].unusedExport);
+});

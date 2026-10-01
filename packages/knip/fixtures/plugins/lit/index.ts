@@ -1,0 +1,9 @@
+import './my-element.js';
+import './separate-element.js';
+import './namespace-element.js';
+import './aliased-element.js';
+import './anonymous-element.js';
+import './not-lit-element.js';
+import './imported-non-lit-element.js';
+import './scoped-collision-element.js';
+import './aliased-export-element.js';

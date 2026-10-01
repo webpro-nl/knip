@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/vite-plugin-vue-layouts-custom-dir",
+  "dependencies": {
+    "vue": "*",
+    "vite-plugin-vue-layouts-next": "*"
+  }
+}

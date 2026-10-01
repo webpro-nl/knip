@@ -1,26 +1,31 @@
 ---
-title: Handling Issues
-sidebar:
-  order: 3
+title: Resolve reported issues
+description: Fix Knip findings by issue type, covering unused files, dependencies, unresolved imports, and unused exports, with common causes and solutions.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Issues reported by Knip may contain false positives, but also tons of useful
-information. Getting the most out of Knip may require some configuration.
+When Knip reports something you didn't expect, it's telling the truth about its
+[module graph][1]: it couldn't reach that code from an entry file. So a
+surprising result is usually a real finding or a configuration gap, not a false
+positive to silence. The fix is to teach Knip about your project, issue type by
+issue type.
 
-Go over the issue types one by one. For instance, reducing the number of unused
-files will also reduce the number of unused dependencies.
+Work the types top-down. Findings come in chains, so reducing unused files also
+reduces unused exports and dependencies:
 
-1. [Unused files][1]
-2. [Unused dependencies][2]
-3. [Unresolved imports][3]
-4. [Unused exports][4]
+1. [Unused files][2]
+2. [Unresolved imports][3]
+3. [Unused exports][4]
+4. [Unused dependencies][5]
+
+Reach for `ignore*` options only as a last resort, and never before reading
+[Configuring project files][6]. Hiding a result is not the same as resolving it.
 
 :::tip
 
-Try the [Knip Editor Extension][5]! Let your coding agent use the built-in
-MCP Server and create a custom `knip.json` for you.
+Let your coding agent do this for you: the [Knip Editor Extension][7] ships an
+MCP server that uses these docs to write `knip.json` for any project.
 
 :::
 
@@ -36,27 +41,26 @@ unused files = project files - (entry files + resolved files)
 
 :::tip
 
-Addressing reported [Configuration Hints][6] first might help significantly,
+Addressing reported [Configuration Hints][8] first might help significantly,
 especially when handling unused files.
 
 :::
 
 Common causes for unused files include:
 
-- [Missing generated files][7]
-- [Dynamic import specifiers][8]
-- [Unsupported arguments in scripts][9]
-- [Unsupported file formats][10]
-- [Missing plugin][11]
-- [Incomplete plugin][12]
-- [TypeScript path aliases in monorepos][13]
-- [Relative paths across workspaces][14]
-- [Integrated monorepos][15]
-- [Auto-mocking or auto-imports][16]
+- [Missing generated files][9]
+- [Dynamic import specifiers][10]
+- [Unsupported arguments in scripts][11]
+- [Unsupported file formats][12]
+- [Missing plugin][13]
+- [Incomplete plugin][14]
+- [Relative paths across workspaces][15]
+- [Integrated monorepos][16]
+- [Auto-mocking or auto-imports][17]
 
 In most cases you can add `entry` patterns manually.
 
-Use `--files` to [filter the report][17] and focus only on unused files:
+Use `--files` to [filter the report][18] and focus only on unused files:
 
 ```sh
 knip --files
@@ -69,8 +73,8 @@ exports.
 :::caution
 
 Don't add unused files to the `ignore` option before reading [configuring
-project files][18]. Learn why and when to use `entry`, `project`, production
-mode and `ignore*` patterns for better results and performance.
+project files][6]. Learn why and when to use `entry`, `project`, production mode
+and `ignore*` patterns for better results and performance.
 
 :::
 
@@ -160,41 +164,6 @@ file pattern yet. See the [plugins section of entry files][25] for more details.
 **Solution**: [override plugin configuration][26] to customize default patterns
 for existing plugins. Or even better: send a pull request to improve the plugin.
 
-### TypeScript path aliases in monorepos
-
-When using TypeScript path aliases in import specifiers, aliases referencing
-other workspaces are not special-cased. This may cause false positives. For
-Knip, it's better to be explicit and list other workspaces as dependencies in
-`package.json`.
-
-**Solution**: move such "workspace aliases" from `compilerOptions`...
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "paths": {
-      "@org/common/*": ["packages/common/*"]
-    }
-  }
-}
-```
-
-...to `dependencies` or `devDependencies` in `package.json`:
-
-```json title="package.json"
-{
-  "name": "@org/lib",
-  "dependencies": {
-    "@org/common": "workspace:*"
-  }
-}
-```
-
-An additional benefit is that Knip will report unused and unlisted dependencies
-from now on.
-
-Also see [FAQ: Why can't I use path aliases to reference other workspaces?][27]
-
 ### Relative paths across workspaces
 
 Relative paths to import from other workspaces are not special-cased. For Knip,
@@ -216,15 +185,13 @@ import { something } from '@org/common';
 An additional benefit is that Knip will report unused and unlisted dependencies
 from now on.
 
-Also see [TypeScript path aliases in monorepos][13].
-
 ### Integrated monorepos
 
 Multiple instances of configuration files like `.eslintrc` and
 `jest.config.json` across the repository may be reported as unused when working
 in a (mono)repo with a single `package.json`.
 
-**Solution**: see [integrated monorepos][28] for more details and how to
+**Solution**: see [integrated monorepos][27] for more details and how to
 configure plugins to target those configuration files.
 
 ### Auto-mocking or auto-imports
@@ -250,21 +217,232 @@ negated `project` patterns:
 }
 ```
 
+## Unresolved imports
+
+Knip may ignore or be unable to resolve an import specifier or dependency
+references. The most common causes for unresolved imports:
+
+- [Template strings][28]
+- [Extensionless imports][29]
+- [Unrecognized path aliases][30]
+- [External aliased imports][31]
+
+### Template strings
+
+Using template strings in dynamic imports might be ignored or not handled
+properly by Knip, resulting in false positives. Examples of dynamic import
+template strings:
+
+```ts
+import(`./${value}.ts`);
+import(`@org/name/dist/${value}.js`);
+```
+
+**Solution**: for internal source files, add the file(s) to the `entry`
+patterns. For external dependencies, add the dependency to the
+`ignoreDependencies` list.
+
+### Extensionless imports
+
+Knip does not support extensionless imports for some non-standard extensions,
+such as for `.svg` files. Bundlers like Webpack may support this, but Knip does
+not. Here's an example:
+
+```ts title="App.vue"
+import Component from './Component';    // → ✅ Should resolve to ./Component.vue
+import ArrowIcon from '../icons/Arrow'; // → ❌ Does NOT resolve to ../icons/Arrow.svg
+```
+
+The first import is resolved properly, because `.vue` is a known extension if a
+compiler is registered for that extension (e.g. via the Vue plugin). The second
+import might not be resolved, because `.svg` is not a known extension.
+
+**Solution**: include the extension. Hosts supporting ES Modules (e.g. Node.js,
+browsers) require a file extension for import specifiers.
+
+### Unrecognized path aliases
+
+Knip resolves config paths, aliases from enabled plugins that read framework
+config (e.g. Vite/Webpack `resolve.alias`, SvelteKit `$lib`, Nuxt `~/@`, Astro,
+Docusaurus), and [paths configured in knip.json][32].
+
+Aliases go unrecognized only when no plugin covers the tool, the plugin is
+disabled, or the alias lives somewhere Knip doesn't read.
+
+**Solution**: configure [paths][32] or try relative imports. Otherwise, use
+[`ignoreUnresolved`][33] as a last resort.
+
+### External aliased imports
+
+External libraries may use virtual modules not declared in `tsconfig.json`,
+`knip.json` or readable from a plugin's config.
+
+For instance, [unplugin-icons][34] does this to import icons from icon sets as
+components. Such imports are reported as unused. Use the [`paths` configuration
+option][32] to tell Knip where to find the icon types:
+
+```json title="knip.json"
+{
+  "paths": {
+    "~icons/*": ["node_modules/unplugin-icons/types/[framework].d.ts"]
+  }
+}
+```
+
+Where `[framework]` is the name of the framework you're using (see [available
+types][35]).
+
+**Solution**: configure [paths][32].
+
+## Unused exports
+
+By default, Knip does not report unused exports of `entry` files.
+
+The most common causes for unused exports include:
+
+- [Namespace enumerations][36]
+- [External libraries][37]
+- [Custom elements][38]
+- [CommonJS member access][39]
+
+Use the `--exports` flag to [filter][18] and focus only on issues related to
+exports:
+
+```sh
+knip --exports
+```
+
+Use [includeEntryExports][40] to report unused exports of entry files as well.
+This can be set per workspace.
+
+### Namespace enumerations
+
+For exports on an imported namespace, Knip considers all exports referenced if
+that namespace is used in certain patterns like enumeration. Individual exports
+are then **not** reported.
+
+**Solution**: if all exports on imported namespaces should be considered
+individually, include the `nsExports` issue type to disable the heuristic.
+
+See [namespace imports][41] to see all related patterns.
+
+### External libraries
+
+Are the exports consumed or imported by an external library, resulting in a
+non-standard consumption of your exports? Here's an example:
+
+<Tabs>
+  <TabItem label="index.js">
+    ```ts
+    import loadable from '@loadable/component';
+
+    export const DynamicApple = dynamic(() =>
+      import('./components.js').then(mod => mod.Apple)
+    );
+
+    export const LoadableOrange = loadable(() => import('./components.js'), {
+      resolveComponent: components => components.Orange,
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="components.js">
+    ```ts
+    export const Apple = () => 'Apple';
+    export const Orange = () => 'Orange';
+    ```
+  </TabItem>
+</Tabs>
+
+Knip understands `Apple` is used, since it's standard usage. But `Orange` is
+referenced through a function of an external library. Knip includes external
+type definitions to trace such usage, but in some cases it may not be able to
+follow the reference through the library's API.
+
+### Custom elements
+
+A custom element is registered under a tag name rather than imported by its
+class name. Knip recognizes the registration and considers the class used. See
+[Custom Elements][42] for all recognized patterns.
+
+### CommonJS member access
+
+Named exports consumed via member access on a `require`d variable (`const mod =
+require('./mod'); mod.fn()`) are not traced, so they may be reported as unused.
+Destructuring (`const { fn } = require('./mod')`) is traced. See [Working with
+CommonJS][39] for the conventions that avoid these false positives.
+
+### Exclude exports from the report
+
+To exclude false positives from the report, there are a few options:
+
+- [Ignore exports used in file][43] for exports used internally.
+- Individual exports can be [tagged using JSDoc syntax][44].
+- Have the export in an entry file:
+
+  - Add the file to the `entry` file patterns array in the configuration.
+  - Move the export(s) to an entry file.
+  - Add the file to the `exports` field of `package.json`
+- Re-export the unused export(s) from an entry file.
+
+### Missing unused exports?
+
+Did you expect certain exports in the report, but are they missing? They might
+be exported from an entry file. In that case, use [--include-entry-exports][40]
+to make Knip also report unused exports in entry files.
+
+The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
+`.svelte` are not available by default. See [compilers][21] for more details on
+how to include them.
+
+### Enum members
+
+Unused enums and unused members of exported enums are reported by default.
+Reporting such members can be disabled:
+
+```sh
+knip --exclude enumMembers
+```
+
+Individual enum members can be [tagged using JSDoc syntax][44].
+
+Enums exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][40] to make Knip also report members of unused exports
+in entry files.
+
+### Namespace members
+
+Unused members of exported TypeScript namespaces are reported by default.
+Reporting such members can be disabled:
+
+```sh
+knip --exclude namespaceMembers
+```
+
+Individual namespace members can be [tagged using JSDoc syntax][44].
+
+Namespaces exported from entry files are ignored, and so are their members. Use
+[--include-entry-exports][40] to make Knip also report members of unused exports
+in entry files.
+
 ## Unused dependencies
 
 Dependencies imported in unused files are reported as unused dependencies.
-That's why it's strongly recommended to try and remedy [unused files][1] first.
+That's why it's strongly recommended to try and remedy [unused files][2] first.
 Better `entry` and `project` file coverage will solve many cases of reported
 unused dependencies.
 
 The most common causes for unused dependencies include:
 
-- [Missing or incomplete plugins][29]
-- [Unrecognized references][30]
-- [Type Definition Packages][31]
-- [Dependencies named after Node.js builtins][32]
+- [Missing or incomplete plugins][45]
+- [Unrecognized references][29]
+- [Dependencies named after Node.js builtins][46]
+- [Conditional or dynamic dependencies][47]
+- [Type Definition Packages][48]
+- [Unlisted dependencies][49]
+- [Unlisted binaries][50]
 
-Use `--dependencies` to [filter the report][17] and focus only on issues related
+Use `--dependencies` to [filter the report][18] and focus only on issues related
 to dependencies:
 
 ```sh
@@ -298,7 +476,7 @@ so it's a false positive and incorrectly reported as unused.
 like a plugin could solve it, a last resort is to use [ignoreDependencies][24].
 
 If a binary (or "executable") is referenced you'll want to use `ignoreBinaries`
-instead. See [unlisted binaries][33].
+instead. See [unlisted binaries][50].
 
 ### Dependencies named after Node.js builtins
 
@@ -368,13 +546,19 @@ obsolete respectively.
 
 #### Production types
 
-Knip is strict in the divide between `dependencies` and `devDependencies`. Some
-packages are published with one or more type packages listed in `dependencies`.
-In strict production mode, even when re-exported and part of the package's
-public API, Knip does not try to figure out what exactly are "production types"
-and expects those in `devDependencies`.
+In [strict mode][51], a dependency used only in type-only source imports can
+live in `devDependencies`. If the dependency is exposed through the package's
+built declaration files, it is production usage and must instead be listed in
+`dependencies` or required `peerDependencies`.
 
-**Solution**: list exceptions in [ignoreDependencies][24].
+Knip finds this public type graph by following existing declaration files
+exposed through `main`, `types`, `typings`, `exports`, and `typesVersions`. If
+pnpm `publishConfig` overrides those manifest fields, Knip uses their published
+values.
+
+Private workspaces and packages using `publishConfig.directory` are not
+analyzed. Knip only follows existing declaration output and does not guess from
+source imports.
 
 ### Unlisted dependencies
 
@@ -406,7 +590,7 @@ reported as an unlisted binary as there is no package that contains it.
 
 Binaries that are installed on the OS already and thus likely not meant to be
 installed from npm are not reported as unlisted (details: [list of ignored
-binaries in source][34]).
+binaries in source][52]).
 
 #### Missing binaries
 
@@ -416,7 +600,7 @@ either the way your package manager installs dependencies and binaries, or by
 not running Knip from the root of the repository.
 
 **Solution**: run Knip from the project root. If needed, [lint workspaces
-individually][35].
+individually][53].
 
 Sometimes binaries and how they're reported can be a bit confusing. See this
 example:
@@ -441,224 +625,30 @@ technically works, as `commitlint` is a transitive dependency of
 
 **Solution**: use `npx @commitlint/cli`
 
-In some cases, using `npx` in a script may result in Knip not understanding
-intention without an explicit `--yes` or `--no-install` flag.
-
-**Solution**: use `npx --yes` or `npx --no-install` so Knip will either ignore
-or consider the binary and package(s) referenced, respectively.
-
-## Unresolved imports
-
-Knip may ignore or be unable to resolve an import specifier or dependency
-references. The most common causes for unresolved imports:
-
-- [Template strings][36]
-- [Extensionless imports][30]
-- [Unrecognized path aliases][37]
-- [External aliased imports][38]
-
-### Template strings
-
-Using template strings in dynamic imports might be ignored or not handled
-properly by Knip, resulting in false positives. Examples of dynamic import
-template strings:
-
-```ts
-import(`./${value}.ts`);
-import(`@org/name/dist/${value}.js`);
-```
-
-**Solution**: for internal source files, add the file(s) to the `entry`
-patterns. For external dependencies, add the dependency to the
-`ignoreDependencies` list.
-
-### Extensionless imports
-
-Knip does not support extensionless imports for some non-standard extensions,
-such as for `.svg` files. Bundlers like Webpack may support this, but Knip does
-not. Here's an example:
-
-```ts title="App.vue"
-import Component from './Component'; // → Should resolve to ./Component.vue
-import ArrowIcon from '../icons/Arrow'; // → Does NOT resolve to ../icons/Arrow.svg
-```
-
-The first import is resolved properly, because `.vue` is a known extension if
-the Vue plugin is enabled. The second import might not be resolved, because
-`.svg` is not a known extension.
-
-**Solution**: include the extension. Hosts supporting ES Modules (e.g. Node.js,
-browsers) require a file extension for import specifiers.
-
-### Unrecognized path aliases
-
-Knip considers TS config path aliases and [paths configured in knip.json][39],
-but not those in e.g. Webpack or Vite configurations.
-
-**Solution**: configure [paths][39] or try relative imports. Otherwise, use
-[`ignoreUnresolved`][40] as a last resort.
-
-### External aliased imports
-
-External libraries may use aliased imports that aren't resolved by Knip.
-
-For instance, [unplugin-icons][41] does this to import icons from icon sets as
-components. Such imports are reported as unused. Use the [`paths` configuration
-option][39] to tell Knip where to find the icon types:
-
-```json title="knip.json"
-{
-  "paths": {
-    "~icons/*": ["node_modules/unplugin-icons/types/[framework].d.ts"]
-  }
-}
-```
-
-Where `[framework]` is the name of the framework you're using (see [available
-types][42]).
-
-**Solution**: configure [paths][39].
-
-## Unused exports
-
-By default, Knip does not report unused exports of `entry` files.
-
-The most common causes for unused exports include:
-
-- [Namespace enumerations][43]
-- [External libraries][44]
-
-Use the `--exports` flag to [filter][17] and focus only on issues related to
-exports:
-
-```sh
-knip --exports
-```
-
-Use [includeEntryExports][45] to report unused exports of entry files as well.
-This can be set per workspace.
-
-### Namespace enumerations
-
-For exports on an imported namespace, Knip considers all exports referenced if
-that namespace is used in certain patterns like enumeration. Individual exports
-are then **not** reported.
-
-**Solution**: if all exports on imported namespaces should be considered
-individually, include the `nsExports` issue type to disable the heuristic.
-
-See [namespace imports][46] to see all related patterns.
-
-### External libraries
-
-Are the exports consumed or imported by an external library, resulting in a
-non-standard consumption of your exports? Here's an example:
-
-<Tabs>
-  <TabItem label="index.js">
-    ```ts
-    import loadable from '@loadable/component';
-
-    export const DynamicApple = dynamic(() =>
-      import('./components.js').then(mod => mod.Apple)
-    );
-
-    export const LoadableOrange = loadable(() => import('./components.js'), {
-      resolveComponent: components => components.Orange,
-    });
-    ```
-  </TabItem>
-
-  <TabItem label="components.js">
-    ```ts
-    export const Apple = () => 'Apple';
-    export const Orange = () => 'Orange';
-    ```
-  </TabItem>
-</Tabs>
-
-Knip understands `Apple` is used, since it's standard usage. But `Orange` is
-referenced through a function of an external library. Knip includes external
-type definitions to trace such usage, but in some cases it may not be able to
-follow the reference through the library's API.
-
-### Exclude exports from the report
-
-To exclude false positives from the report, there are a few options:
-
-- [Ignore exports used in file][47] for exports used internally.
-- Individual exports can be [tagged using JSDoc syntax][48].
-- Have the export in an entry file:
-
-  - Add the file to the `entry` file patterns array in the configuration.
-  - Move the export(s) to an entry file.
-  - Add the file to the `exports` field of `package.json`
-- Re-export the unused export(s) from an entry file.
-
-### Missing unused exports?
-
-Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][45]
-to make Knip also report unused exports in entry files.
-
-The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
-`.svelte` are not available by default. See [compilers][21] for more details on
-how to include them.
-
-### Enum members
-
-Unused enums and unused members of exported enums are reported by default.
-Reporting such members can be disabled:
-
-```sh
-knip --exclude enumMembers
-```
-
-Individual enum members can be [tagged using JSDoc syntax][48].
-
-Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][45] to make Knip also report members of unused exports
-in entry files.
-
-### Namespace members
-
-Unused members of exported TypeScript namespaces are reported by default.
-Reporting such members can be disabled:
-
-```sh
-knip --exclude namespaceMembers
-```
-
-Individual namespace members can be [tagged using JSDoc syntax][48].
-
-Namespaces exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][45] to make Knip also report members of unused exports
-in entry files.
-
 ## Feedback or false positives?
 
 If you believe Knip incorrectly reports something as unused (i.e. there's a
-false positive), feel free to create a [minimal reproduction][49] and open an
+false positive), feel free to create a [minimal reproduction][54] and open an
 issue on GitHub. It'll make Knip better for everyone!
 
-[1]: #unused-files
-[2]: #unused-dependencies
+[1]: ../explanations/how-knip-works.md
+[2]: #unused-files
 [3]: #unresolved-imports
 [4]: #unused-exports
-[5]: ../reference/integrations.md
-[6]: ../reference/configuration-hints.md
-[7]: #missing-generated-files
-[8]: #dynamic-import-specifiers
-[9]: #unsupported-arguments-in-scripts
-[10]: #unsupported-file-formats
-[11]: #missing-plugin
-[12]: #incomplete-plugin
-[13]: #typescript-path-aliases-in-monorepos
-[14]: #relative-paths-across-workspaces
-[15]: #integrated-monorepos
-[16]: #auto-mocking-or-auto-imports
-[17]: ../features/rules-and-filters.md#filters
-[18]: ./configuring-project-files.md
+[5]: #unused-dependencies
+[6]: ./configuring-project-files.md
+[7]: ../reference/integrations.md
+[8]: ../reference/configuration-hints.md
+[9]: #missing-generated-files
+[10]: #dynamic-import-specifiers
+[11]: #unsupported-arguments-in-scripts
+[12]: #unsupported-file-formats
+[13]: #missing-plugin
+[14]: #incomplete-plugin
+[15]: #relative-paths-across-workspaces
+[16]: #integrated-monorepos
+[17]: #auto-mocking-or-auto-imports
+[18]: ../features/rules-and-filters.md#filters
 [19]: ../features/source-mapping.md
 [20]: ../features/script-parser.md
 [21]: ../features/compilers.md
@@ -667,26 +657,31 @@ issue on GitHub. It'll make Knip better for everyone!
 [24]: ../reference/configuration.md#ignoredependencies
 [25]: ../explanations/plugins.md#entry-files
 [26]: ../explanations/entry-files.md#plugins
-[27]: ../reference/faq.md#why-cant-i-use-path-aliases-to-reference-other-workspaces
-[28]: ../features/integrated-monorepos.md
-[29]: #missing-or-incomplete-plugin
-[30]: #unrecognized-reference
-[31]: #type-definition-packages
-[32]: #dependencies-named-after-nodejs-builtins
-[33]: #unlisted-binaries
-[34]: https://github.com/webpro-nl/knip/blob/e031018e676c47d84873cc2403251c0111ef318d/packages/knip/src/constants.ts#L39-L148
-[35]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[36]: #template-strings
-[37]: #unrecognized-path-aliases
-[38]: #external-aliased-imports
-[39]: ../reference/configuration.md#paths
-[40]: ../reference/configuration.md#ignoreunresolved
-[41]: https://www.npmjs.com/package/unplugin-icons
-[42]: https://github.com/unplugin/unplugin-icons/tree/main/types
-[43]: #namespace-enumerations
-[44]: #external-libraries
-[45]: ../reference/configuration.md#includeentryexports
-[46]: ../guides/namespace-imports.md
-[47]: ../reference/configuration.md#ignoreexportsusedinfile
-[48]: ../reference/jsdoc-tsdoc-tags.md
-[49]: ../guides/issue-reproduction.md
+[27]: ../features/integrated-monorepos.md
+[28]: #template-strings
+[29]: #unrecognized-reference
+[30]: #unrecognized-path-aliases
+[31]: #external-aliased-imports
+[32]: ../reference/configuration.md#paths
+[33]: ../reference/configuration.md#ignoreunresolved
+[34]: https://www.npmx.dev/package/unplugin-icons
+[35]: https://github.com/unplugin/unplugin-icons/tree/main/types
+[36]: #namespace-enumerations
+[37]: #external-libraries
+[38]: #custom-elements
+[39]: ./working-with-commonjs.md
+[40]: ../reference/configuration.md#includeentryexports
+[41]: ../guides/namespace-imports.md
+[42]: ../features/custom-elements.md
+[43]: ../reference/configuration.md#ignoreexportsusedinfile
+[44]: ../reference/jsdoc-tsdoc-tags.md
+[45]: #missing-or-incomplete-plugin
+[46]: #dependencies-named-after-nodejs-builtins
+[47]: #conditional-or-dynamic-dependencies
+[48]: #type-definition-packages
+[49]: #unlisted-dependencies
+[50]: #unlisted-binaries
+[51]: ../features/production-mode.md#strict-mode
+[52]: https://github.com/webpro-nl/knip/blob/e031018e676c47d84873cc2403251c0111ef318d/packages/knip/src/constants.ts#L39-L148
+[53]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[54]: ../guides/issue-reproduction.md

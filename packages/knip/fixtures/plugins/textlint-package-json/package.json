@@ -1,0 +1,21 @@
+{
+  "name": "@plugins/textlint-package-json",
+  "scripts": {
+    "lint": "textlint README.md"
+  },
+  "devDependencies": {
+    "textlint": "*",
+    "textlint-filter-rule-allowlist": "*",
+    "textlint-plugin-latex2e": "*",
+    "textlint-rule-preset-smarthr": "*"
+  },
+  "textlint": {
+    "rules": {
+      "textlint-rule-preset-smarthr": true
+    },
+    "filters": {
+      "allowlist": { "allow": ["knip"] }
+    },
+    "plugins": ["latex2e"]
+  }
+}

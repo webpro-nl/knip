@@ -3,26 +3,32 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { type Input, toBinary, toCatalog, toConfig, toDeferResolve, toDeferResolveEntry, toDependency, toEntry } from '../../src/util/input.ts';
+import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/binaries');
 const containingFilePath = join(cwd, 'package.json');
-const pkgScripts = { cwd, manifestScriptNames: new Set(['program', 'spl:t']) };
-const knownOnly = { cwd, knownBinsOnly: true };
+const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
+const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
+const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
+const forwardedArgs = { cwd, isForwardedArgs: true };
 const opt = { optional: true };
 
 const js = toDeferResolveEntry('./script.js', opt);
 const ts = toDeferResolveEntry('./main.ts', opt);
 const req = toDeferResolve('./require.js');
 
-type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifestScriptNames?: Set<string> }) => void;
+type T = (script: string | string[], dependencies: Input[], options?: { cwd?: string; manifest?: ReturnType<typeof toManifest> }) => void;
 const t: T = (script, dependencies = [], options = { cwd }) =>
   assert.deepEqual(
     _getInputsFromScripts(script, {
+      cwd,
       rootCwd: cwd,
-      manifestScriptNames: new Set(),
+      manifest: toManifest(),
+      rootManifest: undefined,
+      getManifest: () => undefined,
       containingFilePath,
       ...options,
     }),
@@ -46,6 +52,8 @@ test('getInputsFromScripts (unknown programs)', () => {
 
 test('getInputsFromScripts (unknown scripts)', () => {
   t('./script.sh -r 10', [toEntry('./script.sh')]);
+  t('target/release/mytool run', [toEntry('target/release/mytool')]);
+  t('/opt/example-tool --batch', []);
 });
 
 test('getInputsFromScripts (node)', () => {
@@ -75,6 +83,10 @@ test('getInputsFromScripts (node -r)', () => {
   t('node -r @scope/package/register ./dir', [toBinary('node'), toDeferResolveEntry('./dir', opt), toDeferResolve('@scope/package/register')]);
   t('node -r @scope/package/register ./dir/index', [toBinary('node'), toDeferResolveEntry('./dir/index', opt), toDeferResolve('@scope/package/register')]);
   t('node --inspect-brk -r pkg/register node_modules/.bin/exec --runInBand', [toBinary('node'), toBinary('exec'), toDeferResolve('pkg/register')]);
+  t('node --experimental-vm-modules node_modules/.bin/jest --runInBand', [toBinary('node'), toBinary('jest')]);
+  t('node --enable-source-maps --expose-gc node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --experimental-detect-module --experimental-json-modules node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --openssl-legacy-provider node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toDeferResolve('ts-node/register')]);
   t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toDeferResolve('dotenv-flow/config')]);
 });
@@ -97,6 +109,11 @@ test('getInputsFromScripts (.bin)', () => {
   t('node_modules/.bin/tsc --noEmit', [toBinary('tsc')]);
   t('$(npm bin)/tsc --noEmit', [toBinary('tsc')]);
   t('../../../scripts/node_modules/.bin/tsc --noEmit', []);
+  t('./node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], forwardedArgs);
+  t('node_modules/.bin/custom-build-cli', [toBinary('custom-build-cli')], forwardedArgs);
+  t('../../../scripts/node_modules/.bin/custom-build-cli', [], forwardedArgs);
+  t('/opt/node_modules/.bin/custom-build-cli', [], forwardedArgs);
+  t('scripts/check.sh', [], forwardedArgs);
 });
 
 test('getInputsFromScripts (dotenv)', () => {
@@ -107,16 +124,24 @@ test('getInputsFromScripts (dotenv)', () => {
   t('dotenv -- mvn exec:java -Dexec.args="-g -f"', [toBinary('dotenv'), toBinary('mvn')]);
   t('dotenv -- concurrently "npm ci"', [toBinary('dotenv'), toBinary('concurrently')]);
   t('dotenv -- concurrently "next dev" "prisma generate"', [toBinary('dotenv'), toBinary('concurrently'), toBinary('next'), toBinary('prisma')]);
+  t(`dotenv -- concurrently 'echo "next dev"' "prisma generate"`, [toBinary('dotenv'), toBinary('concurrently'), toBinary('echo'), toBinary('prisma')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
   t('cross-env program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env API_URL=https://example.test program', [toBinary('cross-env'), toBinary('program')]);
+  t('cross-env program', [toBinary('cross-env')], forwardedArgs);
   t('cross-env NODE_ENV=production program', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_ENV=production program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS=--max-size=3072 program subcommand', [toBinary('cross-env'), toBinary('program')]);
   t('cross-env NODE_OPTIONS="--loader pkg" knex', [toBinary('cross-env'), toBinary('knex'), toDeferResolve('pkg')]);
   t('NODE_ENV=production cross-env -- program --cache', [toBinary('cross-env'), toBinary('program')]);
   t("NODE_OPTIONS='--require pkg-a --require pkg-b' program", [toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
+  t("NODE_OPTIONS='--require pkg-a' npm run script", [toDeferResolve('pkg-a')]);
+  t("NODE_OPTIONS='--import ./instrumentation.mjs' pnpm exec next dev", [toBinary('next'), toDeferResolve('./instrumentation.mjs')]);
+  t("NODE_OPTIONS='--require pkg-a --require pkg-b' cross-env program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
+  t("NODE_OPTIONS='--require pkg-a' retry-cli program", [toBinary('retry-cli'), toBinary('program'), toDeferResolve('pkg-a')]);
+  t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-b'), toDeferResolve('pkg-a')]);
 });
 
 test('getInputsFromScripts (cross-env/node)', () => {
@@ -134,35 +159,40 @@ test('getInputsFromScripts (nx)', () => {
 test('getInputsFromScripts (npm)', () => {
   t('npm run script', []);
   t('npm run publish:latest -- --npm-tag=debug --no-push', []);
-  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.e2e.config.mts')]);
+  t('npm exec -- vitest -c vitest.e2e.config.mts', [toBinary('vitest', opt), toConfig('vitest', 'vitest.e2e.config.mts')]);
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('npm run program -- run --coverage.enabled', [], pkgScripts);
+  t('npm run with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
 });
 
 test('getInputsFromScripts (npx)', () => {
-  t('npx pkg', [toBinary('pkg')]);
-  t('npx prisma migrate reset --force', [toBinary('prisma')]);
+  t('npx pkg', [toBinary('pkg', opt)]);
+  t('npx prisma migrate reset --force', [toBinary('prisma', opt)]);
   t('npx @scope/pkg', [toDependency('@scope/pkg', opt)]);
-  t('npx tsx watch main', [toBinary('tsx'), toDeferResolveEntry('main', opt)]);
-  t('npx -y pkg', []);
-  t('npx --yes pkg', []);
+  t('npx tsx watch main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
+  t('npx -y pkg', [toBinary('pkg', opt)]);
+  t('npx --yes pkg', [toBinary('pkg', opt)]);
+  t('npx --yes pkg@1.0.0', [toDependency('pkg', opt)]);
+  t('npx --yes --package pkg@1.0.0 custom-build-cli', [toBinary('custom-build-cli', opt), toDependency('pkg', opt)]);
   t('npx --no pkg --edit ${1}', [toBinary('pkg')]);
   t('npx --no -- pkg --edit ${1}', [toBinary('pkg')]);
-  t('npx pkg install --with-deps', [toBinary('pkg')]);
-  t('npx pkg migrate reset --force', [toBinary('pkg')]);
+  t('npx pkg install --with-deps', [toBinary('pkg', opt)]);
+  t('npx pkg migrate reset --force', [toBinary('pkg', opt)]);
   t('npx pkg@1.0.0 migrate reset --force', [toDependency('pkg', opt)]);
   t('npx @scope/cli migrate reset --force', [toDependency('@scope/cli', opt)]);
-  t('npx -- pkg', [toBinary('pkg')]);
+  t('npx -- pkg', [toBinary('pkg', opt)]);
   t('npx -- @scope/cli@1.0.0 migrate reset --force', [toDependency('@scope/cli', opt)]);
   t('npx retry-cli@0.6.0 -- curl --output /dev/null ', [toDependency('retry-cli', opt), toBinary('curl')]);
-  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl'), toDependency('pkg', opt)]);
-  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl'), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
+  t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl', opt), toDependency('pkg', opt)]);
+  t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl', opt), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
   t("npx --package=pkg -c 'curl --output /dev/null'", [toDependency('pkg', opt), toBinary('curl')]);
-  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
-  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api')]);
-  t('npx tsx main', [toBinary('tsx'), toDeferResolveEntry('main', opt)]);
-  t('npx tsx ./main.ts build', [toBinary('tsx'), ts]);
-  t('npx tsx ./main.ts -- build', [toBinary('tsx'), ts]);
+  t('npx license-checker --production --onlyAllow="0BSD;Apache-2.0;BSD-2-Clause;ISC;MIT;"', [toBinary('license-checker', opt)]);
+  t('npx license-checker --excludePackages="pkg-a@1.0.0 pkg-b;pkg-c@2.0.0 pkg-d"', [toBinary('license-checker', opt)]);
+  t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
+  t('npx swagger-typescript-api -- -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
+  t('npx tsx main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
+  t('npx tsx ./main.ts build', [toBinary('tsx', opt), ts]);
+  t('npx tsx ./main.ts -- build', [toBinary('tsx', opt), ts]);
 });
 
 test('getInputsFromScripts (bun)', () => {
@@ -170,55 +200,135 @@ test('getInputsFromScripts (bun)', () => {
   t('bunx cowsay "Hello world!"', [toBinary('cowsay', opt)]);
   t('bunx my-cli --arg value', [toBinary('my-cli', opt)]);
   t('bunx --bun biome format --write', [toBinary('biome', opt)]);
-  t('bun x pkg', [toBinary('pkg', opt)]);
-  t('bun ./main.ts', [toEntry(join(cwd, 'main.ts'))]);
-  t('bun run script.js', [toEntry(join(cwd, 'script.js'))]);
-  t('bun run ./main', [toEntry(join(cwd, 'main.ts'))]);
-  t('bun run --cwd packages/knip watch', []);
-  t('bun test', []);
-  t('bun add zod', []);
-  t('bun install', []);
-  t('bun remove webpack', []);
-  t('bun update lodash', []);
-  t('bun link', []);
-  t('bun unlink', []);
-  t('bun pm cache', []);
-  t('bun audit', []);
-  t('bun outdated', []);
-  t('bun init', []);
-  t('bun create next-app', []);
-  t('bun upgrade', []);
-  t('bun build ./index.ts --outdir ./dist', []);
-  t('bun patch zod', []);
-  t('bun why elysia', []);
-  t('bun info tailwindcss', []);
-  t('bun publish --access public', []);
-  t('bun publish --access public --tag latest', []);
-  t('bun repl', []);
-  t('bun exec ./script.sh', []);
-  t('bun feedback', []);
-  t('bun ci', []);
+  t('bun x pkg', [toBinary('bun'), toBinary('pkg', opt)]);
+  t('bun ./main.ts', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
+  t('bun run script.js', [toBinary('bun'), toEntry(join(cwd, 'script.js'))]);
+  t('bun run ./main', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
+  t('bun run orval --config orval.config.ts', [toBinary('bun'), toBinary('orval', opt)]);
+  t('bun run --cwd packages/knip watch', [toBinary('bun'), toBinary('watch', { optional: true, dir: join(cwd, 'packages/knip') })]);
+  t('bun test', [toBinary('bun')]);
+  t('bun add zod', [toBinary('bun')]);
+  t('bun dedupe', [toBinary('bun')]);
+  t('bun install', [toBinary('bun')]);
+  t('bun remove webpack', [toBinary('bun')]);
+  t('bun update lodash', [toBinary('bun')]);
+  t('bun with-env src/main.ts', [toBinary('bun'), toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('bun run with-env src/main.ts', [toBinary('bun'), toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('bun link', [toBinary('bun')]);
+  t('bun unlink', [toBinary('bun')]);
+  t('bun pm cache', [toBinary('bun')]);
+  t('bun audit', [toBinary('bun')]);
+  t('bun outdated', [toBinary('bun')]);
+  t('bun init', [toBinary('bun')]);
+  t('bun create next-app', [toBinary('bun')]);
+  t('bun upgrade', [toBinary('bun')]);
+  t('bun build ./index.ts --outdir ./dist', [toBinary('bun')]);
+  t('bun patch zod', [toBinary('bun')]);
+  t('bun why elysia', [toBinary('bun')]);
+  t('bun info tailwindcss', [toBinary('bun')]);
+  t('bun publish --access public', [toBinary('bun')]);
+  t('bun publish --access public --tag latest', [toBinary('bun')]);
+  t('bun repl', [toBinary('bun')]);
+  t('bun exec ./script.sh', [toBinary('bun')]);
+  t('bun feedback', [toBinary('bun')]);
+  t('bun ci', [toBinary('bun')]);
+});
+
+test('getInputsFromScripts (nub)', () => {
+  t('nubx eslint . --fix', [toBinary('eslint', opt)]);
+  t('nubx cowsay@1.5.0', [toDependency('cowsay', opt)]);
+  t('nub ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --watch ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --inspect ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
+  t('nub --import tsx ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt), toDeferResolve('tsx')]);
+  t('nub --test --test-reporter=custom-reporter', [toBinary('nub'), toBinary('node'), toDeferResolve('custom-reporter')]);
+  t('nub watch ./main.ts', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
+  t('nub run ./main', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
+  t('nub run program', [toBinary('nub')], pkgScripts);
+  t('nub -r build', [toBinary('nub')]);
+  t('nub --filter pkg build', [toBinary('nub')]);
+  t('nub install', [toBinary('nub')]);
+  t('nub install --frozen-lockfile', [toBinary('nub')]);
+  t('nub ci', [toBinary('nub')]);
+  t('nub add -E -D react', [toBinary('nub')]);
+  t('nub remove webpack', [toBinary('nub')]);
+  t('nub approve-builds', [toBinary('nub')]);
+  t('nub node install 26', [toBinary('nub')]);
+  t('nub dlx eslint', [toBinary('nub'), toBinary('eslint', opt)]);
+  t('nub exec eslint', [toBinary('nub'), toBinary('eslint', opt)]);
 });
 
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
+  t('pnpm exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm exec custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
+  t('pnpm exec -- custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
+  t('pnpm exec node --import tsx ./main.ts', [toBinary('node'), ts, toDeferResolve('tsx')]);
+  t('pnpm exec node ./script.js -- --import tsx', [toBinary('node'), js]);
+  t('pnpm exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('program')]);
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
+  t('pnpm dlx pkg@catalog:', [toDependency('pkg', opt), toCatalog('pkg', 'default')]);
+  t("pnpm dlx --silent '@scope/pkg@catalog:tools'", [toDependency('@scope/pkg', opt), toCatalog('@scope/pkg', 'tools')]);
+  t('echo "pnpm dlx pkg@catalog:"', [toBinary('echo')]);
   t('pnpm --package=pkg-a dlx pkg', [toDependency('pkg', opt), toDependency('pkg-a', opt)]);
+  t('pnpm --package=helper@catalog:tools dlx pkg@catalog:', [toDependency('pkg', opt), toCatalog('pkg', 'default'), toDependency('helper', opt), toCatalog('helper', 'tools')]);
   t('pnpm --recursive --parallel test -- --sequence.seed=1700316221712', []);
   t('pnpm program script.js', [], pkgScripts);
   t('pnpm --silent program script.js', [], pkgScripts);
   t('pnpm --silent run program script.js', [], pkgScripts);
+  t('pnpm with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm run with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('pnpm with-env', [], withEnv);
+  t('pnpm loop src/main.ts', [], withEnv);
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, [toBinary('git')]);
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('pnpm write:report', []);
   t('pnpm perf:test:ci', []);
+  t('pnpm clean', []);
+  t('pnpm purge', []);
+  t('pnpm ci', []);
+  t('pnpm ic', []);
+  t('pnpm clean-install', []);
+  t('pnpm install-clean', []);
+  t('pnpm pm install', [], { cwd, manifest: toManifest(['install']) });
+  t('pnpm pm clean', [], { cwd, manifest: toManifest(['clean']) });
+  t('pnpm with 10 install', []);
+  t('pnpm runtime set node 22 -g', []);
+  t('pnpm rt set node lts -g', []);
+  t('pnpm sbom --sbom-format cyclonedx', []);
+  t('pnpm stage publish', []);
+  t('pnpm pack-app --entry dist/index.cjs --target linux-x64', []);
+  t('pnpm peers check', []);
+  t('pnpm ping --registry https://registry.npmjs.org', []);
+  t('pnpm docs lodash', []);
+  t('pnpm home lodash', []);
+  t('pnpm la', []);
+  t('pnpm ll', []);
+  t('pnpm info knip', []);
+  t('pnpm view knip version', []);
+  t('pnpm create vite my-app', []);
+  t('pnpm login --registry https://registry.npmjs.org', []);
+  t('pnpm logout', []);
+  t('pnpm token list', []);
+  t('pnpm recursive run program', [], pkgScripts);
+  t('pnpm multi run program', [], pkgScripts);
+  t('pnpm m run program', [], pkgScripts);
+});
+
+test('getInputsFromScripts (pnpm exec child options)', () => {
+  t('pnpm exec custom-build-cli --filter other-workspace', [toBinary('custom-build-cli')]);
+  t('pnpm --filter other-workspace exec custom-build-cli --recursive', []);
+  t('pnpm --filter other-workspace --recursive exec custom-build-cli', [toBinary('custom-build-cli')]);
 });
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
@@ -227,13 +337,29 @@ test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --recursive --parallel exec program', [toBinary('program')]);
-  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifestScriptNames: new Set(['program']) });
+  t('pnpm --recursive --parallel exec program', [toBinary('program')], { manifest: toManifest(['program']) });
+});
+
+test('getInputsFromScripts (pn/pnx aliases)', () => {
+  t('pn exec program', [toBinary('program')]);
+  t('pn dlx pkg', [toDependency('pkg', opt)]);
+  t('pnx pkg', [toDependency('pkg', opt)]);
+  t('pn program', [toBinary('program')]);
+  t('pn program', [], pkgScripts);
+  t('pn run program', [], pkgScripts);
+  t('pn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pn run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('pn exec program -- node script.js', [toBinary('program')]);
+  const dlxInputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
+  t('pnx --package cowsay --package lolcatjs -c \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
+  t('pn --package cowsay --package lolcatjs -c dlx \'echo "hi" | cowsay | lolcatjs\'', dlxInputs);
 });
 
 test('getInputsFromScripts (yarn)', () => {
   t('yarn exec program', [toBinary('program')]);
   t('yarn run program', [toBinary('program', opt)]);
   t('yarn program', [toBinary('program')]);
+  t('yarn program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('program')]);
   t('yarn run program', [], pkgScripts);
   t('yarn program', [], pkgScripts);
   t('yarn node ./script.js', [toBinary('node'), js]);
@@ -241,6 +367,8 @@ test('getInputsFromScripts (yarn)', () => {
   const dir = join(cwd, 'components');
   t('yarn --cwd components vitest -c vitest.components.config.ts', [toBinary('vitest', { dir }), toConfig('vitest', 'vitest.components.config.ts', { dir })]);
   t('yarn program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
+  t('yarn with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('yarn run with-env src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
 });
 
 test('getInputsFromScripts (yarn dlx)', () => {
@@ -259,24 +387,25 @@ test('getInputsFromScripts (rollup)', () => {
 
 test('getInputsFromScripts ("positionals")', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toDeferResolve('./script.js')]);
-  t('npx --yes execa --quiet ./script.js', [toDeferResolve('./script.js')]);
+  t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toDeferResolve('./script.js')]);
   t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
-  t('npx --yes zx --quiet script.js', [toDeferResolve('script.js')]);
+  t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toDeferResolve('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
-  t('npx jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
-  t('npx --yes jiti script.js', [toDeferResolve('script.js')]);
+  t('npx jiti script.js', [toBinary('jiti', opt), toDeferResolve('script.js')]);
+  t('npx --yes jiti script.js', [toBinary('jiti', opt), toDeferResolve('script.js')]);
   t('npx --no jiti script.js', [toBinary('jiti'), toDeferResolve('script.js')]);
 });
 
 test('getInputsFromScripts (c8)', () => {
+  t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
-  t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha')]);
+  t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toDeferResolve('@org/rep')]);
 });
 
@@ -304,18 +433,18 @@ test('getInputsFromScripts (double-dash)', () => {
 test('getInputsFromScripts (advanced bash syntax)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
-  t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg'), toBinary('exit')]);
+  t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg', opt), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
   t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
   t('var=$(node ./script.js)', [toBinary('node'), js]);
   t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js', opt)]);
-  t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint')]);
+  t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint'), toDependency('eslint-formatter-json', { optional: true })]);
   t('until curl -s localhost:3000; do sleep 1; done', [toBinary('curl'), toBinary('sleep')]);
   t('coproc eslint .', [toBinary('eslint')]);
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged'), toBinary('dirname')]);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged', opt), toBinary('dirname')]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toDependency('rc', opt), toDependency('@scope/rc', opt)]);
-  t('curl', [], knownOnly);
-  t('program -- mvn exec:java -Dexec.args="-g -f"', [], knownOnly);
+  t('curl', [], forwardedArgs);
+  t('program -- mvn exec:java -Dexec.args="-g -f"', [], forwardedArgs);
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', [toBinary('node'), toBinary('node')]);
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, [toBinary('cat'), toBinary('jq')]);
 });
@@ -330,6 +459,7 @@ test('getInputsFromScripts (plugins → double-dash)', () => {
 test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
+  t('prettier --write --config=my-prettier-settings.js', [toBinary('prettier'), toConfig('prettier', 'my-prettier-settings.js')]);
 });
 
 test('getInputsFromScripts (find -exec)', () => {

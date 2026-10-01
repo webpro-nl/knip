@@ -1,1 +1,0 @@
-export { NS } from './mid';

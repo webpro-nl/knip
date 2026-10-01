@@ -19,7 +19,7 @@ const production: string[] = [];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   const inputs = config?.plugins ?? [];
-  return [...inputs].map(id => toDeferResolve(id));
+  return Array.from(inputs, id => toDeferResolve(id));
 };
 
 const plugin: Plugin = {

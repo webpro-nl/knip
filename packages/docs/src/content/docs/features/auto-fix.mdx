@@ -1,5 +1,6 @@
 ---
 title: Auto-fix
+description: Use `knip --fix` to remove unused exports, dependencies, files and catalog entries, with `--fix-type` and `--format` flags.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -9,11 +10,11 @@ Run Knip as you normally would, and if the report looks good then run it again
 with the `--fix` flag to let Knip automatically apply fixes. It fixes the
 following [issue types][1]:
 
+- Remove unused files
 - Remove `export` keyword for unused exports, re-exports, and exported types
 - Remove `export default` keywords for unused default exports
 - Remove unused enum and namespace members
 - Remove unused `dependencies` and `devDependencies` from `package.json`
-- Remove unused files
 - Remove unused catalog entries
 
 :::caution

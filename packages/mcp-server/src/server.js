@@ -87,12 +87,13 @@ class MCP {
         description: RUN_KNIP_TOOL_DESCRIPTION,
         inputSchema: {
           cwd: z.string().optional().describe('Working directory (default: workspace root)'),
+          workspace: z.array(z.string()).optional().describe('Scope run to array of workspaces'),
         },
       },
       async opts => {
         try {
           const cwd = opts.cwd || process.cwd();
-          const results = await getResults(cwd);
+          const results = await getResults(cwd, opts.workspace);
           return { content: [{ type: 'text', text: JSON.stringify(results) }] };
         } catch (error) {
           const message = getErrorMessage(error);

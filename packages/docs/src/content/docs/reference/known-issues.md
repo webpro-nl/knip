@@ -1,20 +1,24 @@
 ---
 title: Known Issues
+description: Known limitations and workarounds for caching, config file errors, path aliases in config files, and the Nx daemon.
 ---
 
-List of known issues and workarounds for exceptions thrown during a Knip run.
+Known limitations and workarounds for errors during a Knip run.
 
 See [handling issues][1] to learn more about dealing with lint issues.
 
 ## Exceptions from config files
 
-An exception may be thrown when a Knip plugin loads a JavaScript or TypeScript
-configuration file such as `webpack.config.js` or `vite.config.ts`:
+Knip plugins may fail to load a JavaScript or TypeScript configuration file such
+as `webpack.config.js` or `vite.config.ts`:
 
 ```sh
 $ knip
-Error loading .../vite.config.ts
+ERROR: Error loading vite.config.ts
 ```
+
+Knip exits with code `2` when a plugin config file fails to load.
+`--no-exit-code` does not suppress this error.
 
 Knip may load such files differently, in a different environment, with missing
 environment variables, missing path aliases, etcetera. Use `--debug` to locate
@@ -22,20 +26,24 @@ the cause of the issue with more details.
 
 Potential workarounds:
 
-- [Set path aliases][2] for "Cannot find module" errors
+- For "Cannot find module" and "ENOENT: no such file/dir, open './file'" errors:
+  - Install dependencies
+  - Use absolute paths, e.g. with `path.join()` or `path.resolve()`
+  - [Set path aliases][2]
 - Set missing environment variable(s), potential solutions:
   - Use a helper package like [dotenvx][3]
   - `KEY=VAL knip`
   - `node --env-file .env $(which knip)`
+- Run the build script to generate required files.
 - Disable loading the file by overriding the default `config` for that plugin.
   - Example: `vite: { config: [] }`
-  - In a monorepo, be more specific like so:
-    `workspaces: { "packages/lib": { vite: { config: [] } } }`
+  - In a monorepo, be more specific like so: `workspaces: { "packages/lib": {
+vite: { config: [] } } }`
   - If this helps, add the file as an `entry` file for static analysis.
 - Disable the related plugin.
   - Example: `eslint: false`
-  - In a monorepo, be more specific like so:
-    `workspaces: { "packages/lib": { eslint: false } }`
+  - In a monorepo, be more specific like so: `workspaces: { "packages/lib": {
+eslint: false } }`
   - If this helps, add the file as an `entry` file for static analysis.
 - As a last resort, ignore the workspace: `ignoreWorkspaces: ["packages/lib"]`.
 
@@ -77,6 +85,31 @@ The solution is to [disable the Nx Daemon][6]:
 ```sh
 NX_DAEMON=false knip
 ```
+
+## Raw transfer memory errors
+
+On machines with low RAM or Windows with Node.js >=22, oxc-parser raw transfer
+may fail under memory pressure:
+
+```sh
+RangeError: Array buffer allocation failed
+```
+
+Disable raw transfer to use the normal parser path:
+
+```sh
+KNIP_DISABLE_RAW_TRANSFER=1 knip
+```
+
+## Stale cache results
+
+With `--cache`, configuration or path alias changes may leave results stale. An
+import may still be reported as unresolved after the missing file is added.
+Newly added `.gitignore` files are also not detected automatically.
+
+Run without `--cache` for fresh results, or delete the cache directory
+(`node_modules/.cache/knip` by default, configurable with `--cache-location`)
+before running with `--cache` again.
 
 [1]: ../guides/handling-issues.mdx
 [2]: #path-aliases-in-config-files

@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/tsd",
+  "scripts": {
+    "test:types": "tsd",
+    "test:assertions": "tsd --files 'assertions/*.test-d.ts'"
+  },
+  "tsd": {
+    "directory": "type-checks"
+  },
+  "devDependencies": {
+    "tsd": "*"
+  }
+}

@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
+import { createOptions } from '../helpers/create-options.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+const cwd = resolve('fixtures/entry/include-entry-exports');
+
+test('Skip unused exports in entry source files', async () => {
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 4,
+    total: 4,
+  });
+});
+
+test('Report unused exports in entry source files', async () => {
+  const options = await createOptions({ cwd, isIncludeEntryExports: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.exports['cli.js']['a']);
+  assert(issues.exports['index.ts']['default']);
+  assert(issues.exports['main.ts']['x']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    exports: 3,
+    types: 3,
+    processed: 4,
+    total: 4,
+  });
+});

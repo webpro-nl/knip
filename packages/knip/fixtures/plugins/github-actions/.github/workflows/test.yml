@@ -28,6 +28,7 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm run publish
+      - run: npx license-checker --production --summary --onlyAllow="0BSD;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;MIT;"
       - run: npx playwright install --with-deps
       - run: npx prisma migrate reset --force
       - run: pnpm build

@@ -6,28 +6,36 @@ import Anthropic from '../assets/projects/anthropic.svg';
 import ArkType from '../assets/projects/arktype.svg';
 import AstroLogo from '../assets/projects/astro.svg';
 import AWS from '../assets/projects/aws.svg';
+import Babel from '../assets/projects/babel.svg';
 import Backstage from '../assets/projects/backstage.svg';
 import Cloudflare from '../assets/projects/cloudflare.svg';
 import CreateTypeScriptApp from '../assets/projects/create-typescript-app.png';
 import Datadog from '../assets/projects/datadog.svg';
 import ESLint from '../assets/projects/eslint.svg';
 import FreeCodeCamp from '../assets/projects/freecodecamp.svg';
+import Ghost from '../assets/projects/ghost.svg';
 import Google from '../assets/projects/google.svg';
 import Grafana from '../assets/projects/grafana.svg';
 import Guardian from '../assets/projects/guardian.svg';
+import KhanAcademy from '../assets/projects/khan-academy.svg';
 import Microsoft from '../assets/projects/microsoft.svg';
 import Mocha from '../assets/projects/mocha.svg';
+import N8n from '../assets/projects/n8n.svg';
 import Nuxt from '../assets/projects/nuxt.svg';
+import Nvidia from '../assets/projects/nvidia.svg';
+import Oxc from '../assets/projects/oxc.svg';
 import Prettier from '../assets/projects/prettier.svg';
 import Sanity from '../assets/projects/sanity.svg';
 import SAP from '../assets/projects/sap.svg';
 import Sentry from '../assets/projects/sentry.svg';
 import Shopify from '../assets/projects/shopify.svg';
+import Signal from '../assets/projects/signal.svg';
 import SourceGraph from '../assets/projects/sourcegraph.svg';
 import Stately from '../assets/projects/stately.svg';
 import Storybook from '../assets/projects/storybook.svg';
+import Supabase from '../assets/projects/supabase.svg';
 import Svelte from '../assets/projects/svelte.svg';
-import TanStack from '../assets/projects/tanstack.png';
+import TanStack from '../assets/projects/tanstack.svg';
 import TypeScriptESLint from '../assets/projects/typescript-eslint.svg';
 import Vercel from '../assets/projects/vercel.svg';
 ---
@@ -40,7 +48,7 @@ import Vercel from '../assets/projects/vercel.svg';
     align-content: center;
     align-items: center;
     justify-content: space-between;
-    gap: 3.5rem;
+    gap: 3rem;
     list-style: none;
     padding: 0;
   }
@@ -59,7 +67,7 @@ import Vercel from '../assets/projects/vercel.svg';
     filter: brightness(0.6) grayscale(100%)
   }
 
-  [data-theme=light] svg {
+  :global([data-theme=light]) svg {
     opacity: 0.7;
   }
 
@@ -74,10 +82,10 @@ import Vercel from '../assets/projects/vercel.svg';
     }
   }
   .grow svg {
-    scale: 1.4;
+    scale: 1.25;
   }
   .blowup svg {
-    scale: 2.5;
+    scale: 2.1;
   }
   .raise svg {
     translate: 0 -6px;
@@ -87,13 +95,27 @@ import Vercel from '../assets/projects/vercel.svg';
   }
 
 
-  a:hover svg,
-  a:hover img {
+  #projects a:hover,
+  #projects.show-all a {
+    color: #fff;
+  }
+
+  #projects a:hover svg,
+  #projects a:hover img,
+  #projects.show-all svg,
+  #projects.show-all img {
     filter: none;
   }
 
-  [data-theme=light] a:hover svg,
-  [data-theme=light] a:hover img {
+  :global([data-theme=light]) #projects a:hover,
+  :global([data-theme=light]) #projects.show-all a {
+    color: #111;
+  }
+
+  :global([data-theme=light]) #projects a:hover svg,
+  :global([data-theme=light]) #projects a:hover img,
+  :global([data-theme=light]) #projects.show-all svg,
+  :global([data-theme=light]) #projects.show-all img {
     opacity: 1;
     filter: none;
   }
@@ -106,28 +128,48 @@ import Vercel from '../assets/projects/vercel.svg';
     <a href="https://github.com/search?type=code&q=org:arktypeio knip" class="grow"><ArkType  /></a>
     <a href="https://github.com/search?type=code&q=org:withastro knip"><AstroLogo /></a>
     <a href="https://github.com/search?type=code&q=org:aws-samples knip" class="sink" ><AWS/></a>
+    <a href="https://github.com/search?type=code&q=org:babel knip"><Babel /></a>
     <a href="https://github.com/search?type=code&q=org:backstage knip"><Backstage /></a>
     <a href="https://github.com/search?type=code&q=org:cloudflare knip" class="grow"><Cloudflare /></a>
     <a href="https://github.com/search?type=code&q=org:datadog knip"><Datadog /></a>
     <a href="https://github.com/search?type=code&q=org:eslint knip" class="contrast"><ESLint  /></a>
     <a href="https://github.com/search?type=code&q=org:freeCodeCamp knip"><FreeCodeCamp  /></a>
+    <a href="https://github.com/search?type=code&q=org:TryGhost knip"><Ghost /></a>
     <a href="https://github.com/search?type=code&q=org:google-gemini knip"><Google /></a>
     <a href="https://github.com/search?type=code&q=org:grafana knip"><Grafana /></a>
     <a href="https://github.com/search?type=code&q=org:guardian knip"><Guardian /></a>
+    <a href="https://github.com/search?type=code&q=org:Khan knip"><KhanAcademy /></a>
     <a href="https://github.com/search?type=code&q=org:JoshuaKGoldberg knip"><img src={CreateTypeScriptApp.src}/></a>
     <a href="https://github.com/search?type=code&q=org:microsoft knip"><Microsoft /></a>
     <a href="https://github.com/search?type=code&q=org:mochajs knip" class="contrast grow"><Mocha /></a>
+    <a href="https://github.com/search?type=code&q=org:n8n-io knip" aria-label="n8n"><N8n /></a>
     <a href="https://github.com/search?type=code&q=org:nuxt knip"><Nuxt /></a>
+    <a href="https://github.com/search?type=code&q=org:NVIDIA knip" class="shrink"><Nvidia /></a>
+    <a href="https://github.com/search?type=code&q=org:oxc-project knip" class="shrink"><Oxc /></a>
     <a href="https://github.com/search?type=code&q=org:prettier knip" class="contrast grow"><Prettier /></a>
     <a href="https://github.com/search?type=code&q=org:sanity-io knip"><Sanity /></a>
     <a href="https://github.com/search?type=code&q=org:SAP knip" class="blowup"><SAP /></a>
     <a href="https://github.com/search?type=code&q=org:getsentry knip"><Sentry /></a>
     <a href="https://github.com/search?type=code&q=org:shopify knip"><Shopify /></a>
+    <a href="https://github.com/search?type=code&q=org:signalapp knip" class="grow"><Signal /></a>
     <a href="https://github.com/search?type=code&q=org:sourcegraph knip"><SourceGraph /></a>
     <a href="https://github.com/search?type=code&q=org:statelyai knip"><Stately /></a>
     <a href="https://github.com/search?type=code&q=org:storybookjs knip"><Storybook  /></a>
-    <a href="https://github.com/search?type=code&q=org:sveltejs knip" class="contrast"><Svelte /></a>
-    <a href="https://github.com/search?type=code&q=org:tanstack knip" class="contrast"><img src={TanStack.src}/></a>
+    <a href="https://github.com/search?type=code&q=org:supabase knip"><Supabase /></a>
+    <a href="https://github.com/search?type=code&q=org:sveltejs knip"><Svelte /></a>
+    <a href="https://github.com/search?type=code&q=org:tanstack knip" class="shrink"><TanStack /></a>
     <a href="https://github.com/search?type=code&q=org:typescript-eslint knip" class="contrast grow"><TypeScriptESLint/></a>
     <a href="https://github.com/search?type=pullrequests&q=org:vercel knip" class="shrink"><Vercel/></a>
 </div>
+
+<script>
+  const projects = document.getElementById('projects');
+  const heading = projects?.closest('.projects')?.previousElementSibling;
+  if (heading instanceof HTMLElement) {
+    heading.style.cursor = 'pointer';
+    heading.addEventListener('click', (e) => {
+      e.preventDefault();
+      projects?.classList.toggle('show-all');
+    });
+  }
+</script>

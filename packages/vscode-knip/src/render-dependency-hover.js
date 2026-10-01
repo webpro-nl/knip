@@ -21,6 +21,7 @@ const replaceLessThan = text => text.replace(/</g, '‹');
 
 const MAX_TOTAL_SNIPPETS = 30;
 const MAX_SNIPPETS_PER_FILE = 3;
+const collator = new Intl.Collator();
 
 /**
  * @param {DependencyNodes} usage
@@ -53,7 +54,7 @@ export function renderDependencyHover(usage, root, snippets) {
 
   if (binaryNames.size > 0) nodes.push(u('text', ` (${[...binaryNames].join(', ')})`));
 
-  snippets.sort((a, b) => a.filePath.localeCompare(b.filePath));
+  snippets.sort((a, b) => collator.compare(a.filePath, b.filePath));
 
   /** @type {Map<string, DependencySnippet[]>} */
   const snippetsByFile = new Map();

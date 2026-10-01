@@ -1,49 +1,88 @@
 import { readFile } from 'node:fs/promises';
 import { ROOT_WORKSPACE_NAME } from './constants.ts';
 import { JsonCatalogPeeker } from './JsonCatalogPeeker.ts';
+import { PackagePeeker } from './PackagePeeker.ts';
 import type { Fixes } from './types/exports.ts';
 import type { Issue } from './types/issues.ts';
-import type { Catalog, Catalogs, PackageJson } from './types/package-json.ts';
-import { extractCatalogReferences, parseCatalog } from './util/catalog.ts';
+import type { Catalog, Catalogs, WorkspacePackage } from './types/package-json.ts';
+import {
+  type CatalogReference,
+  extractCatalogReferences,
+  getOverrideCatalogReferences,
+  type OverrideCatalogReference,
+  parseCatalog,
+} from './util/catalog.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { extname } from './util/path.ts';
 import { YamlCatalogPeeker } from './YamlCatalogPeeker.ts';
 
-export type CatalogContainer = { filePath: string; catalog?: Catalog; catalogs?: Catalogs };
+export type CatalogContainer = { filePath: string; catalog?: Catalog; catalogs?: Catalogs; overrides?: Catalog };
 
 export class CatalogCounselor {
   private filePath: string;
   private entries = new Set<string>();
   private referencedEntries = new Set<string>();
+  private referenceIssues: Issue[] = [];
+  private overrideReferences: OverrideCatalogReference[] = [];
   private fileContent?: string;
 
   constructor(options: MainOptions) {
     this.filePath = options.catalog.filePath;
     this.entries = parseCatalog(options.catalog);
+    this.overrideReferences = getOverrideCatalogReferences(options.catalog.overrides);
+    for (const reference of this.overrideReferences) this.addReference(reference);
   }
 
   private addReferencedCatalogEntry(entryName: string) {
     this.referencedEntries.add(entryName);
   }
 
-  public addWorkspace(manifest: PackageJson) {
-    if (this.entries.size === 0) return;
+  public addReference({ catalogName, packageName }: CatalogReference) {
+    this.addReferencedCatalogEntry(`${catalogName}:${packageName}`);
+  }
+
+  public addWorkspace({
+    name: workspace,
+    manifest,
+    manifestPath: filePath,
+    manifestStr,
+  }: Pick<WorkspacePackage, 'name' | 'manifest' | 'manifestPath' | 'manifestStr'>) {
     const catalogReferences = extractCatalogReferences(manifest);
-    for (const catalogEntryName of catalogReferences) this.addReferencedCatalogEntry(catalogEntryName);
+    if (workspace === ROOT_WORKSPACE_NAME) {
+      for (const reference of getOverrideCatalogReferences(manifest.pnpm?.overrides)) catalogReferences.push(reference);
+    }
+    if (catalogReferences.length === 0) return;
+
+    const peeker = new PackagePeeker(manifestStr);
+    for (const { catalogName, packageName, selector } of catalogReferences) {
+      const catalogEntryName = `${catalogName}:${packageName}`;
+      this.addReferencedCatalogEntry(catalogEntryName);
+      if (!this.entries.has(catalogEntryName)) {
+        const pos = peeker.getCatalogReferenceLocation(selector ?? packageName, catalogName);
+        this.referenceIssues.push({
+          type: 'catalogReferences',
+          filePath,
+          workspace,
+          symbol: packageName,
+          parentSymbol: catalogName,
+          fixes: [],
+          ...pos,
+        });
+      }
+    }
   }
 
   public async settleCatalogIssues(options: MainOptions) {
-    if (this.entries.size === 0) return [];
-
     const filePath = this.filePath;
     const workspace = ROOT_WORKSPACE_NAME;
     const catalogIssues: Issue[] = [];
+    const overrideReferenceIssues: Issue[] = [];
 
-    if (this.entries.size > this.referencedEntries.size) {
+    if (this.entries.size > 0 || this.overrideReferences.length > 0) {
       this.fileContent = await readFile(filePath, 'utf-8');
       const isYaml = ['.yml', '.yaml'].includes(extname(filePath));
-      const Peeker = isYaml ? YamlCatalogPeeker : JsonCatalogPeeker;
-      const peeker = new Peeker(this.fileContent);
+      const yamlPeeker = isYaml ? new YamlCatalogPeeker(this.fileContent) : undefined;
+      const peeker = yamlPeeker ?? new JsonCatalogPeeker(this.fileContent);
 
       for (const entry of this.entries.keys()) {
         if (!this.referencedEntries.has(entry)) {
@@ -54,8 +93,22 @@ export class CatalogCounselor {
           catalogIssues.push({ type: 'catalog', filePath, workspace, symbol, parentSymbol, fixes, ...pos });
         }
       }
+
+      for (const { catalogName, packageName, selector } of this.overrideReferences) {
+        if (this.entries.has(`${catalogName}:${packageName}`)) continue;
+        const pos = yamlPeeker?.getOverrideCatalogReferenceLocation(selector);
+        overrideReferenceIssues.push({
+          type: 'catalogReferences',
+          filePath,
+          workspace,
+          symbol: packageName,
+          parentSymbol: catalogName,
+          fixes: [],
+          ...pos,
+        });
+      }
     }
 
-    return catalogIssues;
+    return [...catalogIssues, ...this.referenceIssues, ...overrideReferenceIssues];
   }
 }

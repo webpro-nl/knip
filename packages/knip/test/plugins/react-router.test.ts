@@ -1,12 +1,9 @@
 import assert from 'node:assert/strict';
-import os from 'node:os';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
-
-const isWindows = os.platform() === 'win32';
 
 test('Find dependencies with the react-router plugin', async () => {
   const cwd = resolve('fixtures/plugins/react-router');
@@ -17,9 +14,6 @@ test('Find dependencies with the react-router plugin', async () => {
     ...baseCounters,
     processed: 10,
     total: 10,
-    // There is a bug with routes that include () on Windows so they will not be found there, revert when
-    // the bug is fixed
-    files: isWindows ? 1 : 0,
   });
 });
 

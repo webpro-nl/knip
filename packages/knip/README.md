@@ -46,16 +46,16 @@ following projects:
 - [file-entry-cache][22] ([MIT][23])
 - [json-parse-even-better-errors][24] ([MIT][25])
 
-[1]: https://www.npmjs.com/package/knip
+[1]: https://www.npmx.dev/package/knip
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
 [3]: https://img.shields.io/npm/dm/knip?color=f56e0f
 [4]: https://github.com/webpro-nl/knip
 [5]:
-  https://img.shields.io/github/stars/webpro-nl/knip?style=flat-square&color=f56e0f
+  https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f
 [6]: https://knip.dev
-[7]: https://www.npmjs.com/package/@knip/create-config
-[8]: https://www.npmjs.com/package/@knip/language-server
-[9]: https://www.npmjs.com/package/@knip/mcp
+[7]: https://www.npmx.dev/package/@knip/create-config
+[8]: https://www.npmx.dev/package/@knip/language-server
+[9]: https://www.npmx.dev/package/@knip/mcp
 [10]: https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
 [11]: https://open-vsx.org/extension/webpro/vscode-knip
 [12]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
@@ -63,7 +63,7 @@ following projects:
 [14]: https://knip.dev/sponsors
 [15]: https://knip.dev/#created-by-awesome-contributors
 [16]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
-[17]: ./license
+[17]: ./LICENSE
 [18]: https://github.com/npm/package-json
 [19]: https://github.com/npm/package-json/blob/main/LICENSE
 [20]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer

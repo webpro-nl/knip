@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/nano-spawn",
+  "scripts": {
+    "go": "node ./main.js"
+  },
+  "devDependencies": {
+    "gsutil": "*",
+    "nano-spawn": "*"
+  },
+  "knip": {
+    "ignoreBinaries": ["mycustombin"]
+  }
+}

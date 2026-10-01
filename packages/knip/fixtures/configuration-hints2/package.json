@@ -1,6 +1,0 @@
-{
-  "name": "@fixtures/configuration-hints",
-  "workspaces": [
-    "lib"
-  ]
-}

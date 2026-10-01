@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/subpath-import",
+  "imports": {
+    "#dep": {
+      "node": "dep-node-native",
+      "default": "./lib/dep-polyfill.js"
+    },
+    "#builtless": {
+      "node": "./dist/builtless.js",
+      "default": "./lib/builtless.ts"
+    }
+  },
+  "dependencies": {
+    "dep-node-native": "^1.0.0"
+  }
+}

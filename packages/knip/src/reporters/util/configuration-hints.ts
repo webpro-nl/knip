@@ -32,7 +32,7 @@ const getIdentifier = (hint: ConfigurationHint) => {
 };
 
 const getTableForHints = (hints: TableRow[]) => {
-  const table = new Table({ truncateStart: ['identifier', 'workspace', 'filePath'] });
+  const table = new Table({ truncate: { identifier: 'start', workspace: 'start', filePath: 'start' } });
   for (const hint of hints) {
     table.row();
     table.cell('identifier', getIdentifier(hint));
@@ -61,15 +61,22 @@ const addWorkspace = (options: PrintHintOptions) =>
 
 const packageEntry = () => 'Package entry file not found';
 
-const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
+const extensionUnregistered = () => `Extension in ${bright('project')} not registered as a compiler`;
+
+const extensionExcluded = () => `Compiled extension excluded by ${bright('project')} (imports not followed)`;
+
+export const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignore', { print: unused }],
   ['ignoreFiles', { print: unused }],
   ['ignoreBinaries', { print: unused }],
   ['ignoreDependencies', { print: unused }],
   ['ignoreUnresolved', { print: unused }],
+  ['workspaces', { print: unused }],
   ['ignoreWorkspaces', { print: unused }],
   ['entry-empty', { print: empty }],
   ['project-empty', { print: empty }],
+  ['project-extension-unregistered', { print: extensionUnregistered }],
+  ['project-extension-excluded', { print: extensionExcluded }],
   ['entry-redundant', { print: remove }],
   ['project-redundant', { print: remove }],
   ['top-level-unconfigured', { print: add }],
@@ -79,17 +86,17 @@ const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHint
   ['package-entry', { print: packageEntry }],
 ]);
 
-export { hintPrinters };
-
 const hintTypesOrder: ConfigurationHintType[][] = [
   ['top-level-unconfigured', 'workspace-unconfigured'],
   ['entry-top-level', 'project-top-level'],
+  ['workspaces'],
   ['ignore', 'ignoreFiles'],
   ['ignoreWorkspaces'],
   ['ignoreDependencies'],
   ['ignoreBinaries'],
   ['ignoreUnresolved'],
   ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
+  ['project-extension-unregistered', 'project-extension-excluded'],
   ['package-entry'],
 ];
 
@@ -97,11 +104,16 @@ interface ProcessedHint extends ConfigurationHint {
   message: string;
 }
 
+const UNCONFIGURED_MIN_FILES = 20;
+const UNCONFIGURED_MIN_RATIO = 0.2;
+
 export const finalizeConfigurationHints = (
   results: Results,
   options: { cwd: string; configFilePath?: string }
 ): ProcessedHint[] => {
-  if (results.counters.files > 20) {
+  const { files, processed } = results.counters;
+  const unusedFileRatio = processed > 0 ? files / processed : 0;
+  if (files > UNCONFIGURED_MIN_FILES && unusedFileRatio > UNCONFIGURED_MIN_RATIO) {
     const workspaces = results.includedWorkspaceDirs
       .sort(byPathDepth)
       .reverse()
@@ -162,6 +174,7 @@ export const printConfigurationHints = ({
   issues,
   tagHints,
   configurationHints,
+  hasConfigLoadErrors,
   enabledPlugins,
   isTreatConfigHintsAsErrors,
   includedWorkspaceDirs,
@@ -169,18 +182,30 @@ export const printConfigurationHints = ({
   configFilePath,
 }: ReporterOptions) => {
   const rows = finalizeConfigurationHints(
-    { issues, counters, configurationHints, tagHints, includedWorkspaceDirs, selectedWorkspaces, enabledPlugins },
+    {
+      issues,
+      counters,
+      configurationHints,
+      hasConfigLoadErrors,
+      tagHints,
+      includedWorkspaceDirs,
+      selectedWorkspaces,
+      enabledPlugins,
+    },
     { cwd, configFilePath }
   );
 
   if (rows.length > 0) {
     const getTitle = isTreatConfigHintsAsErrors ? getColoredTitle : getDimmedTitle;
-    console.log(getTitle('Configuration hints', configurationHints.length));
+    console.warn(getTitle('Configuration hints', configurationHints.length));
     console.warn(getTableForHints(rows).toString());
   }
+};
 
+export const printTagHints = ({ cwd, tagHints, isTreatTagHintsAsErrors }: ReporterOptions) => {
   if (tagHints.size > 0) {
-    console.log(getDimmedTitle('Tag hints', tagHints.size));
+    const getTitle = isTreatTagHintsAsErrors ? getColoredTitle : getDimmedTitle;
+    console.warn(getTitle('Tag hints', tagHints.size));
     for (const hint of tagHints) {
       const { filePath, identifier, tagName } = hint;
       const message = `Unused tag in ${toRelative(filePath, cwd)}:`;

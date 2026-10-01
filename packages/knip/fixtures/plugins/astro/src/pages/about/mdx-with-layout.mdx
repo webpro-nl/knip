@@ -3,4 +3,6 @@ layout: "../../layouts/Layout.astro"
 title: "MDX with Layout"
 ---
 
+export const loadConfig = () => import('remote-config/settings.json', { with: { type: 'json' } });
+
 Lorem ipsum dolor sit amet, consectetur adipiscing elit.

@@ -1,0 +1,29 @@
+{
+  "name": "@fixtures/declaration-entry-selection",
+  "private": false,
+  "main": "./src/index.ts",
+  "types": "./types/development.d.ts",
+  "bin": "./bin/cli.js",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./types/public.d.ts",
+    "exports": {
+      ".": {
+        "types": "./types/public.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "public-dependency": "*"
+  },
+  "devDependencies": {
+    "bin-only-dependency": "*",
+    "development-only-dependency": "*",
+    "fallback-only-dependency": "*",
+    "runtime-only-dependency": "*"
+  }
+}

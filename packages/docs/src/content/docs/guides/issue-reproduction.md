@@ -1,7 +1,6 @@
 ---
 title: Issue Reproduction
-sidebar:
-  order: 4
+description: How to create a minimal reproduction for a Knip bug or false positive using CodeSandbox, StackBlitz, a repo, or a test fixture.
 ---
 
 If you encounter an issue or false positives when using Knip, you can [open an

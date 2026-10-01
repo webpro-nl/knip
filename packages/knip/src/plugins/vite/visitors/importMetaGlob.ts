@@ -1,8 +1,8 @@
-import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
-import { _syncGlob } from '../../../util/glob.ts';
-import { dirname, isAbsolute, join } from '../../../util/path.ts';
-import { getStringValue, isStringLiteral } from '../../../typescript/visitors/helpers.ts';
+import { findProperty } from '../../../typescript/ast-helpers.ts';
+import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
+
+const RAW_QUERY_RE = /(\?|&)raw(?:&|$)/;
 
 export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   return {
@@ -29,12 +29,18 @@ export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVi
 
       if (!patterns?.length) return;
 
-      const dir = dirname(ctx.filePath);
-      const files = _syncGlob({ patterns, cwd: dir });
-
-      for (const f of files) {
-        ctx.addImport(isAbsolute(f) ? f : join(dir, f), arg.start, IMPORT_FLAGS.ENTRY);
+      const options = node.arguments[1];
+      if (options?.type === 'ObjectExpression') {
+        const queryNode = findProperty(options, 'query');
+        const query = getStringValue(queryNode);
+        const isRaw =
+          getStringValue(findProperty(options, 'as')) === 'raw' ||
+          (query !== undefined && RAW_QUERY_RE.test(query.startsWith('?') ? query : `?${query}`)) ||
+          getStringValue(findProperty(queryNode, 'raw')) === '';
+        if (isRaw) return ctx.addImportGlob(patterns, { analyzeExports: true });
       }
+
+      ctx.addImportGlob(patterns);
     },
   };
 }

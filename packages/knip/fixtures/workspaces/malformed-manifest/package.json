@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-malformed-manifest",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

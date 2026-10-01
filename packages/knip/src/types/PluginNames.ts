@@ -3,14 +3,17 @@ export type PluginName =
   | 'angular'
   | 'astro'
   | 'astro-db'
+  | 'astro-markdoc'
   | 'astro-og-canvas'
   | 'ava'
   | 'babel'
   | 'biome'
+  | 'borp'
   | 'bumpp'
   | 'bun'
   | 'c8'
   | 'capacitor'
+  | 'catalyst'
   | 'changelogen'
   | 'changelogithub'
   | 'changesets'
@@ -26,11 +29,16 @@ export type PluginName =
   | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
+  | 'electron-vite'
   | 'eleventy'
+  | 'esbuild'
   | 'eslint'
+  | 'eve'
   | 'execa'
   | 'expo'
   | 'expressive-code'
+  | 'fast'
+  | 'fumadocs'
   | 'gatsby'
   | 'github-action'
   | 'github-actions'
@@ -43,18 +51,24 @@ export type PluginName =
   | 'karma'
   | 'knex'
   | 'ladle'
+  | 'laravel-vite-plugin'
   | 'lefthook'
   | 'lint-staged'
   | 'linthtml'
+  | 'lit'
   | 'lockfile-lint'
   | 'lost-pixel'
+  | 'lunaria'
   | 'markdownlint'
+  | 'marko'
   | 'mdx'
   | 'mdxlint'
   | 'metro'
+  | 'mise'
   | 'mocha'
   | 'moonrepo'
   | 'msw'
+  | 'nano-spawn'
   | 'nano-staged'
   | 'nest'
   | 'netlify'
@@ -67,14 +81,19 @@ export type PluginName =
   | 'nodemon'
   | 'npm-package-json-lint'
   | 'nuxt'
+  | 'nuxtjs-i18n'
   | 'nx'
   | 'nyc'
   | 'oclif'
   | 'openapi-ts'
+  | 'openclaw'
+  | 'orval'
   | 'oxfmt'
   | 'oxlint'
+  | 'panda-css'
   | 'parcel'
   | 'payload'
+  | 'pino'
   | 'playwright'
   | 'playwright-ct'
   | 'playwright-test'
@@ -82,12 +101,16 @@ export type PluginName =
   | 'pm2'
   | 'pnpm'
   | 'postcss'
+  | 'pre-commit'
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'quasar'
   | 'qwik'
+  | 'railway'
   | 'raycast'
   | 'react-cosmos'
+  | 'react-email'
   | 'react-native'
   | 'react-router'
   | 'relay'
@@ -103,6 +126,7 @@ export type PluginName =
   | 'sanity'
   | 'semantic-release'
   | 'sentry'
+  | 'serverless-framework'
   | 'simple-git-hooks'
   | 'size-limit'
   | 'sst'
@@ -112,6 +136,7 @@ export type PluginName =
   | 'stryker'
   | 'stylelint'
   | 'svelte'
+  | 'sveltejs-package'
   | 'sveltekit'
   | 'svgo'
   | 'svgr'
@@ -120,18 +145,37 @@ export type PluginName =
   | 'tailwind'
   | 'tanstack-router'
   | 'taskfile'
+  | 'tauri'
+  | 'temporal'
+  | 'textlint'
   | 'travis'
   | 'ts-node'
+  | 'tsd'
   | 'tsdown'
   | 'tsup'
   | 'tsx'
+  | 'turbo'
   | 'typedoc'
   | 'typescript'
+  | 'typescript-content-mapper'
   | 'unbuild'
   | 'unocss'
+  | 'unplugin-auto-import'
+  | 'unplugin-icons'
+  | 'unplugin-vue-components'
+  | 'unplugin-vue-i18n'
+  | 'unplugin-vue-markdown'
+  | 'unplugin-vue-router'
+  | 'varlock'
+  | 'vercel'
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vite-plugin-pages'
+  | 'vite-plugin-pwa'
+  | 'vite-plugin-vue-layouts-next'
+  | 'vite-plus'
+  | 'vite-pwa-assets-generator'
   | 'vitepress'
   | 'vitest'
   | 'vue'
@@ -139,6 +183,7 @@ export type PluginName =
   | 'webpack'
   | 'wireit'
   | 'wrangler'
+  | 'wxt'
   | 'xo'
   | 'yarn'
   | 'yorkie'
@@ -148,14 +193,17 @@ export const pluginNames = [
   'angular',
   'astro',
   'astro-db',
+  'astro-markdoc',
   'astro-og-canvas',
   'ava',
   'babel',
   'biome',
+  'borp',
   'bumpp',
   'bun',
   'c8',
   'capacitor',
+  'catalyst',
   'changelogen',
   'changelogithub',
   'changesets',
@@ -171,11 +219,16 @@ export const pluginNames = [
   'docusaurus',
   'dotenv',
   'drizzle',
+  'electron-vite',
   'eleventy',
+  'esbuild',
   'eslint',
+  'eve',
   'execa',
   'expo',
   'expressive-code',
+  'fast',
+  'fumadocs',
   'gatsby',
   'github-action',
   'github-actions',
@@ -188,18 +241,24 @@ export const pluginNames = [
   'karma',
   'knex',
   'ladle',
+  'laravel-vite-plugin',
   'lefthook',
   'lint-staged',
   'linthtml',
+  'lit',
   'lockfile-lint',
   'lost-pixel',
+  'lunaria',
   'markdownlint',
+  'marko',
   'mdx',
   'mdxlint',
   'metro',
+  'mise',
   'mocha',
   'moonrepo',
   'msw',
+  'nano-spawn',
   'nano-staged',
   'nest',
   'netlify',
@@ -212,14 +271,19 @@ export const pluginNames = [
   'nodemon',
   'npm-package-json-lint',
   'nuxt',
+  'nuxtjs-i18n',
   'nx',
   'nyc',
   'oclif',
   'openapi-ts',
+  'openclaw',
+  'orval',
   'oxfmt',
   'oxlint',
+  'panda-css',
   'parcel',
   'payload',
+  'pino',
   'playwright',
   'playwright-ct',
   'playwright-test',
@@ -227,12 +291,16 @@ export const pluginNames = [
   'pm2',
   'pnpm',
   'postcss',
+  'pre-commit',
   'preconstruct',
   'prettier',
   'prisma',
+  'quasar',
   'qwik',
+  'railway',
   'raycast',
   'react-cosmos',
+  'react-email',
   'react-native',
   'react-router',
   'relay',
@@ -248,6 +316,7 @@ export const pluginNames = [
   'sanity',
   'semantic-release',
   'sentry',
+  'serverless-framework',
   'simple-git-hooks',
   'size-limit',
   'sst',
@@ -257,6 +326,7 @@ export const pluginNames = [
   'stryker',
   'stylelint',
   'svelte',
+  'sveltejs-package',
   'sveltekit',
   'svgo',
   'svgr',
@@ -265,18 +335,37 @@ export const pluginNames = [
   'tailwind',
   'tanstack-router',
   'taskfile',
+  'tauri',
+  'temporal',
+  'textlint',
   'travis',
   'ts-node',
+  'tsd',
   'tsdown',
   'tsup',
   'tsx',
+  'turbo',
   'typedoc',
   'typescript',
+  'typescript-content-mapper',
   'unbuild',
   'unocss',
+  'unplugin-auto-import',
+  'unplugin-icons',
+  'unplugin-vue-components',
+  'unplugin-vue-i18n',
+  'unplugin-vue-markdown',
+  'unplugin-vue-router',
+  'varlock',
+  'vercel',
   'vercel-og',
   'vike',
   'vite',
+  'vite-plugin-pages',
+  'vite-plugin-pwa',
+  'vite-plugin-vue-layouts-next',
+  'vite-plus',
+  'vite-pwa-assets-generator',
   'vitepress',
   'vitest',
   'vue',
@@ -284,6 +373,7 @@ export const pluginNames = [
   'webpack',
   'wireit',
   'wrangler',
+  'wxt',
   'xo',
   'yarn',
   'yorkie',

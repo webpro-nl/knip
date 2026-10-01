@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/eve",
+  "dependencies": {
+    "channel-credentials": "*",
+    "connection-config": "*",
+    "eve": "*",
+    "hook-logger": "*",
+    "weather-client": "*"
+  }
+}

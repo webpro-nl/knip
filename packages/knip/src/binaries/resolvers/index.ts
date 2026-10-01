@@ -3,17 +3,25 @@ import * as bunx from './bunx.ts';
 import * as find from './find.ts';
 import * as npm from './npm.ts';
 import * as npx from './npx.ts';
+import * as nub from './nub.ts';
 import * as pnpm from './pnpm.ts';
 import * as pnpx from './pnpx.ts';
 import * as yarn from './yarn.ts';
 
-export default {
+const packageManagerResolvers = {
   bun: bun.resolve,
   bunx: bunx.resolve,
-  find: find.resolve,
+  nub: nub.resolve,
+  nubx: bunx.resolve,
   npm: npm.resolve,
   npx: npx.resolve,
   pnpm: pnpm.resolve,
+  pn: pnpm.resolve,
   pnpx: pnpx.resolve,
+  pnx: pnpx.resolve,
   yarn: yarn.resolve,
 };
+
+export const isPackageManager = (binary: string) => binary in packageManagerResolvers;
+
+export default { ...packageManagerResolvers, find: find.resolve };

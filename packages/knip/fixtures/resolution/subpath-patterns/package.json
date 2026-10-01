@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/subpath-patterns",
+  "imports": {
+    "#internals/*": "./src/internals/*.ts",
+    "#internals-explicit-ext/*": "./src/internals/*",
+    "#internals-alias/used.alt": "./src/internals/used.alt",
+    "#:/*": "./src/internals/*.ts",
+    "#conditional/*": {
+      "node": "./dist/*.js",
+      "browser": "./src/internals/*.ts"
+    }
+  }
+}

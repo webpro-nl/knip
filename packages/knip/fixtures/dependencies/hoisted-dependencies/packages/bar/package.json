@@ -1,0 +1,7 @@
+{
+  "name": "bar",
+  "devDependencies": {
+    "chai": "*",
+    "chai-as-promised": "*"
+  }
+}

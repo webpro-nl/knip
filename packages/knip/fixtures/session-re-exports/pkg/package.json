@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/session-re-exports-pkg",
+  "name": "@fixtures/session-re-exports__pkg",
   "exports": {
     "./public": "./public/barrel.ts",
     "./internal": "./internal/consumer-1.ts"

@@ -7,12 +7,12 @@ import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
-  const cwd = await copyFixture('fixtures/catalog-named');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-named');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
   assert(issues.catalog['pnpm-workspace.yaml']['default.lodash']);
-  assert(issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
+  assert(!issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
   assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
 
   assert.equal(
@@ -26,14 +26,18 @@ catalog:
 catalogs:
   frontend:
     vue: ^3.0.0
+    "@nu/xt": ^3.0.0
   backend:
     '@ex/press': ^4.18.0
+
+overrides:
+  '@nu/xt@^3': 'catalog:frontend'
 `
   );
 });
 
 test('Fix catalog entries (.yarnrc.yml)', async () => {
-  const cwd = await copyFixture('fixtures/catalog-yarn');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-yarn');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 

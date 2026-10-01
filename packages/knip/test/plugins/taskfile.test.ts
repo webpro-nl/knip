@@ -12,7 +12,7 @@ test('Find dependencies with the taskfile plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.unresolved['Taskfile.yml']['esbuild-register']);
-  assert(issues.binaries['Taskfile.yml']['eslint']);
+  assert(!issues.binaries['Taskfile.yml']['eslint']);
   assert(issues.binaries['Taskfile.yml']['knip']);
   assert(issues.binaries['Taskfile.yml']['prettier']);
   assert(issues.binaries['Taskfile.yml']['test-command-object-binary']);
@@ -24,9 +24,8 @@ test('Find dependencies with the taskfile plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    // case-sensitivity: fast-glob returns two files (taskfile.yml and Taskfile.yml) while there's only one
-    binaries: process.platform === 'darwin' || process.platform === 'win32' ? 15 : 9,
-    unresolved: process.platform === 'darwin' || process.platform === 'win32' ? 2 : 1,
+    binaries: 8,
+    unresolved: 1,
     processed: 7,
     total: 7,
   });

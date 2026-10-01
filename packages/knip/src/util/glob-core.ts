@@ -1,33 +1,59 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { promisify } from 'node:util';
-import { walk as _walk, type Entry } from '@nodelib/fs.walk';
-import fg, { type Options as FastGlobOptions } from 'fast-glob';
+// oxlint-disable-next-line no-restricted-imports
+import { basename } from 'node:path';
+import { fdir } from 'fdir';
+import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
 import { compact, partition } from './array.ts';
 import { debugLogObject } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
+import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
-import { parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, join, relative, toPosix } from './path.ts';
-
-const walk = promisify(_walk);
+import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
+import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
-interface GlobOptions extends FastGlobOptions {
+interface GlobOptions extends TinyGlobOptions {
   gitignore: boolean;
   cwd: string;
   dir: string;
   label?: string;
 }
 
-type Gitignores = { ignores: Set<string>; unignores: Set<string> };
+export type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 
 // ignore patterns are cached per gitignore file
 const cachedGitIgnores = new Map<string, Gitignores>();
 // ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
 const cachedGlobIgnores = new Map<string, string[]>();
+
+let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
+let gitignoreMatcher = (_filePath: string) => false;
+
+export const isGitIgnored = (filePath: string) => gitignoreMatcher(filePath);
+
+// Fingerprint of the resolved ignore set, mixed into glob cache keys so an edited .gitignore
+// (which changes no directory mtime) still invalidates cached glob results.
+let gitignoreFingerprint = '';
+
+export const getGitignoreFingerprint = () => gitignoreFingerprint;
+
+const hashIgnores = (ignores: Set<string>, unignores: Set<string>): string => {
+  const h = createHash('sha1');
+  for (const p of [...ignores].sort()) {
+    h.update(p);
+    h.update('\0');
+  }
+  h.update('\u0001');
+  for (const p of [...unignores].sort()) {
+    h.update(p);
+    h.update('\0');
+  }
+  return h.digest('base64url');
+};
 
 // Check if directory is a git root (has .git directory or .git file for worktrees)
 const isGitRoot = (dir: string) => isDirectory(dir, '.git') || isFile(dir, '.git');
@@ -39,7 +65,7 @@ const getGitDir = (cwd: string): string | undefined => {
   if (isFile(dotGit)) {
     const content = readFileSync(dotGit, 'utf8').trim();
     const match = content.match(/^gitdir:\s*(.+)$/);
-    if (match) return join(cwd, match[1]);
+    if (match) return toAbsolute(toPosix(match[1]), cwd);
   }
   return undefined;
 };
@@ -62,31 +88,47 @@ const findAncestorGitignoreFiles = (cwd: string): string[] => {
 
 /** @internal */
 export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<string>) => {
+  if (isGitignoreCacheEnabled()) {
+    const cached = getCachedGitignore(cwd, workspaceDirs);
+    if (cached) {
+      for (const [dir, data] of cached.perDirIgnores) cachedGitIgnores.set(dir, data);
+      debugLogObject('*', 'Parsed gitignore files (cached)', { gitignoreFiles: cached.gitignoreFiles });
+      return { gitignoreFiles: cached.gitignoreFiles, ignores: cached.ignores, unignores: cached.unignores };
+    }
+  }
+
   const ignores: Set<string> = new Set(GLOBAL_IGNORE_PATTERNS);
-  const unignores: string[] = [];
+  const unignores: Set<string> = new Set();
   const gitignoreFiles: string[] = [];
-  const pmOptions = { ignore: unignores };
 
   let deepFilterMatcher: ((str: string) => boolean) | undefined;
-  let prevUnignoreLength = unignores.length;
+  let prevUnignoreSize = unignores.size;
+  let unignoresArray: string[] = [];
   const pendingIgnores: string[] = [];
 
   const getMatcher = () => {
     if (!deepFilterMatcher) {
-      deepFilterMatcher = picomatch(Array.from(ignores), pmOptions);
+      unignoresArray = Array.from(unignores);
+      deepFilterMatcher = picomatch(Array.from(ignores), { ignore: unignoresArray });
       pendingIgnores.length = 0;
     } else if (pendingIgnores.length > 0) {
       const prev = deepFilterMatcher;
-      const incr = picomatch(pendingIgnores.splice(0), pmOptions);
+      const incr = picomatch(pendingIgnores.splice(0), { ignore: unignoresArray });
       deepFilterMatcher = (path: string) => prev(path) || incr(path);
     }
     return deepFilterMatcher;
   };
 
+  const seenGitignoreFiles = new Set<string>();
+
   const addFile = (filePath: string, baseDir?: string) => {
+    const absPath = toPosix(filePath);
+    if (seenGitignoreFiles.has(absPath)) return;
+    seenGitignoreFiles.add(absPath);
+
     gitignoreFiles.push(relative(cwd, filePath));
 
-    const dir = baseDir ?? dirname(toPosix(filePath));
+    const dir = baseDir ?? dirname(absPath);
     const base = relative(cwd, dir);
     const ancestor = base.startsWith('..') ? `${relative(dir, cwd)}/` : undefined;
 
@@ -96,38 +138,26 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
     const patterns = readFileSync(filePath, 'utf8');
 
-    for (const rule of parseAndConvertGitignorePatterns(patterns, ancestor)) {
-      const [pattern, extraPattern] = rule.patterns;
-      if (rule.negated) {
-        if (base === '' || base.startsWith('..')) {
-          if (!unignores.includes(extraPattern)) {
-            unignores.push(...rule.patterns);
+    const isRoot = base === '' || base.startsWith('..');
+    for (const { negated, pattern } of parseAndConvertGitignorePatterns(patterns, ancestor)) {
+      if (negated) {
+        if (isRoot) {
+          if (!unignores.has(pattern)) {
+            unignores.add(pattern);
             unignoresForDir.add(pattern);
-            unignoresForDir.add(extraPattern);
           }
-        } else {
-          if (!unignores.includes(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
-            const unignore = join(base, pattern);
-            const extraUnignore = join(base, extraPattern);
-            unignores.push(unignore, extraUnignore);
-            unignoresForDir.add(unignore);
-            unignoresForDir.add(extraUnignore);
-          }
+        } else if (!unignores.has(pattern)) {
+          const unignore = join(base, pattern);
+          unignores.add(unignore);
+          unignoresForDir.add(unignore);
         }
-      } else {
-        if (base === '' || base.startsWith('..')) {
-          ignores.add(pattern);
-          ignores.add(extraPattern);
-          ignoresForDir.add(pattern);
-          ignoresForDir.add(extraPattern);
-        } else if (!unignores.includes(extraPattern.startsWith('**/') ? extraPattern : `**/${extraPattern}`)) {
-          const ignore = join(base, pattern);
-          const extraIgnore = join(base, extraPattern);
-          ignores.add(ignore);
-          ignores.add(extraIgnore);
-          ignoresForDir.add(ignore);
-          ignoresForDir.add(extraIgnore);
-        }
+      } else if (isRoot) {
+        ignores.add(pattern);
+        ignoresForDir.add(pattern);
+      } else if (!unignores.has(pattern)) {
+        const ignore = join(base, pattern);
+        ignores.add(ignore);
+        ignoresForDir.add(ignore);
       }
     }
 
@@ -141,9 +171,9 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    if (unignores.length !== prevUnignoreLength) {
+    if (unignores.size !== prevUnignoreSize) {
       deepFilterMatcher = undefined;
-      prevUnignoreLength = unignores.length;
+      prevUnignoreSize = unignores.size;
     } else if (ignores.size !== prevIgnoreSize) {
       for (const p of ignoresForDir) if (!GLOBAL_IGNORE_PATTERNS.includes(p)) pendingIgnores.push(p);
     }
@@ -153,9 +183,16 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
   const gitDir = getGitDir(cwd);
   if (gitDir) {
-    const excludePath = join(gitDir, 'info/exclude');
+    const commonDirPath = join(gitDir, 'commondir');
+    const commonDir = isFile(commonDirPath)
+      ? toAbsolute(toPosix(readFileSync(commonDirPath, 'utf8').trim()), gitDir)
+      : gitDir;
+    const excludePath = join(commonDir, 'info/exclude');
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
+
+  const rootGitignorePath = join(cwd, '.gitignore');
+  if (isFile(rootGitignorePath)) addFile(rootGitignorePath);
 
   // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
   let isRelevantDir: ((absPath: string) => boolean) | undefined;
@@ -181,24 +218,70 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     }
   }
 
-  const entryFilter = (entry: Entry) => {
-    if (entry.dirent.isFile() && entry.name === '.gitignore') {
-      addFile(entry.path);
-      return true;
-    }
-    return false;
+  const cwdPrefixLen = cwd.length + 1;
+  const walkGitignores = async () => {
+    await new fdir()
+      .withFullPaths()
+      .exclude((_dirName: string, dirPath: string) => {
+        const absPath = toPosix(dirPath.slice(0, -1));
+        return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(absPath.slice(cwdPrefixLen));
+      })
+      .filter((filePath: string, isDir: boolean) => {
+        if (isDir || basename(filePath) !== '.gitignore') return false;
+        addFile(filePath);
+        return true;
+      })
+      .crawl(cwd)
+      .withPromise();
   };
 
-  const deepFilter = (entry: Entry) =>
-    (!isRelevantDir || isRelevantDir(toPosix(entry.path))) && !getMatcher()(relative(cwd, entry.path));
+  await walkGitignores();
 
-  await walk(cwd, {
-    concurrency: 16,
-    entryFilter,
-    deepFilter,
-  });
+  // tinyglobby's `ignore` can't express unignores (see tinyglobby/fast-glob #86). Drop cached
+  // ignore patterns shadowed by any unignore path (and its ancestor dirs) so glob() sees a
+  // safe-to-use flat list — the walk above already respects unignores via picomatch directly.
+  //
+  // Example: a yarn-berry `.gitignore` with `.yarn/*` + `!.yarn/plugins` yields ignore
+  // `**/.yarn/*` and unignore `**/.yarn/plugins`. Without this filter tinyglobby would prune
+  // `.yarn/plugins` during traversal; here we drop `**/.yarn/*` since it shadows the unignore.
+  if (unignores.size > 0) {
+    const unignorePaths = new Set<string>();
+    for (const u of unignores) {
+      let p = u.replace(/^\*\*\//, '');
+      while (p && p !== '.' && p !== '/') {
+        unignorePaths.add(p);
+        const parent = dirname(p);
+        if (parent === p) break;
+        p = parent;
+      }
+    }
+    // Whether a pattern is shadowed depends only on the pattern, not the dir, so memoize the
+    // picomatch compile+test across the (often identical) patterns repeated in per-dir caches.
+    const isShadowed = new Map<string, boolean>();
+    for (const cacheForDir of cachedGitIgnores.values()) {
+      for (const pattern of cacheForDir.ignores) {
+        let shadowed = isShadowed.get(pattern);
+        if (shadowed === undefined) {
+          const match = picomatch(pattern);
+          shadowed = false;
+          for (const p of unignorePaths) {
+            if (match(p)) {
+              shadowed = true;
+              break;
+            }
+          }
+          isShadowed.set(pattern, shadowed);
+        }
+        if (shadowed) cacheForDir.ignores.delete(pattern);
+      }
+    }
+  }
 
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
+
+  if (isGitignoreCacheEnabled()) {
+    setCachedGitignore(cwd, workspaceDirs, gitignoreFiles, ignores, unignores, cachedGitIgnores);
+  }
 
   return { gitignoreFiles, ignores, unignores };
 };
@@ -208,41 +291,40 @@ const _parseFindGitignores = timerify(findAndParseGitignores);
 export async function glob(_patterns: string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(_patterns) && _patterns.length === 0) return [];
 
-  const hasCache = cachedGlobIgnores.has(options.dir);
-  const willCache = !hasCache && options.gitignore && options.label;
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
   const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
   const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
 
-  if (options.gitignore && willCache) {
+  if (!cachedIgnores && options.gitignore && options.label) {
     let dir = options.dir;
     let prev: string;
     while (dir) {
       const cacheForDir = cachedGitIgnores.get(dir);
-      if (cacheForDir) {
-        // fast-glob doesn't support negated patterns in `ignore` (i.e. unignores are.. ignored): https://github.com/mrmlnc/fast-glob/issues/86
-        _ignore.push(...cacheForDir.ignores);
-      }
+      if (cacheForDir) _ignore.push(...cacheForDir.ignores);
       // oxlint-disable-next-line no-cond-assign
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
     }
+    cachedGlobIgnores.set(options.dir, compact(_ignore));
   }
 
-  if (willCache) cachedGlobIgnores.set(options.dir, compact(_ignore));
+  const ignorePatterns = (cachedIgnores ?? _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
 
-  const ignorePatterns = (cachedIgnores || _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
+  const { dir, label, ...fgOptions } = {
+    ...options,
+    ignore: ignorePatterns,
+    expandDirectories: false,
+    followSymbolicLinks: false,
+  };
 
-  const { dir, label, ...fgOptions } = { ...options, ignore: ignorePatterns };
-
-  const paths = await fg.glob(patterns, fgOptions);
+  const paths = await tinyGlob(patterns, fgOptions);
 
   debugLogObject(relative(options.cwd, dir), label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
     ...fgOptions,
     ignore:
-      hasCache && ignorePatterns.length === (cachedIgnores || _ignore).length
+      cachedIgnores && negatedPatterns.length === 0
         ? `// using cache from previous glob cwd: ${fgOptions.cwd}`
         : ignorePatterns,
     paths,
@@ -251,16 +333,30 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
   return paths;
 }
 
+export function reconcileGitignoredPaths(paths: string[], cwd: string): string[] {
+  if (!gitignoreReconciler || paths.length === 0) return paths;
+  const isGitIgnored = gitignoreReconciler;
+  const result: string[] = [];
+  for (const path of paths) if (!isGitIgnored(isAbsolute(path) ? path : join(cwd, path))) result.push(path);
+  return result;
+}
+
 export async function getGitIgnoredHandler(
   options: Options,
   workspaceDirs?: Set<string>
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
+  gitignoreReconciler = undefined;
+  gitignoreMatcher = () => false;
+  gitignoreFingerprint = '';
 
   if (options.gitignore === false) return () => false;
 
   const { ignores, unignores } = await _parseFindGitignores(options.cwd, workspaceDirs);
-  const matcher = picomatch(Array.from(ignores), { ignore: unignores });
+  gitignoreFingerprint = hashIgnores(ignores, unignores);
+  const ignoreMatcher = picomatch(expandIgnorePatterns(ignores));
+  const unignoreMatcher = unignores.size > 0 ? picomatch(expandIgnorePatterns(unignores)) : undefined;
+  const matcher = unignoreMatcher ? (path: string) => ignoreMatcher(path) && !unignoreMatcher(path) : ignoreMatcher;
 
   const cache = new Map<string, boolean>();
   const isGitIgnored = (filePath: string) => {
@@ -271,6 +367,9 @@ export async function getGitIgnoredHandler(
     }
     return result;
   };
+  gitignoreMatcher = isGitIgnored;
+
+  if (unignores.size > 0) gitignoreReconciler = isGitIgnored;
 
   return isGitIgnored;
 }

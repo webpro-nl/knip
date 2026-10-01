@@ -1,0 +1,1 @@
+<div>script lazy</div>

@@ -1,9 +1,0 @@
-{
-  "name": "@fixtures/exports-value-refs",
-  "knip": {
-    "ignoreExportsUsedInFile": {
-      "interface": true,
-      "type": true
-    }
-  }
-}

@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/plugin-negated-entry-globs",
+  "type": "module",
+  "dependencies": {
+    "astro": "*"
+  },
+  "devDependencies": {
+    "@storybook/chapter": "*"
+  }
+}

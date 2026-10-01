@@ -2,8 +2,11 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import generatedConfig from '@generated/docusaurus.config';
 
 import Heading from '@theme/Heading';
+
+export const buildTime = generatedConfig.title;
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();

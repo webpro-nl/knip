@@ -1,6 +1,6 @@
 {
   "name": "@plugins/node-test-runner",
   "scripts": {
-    "test": "node --test"
+    "test": "node --te'st'"
   }
 }

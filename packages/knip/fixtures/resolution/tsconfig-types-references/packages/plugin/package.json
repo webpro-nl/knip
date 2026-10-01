@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/tsconfig-types-references__plugin",
+  "main": "src/index.ts"
+}

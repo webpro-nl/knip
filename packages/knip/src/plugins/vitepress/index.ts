@@ -9,7 +9,11 @@ const enablers = ['vitepress'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['.vitepress/config.{js,ts,mjs,mts}', '.vitepress/theme/index.{js,ts,mjs,mts}'];
+const entry = [
+  '.vitepress/config.{js,ts,mjs,mts,cjs,cts}',
+  '.vitepress/config/index.{js,ts,mjs,mts,cjs,cts}',
+  '.vitepress/theme/index.{js,ts,mjs,mts}',
+];
 
 const plugin: Plugin = {
   title,

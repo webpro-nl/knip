@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest9-client",
+  "name": "@plugins/vitest9__client",
   "devDependencies": {
     "vitest": "*"
   }

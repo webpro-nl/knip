@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-circular-symlinks",
+  "workspaces": [
+    "packages/*"
+  ]
+}

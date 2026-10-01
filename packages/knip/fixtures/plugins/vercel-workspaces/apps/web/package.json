@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vercel-workspaces-web",
+  "devDependencies": {
+    "@vercel/config": "*"
+  }
+}

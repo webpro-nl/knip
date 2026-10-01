@@ -1,4 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
+import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 
@@ -7,14 +9,32 @@ import compiler from './compiler.ts';
 
 const title = 'Tailwind';
 
-const enablers = ['tailwindcss'];
+const enablers = [
+  'tailwindcss',
+  '@tailwindcss/vite',
+  '@tailwindcss/webpack',
+  '@tailwindcss/postcss',
+  '@tailwindcss/cli',
+];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
+const entry = ['tailwind.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency }) => {
-  if (hasDependency('tailwindcss')) registerCompiler({ extension: '.css', compiler });
+  for (const enabler of enablers) {
+    if (!hasDependency(enabler)) continue;
+    registerCompiler({ extension: '.css', compiler });
+    break;
+  }
+};
+
+// https://tailwindcss.com/docs/installation/tailwind-cli
+const args: Args = {
+  binaries: ['tailwindcss'],
+  string: ['input'],
+  alias: { input: ['i'] },
+  resolveInputs: parsed => (parsed.input ? [toProductionEntry(parsed.input)] : []),
 };
 
 const plugin: Plugin = {
@@ -22,6 +42,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   entry,
+  args,
   registerCompilers,
 };
 

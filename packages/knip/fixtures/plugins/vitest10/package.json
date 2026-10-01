@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest10",
+  "name": "@plugins/vitest10",
   "scripts": {
     "test": "vitest"
   },

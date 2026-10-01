@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/eve-agent-files",
+  "dependencies": {
+    "eve": "*",
+    "stale-client": "*",
+    "stale-subagent-client": "*"
+  }
+}

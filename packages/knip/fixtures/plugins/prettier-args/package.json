@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/prettier-args",
+  "devDependencies": {
+    "prettier": "*"
+  },
+  "scripts": {
+    "format": "prettier --write --config=my-prettier-settings.js ."
+  }
+}

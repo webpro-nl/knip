@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/tanstack-start",
+  "dependencies": {
+    "@tanstack/react-start": "*"
+  }
+}

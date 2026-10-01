@@ -1,5 +1,5 @@
 {
-  "name": "@plugins/eslint2",
+  "name": "@plugins/eslint5",
   "devDependencies": {
     "@eslint/js": "*",
     "eslint-import-resolver-typescript": "*",

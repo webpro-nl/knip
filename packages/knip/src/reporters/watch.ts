@@ -1,4 +1,4 @@
-import picocolors from 'picocolors';
+import st from '../util/colors.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import type { Entries } from '../types/entries.ts';
 import type { Issues } from '../types/issues.ts';
@@ -28,7 +28,7 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
 
       if (issuesForType.length > 0) {
         if (title) {
-          lines.push(`${picocolors.yellowBright(picocolors.underline(title))} (${issuesForType.length})`);
+          lines.push(`${st.style(['yellowBright', 'underline'], title)} (${issuesForType.length})`);
         }
         lines.push(...getTableForType(issuesForType, options.cwd).toRows());
       }
@@ -43,8 +43,8 @@ export default (options: MainOptions, { issues, streamer, duration, size }: Watc
 
   const messages =
     totalIssues === 0
-      ? ['✂️  Excellent, Knip found no issues.', '', picocolors.gray(summary)]
-      : [...lines, '', picocolors.gray(summary)];
+      ? ['✂️  Excellent, Knip found no issues.', '', st.gray(summary)]
+      : [...lines, '', st.gray(summary)];
 
   if (options.isDebug) console.log(messages.join('\n'));
   else streamer.cast(messages);

@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/xo",
+  "scripts": {
+    "test": "xo"
+  },
+  "devDependencies": {
+    "xo": "^0.60.0"
+  },
+  "xo": {
+    "plugins": [
+      "eslint-comments"
+    ],
+    "space": true
+  }
+}

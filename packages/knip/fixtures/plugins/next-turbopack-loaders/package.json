@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/next-turbopack-loaders",
+  "devDependencies": {
+    "@svgr/webpack": "*",
+    "@tailwindcss/webpack": "*",
+    "csv-loader": "*",
+    "next": "*",
+    "raw-loader": "*",
+    "string-replace-loader": "*",
+    "unused-loader": "*"
+  }
+}

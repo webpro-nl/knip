@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/glob-symlinks",
+  "knip": {
+    "entry": ["index.ts"],
+    "project": ["**/*.ts"]
+  }
+}

@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
+import { join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PlaywrightTestConfig } from './types.ts';
 
@@ -13,7 +13,7 @@ const enablers = ['@playwright/test'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['playwright.config.{js,ts,mjs}'];
+const config = ['playwright.config.{js,cjs,mjs,ts,cts,mts}'];
 
 export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
@@ -36,8 +36,8 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   const { cwd, configFileDir } = options;
 
   const inputs: Input[] = [];
-  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntry(id));
-  for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntry(id));
+  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
+  for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
 
   const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
 

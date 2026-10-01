@@ -1,4 +1,16 @@
-import { Visitor, type Program, type Span, type TSTypeName, type VisitorObject } from 'oxc-parser';
+import {
+  Visitor,
+  visitorKeys,
+  type Class,
+  type Function as FunctionNode,
+  type Program,
+  type Span,
+  type TSInterfaceDeclaration,
+  type TSPropertySignature,
+  type TSTypeName,
+  type VariableDeclarator,
+  type VisitorObject,
+} from 'oxc-parser';
 import type { PluginVisitorObject } from '../../types/config.ts';
 import { FIX_FLAGS, IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
 import type { GetImportsAndExportsOptions } from '../../types/config.ts';
@@ -7,9 +19,16 @@ import type { IssueSymbol, SymbolType } from '../../types/issues.ts';
 import type { Export, ExportMember, ImportMap, ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
-import { getLineAndCol, getStringValue, isStringLiteral, type ResolveModule } from './helpers.ts';
+import { timerify } from '../../util/Performance.ts';
+import {
+  collectAugmentationRefs,
+  getLineAndCol,
+  getStringValue,
+  isStringLiteral,
+  type ResolveModule,
+} from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
-import { handleCallExpression, handleNewExpression } from './calls.ts';
+import { handleCallExpression, handleNewExpression, trackCustomElementRegistry } from './calls.ts';
 import {
   handleExportAssignment,
   handleExportDefault,
@@ -51,9 +70,18 @@ interface WalkContext {
   localRefs: Set<string> | undefined;
   destructuredExports: Set<string>;
   hasNodeModuleImport: boolean;
+  hasWorkerThreadsImport: boolean;
+  hasChildProcessImport: boolean;
+  childProcessNamespaces: ReadonlySet<string>;
+  childProcessMethods: ReadonlyMap<string, string>;
+  /** Local class names kept alive by a runtime registration (`customElements.define`, plugin-contributed `@customElement`). */
+  registeredCustomElements: Set<string>;
+  hasPathJoinImport: boolean;
+  hasPathResolveImport: boolean;
   resolveModule: ResolveModule;
   programFiles: Set<string>;
   entryFiles: Set<string>;
+  handledImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -62,6 +90,7 @@ export interface WalkState extends WalkContext {
   filePath: string;
   sourceText: string;
   isJS: boolean;
+  isModuleFile: boolean;
   handledImportExpressions: Set<number>;
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
@@ -71,10 +100,30 @@ export interface WalkState extends WalkContext {
   currentVarDeclStart: number;
   nsRanges: [number, number][];
   memberRefsInFile: string[];
+  importedRefs: Set<string> | undefined;
   scopeDepth: number;
   scopeStarts: number[];
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
+  localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
+  localInterfaces: Map<string, TSInterfaceDeclaration | null>;
+  pendingCallRefs: Array<{
+    name: string;
+    exportName: string;
+    seen: Set<string>;
+    kind: 'callee' | 'argument';
+  }>;
+  pendingMemberCallRefs: Array<{ objectName: string; propertyName: string; exportName: string; seen: Set<string> }>;
+  /** Maps a local binding to the export name(s) it surfaces as, so a registered class is credited
+   * even when exported under an alias (`export { X as Y }`, `export { X as default }`, `export default X`). */
+  localToExports: Map<string, Set<string>>;
+  /** Local identifiers bound to a custom-element registry (a `customElements` alias or a
+   * `new CustomElementRegistry()` instance), so `<id>.define('tag', Class)` credits the class. */
+  customElementRegistries: Set<string>;
+  /** Enclosing class names (innermost last) and static-block nesting, to resolve `this` in a
+   * `static { customElements.define('tag', this) }` self-registration. */
+  classNameStack: string[];
+  staticBlockDepth: number;
   addExport: (
     identifier: string,
     type: SymbolType,
@@ -82,7 +131,9 @@ export interface WalkState extends WalkContext {
     members: ExportMember[],
     fix: Fix,
     isReExport: boolean,
-    jsDocTags: Set<string>
+    jsDocTags: Set<string>,
+    binding?: string,
+    isBindingReExport?: boolean
   ) => void;
   getFix: (start: number, end: number, flags?: number) => Fix;
   getTypeFix: (start: number, end: number) => Fix;
@@ -106,7 +157,9 @@ const _addExport = (
   members: ExportMember[],
   fix: Fix,
   isReExport: boolean,
-  jsDocTags: Set<string>
+  jsDocTags: Set<string>,
+  binding = identifier,
+  isBindingReExport = false
 ) => {
   const item = state.exports.get(identifier);
   if (item) {
@@ -120,10 +173,12 @@ const _addExport = (
       }
     }
     item.isReExport = isReExport;
+    item.isBindingReExport = isBindingReExport;
   } else {
     const { line, col } = getLineAndCol(state.lineStarts, pos);
     state.exports.set(identifier, {
       identifier,
+      binding,
       type,
       members,
       jsDocTags,
@@ -131,42 +186,163 @@ const _addExport = (
       line,
       col,
       hasRefsInFile: false,
+      isRegistered: false,
       referencedIn: undefined,
       fixes: fix ? [fix] : [],
       isReExport,
+      isBindingReExport,
     });
   }
 };
 
-const _collectRefsInType = (node: any, exportName: string, signatureOnly: boolean): void => {
-  if (!node || typeof node !== 'object') return;
-  if (node.type === 'TSTypeQuery') {
-    const name = node.exprName.type === 'Identifier' ? node.exprName.name : undefined;
-    if (name) {
-      const refs = state.referencedInExport.get(name);
-      if (refs) refs.add(exportName);
-      else state.referencedInExport.set(name, new Set([exportName]));
+const _collectRefsInType = (
+  node: any,
+  exportName: string,
+  signatureOnly: boolean,
+  seen = new Set<string>(),
+  inBody = false,
+  thisType?: string
+): void => {
+  if (!node) return;
+  const type = node.type;
+  if (!type) return;
+
+  switch (type) {
+    case 'TSTypeQuery':
+      if (node.exprName?.type === 'Identifier') _addRefInExport(node.exprName.name, exportName);
+      return;
+    case 'TSTypeReference':
+      if (node.typeName?.type === 'Identifier') _addRefInExport(node.typeName.name, exportName);
+      break;
+    case 'TSThisType':
+      if (thisType) _addRefInExport(thisType, exportName);
+      return;
+    case 'CallExpression': {
+      const callee = node.callee;
+      if (callee?.type === 'Identifier') {
+        state.pendingCallRefs.push({ name: callee.name, exportName, seen, kind: 'callee' });
+      } else if (
+        callee?.type === 'MemberExpression' &&
+        !callee.computed &&
+        callee.object?.type === 'Identifier' &&
+        callee.property?.type === 'Identifier'
+      ) {
+        state.pendingMemberCallRefs.push({
+          objectName: callee.object.name,
+          propertyName: callee.property.name,
+          exportName,
+          seen,
+        });
+      }
+      // Only follow Identifier arguments at top level (e.g. `export const x = wrap(inner)`).
+      // Inside a function body the call result usually doesn't flow into the inferred return,
+      // and following would over-capture (e.g. `useReducer(reducer, …)` style).
+      if (!inBody) {
+        const args = node.arguments;
+        if (args) {
+          for (const arg of args) {
+            if (arg?.type === 'Identifier') {
+              state.pendingCallRefs.push({ name: arg.name, exportName, seen, kind: 'argument' });
+            }
+          }
+        }
+      }
+      break;
     }
-    return;
+    case 'FunctionBody':
+    case 'BlockStatement':
+      if (signatureOnly) return;
+      break;
+    case 'TSAsExpression':
+    case 'TSTypeAssertion':
+    case 'TSSatisfiesExpression':
+      if (inBody) {
+        if (node.expression) _collectRefsInType(node.expression, exportName, signatureOnly, seen, inBody, thisType);
+        return;
+      }
+      break;
+    case 'VariableDeclarator':
+      if (inBody) {
+        if (node.init) _collectRefsInType(node.init, exportName, signatureOnly, seen, inBody, thisType);
+        return;
+      }
+      break;
   }
-  if (signatureOnly && (node.type === 'FunctionBody' || node.type === 'BlockStatement')) return;
-  if (node.type === 'TSTypeReference' && node.typeName.type === 'Identifier') {
-    const name = node.typeName.name;
-    const refs = state.referencedInExport.get(name);
-    if (refs) refs.add(exportName);
-    else state.referencedInExport.set(name, new Set([exportName]));
-  }
-  for (const key in node) {
-    if (key === 'type' || key === 'parent') continue;
+
+  const keys = visitorKeys[type];
+  if (!keys) return;
+  const childInBody = inBody || type === 'FunctionBody' || type === 'BlockStatement';
+  for (const key of keys) {
     const val = node[key];
+    if (!val) continue;
     if (Array.isArray(val)) {
       for (const item of val) {
-        if (item && typeof item === 'object' && item.type) _collectRefsInType(item, exportName, signatureOnly);
+        if (item) _collectRefsInType(item, exportName, signatureOnly, seen, childInBody, thisType);
       }
-    } else if (val && typeof val === 'object' && val.type) {
-      _collectRefsInType(val, exportName, signatureOnly);
+    } else {
+      _collectRefsInType(val, exportName, signatureOnly, seen, childInBody, thisType);
     }
   }
+};
+
+const _collectRefsInDirectMemberResult = (fn: any, exportName: string, seen: Set<string>): boolean => {
+  const body = fn.body;
+  if (
+    body?.type !== 'MemberExpression' ||
+    body.computed ||
+    body.object?.type !== 'Identifier' ||
+    body.property?.type !== 'Identifier'
+  ) {
+    return false;
+  }
+
+  const params = Array.isArray(fn.params) ? fn.params : (fn.params?.items ?? []);
+  const param = params.find((param: any) => param.type === 'Identifier' && param.name === body.object.name);
+  const paramType = param?.typeAnnotation?.typeAnnotation;
+  if (paramType?.type !== 'TSTypeReference' || paramType.typeName?.type !== 'Identifier' || paramType.typeArguments) {
+    return false;
+  }
+
+  const declaration = state.localInterfaces.get(paramType.typeName.name);
+  if (!declaration || declaration.typeParameters) return false;
+  const members = declaration.body.body.filter(
+    (member): member is TSPropertySignature =>
+      member.type === 'TSPropertySignature' &&
+      !member.computed &&
+      member.key?.type === 'Identifier' &&
+      member.key.name === body.property.name &&
+      Boolean(member.typeAnnotation)
+  );
+  if (members.length !== 1) return false;
+
+  _collectRefsInType(members[0].typeAnnotation, exportName, true, seen, false, paramType.typeName.name);
+  return true;
+};
+
+const _collectRefsInCallResult = (node: any, exportName: string, seen: Set<string>) => {
+  const annotatedType = node.type === 'VariableDeclarator' ? node.id.typeAnnotation?.typeAnnotation : undefined;
+  if (annotatedType?.type === 'TSFunctionType') {
+    _collectRefsInType(annotatedType.typeParameters, exportName, true, seen);
+    return _collectRefsInType(annotatedType.returnType, exportName, true, seen);
+  }
+  if (annotatedType) return _collectRefsInType(annotatedType, exportName, true, seen);
+
+  const fn = node.type === 'VariableDeclarator' ? node.init : node;
+  if (
+    fn?.type !== 'ArrowFunctionExpression' &&
+    fn?.type !== 'FunctionDeclaration' &&
+    fn?.type !== 'FunctionExpression'
+  ) {
+    return _collectRefsInType(node, exportName, true, seen);
+  }
+
+  if (fn.returnType) {
+    _collectRefsInType(fn.typeParameters, exportName, true, seen);
+    return _collectRefsInType(fn.returnType, exportName, true, seen);
+  }
+
+  if (_collectRefsInDirectMemberResult(fn, exportName, seen)) return;
+  _collectRefsInType(fn, exportName, true, seen);
 };
 
 const _addRefInExport = (name: string, exportName: string) => {
@@ -190,7 +366,9 @@ export const isShadowed = (name: string, pos: number): boolean => {
 };
 
 const _addLocalRef = (name: string, pos: number) => {
-  if (!state.localImportMap.has(name) && !isShadowed(name, pos)) state.localRefs!.add(name);
+  if (isShadowed(name, pos)) return;
+  if (state.localImportMap.has(name)) (state.importedRefs ??= new Set()).add(name);
+  else state.localRefs!.add(name);
 };
 
 const _addShadowRange = (name: string, range: [number, number]) => {
@@ -241,13 +419,50 @@ const coreVisitorObject: VisitorObject = {
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
+    if (node.kind !== 'global' && state.isModuleFile && isStringLiteral(node.id)) {
+      const specifier = getStringValue(node.id)!;
+      for (const name of collectAugmentationRefs(node))
+        state.addImport(
+          specifier,
+          name,
+          undefined,
+          undefined,
+          node.id.start,
+          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
+        );
+    }
+  },
+  TSInterfaceDeclaration(node) {
+    if (state.scopeDepth > 0 || state.isInNamespace(node)) return;
+    const name = node.id.name;
+    state.localInterfaces.set(name, state.localInterfaces.has(name) ? null : node);
   },
   ClassDeclaration(node) {
-    if (node.id?.name) state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
+    state.classNameStack.push(node.id?.name ?? '');
+    if (node.id?.name) {
+      state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
+      state.localDeclarations.set(node.id.name, node);
+    }
+  },
+  'ClassDeclaration:exit'() {
+    state.classNameStack.pop();
+  },
+  ClassExpression(node) {
+    state.classNameStack.push(node.id?.name ?? '');
+  },
+  'ClassExpression:exit'() {
+    state.classNameStack.pop();
+  },
+  StaticBlock() {
+    state.staticBlockDepth++;
+  },
+  'StaticBlock:exit'() {
+    state.staticBlockDepth--;
   },
   FunctionDeclaration(node) {
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
+      state.localDeclarations.set(node.id.name, node);
       if (state.scopeDepth > 0) _addShadow(node.id.name);
     }
     _addParamShadows(node.params, node.body);
@@ -274,7 +489,10 @@ const coreVisitorObject: VisitorObject = {
       }
     } else {
       for (const decl of node.declarations) {
-        if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+        if (decl.id.type === 'Identifier') {
+          state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+          state.localDeclarations.set(decl.id.name, decl);
+        }
       }
     }
   },
@@ -295,6 +513,7 @@ const coreVisitorObject: VisitorObject = {
   },
   VariableDeclarator(node) {
     handleVariableDeclarator(node, state);
+    trackCustomElementRegistry(node, state);
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
@@ -640,7 +859,17 @@ export function buildVisitor(pluginVisitorObjects: PluginVisitorObject[], includ
   return new Visitor(merged as VisitorObject);
 }
 
-export function walkAST(program: Program, sourceText: string, filePath: string, ctx: WalkContext) {
+const isExternalModule = (program: Program, hasModuleSyntax: boolean) => {
+  if (hasModuleSyntax) return true;
+  for (const node of program.body) {
+    if (node.type === 'TSImportEqualsDeclaration' && node.moduleReference.type === 'TSExternalModuleReference') {
+      return true;
+    }
+  }
+  return false;
+};
+
+function walkAST(program: Program, sourceText: string, filePath: string, hasModuleSyntax: boolean, ctx: WalkContext) {
   const isJS =
     filePath.endsWith('.js') || filePath.endsWith('.mjs') || filePath.endsWith('.cjs') || filePath.endsWith('.jsx');
 
@@ -649,7 +878,7 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     filePath,
     sourceText,
     isJS,
-    handledImportExpressions: new Set(),
+    isModuleFile: isExternalModule(program, hasModuleSyntax),
     bareExprRefs: new Set(),
     accessedAliases: new Set(),
     nsContainers: new Map(),
@@ -658,10 +887,19 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     currentVarDeclStart: -1,
     nsRanges: [],
     memberRefsInFile: [],
+    importedRefs: undefined,
     scopeDepth: 0,
     scopeStarts: [],
     scopeEnds: [],
     shadowScopes: new Map(),
+    localDeclarations: new Map(),
+    localInterfaces: new Map(),
+    pendingCallRefs: [],
+    pendingMemberCallRefs: [],
+    localToExports: new Map(),
+    customElementRegistries: new Set(),
+    classNameStack: [],
+    staticBlockDepth: 0,
     addExport: _addExport,
     getFix: _getFix,
     getTypeFix: _getTypeFix,
@@ -671,6 +909,34 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
   };
 
   ctx.visitor.visit(program);
+
+  while (state.pendingCallRefs.length > 0 || state.pendingMemberCallRefs.length > 0) {
+    while (state.pendingCallRefs.length > 0) {
+      const { name, exportName, seen, kind } = state.pendingCallRefs.pop()!;
+      const key = `${kind}:${name}`;
+      if (seen.has(key)) continue;
+      const decl = state.localDeclarations.get(name);
+      if (!decl) continue;
+      seen.add(key);
+      if (kind === 'callee') _collectRefsInCallResult(decl, exportName, seen);
+      else _collectRefsInType(decl, exportName, true, seen);
+    }
+    while (state.pendingMemberCallRefs.length > 0) {
+      const { objectName, propertyName, exportName, seen } = state.pendingMemberCallRefs.pop()!;
+      const key = `${objectName}.${propertyName}`;
+      if (seen.has(key)) continue;
+      const decl = state.localDeclarations.get(objectName);
+      if (decl?.type !== 'VariableDeclarator' || decl.init?.type !== 'ObjectExpression') continue;
+      const prop = decl.init.properties.find(
+        p => p.type === 'Property' && p.key?.type === 'Identifier' && p.key.name === propertyName
+      );
+      if (prop?.type !== 'Property') continue;
+      const fn = prop.value;
+      if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') continue;
+      seen.add(key);
+      _collectRefsInCallResult(fn, exportName, seen);
+    }
+  }
 
   for (let i = 0; i < state.memberRefsInFile.length; i += 2) {
     const exp = state.exports.get(state.memberRefsInFile[i]);
@@ -717,7 +983,28 @@ export function walkAST(program: Program, sourceText: string, filePath: string, 
     }
   }
 
+  for (const name of state.registeredCustomElements) {
+    const item = state.exports.get(name);
+    if (item) item.isRegistered = true;
+    const aliases = state.localToExports.get(name);
+    if (aliases) {
+      for (const exportName of aliases) {
+        const aliased = state.exports.get(exportName);
+        if (aliased) aliased.isRegistered = true;
+      }
+    }
+  }
+
+  if (state.localRefs && state.importedRefs) {
+    for (const name of state.importedRefs) {
+      const exportNames = state.localToExports.get(name);
+      if (exportNames) for (const exportName of exportNames) state.localRefs.add(exportName);
+    }
+  }
+
   const localRefs = state.localRefs;
   state = undefined!;
   return localRefs;
 }
+
+export const _walkAST = timerify(walkAST);

@@ -10,6 +10,11 @@
     "test:typecheck": "vitest --typecheck.checker vue-tsc",
     "test:typecheck:tsc": "vitest --typecheck.checker tsc"
   },
+  "dependencies": {
+    "linked-package": "*",
+    "shared-state": "*",
+    "upstream-esm": "*"
+  },
   "devDependencies": {
     "vitest": "*",
     "@vitest/ui": "*"

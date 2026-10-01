@@ -1,5 +1,6 @@
 ---
 title: Integrations
+description: Knip's VS Code extension, JetBrains plugin, MCP server and language server for editor diagnostics and coding agents.
 ---
 
 - [VS Code/VSX Extension][1]
@@ -16,8 +17,8 @@ Language Server][4]:
 - **Hover Information**: Hover over exports to see import and usage locations
 - **Imports Tree View**: Direct links to implementations
 - **Exports Tree View**: Direct links to import and usage locations
-- **Contention Detection**: Warnings for circular dependencies, conflicts and
-  branched import chains
+- **Contention Detection**: Warnings for circular dependencies, ambiguous,
+  shadowed and diamond-shaped import chains
 - **Built-in MCP Server**: Automated configuration support for coding agents
 
 Find [Knip on the VS Code Marketplace][5] and find [Knip in the Open VSX
@@ -67,24 +68,37 @@ integrating Knip.
 
 ### Contention
 
-The IDE extension shows extra issues in the tree views like circular
-dependencies.
+The extension shows circular dependencies and three kinds of export contention:
+ambiguous, shadowed, and converged.
 
 #### Circular Dependencies
 
 ![Circular Dependencies][13]
 
-#### Conflicts
+#### Ambiguous
 
-![Conflicts][14]
+Different bindings compete for the same name, with no winner. Knip lists the
+competing bindings:
 
-#### Branching
+![Ambiguous][14]
 
-![Branching][15]
+#### Shadowed
+
+An explicit export hides bindings from `export *`. Knip labels the site as
+"shadowing" and lists the winning and hidden bindings:
+
+![Shadowed][15]
+
+#### Converged
+
+The same binding arrives through multiple re-export paths. Knip shows where
+those paths meet and the binding they share.
+
+![Converged][16]
 
 ### Settings
 
-![VS Code Extension Settings][16]
+![VS Code Extension Settings][17]
 
 [1]: #vs-code-extension
 [2]: #jetbrains-plugin
@@ -94,11 +108,12 @@ dependencies.
 [6]: https://open-vsx.org/extension/webpro/vscode-knip
 [7]: #vs-code-extension-screenshots
 [8]: https://plugins.jetbrains.com/plugin/29765-knip
-[9]: https://www.npmjs.com/package/@knip/mcp
+[9]: https://www.npmx.dev/package/@knip/mcp
 [10]: https://github.com/webpro-nl/knip/blob/main/packages/language-server/README.md
 [11]: /screenshots/editors-and-agents/diagnostics.webp
 [12]: /screenshots/editors-and-agents/imports-exports.webp
 [13]: /screenshots/editors-and-agents/circular-dependency.webp
-[14]: /screenshots/editors-and-agents/conflict.webp
-[15]: /screenshots/editors-and-agents/branch.webp
-[16]: /screenshots/editors-and-agents/vscode-extension-settings.webp
+[14]: /screenshots/editors-and-agents/ambiguous.webp
+[15]: /screenshots/editors-and-agents/shadow.webp
+[16]: /screenshots/editors-and-agents/branch.webp
+[17]: /screenshots/editors-and-agents/vscode-extension-settings.webp

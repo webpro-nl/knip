@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/admin/*": ["./admin/*"],
+      "$routes/*": ["./routes/*"],
+      "$shared/*": ["./lib/a/*", "./lib/b/*"]
+    }
+  },
+  "include": ["."]
+}

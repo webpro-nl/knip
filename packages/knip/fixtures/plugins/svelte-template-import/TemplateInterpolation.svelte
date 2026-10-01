@@ -1,0 +1,1 @@
+<div>template interpolation</div>

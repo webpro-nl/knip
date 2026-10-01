@@ -1,5 +1,6 @@
 ---
 title: CLI Arguments
+description: Every Knip command-line flag, grouped by mode, scope, fix, output and troubleshooting, with shortcuts and exit codes.
 ---
 
 ## General
@@ -31,15 +32,22 @@ Use an alternative path for the configuration file. Default locations:
 - `knip.jsonc`
 - `.knip.json`
 - `.knip.jsonc`
-- `knip.js`
 - `knip.ts`
+- `knip.js`
+- `knip.config.ts`
+- `knip.config.js`
 - `package.json#knip`
 
 Shortcut: `-c`
 
 ### `--use-tsconfig-files`
 
-Use `tsconfig.json` to define project files (override `project` patterns).
+Per workspace, take project files from `tsconfig.json` (`files` + `include`,
+minus `exclude`, `node_modules` and `outDir`) instead of the `project` patterns.
+Workspaces without a `tsconfig.json` fall back to their `project` patterns.
+
+Implicitly enabled in the [editor extension, MCP server and language server][1]
+when there is no Knip configuration file.
 
 ### `--tsConfig [file]`
 
@@ -61,16 +69,21 @@ knip-bun
 
 This is equal to `bunx --bun knip`
 
-Requires [Bun][1] to be installed. Also see [known issues][2] for the type of
+Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO_COLOR
+### NO\_COLOR
 
-The built-in reporters use the [NO_COLOR][3] friendly [picocolors][4]:
+The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
+
+### KNIP\_DISABLE\_RAW\_TRANSFER
+
+Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
+normal parser path.
 
 ## Mode
 
@@ -81,6 +94,8 @@ Enable caching.
 Consecutive runs are 10-40% faster as the results of file analysis (AST
 traversal) are cached. Conservative. Cache strategy based on file meta data
 (modification time + file size).
+
+See [stale cache results][6] for limitations and workarounds.
 
 ### `--cache-location`
 
@@ -97,13 +112,15 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][5].
+Also see [includeEntryExports][7].
 
 ### `--no-gitignore`
 
 Ignore `.gitignore` files.
 
 ### `--production`
+
+Shortcut: `-p`
 
 Lint only production source files. This excludes:
 
@@ -113,16 +130,20 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][6].
+Read more at [Production Mode][8].
 
 ### `--strict`
 
-Isolate workspaces and consider only direct dependencies. Implies [production
-mode][7].
+Shortcut: `-s`
 
-Read more at [Production Mode][6].
+Isolate workspaces and consider only direct dependencies. Implies [production
+mode][9].
+
+Read more at [Production Mode][8].
 
 ### `--watch`
+
+Shortcut: `-w`
 
 Watch current directory, and update reported issues when a file is modified,
 added or deleted.
@@ -134,14 +155,17 @@ changes in `package.json` or `node_modules` may not cause an updated report.
 
 ### `--workspace [filter]`
 
-Select one or multiple workspaces (including its ancestor and dependent
-workspaces). The default behavior is to lint all configured workspaces.
+Select one or multiple workspaces (including its ancestor, dependency and
+dependent workspaces). The default behavior is to lint all configured
+workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][8] for more details and examples.
+See [filter workspaces][10] for more details and examples.
 
 ### `--directory [dir]`
+
+Shortcut: `-D`
 
 Default: `cwd` (current directory)
 
@@ -168,12 +192,16 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-Available [issue types][9] when filtering output using `--include` or
+`nsExports` and `nsTypes` are [off by default][11]; including only those _adds_
+them to the default report instead of narrowing it.
+
+Available [issue types][12] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
 - `dependencies`
 - `unlisted`
+- `binaries`
 - `unresolved`
 - `exports`
 - `nsExports`
@@ -183,18 +211,19 @@ Available [issue types][9] when filtering output using `--include` or
 - `namespaceMembers`
 - `duplicates`
 - `catalog`
+- `catalogReferences`
 
 ### `--dependencies`
 
-Shortcut to include all types of dependency issues:
+Shortcut to report only all types of dependency issues:
 
 ```sh
---include dependencies,unlisted,binaries,unresolved,catalog
+--include dependencies,unlisted,binaries,unresolved,catalog,catalogReferences
 ```
 
 ### `--exports`
 
-Shortcut to include all types of export issues:
+Shortcut to report only all types of export issues:
 
 ```sh
 --include exports,nsExports,types,nsTypes,enumMembers,namespaceMembers,duplicates
@@ -202,11 +231,21 @@ Shortcut to include all types of export issues:
 
 ### `--files`
 
-Shortcut to include file issues:
+Shortcut to report only file issues:
 
 ```sh
 --include files
 ```
+
+### `--cycles`
+
+Shortcut to report only circular dependencies:
+
+```sh
+--include cycles
+```
+
+Also see the [cycles reporter][13].
 
 ### `--tags`
 
@@ -246,13 +285,15 @@ knip --tags @lintignore --tags @internal
 
 ### `--fix`
 
-Read more at [auto-fix][10].
+Shortcut: `-f`
+
+Read more at [auto-fix][14].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][9]
+More info about fixable types at [issue types][12]
 
 ### `--allow-remove-files`
 
@@ -260,13 +301,15 @@ Allow Knip to remove files (with `--fix`).
 
 ### `--format`
 
+Shortcut: `-F`
+
 Format modified files after `--fix` using the local formatter.
 
 ## Output
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][11].
+Preprocess the results before providing it to the [reporter(s)][15].
 
 Can be repeated. Examples:
 
@@ -278,7 +321,9 @@ knip --preprocessor ./my-preprocessor.ts
 knip --preprocessor preprocessor-package
 ```
 
-Also see [Reporters & Preprocessors][12].
+Preprocessors can also be configured in the Knip configuration file.
+
+Also see [Reporters & Preprocessors][16].
 
 ### `--preprocessor-options [json]`
 
@@ -300,6 +345,7 @@ Available reporters:
 - `markdown`
 - `disclosure`
 - `github-actions`
+- `sarif`
 
 Can be repeated. Example:
 
@@ -307,7 +353,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][12].
+Also see [Reporters & Preprocessors][16].
 
 ### `--reporter-options [json]`
 
@@ -323,9 +369,17 @@ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 
 Suppress configuration hints.
 
+### `--no-tag-hints`
+
+Suppress tag hints.
+
 ### `--treat-config-hints-as-errors`
 
 Exit with non-zero exit code (`1`) if there are any configuration hints.
+
+### `--treat-tag-hints-as-errors`
+
+Exit with non-zero exit code (`1`) if there are any tag hints.
 
 ### `--max-issues`
 
@@ -337,15 +391,16 @@ Maximum number of issues per type to display (does not affect exit code).
 
 ### `--no-exit-code`
 
-Always exit with code zero (`0`), even when there are lint issues.
+Exit with code zero (`0`) even when there are lint issues. Config load failures
+and internal errors still exit with code `2`.
 
 The default exit codes:
 
-| Code | Description                                                      |
-| :--: | :--------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint issues                            |
-| `1`  | Knip ran successfully, but there is at least one lint issue      |
-| `2`  | Knip did not run successfully due to bad input or internal error |
+| Code | Description                                                                                     |
+| :--: | :---------------------------------------------------------------------------------------------- |
+| `0`  | Knip ran successfully, no lint issues                                                           |
+| `1`  | Knip ran successfully, but there is at least one lint issue                                     |
+| `2`  | Knip did not run successfully due to bad input, a plugin config load error or an internal error |
 
 ## Troubleshooting
 
@@ -353,7 +408,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][13].
+Show [debug output][17].
 
 ### `--memory`
 
@@ -430,7 +485,14 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][14]).
+`performance.timerify` ([GitHub issue][18]).
+
+### `--duration`
+
+Shortcut: `-u`
+
+Print total running time. Zero overhead — no `timerify` instrumentation, unlike
+`--performance`.
 
 ### `--performance-fn`
 
@@ -453,34 +515,38 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][15].
+Also see [Trace][19].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][16].
+[--trace][20].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][16].
+Trace export name to see where it's imported. Implies [--trace][20].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][16].
+Trace file to see where its exports are imported. Implies [--trace][20].
 
-[1]: https://bun.sh
-[2]: ../reference/known-issues.md
-[3]: https://no-color.org/
-[4]: https://www.npmjs.com/package/picocolors
-[5]: ./configuration.md#includeentryexports
-[6]: ../features/production-mode.md
-[7]: #--production
-[8]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[9]: ./issue-types.md
-[10]: ../features/auto-fix.mdx
-[11]: #--reporter-reporter
-[12]: ../features/reporters.md
-[13]: ../guides/troubleshooting.md#debug
-[14]: https://github.com/oven-sh/bun/issues/9271
-[15]: ../guides/troubleshooting.md#trace
-[16]: #--trace
+[1]: ./integrations.md
+[2]: https://bun.sh
+[3]: ../reference/known-issues.md
+[4]: https://no-color.org/
+[5]: https://www.npmx.dev/package/picocolors
+[6]: ./known-issues.md#stale-cache-results
+[7]: ./configuration.md#includeentryexports
+[8]: ../features/production-mode.md
+[9]: #--production
+[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[11]: ../guides/namespace-imports.md
+[12]: ./issue-types.md
+[13]: ../features/reporters.md#cycles
+[14]: ../features/auto-fix.mdx
+[15]: #--reporter-reporter
+[16]: ../features/reporters.md
+[17]: ../guides/troubleshooting.md#debug
+[18]: https://github.com/oven-sh/bun/issues/9271
+[19]: ../guides/troubleshooting.md#trace
+[20]: #--trace

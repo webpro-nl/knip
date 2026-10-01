@@ -27,9 +27,9 @@ test('Find dependencies with the Nx plugin', async () => {
 
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
-  assert(issues.binaries['libs/b/project.json']['compodoc']);
   assert(issues.binaries['libs/b/project.json']['biome']);
   assert(issues.binaries['libs/b/project.json']['tsc']);
+  assert(issues.binaries['libs/b/project.json']['tsx']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -37,7 +37,7 @@ test('Find dependencies with the Nx plugin', async () => {
     devDependencies: 6,
     unlisted: 6,
     files: 3,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });

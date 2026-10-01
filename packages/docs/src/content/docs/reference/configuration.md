@@ -1,5 +1,6 @@
 ---
 title: Configuration
+description: Every knip.json option, including entry, project, paths, workspaces, plugins, rules, tags, ignores and compilers.
 ---
 
 This page lists all configuration file options.
@@ -87,11 +88,34 @@ TypeScript semantics:
 
 ## Workspaces
 
+### `workspaces`
+
+Configure `entry`, `project`, plugins and most other options per workspace. Keys
+are workspace directories (globs allowed); the root workspace is `"."`.
+
+```json title="knip.json"
+{
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"],
+      "project": ["scripts/**/*.ts"]
+    },
+    "packages/*": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  }
+}
+```
+
+Workspaces configured here that aren't already defined in the root
+`package.json` (or `pnpm-workspace.yaml`) are added to the analysis. Also see
+[Monorepos & Workspaces][4].
+
 Individual workspace configurations may contain all other options listed on this
 page, except for the following root-only options:
 
 - `exclude` / `include`
-- `ignoreExportsUsedInFile`
 - `ignoreWorkspaces`
 - `workspaces`
 
@@ -189,6 +213,31 @@ letters and avoid snake-case.
 
 Also see [JSDoc & TSDoc Tags][8].
 
+### `preprocessor`
+
+Preprocess the results before providing them to the reporter(s). Can be a single
+preprocessor or an array of preprocessors. Each value is a path to a local file
+or an npm package name.
+
+```json title="knip.json"
+{
+  "preprocessor": ["./first.ts", "./second.ts"]
+}
+```
+
+Also see [Preprocessors][9].
+
+### `preprocessorOptions`
+
+Extra options to pass to the preprocessor.
+
+```json title="knip.json"
+{
+  "preprocessor": "./my-preprocessor.ts",
+  "preprocessorOptions": { "key": "value" }
+}
+```
+
 ### `treatConfigHintsAsErrors`
 
 Exit with non-zero code (1) if there are any configuration hints.
@@ -199,13 +248,23 @@ Exit with non-zero code (1) if there are any configuration hints.
 }
 ```
 
+### `treatTagHintsAsErrors`
+
+Exit with non-zero code (1) if there are any tag hints.
+
+```json title="knip.json"
+{
+  "treatTagHintsAsErrors": true
+}
+```
+
 ## Ignore Issues
 
 ### `ignore`
 
 :::tip
 
-Please read [configuring project files][9] before using the `ignore` option.
+Please read [configuring project files][10] before using the `ignore` option.
 
 :::
 
@@ -213,7 +272,7 @@ Avoid `ignore` patterns. There is almost always a better solution:
 
 - Follow up on configuration hints (if there are any).
 - Fine-tune `entry` and `project` patterns.
-- Use [production mode][10].
+- Use [production mode][11].
 - Other `ignore*` options.
 
 **NOTE**: An exception to the rule: to _temporarily_ report only issues in files
@@ -263,6 +322,19 @@ export default {
 
 Suffix an item with `!` to enable it only in production mode.
 
+### `ignoreGlobalBinaries`
+
+Defaults to `true`, suppressing missing-binary reports for common global commands such as `git` and `docker`. Set it to `false` to report these commands where a project dependency is expected:
+
+```json title="knip.json"
+{
+  "ignoreGlobalBinaries": false,
+  "ignoreBinaries": ["git"]
+}
+```
+
+Dependencies that provide a referenced binary still count as used, and `ignoreBinaries` still applies. Optional commands, including bare CI/hook commands and commands installed on demand, produce no missing-binary reports. Workspaces inherit the top-level value unless they override it.
+
 ### `ignoreDependencies`
 
 Array of package names to exclude from the report. Regular expressions allowed.
@@ -284,7 +356,7 @@ export default {
 
 Suffix an item with `!` to enable it only in production mode.
 
-Also see [Unused dependencies][11].
+Also see [Unused dependencies][12].
 
 ### `ignoreMembers`
 
@@ -314,7 +386,7 @@ Actual regular expressions can be used in dynamic configurations:
 
 ```ts title="knip.ts"
 export default {
-  ignoreUnresolved: [/^#/.+/],
+  ignoreUnresolved: [/^#virtual\/.+/],
 };
 ```
 
@@ -352,6 +424,27 @@ reporting other issues in those same files.
 }
 ```
 
+### `cycles`
+
+Configure circular dependency (`cycles`) detection.
+
+Set `dynamicImports` to include dynamic `import()` edges, which are excluded by
+default (a dynamic import defers evaluation, so it does not cause the
+initialization hazard cycles are meant to catch).
+
+Use `allow` to accept specific cycles by exact path while keeping other `cycles`
+issues enabled. Path entries are relative to the project root and omit the
+closing repeat of the first file.
+
+```json title="knip.json"
+{
+  "cycles": {
+    "dynamicImports": true,
+    "allow": [["src/i18n/index.ts", "src/i18n/middleware.ts"]]
+  }
+}
+```
+
 ## Exports
 
 ### `ignoreExportsUsedInFile`
@@ -378,6 +471,12 @@ In a more fine-grained manner, to ignore only specific issue types:
 }
 ```
 
+Valid keys are the symbol types Knip distinguishes: `class`, `enum`, `function`,
+`interface`, `member`, `namespace`, `type` and `variable`.
+
+Set this option at root level to enable this globally, or within workspace
+configurations individually.
+
 ### `includeEntryExports`
 
 By default, Knip does not report unused exports in entry files. When a
@@ -392,7 +491,8 @@ entry files when reporting unused exports:
 
 If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
-or `src/routes/+page.svelte`.
+or `src/routes/+page.svelte`. Entry files discovered only through `package.json`
+scripts are also excluded; add them to `entry` to include their exports.
 
 This will also enable reporting unused members of exported enums and namespaces.
 
@@ -414,7 +514,7 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 Override built-in compilers or add custom compilers for additional file types.
 
-Also see [Compilers][12].
+Also see [Compilers][13].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -424,7 +524,8 @@ Also see [Compilers][12].
 [6]: ../explanations/plugins.md
 [7]: ../features/rules-and-filters.md#filters
 [8]: ./jsdoc-tsdoc-tags.md
-[9]: ../guides/configuring-project-files.md
-[10]: ../features/production-mode.md
-[11]: ../guides/handling-issues.mdx#unused-dependencies
-[12]: ../features/compilers.md
+[9]: ../features/reporters.md#preprocessors
+[10]: ../guides/configuring-project-files.md
+[11]: ../features/production-mode.md
+[12]: ../guides/handling-issues.mdx#unused-dependencies
+[13]: ../features/compilers.md

@@ -1,4 +1,4 @@
-import type { ParsedArgs } from 'minimist';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
@@ -10,7 +10,7 @@ import {
   toDeferResolveProductionEntry,
   toDependency,
 } from '../../util/input.ts';
-import { isInternal, join, toAbsolute } from '../../util/path.ts';
+import { extname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
@@ -26,12 +26,26 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['webpack.config.{js,ts,mjs,cjs,mts,cts}'];
 
+const interpretLoaders: Record<string, string[]> = {
+  '.ts': ['ts-node', 'sucrase', '@babel/register', 'esbuild-register', '@swc/register'],
+  '.cts': ['ts-node'],
+};
+
 const hasBabelOptions = (use: RuleSetUseItem) =>
   Boolean(use) &&
   typeof use !== 'string' &&
   'loader' in use &&
   typeof use.loader === 'string' &&
   use.loader === 'babel-loader' &&
+  typeof use.options === 'object';
+
+const hasLoaderOptions = (
+  use: RuleSetUseItem
+): use is Exclude<RuleSetUseItem, string> & { loader: string; options: object } =>
+  Boolean(use) &&
+  typeof use !== 'string' &&
+  'loader' in use &&
+  typeof use.loader === 'string' &&
   typeof use.options === 'object';
 
 const info = {
@@ -65,10 +79,24 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
   });
 };
 
+const isSwcLoader = (loader: string) =>
+  loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
+
+const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
+  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
+  const plugins = (use.options as { jsc?: { experimental?: { plugins?: unknown[] } } }).jsc?.experimental?.plugins;
+  if (!Array.isArray(plugins)) return [];
+  return plugins.flatMap(plugin => {
+    if (typeof plugin === 'string') return [plugin];
+    if (Array.isArray(plugin) && typeof plugin[0] === 'string') return [plugin[0]];
+    return [];
+  });
+};
+
 const resolveUseItem = (use: RuleSetUseItem) => {
   if (!use) return [];
   if (typeof use === 'string') return [use];
-  if ('loader' in use && typeof use.loader === 'string') return [use.loader];
+  if ('loader' in use && typeof use.loader === 'string') return [use.loader, ...resolveSwcPluginDependencies(use)];
   return [];
 };
 
@@ -106,15 +134,16 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
         }
       }
 
-      if (typeof opts.entry === 'string') entries.push(opts.entry);
-      else if (Array.isArray(opts.entry)) entries.push(...opts.entry);
-      else if (typeof opts.entry === 'object') {
-        for (const entry of Object.values(opts.entry)) {
-          if (typeof entry === 'string') entries.push(entry);
-          else if (Array.isArray(entry)) entries.push(...entry);
-          else if (typeof entry === 'function') entries.push((entry as () => string)());
-          else if (entry && typeof entry === 'object' && 'import' in entry) entries.push(...[entry.import].flat());
-          else if (entry && typeof entry === 'object' && 'filename' in entry) entries.push(entry['filename'] as string);
+      const entry = typeof opts.entry === 'function' ? await opts.entry() : opts.entry;
+
+      if (typeof entry === 'string') entries.push(entry);
+      else if (Array.isArray(entry)) entries.push(...entry);
+      else if (typeof entry === 'object') {
+        for (const item of Object.values(entry)) {
+          if (typeof item === 'string') entries.push(item);
+          else if (Array.isArray(item)) entries.push(...item);
+          else if (typeof item === 'function') entries.push((item as () => string)());
+          else if (item && typeof item === 'object' && 'import' in item) entries.push(...[item.import].flat());
         }
       }
 
@@ -163,6 +192,9 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
 const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
   inputs.push(toDependency('webpack-cli', { optional: true }));
+  for (const loader of interpretLoaders[extname(options.configFilePath)] ?? []) {
+    inputs.push(toDependency(loader, { optional: true }));
+  }
   return inputs;
 };
 

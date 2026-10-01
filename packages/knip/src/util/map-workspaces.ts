@@ -1,8 +1,10 @@
 import { readFile } from 'node:fs/promises';
-import fg from 'fast-glob';
+import { glob } from 'tinyglobby';
 import type { PackageJson, WorkspacePackage } from '../types/package-json.ts';
 import { partition } from './array.ts';
+import { debugLog } from './debug.ts';
 import { ConfigurationError } from './errors.ts';
+import { logWarning } from './log.ts';
 import { getPackageName } from './package-name.ts';
 import { join } from './path.ts';
 
@@ -18,9 +20,9 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
 
   const manifestPatterns = patterns.map(p => join(p, 'package.json'));
 
-  const matches = await fg.glob(manifestPatterns, {
+  const matches = await glob(manifestPatterns, {
     cwd,
-    ignore: ['**/node_modules/**', ...negatedPatterns.map(p => p.slice(1))],
+    ignore: ['**/node_modules/**', ...negatedPatterns.map(p => join(p.slice(1), 'package.json'))],
   });
 
   for (const match of matches.sort()) {
@@ -28,7 +30,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
     const dir = join(cwd, name);
     const manifestPath = join(cwd, match);
     try {
-      const manifestStr = await readFile(manifestPath, 'utf8');
+      const manifestStr = (await readFile(manifestPath, 'utf8')).replace(/^﻿/, '');
       const manifest: PackageJson = JSON.parse(manifestStr);
       const pkgName = getPackageName(manifest, dir);
       const pkg: WorkspacePackage = { dir, name, pkgName, manifestPath, manifestStr, manifest };
@@ -36,9 +38,11 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
       if (pkgName) wsPkgNames.add(pkgName);
       else throw new ConfigurationError(`Missing package name in ${manifestPath}`);
     } catch (error) {
-      // @ts-expect-error
-      if (error?.code === 'ENOENT') debugLog('*', `Unable to load package.json for ${name}`);
-      else throw error;
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+        debugLog('*', `Unable to load package.json for ${name}`);
+      } else if (error instanceof SyntaxError) {
+        logWarning(`Skipping workspace ${name}: invalid JSON in ${manifestPath} (${error.message})`);
+      } else throw error;
     }
   }
 

@@ -1,5 +1,11 @@
 ---
-import Chart from '../assets/venz-chart.svg';
+import { SPONSORS_CHART } from './SponsorsChart.data.ts';
+import { buildParams } from './SponsorsChart.params.ts';
+
+const params = buildParams(SPONSORS_CHART);
+const url = `https://cdn.venz.dev/i/chart.svg?${params}&w=928&h=384`;
+const res = await fetch(url);
+const svg = await res.text();
 ---
 
-<Chart />
+<Fragment set:html={svg} />

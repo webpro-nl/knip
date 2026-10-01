@@ -1,0 +1,13 @@
+import './my-fast-element.js';
+import './config-fast-element.js';
+import './define-element.js';
+import './define-config-element.js';
+import './aliased-base-element.js';
+import './define-async-element.js';
+import './mixin-element.js';
+import './unregistered-element.js';
+import './plain-define.js';
+import './scoped-define-element.js';
+import './directive-define.js';
+import './not-fast-element.js';
+import './imported-non-fast-element.js';

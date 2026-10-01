@@ -1,0 +1,4 @@
+{
+  // Comments are valid in JSONC only
+  "jsPlugins": ["./oxlint-plugin-orchard.mjs"]
+}

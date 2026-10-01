@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/vitest9",
+  "name": "@plugins/vitest9",
   "workspaces": [
     "packages/*"
   ],

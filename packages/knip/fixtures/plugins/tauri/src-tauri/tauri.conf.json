@@ -1,0 +1,10 @@
+{
+  "productName": "grape-cellar",
+  "identifier": "dev.knip.grape-cellar",
+  "build": {
+    "beforeDevCommand": "vite",
+    "beforeBuildCommand": { "script": "vite build" },
+    "beforeBundleCommand": { "script": "node crush.js", "cwd": "ui" },
+    "frontendDist": "../dist"
+  }
+}

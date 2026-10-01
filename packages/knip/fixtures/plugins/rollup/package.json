@@ -1,7 +1,9 @@
 {
   "name": "@plugins/rollup",
   "scripts": {
-    "build": "rollup"
+    "build": "rollup",
+    "build:web": "rollup --config configs/rollup.web.config.mjs",
+    "build:watch": "rollup --config -w"
   },
   "devDependencies": {
     "rollup": "*"

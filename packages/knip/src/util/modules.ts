@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
-import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
+import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
   if (!isStartsLikePackageName(specifier)) return;
@@ -17,25 +18,49 @@ export const getPackageNameFromModuleSpecifier = (specifier: string) => {
 };
 
 const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
+const yarnPnpmStorePackageRoot = /^(.*\/node_modules\/\.store\/[^/]+\/package)(?:\/|$)/;
+const yarnPnpmStoreNameCache = new Map<string, string | undefined>();
+
+const getPackageNameFromYarnPnpmStore = (posixPath: string): string | undefined => {
+  const match = posixPath.match(yarnPnpmStorePackageRoot);
+  if (!match) return;
+  const root = match[1];
+  if (yarnPnpmStoreNameCache.has(root)) return yarnPnpmStoreNameCache.get(root);
+  let name: string | undefined;
+  try {
+    name = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name;
+  } catch {}
+  yarnPnpmStoreNameCache.set(root, name);
+  return name;
+};
+
 export const getPackageNameFromFilePath = (value: string) => {
   const name = value.startsWith('file://') ? value.slice(7) : value;
-  if (name.includes('node_modules/.bin/')) return extractBinary(name);
-  const match = toPosix(name).match(lastPackageNameMatch);
-  if (match) return match[match.length - 1];
+  if (isInNodeModulesBin(name)) return extractBinary(name);
+  const posixPath = toPosix(name);
+  const match = posixPath.match(lastPackageNameMatch);
+  if (match) {
+    const last = match[match.length - 1];
+    return last === '.store' ? (getPackageNameFromYarnPnpmStore(posixPath) ?? last) : last;
+  }
   return name;
 };
 
 export const getPackageNameFromSpecifier = (specifier: string) =>
   isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
 
-const matchPackageNameStart = /^(@[a-z0-9._~]|[a-z0-9])/i;
+const isPackageNameStart = (ch: number) => (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch >= 48 && ch <= 57);
+const isPackageScopeStart = (ch: number) => isPackageNameStart(ch) || ch === 46 || ch === 95 || ch === 126;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
-  if (ch === 46 || ch === 47 || ch === 35 || ch === 126 || ch === 36) return false; // . / # ~ $
-  return matchPackageNameStart.test(specifier);
+  return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
 };
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
+
+export const isInNodeModulesBin = (value: string) => value.includes('node_modules/.bin/');
+
+export const isRelativeNodeModulesBin = (value: string) => /^(?:\.\.?\/)*node_modules\/\.bin\//.test(value);
 
 const stripNodeModulesFromPath = (command: string) => command.replace(/(?:\.{0,2}\/)*node_modules\//, '');
 
@@ -81,6 +106,7 @@ export const sanitizeSpecifier = (specifier: string) => {
   ) {
     return specifier;
   }
+  const isSubpathImport = specifier.charCodeAt(0) === CHAR_HASH;
   const len = specifier.length;
   let start = 0;
   let end = len;
@@ -95,7 +121,7 @@ export const sanitizeSpecifier = (specifier: string) => {
     if (ch === CHAR_SLASH && colon === -1) {
       hasSlash = true;
     }
-    if (colon === -1 && ch === CHAR_COLON && !hasSlash) {
+    if (colon === -1 && ch === CHAR_COLON && !hasSlash && !isSubpathImport) {
       colon = i;
     }
     if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {

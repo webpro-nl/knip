@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/lunaria-core",
+  "scripts": {
+    "lunaria:build": "lunaria build"
+  },
+  "dependencies": {
+    "@lunariajs/core": "*"
+  }
+}

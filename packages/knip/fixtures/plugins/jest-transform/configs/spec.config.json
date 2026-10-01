@@ -1,0 +1,6 @@
+{
+  "rootDir": "..",
+  "transform": {
+    "^.+\\.jsx?$": ["babel-jest", { "configFile": "./configs/babel.config.js" }]
+  }
+}

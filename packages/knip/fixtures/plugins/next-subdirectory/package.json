@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/next-subdirectory",
+  "scripts": {
+    "dev": "next dev ./web"
+  },
+  "devDependencies": {
+    "next": "*"
+  }
+}

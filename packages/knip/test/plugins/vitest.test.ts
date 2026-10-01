@@ -23,13 +23,14 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unlisted['package.json']['jsdom']);
   assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
+  assert(issues.unresolved['vitest.config.ts']['snapshot-serializer.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 11,
-    unresolved: 1,
-    processed: 11,
-    total: 11,
+    unresolved: 2,
+    processed: 12,
+    total: 12,
   });
 });
 
@@ -38,12 +39,13 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/setupTests.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 1);
+  assert('src/htmlSnapshotSerializer.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 2);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 1,
-    total: 1,
+    files: 2,
+    processed: 2,
+    total: 2,
   });
 });

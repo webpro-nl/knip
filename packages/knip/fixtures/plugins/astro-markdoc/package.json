@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/astro-markdoc",
+  "dependencies": {
+    "@astrojs/markdoc": "*",
+    "astro": "*"
+  }
+}

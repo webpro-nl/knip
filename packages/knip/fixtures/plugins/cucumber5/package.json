@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/cucumber5",
+  "devDependencies": {
+    "@cucumber/cucumber": "*"
+  }
+}

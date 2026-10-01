@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/bun-dev-dependency",
+  "scripts": {
+    "prepare-local-bun": "bun scripts/prepare.ts"
+  },
+  "devDependencies": {
+    "bun": "*"
+  }
+}

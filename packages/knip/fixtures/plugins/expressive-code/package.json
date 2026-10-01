@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/expressive-code-nextjs",
+  "name": "@plugins/expressive-code",
   "scripts": {
     "dev": "next dev",
     "build": "next build"

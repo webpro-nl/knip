@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/workspaces-stale-config",
+  "version": "*",
+  "workspaces": ["packages/*"],
+  "knip": {
+    "workspaces": {
+      "packages/a": {},
+      "packages/*": {},
+      "packages/removed": {},
+      "apps/*": {}
+    }
+  }
+}

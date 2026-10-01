@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/nuxt-no-root-tsconfig",
+  "dependencies": {
+    "nuxt": "*",
+    "vue": "*"
+  },
+  "devDependencies": {
+    "nuxt-module": "*"
+  }
+}

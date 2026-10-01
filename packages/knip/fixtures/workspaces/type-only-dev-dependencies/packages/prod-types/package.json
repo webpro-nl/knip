@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-type-only-dev-dependencies__prod-types",
+  "private": true,
+  "type": "module",
+  "exports": "./index.ts"
+}

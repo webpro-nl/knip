@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/expressive-code-astro",
+  "name": "@plugins/expressive-code2",
   "type": "module",
   "scripts": {
     "dev": "astro dev",

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/nuxtjs-i18n",
+  "scripts": {
+    "build": "nuxt build"
+  },
+  "dependencies": {
+    "nuxt": "*",
+    "@nuxtjs/i18n": "*"
+  }
+}

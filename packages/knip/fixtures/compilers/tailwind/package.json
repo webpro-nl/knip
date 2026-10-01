@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/compilers-tailwind",
+  "exports": {
+    "./tailwind-theme.css": "./styles.css"
+  },
+  "dependencies": {
+    "tailwindcss": "*"
+  },
+  "devDependencies": {
+    "@heroui/react": "*",
+    "@tailwindcss/forms": "*",
+    "@tailwindcss/typography": "*"
+  }
+}

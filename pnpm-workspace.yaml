@@ -1,3 +1,18 @@
 packages:
   - packages/*
   - '!packages/knip/fixtures'
+allowBuilds:
+  esbuild: false
+  sharp: false
+minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - release-it
+  - '@release-it/bumper'
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - chokidar@4.0.3
+  - undici-types@6.21.0
+packageExtensions:
+  '@astrojs/mdx@7.0.3':
+    dependencies:
+      satteri: 0.9.5

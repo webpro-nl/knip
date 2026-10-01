@@ -1,0 +1,16 @@
+{
+  "name": "@fixtures/workspaces-cross-ref",
+  "workspaces": [
+    "scripts"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate.ts",
+    "test": "node --test"
+  },
+  "knip": {
+    "workspaces": {
+      ".": {},
+      "scripts": {}
+    }
+  }
+}

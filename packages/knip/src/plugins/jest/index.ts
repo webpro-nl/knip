@@ -1,7 +1,11 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { arrayify } from '../../util/array.ts';
+import { _glob, _dirGlob } from '../../util/glob.ts';
+import { type Input, toConfig, toDeferResolve, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
+import type { BabelConfigObj } from '../babel/types.ts';
 import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
 import type { JestConfig, JestInitialOptions } from './types.ts';
 
@@ -14,13 +18,22 @@ const enablers = ['jest'];
 const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
   hasDependency(dependencies, enablers) || Boolean(manifest.name?.startsWith('jest-presets'));
 
-const config = ['jest.config.{js,ts,mjs,cjs,json}', 'package.json'];
+const config = ['jest.config.{js,ts,mjs,cjs,mts,cts,json}', 'package.json'];
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
-const entry = ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', ...mocks];
+const entry = ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/?(*.)+(spec|test).?(c|m)[jt]s?(x)', ...mocks];
 
-const resolveDependencies = async (config: JestInitialOptions, options: PluginOptions): Promise<Input[]> => {
+const rootDirRe = /<rootDir>/;
+
+const isBabelJest = (transformer: [string, unknown]): transformer is [string, BabelConfigObj] =>
+  transformer[0] === 'babel-jest';
+
+const resolveDependencies = async (
+  config: JestInitialOptions,
+  rootDir: string,
+  options: PluginOptions
+): Promise<Input[]> => {
   const { configFileDir } = options;
 
   if (config?.preset) {
@@ -36,17 +49,27 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
 
-  const projects = [];
+  const projects: (string | Input)[] = [];
   for (const project of config.projects ?? []) {
     if (typeof project === 'string') {
-      projects.push(project);
+      // Special case: Most Jest config settings can resolve <rootDir> later,
+      // but projects support wildcard expansion so should be expanded now.
+      //
+      // Jest projects may be directories or Jest config paths.
+      //
+      // Jest uses glob's `{ windowsPathsNoEscape: true }`, which we don't
+      // currently implement.
+      const patterns = [project.replace(rootDirRe, rootDir)];
+      const files = await _glob({ patterns, cwd: options.cwd });
+      const dirs = await _dirGlob({ patterns, cwd: options.cwd });
+      projects.push(...files, ...dirs);
     } else {
-      const dependencies = await resolveDependencies(project, options);
+      const dependencies = await resolveDependencies(project, rootDir, options);
       for (const dependency of dependencies) projects.push(dependency);
     }
   }
 
-  const runner = config.runner ? [config.runner] : [];
+  const runner = config.runner ? [typeof config.runner === 'string' ? config.runner : config.runner[0]] : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
   const environments =
     config.testEnvironment === 'jsdom'
@@ -58,9 +81,22 @@ const resolveDependencies = async (config: JestInitialOptions, options: PluginOp
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
-  const transform = config.transform
-    ? Object.values(config.transform).map(transform => (typeof transform === 'string' ? transform : transform[0]))
-    : [];
+  const transform: (string | Input)[] = [];
+  for (const transformer of config.transform ? Object.values(config.transform) : []) {
+    if (typeof transformer === 'string') {
+      transform.push(transformer);
+    } else {
+      transform.push(transformer[0]);
+      if (isBabelJest(transformer)) {
+        transform.push(...getDependenciesFromConfig(transformer[1]));
+        const { configFile } = transformer[1];
+        if (typeof configFile === 'string')
+          transform.push(
+            toConfig('babel', rootDirRe.test(configFile) ? configFile : toAbsolute(configFile, options.cwd))
+          );
+      }
+    }
+  }
   const moduleNameMapper = (
     config.moduleNameMapper
       ? Object.values(config.moduleNameMapper).map(mapper => (typeof mapper === 'string' ? mapper : mapper[0]))
@@ -103,12 +139,14 @@ const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) =>
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
   const rootDir = localConfig.rootDir ?? configFileDir;
-  const replaceRootDir = (name: string) => name.replace(/<rootDir>/, rootDir);
+  const replaceRootDir = (name: string) => name.replace(rootDirRe, rootDir);
 
-  const inputs = await resolveDependencies(localConfig, options);
+  const inputs = await resolveDependencies(localConfig, rootDir, options);
 
   const entries = localConfig.testMatch
-    ? localConfig.testMatch.map(replaceRootDir).map(id => toEntry(id))
+    ? arrayify(localConfig.testMatch)
+        .map(replaceRootDir)
+        .map(id => toEntry(id))
     : entry.map(id => toEntry(id));
 
   if (localConfig.testMatch && !options.config.entry) entries.push(...mocks.map(id => toEntry(id)));

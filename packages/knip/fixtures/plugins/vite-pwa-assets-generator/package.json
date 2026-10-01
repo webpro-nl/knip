@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vite-pwa-assets-generator",
+  "dependencies": {
+    "@vite-pwa/assets-generator": "*"
+  }
+}

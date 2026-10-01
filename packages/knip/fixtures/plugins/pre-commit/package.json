@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/pre-commit",
+  "precommit": ["lint"],
+  "scripts": {
+    "lint": "node checks/style.js"
+  },
+  "devDependencies": {
+    "@fastify/pre-commit": "*"
+  }
+}

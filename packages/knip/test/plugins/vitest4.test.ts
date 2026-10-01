@@ -12,11 +12,13 @@ test('Find dependencies with the Vitest plugin (4)', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/unused.test.ts' in issues.files);
+  assert(issues.unlisted['vitest.config.ts']['custom-reporter-package']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 4,
-    total: 4,
+    unlisted: 1,
+    processed: 5,
+    total: 5,
   });
 });

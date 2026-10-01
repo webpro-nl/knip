@@ -16,7 +16,7 @@ export async function run() {
         console.log(`✓ ${name}`);
         results.passed++;
       } catch (err) {
-        console.error(`✗ ${name}:`, err.message);
+        console.error(`✗ ${name}:`, err instanceof Error ? err.message : String(err));
         results.failed++;
       }
     }

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/unplugin-icons",
+  "dependencies": {
+    "unplugin-icons": "*",
+    "@iconify-json/mdi": "*"
+  }
+}

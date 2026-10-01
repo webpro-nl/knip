@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/declaration-publish-directory",
+  "private": false,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "publishConfig": {
+    "directory": "dist"
+  },
+  "devDependencies": {
+    "root-only-dependency": "*"
+  }
+}

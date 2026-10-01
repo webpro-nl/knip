@@ -1,5 +1,9 @@
 {
   "name": "@plugins/yarn",
+  "packageManager": "yarn@4.0.0",
+  "dependencies": {
+    "prop-types": "*"
+  },
   "devDependencies": {
     "@yarnpkg/types": "latest"
   }

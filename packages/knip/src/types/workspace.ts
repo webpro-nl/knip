@@ -11,6 +11,8 @@ type WorkspaceManifest = {
   optionalPeerDependencies: DependencySet;
   requiredPeerDependencies: DependencyArray;
   allDependencies: DependencySet;
+  engines: Record<string, string>;
+  isPrivate: boolean;
   ignoreDependencies: (string | RegExp)[];
   ignoreBinaries: (string | RegExp)[];
   ignoreUnresolved: (string | RegExp)[];

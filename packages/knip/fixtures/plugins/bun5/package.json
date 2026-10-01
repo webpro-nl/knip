@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/bun5",
+  "scripts": {
+    "test": "bun test ./src/math.test.ts"
+  }
+}

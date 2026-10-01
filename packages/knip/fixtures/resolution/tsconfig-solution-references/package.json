@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/tsconfig-solution-references",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

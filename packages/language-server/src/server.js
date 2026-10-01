@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
-import { CodeActionKind, createConnection } from 'vscode-languageserver/node.js';
+import { CodeActionKind, createConnection } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import pkg from '../package.json' with { type: 'json' };
 import {
@@ -43,6 +43,7 @@ function readKnipVersion(resolvedPath) {
 const DEFAULT_CONFIG = {
   deferSession: false,
   editor: {
+    severity: 'default',
     exports: {
       codelens: { enabled: true },
       hover: { enabled: true, includeImportLocationSnippet: false, maxSnippets: 10, timeout: 300 },
@@ -51,7 +52,6 @@ const DEFAULT_CONFIG = {
         dimExports: false,
         dimTypes: false,
         dimEnumMembers: false,
-        dimClassMembers: false,
         dimDuplicates: false,
       },
     },
@@ -132,7 +132,7 @@ export class LanguageServer {
 
       if (!uri) return { capabilities: {} };
 
-      this.cwd = fileURLToPath(uri);
+      this.cwd = params.initializationOptions?.cwd ?? fileURLToPath(uri);
 
       this.initConfig = params.initializationOptions?.config;
 
@@ -237,7 +237,7 @@ export class LanguageServer {
       } catch {}
     }
     this.connection.console.log(
-      `Using bundled knip${readKnipVersion(createRequire(__filename).resolve('knip/session'))}`
+      `Using bundled knip${readKnipVersion(createRequire(import.meta.url).resolve('knip/session'))}`
     );
     return { createOptions, createSession };
   }

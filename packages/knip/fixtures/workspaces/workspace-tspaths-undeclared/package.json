@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspace-tspaths-undeclared",
+  "private": true,
+  "workspaces": ["projects/*"]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/ignore-issues-workspaces",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

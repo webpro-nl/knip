@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 /**
  * @import { ExtensionContext } from 'vscode';
- * @import { LanguageClient } from 'vscode-languageclient/node.js';
+ * @import { LanguageClient } from 'vscode-languageclient/node';
  */
 
 /** @type {LanguageClient | undefined} */

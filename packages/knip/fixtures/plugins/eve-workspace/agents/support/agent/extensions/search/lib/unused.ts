@@ -1,0 +1,1 @@
+import 'stale-support-client';

@@ -10,7 +10,7 @@ const enablers = ['hardhat'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry: string[] = ['hardhat.config.{js,cjs,mjs,ts}'];
+const entry: string[] = ['hardhat.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const resolve: Resolve = async () => {
   return [toDependency('hardhat')];

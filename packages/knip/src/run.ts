@@ -1,4 +1,6 @@
 import { watch } from 'node:fs';
+import { createScriptParserContext } from './binaries/create-script-parser-context.ts';
+import { _getInputsFromScripts } from './binaries/index.ts';
 import { CatalogCounselor } from './CatalogCounselor.ts';
 import { ConfigurationChief } from './ConfigurationChief.ts';
 import { ConsoleStreamer } from './ConsoleStreamer.ts';
@@ -10,8 +12,12 @@ import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
+import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
+import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
-import { getModuleSourcePathHandler } from './util/to-source-path.ts';
+import { isCatalog } from './util/input.ts';
+import { createManifest } from './util/package-json.ts';
+import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
@@ -19,6 +25,11 @@ export type Results = Awaited<ReturnType<typeof run>>['results'];
 export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
+
+  if (options.isCache) {
+    initGlobCache(options.cacheLocation);
+    initGitignoreCache(options.cacheLocation);
+  }
 
   const chief = new ConfigurationChief(options);
   const deputy = new DependencyDeputy(options);
@@ -29,13 +40,45 @@ export const run = async (options: MainOptions) => {
   streamer.cast('Reading workspace configuration');
 
   const workspaces = await chief.getWorkspaces();
+  const includedWorkspaceNames = new Set(workspaces.map(workspace => workspace.name));
+  const scriptParserContext = createScriptParserContext(chief);
+  const { rootManifest, getManifest } = scriptParserContext;
+
+  for (const name of chief.availableWorkspaceNames) {
+    const workspace = chief.workspacePackages.get(name);
+    if (!workspace) continue;
+    counselor.addWorkspace(workspace);
+    if (includedWorkspaceNames.has(name)) continue;
+
+    const manifest = createManifest(workspace.manifest);
+    const inputs = _getInputsFromScripts(Object.values(manifest.scripts ?? {}), {
+      cwd: workspace.dir,
+      rootCwd: options.cwd,
+      containingFilePath: workspace.manifestPath,
+      manifest,
+      rootManifest,
+      getManifest,
+    });
+    for (const input of inputs) {
+      if (isCatalog(input)) {
+        counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
+      }
+    }
+  }
   const isGitIgnored = await getGitIgnoredHandler(options, new Set(workspaces.map(w => w.dir)));
 
   const toSourceFilePath = getModuleSourcePathHandler(chief);
-  const principal = new ProjectPrincipal(options, toSourceFilePath);
+  const findWorkspacePackageTarget = getWorkspacePackageTargetHandler(chief);
+  const principal = new ProjectPrincipal(
+    options,
+    toSourceFilePath,
+    findWorkspacePackageTarget,
+    filePath => chief.findWorkspaceByFilePath(filePath)?.name
+  );
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
-  collector.setIgnoreIssues(chief.config.ignoreIssues);
+  collector.setSelectedWorkspaces(chief.selectedWorkspaces);
+  collector.setIgnoreIssues(chief.getIgnoreIssues());
 
   debugLogObject('*', 'Included workspaces', () => workspaces.map(w => w.pkgName));
   debugLogObject('*', 'Included workspace configs', () =>
@@ -49,6 +92,7 @@ export const run = async (options: MainOptions) => {
     deputy,
     principal,
     isGitIgnored,
+    scriptParserContext,
     streamer,
     workspaces,
     options,
@@ -96,9 +140,14 @@ export const run = async (options: MainOptions) => {
     if (options.isWatch) watch('.', { recursive: true }, session.listener);
   }
 
-  const { issues, counters, tagHints, configurationHints } = collector.getIssues();
+  const { issues, counters, tagHints, configurationHints, hasConfigLoadErrors } = collector.getIssues();
 
   if (!options.isWatch) streamer.clear();
+
+  if (options.isCache) {
+    flushGlobCache();
+    flushGitignoreCache();
+  }
 
   return {
     results: {
@@ -106,6 +155,7 @@ export const run = async (options: MainOptions) => {
       counters,
       tagHints,
       configurationHints,
+      hasConfigLoadErrors,
       selectedWorkspaces: chief.selectedWorkspaces ? Array.from(chief.selectedWorkspaces) : undefined,
       includedWorkspaceDirs: Array.from(chief.workspacesByDir.keys()),
       enabledPlugins: Object.fromEntries(enabledPluginsStore),

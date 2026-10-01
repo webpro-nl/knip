@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vitepress-config-dir",
+  "dependencies": {
+    "vitepress": "*"
+  }
+}

@@ -1,5 +1,6 @@
 ---
 title: Configuration Hints
+description: The configuration hints Knip emits to keep your config tidy, what each one means, and how to resolve it.
 ---
 
 Knip emits configuration hints to help keep your configuration file tidy and
@@ -10,7 +11,8 @@ improve results significantly. The hints on this page are sorted by
 impact/importance (most impactful first).
 
 Use [`--treat-config-hints-as-errors`][1] or [`treatConfigHintsAsErrors`][2] to
-make any configuration hint result in a non-zero exit code and fail CI.
+make any configuration hint an error and result in a non-zero exit code to fail
+CI.
 
 ## Unconfigured projects
 
@@ -55,7 +57,7 @@ configuration like this:
 
 ```json
 {
-  "workspaces" {
+  "workspaces": {
     "packages/app": {
       "entry": ["src/App.tsx"],
       "project": ["src/**/*.ts"]
@@ -94,6 +96,17 @@ Remove, or move unused top-level project to one of "workspaces"
   },
 }
 ```
+
+## Stale workspace configuration
+
+A key in the `workspaces` configuration matches no workspace in the project, for
+instance after the workspace was removed or renamed.
+
+```
+Remove from workspaces
+```
+
+**Solution**: Remove the stale key from `workspaces`, or correct its path.
 
 ## Unused entry in ignore group
 

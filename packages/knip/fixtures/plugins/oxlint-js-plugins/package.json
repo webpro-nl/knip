@@ -8,6 +8,7 @@
     "eslint-plugin-security": "*",
     "eslint-plugin-unused-imports": "*",
     "eslint-plugin-jsdoc": "*",
-    "eslint-plugin-import": "*"
+    "eslint-plugin-import": "*",
+    "eslint-import-resolver-typescript": "*"
   }
 }

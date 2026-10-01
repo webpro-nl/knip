@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/rstest-cli",
+  "scripts": {
+    "test": "rstest run --testEnvironment jsdom",
+    "test:browser": "rstest -c rstest.browser.config.ts"
+  },
+  "devDependencies": {
+    "@rstest/core": "*",
+    "jsdom": "*"
+  }
+}

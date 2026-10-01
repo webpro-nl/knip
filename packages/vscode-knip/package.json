@@ -1,7 +1,7 @@
 {
   "name": "vscode-knip",
   "displayName": "Knip",
-  "version": "2.1.0",
+  "version": "2.3.1",
   "private": true,
   "description": "Find unused files, dependencies, and exports in JavaScript/TypeScript projects",
   "categories": [
@@ -37,7 +37,7 @@
   "files": [
     "dist/",
     "icon-192x192.png",
-    "license",
+    "LICENSE",
     "README.md"
   ],
   "type": "module",
@@ -45,7 +45,8 @@
   "scripts": {
     "package": "node scripts/publish.js",
     "release": "release-it",
-    "test": "pnpm package && node test/run.mjs",
+    "test": "pnpm test:unit && pnpm package && node test/run.mjs",
+    "test:unit": "node --test test/tree-view-exports.test.js",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {
@@ -53,14 +54,14 @@
     "@knip/mcp": "workspace:*",
     "mdast-util-to-markdown": "2.1.2",
     "unist-builder": "4.0.0",
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^10.1.1"
   },
   "devDependencies": {
     "@types/mdast": "4.0.4",
-    "@types/vscode": "^1.95.0",
-    "@vscode/test-electron": "^2.5.2",
+    "@types/vscode": "~1.95.0",
+    "@vscode/test-electron": "^3.1.0",
     "knip": "workspace:*",
-    "rolldown": "^1.0.0-rc.12"
+    "rolldown": "^1.2.8"
   },
   "contributes": {
     "languageModelTools": [
@@ -70,7 +71,7 @@
         "toolReferenceName": "knip-configure",
         "icon": "$(tools)",
         "userDescription": "Set up and optimize Knip configuration",
-        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Summary counts of each issue type\n- enabledPlugins: Auto-detected plugins per workspace\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Current config file status\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
+        "modelDescription": "Run Knip and return configuration hints and issues.\n\nReturns:\n- totalIssues: Total number of issues found (0 = clean)\n- configurationHints: Ordered suggestions to improve configuration (address these first)\n- counters: Per-issue-type counts, plus processed (files analyzed) and total (a size metric, not the issue count — use totalIssues)\n- enabledPlugins: Auto-detected plugins per workspace (no knip.json needed for these)\n- files: List of unused files\n- issues: Detailed issues by type (dependencies, exports, types, etc.)\n- configFile: Config file status; exists:false is normal when plugins auto-configure\n\nOptions:\n- cwd: Working directory (defaults to the process cwd)\n- workspace: Scope run to array of workspaces\n\nIterate: adjust knip.json based on hints, run again until no hints remain and false positives are minimized.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -88,7 +89,7 @@
         "toolReferenceName": "knip-docs",
         "icon": "$(book)",
         "userDescription": "Get Knip documentation",
-        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to handle each issue type: files, dependencies, exports, types, duplicates\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g. \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from https://knip.dev.",
+        "modelDescription": "Get Knip documentation by topic.\n\nIf registered resources are unavailable, use this tool.\n\nAvailable topics (use these IDs):\n- getting-started: New to Knip? Start here for installation and first run\n- first-cleanup: Guided first pass: read the report top-down and fix one unused file, export, and dependency\n- how-knip-works: The mental model: entry files, the module graph, reachability, and why findings cascade. Read to reason about any result\n- configuration: Understand configuration basics, defaults, and file locations\n- configuring-project-files: READ FIRST for unused files or false positives. Covers entry/project patterns\n- handling-issues: How to resolve each issue type: files, dependencies, exports, types, duplicates\n- issue-types: Decode knip-run output: every issue type, what it means and its key (files, dependencies, exports, …)\n- json-output: Shape of `knip --reporter json` for parsing results in scripts, CI, or tools\n- configuration-hints: Decode the configurationHints from knip-run: each hint type and how to resolve it\n- monorepos-and-workspaces: Multi-package repo? Configure workspaces and cross-references here\n- production-mode: Exclude tests, stories, devDependencies with --production and --strict flags\n- rules-and-filters: Focus or mute issue types with --include/--exclude and rules (the right alternative to \"ignore\")\n- compilers: Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them\n- auto-fix: Clean up with --fix: what it removes, related flags, and post-fix steps\n- jsdoc-tsdoc-tags: Keep an export but exclude it from the report with @public/@internal and custom tags\n- configuration-reference: Complete reference of all config options: entry, project, ignore, plugins, etc.\n- cli: All CLI flags, shortcuts, exit codes and environment variables\n- plugins-explanation: Config files showing as unused? Understand plugin config vs entry files\n- entry-files: Understand how Knip discovers entry files and default patterns per plugin\n- plugin-list: Check if a plugin exists for your tool (Jest, Vitest, ESLint, etc.)\n- known-issues: Errors or unexpected behavior? Check workarounds for common problems\n\nCan also fetch any doc by path (e.g. \"reference/cli\" or \"guides/troubleshooting\").\nUse this instead of fetching from https://knip.dev.",
         "canBeReferencedInPrompt": true,
         "inputSchema": {
           "type": "object",
@@ -182,6 +183,11 @@
             "default": "",
             "description": "Path to Knip configuration file (relative to workspace root)"
           },
+          "knip.cwd": {
+            "type": "string",
+            "default": "",
+            "description": "Directory to run Knip from (its cwd), relative to the VS Code workspace folder. Use when the folder isn't the Knip project root, e.g. \"./typescript\", or \"../..\" for a monorepo root."
+          },
           "knip.nodeRuntimePath": {
             "type": "string",
             "default": "",
@@ -195,6 +201,63 @@
         "displayName": "Editor",
         "order": 2,
         "properties": {
+          "knip.editor.severity": {
+            "type": [
+              "string",
+              "object"
+            ],
+            "default": "default",
+            "markdownDescription": "How Knip issues are shown in the editor. This affects the editor only: `rules` in your Knip configuration still decide what fails a `knip` run.\n\nEither one value for every issue type (`\"warning\"`), or an object keyed by [issue type](https://knip.dev/reference/issue-types) where `*` sets the fallback (`{ \"*\": \"downgrade\", \"unresolved\": \"error\" }`).",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Applies to every issue type",
+                "enum": [
+                  "default",
+                  "error",
+                  "warning",
+                  "information",
+                  "hint",
+                  "downgrade",
+                  "upgrade"
+                ],
+                "enumDescriptions": [
+                  "Follow Knip's own rules",
+                  "Show as an error",
+                  "Show as a warning",
+                  "Show as information",
+                  "Show as a hint, fading the code",
+                  "One step quieter than Knip's rules: error becomes warning, warning becomes information",
+                  "One step louder than Knip's rules: warning becomes error"
+                ]
+              },
+              {
+                "type": "object",
+                "description": "Per issue type, where `*` sets the fallback for the rest",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "default",
+                    "error",
+                    "warning",
+                    "information",
+                    "hint",
+                    "downgrade",
+                    "upgrade"
+                  ],
+                  "enumDescriptions": [
+                    "Follow Knip's own rules",
+                    "Show as an error",
+                    "Show as a warning",
+                    "Show as information",
+                    "Show as a hint, fading the code",
+                    "One step quieter than Knip's rules: error becomes warning, warning becomes information",
+                    "One step louder than Knip's rules: warning becomes error"
+                  ]
+                }
+              }
+            ]
+          },
           "knip.editor.exports.codelens.enabled": {
             "type": "boolean",
             "default": true,
@@ -247,27 +310,26 @@
           "knip.editor.exports.highlight.dimExports": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused exports (instead of warnings)"
+            "description": "Dim unused exports (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"exports\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimTypes": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused types (instead of warnings)"
+            "description": "Dim unused types (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"types\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimEnumMembers": {
             "type": "boolean",
             "default": false,
-            "description": "Dim unused enum members (instead of warnings)"
-          },
-          "knip.editor.exports.highlight.dimClassMembers": {
-            "type": "boolean",
-            "default": false,
-            "description": "Dim unused class members (instead of warnings)"
+            "description": "Dim unused enum members (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"enumMembers\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           },
           "knip.editor.exports.highlight.dimDuplicates": {
             "type": "boolean",
             "default": false,
-            "description": "Dim duplicate exports (instead of warnings)"
+            "description": "Dim duplicate exports (instead of warnings)",
+            "markdownDeprecationMessage": "Use `#knip.editor.severity#` instead: `{ \"duplicates\": \"hint\" }`. Still honoured, but an entry for this issue type in `knip.editor.severity` takes precedence."
           }
         }
       },
@@ -282,6 +344,11 @@
             "type": "boolean",
             "default": true,
             "description": "Enable imports view"
+          },
+          "knip.imports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the import matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
           }
         }
       },
@@ -297,10 +364,15 @@
             "default": true,
             "description": "Enable exports view"
           },
+          "knip.exports.followCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "Reveal and select the export matching the editor cursor position. Disable to keep the view in sync without it taking focus, e.g. when moved out of the Explorer."
+          },
           "knip.exports.contention.enabled": {
             "type": "boolean",
             "default": true,
-            "description": "Report export contention (branching and conflicts)"
+            "description": "Report export contention: ambiguous star re-exports, exports shadowed by an explicit export, and converged (diamond-shaped) re-export paths"
           }
         }
       }

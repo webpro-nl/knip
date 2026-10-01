@@ -1,0 +1,6 @@
+{
+  "name": "consumer",
+  "peerDependencies": {
+    "host": ">=1"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@plugins/openclaw",
+  "knip": { "entry": ["bootstrap.ts"] },
+  "openclaw": {
+    "extensions": ["./src/plugin-entry.ts"],
+    "runtimeExtensions": ["./runtime/plugin-entry.js"],
+    "setupEntry": "./setup-entry.ts",
+    "runtimeSetupEntry": "./runtime/setup-entry.js",
+    "channel": {
+      "configuredState": { "specifier": "./configured-state.ts" },
+      "persistedAuthState": { "specifier": "./auth-presence.ts" }
+    },
+    "build": {
+      "staticAssets": [{ "source": "./assets/runtime.js", "output": "runtime.js" }]
+    },
+    "assetScripts": {
+      "build": "node scripts/build-assets.mjs"
+    }
+  }
+}

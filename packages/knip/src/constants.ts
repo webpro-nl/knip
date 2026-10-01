@@ -19,7 +19,7 @@ export const DTS_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'];
 
 export const IS_DTS = /\.d\.(c|m)?ts$/;
 
-export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules/**', '.yarn', '.git'];
+export const GLOBAL_IGNORE_PATTERNS: readonly string[] = ['**/node_modules', '.git/!(hooks)'];
 
 export const PUBLIC_TAG = '@public';
 export const INTERNAL_TAG = '@internal';
@@ -33,11 +33,14 @@ export const PROTOCOL_VIRTUAL = 'virtual:';
 /**
  * Binaries that are expected to be globally available. The package at
  * https://www.npmjs.com/package/[name] might exist, but is not expected to be
- * listed in package.json because last npm publish was >6 years ago OR weekly downloads <5_000
+ * listed in package.json because last npm publish was >6 years ago OR weekly
+ * downloads <5_000 OR it doesn't even provide a bin of that name (so the package
+ * can't be the source of the binary)
  */
 export const IGNORED_GLOBAL_BINARIES = new Set([
   'amplify',
   'aws',
+  'az',
   'base64',
   'basename',
   'bash',
@@ -50,8 +53,13 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'chmod',
   'chown',
   'cksum',
+  'claude',
   'clear',
   'cmd',
+  'cmd.exe',
+  'code',
+  'code-insiders',
+  'codesign',
   'comm',
   'command',
   'corepack',
@@ -59,11 +67,14 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'curl',
   'cut',
   'date',
+  'defaults',
   'deno',
+  'devtunnel',
   'df',
   'dir',
   'dirname',
   'docker',
+  'dotnet',
   'echo',
   'env',
   'exec',
@@ -74,22 +85,29 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'factor',
   'false',
   'find',
+  'fuser',
   'gem',
+  'getconf',
+  'gh',
   'git',
   'grep',
   'groups',
   'gzip',
   'head',
+  'hg',
   'id',
   'join',
   'kill',
+  'launchctl',
   'ln',
   'logname',
   'ls',
+  'lsof',
   'md5sum',
   'mkdir',
   'mknod',
   'mv',
+  'nc',
   'nice',
   'nl',
   'node',
@@ -97,16 +115,29 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'npm',
   'nproc',
   'npx',
+  'nub',
+  'nubx',
+  'open',
   'paste',
   'pnpm',
   'pnpx',
+  'powershell',
+  'powershell.exe',
   'pr',
   'printenv',
+  'printf',
+  'ps',
+  'pulumi',
   'pwd',
+  'python',
+  'python3',
+  'raft',
+  'railway',
   'rm',
   'rmdir',
   'rsync',
   'scp',
+  'security',
   'sed',
   'seq',
   'set',
@@ -115,19 +146,28 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'sha512sum',
   'shred',
   'shuf',
+  'sleep',
   'sort',
   'split',
   'ssh',
   'stat',
   'stty',
   'sudo',
+  'sw_vers',
   'sync',
+  'sysctl',
+  'systemctl',
   'tac',
+  'tar',
+  'taskkill',
   'tee',
   'test', // exception (node built-in module)
   'time',
   'timeout',
+  'tmux',
+  'tmuxinator',
   'touch',
+  'trap',
   'tr',
   'true',
   'tsort',
@@ -137,14 +177,18 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'uniq',
   'unzip',
   'wc',
+  'which',
   'who',
   'whoami',
   'xargs',
   'xcodebuild',
+  'xcrun',
   'xvfb-run',
   'yarn',
   'yes',
   'zip',
+  'zsh',
+  'zstd',
 ]);
 
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
@@ -166,6 +210,8 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.sass',
   '.scss',
   '.sh',
+  '.styl',
+  '.stylus',
   '.svg',
   '.ttf',
   '.webp',
@@ -199,6 +245,8 @@ export const ISSUE_TYPES = [
   'namespaceMembers',
   'duplicates',
   'catalog',
+  'catalogReferences',
+  'cycles',
 ] as const;
 
 export const ISSUE_TYPE_TITLE = {
@@ -217,6 +265,8 @@ export const ISSUE_TYPE_TITLE = {
   namespaceMembers: 'Unused exported namespace members',
   duplicates: 'Duplicate exports',
   catalog: 'Unused catalog entries',
+  catalogReferences: 'Unresolved catalog references',
+  cycles: 'Circular dependencies',
 } as const;
 
 export const SYMBOL_TYPE = {
@@ -242,6 +292,10 @@ export const SIDE_EFFECTS = '__side-effects';
 
 export const OPAQUE = '__opaque';
 
+export const LOADER_DEFAULT = '__loader-default';
+
+export const SCRIPT_INTERPOLATION = '$__knip__';
+
 export const IMPORT_FLAGS = {
   NONE: 0,
   RE_EXPORT: 1 << 0,
@@ -251,4 +305,7 @@ export const IMPORT_FLAGS = {
   OPTIONAL: 1 << 4, // no error if not resolved
   SIDE_EFFECTS: 1 << 5,
   OPAQUE: 1 << 6,
+  AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
+  DYNAMIC: 1 << 8, // dynamic import(), excluded from cycle detection
+  LOADER: 1 << 9, // inline arrow loader in call args: consumes default export only, if the target has one
 } as const;

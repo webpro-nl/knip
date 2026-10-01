@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { debugLog } from './debug.ts';
-import { convertGitignoreToPicomatchIgnorePatterns } from './parse-and-convert-gitignores.ts';
+import { convertGitignoreToPicomatchIgnorePatterns, expandIgnorePatterns } from './parse-and-convert-gitignores.ts';
 
 /** @internal */
 export function parseCodeowners(content: string) {
@@ -10,12 +10,13 @@ export function parseCodeowners(content: string) {
     .filter(line => line && !line.startsWith('#'))
     .map(rule => {
       const [path, ...owners] = rule.split(/\s+/);
-      const { patterns } = convertGitignoreToPicomatchIgnorePatterns(path);
-      return { owners, match: picomatch(patterns) };
+      const { pattern } = convertGitignoreToPicomatchIgnorePatterns(path);
+      // CODEOWNERS `dir/*` is shallow: it owns direct files only, not nested subdirectories
+      return { owners, match: picomatch(expandIgnorePatterns([pattern], true)) };
     });
 
   return (filePath: string) => {
-    for (const matcher of [...matchers].reverse()) {
+    for (const matcher of matchers.toReversed()) {
       if (matcher.match(filePath)) {
         return matcher.owners;
       }

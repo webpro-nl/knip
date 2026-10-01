@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/borp",
+  "scripts": {
+    "test": "borp --coverage 'spec/**/*.spec.mts'",
+    "test:ci": "c8 borp --reporter ./reporters/plum.mjs:out.txt --reporter gh"
+  },
+  "devDependencies": {
+    "@jsumners/line-reporter": "*",
+    "borp": "*",
+    "c8": "*"
+  }
+}

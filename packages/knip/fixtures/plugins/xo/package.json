@@ -4,12 +4,9 @@
     "test": "xo"
   },
   "devDependencies": {
-    "xo": "^0.24.0"
+    "xo": "^3.0.2"
   },
   "xo": {
-    "space": true,
-    "plugins": [
-      "eslint-comments"
-    ]
+    "space": true
   }
 }

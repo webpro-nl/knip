@@ -9,6 +9,10 @@ import type {
 
 const updateImportMaps = (fromImportMaps: ImportMaps, toImportMaps: ImportMaps) => {
   for (const id of fromImportMaps.refs) toImportMaps.refs.add(id);
+  if (fromImportMaps.enumerated) {
+    if (!toImportMaps.enumerated) toImportMaps.enumerated = new Set();
+    for (const id of fromImportMaps.enumerated) toImportMaps.enumerated.add(id);
+  }
   for (const [id, v] of fromImportMaps.import) addValues(toImportMaps.import, id, v);
   for (const [id, v] of fromImportMaps.importAs) addNsValues(toImportMaps.importAs, id, v);
   for (const [id, v] of fromImportMaps.importNs) addValues(toImportMaps.importNs, id, v);
@@ -32,6 +36,7 @@ export const updateImportMap = (file: FileNode, importMap: ImportMap, graph: Mod
 };
 
 export const createFileNode = (): FileNode => ({
+  skipExports: false,
   imports: {
     internal: new Map(),
     external: new Set(),
@@ -44,12 +49,14 @@ export const createFileNode = (): FileNode => ({
   exports: new Map(),
   duplicates: new Set(),
   scripts: new Set(),
+  importGlobs: [],
   importedBy: undefined,
   internalImportCache: undefined,
 });
 
 export const createImports = (): ImportMaps => ({
   refs: new Set(),
+  enumerated: undefined,
   import: new Map(),
   importAs: new Map(),
   importNs: new Map(),
@@ -59,26 +66,30 @@ export const createImports = (): ImportMaps => ({
 });
 
 export const addValue = (map: IdToFileMap, id: string, value: string) => {
-  if (map.has(id)) map.get(id)?.add(value);
+  const existing = map.get(id);
+  if (existing) existing.add(value);
   else map.set(id, new Set([value]));
 };
 
 export const addNsValue = (map: IdToNsToFileMap, id: string, ns: string, value: string) => {
-  if (map.has(id)) {
-    if (map.get(id)?.has(ns)) map.get(id)?.get(ns)?.add(value);
-    else map.get(id)?.set(ns, new Set([value]));
-  } else {
+  const inner = map.get(id);
+  if (!inner) {
     map.set(id, new Map([[ns, new Set([value])]]));
+    return;
   }
+  const set = inner.get(ns);
+  if (set) set.add(value);
+  else inner.set(ns, new Set([value]));
 };
 
 const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
-  if (map.has(id)) for (const v of values) map.get(id)?.add(v);
+  const existing = map.get(id);
+  if (existing) for (const v of values) existing.add(v);
   else map.set(id, values);
 };
 
 const addNsValues = (map: IdToNsToFileMap, id: string, value: IdToFileMap) => {
-  // @ts-expect-error come on
-  if (map.has(id)) for (const [ns, v] of value) addValues(map.get(id), ns, v);
+  const existing = map.get(id);
+  if (existing) for (const [ns, v] of value) addValues(existing, ns, v);
   else map.set(id, value);
 };

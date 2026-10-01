@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
@@ -9,20 +9,20 @@ import {
   toDependency,
   toEntry,
   toIgnore,
+  toProductionDependency,
   toProductionEntry,
 } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import {
   buildAutoImportMap,
-  collectIdentifiers,
   collectLocalImportPaths,
-  collectTemplateInfo,
-  getVueSfc,
+  createAutoImportMaps,
+  createTsCompiler,
+  createVueCompiler,
   readAndParseFile,
-  toKebabCase,
-} from './helpers.ts';
+} from '../_vue/auto-import.ts';
 import type { NuxtConfig } from './types.ts';
 
 const title = 'Nuxt';
@@ -31,7 +31,7 @@ const enablers = ['nuxt', 'nuxt-nightly'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['nuxt.config.{js,mjs,ts}'];
+const config = ['nuxt.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const entry = ['app.config.ts', '**/*.d.vue.ts'];
 
@@ -63,11 +63,38 @@ const setup = async () => {
   }
 };
 
-// Workaround to pre-resolve specifiers from root, as no tsconfig.json/project references covers
+const resolve: Resolve = () => [
+  toIgnore('^#build/', 'unresolved'),
+  toIgnore('#components', 'unresolved'),
+  toIgnore('#imports', 'unresolved'),
+  toIgnore('^#internal/', 'unresolved'),
+  toIgnore('#spa-template', 'unresolved'),
+];
+
+// Nuxt aliases are unavailable until `nuxt prepare` generates `.nuxt/tsconfig.json`.
 const resolveAlias = (specifier: string, srcDir: string, rootDir: string) => {
   if (specifier.startsWith('~~/') || specifier.startsWith('@@/')) return join(rootDir, specifier.slice(3));
   if (specifier.startsWith('~/') || specifier.startsWith('@/')) return join(srcDir, specifier.slice(2));
   return specifier;
+};
+
+// Layers from these sources are downloaded by c12, they are not dependencies
+const remoteSourcePrefixes = ['gh:', 'github:', 'gitlab:', 'bitbucket:', 'https://', 'http://'];
+
+const toLayerSource = (layer: unknown): unknown => {
+  if (typeof layer === 'string') return layer;
+  if (Array.isArray(layer)) return layer[0];
+  if (layer && typeof layer === 'object' && 'source' in layer) return layer.source;
+};
+
+const toLayerSources = (extend: NuxtConfig['extends']) => {
+  const sources: string[] = [];
+  if (!extend) return sources;
+  for (const layer of Array.isArray(extend) ? extend : [extend]) {
+    const source = toLayerSource(layer);
+    if (typeof source === 'string') sources.push(source);
+  }
+  return sources;
 };
 
 const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, config: NuxtConfig, dir: string) => {
@@ -86,104 +113,49 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
 
 const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
 
+const definitionFiles = [
+  '.nuxt/imports.d.ts',
+  '.nuxt/components.d.ts',
+  '.nuxt/types/nitro-routes.d.ts',
+  '.nuxt/types/nitro-imports.d.ts',
+];
+
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
-  if (hasDependency('nuxt') || hasDependency('nuxt-nightly')) {
-    const vueSfc = getVueSfc(cwd);
+  if (hasDependency('nuxt') || hasDependency('nuxt-nightly') || isDirectory(cwd, '.nuxt')) {
+    const paths = definitionFiles.map(file => join(cwd, file));
+    const maps = createAutoImportMaps();
 
-    const importMap = new Map<string, string>();
-    const componentMap = new Map<string, string[]>();
-
-    const definitionFiles = [
-      '.nuxt/imports.d.ts',
-      '.nuxt/components.d.ts',
-      '.nuxt/types/nitro-routes.d.ts',
-      '.nuxt/types/nitro-imports.d.ts',
-    ];
-
-    for (const file of definitionFiles) {
-      const path = join(cwd, file);
-      const result = readAndParseFile(path);
-      const maps = buildAutoImportMap(path, result);
-      for (const [id, specifier] of maps.importMap) importMap.set(id, specifier);
-      for (const [id, components] of maps.componentMap) {
-        const store = componentMap.get(id);
-        if (store) store.push(...components);
-        else componentMap.set(id, [...components]);
-      }
+    for (const path of paths) {
+      buildAutoImportMap(path, readAndParseFile(path), maps, path.endsWith('components.d.ts'));
     }
 
-    const getSyntheticImports = (identifiers: Set<string>, templateTags?: Set<string>) => {
-      const syntheticImports: string[] = [];
-
-      for (const [name, specifier] of importMap) {
-        if (identifiers.has(name)) syntheticImports.push(`import { ${name} } from '${specifier}';`);
-      }
-
-      if (templateTags) {
-        for (const [name, specifiers] of componentMap) {
-          const kebab = toKebabCase(name);
-          if (
-            templateTags.has(name) ||
-            templateTags.has(kebab) ||
-            templateTags.has(`Lazy${name}`) ||
-            templateTags.has(`lazy-${kebab}`)
-          ) {
-            syntheticImports.push(`import { default as ${name} } from '${specifiers[0]}';`);
-            for (let i = 1; i < specifiers.length; i++) syntheticImports.push(`import '${specifiers[i]}';`);
-          }
-        }
-      }
-
-      return syntheticImports;
-    };
-
-    const compiler = (source: string, path: string) => {
-      const { descriptor } = vueSfc.parse(source, path);
-      const scripts: string[] = [];
-
-      if (descriptor.script?.content) scripts.push(descriptor.script.content);
-      if (descriptor.scriptSetup?.content) scripts.push(descriptor.scriptSetup.content);
-
-      const identifiers = collectIdentifiers(scripts.join('\n'), path);
-      let templateTags: Set<string> | undefined;
-      if (descriptor.template?.ast) {
-        const info = collectTemplateInfo(descriptor.template.ast);
-        templateTags = info.tags;
-        for (const id of info.identifiers) identifiers.add(id);
-      }
-      const synthetic = getSyntheticImports(identifiers, templateTags);
-      scripts.push(...synthetic);
-
-      return scripts.join(';\n');
-    };
-
-    const tsCompiler = (source: string, path: string) => {
-      // TODO Can we filter out more files that are outside the realm of auto-imports?
-      if (path.endsWith('.d.ts') || path.endsWith('.config.ts')) return source;
-      const identifiers = collectIdentifiers(source, path);
-      const syntheticImports = getSyntheticImports(identifiers);
-      if (syntheticImports.length === 0) return source;
-      return `${source}\n${syntheticImports.join('\n')}`;
-    };
-
-    registerCompiler({ extension: '.vue', compiler });
-    registerCompiler({ extension: '.ts', compiler: tsCompiler });
+    registerCompiler({ extension: '.vue', compiler: createVueCompiler(maps, cwd) });
+    registerCompiler({ extension: '.ts', compiler: createTsCompiler(maps) });
   }
 };
 
 const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) => {
   const { configFileDir: cwd } = options;
   const hasAppDir = isDirectory(cwd, 'app');
-  const srcDir = localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd);
+  const srcDir = toAbsolute(localConfig.srcDir ?? (hasAppDir ? join(cwd, 'app') : cwd), cwd);
   const serverDir = localConfig.serverDir ?? 'server';
   const inputs: Input[] = [];
 
+  const addModule = (id: string) => {
+    const specifier = resolveAlias(id, srcDir, cwd);
+    inputs.push(isInternal(specifier) ? toDeferResolveProductionEntry(specifier) : toProductionDependency(specifier));
+  };
+
   for (const id of localConfig.modules ?? []) {
-    if (Array.isArray(id) && typeof id[0] === 'string') inputs.push(toDependency(id[0]));
-    if (typeof id === 'string') inputs.push(toDependency(id));
+    if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
+    if (typeof id === 'string') addModule(id);
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
+
+  const sharedDir = toAbsolute(localConfig.dir?.shared ?? 'shared', cwd);
+  inputs.push(toAlias('#shared', sharedDir));
+  inputs.push(toAlias('#shared/*', join(sharedDir, '*'), { dir: cwd }));
 
   const aliases = localConfig.alias;
   if (aliases) {
@@ -196,11 +168,13 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  for (const ext of localConfig.extends ?? []) {
-    const resolved = resolveAlias(ext, srcDir, cwd);
+  for (const source of toLayerSources(localConfig.extends)) {
+    if (remoteSourcePrefixes.some(prefix => source.startsWith(prefix))) continue;
+    const target = resolveAlias(source, srcDir, cwd);
+    const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
-    if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', join(resolved, cfg)));
-    else inputs.push(toDependency(ext));
+    if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
+    else inputs.push(toDependency(source));
   }
 
   for (const layerConfig of findLayerConfigs(cwd)) {
@@ -210,9 +184,8 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   if (cwd !== options.cwd) return inputs;
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
-    const fp = join(cwd, file);
-    const result = readAndParseFile(fp);
-    for (const p of collectLocalImportPaths(fp, result)) inputs.push(toProductionEntry(p));
+    const result = readAndParseFile(file);
+    for (const p of collectLocalImportPaths(file, result)) inputs.push(toProductionEntry(p));
   }
 
   // In case typescript isn't listed
@@ -226,9 +199,6 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     }
   }
 
-  inputs.push(toIgnore('#imports', 'unresolved'));
-  inputs.push(toIgnore('#components', 'unresolved'));
-
   return inputs;
 };
 
@@ -240,6 +210,7 @@ const plugin: Plugin = {
   entry,
   production,
   setup,
+  resolve,
   resolveConfig,
   registerCompilers,
 };

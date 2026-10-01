@@ -1,68 +1,106 @@
 import type { Program } from 'oxc-parser';
-import { Visitor } from 'oxc-parser';
-import { findProperty, getDefaultImportName, getImportMap, getStringValues } from '../../typescript/ast-helpers.ts';
+import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../compilers/compilers.ts';
+import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { dirname, join, toAbsolute } from '../../util/path.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
 
-export const getReactBabelPlugins = (program: Program): string[] => {
-  const babelPlugins: string[] = [];
+const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
 
-  const importMap = getImportMap(program);
-  const reactPluginNames = new Set<string>();
+const isBabelWrappingPlugin = (path: string) =>
+  babelPluginSources.some(source => path === source || path.startsWith(`${source}/`));
 
-  for (const [importName, importPath] of importMap) {
-    if (importPath.includes('@vitejs/plugin-react')) reactPluginNames.add(importName);
+export const getBabelInputs = (program: Program): Input[] => {
+  const inputs: Input[] = [];
+  for (const call of findImportedCalls(program, isBabelWrappingPlugin)) {
+    const options = call.arguments?.[0];
+    const plugins: string[] = [];
+    const presets: string[] = [];
+    for (const config of [options, findProperty(options, 'babel'), findProperty(options, 'babelConfig')]) {
+      plugins.push(...getStringValues(findProperty(config, 'plugins')));
+      presets.push(...getStringValues(findProperty(config, 'presets')));
+    }
+    inputs.push(...getDependenciesFromConfig({ plugins, presets }));
   }
-
-  if (reactPluginNames.size === 0) {
-    const defaultImportName = getDefaultImportName(importMap, '@vitejs/plugin-react');
-    if (defaultImportName) reactPluginNames.add(defaultImportName);
-    else reactPluginNames.add('react');
-  }
-
-  const visitor = new Visitor({
-    CallExpression(node) {
-      if (node.callee?.type !== 'Identifier' || node.callee.name !== 'defineConfig') return;
-      const plugins = findProperty(node.arguments?.[0], 'plugins');
-      if (plugins?.type !== 'ArrayExpression') return;
-
-      for (const el of plugins.elements ?? []) {
-        if (el?.type !== 'CallExpression' || el.callee?.type !== 'Identifier') continue;
-        if (!reactPluginNames.has(el.callee.name)) continue;
-
-        const babelPluginsArray = findProperty(findProperty(el.arguments?.[0], 'babel'), 'plugins');
-        for (const v of getStringValues(babelPluginsArray)) babelPlugins.push(v);
-      }
-    },
-  });
-  visitor.visit(program);
-
-  return babelPlugins;
+  return inputs;
 };
 
-const moduleScriptPattern =
-  /<script\b(?=[^>]*\btype\s*=\s*["']?module["']?)(?=[^>]*\bsrc\s*=\s*["']?([^"' >]+)["']?)[^>]*>/gi;
+const moduleTypePattern = /\btype\s*=\s*["']?module["']?/i;
 
-const normalizeModuleScriptSrc = (value: string) => value.trim().replace(/^\//, '');
+const srcAttrPattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 
-const getModuleScriptSources = (html: string): string[] => {
-  const matches = html.matchAll(moduleScriptPattern);
-  const sources = [];
+const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)(['"])([^'"]+)\1/g;
 
-  for (const match of matches) {
-    const src = normalizeModuleScriptSrc(match[1]);
-    if (src) sources.push(src);
+const isFilePath = (specifier: string) =>
+  specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
+
+const getScriptSources = (html: string, htmlDir: string, rootDir: string, publicDir?: string): string[] => {
+  const sources: string[] = [];
+  const resolveSource = (src: string) => (src.startsWith('/') ? join(rootDir, src) : toAbsolute(src, htmlDir));
+
+  for (const [, attrs, body] of html.matchAll(scriptExtractor)) {
+    const srcMatch = attrs.match(srcAttrPattern);
+    if (srcMatch) {
+      const src = srcMatch[1].trim();
+      if (!src || /^(?:[\w+.-]+:|\/\/)/.test(src)) continue;
+      if (publicDir && src.startsWith('/')) {
+        const publicPath = join(publicDir, src.split(/[?#]/, 1)[0]);
+        if (publicPath.startsWith(join(publicDir, '/')) && isFile(publicPath)) {
+          sources.push(publicPath);
+          continue;
+        }
+      }
+      if (moduleTypePattern.test(attrs)) sources.push(resolveSource(src));
+      continue;
+    }
+
+    if (moduleTypePattern.test(attrs) && body) {
+      const code = body.replace(blockCommentMatcher, '').replace(lineCommentMatcher, '');
+      for (const importMatch of code.matchAll(importSpecPattern)) {
+        const specifier = importMatch[2];
+        if (isFilePath(specifier)) sources.push(resolveSource(specifier));
+      }
+    }
   }
 
   return sources;
 };
 
-export const getIndexHtmlEntries = async (rootDir: string): Promise<Input[]> => {
-  const indexPath = join(rootDir, 'index.html');
-  if (!isFile(indexPath)) return [];
+export const getHtmlScriptEntries = async (
+  htmlPath: string,
+  rootDir = dirname(htmlPath),
+  publicDir?: string
+): Promise<Input[]> => {
+  if (!isFile(htmlPath)) return [];
 
-  const html = await loadFile(indexPath);
-  const entries = getModuleScriptSources(html).map(src => join(rootDir, src));
-  return entries.map(entry => toProductionEntry(entry));
+  const html = await loadFile(htmlPath);
+  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toProductionEntry(src));
+};
+
+export const getIndexHtmlEntries = (rootDir: string, publicDir?: string): Promise<Input[]> =>
+  getHtmlScriptEntries(join(rootDir, 'index.html'), rootDir, publicDir);
+
+export const getVitePluginDirs = (program: Program, specifiers: string[], key: string): string[] | undefined => {
+  let dirs: string[] | undefined;
+  for (const call of findImportedCalls(program, specifiers)) {
+    const value = findProperty(call.arguments?.[0], key);
+    if (!value) continue;
+    const collected: string[] = [];
+    const single = getStringValue(value);
+    if (single !== undefined) collected.push(single);
+    else if (value.type === 'ArrayExpression') {
+      for (const element of value.elements ?? []) {
+        const str = getStringValue(element);
+        if (str !== undefined) collected.push(str);
+        else if (element?.type === 'ObjectExpression') {
+          const dir = getStringValue(findProperty(element, 'dir'));
+          if (dir !== undefined) collected.push(dir);
+        }
+      }
+    }
+    if (collected.length > 0) dirs = collected;
+  }
+  return dirs;
 };

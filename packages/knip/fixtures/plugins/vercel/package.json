@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vercel",
+  "devDependencies": {
+    "@vercel/config": "*"
+  }
+}

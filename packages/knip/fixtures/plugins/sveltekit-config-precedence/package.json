@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/sveltekit-config-precedence",
+  "type": "module",
+  "devDependencies": {
+    "@sveltejs/kit": "*",
+    "svelte": "*",
+    "typescript": "*",
+    "vite": "*"
+  }
+}

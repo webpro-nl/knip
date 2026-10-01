@@ -1,9 +1,9 @@
 import type { FileNode, Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
+import { substringBefore } from '../../util/string.ts';
 import { CONTINUE } from '../constants.ts';
 import type { Via } from '../walk-down.ts';
 import { walkDown } from '../walk-down.ts';
 
-/** @internal */
 export interface ExportsTreeNode {
   filePath: string;
   identifier: string;
@@ -68,12 +68,13 @@ const buildExportTree = (
     (sourceFile, sourceId, importingFile, id, isEntry, via) => {
       const importMaps = graph.get(importingFile)?.imports.internal.get(sourceFile);
       const importRefs = importMaps?.refs;
-      const ns = id.split('.')[0];
+      const ns = substringBefore(id, '.');
       if (via === 'importNS' && !hasRelevantRef(importRefs, id) && !isNsReExported(importMaps, ns)) return CONTINUE;
       const key = `${importingFile}:${id}`;
       const isRenamed = via.endsWith('As') && sourceId !== ns;
       const refs = filterRefs(importRefs, id);
-      const childNode = nodeMap.get(key) ?? {
+      const existingNode = nodeMap.get(key);
+      const childNode = existingNode ?? {
         filePath: importingFile,
         identifier: id,
         originalId: isRenamed ? sourceId : undefined,
@@ -92,7 +93,9 @@ const buildExportTree = (
           }
         }
       }
-      (parentNode ?? rootNode).children.push(childNode);
+      const parent = parentNode ?? rootNode;
+      if (existingNode && reaches(existingNode, parent)) return CONTINUE;
+      parent.children.push(childNode);
       return CONTINUE;
     },
     entryPaths
@@ -101,6 +104,12 @@ const buildExportTree = (
   pruneReExportStarOnlyBranches(rootNode);
 
   return rootNode;
+};
+
+const reaches = (node: ExportsTreeNode, target: ExportsTreeNode): boolean => {
+  if (node === target) return true;
+  for (const child of node.children) if (reaches(child, target)) return true;
+  return false;
 };
 
 const filterRefs = (refs: Set<string> | undefined, id: string): string[] => {

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/laravel-vite-plugin",
+  "devDependencies": {
+    "laravel-vite-plugin": "*",
+    "vite": "*"
+  }
+}

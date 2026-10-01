@@ -14,12 +14,11 @@ test('Find dependencies with the yorkie plugin', async () => {
   assert(issues.devDependencies['package.json']['lint-staged']);
   assert(issues.binaries['package.json']['eslint']);
   assert(issues.binaries['package.json']['markdownlint']);
-  assert(issues.binaries['package.json']['svgo']);
   assert(issues.binaries['package.json']['lint-staged']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 4,
+    binaries: 3,
     devDependencies: 1,
     processed: 0,
     total: 0,

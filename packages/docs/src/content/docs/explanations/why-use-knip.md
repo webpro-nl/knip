@@ -1,25 +1,17 @@
 ---
 title: Why use Knip?
-sidebar:
-  order: 3
+description: Why remove unused files, exports and dependencies, and how Knip finds them comprehensively across greenfield and legacy (mono)repos.
 ---
 
-The value of removing clutter is clear, but finding it manually is tedious. This
-is where Knip comes in: comprehensive and accurate results at any scale.
+The value of removing clutter is clear, but finding it manually is tedious. Meet
+Knip: comprehensive and accurate results at any scale.
 
 :::tip[TL;DR]
 
-Knip finds and fixes unused dependencies, exports and files.
-
-Deep analysis from [fine-grained entry points][1] based on the actual frameworks
-and tooling in [(mono)repos][2] for accurate and actionable results. Advanced
-features for maximum coverage:
-
-- [Custom module resolution][3]
-- [Configuration file parsers][4]
-- [Advanced shell script parser][5]
-- [Built-in and custom compilers][6]
-- [Auto-fix most issues][7]
+Unused files, exports and dependencies pile up as projects grow. Removing them
+improves maintenance, performance, security and onboarding, and prevents
+regressions in CI. Knip automates finding (and fixing) all three,
+comprehensively and at any scale.
 
 :::
 
@@ -33,6 +25,7 @@ code":
   negatively impacted when unused code, files and/or dependencies are included.
   Relying on tree-shaking when bundling code helps, but it's not a silver
   bullet.
+- Increased security: less code and dependencies means less room for weak spots.
 - Easier onboarding: there should be no doubts about whether files, dependencies
   and exports are actually in use or not. Especially for people new to the
   project and/or taking over responsibilities this is harder to grasp.
@@ -41,9 +34,9 @@ code":
   the same for dependencies, exports and files that are obsolete.
 - Keeping dead code around has a negative value on readability, as it can be
   misleading and distracting. Even if it serves no purpose it will need to be
-  maintained (source: [Safe dead code removal → YAGNI][8]).
-- Also see [Why are unused dependencies a problem?][9] and [Why are unused
-  exports a problem?][10].
+  maintained (source: [Safe dead code removal → YAGNI][1]).
+- Also see [Why are unused dependencies a problem?][2] and [Why are unused
+  exports a problem?][3].
 
 ## Automation
 
@@ -54,7 +47,7 @@ techniques and heuristics to report what you need and save a lot of time.
 
 :::tip
 
-Knip not only finds clutter, it can also [remove clutter][7]!
+Knip not only finds clutter, it can also [remove clutter][4]!
 
 Use Knip next to a linter like ESLint or Biome: after removing unused variables
 inside files, Knip might find even more unused code. Rinse and repeat!
@@ -73,8 +66,14 @@ synergy:
   exports.
 - Analyzing more files reveals more unused exports and dependency usage,
   refining the list of both unused and unlisted dependencies.
-- This approach is amplified in a monorepo setting. In fact, files and internal
-  dependencies can recursively reference each other (across workspaces).
+- This approach is amplified in a [monorepo setting][5]. In fact, files and
+  internal dependencies can recursively reference each other (across
+  workspaces).
+
+Knip reaches this coverage through [fine-grained entry points][6], [custom
+module resolution][7], [configuration-file parsers][8], an [advanced
+shell-script parser][9], and [built-in and custom compilers][10], then [fixes
+most of it automatically][4].
 
 ## Greenfield or Legacy
 
@@ -104,8 +103,8 @@ consider comments like the following:
 // @ts-expect-error
 ```
 
-Maybe you wonder why Knip does not have similar comments like `// knip-ignore`
-so you can get rid of false positives? A variety of reasons:
+Knip doesn't have similar comments like `// knip-ignore` so you can get rid of
+false positives for a variety of reasons:
 
 1. A false positive may be a bug in Knip, and should be reported, not dismissed.
 2. Instead of proprietary comments, use [standardized annotations][11] that also
@@ -115,14 +114,14 @@ so you can get rid of false positives? A variety of reasons:
 
 Tip: use `@lintignore` in JSDoc comments, so other linters can use the same.
 
-[1]: ./entry-files.md
-[2]: ../features/monorepos-and-workspaces.md
-[3]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
-[4]: ./plugins.md#configuration-files
-[5]: ../features/script-parser.md
-[6]: ../features/compilers.md
-[7]: ../features/auto-fix.mdx
-[8]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
-[9]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
-[10]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
+[1]: https://jfmengels.net/safe-dead-code-removal/#yagni-you-arent-gonna-need-it
+[2]: ../typescript/unused-dependencies.md#why-are-unused-dependencies-a-problem
+[3]: ../typescript/unused-exports.md#why-are-unused-exports-a-problem
+[4]: ../features/auto-fix.mdx
+[5]: ../features/monorepos-and-workspaces.md
+[6]: ./entry-files.md
+[7]: ../reference/faq.md#why-doesnt-knip-use-an-existing-module-resolver
+[8]: ./plugins.md#configuration-files
+[9]: ../features/script-parser.md
+[10]: ../features/compilers.md
 [11]: ../reference/jsdoc-tsdoc-tags.md

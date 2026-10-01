@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vite-plugin-pages-custom-dir",
+  "dependencies": {
+    "vite-plugin-pages": "*"
+  }
+}

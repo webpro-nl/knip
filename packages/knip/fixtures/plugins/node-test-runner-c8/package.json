@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/node-test-runner-c8",
+  "scripts": {
+    "test": "c8 node --test"
+  },
+  "devDependencies": {
+    "c8": "*"
+  }
+}

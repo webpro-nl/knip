@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "~/*": ["src/*"]
+    },
+    "strict": true,
+    "target": "ES2022"
+  },
+  "include": ["serverless.ts", "src/**/*.ts"]
+}

@@ -1,17 +1,26 @@
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
-import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
-import { getIssueType, hasStrictlyEnumReferences } from '../graph-explorer/utils.ts';
+import {
+  getIgnoredCycleImportFlags,
+  getIssueType,
+  getRuntimeImport,
+  hasStrictlyEnumReferences,
+} from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import traceReporter from '../reporters/trace.ts';
-import type { Export, ModuleGraph } from '../types/module-graph.ts';
+import type { CyclesConfig, IgnoreExportsUsedInFile } from '../types/config.ts';
+import type { Export, ExportMember, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
+import { shouldCountRefs } from '../typescript/ast-nodes.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
-import { perfObserver } from '../util/Performance.ts';
+import { relative } from '../util/path.ts';
+import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
-import { getShouldIgnoreHandler, getShouldIgnoreTagHandler } from '../util/tag.ts';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
+import { INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -25,6 +34,21 @@ interface AnalyzeOptions {
   unreferencedFiles: Set<string>;
   options: MainOptions;
 }
+
+const toCyclePathKey = (path: string[]) => {
+  const length = path.length > 1 && path[0] === path[path.length - 1] ? path.length - 1 : path.length;
+  return path.slice(0, length).join('\0');
+};
+
+const getAllowedCyclePaths = (cycles: CyclesConfig) => {
+  if (!cycles.allow?.length) return;
+  const paths = new Set<string>();
+  for (const path of cycles.allow) if (path.length > 0) paths.add(toCyclePathKey(path));
+  return paths;
+};
+
+const isAllowedCycle = (symbols: { symbol: string }[], paths: Set<string> | undefined) =>
+  paths?.has(toCyclePathKey(symbols.map(s => s.symbol))) ?? false;
 
 export const analyze = async ({
   analyzedFiles,
@@ -47,25 +71,85 @@ export const analyze = async ({
     exportedItem: Export,
     filePath: string,
     includeEntryExports: boolean,
+    ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
     visited?: Set<string>
   ) => {
     if (!exportedItem.referencedIn) return false;
     const file = graph.get(filePath);
     if (!file) return false;
     for (const containingExport of exportedItem.referencedIn) {
-      if (explorer.isReferenced(filePath, containingExport, { includeEntryExports })[0]) return true;
       const inExport = file.exports.get(containingExport);
       if (!inExport) continue;
-      if (inExport.hasRefsInFile && (inExport.type === 'type' || inExport.type === 'interface')) return true;
+      if (
+        (inExport.type === 'type' || inExport.type === 'interface' || inExport.type === 'enum') &&
+        !shouldCountRefs(ignoreExportsUsedInFile, inExport.type)
+      ) {
+        continue;
+      }
+      if (inExport.hasRefsInFile || inExport.isRegistered) return true;
+      if (explorer.isReferenced(filePath, containingExport, { traverseEntries: includeEntryExports })[0]) return true;
       if (inExport.referencedIn) {
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {
           v.add(containingExport);
-          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, v)) return true;
+          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, ignoreExportsUsedInFile, v))
+            return true;
         }
       }
     }
     return false;
+  };
+
+  const getMemberIssues = (
+    exportedItem: Export,
+    filePath: string,
+    identifier: string,
+    workspace: Workspace,
+    importsForExport: ImportMaps
+  ) => {
+    const isEnumMembers = options.includedIssueTypes.enumMembers && exportedItem.type === 'enum';
+    const isNsMembers =
+      options.includedIssueTypes.namespaceMembers && exportedItem.members.length > 0 && exportedItem.type !== 'enum';
+
+    if (!isEnumMembers && !isNsMembers) return;
+    if (exportedItem.members.length === 0) return;
+    if (explorer.isEnumerated(filePath, identifier)) return;
+    if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) return;
+    if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) return;
+
+    const issueType: 'enumMembers' | 'namespaceMembers' = isEnumMembers ? 'enumMembers' : 'namespaceMembers';
+    const unusedMembers: ExportMember[] = [];
+    const ignoredMembers: ExportMember[] = [];
+
+    for (const member of exportedItem.members) {
+      if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
+      if (shouldIgnore(member.jsDocTags)) continue;
+      if (member.hasRefsInFile) continue;
+
+      const [isMemberReferenced] = explorer.isReferenced(filePath, `${identifier}.${member.identifier}`, {
+        traverseEntries: true,
+        treatStarAtEntryAsReferenced: true,
+      });
+      const isMemberIgnored = shouldIgnoreTags(member.jsDocTags);
+
+      if (!isMemberReferenced) {
+        if (!isMemberIgnored) unusedMembers.push(member);
+      } else if (isMemberIgnored) {
+        ignoredMembers.push(member);
+      }
+    }
+
+    return { issueType, unusedMembers, ignoredMembers };
+  };
+
+  const addMemberTagHints = (members: ExportMember[], filePath: string, identifier: string) => {
+    for (const member of members) {
+      for (const tagName of member.jsDocTags) {
+        if (options.tags[1].includes(tagName)) {
+          collector.addTagHint({ type: 'tag', filePath, identifier: `${identifier}.${member.identifier}`, tagName });
+        }
+      }
+    }
   };
 
   const analyzeGraph = async () => {
@@ -80,7 +164,7 @@ export const analyze = async ({
         const workspace = chief.findWorkspaceByFilePath(filePath);
 
         if (workspace) {
-          const { isIncludeEntryExports } = workspace.config;
+          const { isIncludeEntryExports, ignoreExportsUsedInFile } = workspace.config;
 
           const isEntry = entryPaths.has(filePath);
 
@@ -92,85 +176,81 @@ export const analyze = async ({
           const importsForExport = file.importedBy;
 
           for (const [identifier, exportedItem] of exportItems) {
-            // Skip tagged exports
-            if (shouldIgnore(exportedItem.jsDocTags)) continue;
+            // Skip exports tagged @public/@beta/@alias entirely (no refs check)
+            if (isAlwaysIgnored(exportedItem.jsDocTags)) continue;
 
-            const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags);
+            const isInternalProd = options.isProduction && exportedItem.jsDocTags.has(INTERNAL_TAG);
+            const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags) || isInternalProd;
 
             if (importsForExport) {
-              const [isReferenced, reExportingEntryFile] = explorer.isReferenced(filePath, identifier, {
-                includeEntryExports: isIncludeEntryExports,
+              const [isReferenced, reExportingEntryFile, reExportedIds] = explorer.isReferenced(filePath, identifier, {
+                traverseEntries: isIncludeEntryExports,
               });
 
-              if (
-                isIgnored &&
-                (isReferenced || isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports))
-              ) {
-                for (const tagName of exportedItem.jsDocTags) {
-                  if (options.tags[1].includes(tagName)) {
-                    collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+              if (isIgnored) {
+                if (
+                  isReferenced ||
+                  isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile)
+                ) {
+                  const memberIssues = isReferenced
+                    ? getMemberIssues(exportedItem, filePath, identifier, workspace, importsForExport)
+                    : undefined;
+
+                  if (memberIssues) addMemberTagHints(memberIssues.ignoredMembers, filePath, identifier);
+
+                  if (!memberIssues || memberIssues.unusedMembers.length === 0) {
+                    for (const tagName of exportedItem.jsDocTags) {
+                      if (options.tags[1].includes(tagName) || (isInternalProd && tagName === INTERNAL_TAG)) {
+                        collector.addTagHint({ type: 'tag', filePath, identifier, tagName });
+                      }
+                    }
                   }
                 }
+
+                continue;
               }
 
-              if (isIgnored) continue;
-
-              if (reExportingEntryFile && !isReferenced) {
+              if (reExportingEntryFile) {
                 if (!isIncludeEntryExports) {
                   continue;
                 }
                 // Skip exports if re-exported from entry file and tagged
-                const reExportedItem = graph.get(reExportingEntryFile)?.exports.get(identifier);
-                if (reExportedItem && shouldIgnore(reExportedItem.jsDocTags)) continue;
+                if (!isReferenced && reExportedIds) {
+                  const entryExports = graph.get(reExportingEntryFile)?.exports;
+                  let isTagged = false;
+                  for (const id of reExportedIds) {
+                    const reExportedItem = entryExports?.get(id);
+                    if (
+                      reExportedItem &&
+                      (shouldIgnore(reExportedItem.jsDocTags) || hasTag(options.tags[1], reExportedItem.jsDocTags))
+                    ) {
+                      isTagged = true;
+                      break;
+                    }
+                  }
+                  if (isTagged) continue;
+                }
               }
 
               if (isReferenced) {
-                const isEnumMembers = options.includedIssueTypes.enumMembers && exportedItem.type === 'enum';
-                const isNsMembers =
-                  options.includedIssueTypes.namespaceMembers &&
-                  exportedItem.members.length > 0 &&
-                  exportedItem.type !== 'enum';
+                const memberIssues = getMemberIssues(exportedItem, filePath, identifier, workspace, importsForExport);
 
-                if ((isEnumMembers || isNsMembers) && exportedItem.members.length > 0) {
-                  if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) continue;
-                  if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) continue;
-
-                  const issueType = isEnumMembers ? 'enumMembers' : 'namespaceMembers';
-
-                  for (const member of exportedItem.members) {
-                    if (findMatch(workspace.ignoreMembers, member.identifier)) continue;
-                    if (shouldIgnore(member.jsDocTags)) continue;
-
-                    if (!member.hasRefsInFile) {
-                      const id = `${identifier}.${member.identifier}`;
-                      const [isMemberReferenced] = explorer.isReferenced(filePath, id, {
-                        includeEntryExports: true,
-                      });
-                      const isIgnored = shouldIgnoreTags(member.jsDocTags);
-
-                      if (!isMemberReferenced) {
-                        if (isIgnored) continue;
-
-                        collector.addIssue({
-                          type: issueType,
-                          filePath,
-                          workspace: workspace.name,
-                          symbol: member.identifier,
-                          parentSymbol: identifier,
-                          pos: member.pos,
-                          line: member.line,
-                          col: member.col,
-                          fixes: member.fix ? [member.fix] : [],
-                        });
-                      } else if (isIgnored) {
-                        for (const tagName of exportedItem.jsDocTags) {
-                          if (options.tags[1].includes(tagName)) {
-                            collector.addTagHint({ type: 'tag', filePath, identifier: id, tagName });
-                          }
-                        }
-                      }
-                    }
+                if (memberIssues) {
+                  for (const member of memberIssues.unusedMembers) {
+                    collector.addIssue({
+                      type: memberIssues.issueType,
+                      filePath,
+                      workspace: workspace.name,
+                      symbol: member.identifier,
+                      parentSymbol: identifier,
+                      pos: member.pos,
+                      line: member.line,
+                      col: member.col,
+                      fixes: member.fix ? [member.fix] : [],
+                    });
                   }
+
+                  addMemberTagHints(memberIssues.ignoredMembers, filePath, identifier);
                 }
 
                 // This id was imported, so we bail out early
@@ -180,12 +260,14 @@ export const analyze = async ({
 
             const [hasStrictlyNsRefs, namespace] = explorer.hasStrictlyNsReferences(filePath, identifier);
 
-            const isType = ['enum', 'type', 'interface'].includes(exportedItem.type);
+            const isType =
+              exportedItem.type === 'enum' || exportedItem.type === 'type' || exportedItem.type === 'interface';
 
             if (
               isIgnored ||
               exportedItem.hasRefsInFile ||
-              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports) ||
+              exportedItem.isRegistered ||
+              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile) ||
               (hasStrictlyNsRefs &&
                 ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))
             ) {
@@ -223,11 +305,17 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.external) {
+        if (file.imports.external) {
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
-            const isHandled = packageName && deputy.maybeAddReferencedExternalDependency(ws, packageName);
-            if (!isHandled)
+            const isHandled =
+              packageName &&
+              deputy.maybeAddReferencedExternalDependency(ws, packageName, {
+                specifier: extImport.specifier,
+                isTypeOnly: extImport.isTypeOnly,
+                isResolved: extImport.filePath !== undefined,
+              });
+            if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
                 type: 'unlisted',
                 filePath,
@@ -242,7 +330,7 @@ export const analyze = async ({
           }
         }
 
-        if (file.imports?.unresolved) {
+        if (file.imports.unresolved) {
           for (const unresolvedImport of file.imports.unresolved) {
             const { specifier, pos, line, col } = unresolvedImport;
             collector.addIssue({
@@ -257,6 +345,25 @@ export const analyze = async ({
             });
           }
         }
+      }
+    }
+
+    if (options.isReportCycles) {
+      const cyclesConfig = chief.config.cycles;
+      const allowedCyclePaths = getAllowedCyclePaths(cyclesConfig);
+      const ignoredFlags = getIgnoredCycleImportFlags(cyclesConfig.dynamicImports ?? false);
+      for (const cycle of timerify(explorer.findAllCycles, 'findAllCycles')(ignoredFlags)) {
+        const filePath = cycle[0];
+        const ws = chief.findWorkspaceByFilePath(filePath);
+        if (!ws) continue;
+        const symbols = cycle.slice(0, -1).map((file, index) => {
+          const node = graph.get(file);
+          const edge = node && getRuntimeImport(node, cycle[index + 1], ignoredFlags);
+          return edge ? { symbol: relative(options.cwd, file), ...edge } : { symbol: relative(options.cwd, file) };
+        });
+        if (isAllowedCycle(symbols, allowedCyclePaths)) continue;
+        const symbol = symbols.map(s => s.symbol).join(' → ');
+        collector.addIssue({ type: 'cycles', filePath, workspace: ws.name, symbol, symbols, fixes: [] });
       }
     }
 
@@ -283,6 +390,11 @@ export const analyze = async ({
     const catalogIssues = await counselor.settleCatalogIssues(options);
     for (const issue of catalogIssues) collector.addIssue(issue);
 
+    const unusedConfiguredWorkspaces = chief.getUnusedConfiguredWorkspaces();
+    for (const identifier of unusedConfiguredWorkspaces) {
+      collector.addConfigurationHint({ type: 'workspaces', identifier });
+    }
+
     const unusedIgnoredWorkspaces = chief.getUnusedIgnoredWorkspaces();
     for (const identifier of unusedIgnoredWorkspaces) {
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
@@ -300,7 +412,13 @@ export const analyze = async ({
   perfObserver.addMemoryMark('analyze');
 
   if (options.isTrace) {
-    traceReporter({ graph, explorer, options, workspaceFilePathFilter: chief.workspaceFilePathFilter });
+    traceReporter({
+      graph,
+      explorer,
+      options,
+      workspaceFilePathFilter: chief.workspaceFilePathFilter,
+      issues: collector.getIssues().issues,
+    });
   }
 
   return analyzeGraph;

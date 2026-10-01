@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vitest-regressions",
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

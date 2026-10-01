@@ -1,5 +1,6 @@
 ---
 title: Namespace Imports
+description: How Knip handles exports used through `import * as NS` namespace imports, its usage heuristic, and the `nsExports` and `nsTypes` issue types.
 ---
 
 The intention of exports used through namespace imports may not always be clear
@@ -33,7 +34,7 @@ import * as NS from './my-namespace.js';
 export { NS };
 ```
 
-If this all usage of the `NS` namespace object, we also don't know whether
+If this is all usage of the `NS` namespace object, we also don't know whether
 individual exports like `version` or `getRocket` will be used. However, if at
 least one reference to a property such as `NS.version` is found, then the
 individual exports are considered separately again and `getRocket` will be
@@ -86,7 +87,7 @@ type TypeOf = typeof NS;
 
 Object.values(NS);
 
-for (const fruit in Fruits) {
+for (const fruit in NS) {
   //
 }
 
@@ -123,3 +124,6 @@ export on a namespace individually, include the `nsExports` issue type:
 
 Or use the `--include nsExports` argument from the CLI. The `nsTypes` can be
 added as well to do the same for exported types.
+
+Including these _adds_ them to the report; all other issue types are still
+reported.

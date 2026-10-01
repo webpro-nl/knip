@@ -13,5 +13,9 @@
     "@types/mocha": "*",
     "mocha": "*",
     "ts-node": "*"
+  },
+  "scripts": {
+    "test:integration": "mocha --recursive integration",
+    "test:e2e": "mocha \"e2e/*.e2e.mjs\" \"smoke/*.smoke.mjs\""
   }
 }

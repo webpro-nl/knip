@@ -1,0 +1,6 @@
+{
+  "name": "@mise/web",
+  "devDependencies": {
+    "asset-builder": "*"
+  }
+}

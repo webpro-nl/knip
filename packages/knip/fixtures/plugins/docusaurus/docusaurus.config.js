@@ -26,6 +26,8 @@ export default {
     '@my-company',
     '@my-company/awesome',
     '@my-company/cool/web',
+    './plugins/local-plugin.js',
+    ['./plugins/local-plugin-with-options.js', { foo: 'bar' }],
   ],
   presets: [
     [

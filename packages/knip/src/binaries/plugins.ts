@@ -1,27 +1,32 @@
-import parseArgs from 'minimist';
+import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { BinaryResolver } from '../types/config.ts';
 import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
-import { extractBinary } from '../util/modules.ts';
+import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { resolve as fallbackResolve } from './fallback.ts';
+import { isWrapper as isFallbackWrapper, resolve as fallbackResolve } from './fallback.ts';
+import { toCommandBinary, toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
-export const resolve: BinaryResolver = (binary, _args, options) => {
-  const { cwd, fromArgs, containingFilePath } = options;
+export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
+
+export const resolve: BinaryResolver = (binary, words, options) => {
+  const { cwd, fromArgs, containingFilePath, manifest } = options;
   const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
 
-  if (!pluginArgs) return fallbackResolve(binary, _args, options);
+  if (!pluginArgs) return fallbackResolve(binary, words, options);
 
   const inputOpts = {};
   if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });
 
-  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(_args) : _args;
+  const values: string[] = [];
+  for (const word of words) values.push(word.value);
+  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
 
   const parsed = parseArgs(args, {
     string: [
@@ -43,7 +48,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
     const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
-      if (id.includes('node_modules/.bin/')) positionals.push(toBinary(extractBinary(id)));
+      if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
       else positionals.push(toDeferResolveEntry(id, { optional: true }));
     }
   }
@@ -55,7 +60,7 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
 
   const resolvedFromArgs =
     typeof pluginArgs.fromArgs === 'function'
-      ? fromArgs(pluginArgs.fromArgs(parsed, args))
+      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args), words))
       : Array.isArray(pluginArgs.fromArgs)
         ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];
@@ -69,10 +74,10 @@ export const resolve: BinaryResolver = (binary, _args, options) => {
   };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
-  const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd }) ?? [];
+  const inputs: Input[] = pluginArgs.resolveInputs?.(parsed, { args, cwd, manifest }) ?? [];
 
   return [
-    toBinary(binary, inputOpts),
+    toCommandBinary(binary, options, inputOpts),
     ...positionals,
     ...resolved.map(id => toDeferResolve(id)),
     ...resolvedImports.map(id => toDeferResolve(id)),

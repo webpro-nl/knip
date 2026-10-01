@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/pino",
+  "main": "src/logger.ts",
+  "dependencies": {
+    "@axiomhq/pino": "*",
+    "@openobserve/pino-openobserve": "*",
+    "pino": "*",
+    "pino-elasticsearch": "*",
+    "pino-loki": "*",
+    "pino-mongodb": "*",
+    "pino-pretty": "*",
+    "pino-socket": "*",
+    "pino-syslog": "*"
+  }
+}

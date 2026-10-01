@@ -18,7 +18,6 @@ export interface CompilerOptions {
   noEmit?: boolean;
   outDir?: string;
   paths?: Record<string, string[]>;
-  pathsBasePath?: string;
   plugins?: Array<{ name: string } | string>;
   rootDir?: string;
   rootDirs?: string[];

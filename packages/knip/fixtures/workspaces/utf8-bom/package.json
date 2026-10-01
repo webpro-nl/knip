@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-utf8-bom",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

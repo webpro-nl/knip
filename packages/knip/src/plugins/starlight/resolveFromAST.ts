@@ -1,10 +1,13 @@
-import type { Program } from 'oxc-parser';
-import { findCallArg, getDefaultImportName, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import type { ResolveFromAST } from '../../types/config.ts';
+import { findImportedCallArg, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { type Input, toProductionEntry } from '../../util/input.ts';
 
-export const getComponentPathsFromSourceFile = (program: Program) => {
-  const importMap = getImportMap(program);
-  const starlightImportName = getDefaultImportName(importMap, '@astrojs/starlight');
-  if (!starlightImportName) return new Set<string>();
-  const arg = findCallArg(program, starlightImportName);
-  return arg ? getPropertyValues(arg, 'components') : new Set<string>();
+export const resolveFromAST: ResolveFromAST = program => {
+  const starlightConfig = findImportedCallArg(program, '@astrojs/starlight');
+  if (!starlightConfig) return [];
+
+  const inputs: Input[] = [];
+  for (const id of getPropertyValues(starlightConfig, 'components')) inputs.push(toProductionEntry(id));
+  for (const id of getPropertyValues(starlightConfig, 'customCss')) inputs.push(toProductionEntry(id));
+  return inputs;
 };

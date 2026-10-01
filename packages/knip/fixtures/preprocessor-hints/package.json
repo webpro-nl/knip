@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/preprocessor-hints",
+  "knip": {
+    "ignore": ["not-a-real-file.ts"],
+    "tags": ["-internal"],
+    "treatConfigHintsAsErrors": true,
+    "treatTagHintsAsErrors": true,
+    "preprocessor": "./clear-hints.js"
+  }
+}

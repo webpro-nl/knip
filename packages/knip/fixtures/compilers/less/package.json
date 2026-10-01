@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/compilers-less",
+  "devDependencies": {
+    "less": "*"
+  }
+}

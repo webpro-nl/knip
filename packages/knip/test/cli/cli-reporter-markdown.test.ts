@@ -3,7 +3,7 @@ import test from 'node:test';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/module-resolution-non-std');
+const cwd = resolve('fixtures/resolution/module-resolution-non-std');
 
 test('knip --reporter markdown', () => {
   const markdown = `# Knip report

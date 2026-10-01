@@ -23,12 +23,14 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
         const longestSymbol = issuesForType.sort(sortLongestSymbol)[0].symbol.length;
         const sortedByFilePath = issuesForType.sort(sortLongestFilePath);
         const longestFilePath = getFilePath(sortedByFilePath[0]).length;
+        const nameWidth = Math.max(longestSymbol, 'Name'.length);
+        const locationWidth = Math.max(longestFilePath, 'Location'.length);
 
-        console.log(`| ${'Name'.padEnd(longestSymbol)} | ${'Location'.padEnd(longestFilePath)} | Severity |`);
-        console.log(`| :${'-'.repeat(longestSymbol - 1)} | :${'-'.repeat(longestFilePath - 1)} | :------- |`);
+        console.log(`| ${'Name'.padEnd(nameWidth)} | ${'Location'.padEnd(locationWidth)} | Severity |`);
+        console.log(`| :${'-'.repeat(nameWidth - 1)} | :${'-'.repeat(locationWidth - 1)} | :------- |`);
         for (const issue of sortedByFilePath) {
           console.log(
-            `| ${issue.symbol.padEnd(longestSymbol)} | ${getFilePath(issue).padEnd(longestFilePath)} | ${(issue.severity ?? '').padEnd(8)} |`
+            `| ${issue.symbol.padEnd(nameWidth)} | ${getFilePath(issue).padEnd(locationWidth)} | ${(issue.severity ?? '').padEnd(8)} |`
           );
         }
         console.log('');

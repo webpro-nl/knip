@@ -1,5 +1,5 @@
 {
-  "name": "@fixtures/sveltekit2",
+  "name": "@plugins/sveltekit2",
   "type": "module",
   "devDependencies": {
     "@sveltejs/kit": "*",

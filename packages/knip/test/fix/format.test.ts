@@ -73,8 +73,8 @@ export const { set: setter } = fn();
     'package.json': `{
   "name": "@fixtures/fix",
   "dependencies": {
-    "lodash": "*",
-    "ignored": "*"
+    "ignored": "*",
+    "lodash": "*"
   },
   "devDependencies": {}
 }

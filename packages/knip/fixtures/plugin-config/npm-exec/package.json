@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/npm-exec",
+  "scripts": {
+    "build": "npm exec custom-build-cli",
+    "temporary": "npm exec --yes temporary-build-cli",
+    "missing": "npm exec --no missing-build-cli"
+  },
+  "devDependencies": {
+    "custom-provider": "*",
+    "unused-provider": "*"
+  }
+}

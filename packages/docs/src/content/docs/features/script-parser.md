@@ -1,5 +1,6 @@
 ---
 title: Script Parser
+description: How Knip statically parses shell scripts and CLI arguments in `package.json`, plugins and source code to find entry files and dependencies.
 ---
 
 Knip parses shell commands and scripts to find additional dependencies, entry
@@ -10,7 +11,7 @@ files and configuration files in various places:
 - In [scripts][3]
 - In [source code][4]
 
-Shell scripts can be read and statically analyzed, but they're not executed.
+Shell scripts are parsed and statically analyzed, but they're not executed.
 
 ## package.json
 
@@ -137,7 +138,8 @@ await $({ stdio: 'inherit' })`c8 node hydrate.js`;
 ```
 
 Parsing the script results in `hydrate.js` added as an entry file and the `c8`
-binary/dependency as referenced.
+binary/dependency as referenced. The `execa()`, `execaSync()`, `execaCommand()`
+and `execaCommandSync()` call forms are parsed the same way.
 
 ### zx
 
@@ -149,6 +151,34 @@ await $`node scripts/parse.js`;
 ```
 
 This will add `scripts/parse.js` as an entry file.
+
+### child\_process
+
+If `node:child_process` is imported in source code, Knip parses the command in
+`exec`/`execSync` calls and the executable (with its arguments) in
+`spawn`/`spawnSync`/`execFile`/`execFileSync` calls:
+
+```ts
+import { execSync, execFile } from 'node:child_process';
+execSync('eslint --cache');
+execFile('boxen', ['I ❤ unicorns']);
+```
+
+This marks the `eslint` and `boxen` binaries as referenced. An inline
+`path.join(__dirname, …)` argument to `spawn`, `execFile` or `fork` is added as
+an entry file instead.
+
+### nano-spawn
+
+If `nano-spawn` is imported in source code, Knip parses the executable and its
+arguments:
+
+```ts
+import spawn from 'nano-spawn';
+await spawn('gsutil', ['cp', './file.txt', 'gs://bucket/']);
+```
+
+This marks the `gsutil` binary as referenced.
 
 [1]: #packagejson
 [2]: #cli-arguments

@@ -1,13 +1,11 @@
-import type { ParseResult, Program } from 'oxc-parser';
+import type { CallExpression, ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
-import { parseFile } from './visitors/helpers.ts';
+import { _parseFile, getStringValue } from './ast-nodes.ts';
 
-const isStringLiteral = (node: any): boolean =>
-  node?.type === 'StringLiteral' || (node?.type === 'Literal' && typeof node.value === 'string');
-
-const getStringValue = (node: any): string | undefined => (isStringLiteral(node) ? node.value : undefined);
+export const getPropertyKey = (prop: any): string | undefined =>
+  prop?.key?.type === 'Identifier' ? prop.key.name : getStringValue(prop?.key);
 
 export const getImportMap = (program: Program) => {
   const importMap = new Map<string, string>();
@@ -29,10 +27,10 @@ export const getImportMap = (program: Program) => {
           decl.init?.type === 'CallExpression' &&
           decl.init.callee?.type === 'Identifier' &&
           decl.init.callee.name === 'require' &&
-          isStringLiteral(decl.init.arguments?.[0]) &&
           decl.id?.type === 'Identifier'
         ) {
-          importMap.set(decl.id.name, decl.init.arguments[0].value);
+          const source = getStringValue(decl.init.arguments?.[0]);
+          if (source != null) importMap.set(decl.id.name, source);
         }
       }
     }
@@ -40,10 +38,9 @@ export const getImportMap = (program: Program) => {
   return importMap;
 };
 
-export const getDefaultImportName = (importMap: Map<string, string>, specifier: string) => {
-  for (const [name, path] of importMap) {
-    if (path === specifier) return name;
-  }
+const addStringValue = (values: Set<string>, node: any) => {
+  const value = getStringValue(node);
+  if (value != null) values.add(value);
 };
 
 export const getPropertyValues = (node: any, propertyName: string) => {
@@ -51,21 +48,16 @@ export const getPropertyValues = (node: any, propertyName: string) => {
   if (node?.type !== 'ObjectExpression') return values;
   for (const prop of node.properties ?? []) {
     if (prop.type !== 'Property') continue;
-    const name = prop.key?.name ?? prop.key?.value;
-    if (name !== propertyName) continue;
+    if (getPropertyKey(prop) !== propertyName) continue;
     const init = prop.value;
-    if (isStringLiteral(init)) {
-      values.add(init.value);
-    } else if (init?.type === 'ArrayExpression') {
-      for (const el of init.elements ?? []) {
-        if (isStringLiteral(el)) values.add(el.value);
-      }
+    if (init?.type === 'ArrayExpression') {
+      for (const el of init.elements ?? []) addStringValue(values, el);
     } else if (init?.type === 'ObjectExpression') {
       for (const p of init.properties ?? []) {
-        if (p.type === 'Property' && isStringLiteral(p.value)) {
-          values.add(p.value.value);
-        }
+        if (p.type === 'Property') addStringValue(values, p.value);
       }
+    } else {
+      addStringValue(values, init);
     }
   }
   return values;
@@ -83,6 +75,74 @@ export const collectPropertyValues = (program: Program, propertyName: string): S
   return values;
 };
 
+const firstValue = (values: Iterable<string>): string | undefined => {
+  for (const value of values) return value;
+};
+
+/** First value of a named property in an ObjectExpression */
+export const getFirstPropertyValue = (node: any, propertyName: string) =>
+  firstValue(getPropertyValues(node, propertyName));
+
+/** First value of a named property from any ObjectExpression in the program */
+export const collectFirstPropertyValue = (program: Program, propertyName: string) =>
+  firstValue(collectPropertyValues(program, propertyName));
+
+const unwrapParens = (node: any): any =>
+  node?.type === 'ParenthesizedExpression' ? unwrapParens(node.expression) : node;
+
+/**
+ * Resolve a `defineConfig`-style argument to its ObjectExpression. Handles:
+ * object form `defineConfig({...})`, implicit-return arrow `defineConfig(() => ({...}))`,
+ * and `defineConfig(() => { return {...}; })` (single inline return). Unwraps
+ * `ParenthesizedExpression` at every step.
+ */
+export const resolveObjectArg = (arg: any): any | undefined => {
+  const node = unwrapParens(arg);
+  if (!node) return;
+  if (node.type === 'ObjectExpression') return node;
+  if (node.type !== 'ArrowFunctionExpression' && node.type !== 'FunctionExpression') return;
+  const body = unwrapParens(node.body);
+  if (body?.type === 'ObjectExpression') return body;
+  if (body?.type !== 'BlockStatement') return;
+  for (const stmt of body.body ?? []) {
+    if (stmt.type === 'ReturnStatement') {
+      const ret = unwrapParens(stmt.argument);
+      if (ret?.type === 'ObjectExpression') return ret;
+    }
+  }
+};
+
+type ModuleMatch = string | string[] | ((path: string) => boolean);
+
+/** Find all CallExpressions whose callee is a binding imported from the given module(s) */
+export const findImportedCalls = (program: Program, module: ModuleMatch): CallExpression[] => {
+  const isMatch =
+    typeof module === 'function'
+      ? module
+      : Array.isArray(module)
+        ? (path: string) => module.includes(path)
+        : (path: string) => path === module;
+  const names = new Set<string>();
+  for (const [name, path] of getImportMap(program)) if (isMatch(path)) names.add(name);
+  const calls: CallExpression[] = [];
+  if (names.size === 0) return calls;
+  const visitor = new Visitor({
+    CallExpression(node) {
+      if (node.callee?.type === 'Identifier' && names.has(node.callee.name)) calls.push(node);
+    },
+  });
+  visitor.visit(program);
+  return calls;
+};
+
+/** Find the first ObjectExpression argument of a call to a binding imported from the given module(s) */
+export const findImportedCallArg = (program: Program, module: ModuleMatch): any | undefined => {
+  for (const call of findImportedCalls(program, module)) {
+    const arg = resolveObjectArg(call.arguments?.[0]);
+    if (arg) return arg;
+  }
+};
+
 /** Find the first ObjectExpression argument of a named function call */
 export const findCallArg = (program: Program, fnName: string): any | undefined => {
   let result: any;
@@ -90,8 +150,8 @@ export const findCallArg = (program: Program, fnName: string): any | undefined =
     CallExpression(node) {
       if (result) return;
       if (node.callee?.type === 'Identifier' && node.callee.name === fnName) {
-        const arg = node.arguments?.[0];
-        if (arg?.type === 'ObjectExpression') result = arg;
+        const obj = resolveObjectArg(node.arguments?.[0]);
+        if (obj) result = obj;
       }
     },
   });
@@ -103,9 +163,7 @@ export const findCallArg = (program: Program, fnName: string): any | undefined =
 export const findProperty = (node: any, name: string): any | undefined => {
   if (node?.type !== 'ObjectExpression') return;
   for (const prop of node.properties ?? []) {
-    if (prop.type === 'Property' && (prop.key?.name === name || prop.key?.value === name)) {
-      return prop.value;
-    }
+    if (prop.type === 'Property' && getPropertyKey(prop) === name) return prop.value;
   }
 };
 
@@ -114,11 +172,8 @@ export const getStringValues = (node: any): Set<string> => {
   const values = new Set<string>();
   if (node?.type !== 'ArrayExpression') return values;
   for (const el of node.elements ?? []) {
-    if (isStringLiteral(el)) {
-      values.add(el.value);
-    } else if (el?.type === 'ArrayExpression' && isStringLiteral(el.elements?.[0])) {
-      values.add(el.elements[0].value);
-    }
+    if (el?.type === 'ArrayExpression') addStringValue(values, el.elements?.[0]);
+    else addStringValue(values, el);
   }
   return values;
 };
@@ -168,7 +223,7 @@ export const collectStringLiterals = (sourceText: string, filePath: string): Set
       collectJsonStringLiterals(JSON.parse(stripJsonComments(sourceText, { trailingCommas: true })), literals);
       return literals;
     }
-    const result = parseFile(filePath, sourceText);
+    const result = _parseFile(filePath, sourceText);
     const visitor = new Visitor({
       Literal(node: any) {
         if (typeof node.value === 'string') literals.add(node.value);

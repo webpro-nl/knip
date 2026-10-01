@@ -19,6 +19,9 @@ interface Transaction {
     currency: string;
   };
   createdAt: string;
+  order: {
+    frequency: 'MONTHLY' | 'YEARLY' | 'ONETIME' | null;
+  } | null;
   fromAccount: {
     name: string;
   };
@@ -61,6 +64,9 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
                 currency
               }
               createdAt
+              order {
+                frequency
+              }
               fromAccount {
                 name
               }
@@ -94,7 +100,10 @@ const getMonthlyTotals = async (options: Options): Promise<Map<string, number>> 
   }
 
   for (const transaction of account.transactions.nodes) {
-    if (recurringOnly && transaction.kind !== 'CONTRIBUTION') continue;
+    if (recurringOnly) {
+      const frequency = transaction.order?.frequency;
+      if (transaction.kind !== 'CONTRIBUTION' || (frequency !== 'MONTHLY' && frequency !== 'YEARLY')) continue;
+    }
 
     const month = new Date(transaction.createdAt).toISOString().substring(0, 7);
     const amount = Math.round(transaction.amount.value);

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/panda-css",
+  "devDependencies": {
+    "@pandacss/dev": "*",
+    "postcss": "*"
+  }
+}

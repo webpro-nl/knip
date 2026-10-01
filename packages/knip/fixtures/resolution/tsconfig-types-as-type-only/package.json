@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/tsconfig-types-as-type-only",
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/mango": "*",
+    "typescript": "*"
+  }
+}

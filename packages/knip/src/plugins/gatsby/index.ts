@@ -26,13 +26,13 @@ const production = [
 const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConfig, options) => {
   const { configFileName } = options;
 
-  if (/gatsby-config/.test(configFileName)) {
+  if (configFileName.includes('gatsby-config')) {
     return (localConfig as GatsbyConfig).plugins
       .map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve))
       .map(id => toDeferResolve(id));
   }
 
-  if (/gatsby-node/.test(configFileName)) {
+  if (configFileName.includes('gatsby-node')) {
     const plugins = new Set<string>();
     const actions: GatsbyActions['actions'] = { setBabelPlugin: plugin => plugins.add(plugin.name) };
     const _config = localConfig as GatsbyNode;

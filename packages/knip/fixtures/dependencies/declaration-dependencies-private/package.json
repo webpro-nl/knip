@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/declaration-dependencies-private",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "devDependencies": {
+    "ambient-shim": "*"
+  }
+}

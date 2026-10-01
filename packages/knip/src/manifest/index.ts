@@ -6,10 +6,9 @@ import { loadPackageManifest } from './helpers.ts';
 type Options = {
   packageNames: string[];
   dir: string;
-  cwd: string;
 };
 
-const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
+const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
   const hostDependencies: HostDependencies = new Map();
 
   // Find all binaries for each dependency
@@ -17,24 +16,19 @@ const getMetaDataFromPackageJson = ({ cwd, dir, packageNames }: Options) => {
 
   const hasTypesIncluded = new Set<string>();
 
+  const addBinary = (key: string, value: string) => {
+    const set = installedBinaries.get(key);
+    if (set) set.add(value);
+    else installedBinaries.set(key, new Set([value]));
+  };
+
   for (const packageName of packageNames) {
-    const manifest = loadPackageManifest({ cwd, dir, packageName });
+    const manifest = loadPackageManifest({ dir, packageName });
     if (manifest) {
       // Read and store installed binaries
-      const binaryName = packageName.replace(/^@[^/]+\//, '');
-      const binaries = typeof manifest.bin === 'string' ? [binaryName] : Object.keys(manifest.bin ?? {});
-      for (const binaryName of binaries) {
-        if (installedBinaries.has(binaryName)) {
-          installedBinaries.get(binaryName)?.add(packageName);
-        } else {
-          installedBinaries.set(binaryName, new Set([packageName]));
-        }
-        if (installedBinaries.has(packageName)) {
-          installedBinaries.get(packageName)?.add(binaryName);
-        } else {
-          installedBinaries.set(packageName, new Set([binaryName]));
-        }
-      }
+      const defaultBinaryName = packageName.replace(/^@[^/]+\//, '');
+      const binaries = typeof manifest.bin === 'string' ? [defaultBinaryName] : Object.keys(manifest.bin ?? {});
+      for (const binaryName of binaries) addBinary(binaryName, packageName);
 
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});

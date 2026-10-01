@@ -17,13 +17,14 @@ test('Find dependencies with the typedoc plugin', async () => {
   assert(issues.unresolved['package.json']['typedoc-plugin-umami']);
   assert(issues.unresolved['tsconfig.json']['typedoc-plugin-zod']);
   assert(issues.unresolved['typedoc.json']['./dist/index.cjs']);
+  assert(!('custom.js' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 1,
     unresolved: 4,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

@@ -1,7 +1,6 @@
 ---
 title: Configuring Project Files
-sidebar:
-  order: 1
+description: How to set Knip's `entry` and `project` file patterns, use negations and production mode, and when to reach for `ignore`.
 ---
 
 The `entry` and `project` file patterns are the first and most important

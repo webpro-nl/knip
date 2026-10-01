@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/workspaces-malformed-manifest__good",
+  "main": "./index.ts"
+}

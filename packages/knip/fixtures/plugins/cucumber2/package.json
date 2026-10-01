@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/cucumber2",
+  "devDependencies": {
+    "@cucumber/cucumber": "*",
+    "@cucumber/pretty-formatter": "*"
+  }
+}

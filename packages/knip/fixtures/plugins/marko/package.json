@@ -1,0 +1,20 @@
+{
+  "name": "@fixtures/marko",
+  "files": ["dist", "marko.json"],
+  "scripts": {
+    "build": "mtc"
+  },
+  "dependencies": {
+    "@orchard/marko-tags": "*",
+    "@orchard/unused-legacy-marko-tags": "*",
+    "@orchard/unused-marko-tags": "*",
+    "combined-marko-tags": "*",
+    "legacy-marko-tags": "*",
+    "unused-library": "*"
+  },
+  "devDependencies": {
+    "@marko/type-check": "*",
+    "marko": "*",
+    "sass": "*"
+  }
+}

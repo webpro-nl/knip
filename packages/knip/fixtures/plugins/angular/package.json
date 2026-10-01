@@ -18,6 +18,7 @@
     "karma-jasmine": "*",
     "karma-jasmine-html-reporter": "*",
     "jasmine-core": "*",
-    "typescript": "*"
+    "typescript": "*",
+    "sass": "*"
   }
 }

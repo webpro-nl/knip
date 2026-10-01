@@ -7,12 +7,12 @@ import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 test('Fix catalog entries', async () => {
-  const cwd = await copyFixture('fixtures/catalog-named-package-json-root');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-named-package-json-root');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 
   assert(issues.catalog['package.json']['default.lodash']);
-  assert(issues.catalog['package.json']['frontend.@nu/xt']);
+  assert(!issues.catalog['package.json']['frontend.@nu/xt']);
   assert(issues.catalog['package.json']['backend.fastify']);
 
   assert.equal(
@@ -33,10 +33,16 @@ test('Fix catalog entries', async () => {
   },
   "catalogs": {
     "frontend": {
-      "vue": "^3.0.0"
+      "vue": "^3.0.0",
+      "@nu/xt": "^3.0.0"
     },
     "backend": {
       "express": "^4.18.0"
+    }
+  },
+  "pnpm": {
+    "overrides": {
+      "@nu/xt@^3": "catalog:frontend"
     }
   }
 }

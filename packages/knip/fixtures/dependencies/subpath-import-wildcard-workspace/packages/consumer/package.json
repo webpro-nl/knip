@@ -1,0 +1,10 @@
+{
+  "name": "@scope/consumer",
+  "private": true,
+  "imports": {
+    "#fruit/*": "@scope/fruit/*"
+  },
+  "dependencies": {
+    "@scope/fruit": "*"
+  }
+}

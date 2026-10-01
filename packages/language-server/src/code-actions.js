@@ -1,4 +1,4 @@
-import { DeleteFile, TextEdit } from 'vscode-languageserver/node.js';
+import { DeleteFile, TextEdit } from 'vscode-languageserver/node';
 
 /**
  * @import { WorkspaceEdit } from 'vscode-languageserver';
@@ -39,6 +39,15 @@ export const createRemoveDependencyEdit = (document, uri, issue) => {
     const lineIndex = issue.line - 1;
     const range = { start: { line: lineIndex, character: 0 }, end: { line: lineIndex + 1, character: 0 } };
     const edits = [TextEdit.del(range)];
+
+    if (lineIndex > 0 && !document.getText(range).trimEnd().endsWith(',')) {
+      const prevRange = { start: { line: lineIndex - 1, character: 0 }, end: { line: lineIndex, character: 0 } };
+      const prevLine = document.getText(prevRange).trimEnd();
+      if (prevLine.endsWith(',')) {
+        const start = { line: lineIndex - 1, character: prevLine.length - 1 };
+        edits.push(TextEdit.del({ start, end: { line: lineIndex - 1, character: prevLine.length } }));
+      }
+    }
 
     return { changes: { [uri]: edits } };
   } catch (_error) {

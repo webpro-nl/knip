@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/custom-conditions-consumer",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@fixtures/custom-conditions-analyzer": "workspace:*"
+  }
+}

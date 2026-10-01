@@ -1,0 +1,8 @@
+{
+  "workspaces": {
+    "packages/*": {
+      "entry": "index.ts!",
+      "project": "index.ts!"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/compilers-scss-paths",
+  "devDependencies": {
+    "sass": "*"
+  }
+}

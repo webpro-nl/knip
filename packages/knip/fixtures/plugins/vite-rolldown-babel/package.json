@@ -1,0 +1,15 @@
+{
+  "name": "@plugins/vite-rolldown-babel",
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "*"
+  },
+  "dependencies": {
+    "@babel/preset-env": "*",
+    "@rolldown/plugin-babel": "*",
+    "babel-plugin-styled-components": "*"
+  }
+}

@@ -1,7 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { toLilconfig } from '../../util/plugin-config.ts';
 import type { Entry, LintStagedConfig } from './types.ts';
 
 // https://github.com/okonet/lint-staged
@@ -13,11 +12,10 @@ const enablers = ['lint-staged'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = [
-  'package.json',
-  'package.yaml',
-  'package.yml',
-  ...toLilconfig('lint-staged'),
-  ...toLilconfig('lintstaged'),
+  'package.{json,yaml,yml}',
+  '.lintstagedrc',
+  '.lintstagedrc.{json,yaml,yml,mjs,mts,js,ts,cjs,cts}',
+  'lint-staged.config.{mjs,mts,js,ts,cjs,cts}',
 ];
 
 const resolveEntry = async (value: Entry): Promise<string[]> => {

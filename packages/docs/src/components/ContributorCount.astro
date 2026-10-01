@@ -1,0 +1,7 @@
+---
+import { getContributors } from '../util/contributors';
+
+const contributors = await getContributors();
+---
+
+{contributors.length > 0 ? `${contributors.length} ` : null}

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/turbo",
+  "scripts": {
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "@turbo/gen": "*",
+    "turbo": "*"
+  }
+}

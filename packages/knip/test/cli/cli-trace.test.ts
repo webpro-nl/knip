@@ -5,7 +5,7 @@ import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/trace');
-const nsCwd = resolve('fixtures/ts-namespace');
+const nsCwd = resolve('fixtures/namespaces/ts-namespace');
 
 test('knip --trace', () => {
   const actual = exec('knip --trace', { cwd }).stdout;
@@ -15,7 +15,7 @@ require.ts:resolve
 └── barrel.ts:reExportStar[resolve]
     ├── module.ts:importNS[NS.resolve] ✓
     │     refs: [NS.resolve]
-    └── shared.ts:reExport[resolve]
+    └── shared.ts:reExport[resolve] ✓
 shared.ts:CONTAINER
 └── module.ts:importAs[CONTAINER → ROOT] ✓
       refs: [ROOT.NS, ROOT.NS.resolve]
@@ -30,10 +30,24 @@ string.ts:leftPad
 string.ts:truncate
 ├── module.ts:import[truncate] ✓
 ├── module.ts:importAs[truncate → trunc] ✓
-├── shared.ts:reExportAs[truncate → shorten]
+├── shared.ts:reExportAs[truncate → shorten] ✓
 └── barrel.ts:reExportNS[STR.truncate]
     └── module.ts:importNS[NS.STR.truncate] ✓
           refs: [NS.STR, NS.STR.truncate]`;
+
+  if (actual !== expected) {
+    showDiff(actual, expected);
+    assert.fail('Output mismatch (see diff above)');
+  }
+});
+
+test('knip --trace-export traces a star-only re-export from its origin', () => {
+  const actual = exec('knip --trace-export resolve --trace-file barrel.ts', { cwd }).stdout;
+  const expected = `require.ts:resolve
+└── barrel.ts:reExportStar[resolve]
+    ├── module.ts:importNS[NS.resolve] ✓
+    │     refs: [NS.resolve]
+    └── shared.ts:reExport[resolve] ✓`;
 
   if (actual !== expected) {
     showDiff(actual, expected);

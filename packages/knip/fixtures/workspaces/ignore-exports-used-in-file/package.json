@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/workspaces-ignore-exports-used-in-file",
+  "workspaces": ["packages/*"],
+  "knip": {
+    "workspaces": {
+      "packages/app": {},
+      "packages/lib": {
+        "ignoreExportsUsedInFile": true
+      }
+    }
+  }
+}

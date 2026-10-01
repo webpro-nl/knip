@@ -1,3 +1,5 @@
+type NuxtLayer = string | [string, unknown?] | { source: string };
+
 export interface NuxtConfig {
   srcDir?: string;
   buildDir?: string;
@@ -14,35 +16,8 @@ export interface NuxtConfig {
     autoImport?: boolean;
     dirs?: string[];
   };
-  extends?: string[];
+  extends?: NuxtLayer | NuxtLayer[];
   components?: Array<string | { path: string }> | { dirs?: Array<string | { path: string }> };
   css?: string[];
   alias?: Record<string, string>;
 }
-
-export interface TemplateExpressionNode {
-  content: string;
-  isStatic: boolean;
-}
-
-export interface TemplateAstProp {
-  type: number;
-  exp?: TemplateExpressionNode;
-  arg?: TemplateExpressionNode;
-}
-
-export interface TemplateAstNode {
-  type?: number;
-  tag?: string;
-  props?: TemplateAstProp[];
-  content?: TemplateExpressionNode;
-  children?: TemplateAstNode[];
-}
-
-export interface Descriptor {
-  script: { content: string } | null;
-  scriptSetup: { content: string } | null;
-  template: { content: string; ast?: TemplateAstNode } | null;
-}
-
-export type VueSfc = { parse: (source: string, path: string) => { descriptor: Descriptor } };

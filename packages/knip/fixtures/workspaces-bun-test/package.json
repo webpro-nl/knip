@@ -1,9 +1,0 @@
-{
-  "name": "@knip/workspaces-bun-test",
-  "scripts": {
-    "test": "bun test"
-  },
-  "workspaces": [
-    "packages/*"
-  ]
-}

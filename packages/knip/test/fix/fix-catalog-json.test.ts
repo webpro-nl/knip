@@ -7,7 +7,7 @@ import { copyFixture } from '../helpers/copy-fixture.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 test('Fix catalog entries (package.json)', async () => {
-  const cwd = await copyFixture('fixtures/catalog-named-package-json');
+  const cwd = await copyFixture('fixtures/dependencies/catalog-named-package-json');
   const options = await createOptions({ cwd, isFix: true });
   const { issues } = await main(options);
 

@@ -26,14 +26,16 @@ test('Find dependencies with the Stryker plugin', async () => {
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/typescript-checker']);
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/jasmine-framework']);
   assert(issues.unlisted['stryker.conf.mjs']['@stryker-mutator/karma-runner']);
+  assert(issues.unlisted['stryker.custom.conf.ts']['@stryker-mutator/tap-runner']);
+  assert(issues.unlisted['stryker.custom.conf.ts']['@stryker-mutator/typescript-checker']);
   assert(issues.binaries['package.json']['stryker']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
     dependencies: 1,
-    unlisted: 14,
-    processed: 3,
-    total: 3,
+    unlisted: 16,
+    processed: 4,
+    total: 4,
   });
 });

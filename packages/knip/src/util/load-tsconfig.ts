@@ -1,10 +1,10 @@
-import { readFileSync } from 'node:fs';
-import { parseTsconfig } from 'get-tsconfig';
-import stripJsonComments from 'strip-json-comments';
+import { parseTsconfig, type TsConfigJsonResolved } from 'get-tsconfig';
+import type { SourceMap } from '../types/config.ts';
 import type { CompilerOptions } from '../types/project.ts';
-import { isFile as _isFile } from './fs.ts';
+import { compact } from './array.ts';
+import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
-import { dirname, isAbsolute, join, toAbsolute } from './path.ts';
+import { dirname, isAbsolute, join, toAbsolute, toPosix } from './path.ts';
 
 const hasGlobChar = (p: string) => p.includes('*') || p.includes('?');
 const hasExtension = (p: string) => {
@@ -19,6 +19,28 @@ const resolvePatterns = (patterns: string[] | undefined, dir: string, expandDirs
     const resolved = isAbsolute(p) ? p : join(dir, p);
     return expandDirs && !hasGlobChar(p) && !hasExtension(p) ? join(resolved, '**/*') : resolved;
   });
+};
+
+const getImplicitBaseUrl = (compilerOptions: object): string | undefined => {
+  for (const symbol of Object.getOwnPropertySymbols(compilerOptions)) {
+    if (symbol.description === 'implicitBaseUrl') {
+      const value = Reflect.get(compilerOptions, symbol);
+      if (typeof value === 'string') return toPosix(value);
+    }
+  }
+};
+
+const pathsBaseDir = (compilerOptions: { baseUrl?: string } | undefined, dir: string) => {
+  if (compilerOptions?.baseUrl) return toAbsolute(compilerOptions.baseUrl, dir);
+  return (compilerOptions && getImplicitBaseUrl(compilerOptions)) ?? dir;
+};
+
+const collectPaths = (acc: Record<string, string[]>, paths: Record<string, string[]> | undefined, baseDir: string) => {
+  if (!paths) return;
+  for (const key in paths) {
+    const resolved = paths[key].map(p => toAbsolute(p, baseDir));
+    acc[key] = key in acc ? compact([...acc[key], ...resolved]) : resolved;
+  }
 };
 
 const DEFAULT_INCLUDE = ['**/*'];
@@ -59,48 +81,85 @@ const expandFileNames = (
   return result;
 };
 
-const findRootDirsBase = (tsConfigFilePath: string): string | undefined => {
-  try {
-    const raw = JSON.parse(stripJsonComments(readFileSync(tsConfigFilePath, 'utf8')));
-    if (raw.compilerOptions?.rootDirs) return dirname(tsConfigFilePath);
-    if (raw.extends) {
-      const extPath = join(dirname(tsConfigFilePath), raw.extends);
-      return findRootDirsBase(extPath);
-    }
-  } catch {}
-  return undefined;
+const resolveReference = (refPath: string, dir: string): string | undefined => {
+  const abs = isAbsolute(refPath) ? refPath : join(dir, refPath);
+  if (isFile(abs)) return abs;
+  const withTsconfig = join(abs, 'tsconfig.json');
+  return isFile(withTsconfig) ? withTsconfig : undefined;
 };
 
-const resolveConfig = (tsConfigFilePath: string) => {
-  try {
-    return parseTsconfig(tsConfigFilePath);
-  } catch {
-    try {
-      const raw = readFileSync(tsConfigFilePath, 'utf8');
-      return JSON.parse(stripJsonComments(raw));
-    } catch {
-      return undefined;
-    }
+const absDir = (path: string, dir: string) => toAbsolute(path, dir).replace(/\/+$/, '');
+
+const walkReferences = (
+  target: CompilerOptions,
+  references: TsConfigJsonResolved['references'],
+  dir: string,
+  visited: Set<string>,
+  pairs: SourceMap[],
+  paths: Record<string, string[]>
+) => {
+  if (!references?.length) return;
+  for (const ref of references) {
+    const refPath = resolveReference(ref.path, dir);
+    if (!refPath || visited.has(refPath)) continue;
+    visited.add(refPath);
+    const refConfig = parseTsconfig(refPath);
+    const refDir = dirname(refPath);
+    const refOpts = refConfig.compilerOptions;
+    collectPaths(paths, refOpts?.paths, pathsBaseDir(refOpts, refDir));
+    const refOutDir = refOpts?.outDir ? absDir(refOpts.outDir, refDir) : undefined;
+    const refRootDir = refOpts?.rootDir ? absDir(refOpts.rootDir, refDir) : undefined;
+    if (refOutDir && refRootDir && refOutDir !== refRootDir) pairs.push({ srcDir: refRootDir, outDir: refOutDir });
+    if (refOutDir && !target.outDir) target.outDir = refOutDir;
+    if (refRootDir && !target.rootDir) target.rootDir = refRootDir;
+    if (!refOutDir || !refRootDir) walkReferences(target, refConfig.references, refDir, visited, pairs, paths);
   }
 };
 
-export const loadTSConfig = async (tsConfigFilePath: string) => {
-  if (_isFile(tsConfigFilePath)) {
-    const config = resolveConfig(tsConfigFilePath);
-    if (!config) return { isFile: true, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
+interface TSConfigInfo {
+  isFile: boolean;
+  compilerOptions: CompilerOptions;
+  fileNames: string[];
+  include: string[] | undefined;
+  exclude: string[] | undefined;
+  sourceMapPairs: SourceMap[];
+  paths: Record<string, string[]> | undefined;
+}
+
+const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
+  compilerOptions: {},
+  fileNames: [],
+  include: undefined,
+  exclude: undefined,
+  sourceMapPairs: [],
+  paths: undefined,
+};
+
+export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigInfo> => {
+  if (!isFile(tsConfigFilePath)) return { isFile: false, ...EMPTY };
+
+  try {
+    const config = parseTsconfig(tsConfigFilePath);
 
     const dir = dirname(tsConfigFilePath);
     const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
-    if (compilerOptions.outDir) compilerOptions.outDir = toAbsolute(compilerOptions.outDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.rootDir) compilerOptions.rootDir = toAbsolute(compilerOptions.rootDir, dir).replace(/\/+$/, '');
-    if (compilerOptions.paths) {
-      compilerOptions.pathsBasePath ??= dir;
-    }
-    if (compilerOptions.rootDirs) {
-      const rootDirsBase = findRootDirsBase(tsConfigFilePath) ?? dir;
-      compilerOptions.rootDirs = compilerOptions.rootDirs.map((d: string) =>
-        isAbsolute(d) ? d : join(rootDirsBase, d)
+    if (compilerOptions.outDir) compilerOptions.outDir = absDir(compilerOptions.outDir, dir);
+    if (compilerOptions.rootDir) compilerOptions.rootDir = absDir(compilerOptions.rootDir, dir);
+    if (compilerOptions.rootDirs) compilerOptions.rootDirs = compilerOptions.rootDirs.map(d => absDir(d, dir));
+
+    const tsconfigPaths: Record<string, string[]> = {};
+    collectPaths(tsconfigPaths, compilerOptions.paths, pathsBaseDir(compilerOptions, dir));
+
+    const sourceMapPairs: SourceMap[] = [];
+    if (config.references?.length) {
+      walkReferences(
+        compilerOptions,
+        config.references,
+        dir,
+        new Set([tsConfigFilePath]),
+        sourceMapPairs,
+        tsconfigPaths
       );
     }
 
@@ -108,8 +167,10 @@ export const loadTSConfig = async (tsConfigFilePath: string) => {
     const exclude = resolvePatterns(config.exclude, dir, true);
     const files = resolvePatterns(config.files, dir);
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+    const paths = Object.keys(tsconfigPaths).length > 0 ? tsconfigPaths : undefined;
 
-    return { isFile: true, compilerOptions, fileNames };
+    return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs, paths };
+  } catch {
+    return { isFile: true, ...EMPTY };
   }
-  return { isFile: false, compilerOptions: {} as CompilerOptions, fileNames: [] as string[] };
 };

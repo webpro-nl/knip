@@ -1,4 +1,4 @@
-import { OPAQUE } from '../../constants.ts';
+import { LOADER_DEFAULT, OPAQUE } from '../../constants.ts';
 import type { Identifier, ImportMaps, ModuleGraph } from '../../types/module-graph.ts';
 import {
   getAliasReExportMap,
@@ -23,78 +23,100 @@ export const isReferenced = (
   entryPaths: Set<string>,
   filePath: string,
   id: Identifier,
-  options: { includeEntryExports: boolean }
+  options: { traverseEntries: boolean; treatStarAtEntryAsReferenced?: boolean }
 ) => {
   const seen = new Set<string>();
+  let isReferenced = false;
+  let reExportingEntryFile: string | undefined;
+  let reExportedIds: Set<string> | undefined;
 
-  const walkDown = (path: string, id: string): [boolean, string | undefined] => {
+  const hasCompleteResult = () => isReferenced && (options.traverseEntries || reExportingEntryFile !== undefined);
+
+  const walkDown = (path: string, id: string, viaStar = false): boolean => {
     const isEntryFile = entryPaths.has(path);
-    let reExportingEntryFile: string | undefined = isEntryFile ? path : undefined;
-
-    if (seen.has(path)) return [false, reExportingEntryFile];
-    seen.add(path);
+    if (isEntryFile && !reExportingEntryFile) reExportingEntryFile = path;
+    if (path === reExportingEntryFile) (reExportedIds ??= new Set()).add(id);
+    if (hasCompleteResult()) return true;
 
     const restIds = id.split('.');
     const identifier = restIds.shift();
-    const file = graph.get(path)?.importedBy;
 
-    if (!identifier || !file) {
-      return [false, reExportingEntryFile];
+    const key = `${path}:${identifier}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+
+    if (options.treatStarAtEntryAsReferenced && isEntryFile && viaStar && restIds.length > 0) {
+      isReferenced = true;
+      return hasCompleteResult();
     }
 
-    const follow = (sources: Set<string>, nextId: string): boolean => {
+    const node = graph.get(path);
+    const file = node?.importedBy;
+
+    if (!identifier || !node || !file) {
+      return false;
+    }
+
+    const follow = (sources: Set<string>, nextId: string, nextViaStar = viaStar): boolean => {
       for (const byFilePath of sources) {
-        if (seen.has(byFilePath)) continue;
-        const result = walkDown(byFilePath, nextId);
-        if (result[1]) reExportingEntryFile = result[1];
-        if (result[0]) return true;
+        if (walkDown(byFilePath, nextId, nextViaStar)) return true;
       }
       return false;
     };
 
-    if (
-      (file.import.get(OPAQUE) && !hasOnlyNsRefs(file)) ||
-      ((identifier === id || (identifier !== id && file.refs.has(id))) &&
-        (file.import.has(identifier) || file.importAs.has(identifier)))
-    ) {
-      return [true, reExportingEntryFile];
-    }
-
-    for (const [exportId, aliases] of file.importAs) {
-      if (identifier === exportId) {
-        for (const alias of aliases.keys()) {
-          const aliasedRef = [alias, ...restIds].join('.');
-          if (file.refs.has(aliasedRef)) {
-            return [true, reExportingEntryFile];
-          }
-        }
+    if (!isReferenced) {
+      const isLoaderImport = file.import.has(LOADER_DEFAULT);
+      const hasDirectReference =
+        ((file.import.get(OPAQUE) || (isLoaderImport && !node.exports.has('default'))) && !hasOnlyNsRefs(file)) ||
+        (isLoaderImport && identifier === 'default') ||
+        ((identifier === id || (identifier !== id && file.refs.has(id))) &&
+          (file.import.has(identifier) || file.importAs.has(identifier)));
+      if (hasDirectReference) {
+        isReferenced = true;
+        if (hasCompleteResult()) return true;
       }
     }
 
+    if (!isReferenced) {
+      aliasImports: for (const [exportId, aliases] of file.importAs) {
+        if (identifier === exportId) {
+          for (const alias of aliases.keys()) {
+            const aliasedRef = [alias, ...restIds].join('.');
+            if (file.refs.has(aliasedRef)) {
+              isReferenced = true;
+              break aliasImports;
+            }
+          }
+        }
+      }
+      if (hasCompleteResult()) return true;
+    }
+
     for (const namespace of file.importNs.keys()) {
-      if (file.refs.has(`${namespace}.${id}`)) {
-        return [true, reExportingEntryFile];
+      if (!isReferenced && file.refs.has(`${namespace}.${id}`)) {
+        isReferenced = true;
+        if (hasCompleteResult()) return true;
       }
 
       const nsAliasMap = getAliasReExportMap(file, namespace);
       if (nsAliasMap) {
         for (const [alias, sources] of nsAliasMap) {
-          if (follow(sources, `${alias}.${id}`)) return [true, reExportingEntryFile];
+          if (follow(sources, `${alias}.${id}`)) return true;
         }
       }
 
       const nsReExportSources = getNamespaceReExportSources(file, namespace);
       if (nsReExportSources) {
-        if (follow(nsReExportSources, `${namespace}.${id}`)) return [true, reExportingEntryFile];
+        if (follow(nsReExportSources, `${namespace}.${id}`)) return true;
       }
     }
 
-    if (isEntryFile && !options.includeEntryExports) return [false, reExportingEntryFile];
+    if (isEntryFile && !options.traverseEntries) return false;
 
     const aliasMap = getAliasReExportMap(file, identifier);
     if (aliasMap) {
       for (const [alias, sources] of aliasMap) {
-        if (follow(sources, [alias, ...restIds].join('.'))) return [true, reExportingEntryFile];
+        if (follow(sources, [alias, ...restIds].join('.'))) return true;
       }
     }
 
@@ -102,19 +124,18 @@ export const isReferenced = (
     const starSources = getStarReExportSources(file);
 
     if (directSources) {
-      if (follow(directSources, id)) return [true, reExportingEntryFile];
+      if (follow(directSources, id)) return true;
     } else if (starSources) {
-      if (follow(starSources, id)) return [true, reExportingEntryFile];
+      if (follow(starSources, id, true)) return true;
     }
 
     for (const [namespace, sources] of file.reExportNs) {
-      if (follow(sources, `${namespace}.${id}`)) {
-        return [true, reExportingEntryFile];
-      }
+      if (follow(sources, `${namespace}.${id}`, true)) return true;
     }
 
-    return [false, reExportingEntryFile];
+    return false;
   };
 
-  return walkDown(filePath, id);
+  walkDown(filePath, id);
+  return [isReferenced, reExportingEntryFile, reExportedIds] as const;
 };

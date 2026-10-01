@@ -1,7 +1,6 @@
 ---
 title: Writing A Plugin
-sidebar:
-  order: 1
+description: Tutorial for writing a Knip plugin with entry, config, resolveConfig, resolveFromAST and resolve to find entry files and dependencies.
 ---
 
 Plugins provide Knip with entry files and dependencies it would be unable to
@@ -42,7 +41,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 
 const entry = ['tailwind.config.{js,cjs,mjs,ts}'];
 
-const plugin: Plugin {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
@@ -117,12 +116,12 @@ const resolveConfig: ResolveConfig<NycConfig> = config => {
   return [extend, requires].flat().map(id => toDeferResolve(id));
 };
 
-const plugin: Plugin {
+const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
-  resolveConfig
+  resolveConfig,
 };
 
 export default plugin;
@@ -210,7 +209,7 @@ default values.
 
 ## Example 4: Use the AST directly
 
-If the `resolveFromConfig` function is implemented, Knip loads the configuration
+If the `resolveConfig` function is implemented, Knip loads the configuration
 file and passes the default-exported object to this plugin function. However,
 that object might then not contain the information we need.
 

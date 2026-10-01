@@ -1,0 +1,4 @@
+{
+  id: 'fixture',
+  providerCatalogEntry: './provider-discovery.ts',
+}

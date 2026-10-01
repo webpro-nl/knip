@@ -24,13 +24,15 @@ Use what fits your workflow best, but make sure [QA][1] passes.
 - [Tests][7]
 - [QA][1]
 - [GitHub Action][8]
+- [Test Preview Packages][9]
+- [Test VS Code Extension][10]
 
 ## Getting started
 
-This guide assumes familiarity with concepts like [forking][9], [cloning a
-repo][10] and working with a package manager.
+This guide assumes familiarity with concepts like [forking][11], [cloning a
+repo][12] and working with a package manager.
 
-- Fork the project using the [GitHub website][11] or the [`gh` CLI][12]
+- Fork the project using the [GitHub website][13] or the [`gh` CLI][14]
 - Clone the repository
 - Install dependencies
 
@@ -38,7 +40,7 @@ Example terminal commands on your machine to get started:
 
 ```shell
 git clone git@github.com:[username]/knip.git
-# Or using gh CLI: gh repo fork webpro-nl/knip --clone
+# Or using the GitHub CLI: gh repo fork webpro-nl/knip --clone
 cd knip
 pnpm install
 cd packages/knip
@@ -50,45 +52,26 @@ To skip slower tests related to CLI and `--fix`, while still covering all the
 essentials and plugins:
 
 ```shell
-pnpm test:smoke
-bun test:bun:smoke
+pnpm test --smoke
 ```
 
 Note that Git `core.symlinks=true` is required for some tests.
 
 ## Agents
 
-Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][13]. Take
+Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][15]. Take
 responsibility and make sure to not cause unnecessary review and "wall of text"
-overhead to maintainers. Also [consider this before opening a pull request][14].
+overhead to maintainers. Also [consider this before opening a pull request][16].
 
 ## Contributing a plugin?
 
 In addition to the generic guidelines in this document, there's a guide for
-[writing a plugin][15].
+[writing a plugin][17].
 
 ## Running Knip
 
-Knip is written in TypeScript, and there are a few options to run it including
-your changes:
-
-- [Compile][16] ahead of time to JavaScript to run in Node.js
-- [Without compilation][17]
-  - Transpile on the fly using e.g `tsx` to run in Node.js
-  - Use a runtime that supports TypeScript (i.e. Bun)
-
-### Compile
-
-Use `pnpm build` to compile using `tsc` once. To recompile on changes:
-
-```shell
-pnpm watch
-```
-
-On source code changes, `tsc` will compile to JavaScript, and the `knip`
-executable is available globally to run from any directory.
-
-### Without compilation
+Knip is written in TypeScript, run it including your changes directly using
+Node.js v24+ or Bun.
 
 Run Knip without compilation:
 
@@ -96,9 +79,9 @@ Run Knip without compilation:
 node path/to/knip/packages/knip/src/cli.ts
 ```
 
-#### Alias
+### Alias
 
-Expanding on this idea, set up an alias like so:
+Set up an alias like so:
 
 ```shell
 alias k="node --inspect ~/p/knip/packages/knip/src/cli.ts"
@@ -167,7 +150,7 @@ test file to run and debug.
 In case you're wondering if or why some code is ever hit, attach the debugger to
 each test. Set a breakpoint and run all tests in one of the following ways:
 
-- From built-in terminal: `tsx --inspect --test test/**/*.test.ts`
+- From built-in terminal: `node --inspect --test test/**/*.test.ts`
 - Use the "Debug all tests with Bun" launch config.
 
 ## QA
@@ -176,7 +159,7 @@ Knip has a few tools set up to verify code quality and to format code and
 documentation:
 
 ```shell
-pnpm format
+pnpm fmt
 pnpm lint
 pnpm knip
 pnpm knip --strict
@@ -190,29 +173,61 @@ Ubuntu, macOS and Windows. QA in CI must be all green before a pull request can
 be merged. The [integration.yml][24] workflow runs Knip in multiple repositories
 using Knip, against the latest version of the code.
 
-## Previews
+## Test Preview Packages
 
-Thanks to [pkg.pr.new][25] pull requests can be previewed by installing it as a
-regular package. Every push is published to their registry. Look for the
-`pkg-pr-new` bot in your pull request.
+For pull requests and on each push, the [pkg.pr.new][25] bot posts preview URLs
+for Knip, the language server, and MCP. Replace `PR_NUMBER` below with the pull
+request number, or a published commit hash to test a specific revision.
+
+Install the preview in the affected project with your package manager, for
+example:
+
+```shell
+npm i -D https://pkg.pr.new/knip@PR_NUMBER
+```
+
+For a standalone language server, configure the LSP client to launch:
+
+```shell
+npm exec --yes --allow-remote=all --package=https://pkg.pr.new/@knip/language-server@PR_NUMBER -- knip-language-server --stdio
+```
+
+Use the client's usual transport. The server prefers project-local Knip; to test
+its bundled fallback, use a project without a locally resolvable Knip.
+
+## Test VS Code Extension
+
+With Node.js v24+, pnpm, and [vsce][26] installed, check out the branch or pull
+request to test, then run from the repository root:
+
+```shell
+pnpm install
+pnpm --dir packages/mcp-server run prepack
+pnpm --dir packages/vscode-knip package
+```
+
+Install the generated platform-specific `.vsix` from `packages/vscode-knip/`
+using VS Code's "Extensions: Install from VSIX..." command, then reload the
+window. This replaces the Marketplace version. To return to it, uninstall the
+preview and reinstall Knip from the Marketplace.
 
 [1]: #qa
-[2]: #attach-debugger-to-bun-from-a-test
+[2]: #attach-debugger-from-inside-a-test-file
 [3]: #getting-started
 [4]: #agents
 [5]: #contributing-a-plugin
 [6]: #running-knip
 [7]: #tests
 [8]: #github-action
-[9]: https://docs.github.com/get-started/quickstart/fork-a-repo
-[10]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
-[11]: https://github.com/webpro-nl/knip
-[12]: https://cli.github.com/
-[13]: ../AGENTS.md
-[14]: ./CONTRIBUTING.md#open-a-pull-request
-[15]: https://knip.dev/guides/writing-a-plugin/
-[16]: #compile
-[17]: #without-compilation
+[9]: #test-preview-packages
+[10]: #test-vs-code-extension
+[11]: https://docs.github.com/get-started/quickstart/fork-a-repo
+[12]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
+[13]: https://github.com/webpro-nl/knip
+[14]: https://cli.github.com/
+[15]: ../AGENTS.md
+[16]: ./CONTRIBUTING.md#open-a-pull-request
+[17]: https://knip.dev/guides/writing-a-plugin/
 [18]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
 [19]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
 [20]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
@@ -221,3 +236,4 @@ regular package. Every push is published to their registry. Look for the
 [23]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
 [24]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
 [25]: https://pkg.pr.new
+[26]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#vsce

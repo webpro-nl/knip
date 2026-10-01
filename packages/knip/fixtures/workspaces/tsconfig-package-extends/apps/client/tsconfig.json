@@ -1,0 +1,4 @@
+{
+  "extends": "@fixtures/tsconfig-package/app.json",
+  "include": ["src/**/*.ts"]
+}

@@ -1,21 +1,27 @@
-import { partitionCompilers } from '../compilers/index.ts';
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
 import { knipConfigurationSchema } from '../schema/configuration.ts';
 import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
+import { arrayify } from './array.ts';
 import { getCatalogContainer } from './catalog.ts';
-import type { ParsedCLIArgs } from './cli-arguments.ts';
+import { parseNumericOption, type ParsedCLIArgs } from './cli-arguments.ts';
 import { ConfigurationError } from './errors.ts';
 import { findFile, loadJSON } from './fs.ts';
-import { getIncludedIssueTypes, shorthandDeps, shorthandExports, shorthandFiles } from './get-included-issue-types.ts';
+import {
+  getIncludedIssueTypes,
+  shorthandCycles,
+  shorthandDeps,
+  shorthandExports,
+  shorthandFiles,
+} from './get-included-issue-types.ts';
 import { defaultRules } from './issue-initializers.ts';
 import { loadResolvedConfigFile } from './load-config.ts';
 import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
-import { isAbsolute, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { isAbsolute, isInternal, join, normalize, toAbsolute, toPosix } from './path.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -29,8 +35,8 @@ interface CreateOptions extends Partial<Options> {
  */
 export const createOptions = async (options: CreateOptions) => {
   const { args = {} } = options;
-  const pcwd = process.cwd();
-  const cwd = normalize(toPosix(toAbsolute(options.cwd ?? args.directory ?? pcwd, pcwd)));
+  const pcwd = toPosix(process.cwd());
+  const cwd = normalize(toAbsolute(toPosix(options.cwd ?? args.directory ?? pcwd), pcwd));
 
   const manifestPath = findFile(cwd, 'package.json');
   const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
@@ -66,19 +72,19 @@ export const createOptions = async (options: CreateOptions) => {
       const invalid = value.filter((v: string) => !validIssueTypes.has(v));
       if (invalid.length > 0) {
         loadedConfig[key] = value.filter((v: string) => validIssueTypes.has(v));
-        for (const name of invalid) logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+        for (const name of invalid) logWarning(`Ignored unknown issue type "${name}" in ${key}`);
       }
     } else if (typeof value === 'object') {
       for (const name in value) {
         if (!validIssueTypes.has(name)) {
           delete value[name];
-          logWarning('WARNING', `Ignored unknown issue type "${name}" in ${key}`);
+          logWarning(`Ignored unknown issue type "${name}" in ${key}`);
         }
       }
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(partitionCompilers(loadedConfig));
+  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
@@ -111,6 +117,7 @@ export const createOptions = async (options: CreateOptions) => {
       ...(args.dependencies ? shorthandDeps : []),
       ...(args.exports ? shorthandExports : []),
       ...(args.files ? shorthandFiles : []),
+      ...(args.cycles ? shorthandCycles : []),
     ],
   });
 
@@ -118,11 +125,22 @@ export const createOptions = async (options: CreateOptions) => {
     if (!value) rules[key] = 'off';
   }
 
-  const fixTypes = options.fixTypes ?? args['fix-type'] ?? [];
+  const fixTypes = (options.fixTypes ?? args['fix-type'] ?? []).flatMap(type => type.split(','));
   const isFixFiles = args['allow-remove-files'] && (fixTypes.length === 0 || fixTypes.includes('files'));
   const tags = splitTags(args.tags ?? options.tags ?? parsedConfig.tags ?? []);
 
   const workspace = options.workspace ?? args.workspace;
+
+  const toPreprocessor = (specifier: string) => (isInternal(specifier) ? toAbsolute(specifier, cwd) : specifier);
+  const configuredPreprocessor = arrayify(parsedConfig.preprocessor).map(toPreprocessor);
+  const preprocessor = args.preprocessor ? args.preprocessor.map(toPreprocessor) : configuredPreprocessor;
+  // A configured preprocessor stays referenced by the config file even when --preprocessor overrides which ones run
+  const preprocessorInputs = args.preprocessor
+    ? [...new Set([...configuredPreprocessor, ...preprocessor])]
+    : preprocessor;
+  const preprocessorOptions =
+    args['preprocessor-options'] ??
+    (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
 
   return {
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
@@ -130,8 +148,8 @@ export const createOptions = async (options: CreateOptions) => {
     config: args.config,
     configFilePath,
     cwd,
+    cycles: args.cycles ?? false,
     dependencies: args.dependencies ?? false,
-    experimentalTags: tags,
     exports: args.exports ?? false,
     files: args.files ?? false,
     fixTypes,
@@ -139,7 +157,8 @@ export const createOptions = async (options: CreateOptions) => {
     includedIssueTypes,
     isCache: args.cache ?? false,
     isDebug,
-    isDisableConfigHints: args['no-config-hints'] || isProduction || Boolean(workspace),
+    isDisableConfigHints: args['no-config-hints'] || isProduction,
+    isDisableTagHints: Boolean(args['no-tag-hints']),
     isFix: args.fix ?? options.isFix ?? isFixFiles ?? fixTypes.length > 0,
     isFixCatalog: fixTypes.length === 0 || fixTypes.includes('catalog'),
     isFixDependencies: fixTypes.length === 0 || fixTypes.includes('dependencies'),
@@ -162,6 +181,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.enumMembers ||
       includedIssueTypes.namespaceMembers ||
       includedIssueTypes.duplicates,
+    isReportCycles: includedIssueTypes.cycles,
     isReportFiles: includedIssueTypes.files,
     isReportTypes:
       includedIssueTypes.types ||
@@ -181,10 +201,15 @@ export const createOptions = async (options: CreateOptions) => {
     isStrict,
     isTrace,
     isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
+    isTreatTagHintsAsErrors: args['treat-tag-hints-as-errors'] ?? parsedConfig.treatTagHintsAsErrors ?? false,
     isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
     isWatch: args.watch ?? options.isWatch ?? false,
-    maxShowIssues: args['max-show-issues'] ? Number(args['max-show-issues']) : undefined,
+    maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
+    maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),
     parsedConfig,
+    preprocessor,
+    preprocessorInputs,
+    preprocessorOptions,
     rules,
     tags,
     traceDependency: args['trace-dependency'],

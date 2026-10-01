@@ -1,0 +1,5 @@
+{
+  "cycles": {
+    "allow": [["apricot.ts", "banana.ts"]]
+  }
+}

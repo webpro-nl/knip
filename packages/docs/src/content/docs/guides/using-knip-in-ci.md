@@ -1,5 +1,6 @@
 ---
 title: Using Knip in CI
+description: Run Knip in continuous integration to catch regressions, with a GitHub Actions workflow example, exit codes, caching, and reporters.
 ---
 
 Knip is your companion during local development. But it is even more valuable in

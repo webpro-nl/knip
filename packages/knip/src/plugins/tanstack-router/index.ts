@@ -15,13 +15,15 @@ const enablers = [
   '@tanstack/svelte-router',
   '@tanstack/router-cli',
   '@tanstack/router-plugin',
+  '@tanstack/react-start',
+  '@tanstack/solid-start',
 ];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['tsr.config.json'];
 
-const production = ['src/routeTree.gen.{ts,js}'];
+const production = ['src/routeTree.gen.{ts,js}', 'src/{router,start,client,server}.{js,jsx,ts,tsx}'];
 
 const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, options) => {
   const { configFileDir } = options;

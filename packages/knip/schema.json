@@ -24,6 +24,9 @@
     "ignoreBinaries": {
       "$ref": "#/definitions/ignoreBinaries"
     },
+    "ignoreGlobalBinaries": {
+      "$ref": "#/definitions/ignoreGlobalBinaries"
+    },
     "ignoreDependencies": {
       "$ref": "#/definitions/ignoreDependencies"
     },
@@ -50,6 +53,184 @@
       "title": "Exclude issue types from the report",
       "examples": ["enumMembers"],
       "$ref": "#/definitions/issueTypes"
+    },
+    "ignoreExportsUsedInFile": {
+      "$ref": "#/definitions/ignoreExportsUsedInFile"
+    },
+    "ignoreIssues": {
+      "title": " Ignore specific issue types for specific file patterns",
+      "examples": [
+        {
+          "src/generated/**": ["exports", "types"],
+          "**/*.generated.ts": ["exports"]
+        }
+      ],
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/issueTypes"
+      }
+    },
+    "cycles": {
+      "title": "Configure circular dependency (cycles) detection",
+      "examples": [
+        {
+          "dynamicImports": true,
+          "allow": [["src/a.ts", "src/b.ts"]]
+        }
+      ],
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dynamicImports": {
+          "title": "Include dynamic import() edges in cycle detection (excluded by default)",
+          "type": "boolean"
+        },
+        "allow": {
+          "title": "Allow (accept) specific cycles by exact path, relative to the root and omitting the closing repeat of the first file",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "includeEntryExports": {
+      "$ref": "#/definitions/includeEntryExports"
+    },
+    "tags": {
+      "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
+      "examples": ["+custom", "-lintignore", "-@internal"],
+      "$ref": "#/definitions/list"
+    },
+    "workspaces": {
+      "title": "Configuration for workspaces",
+      "type": "object",
+      "additionalProperties": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/workspace"
+          },
+          {
+            "$ref": "#/definitions/plugins"
+          }
+        ],
+        "unevaluatedProperties": false
+      }
+    },
+    "rules": {
+      "type": "object",
+      "properties": {
+        "binaries": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "catalog": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "catalogReferences": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "cycles": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "dependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "devDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "optionalPeerDependencies": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "duplicates": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "enumMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "namespaceMembers": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "exports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "files": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsExports": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "nsTypes": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "types": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unlisted": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "unresolved": {
+          "$ref": "#/definitions/ruleValue"
+        }
+      }
+    },
+    "preprocessor": {
+      "title": "Preprocess the results before providing them to the reporter(s)",
+      "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/list" }]
+    },
+    "preprocessorOptions": {
+      "title": "Extra options to pass to the preprocessor",
+      "type": "object"
+    },
+    "treatConfigHintsAsErrors": {
+      "title": "Exit with non-zero code (1) if there are any configuration hints",
+      "type": "boolean"
+    },
+    "treatTagHintsAsErrors": {
+      "title": "Exit with non-zero code (1) if there are any tag hints",
+      "type": "boolean"
+    }
+  },
+  "unevaluatedProperties": false,
+  "definitions": {
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ignoreBinaries": {
+      "title": "Binaries to exclude from the report (regex allowed)",
+      "examples": ["rm", "docker-compose", "curl"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreGlobalBinaries": {
+      "title": "Ignore common global binaries",
+      "description": "Set to false to report required binaries otherwise excluded by Knip's default list. Explicit ignoreBinaries entries still apply.",
+      "type": "boolean",
+      "default": true
+    },
+    "ignoreDependencies": {
+      "title": "Dependencies to exclude from the report (regex allowed)",
+      "examples": ["husky", "lint-staged"],
+      "$ref": "#/definitions/list"
+    },
+    "ignoreFiles": {
+      "title": "Unused files to exclude from the report",
+      "examples": ["husky", "lint-staged", "**/fixtures/**", "mocks/**"],
+      "default": [],
+      "$ref": "#/definitions/globPatterns"
+    },
+    "ignoreUnresolved": {
+      "title": "Unresolved imports to exclude from the report (regex allowed)",
+      "examples": ["#/virtual"],
+      "$ref": "#/definitions/list"
+    },
+    "includeEntryExports": {
+      "title": "Include entry files when reporting unused exports",
+      "type": "boolean"
     },
     "ignoreExportsUsedInFile": {
       "title": "Ignore exports used in file",
@@ -96,130 +277,6 @@
         }
       ]
     },
-    "ignoreIssues": {
-      "title": " Ignore specific issue types for specific file patterns",
-      "examples": [
-        {
-          "src/generated/**": ["exports", "types"],
-          "**/*.generated.ts": ["exports"]
-        }
-      ],
-      "type": "object",
-      "additionalProperties": {
-        "$ref": "#/definitions/issueTypes"
-      }
-    },
-    "includeEntryExports": {
-      "$ref": "#/definitions/includeEntryExports"
-    },
-    "tags": {
-      "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
-      "examples": ["+custom", "-lintignore", "-@internal"],
-      "$ref": "#/definitions/list"
-    },
-    "workspaces": {
-      "title": "Configuration for workspaces",
-      "type": "object",
-      "additionalProperties": {
-        "allOf": [
-          {
-            "$ref": "#/definitions/workspace"
-          },
-          {
-            "$ref": "#/definitions/plugins"
-          }
-        ],
-        "unevaluatedProperties": false
-      }
-    },
-    "rules": {
-      "type": "object",
-      "properties": {
-        "binaries": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "catalog": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "dependencies": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "devDependencies": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "optionalPeerDependencies": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "duplicates": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "enumMembers": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "namespaceMembers": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "exports": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "files": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "nsExports": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "nsTypes": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "types": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "unlisted": {
-          "$ref": "#/definitions/ruleValue"
-        },
-        "unresolved": {
-          "$ref": "#/definitions/ruleValue"
-        }
-      }
-    },
-    "treatConfigHintsAsErrors": {
-      "title": "Exit with non-zero code (1) if there are any configuration hints",
-      "type": "boolean"
-    }
-  },
-  "unevaluatedProperties": false,
-  "definitions": {
-    "list": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "ignoreBinaries": {
-      "title": "Binaries to exclude from the report (regex allowed)",
-      "examples": ["rm", "docker-compose", "curl"],
-      "$ref": "#/definitions/list"
-    },
-    "ignoreDependencies": {
-      "title": "Dependencies to exclude from the report (regex allowed)",
-      "examples": ["husky", "lint-staged"],
-      "$ref": "#/definitions/list"
-    },
-    "ignoreFiles": {
-      "title": "Unused files to exclude from the report",
-      "examples": ["husky", "lint-staged", "**/fixtures/**", "mocks/**"],
-      "default": [],
-      "$ref": "#/definitions/globPatterns"
-    },
-    "ignoreUnresolved": {
-      "title": "Unresolved imports to exclude from the report (regex allowed)",
-      "examples": ["#/virtual"],
-      "$ref": "#/definitions/list"
-    },
-    "includeEntryExports": {
-      "title": "Include entry files when reporting unused exports",
-      "type": "boolean"
-    },
     "ignoreMembers": {
       "title": "Enum and namespace members to exclude from the report (regex allowed)",
       "examples": ["render", "on.*"],
@@ -244,12 +301,14 @@
           "duplicates",
           "enumMembers",
           "namespaceMembers",
-          "catalog"
+          "catalog",
+          "catalogReferences",
+          "cycles"
         ]
       }
     },
     "globPatterns": {
-      "description": "Use file paths and glob patterns to match files. Knip uses fast-glob and picomatch (https://github.com/micromatch/picomatch)",
+      "description": "Use file paths and glob patterns to match files. Knip uses tinyglobby and picomatch (https://github.com/micromatch/picomatch)",
       "anyOf": [
         {
           "type": "string"
@@ -297,6 +356,9 @@
         "ignoreBinaries": {
           "$ref": "#/definitions/ignoreBinaries"
         },
+        "ignoreGlobalBinaries": {
+          "$ref": "#/definitions/ignoreGlobalBinaries"
+        },
         "ignoreDependencies": {
           "$ref": "#/definitions/ignoreDependencies"
         },
@@ -305,6 +367,22 @@
         },
         "ignoreUnresolved": {
           "$ref": "#/definitions/ignoreUnresolved"
+        },
+        "ignoreExportsUsedInFile": {
+          "$ref": "#/definitions/ignoreExportsUsedInFile"
+        },
+        "ignoreIssues": {
+          "title": " Ignore specific issue types for specific file patterns (relative to the workspace root)",
+          "examples": [
+            {
+              "src/generated/**": ["exports", "types"],
+              "**/*.generated.ts": ["exports"]
+            }
+          ],
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/issueTypes"
+          }
         },
         "includeEntryExports": {
           "$ref": "#/definitions/includeEntryExports"
@@ -356,6 +434,10 @@
           "title": "astro-db plugin configuration (https://knip.dev/reference/plugins/astro-db)",
           "$ref": "#/definitions/plugin"
         },
+        "astro-markdoc": {
+          "title": "astro-markdoc plugin configuration (https://knip.dev/reference/plugins/astro-markdoc)",
+          "$ref": "#/definitions/plugin"
+        },
         "ava": {
           "title": "ava plugin configuration (https://knip.dev/reference/plugins/ava)",
           "$ref": "#/definitions/plugin"
@@ -366,6 +448,10 @@
         },
         "biome": {
           "title": "biome plugin configuration (https://knip.dev/reference/plugins/biome)",
+          "$ref": "#/definitions/plugin"
+        },
+        "borp": {
+          "title": "borp plugin configuration (https://knip.dev/reference/plugins/borp)",
           "$ref": "#/definitions/plugin"
         },
         "bumpp": {
@@ -382,6 +468,10 @@
         },
         "capacitor": {
           "title": "Capacitor plugin configuration (https://knip.dev/reference/plugins/capacitor)",
+          "$ref": "#/definitions/plugin"
+        },
+        "catalyst": {
+          "title": "catalyst plugin configuration (https://knip.dev/reference/plugins/catalyst)",
           "$ref": "#/definitions/plugin"
         },
         "changelogen": {
@@ -444,12 +534,24 @@
           "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
           "$ref": "#/definitions/plugin"
         },
+        "electron-vite": {
+          "title": "electron-vite plugin configuration (https://knip.dev/reference/plugins/electron-vite)",
+          "$ref": "#/definitions/plugin"
+        },
         "eleventy": {
           "title": "eleventy plugin configuration (https://knip.dev/reference/plugins/eleventy)",
           "$ref": "#/definitions/plugin"
         },
+        "esbuild": {
+          "title": "esbuild plugin configuration (https://knip.dev/reference/plugins/esbuild)",
+          "$ref": "#/definitions/plugin"
+        },
         "eslint": {
           "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "eve": {
+          "title": "eve plugin configuration (https://knip.dev/reference/plugins/eve)",
           "$ref": "#/definitions/plugin"
         },
         "execa": {
@@ -462,6 +564,14 @@
         },
         "expressive-code": {
           "title": "expressive-code plugin configuration (https://knip.dev/reference/plugins/expressive-code)",
+          "$ref": "#/definitions/plugin"
+        },
+        "fast": {
+          "title": "fast plugin configuration (https://knip.dev/reference/plugins/fast)",
+          "$ref": "#/definitions/plugin"
+        },
+        "fumadocs": {
+          "title": "fumadocs plugin configuration (https://knip.dev/reference/plugins/fumadocs)",
           "$ref": "#/definitions/plugin"
         },
         "gatsby": {
@@ -508,6 +618,10 @@
           "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"
         },
+        "laravel-vite-plugin": {
+          "title": "laravel-vite-plugin plugin configuration (https://knip.dev/reference/plugins/laravel-vite-plugin)",
+          "$ref": "#/definitions/plugin"
+        },
         "lefthook": {
           "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"
@@ -520,6 +634,10 @@
           "title": "linthtml plugin configuration (https://knip.dev/reference/plugins/linthtml)",
           "$ref": "#/definitions/plugin"
         },
+        "lit": {
+          "title": "lit plugin configuration (https://knip.dev/reference/plugins/lit)",
+          "$ref": "#/definitions/plugin"
+        },
         "lockfile-lint": {
           "title": "lockfile-lint plugin configuration (https://knip.dev/reference/plugins/lockfile-lint)",
           "$ref": "#/definitions/plugin"
@@ -528,8 +646,16 @@
           "title": "lost-pixel plugin configuration (https://knip.dev/reference/plugins/lost-pixel)",
           "$ref": "#/definitions/plugin"
         },
+        "lunaria": {
+          "title": "lunaria plugin configuration (https://knip.dev/reference/plugins/lunaria)",
+          "$ref": "#/definitions/plugin"
+        },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "marko": {
+          "title": "marko plugin configuration (https://knip.dev/reference/plugins/marko)",
           "$ref": "#/definitions/plugin"
         },
         "mdx": {
@@ -544,6 +670,10 @@
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
           "$ref": "#/definitions/plugin"
         },
+        "mise": {
+          "title": "mise plugin configuration (https://knip.dev/reference/plugins/mise)",
+          "$ref": "#/definitions/plugin"
+        },
         "mocha": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/mocha)",
           "$ref": "#/definitions/plugin"
@@ -554,6 +684,10 @@
         },
         "msw": {
           "title": "Mocha plugin configuration (https://knip.dev/reference/plugins/msw)",
+          "$ref": "#/definitions/plugin"
+        },
+        "nano-spawn": {
+          "title": "nano-spawn plugin configuration (https://knip.dev/reference/plugins/nano-spawn)",
           "$ref": "#/definitions/plugin"
         },
         "nano-staged": {
@@ -608,6 +742,10 @@
           "title": "Nuxt plugin configuration (https://knip.dev/reference/plugins/nuxt)",
           "$ref": "#/definitions/plugin"
         },
+        "nuxtjs-i18n": {
+          "title": "nuxtjs-i18n plugin configuration (https://knip.dev/reference/plugins/nuxtjs-i18n)",
+          "$ref": "#/definitions/plugin"
+        },
         "nx": {
           "title": "Nx plugin configuration (https://knip.dev/reference/plugins/nx)",
           "$ref": "#/definitions/plugin"
@@ -624,6 +762,14 @@
           "title": "openapi-ts plugin configuration (https://knip.dev/reference/plugins/openapi-ts)",
           "$ref": "#/definitions/plugin"
         },
+        "openclaw": {
+          "title": "openclaw plugin configuration (https://knip.dev/reference/plugins/openclaw)",
+          "$ref": "#/definitions/plugin"
+        },
+        "orval": {
+          "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
+          "$ref": "#/definitions/plugin"
+        },
         "oxfmt": {
           "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
           "$ref": "#/definitions/plugin"
@@ -632,8 +778,16 @@
           "title": "oxlint plugin configuration (https://knip.dev/reference/plugins/oxlint)",
           "$ref": "#/definitions/plugin"
         },
+        "panda-css": {
+          "title": "panda-css plugin configuration (https://knip.dev/reference/plugins/panda-css)",
+          "$ref": "#/definitions/plugin"
+        },
         "payload": {
           "title": "payload plugin configuration (https://knip.dev/reference/plugins/payload)",
+          "$ref": "#/definitions/plugin"
+        },
+        "pino": {
+          "title": "pino plugin configuration (https://knip.dev/reference/plugins/pino)",
           "$ref": "#/definitions/plugin"
         },
         "playwright": {
@@ -660,6 +814,10 @@
           "title": "PostCSS plugin configuration (https://knip.dev/reference/plugins/postcss)",
           "$ref": "#/definitions/plugin"
         },
+        "pre-commit": {
+          "title": "pre-commit plugin configuration (https://knip.dev/reference/plugins/pre-commit)",
+          "$ref": "#/definitions/plugin"
+        },
         "preconstruct": {
           "title": "preconstruct plugin configuration (https://knip.dev/reference/plugins/preconstruct)",
           "$ref": "#/definitions/plugin"
@@ -672,12 +830,24 @@
           "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
           "$ref": "#/definitions/plugin"
         },
+        "quasar": {
+          "title": "quasar plugin configuration (https://knip.dev/reference/plugins/quasar)",
+          "$ref": "#/definitions/plugin"
+        },
         "qwik": {
           "title": "qwik plugin configuration (https://knip.dev/reference/plugins/qwik)",
           "$ref": "#/definitions/plugin"
         },
+        "railway": {
+          "title": "railway plugin configuration (https://knip.dev/reference/plugins/railway)",
+          "$ref": "#/definitions/plugin"
+        },
         "react-cosmos": {
           "title": "react-cosmos plugin configuration (https://knip.dev/reference/plugins/react-cosmos)",
+          "$ref": "#/definitions/plugin"
+        },
+        "react-email": {
+          "title": "react-email plugin configuration (https://knip.dev/reference/plugins/react-email)",
           "$ref": "#/definitions/plugin"
         },
         "react-native": {
@@ -738,6 +908,10 @@
         },
         "sentry": {
           "title": "Sentry plugin configuration (https://knip.dev/reference/plugins/sentry)",
+          "$ref": "#/definitions/plugin"
+        },
+        "serverless-framework": {
+          "title": "serverless-framework plugin configuration (https://knip.dev/reference/plugins/serverless-framework)",
           "$ref": "#/definitions/plugin"
         },
         "simple-git-hooks": {
@@ -812,12 +986,28 @@
           "title": "taskfile plugin configuration (https://knip.dev/reference/plugins/taskfile)",
           "$ref": "#/definitions/plugin"
         },
+        "tauri": {
+          "title": "tauri plugin configuration (https://knip.dev/reference/plugins/tauri)",
+          "$ref": "#/definitions/plugin"
+        },
+        "temporal": {
+          "title": "temporal plugin configuration (https://knip.dev/reference/plugins/temporal)",
+          "$ref": "#/definitions/plugin"
+        },
+        "textlint": {
+          "title": "textlint plugin configuration (https://knip.dev/reference/plugins/textlint)",
+          "$ref": "#/definitions/plugin"
+        },
         "travis": {
           "title": "travis plugin configuration (https://knip.dev/reference/plugins/travis)",
           "$ref": "#/definitions/plugin"
         },
         "ts-node": {
           "title": "ts-node plugin configuration (https://knip.dev/reference/plugins/ts-node)",
+          "$ref": "#/definitions/plugin"
+        },
+        "tsd": {
+          "title": "tsd plugin configuration (https://knip.dev/reference/plugins/tsd)",
           "$ref": "#/definitions/plugin"
         },
         "tsdown": {
@@ -832,6 +1022,10 @@
           "title": "tsx plugin configuration (https://knip.dev/reference/plugins/tsx)",
           "$ref": "#/definitions/plugin"
         },
+        "turbo": {
+          "title": "turbo plugin configuration (https://knip.dev/reference/plugins/turbo)",
+          "$ref": "#/definitions/plugin"
+        },
         "typedoc": {
           "title": "typedoc plugin configuration (https://knip.dev/reference/plugins/typedoc)",
           "$ref": "#/definitions/plugin"
@@ -840,12 +1034,48 @@
           "title": "TypeScript plugin configuration (https://knip.dev/reference/plugins/typescript)",
           "$ref": "#/definitions/plugin"
         },
+        "typescript-content-mapper": {
+          "title": "typescript-content-mapper plugin configuration (https://knip.dev/reference/plugins/typescript-content-mapper)",
+          "$ref": "#/definitions/plugin"
+        },
         "unbuild": {
           "title": "unbuild plugin configuration (https://knip.dev/reference/plugins/unbuild)",
           "$ref": "#/definitions/plugin"
         },
         "unocss": {
           "title": "unocss plugin configuration (https://knip.dev/reference/plugins/unocss)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-auto-import": {
+          "title": "unplugin-auto-import plugin configuration (https://knip.dev/reference/plugins/unplugin-auto-import)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-icons": {
+          "title": "unplugin-icons plugin configuration (https://knip.dev/reference/plugins/unplugin-icons)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-components": {
+          "title": "unplugin-vue-components plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-components)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-i18n": {
+          "title": "unplugin-vue-i18n plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-i18n)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-markdown": {
+          "title": "unplugin-vue-markdown plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-markdown)",
+          "$ref": "#/definitions/plugin"
+        },
+        "unplugin-vue-router": {
+          "title": "unplugin-vue-router plugin configuration (https://knip.dev/reference/plugins/unplugin-vue-router)",
+          "$ref": "#/definitions/plugin"
+        },
+        "varlock": {
+          "title": "varlock plugin configuration (https://knip.dev/reference/plugins/varlock)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vercel": {
+          "title": "vercel plugin configuration (https://knip.dev/reference/plugins/vercel)",
           "$ref": "#/definitions/plugin"
         },
         "vercel-og": {
@@ -858,6 +1088,26 @@
         },
         "vite": {
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-pages": {
+          "title": "vite-plugin-pages plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pages)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-pwa": {
+          "title": "vite-plugin-pwa plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pwa)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plugin-vue-layouts-next": {
+          "title": "vite-plugin-vue-layouts-next plugin configuration (https://knip.dev/reference/plugins/vite-plugin-vue-layouts-next)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-plus": {
+          "title": "vite-plus plugin configuration (https://knip.dev/reference/plugins/vite-plus)",
+          "$ref": "#/definitions/plugin"
+        },
+        "vite-pwa-assets-generator": {
+          "title": "vite-pwa-assets-generator plugin configuration (https://knip.dev/reference/plugins/vite-pwa-assets-generator)",
           "$ref": "#/definitions/plugin"
         },
         "vitepress": {
@@ -908,7 +1158,7 @@
     },
     "paths": {
       "type": "object",
-      "additionalProperty": {
+      "additionalProperties": {
         "type": "array",
         "items": {
           "type": "string"

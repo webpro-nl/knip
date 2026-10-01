@@ -1,0 +1,4 @@
+reporters:
+  - '@jsumners/line-reporter'
+files:
+  - 'checks/**/*.check.mjs'

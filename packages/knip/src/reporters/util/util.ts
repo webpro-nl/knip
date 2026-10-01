@@ -1,21 +1,20 @@
-import picocolors from 'picocolors';
 import { ISSUE_TYPE_TITLE, SYMBOL_TYPE } from '../../constants.ts';
 import type { Issue, IssueRecords, IssueSeverity, IssueSymbol, IssueType } from '../../types/issues.ts';
+import st from '../../util/colors.ts';
 import { relative } from '../../util/path.ts';
+import { compareStrings } from '../../util/string.ts';
 import { Table } from '../../util/table.ts';
 
 const plain = (text: string) => text;
-export const dim = picocolors.gray;
-export const bright = picocolors.whiteBright;
-const yellow = picocolors.yellow;
+export const dim = st.gray;
+export const bright = st.whiteBright;
 
 export const getIssueTypeTitle = (reportType: keyof typeof ISSUE_TYPE_TITLE) => ISSUE_TYPE_TITLE[reportType];
 
 export const getColoredTitle = (title: string, count: number) =>
-  `${picocolors.yellowBright(picocolors.underline(title))} (${count})`;
+  `${st.style(['yellowBright', 'underline'], title)} (${count})`;
 
-export const getDimmedTitle = (title: string, count: number) =>
-  `${yellow(`${picocolors.underline(title)} (${count})`)}`;
+export const getDimmedTitle = (title: string, count: number) => `${st.yellow(`${st.underline(title)} (${count})`)}`;
 
 type LogIssueLine = {
   owner?: string;
@@ -29,36 +28,36 @@ export const getIssueLine = ({ owner, filePath, symbols, parentSymbol, severity 
   const symbol = symbols ? `: ${symbols.map(s => s.symbol).join(', ')}` : '';
   const parent = parentSymbol ? ` (${parentSymbol})` : '';
   const print = severity === 'warn' ? dim : plain;
-  return `${owner ? `${picocolors.cyan(owner)} ` : ''}${print(`${relative(cwd, filePath)}${symbol}${parent}`)}`;
+  return `${owner ? `${st.cyan(owner)} ` : ''}${print(`${relative(cwd, filePath)}${symbol}${parent}`)}`;
 };
 
 export const convert = (issue: Issue | IssueSymbol) => ({
   namespace: 'parentSymbol' in issue ? issue.parentSymbol : undefined,
   name: issue.symbol,
+  kind: 'kind' in issue ? issue.kind : undefined,
+  specifier: 'kind' in issue ? issue.specifier : undefined,
   line: issue.line,
   col: issue.col,
   pos: issue.pos,
 });
 
 const sortByPos = (a: Issue, b: Issue) => {
-  const [filePathA, rowA, colA] = a.filePath.split(':');
-  const [filePathB, rowB, colB] = b.filePath.split(':');
-  return filePathA === filePathB
-    ? Number(rowA) === Number(rowB)
-      ? Number(colA) - Number(colB)
-      : Number(rowA) - Number(rowB)
-    : filePathA.localeCompare(filePathB);
+  if (a.filePath !== b.filePath) return compareStrings(a.filePath, b.filePath);
+  if (a.line !== b.line) return (a.line ?? 0) - (b.line ?? 0);
+  return (a.col ?? 0) - (b.col ?? 0);
 };
 
 const highlightSymbol =
   (issue: Issue) =>
   (_: unknown): string => {
-    if (issue.specifier && issue.specifier !== issue.symbol && issue.specifier.includes(issue.symbol)) {
-      const parts = issue.specifier.split(issue.symbol);
-      const rest = parts.slice(1).join('');
-      return [dim(parts[0]), bright(issue.symbol), dim(rest)].join('');
+    const { specifier, symbol } = issue;
+    if (specifier && specifier !== symbol) {
+      const idx = specifier.indexOf(symbol);
+      if (idx !== -1) {
+        return `${dim(specifier.slice(0, idx))}${bright(symbol)}${dim(specifier.slice(idx + symbol.length))}`;
+      }
     }
-    return issue.symbol;
+    return symbol;
   };
 
 export const getTableForType = (
@@ -66,7 +65,7 @@ export const getTableForType = (
   cwd: string,
   options: { isUseColors?: boolean } = { isUseColors: true }
 ) => {
-  const table = new Table({ truncateStart: ['filePath'], noTruncate: ['symbolType'] });
+  const table = new Table({ truncate: { filePath: 'start', symbolType: 'none' } });
 
   for (const issue of issues.sort(sortByPos)) {
     table.row();
@@ -74,14 +73,17 @@ export const getTableForType = (
     const print = options.isUseColors && (issue.isFixed || issue.severity === 'warn') ? dim : plain;
 
     const isFileIssue = issue.type === 'files';
-    const symbol = issue.symbols ? issue.symbols.map(s => s.symbol).join(', ') : issue.symbol;
+    const symbol = issue.symbols
+      ? issue.symbols.map(s => s.symbol).join(issue.type === 'cycles' ? ' → ' : ', ')
+      : issue.symbol;
     if (!isFileIssue) table.cell('symbol', print(symbol), options.isUseColors ? highlightSymbol(issue) : () => symbol);
 
     table.cell('parentSymbol', issue.parentSymbol && print(issue.parentSymbol));
     table.cell('symbolType', issue.symbolType && issue.symbolType !== SYMBOL_TYPE.UNKNOWN && print(issue.symbolType));
 
     const pos = issue.line === undefined ? '' : `:${issue.line}${issue.col === undefined ? '' : `:${issue.col}`}`;
-    const cell = isFileIssue ? relative(cwd, symbol) : `${relative(cwd, issue.filePath)}${pos}`;
+    const filePath = relative(cwd, issue.filePath);
+    const cell = isFileIssue ? filePath : `${filePath}${pos}`;
     table.cell('filePath', print(cell));
 
     table.cell('fixed', issue.isFixed && print('(removed)'));
@@ -93,3 +95,8 @@ export const getTableForType = (
 export const flattenIssues = (issues: IssueRecords): Issue[] => Object.values(issues).flatMap(Object.values);
 
 export const getIssuePrefix = (type: IssueType) => ISSUE_TYPE_TITLE[type].replace(/ies$/, 'y').replace(/s$/, '');
+
+export const getIssueDescription = ({ type, symbol, symbols, parentSymbol }: Issue) => {
+  const description = symbols ? symbols.map(item => item.symbol).join(', ') : symbol;
+  return `${getIssuePrefix(type)}: ${description}${parentSymbol ? ` (${parentSymbol})` : ''}`;
+};

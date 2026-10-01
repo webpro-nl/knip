@@ -52,7 +52,7 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   if (transformer?.babelTransformerPath) inputs.push(transformer.babelTransformerPath);
 
   return Array.from(i).concat(
-    [...inputs].map(id =>
+    Array.from(inputs, id =>
       toDeferResolve(id, {
         optional: id === DEFAULT_TRANSFORMER_PACKAGE || id === DEFAULT_MINIFIER_PACKAGE,
       })

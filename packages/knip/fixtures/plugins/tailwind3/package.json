@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/tailwind3",
+  "type": "module",
+  "dependencies": {
+    "radix-themes-tw": "*"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "*"
+  }
+}

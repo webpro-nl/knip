@@ -1,16 +1,23 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency, toEntry } from '../../util/input.ts';
+import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
-import { isInternal } from '../../util/path.ts';
+import { isInternal, join, normalize } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type {
+  ConfiguredOutput,
   ConfiguredPlugin,
   GraphqlCodegenTypes,
   GraphqlConfigTypes,
   GraphqlProjectsConfigTypes,
+  NearOperationFilePresetConfig,
   PresetNames,
 } from './types.ts';
-import { isConfigurationOutput, isGraphqlConfigTypes, isGraphqlProjectsConfigTypes } from './types.ts';
+import {
+  isConfigurationOutput,
+  isGraphqlConfigTypes,
+  isGraphqlProjectsConfigTypes,
+  isNearOperationFilePreset,
+} from './types.ts';
 
 // Both use Cosmiconfig with custom searchPlaces - not using helper as a result
 // Codegen:
@@ -24,6 +31,10 @@ const title = 'GraphQL Codegen';
 const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const args = {
+  config: true,
+};
 
 const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
 
@@ -45,15 +56,38 @@ const getPluginPackageName = (name: string) => {
   return `@graphql-codegen/${name}`;
 };
 
-const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = config => {
+// https://the-guild.dev/graphql/codegen/docs/presets/near-operation-file
+const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
+  if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
+    const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
+    const { folder = '', extension = '.generated.ts', fileName = '*', filePerOperation = false } = presetConfig;
+    // The preset resolves `folder` against each document's own directory, so a parent-relative folder still
+    // lands below the output directory: keep the recursive match and drop the leading `..` segments
+    const subfolder = normalize(folder)
+      .split('/')
+      .filter(segment => segment !== '' && segment !== '.' && segment !== '..');
+    return join(output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`);
+  }
+  return output.endsWith('/') ? `${output}**` : output;
+};
+
+const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = (
+  config,
+  options
+) => {
   const codegenConfigs = isGraphqlProjectsConfigTypes(config)
     ? Object.values(config.projects).flatMap(project => project.extensions?.codegen ?? [])
     : isGraphqlConfigTypes(config)
       ? [config.extensions?.codegen]
       : [config];
-  const generateSet = codegenConfigs
-    .filter((config): config is GraphqlCodegenTypes => Boolean(config?.generates))
-    .flatMap(config => Object.values(config.generates));
+  const generateConfigs = codegenConfigs.filter((config): config is GraphqlCodegenTypes => Boolean(config?.generates));
+  const generateSet = generateConfigs.flatMap(config => Object.values(config.generates));
+
+  const outputs = generateConfigs
+    .flatMap(config => Object.entries(config.generates))
+    .map(([output, outputConfig]) =>
+      toProductionEntry(join(options.configFileDir, getOutputPattern(output, outputConfig)))
+    );
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 
@@ -84,11 +118,14 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
       return [toDependency(getPluginPackageName(plugin))];
     });
 
-  return [...presets, ...flatPlugins, ...nestedPlugins].map(id => (typeof id === 'string' ? toDependency(id) : id));
+  return [...presets, ...flatPlugins, ...nestedPlugins, ...outputs].map(id =>
+    typeof id === 'string' ? toDependency(id) : id
+  );
 };
 
 const plugin: Plugin = {
   title,
+  args,
   enablers,
   isEnabled,
   packageJsonPath,

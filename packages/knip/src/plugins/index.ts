@@ -2,14 +2,17 @@
 import { default as angular } from './angular/index.ts';
 import { default as astro } from './astro/index.ts';
 import { default as astroDb } from './astro-db/index.ts';
+import { default as astroMarkdoc } from './astro-markdoc/index.ts';
 import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
+import { default as borp } from './borp/index.ts';
 import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
 import { default as capacitor } from './capacitor/index.ts';
+import { default as catalyst } from './catalyst/index.ts';
 import { default as changelogen } from './changelogen/index.ts';
 import { default as changelogithub } from './changelogithub/index.ts';
 import { default as changesets } from './changesets/index.ts';
@@ -25,11 +28,16 @@ import { default as dependencyCruiser } from './dependency-cruiser/index.ts';
 import { default as docusaurus } from './docusaurus/index.ts';
 import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
+import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
+import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
+import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
+import { default as fast } from './fast/index.ts';
+import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
 import { default as githubAction } from './github-action/index.ts';
 import { default as githubActions } from './github-actions/index.ts';
@@ -42,18 +50,24 @@ import { default as jest } from './jest/index.ts';
 import { default as karma } from './karma/index.ts';
 import { default as knex } from './knex/index.ts';
 import { default as ladle } from './ladle/index.ts';
+import { default as laravelVitePlugin } from './laravel-vite-plugin/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
 import { default as lintStaged } from './lint-staged/index.ts';
 import { default as linthtml } from './linthtml/index.ts';
+import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
+import { default as lunaria } from './lunaria/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
+import { default as marko } from './marko/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
+import { default as mise } from './mise/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
 import { default as msw } from './msw/index.ts';
+import { default as nanoSpawn } from './nano-spawn/index.ts';
 import { default as nanoStaged } from './nano-staged/index.ts';
 import { default as nest } from './nest/index.ts';
 import { default as netlify } from './netlify/index.ts';
@@ -66,14 +80,19 @@ import { default as nodeModulesInspector } from './node-modules-inspector/index.
 import { default as nodemon } from './nodemon/index.ts';
 import { default as npmPackageJsonLint } from './npm-package-json-lint/index.ts';
 import { default as nuxt } from './nuxt/index.ts';
+import { default as nuxtjsI18n } from './nuxtjs-i18n/index.ts';
 import { default as nx } from './nx/index.ts';
 import { default as nyc } from './nyc/index.ts';
 import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
+import { default as openclaw } from './openclaw/index.ts';
+import { default as orval } from './orval/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
+import { default as pandaCss } from './panda-css/index.ts';
 import { default as parcel } from './parcel/index.ts';
 import { default as payload } from './payload/index.ts';
+import { default as pino } from './pino/index.ts';
 import { default as playwright } from './playwright/index.ts';
 import { default as playwrightCt } from './playwright-ct/index.ts';
 import { default as playwrightTest } from './playwright-test/index.ts';
@@ -81,12 +100,16 @@ import { default as plop } from './plop/index.ts';
 import { default as pm2 } from './pm2/index.ts';
 import { default as pnpm } from './pnpm/index.ts';
 import { default as postcss } from './postcss/index.ts';
+import { default as preCommit } from './pre-commit/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
+import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
+import { default as railway } from './railway/index.ts';
 import { default as raycast } from './raycast/index.ts';
 import { default as reactCosmos } from './react-cosmos/index.ts';
+import { default as reactEmail } from './react-email/index.ts';
 import { default as reactNative } from './react-native/index.ts';
 import { default as reactRouter } from './react-router/index.ts';
 import { default as relay } from './relay/index.ts';
@@ -102,6 +125,7 @@ import { default as rstest } from './rstest/index.ts';
 import { default as sanity } from './sanity/index.ts';
 import { default as semanticRelease } from './semantic-release/index.ts';
 import { default as sentry } from './sentry/index.ts';
+import { default as serverlessFramework } from './serverless-framework/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
 import { default as sst } from './sst/index.ts';
@@ -111,6 +135,7 @@ import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
 import { default as stylelint } from './stylelint/index.ts';
 import { default as svelte } from './svelte/index.ts';
+import { default as sveltejsPackage } from './sveltejs-package/index.ts';
 import { default as sveltekit } from './sveltekit/index.ts';
 import { default as svgo } from './svgo/index.ts';
 import { default as svgr } from './svgr/index.ts';
@@ -119,18 +144,37 @@ import { default as syncpack } from './syncpack/index.ts';
 import { default as tailwind } from './tailwind/index.ts';
 import { default as tanstackRouter } from './tanstack-router/index.ts';
 import { default as taskfile } from './taskfile/index.ts';
+import { default as tauri } from './tauri/index.ts';
+import { default as temporal } from './temporal/index.ts';
+import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
+import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
+import { default as turbo } from './turbo/index.ts';
 import { default as typedoc } from './typedoc/index.ts';
 import { default as typescript } from './typescript/index.ts';
+import { default as typescriptContentMapper } from './typescript-content-mapper/index.ts';
 import { default as unbuild } from './unbuild/index.ts';
 import { default as unocss } from './unocss/index.ts';
+import { default as unpluginAutoImport } from './unplugin-auto-import/index.ts';
+import { default as unpluginIcons } from './unplugin-icons/index.ts';
+import { default as unpluginVueComponents } from './unplugin-vue-components/index.ts';
+import { default as unpluginVueI18n } from './unplugin-vue-i18n/index.ts';
+import { default as unpluginVueMarkdown } from './unplugin-vue-markdown/index.ts';
+import { default as unpluginVueRouter } from './unplugin-vue-router/index.ts';
+import { default as varlock } from './varlock/index.ts';
+import { default as vercel } from './vercel/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
 import { default as vite } from './vite/index.ts';
+import { default as vitePluginPages } from './vite-plugin-pages/index.ts';
+import { default as vitePluginPwa } from './vite-plugin-pwa/index.ts';
+import { default as vitePluginVueLayoutsNext } from './vite-plugin-vue-layouts-next/index.ts';
+import { default as vitePlus } from './vite-plus/index.ts';
+import { default as vitePwaAssetsGenerator } from './vite-pwa-assets-generator/index.ts';
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
 import { default as vue } from './vue/index.ts';
@@ -138,6 +182,7 @@ import { default as webdriverIo } from './webdriver-io/index.ts';
 import { default as webpack } from './webpack/index.ts';
 import { default as wireit } from './wireit/index.ts';
 import { default as wrangler } from './wrangler/index.ts';
+import { default as wxt } from './wxt/index.ts';
 import { default as xo } from './xo/index.ts';
 import { default as yarn } from './yarn/index.ts';
 import { default as yorkie } from './yorkie/index.ts';
@@ -147,14 +192,17 @@ export const Plugins = {
   angular,
   astro,
   'astro-db': astroDb,
+  'astro-markdoc': astroMarkdoc,
   'astro-og-canvas': astroOgCanvas,
   ava,
   babel,
   biome,
+  borp,
   bumpp,
   bun,
   c8,
   capacitor,
+  catalyst,
   changelogen,
   changelogithub,
   changesets,
@@ -170,11 +218,16 @@ export const Plugins = {
   docusaurus,
   dotenv,
   drizzle,
+  'electron-vite': electronVite,
   eleventy,
+  esbuild,
   eslint,
+  eve,
   execa,
   expo,
   'expressive-code': expressiveCode,
+  fast,
+  fumadocs,
   gatsby,
   'github-action': githubAction,
   'github-actions': githubActions,
@@ -187,18 +240,24 @@ export const Plugins = {
   karma,
   knex,
   ladle,
+  'laravel-vite-plugin': laravelVitePlugin,
   lefthook,
   'lint-staged': lintStaged,
   linthtml,
+  lit,
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
+  lunaria,
   markdownlint,
+  marko,
   mdx,
   mdxlint,
   metro,
+  mise,
   mocha,
   moonrepo,
   msw,
+  'nano-spawn': nanoSpawn,
   'nano-staged': nanoStaged,
   nest,
   netlify,
@@ -211,14 +270,19 @@ export const Plugins = {
   nodemon,
   'npm-package-json-lint': npmPackageJsonLint,
   nuxt,
+  'nuxtjs-i18n': nuxtjsI18n,
   nx,
   nyc,
   oclif,
   'openapi-ts': openapiTs,
+  openclaw,
+  orval,
   oxfmt,
   oxlint,
+  'panda-css': pandaCss,
   parcel,
   payload,
+  pino,
   playwright,
   'playwright-ct': playwrightCt,
   'playwright-test': playwrightTest,
@@ -226,12 +290,16 @@ export const Plugins = {
   pm2,
   pnpm,
   postcss,
+  'pre-commit': preCommit,
   preconstruct,
   prettier,
   prisma,
+  quasar,
   qwik,
+  railway,
   raycast,
   'react-cosmos': reactCosmos,
+  'react-email': reactEmail,
   'react-native': reactNative,
   'react-router': reactRouter,
   relay,
@@ -247,6 +315,7 @@ export const Plugins = {
   sanity,
   'semantic-release': semanticRelease,
   sentry,
+  'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
   sst,
@@ -256,6 +325,7 @@ export const Plugins = {
   stryker,
   stylelint,
   svelte,
+  'sveltejs-package': sveltejsPackage,
   sveltekit,
   svgo,
   svgr,
@@ -264,18 +334,37 @@ export const Plugins = {
   tailwind,
   'tanstack-router': tanstackRouter,
   taskfile,
+  tauri,
+  temporal,
+  textlint,
   travis,
   'ts-node': tsNode,
+  tsd,
   tsdown,
   tsup,
   tsx,
+  turbo,
   typedoc,
   typescript,
+  'typescript-content-mapper': typescriptContentMapper,
   unbuild,
   unocss,
+  'unplugin-auto-import': unpluginAutoImport,
+  'unplugin-icons': unpluginIcons,
+  'unplugin-vue-components': unpluginVueComponents,
+  'unplugin-vue-i18n': unpluginVueI18n,
+  'unplugin-vue-markdown': unpluginVueMarkdown,
+  'unplugin-vue-router': unpluginVueRouter,
+  varlock,
+  vercel,
   'vercel-og': vercelOg,
   vike,
   vite,
+  'vite-plugin-pages': vitePluginPages,
+  'vite-plugin-pwa': vitePluginPwa,
+  'vite-plugin-vue-layouts-next': vitePluginVueLayoutsNext,
+  'vite-plus': vitePlus,
+  'vite-pwa-assets-generator': vitePwaAssetsGenerator,
   vitepress,
   vitest,
   vue,
@@ -283,6 +372,7 @@ export const Plugins = {
   webpack,
   wireit,
   wrangler,
+  wxt,
   xo,
   yarn,
   yorkie,

@@ -13,7 +13,7 @@ import {
 import { getErrorMessage } from '@knip/mcp/tools';
 import { KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import * as vscode from 'vscode';
-import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
+import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import { collectDependencySnippets } from './collect-dependency-hover-snippets.js';
 import { collectExportHoverSnippets } from './collect-export-hover-snippets.js';
 import { renderDependencyHover } from './render-dependency-hover.js';
@@ -26,13 +26,27 @@ const require = createRequire(import.meta.url);
 
 /**
  * @import { ExtensionContext, LogOutputChannel, WorkspaceFolder } from 'vscode';
- * @import { ServerOptions, LanguageClientOptions } from 'vscode-languageclient/node.js';
+ * @import { ServerOptions, LanguageClientOptions } from 'vscode-languageclient/node';
  * @import { PackageJson } from 'knip/session';
  * @import { TreeData } from './tree-view-base.js';
  */
 
 /** @param {string} value */
 const toPosix = value => value.split(path.sep).join(path.posix.sep);
+
+/**
+ * Directory Knip runs in (its cwd), from the `knip.cwd` setting. Absolute, or
+ * relative to the VS Code workspace folder; defaults to the folder itself.
+ * @param {import('vscode').WorkspaceFolder} folder
+ * @returns {string}
+ */
+function resolveKnipCwd(folder) {
+  const cwd = vscode.workspace.getConfiguration('knip', folder.uri).get('cwd', '');
+  const base = folder.uri.fsPath;
+  const trimmed = typeof cwd === 'string' ? cwd.trim() : '';
+  if (!trimmed) return base;
+  return path.isAbsolute(trimmed) ? path.normalize(trimmed) : path.resolve(base, trimmed);
+}
 
 export class Extension {
   /** @type {Extension | undefined} */
@@ -145,7 +159,18 @@ export class Extension {
       }
     }
 
-    this.#outputChannel.info(`Starting Knip Language Server for ${folder.name}`);
+    const cwd = resolveKnipCwd(folder);
+    if (cwd !== folder.uri.fsPath && !existsSync(path.join(cwd, 'package.json'))) {
+      this.#outputChannel.warn(
+        `knip.cwd for ${folder.name} resolved to ${cwd}, but no package.json is there — Knip will fail. Check the "knip.cwd" setting.`
+      );
+    }
+
+    this.#outputChannel.info(
+      cwd === folder.uri.fsPath
+        ? `Starting Knip Language Server for ${folder.name}`
+        : `Starting Knip Language Server for ${folder.name} (cwd: ${cwd})`
+    );
 
     const runtime = config.get('nodeRuntimePath', '') || 'node';
 
@@ -167,7 +192,7 @@ export class Extension {
         fileEvents: [vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'))],
       },
       workspaceFolder: folder,
-      initializationOptions: { config },
+      initializationOptions: { config, cwd },
       outputChannel: this.#outputChannel,
       outputChannelName: 'Knip',
     };
@@ -217,8 +242,18 @@ export class Extension {
   }
 
   #logManagedWorkspaces() {
-    const names = [...this.#clients.keys()].map(uri => fileURLToPath(uri));
-    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${names.join(', ')}`);
+    const parts = [];
+    for (const key of this.#clients.keys()) {
+      const folder = vscode.workspace.workspaceFolders?.find(f => f.uri.toString() === key);
+      if (folder) {
+        const cwd = resolveKnipCwd(folder);
+        const ws = folder.uri.fsPath;
+        parts.push(cwd === ws ? cwd : `${ws} (Knip cwd: ${cwd})`);
+      } else {
+        parts.push(vscode.Uri.parse(key).fsPath);
+      }
+    }
+    this.#outputChannel.info(`Managing ${this.#clients.size} workspace(s): ${parts.join(', ')}`);
   }
 
   /**
@@ -226,6 +261,10 @@ export class Extension {
    * @param {string} startDir - Starting directory path
    * @returns {string} Package manager name ('pnpm', 'yarn', or 'npm')
    * @throws {Error} If no package manager can be detected
+   */
+  /**
+   * @param {string} startDir
+   * @returns {'npm' | 'pnpm' | 'yarn'}
    */
   #detectPackageManager(startDir) {
     let dir = startDir;
@@ -263,7 +302,7 @@ export class Extension {
         try {
           await client.sendRequest(REQUEST_START);
         } catch (error) {
-          vscode.window.showErrorMessage((error?.message || error).toString());
+          vscode.window.showErrorMessage(error instanceof Error ? error.message : String(error));
         }
       }
     });
@@ -273,9 +312,9 @@ export class Extension {
       if (!client) return;
       try {
         this.#packageJsonCache = undefined;
-        await client.sendRequest(REQUEST_RESTART);
+        await client.restart();
       } catch (error) {
-        vscode.window.showErrorMessage((error?.message || error).toString());
+        vscode.window.showErrorMessage(error instanceof Error ? error.message : String(error));
       }
     });
 
@@ -450,7 +489,7 @@ export class Extension {
 
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
     if (!folder) return null;
-    const root = toPosix(folder.uri.fsPath);
+    const root = toPosix(resolveKnipCwd(folder));
 
     if (path.basename(document.uri.fsPath) === 'package.json') {
       if (!config.get('editor.dependencies.hover.enabled', true)) return null;
@@ -603,12 +642,14 @@ export class Extension {
    * @returns {Promise<boolean>}
    */
   async #hasKnipConfig(folder) {
-    const config = vscode.workspace.getConfiguration('knip');
+    const config = vscode.workspace.getConfiguration('knip', folder.uri);
     const configFile = config.get('configFilePath', '');
     const locations = configFile ? [configFile] : KNIP_CONFIG_LOCATIONS;
 
+    const rootUri = vscode.Uri.file(resolveKnipCwd(folder));
+
     for (const location of locations) {
-      const candidate = vscode.Uri.joinPath(folder.uri, location);
+      const candidate = vscode.Uri.joinPath(rootUri, location);
       try {
         await vscode.workspace.fs.stat(candidate);
         return true;
@@ -642,19 +683,24 @@ export class Extension {
     });
 
     const showReferences = vscode.commands.registerCommand('knip.showReferences', (uri, position, importLocations) => {
-      const locations = importLocations.map(location => {
-        const pos = new vscode.Position(location.line ? location.line - 1 : 0, location.col ? location.col - 1 : 0);
-        return new vscode.Location(vscode.Uri.file(location.filePath), pos);
-      });
+      const locations = importLocations.map(
+        /** @param {{ filePath: string; line?: number; col?: number }} location */
+        location => {
+          const pos = new vscode.Position(location.line ? location.line - 1 : 0, location.col ? location.col - 1 : 0);
+          return new vscode.Location(vscode.Uri.file(location.filePath), pos);
+        }
+      );
       const vsPosition = new vscode.Position(position.line, position.character);
       vscode.commands.executeCommand('editor.action.showReferences', vscode.Uri.parse(uri), vsPosition, locations);
     });
 
     const expandAll = vscode.commands.registerCommand('knip.expandAll', () => {
+      /** @param {import('./tree-view-base.js').BaseTreeViewProvider | undefined} provider */
       const expand = async provider => {
         const treeViewLocal = provider?.treeView;
         if (!treeViewLocal) return;
 
+        /** @param {import('./tree-view-base.js').TreeViewItem} element */
         const expandNode = async element => {
           try {
             await treeViewLocal.reveal(element, { expand: true, focus: false, select: false });

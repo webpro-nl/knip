@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "location": "docs/**/*.md",
+      "pattern": "y",
+      "type": "universal"
+    }
+  ],
+  "renderer": "./starlight-renderer.ts"
+}

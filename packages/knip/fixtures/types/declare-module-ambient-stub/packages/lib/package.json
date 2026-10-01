@@ -1,0 +1,10 @@
+{
+  "name": "@stub/lib",
+  "version": "1.0.0",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./src/index.ts"
+    }
+  }
+}

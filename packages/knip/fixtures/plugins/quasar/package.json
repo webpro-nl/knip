@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/quasar",
+  "scripts": {
+    "dev": "quasar dev"
+  },
+  "dependencies": {
+    "quasar": "*"
+  },
+  "devDependencies": {
+    "@quasar/app-vite": "*"
+  }
+}

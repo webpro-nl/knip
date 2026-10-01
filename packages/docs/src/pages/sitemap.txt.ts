@@ -21,6 +21,6 @@ for (const [filePath] of Object.entries(plugins)) {
 
 export async function GET(context: APIContext) {
   const baseUrl = context.site?.href;
-  const documents = [...pages].map(entry => new URL(entry, baseUrl).href).sort();
+  const documents = Array.from(pages, entry => new URL(entry, baseUrl).href).sort();
   return new Response(documents.join('\n'));
 }

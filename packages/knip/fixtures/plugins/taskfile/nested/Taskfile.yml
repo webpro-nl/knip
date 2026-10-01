@@ -4,5 +4,5 @@ tasks:
   nested-task:
     cmd: node ../scripts/nested.js
   nested-binary:
-    cmd: npx some-nonexistent-binary
+    cmd: npx --no some-nonexistent-binary
 

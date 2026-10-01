@@ -1,0 +1,92 @@
+# Legacy pipeline: knip v5 has typescript and @types/node as peer dependencies
+
+name: Tests (against typescript@5.0.4 in Node.js v20)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: &paths # All package sources (knip lints across the monorepo and analyzes the repo itself)
+      - 'packages/**'
+      - '!packages/docs/**/*.md'
+      - '!packages/docs/**/*.mdx'
+      # Root workspace / dependency / lint / knip-on-self config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'oxlint.config.ts'
+      - '.oxfmtrc.json'
+      - 'knip.json'
+      # This workflow file
+      - '.github/workflows/ci-legacy-5.0.4.yml'
+  push:
+    branches:
+      - '**'
+    paths: *paths
+
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 20
+          - 22
+        exclude:
+          - os: windows-latest
+            node: 20
+        include:
+          - os: windows-latest
+            node: 20
+            shard: 1/3
+          - os: windows-latest
+            node: 20
+            shard: 2/3
+          - os: windows-latest
+            node: 20
+            shard: 3/3
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} (Node v${{ matrix.node }})${{ matrix.shard && format(' (shard {0})', matrix.shard) || '' }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          version: 10
+          package_json_file: packages/knip/package.json
+      - run: echo "manage-package-manager-versions=false" >> .npmrc
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build knip
+        run: pnpm run build
+        working-directory: packages/knip
+      - name: Install earliest supported peer dependencies
+        run: pnpm add typescript@5.0.4 @types/node@20 --config.trustPolicy=allow
+        working-directory: packages/knip
+      - name: Type-check against TS 5.0.4
+        run: |
+          node -e "const f=require('fs'),p='tsconfig.json',c=JSON.parse(f.readFileSync(p,'utf8'));delete c.compilerOptions.rewriteRelativeImportExtensions;delete c.compilerOptions.erasableSyntaxOnly;c.include.push('./typescript-5.0.d.ts');f.writeFileSync(p,JSON.stringify(c,null,2)+'\n')"
+          pnpm tsc --noEmit
+        working-directory: packages/knip
+      - name: Test knip
+        run: pnpm test --runtime node --smoke --shard=${{ matrix.shard || '1/1' }}
+        working-directory: packages/knip
+      - name: Run knip
+        run: ./packages/knip/bin/knip.js --reporter github-actions
+      - name: Run knip in strict mode
+        run: ./packages/knip/bin/knip.js --production --strict

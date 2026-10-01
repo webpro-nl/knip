@@ -22,9 +22,11 @@ export type IdToNsToFileMap = Map<Identifier, Map<NamespaceOrAlias, Set<FilePath
 export type ImportMaps = {
   /** Usage references cq. property-access patterns on imports ("default", "named", "NS.member", "alias.sub", "enum.member", etc.); NOT mere import usage */
   refs: References;
+  /** Identifiers fully consumed via `Object.{keys,values,entries,getOwnPropertyNames}(id)` — provably uses all members. */
+  enumerated: References | undefined;
   /** Identifiers imported from this file */
   import: IdToFileMap;
-  /** Identifiers imported with alias (id → alias → files) */
+  /** Identifiers imported with alias (id → alias → files) */
   importAs: IdToNsToFileMap;
   /** Namespace imports of this file */
   importNs: IdToFileMap;
@@ -42,7 +44,10 @@ export interface Import extends Position {
   readonly specifier: string;
   readonly filePath: string | undefined;
   readonly identifier: string | undefined;
+  readonly alias: string | undefined;
   readonly isTypeOnly: boolean;
+  readonly modifiers: number;
+  readonly jsDocTags: Tags | undefined;
 }
 
 export interface ExternalRef {
@@ -52,13 +57,17 @@ export interface ExternalRef {
 
 export interface Export extends Position {
   readonly identifier: Identifier;
+  readonly binding: Identifier;
   readonly type: SymbolType;
   readonly members: ExportMember[];
   jsDocTags: Tags;
   hasRefsInFile: boolean;
+  /** Kept alive by an in-module runtime registration (custom element `@customElement`/`customElements.define`), not by an import. */
+  isRegistered: boolean;
   referencedIn: Set<string> | undefined;
   readonly fixes: Fixes;
   isReExport: boolean;
+  isBindingReExport: boolean;
 }
 
 export interface ExportMember extends Position {
@@ -70,11 +79,12 @@ export interface ExportMember extends Position {
   hasRefsInFile: boolean;
 }
 
-export type ExportMap = Map<Identifier, Export>;
+type ExportMap = Map<Identifier, Export>;
 
 export type Imports = Set<Import>;
 
 export type FileNode = {
+  skipExports: boolean;
   imports: {
     readonly internal: ImportMap;
     readonly external: Set<Import>;
@@ -87,9 +97,18 @@ export type FileNode = {
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;
   scripts: Set<string>;
+  importGlobs: ImportGlob[];
   /** Aggregation of other files importing this file's exports */
   importedBy: undefined | ImportMaps;
   internalImportCache: undefined | ImportMap;
 };
+
+export interface ImportGlob {
+  patterns: string[];
+  base?: string;
+  cwd?: string;
+  filter?: RegExp;
+  analyzeExports?: boolean;
+}
 
 export type ModuleGraph = Map<FilePath, FileNode>;

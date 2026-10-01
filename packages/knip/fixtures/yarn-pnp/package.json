@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/yarn-pnp",
+  "private": true,
+  "packageManager": "yarn@4.18.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "host-with-hidden-manifest": "workspace:*",
+    "isarray": "2.0.5",
+    "isarray-alias": "npm:isarray@2.0.5",
+    "peer-package": "workspace:*"
+  }
+}

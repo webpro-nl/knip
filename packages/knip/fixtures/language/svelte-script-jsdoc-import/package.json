@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/svelte-script-jsdoc-import",
+  "type": "module",
+  "knip": {
+    "entry": ["src/App.svelte"],
+    "ignoreDependencies": ["svelte"]
+  },
+  "dependencies": {
+    "remote-config": "*"
+  },
+  "devDependencies": {
+    "svelte": "*"
+  }
+}

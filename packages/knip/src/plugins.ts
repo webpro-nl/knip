@@ -11,7 +11,7 @@ const { values } = parseArgs({ strict: false, options: { performance: { type: 'b
 
 const isEnabled = !!values.performance;
 
-const timerifyMethods = ['resolve', 'resolveConfig', 'resolveAST'] as const;
+const timerifyMethods = ['resolve', 'resolveConfig', 'resolveFromAST'] as const;
 
 const PluginEntries = Object.entries(PMap) as Entries;
 

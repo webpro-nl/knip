@@ -8,12 +8,11 @@ const logIssueRecord = (issues: Issue[], cwd: string) => {
 };
 
 export default ({ report, issues, isShowProgress, cwd }: ReporterOptions) => {
-  const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   let totalIssues = 0;
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
-      const title = reportMultipleGroups && getIssueTypeTitle(reportType);
+      const title = getIssueTypeTitle(reportType);
       const issuesForType =
         reportType === 'duplicates'
           ? flattenIssues(issues[reportType])

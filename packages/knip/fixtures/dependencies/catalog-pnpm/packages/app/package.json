@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/catalog-pnpm__app",
+  "dependencies": {
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

@@ -2,25 +2,54 @@ name: Publish preview & run ecosystem tests
 
 on:
   workflow_dispatch:
+    inputs:
+      update_snapshots:
+        description: Regenerate ecosystem snapshots and upload as artifact
+        type: boolean
+        default: false
   pull_request:
+    paths: &paths # Sources of the three packages published to pkg.pr.new
+      - 'packages/knip/**'
+      - '!packages/knip/test/**'
+      - '!packages/knip/fixtures/**'
+      - 'packages/language-server/**'
+      - 'packages/mcp-server/**'
+      # Root workspace / dependency config
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      # This workflow and its support files
+      - '.github/workflows/integration.yml'
+      - '.github/workflows/scripts/**'
+      - '.github/workflows/snapshots/**'
   push:
     branches:
       - '**'
-    tags:
-      - '!**'
+    paths: *paths
 
-permissions:
-  issues: write
+# Automatically cancel in-progress actions on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   publish:
     name: Build and publish Knip
+    if: ${{ github.repository_owner == 'webpro-nl' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # comment on referenced issues
     outputs:
       sha: ${{ steps.publish.outputs.sha }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
       - run: pnpm run build
@@ -30,7 +59,7 @@ jobs:
           pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'
       - name: Comment on referenced issues
         if: github.event_name == 'push'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const sha = '${{ steps.publish.outputs.sha }}';
@@ -56,8 +85,16 @@ jobs:
     name: Run Knip in ${{ matrix.project.name }}
     needs: publish
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       PKG_URL: https://pkg.pr.new/knip@${{ needs.publish.outputs.sha }}
+      SNAP: ${{ github.workspace }}/.github/workflows/scripts/snap.sh
+      UPDATE_SNAPSHOTS: ${{ inputs.update_snapshots && '1' || '' }}
+      SNAPSHOT_OUT_DIR: /tmp/snapshot-updates
+      PNPM_CONFIG_MINIMUM_RELEASE_AGE: '0'
+      PNPM_CONFIG_TRUST_POLICY: 'off'
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: 'false'
     strategy:
       fail-fast: false
       matrix:
@@ -66,36 +103,35 @@ jobs:
             repo: birchill/10ten-ja-reader
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              bash $SNAP 10ten-ja-reader -- pnpm dlx $PKG_URL
 
           - name: argos
             repo: argos-ci/argos
-            commands: |
+            commands: | # build required: knexfile.js requires ./dist at config load time
               pnpm install
               pnpm build
               pnpm add -D -w $PKG_URL
-              pnpm run knip
+              bash $SNAP argos -- pnpm run knip
 
           - name: astro
             repo: withastro/astro
             commands: |
-              pnpm install --config.minimumReleaseAge=0
-              pnpm build
-              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
-              pnpm knip --fix
+              pnpm install
+              pnpm add -D -w $PKG_URL
+              bash $SNAP astro -- pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
             commands: |
               pnpm install
               pnpm add -D $PKG_URL
-              pnpm lint:knip
+              bash $SNAP create-typescript-app -- pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
             commands: |
               pnpm install
-              pnpm dlx $PKG_URL
+              bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PKG_URL
 
           - name: eslint
             repo: eslint/eslint
@@ -103,15 +139,15 @@ jobs:
               npm install
               npm install --prefix docs
               npm install -D $PKG_URL
-              npm run lint:unused -- --cache
-              npm run lint:unused -- --cache
+              bash $SNAP eslint -- npm run lint:unused -- --cache
+              npm run lint:unused -- --cache --no-exit-code
 
           - name: mocha
             repo: mochajs/mocha
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npm run lint:knip
+              bash $SNAP mocha -- npm run lint:knip
 
           - name: InvokeAI
             repo: invoke-ai/InvokeAI
@@ -120,17 +156,17 @@ jobs:
               cd invokeai/frontend/web
               pnpm install
               pnpm add -D $PKG_URL
-              bunx --bun knip --tags=-knipignore
-              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format
-              bunx --bun knip --tags=-knipignore --production
+              bash $SNAP InvokeAI -- bunx --bun knip --tags=-knipignore
+              bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format --no-exit-code
+              bash $SNAP InvokeAI-prod -- bunx --bun knip --tags=-knipignore --production
 
           - name: npmx.dev
             repo: npmx-dev/npmx.dev
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm knip
-              pnpm knip --production --exclude dependencies --fix
+              bash $SNAP npmx.dev -- pnpm knip
+              bash $SNAP npmx.dev-prod -- pnpm knip --production --exclude dependencies --fix
 
           - name: prettier
             repo: prettier/prettier
@@ -141,77 +177,99 @@ jobs:
               yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
               yarn --cwd website
               yarn add -D knip@$PKG_URL
-              yarn knip
+              bash $SNAP prettier -- yarn knip
 
           - name: query
             repo: TanStack/query
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
-              pnpm test:knip --cache
-              pnpm test:knip --cache
+              bash $SNAP query -- pnpm test:knip --cache
+              pnpm test:knip --cache --no-exit-code
 
           - name: rolldown
             repo: rolldown/rolldown
             commands: |
               pnpm install
               pnpm add -D -w knip@$PKG_URL
-              pnpm knip
+              bash $SNAP rolldown -- pnpm knip
 
           - name: sanity
             repo: sanity-io/sanity
             commands: |
-              pnpm install --no-frozen-lockfile --config.minimumReleaseAge=0
-              pnpm add -D -w $PKG_URL --config.minimumReleaseAge=0
-              pnpm knip --exclude duplicates
+              pnpm install --no-frozen-lockfile
+              pnpm add -D -w $PKG_URL
+              bash $SNAP sanity -- pnpm knip --exclude duplicates
 
           - name: sentry
             repo: getsentry/sentry
             commands: |
               pnpm install
-              pnpm add -D $PKG_URL
-              pnpm run knip --fix
-              pnpm run knip:prod
+              pnpm add -D -w $PKG_URL
+              bash $SNAP sentry -- pnpm run knip --fix
+              bash $SNAP sentry-prod -- pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
             commands: |
-              pnpm install --no-frozen-lockfile
-              pnpm dlx $PKG_URL
+              pnpm install --no-frozen-lockfile --ignore-scripts
+              bash $SNAP slonik -- pnpm dlx $PKG_URL
 
           - name: TypeScript
             repo: microsoft/TypeScript
+            ref: b465fdbfe175304d9b977da137b2c178ae1091d3 # Last passing commit before the TypeScript 7 migration
             commands: |
               npm ci
               npm install -D $PKG_URL
-              npm run knip
+              bash $SNAP TypeScript -- npx knip
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Check out ${{ matrix.project.repo }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: ${{ matrix.project.repo }}
+          ref: ${{ matrix.project.ref }}
           path: ${{ matrix.project.name }}
           sparse-checkout: ${{ matrix.project.sparse-checkout }}
 
-      - name: Apply patch if exists
-        working-directory: ${{ matrix.project.name }}
-        run: |
-          PATCH_FILE="${{ github.workspace }}/.github/workflows/patches/${{ matrix.project.name }}.patch"
-          [ -f "$PATCH_FILE" ] && git apply --verbose -C0 --ignore-whitespace "$PATCH_FILE" || true
-
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
 
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
       - name: Run Knip in ${{ matrix.project.repo }}
         working-directory: ${{ matrix.project.name }}
         run: |
           set -x
           ${{ matrix.project.commands }}
+
+      - name: Upload updated snapshots
+        if: ${{ inputs.update_snapshots }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: snapshots-${{ matrix.project.name }}
+          path: /tmp/snapshot-updates/
+          if-no-files-found: ignore
+
+  aggregate-snapshots:
+    name: Aggregate updated snapshots
+    if: ${{ inputs.update_snapshots }}
+    needs: integration
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: snapshots-*
+          path: snapshots/
+          merge-multiple: true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: snapshots
+          path: snapshots/

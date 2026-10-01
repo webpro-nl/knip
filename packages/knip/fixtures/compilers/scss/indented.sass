@@ -1,0 +1,10 @@
+@use "./mixins"
+@use './variables' as vars
+@use "./breakpoints" as bp
+@import "./legacy"
+@import "./animations"
+@forward "./utils"
+
+.indented
+  color: vars.$secondary
+  max-width: bp.$tablet

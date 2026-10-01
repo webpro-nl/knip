@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/plugin-config-load-error",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}

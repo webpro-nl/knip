@@ -2,7 +2,7 @@ import type { Expression, ImportExpression, VariableDeclarator } from 'oxc-parse
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
-import { getStringValue, isStringLiteral } from './helpers.ts';
+import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
 
 export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
@@ -30,14 +30,14 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                 : undefined;
           const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
           const alias = localName !== importedName ? localName : undefined;
-          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.DYNAMIC);
         } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
-          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.DYNAMIC);
         }
       }
     } else if (node.id.type === 'Identifier') {
       if (init.type === 'AwaitExpression') {
-        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.NONE);
+        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC);
         const resolved = s.resolveModule(specifier, s.filePath);
         if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
           s.localImportMap.set(node.id.name, {
@@ -48,10 +48,24 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
           });
         }
       } else {
-        s.addImport(specifier, undefined, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.OPAQUE);
+        s.addImport(
+          specifier,
+          undefined,
+          undefined,
+          undefined,
+          importExpr.source.start,
+          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+        );
       }
     } else {
-      s.addImport(specifier, undefined, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.OPAQUE);
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        importExpr.source.start,
+        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+      );
     }
     return;
   }
@@ -164,9 +178,16 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
             }
           }
         } else if (binding?.type === 'Identifier') {
-          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.NONE);
+          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.DYNAMIC);
         } else {
-          s.addImport(specifier, undefined, undefined, undefined, imp.source.start, IMPORT_FLAGS.SIDE_EFFECTS);
+          s.addImport(
+            specifier,
+            undefined,
+            undefined,
+            undefined,
+            imp.source.start,
+            IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.SIDE_EFFECTS
+          );
         }
       }
     }
@@ -250,7 +271,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
         if (internalImport) {
-          if (_import.isDynamicImport) {
+          if (_import.isDynamicImport && memberPath.length === 0) {
             for (const prop of node.id.properties) {
               if (prop.type === 'Property' && prop.key?.type === 'Identifier') {
                 addValue(internalImport.import, prop.key.name, s.filePath);
@@ -258,13 +279,14 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                 addValue(internalImport.import, OPAQUE, s.filePath);
               }
             }
-          } else {
+          } else if (!_import.isDynamicImport) {
             const ns = _import.isNamespace ? rootName : _import.importedName;
             const prefix = [ns, ...memberPath].join('.');
+            const isNsRoot = _import.isNamespace && memberPath.length === 0;
             for (const prop of node.id.properties) {
               if (prop.type === 'Property' && prop.key?.type === 'Identifier') {
                 internalImport.refs.add(`${prefix}.${prop.key.name}`);
-              } else if (prop.type === 'RestElement') {
+              } else if (prop.type === 'RestElement' && isNsRoot) {
                 addValue(internalImport.import, OPAQUE, s.filePath);
               }
             }
@@ -298,6 +320,13 @@ export function handleImportExpression(node: ImportExpression, s: WalkState) {
   if (s.handledImportExpressions.has(node.start)) return;
   const specifier = getStringValue(node.source);
   if (specifier) {
-    s.addImport(specifier, undefined, undefined, undefined, node.source.start, IMPORT_FLAGS.OPAQUE);
+    s.addImport(
+      specifier,
+      undefined,
+      undefined,
+      undefined,
+      node.source.start,
+      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+    );
   }
 }

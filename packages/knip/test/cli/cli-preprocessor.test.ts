@@ -7,6 +7,16 @@ const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
 
 const cwd = resolve('fixtures/cli-preprocessor');
 
+skipIfBun('knip with package preprocessor in config', () => {
+  const { stdout } = exec('knip', { cwd });
+  assert.equal(stdout, 'hi from pkg preprocessor');
+});
+
+skipIfBun('knip --strict with package preprocessor in config', () => {
+  const { stdout } = exec('knip --strict', { cwd });
+  assert.equal(stdout, 'hi from pkg preprocessor');
+});
+
 test('knip --preprocessor ./index.js', () => {
   const { stdout } = exec('knip --preprocessor ./index.js', { cwd });
   assert.equal(stdout, 'hi from js preprocessor');
@@ -35,4 +45,9 @@ skipIfBun(`knip --preprocessor with-args --preprocessor-options {"food":"cupcake
 test('knip --preprocessor {cwd}/index.js', () => {
   const { stdout } = exec(`knip --preprocessor ${cwd}/index.js`, { cwd });
   assert.equal(stdout, 'hi from js preprocessor');
+});
+
+test('knip --preprocessor ./chain-async.js --preprocessor ./chain-sync.js', () => {
+  const { stdout } = exec('knip --preprocessor ./chain-async.js --preprocessor ./chain-sync.js', { cwd });
+  assert.equal(stdout, 'hi from async then sync preprocessor');
 });

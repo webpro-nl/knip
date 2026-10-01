@@ -16,3 +16,5 @@ runs:
       shell: /bin/bash
     - run: yarn workspace @apps/website playwright test --project=e2e
       shell: /bin/bash
+    - run: node "$GITHUB_ACTION_PATH/helper.mjs" --workspace "$GITHUB_WORKSPACE"
+      shell: bash
