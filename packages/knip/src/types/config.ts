@@ -84,6 +84,7 @@ export interface Configuration {
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
+  reportExportsUsedInSignatures: boolean;
   compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
@@ -104,6 +105,7 @@ interface BaseWorkspaceConfiguration {
   ignoreFiles: NormalizedGlob;
   ignoreGlobalBinaries: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
+  reportExportsUsedInSignatures: boolean;
   isIncludeEntryExports: boolean;
 }
 

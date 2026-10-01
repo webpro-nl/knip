@@ -338,6 +338,26 @@ const rootConfigurationSchema = z.object({
    */
   includeEntryExports: z.optional(z.boolean()),
   /**
+   * By default, Knip does not report exports that are used only in the type
+   * signature of another used export, since TypeScript may need them to emit
+   * declarations. Enable this option to report them anyway, e.g. for projects
+   * that do not emit `.d.ts` files:
+   *
+   * @default false
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "reportExportsUsedInSignatures": true
+   * }
+   * ```
+   *
+   * @remarks
+   * Set this option at root level to enable this globally, or within workspace
+   * configurations individually.
+   */
+  reportExportsUsedInSignatures: z.optional(z.boolean()),
+  /**
    * Override built-in compilers or add custom compilers for additional file types.
    *
    * @see {@link https://knip.dev/features/compilers | Compilers}
@@ -484,6 +504,7 @@ const baseWorkspaceConfigurationSchema = z.object({
   ignoreExportsUsedInFile: z.optional(ignoreExportsUsedInFileSchema),
   ignoreIssues: z.optional(ignoreIssuesSchema),
   includeEntryExports: z.optional(z.boolean()),
+  reportExportsUsedInSignatures: z.optional(z.boolean()),
 });
 
 const partialPluginsSchema = z.partial(pluginsSchema);
