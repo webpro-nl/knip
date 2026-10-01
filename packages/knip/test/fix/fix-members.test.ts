@@ -31,7 +31,10 @@ export enum Fruits {
   assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.length']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.spin']);
-  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 4);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.width']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.height']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.depth']);
+  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 7);
   assert.equal(
     await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
     `export namespace Animals {
@@ -67,7 +70,18 @@ export namespace Shapes {
 
   export const perimeter = () => [1, 2].length;
 
+  export function measure() {
+    const width = 2;
+    {
+      var height = 3;
+    }
+    try {
+      return width + height;
+    } catch (depth) {
+      return depth;
+    }
   }
+}
 `
   );
 });

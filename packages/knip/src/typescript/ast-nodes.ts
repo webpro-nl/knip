@@ -182,6 +182,8 @@ export function extractNamespaceMembers(
 
 type NamespaceScope = { prefix: string; names: Set<string>; own: Set<string>; isShadow?: boolean };
 
+const noNames = new Set<string>();
+
 const addBindingNames = (pattern: any, names: Set<string>) => {
   if (!pattern) return;
   if (pattern.type === 'Identifier') names.add(pattern.name);
@@ -190,6 +192,92 @@ const addBindingNames = (pattern: any, names: Set<string>) => {
   else if (pattern.type === 'ArrayPattern') for (const el of pattern.elements) addBindingNames(el, names);
   else if (pattern.type === 'AssignmentPattern') addBindingNames(pattern.left, names);
   else if (pattern.type === 'RestElement') addBindingNames(pattern.argument, names);
+};
+
+const addDeclaredNames = (statements: any[], names: Set<string>) => {
+  for (const stmt of statements) {
+    if (stmt.type === 'VariableDeclaration') for (const d of stmt.declarations) addBindingNames(d.id, names);
+    else if (stmt.type !== 'ExpressionStatement' && stmt.id?.type === 'Identifier') names.add(stmt.id.name);
+  }
+};
+
+const addVarNames = (node: any, names: Set<string>) => {
+  if (!node) return;
+  switch (node.type) {
+    case 'VariableDeclaration':
+      if (node.kind === 'var') for (const d of node.declarations) addBindingNames(d.id, names);
+      return;
+    case 'BlockStatement':
+      for (const stmt of node.body) addVarNames(stmt, names);
+      return;
+    case 'IfStatement':
+      addVarNames(node.consequent, names);
+      addVarNames(node.alternate, names);
+      return;
+    case 'ForStatement':
+      addVarNames(node.init, names);
+      addVarNames(node.body, names);
+      return;
+    case 'ForInStatement':
+    case 'ForOfStatement':
+      addVarNames(node.left, names);
+      addVarNames(node.body, names);
+      return;
+    case 'WhileStatement':
+    case 'DoWhileStatement':
+    case 'LabeledStatement':
+      addVarNames(node.body, names);
+      return;
+    case 'TryStatement':
+      addVarNames(node.block, names);
+      addVarNames(node.handler?.body, names);
+      addVarNames(node.finalizer, names);
+      return;
+    case 'SwitchStatement':
+      for (const c of node.cases) for (const stmt of c.consequent) addVarNames(stmt, names);
+      return;
+  }
+};
+
+const getShadowedNames = (node: any): Set<string> | undefined => {
+  switch (node.type) {
+    case 'BlockStatement':
+    case 'StaticBlock': {
+      const names = new Set<string>();
+      addDeclaredNames(node.body, names);
+      return names;
+    }
+    case 'SwitchStatement': {
+      const names = new Set<string>();
+      for (const c of node.cases) addDeclaredNames(c.consequent, names);
+      return names;
+    }
+    case 'ForStatement':
+    case 'ForInStatement':
+    case 'ForOfStatement': {
+      const init = node.init ?? node.left;
+      if (init?.type !== 'VariableDeclaration') return;
+      const names = new Set<string>();
+      addDeclaredNames([init], names);
+      return names;
+    }
+    case 'CatchClause': {
+      const names = new Set<string>();
+      addBindingNames(node.param, names);
+      return names;
+    }
+    case 'ClassExpression':
+      return node.id?.type === 'Identifier' ? new Set([node.id.name]) : undefined;
+  }
+  const params = node.params;
+  if (!params || node.type === 'TSTypeParameterDeclaration') return;
+  const names = new Set<string>();
+  for (const param of Array.isArray(params) ? params : (params.items ?? [])) {
+    addBindingNames(param.type === 'TSParameterProperty' ? param.parameter : param, names);
+  }
+  if (node.type === 'FunctionExpression' && node.id?.type === 'Identifier') names.add(node.id.name);
+  if (node.body?.type === 'BlockStatement') addVarNames(node.body, names);
+  return names;
 };
 
 const markNamespaceMemberRefs = (body: any[], members: ExportMember[]) => {
@@ -297,15 +385,10 @@ const markNamespaceMemberRefs = (body: any[], members: ExportMember[]) => {
     }
     const keys = visitorKeys[type];
     if (!keys) return;
-    const params = node.params;
-    let shadow: NamespaceScope | undefined;
-    if (params) {
-      shadow = { prefix: '', names: new Set(), own: new Set(), isShadow: true };
-      for (const param of Array.isArray(params) ? params : (params.items ?? [])) {
-        addBindingNames(param.type === 'TSParameterProperty' ? param.parameter : param, shadow.names);
-      }
-      scopes.push(shadow);
-    }
+    const shadowed = getShadowedNames(node);
+    const shadow: NamespaceScope | undefined =
+      shadowed && shadowed.size > 0 ? { prefix: '', names: shadowed, own: noNames, isShadow: true } : undefined;
+    if (shadow) scopes.push(shadow);
     for (const key of keys) {
       const val = node[key];
       if (!val || key === 'label') continue;

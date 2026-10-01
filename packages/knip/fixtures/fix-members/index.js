@@ -19,3 +19,4 @@ Shapes.area(1);
 Shapes.options;
 Shapes.double();
 Shapes.perimeter();
+Shapes.measure();

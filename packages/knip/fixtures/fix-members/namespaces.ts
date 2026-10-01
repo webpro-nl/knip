@@ -37,4 +37,19 @@ export namespace Shapes {
   export function spin(): void {
     spin();
   }
+
+  export const width = 1;
+  export const height = 2;
+  export const depth = 3;
+  export function measure() {
+    const width = 2;
+    {
+      var height = 3;
+    }
+    try {
+      return width + height;
+    } catch (depth) {
+      return depth;
+    }
+  }
 }
