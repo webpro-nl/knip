@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/serverless-framework-file-variables",
+  "scripts": {
+    "deploy": "serverless deploy"
+  },
+  "devDependencies": {
+    "serverless": "*",
+    "serverless-offline": "*"
+  }
+}

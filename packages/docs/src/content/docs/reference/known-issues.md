@@ -1,9 +1,9 @@
 ---
 title: Known Issues
-description: Workarounds for errors Knip may throw, such as failing config files, path aliases in config files, and the Nx daemon.
+description: Known limitations and workarounds for caching, config file errors, path aliases in config files, and the Nx daemon.
 ---
 
-List of known issues and workarounds for exceptions thrown during a Knip run.
+Known limitations and workarounds for errors during a Knip run.
 
 See [handling issues][1] to learn more about dealing with lint issues.
 
@@ -100,6 +100,16 @@ Disable raw transfer to use the normal parser path:
 ```sh
 KNIP_DISABLE_RAW_TRANSFER=1 knip
 ```
+
+## Stale cache results
+
+With `--cache`, configuration or path alias changes may leave results stale. An
+import may still be reported as unresolved after the missing file is added.
+Newly added `.gitignore` files are also not detected automatically.
+
+Run without `--cache` for fresh results, or delete the cache directory
+(`node_modules/.cache/knip` by default, configurable with `--cache-location`)
+before running with `--cache` again.
 
 [1]: ../guides/handling-issues.mdx
 [2]: #path-aliases-in-config-files

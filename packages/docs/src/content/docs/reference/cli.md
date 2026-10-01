@@ -95,8 +95,7 @@ Consecutive runs are 10-40% faster as the results of file analysis (AST
 traversal) are cached. Conservative. Cache strategy based on file meta data
 (modification time + file size).
 
-Newly-added `.gitignore` files are not detected automatically — delete the cache
-to pick them up.
+See [stale cache results][6] for limitations and workarounds.
 
 ### `--cache-location`
 
@@ -113,7 +112,7 @@ files when reporting unused exports:
 knip --include-entry-exports
 ```
 
-Also see [includeEntryExports][6].
+Also see [includeEntryExports][7].
 
 ### `--no-gitignore`
 
@@ -131,16 +130,16 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][7].
+Read more at [Production Mode][8].
 
 ### `--strict`
 
 Shortcut: `-s`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][8].
+mode][9].
 
-Read more at [Production Mode][7].
+Read more at [Production Mode][8].
 
 ### `--watch`
 
@@ -162,7 +161,7 @@ workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][9] for more details and examples.
+See [filter workspaces][10] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -193,10 +192,10 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-`nsExports` and `nsTypes` are [off by default][10]; including only those _adds_
+`nsExports` and `nsTypes` are [off by default][11]; including only those _adds_
 them to the default report instead of narrowing it.
 
-Available [issue types][11] when filtering output using `--include` or
+Available [issue types][12] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
@@ -246,7 +245,7 @@ Shortcut to report only circular dependencies:
 --include cycles
 ```
 
-Also see the [cycles reporter][12].
+Also see the [cycles reporter][13].
 
 ### `--tags`
 
@@ -288,13 +287,13 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][13].
+Read more at [auto-fix][14].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][11]
+More info about fixable types at [issue types][12]
 
 ### `--allow-remove-files`
 
@@ -310,7 +309,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][14].
+Preprocess the results before providing it to the [reporter(s)][15].
 
 Can be repeated. Examples:
 
@@ -324,7 +323,7 @@ knip --preprocessor preprocessor-package
 
 Preprocessors can also be configured in the Knip configuration file.
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][16].
 
 ### `--preprocessor-options [json]`
 
@@ -354,7 +353,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][15].
+Also see [Reporters & Preprocessors][16].
 
 ### `--reporter-options [json]`
 
@@ -409,7 +408,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][16].
+Show [debug output][17].
 
 ### `--memory`
 
@@ -486,7 +485,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][17]).
+`performance.timerify` ([GitHub issue][18]).
 
 ### `--duration`
 
@@ -516,37 +515,38 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][18].
+Also see [Trace][19].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][19].
+[--trace][20].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][19].
+Trace export name to see where it's imported. Implies [--trace][20].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][19].
+Trace file to see where its exports are imported. Implies [--trace][20].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
 [3]: ../reference/known-issues.md
 [4]: https://no-color.org/
 [5]: https://www.npmx.dev/package/picocolors
-[6]: ./configuration.md#includeentryexports
-[7]: ../features/production-mode.md
-[8]: #--production
-[9]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[10]: ../guides/namespace-imports.md
-[11]: ./issue-types.md
-[12]: ../features/reporters.md#cycles
-[13]: ../features/auto-fix.mdx
-[14]: #--reporter-reporter
-[15]: ../features/reporters.md
-[16]: ../guides/troubleshooting.md#debug
-[17]: https://github.com/oven-sh/bun/issues/9271
-[18]: ../guides/troubleshooting.md#trace
-[19]: #--trace
+[6]: ./known-issues.md#stale-cache-results
+[7]: ./configuration.md#includeentryexports
+[8]: ../features/production-mode.md
+[9]: #--production
+[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[11]: ../guides/namespace-imports.md
+[12]: ./issue-types.md
+[13]: ../features/reporters.md#cycles
+[14]: ../features/auto-fix.mdx
+[15]: #--reporter-reporter
+[16]: ../features/reporters.md
+[17]: ../guides/troubleshooting.md#debug
+[18]: https://github.com/oven-sh/bun/issues/9271
+[19]: ../guides/troubleshooting.md#trace
+[20]: #--trace

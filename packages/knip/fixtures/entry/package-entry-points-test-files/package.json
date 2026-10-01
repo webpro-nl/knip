@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/package-entry-points-test-files",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

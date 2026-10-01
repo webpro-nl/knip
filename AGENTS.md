@@ -10,6 +10,7 @@ JavaScript and TypeScript projects.
 - Language Server in `packages/language-server` (JS + JSDoc for types)
 - VS Code Extension in `packages/vscode-knip` (JS + JSDoc for types)
 - [Documentation][1] content in `packages/docs` (Astro + MD/MDX)
+- Tracked `.agents` guides live in the checkout; there might be shared lessons and tasks in the workspace's `.agents`.
 
 ## Code style
 
@@ -32,7 +33,7 @@ JavaScript and TypeScript projects.
 - Non-JS/TS files (.css, .mdx, .vue) enter the graph via (usually plugin-registered) compilers (`registerCompilers`)
 - Library-specific AST patterns are caught by plugin-registered visitors (`registerVisitors`)
 - Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
-- If creating or modifying a plugin, read [PLUGINS.md][3] first.
+- If creating, modifying, or reviewing a plugin, read [PLUGINS.md][3] first.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE-GRAPH.md][4] first.
 - For issues re. exported identifiers (following refs, shadowing, `ignoreExportsUsedInFile`), see [EXPORTS.md][5].
 - Before any significant performance tuning, consult [PERFORMANCE.md][6].
@@ -41,6 +42,7 @@ JavaScript and TypeScript projects.
 
 ## Issues and Pull Requests
 
+- Use `gh` for PR metadata, diffs, comments, and checks. Reuse retrieved evidence; browse upstream documentation separately.
 - When given a bug report, first confirm the behavior is actually wrong. Reproduce, then check if the reported behavior is correct-by-design before writing any fix.
 - Find repositories/CodeSandbox/StackBlitz source files and local fixtures to actually reproduce the issue at hand.
 - To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
