@@ -44,9 +44,9 @@ for await (const dir of directories) {
     if (configFiles && configFiles.length > 0) defaults.config = configFiles;
     if (entry && entry.length > 0) defaults.entry = entry;
     if (docs?.entry && docs.entry.length > 0) defaults.entry = [...(defaults.entry ?? []), ...docs.entry];
-    if (production && production.length > 0) defaults.entry = [...(defaults.entry ?? []), ...production];
+    if (production && production.length > 0) defaults.entry = [...new Set([...(defaults.entry ?? []), ...production])];
     if (docs?.production && docs.production.length > 0)
-      defaults.entry = [...(defaults.entry ?? []), ...docs.production];
+      defaults.entry = [...new Set([...(defaults.entry ?? []), ...docs.production])];
     if (project && project.length > 0) defaults.project = project;
 
     const hasDefaultConfig = Object.values(defaults).some(v => v.length > 0);

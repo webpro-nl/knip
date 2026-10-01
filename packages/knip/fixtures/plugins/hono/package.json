@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/hono",
+  "dependencies": {
+    "hono": "*"
+  }
+}

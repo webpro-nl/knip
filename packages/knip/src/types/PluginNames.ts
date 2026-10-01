@@ -45,6 +45,7 @@ export type PluginName =
   | 'glob'
   | 'graphql-codegen'
   | 'hardhat'
+  | 'hono'
   | 'husky'
   | 'i18next-parser'
   | 'jest'
@@ -235,6 +236,7 @@ export const pluginNames = [
   'glob',
   'graphql-codegen',
   'hardhat',
+  'hono',
   'husky',
   'i18next-parser',
   'jest',
