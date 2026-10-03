@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/workspaces-export-fallback-array__library",
+  "private": true,
+  "type": "module",
+  "exports": ["./dist/index.js", "./dist/fallback.js"]
+}
