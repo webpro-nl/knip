@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/postcss-disabled",
+  "scripts": {
+    "postcss": "postcss"
+  },
+  "devDependencies": {
+    "autoprefixer": "*",
+    "postcss": "*"
+  }
+}
