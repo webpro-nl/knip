@@ -29,10 +29,19 @@ test('Find dependencies with the Capacitor plugin', async () => {
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/storage']);
   assert(issues.unlisted['capacitor.config.ts']['cordova-plugin-inappbrowser']);
 
+  assert(issues.unlisted['capacitor.config.js']['@capacitor-community/http']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/android']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/ios']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/app']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/splash-screen']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/status-bar']);
+  assert(issues.unlisted['capacitor.config.js']['@capacitor/storage']);
+  assert(issues.unlisted['capacitor.config.js']['cordova-plugin-inappbrowser']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 16,
-    processed: 1,
-    total: 1,
+    unlisted: 24,
+    processed: 2,
+    total: 2,
   });
 });
