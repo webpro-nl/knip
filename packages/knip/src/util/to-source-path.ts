@@ -11,7 +11,7 @@ import { isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
-const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
+const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
