@@ -14,6 +14,7 @@ module.exports = {
       },
     },
     'commitlint-plugin-tense',
+    '@organization/scope',
   ],
   rules: {
     'type-enum': [2, 'always', ['oh-no']],
