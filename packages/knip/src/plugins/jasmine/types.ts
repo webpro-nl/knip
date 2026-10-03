@@ -5,4 +5,5 @@ export type JasmineConfig = {
   spec_files?: string[];
   helpers?: string[];
   requires?: string[];
+  loader?: string;
 };

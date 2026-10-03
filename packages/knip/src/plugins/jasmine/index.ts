@@ -26,7 +26,7 @@ const toSpecDirPattern = (specDir: string, pattern: string) => {
   return isNegated ? `!${resolved}` : resolved;
 };
 
-const resolveConfig: ResolveConfig<JasmineConfig> = localConfig => {
+const resolveConfig: ResolveConfig<JasmineConfig> = (localConfig, options) => {
   const specDir = localConfig.spec_dir ?? '';
   const specFiles = localConfig.spec_files?.map(pattern => toSpecDirPattern(specDir, pattern)) ?? [defaultSpecFiles];
   const helpers = localConfig.helpers?.map(pattern => toSpecDirPattern(specDir, pattern)) ?? [];
@@ -34,7 +34,9 @@ const resolveConfig: ResolveConfig<JasmineConfig> = localConfig => {
 
   const inputs: Input[] = [];
   for (const id of [...specFiles, ...helpers]) inputs.push(toEntry(id));
-  for (const id of requires) inputs.push(toDeferResolve(id));
+  // `requires` and `loader` are resolved from the working directory, not from the config file, and may be a package name
+  for (const id of requires) inputs.push(toDeferResolve(id, { dir: options.cwd }));
+  if (localConfig.loader) inputs.push(toDeferResolve(localConfig.loader, { dir: options.cwd }));
   return inputs;
 };
 

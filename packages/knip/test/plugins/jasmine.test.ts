@@ -13,12 +13,14 @@ test('Find dependencies with the Jasmine plugin', async () => {
 
   assert(!('tests/unit/cart.suite.js' in issues.files));
   assert(!('tests/setup/currency.js' in issues.files));
+  assert(!('bootstrap/setup.js' in issues.files));
+  assert(!('config/custom-loader.mjs' in issues.files));
   assert('tests/unit/legacy.suite.js' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });
