@@ -5,15 +5,15 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/oxlint-vite-config');
+const cwd = resolve('fixtures/plugins/oxlint-vite-config-spread');
 
-test('Resolve oxlint jsPlugins from the vite-plus vite.config.ts lint block and its overrides', async () => {
+test('Resolve oxlint jsPlugins from imported objects spread into lint and overrides in vite.config.ts', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 5,
+    total: 5,
   });
 });

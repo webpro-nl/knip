@@ -8,5 +8,11 @@ export default defineConfig({
       'import/resolver': { typescript: { project: 'tsconfig.json' } },
       'import/parsers': { '@typescript-eslint/parser': ['.ts', '.tsx'] },
     },
+    overrides: [
+      {
+        files: ['**/*.test.ts'],
+        jsPlugins: ['eslint-plugin-testing-library', { name: 'testing', specifier: './tooling/oxlint-plugin-testing.ts' }],
+      },
+    ],
   },
 });

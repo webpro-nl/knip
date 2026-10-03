@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/oxlint-vite-config-scope",
+  "devDependencies": {
+    "vite-plus": "*",
+    "eslint-plugin-regexp": "*",
+    "eslint-plugin-testing-library": "*",
+    "eslint-plugin-vitest": "*"
+  }
+}
