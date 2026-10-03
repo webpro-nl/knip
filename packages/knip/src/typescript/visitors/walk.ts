@@ -554,6 +554,16 @@ const coreVisitorObject: VisitorObject = {
       }
     }
   },
+  ArrayExpression(node) {
+    for (const element of node.elements ?? []) {
+      if (element?.type !== 'Identifier') continue;
+      const _import = state.localImportMap.get(element.name);
+      if (_import?.isNamespace) {
+        const internalImport = state.internal.get(_import.filePath);
+        if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
+      }
+    }
+  },
   TSQualifiedName(node) {
     let left: TSTypeName = node;
     const parts: string[] = [];
