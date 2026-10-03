@@ -8,12 +8,12 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/entry/package-entry-points-gitignored');
 
-test('Exclude gitignored and null package entry points', async () => {
+test('Exclude gitignored package entries without removing exported aliases', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters, configurationHints } = await main(options);
 
   assert('helper.js' in issues.files);
-  assert('hidden.js' in issues.files);
+  assert(!('hidden.js' in issues.files));
   assert(!('dist/generated.js' in issues.files));
   assert(!('dist/extra.js' in issues.files));
 
@@ -24,7 +24,7 @@ test('Exclude gitignored and null package entry points', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
+    files: 1,
     processed: 3,
     total: 3,
   });
