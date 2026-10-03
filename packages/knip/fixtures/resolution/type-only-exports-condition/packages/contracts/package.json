@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/type-only-exports-condition-contracts",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types.d.ts",
+      "import": "./runtime.js"
+    }
+  }
+}

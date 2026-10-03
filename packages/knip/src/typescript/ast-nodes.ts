@@ -37,7 +37,11 @@ export const isAmbientDeclarationFile = (filePath: string, sourceText: string): 
   }
 };
 
-export type ResolveModule = (specifier: string, containingFile: string) => ResolvedModule | undefined;
+export type ResolveModule = (
+  specifier: string,
+  containingFile: string,
+  isTypeOnly?: boolean
+) => ResolvedModule | undefined;
 
 export interface ResolvedModule {
   resolvedFileName: string;

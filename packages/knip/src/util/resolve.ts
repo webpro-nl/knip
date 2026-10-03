@@ -48,22 +48,32 @@ const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =
     conditionNames: ['require', 'import', 'node', 'default'],
     nodePath: false,
   };
+  const tsconfig = tsConfigFile ? { configFile: tsConfigFile, references: 'auto' as const } : 'auto';
   const resolver = new ResolverFactory({
-    tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
+    tsconfig,
     ...baseOptions,
   });
   const fallbackResolver = new ResolverFactory({
     ...baseOptions,
     conditionNames: ['require', 'import', 'browser', 'default'],
   });
-
-  resolverInstances.push(resolver, fallbackResolver);
-
-  return function resolveSync(specifier: string, basePath: string) {
-    const resolved = resolver.resolveFileSync(basePath, specifier);
+  const typesResolver = new ResolverFactory({
+    tsconfig,
+    ...baseOptions,
+    conditionNames: ['types', 'require', 'import', 'node', 'default'],
+  });
+  const typesFallbackResolver = new ResolverFactory({
+    ...baseOptions,
+    conditionNames: ['types', 'require', 'import', 'browser', 'default'],
+  });
+  resolverInstances.push(resolver, fallbackResolver, typesResolver, typesFallbackResolver);
+  return function resolveSync(specifier: string, basePath: string, isTypeOnly = false) {
+    const activeResolver = isTypeOnly ? typesResolver : resolver;
+    const activeFallbackResolver = isTypeOnly ? typesFallbackResolver : fallbackResolver;
+    const resolved = activeResolver.resolveFileSync(basePath, specifier);
     if (resolved.path) return toPosix(resolved.path);
     if (resolved.error) {
-      const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
+      const fallback = activeFallbackResolver.resolveFileSync(basePath, specifier);
       if (fallback.path) return toPosix(fallback.path);
     }
   };

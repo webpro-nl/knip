@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/type-only-exports-condition",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
