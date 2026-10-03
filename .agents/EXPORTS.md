@@ -23,6 +23,11 @@ build config or declaration tool, and consumers may infer the type into their
 own public declarations. Absence from the selected config is not proof that
 `tsc --declaration` or another declaration tool can remove the export safely.
 
+The `reportExportsUsedInSignatures` setting (default `false`) opts a workspace
+out of this protection: `isReferencedInUsedExport` returns `false` and exports
+used only in signatures of used exports are reported. The user takes
+responsibility for declaration emit of the project and its consumers.
+
 ### `isolatedDeclarations` does not make removal safe
 
 `isolatedDeclarations` requires enough annotations to emit each source file

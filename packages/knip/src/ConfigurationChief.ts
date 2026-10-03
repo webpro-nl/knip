@@ -62,6 +62,7 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   ignoreExportsUsedInFile: false,
   isIncludeEntryExports: false,
+  reportExportsUsedInSignatures: false,
   compilers: new Map(),
   rootPluginConfigs: {},
 };
@@ -150,6 +151,7 @@ export class ConfigurationChief {
     const cycles = rawConfig.cycles ?? {};
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
+    const reportExportsUsedInSignatures = rawConfig.reportExportsUsedInSignatures ?? false;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
 
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
@@ -172,6 +174,7 @@ export class ConfigurationChief {
       ignoreExportsUsedInFile,
       ignoreIssues,
       ignoreWorkspaces,
+      reportExportsUsedInSignatures,
       isIncludeEntryExports,
       compilers: normalizeCompilers(rawConfig),
       rootPluginConfigs,
@@ -434,6 +437,8 @@ export class ConfigurationChief {
     const ignore = arrayify(workspaceConfig.ignore);
     const ignoreFiles = arrayify(workspaceConfig.ignoreFiles);
     const ignoreGlobalBinaries = workspaceConfig.ignoreGlobalBinaries ?? this.config.ignoreGlobalBinaries;
+    const reportExportsUsedInSignatures =
+      workspaceConfig.reportExportsUsedInSignatures ?? this.config.reportExportsUsedInSignatures;
     const ignoreExportsUsedInFile = workspaceConfig.ignoreExportsUsedInFile ?? this.config.ignoreExportsUsedInFile;
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
 
@@ -455,6 +460,7 @@ export class ConfigurationChief {
       paths,
       ignore,
       ignoreFiles,
+      reportExportsUsedInSignatures,
       ignoreGlobalBinaries,
       ignoreExportsUsedInFile,
       isIncludeEntryExports,

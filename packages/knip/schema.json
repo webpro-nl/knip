@@ -100,6 +100,9 @@
     "includeEntryExports": {
       "$ref": "#/definitions/includeEntryExports"
     },
+    "reportExportsUsedInSignatures": {
+      "$ref": "#/definitions/reportExportsUsedInSignatures"
+    },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
       "examples": ["+custom", "-lintignore", "-@internal"],
@@ -230,6 +233,10 @@
     },
     "includeEntryExports": {
       "title": "Include entry files when reporting unused exports",
+      "type": "boolean"
+    },
+    "reportExportsUsedInSignatures": {
+      "title": "Report exports used in the signature of another used export",
       "type": "boolean"
     },
     "ignoreExportsUsedInFile": {
@@ -386,6 +393,9 @@
         },
         "includeEntryExports": {
           "$ref": "#/definitions/includeEntryExports"
+        },
+        "reportExportsUsedInSignatures": {
+          "$ref": "#/definitions/reportExportsUsedInSignatures"
         }
       }
     },

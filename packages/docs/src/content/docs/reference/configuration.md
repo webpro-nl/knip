@@ -499,6 +499,26 @@ This will also enable reporting unused members of exported enums and namespaces.
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
 
+### `reportExportsUsedInSignatures`
+
+By default, Knip does not report exports that are used only in the type
+signature of another used export, since TypeScript may need them to emit
+declarations (such as a type in the return type of an exported function).
+Projects that do not emit `.d.ts` files can enable this option to report them
+anyway:
+
+```json title="knip.json"
+{
+  "reportExportsUsedInSignatures": true
+}
+```
+
+Removing such exports can still break consumers that emit declarations
+themselves, so be careful before applying fixes in published packages.
+
+Set this option at root level to enable this globally, or within workspace
+configurations individually.
+
 ## Compilers
 
 Knip supports custom compilers to transform files before analysis.

@@ -72,8 +72,10 @@ export const analyze = async ({
     filePath: string,
     includeEntryExports: boolean,
     ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
+    reportExportsUsedInSignatures: boolean,
     visited?: Set<string>
   ) => {
+    if (reportExportsUsedInSignatures) return false;
     if (!exportedItem.referencedIn) return false;
     const file = graph.get(filePath);
     if (!file) return false;
@@ -92,7 +94,16 @@ export const analyze = async ({
         const v = visited ?? new Set();
         if (!v.has(containingExport)) {
           v.add(containingExport);
-          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, ignoreExportsUsedInFile, v))
+          if (
+            isReferencedInUsedExport(
+              inExport,
+              filePath,
+              includeEntryExports,
+              ignoreExportsUsedInFile,
+              reportExportsUsedInSignatures,
+              v
+            )
+          )
             return true;
         }
       }
@@ -164,7 +175,7 @@ export const analyze = async ({
         const workspace = chief.findWorkspaceByFilePath(filePath);
 
         if (workspace) {
-          const { isIncludeEntryExports, ignoreExportsUsedInFile } = workspace.config;
+          const { isIncludeEntryExports, ignoreExportsUsedInFile, reportExportsUsedInSignatures } = workspace.config;
 
           const isEntry = entryPaths.has(filePath);
 
@@ -190,7 +201,13 @@ export const analyze = async ({
               if (isIgnored) {
                 if (
                   isReferenced ||
-                  isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile)
+                  isReferencedInUsedExport(
+                    exportedItem,
+                    filePath,
+                    isIncludeEntryExports,
+                    ignoreExportsUsedInFile,
+                    reportExportsUsedInSignatures
+                  )
                 ) {
                   const memberIssues = isReferenced
                     ? getMemberIssues(exportedItem, filePath, identifier, workspace, importsForExport)
@@ -267,7 +284,13 @@ export const analyze = async ({
               isIgnored ||
               exportedItem.hasRefsInFile ||
               exportedItem.isRegistered ||
-              isReferencedInUsedExport(exportedItem, filePath, isIncludeEntryExports, ignoreExportsUsedInFile) ||
+              isReferencedInUsedExport(
+                exportedItem,
+                filePath,
+                isIncludeEntryExports,
+                ignoreExportsUsedInFile,
+                reportExportsUsedInSignatures
+              ) ||
               (hasStrictlyNsRefs &&
                 ((!options.includedIssueTypes.nsTypes && isType) || !(options.includedIssueTypes.nsExports || isType)))
             ) {
