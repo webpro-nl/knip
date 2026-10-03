@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/production-plugin-negations",
+  "exports": {
+    "./client": "./src/generated/client.ts"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}
