@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/jasmine3",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "devDependencies": {
+    "jasmine": "*"
+  }
+}

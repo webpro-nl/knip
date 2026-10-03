@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/jasmine",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "devDependencies": {
+    "jasmine": "*",
+    "source-map-support": "*"
+  }
+}
