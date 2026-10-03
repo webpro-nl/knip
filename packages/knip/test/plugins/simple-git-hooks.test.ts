@@ -19,5 +19,7 @@ test('Find dependencies with the simple-git-hooks plugin', async () => {
     ...baseCounters,
     binaries: 2,
     devDependencies: 1,
+    processed: 4,
+    total: 4,
   });
 });
