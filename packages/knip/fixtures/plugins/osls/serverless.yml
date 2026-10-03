@@ -1,0 +1,14 @@
+service: orchard
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+
+plugins:
+  - serverless-offline
+
+functions:
+  harvest:
+    handler: src/handlers/harvest.handler

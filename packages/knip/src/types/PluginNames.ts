@@ -88,6 +88,7 @@ export type PluginName =
   | 'openapi-ts'
   | 'openclaw'
   | 'orval'
+  | 'osls'
   | 'oxfmt'
   | 'oxlint'
   | 'panda-css'
@@ -278,6 +279,7 @@ export const pluginNames = [
   'openapi-ts',
   'openclaw',
   'orval',
+  'osls',
   'oxfmt',
   'oxlint',
   'panda-css',

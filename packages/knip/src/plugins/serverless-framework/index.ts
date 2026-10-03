@@ -15,7 +15,7 @@ const enablers = ['serverless'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['serverless.{js,cjs,mjs,ts,cts,mts,yml,yaml}'];
+export const config = ['serverless.{js,cjs,mjs,ts,cts,mts,yml,yaml}'];
 
 const fileVariable = /^\$\{file\(([^()$]+)\)(?::([^\s,}]+))?/;
 
@@ -57,7 +57,7 @@ const getFunctionEntries = async (functions: unknown, dir: string) => {
 const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
   esbuild && typeof esbuild === 'object' ? arrayify(esbuild.inject).map(id => toProductionEntry(join(dir, id))) : [];
 
-const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
+export const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
   const functions = await getFunctionEntries(config.functions, options.configFileDir);
   const resolvedPlugins = await resolveFileVariable(config.plugins, options.configFileDir);
   const plugins = Array.isArray(resolvedPlugins)

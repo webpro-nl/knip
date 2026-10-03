@@ -770,6 +770,10 @@
           "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
           "$ref": "#/definitions/plugin"
         },
+        "osls": {
+          "title": "osls plugin configuration (https://knip.dev/reference/plugins/osls)",
+          "$ref": "#/definitions/plugin"
+        },
         "oxfmt": {
           "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
           "$ref": "#/definitions/plugin"
