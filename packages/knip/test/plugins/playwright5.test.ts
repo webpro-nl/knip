@@ -5,17 +5,15 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/playwright3');
+const cwd = resolve('fixtures/plugins/playwright5');
 
-test('Find dependencies with the Playwright plugin', async () => {
+test('Find webServer commands in other workspaces with the Playwright plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters, issues } = await main(options);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 8,
-    total: 8,
+    processed: 2,
+    total: 2,
   });
-  assert.deepEqual(Object.keys(issues.files), ['launch.mjs']);
 });
