@@ -85,7 +85,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string | undefined>();
 
-  return (filePath: string) => {
+  return (filePath: string, extensions = sourceExtensions) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -94,7 +94,7 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
       for (const { srcDir, outDir } of workspace.sourceMaps) {
         if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
         const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
-        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        const srcFilePath = findFileWithExtensions(basePath, extensions);
         if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
           result = srcFilePath;
