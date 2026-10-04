@@ -1,0 +1,5 @@
+{
+  "vitest": {
+    "entry": ["src/**/*.ts", "!src/generated/**"]
+  }
+}

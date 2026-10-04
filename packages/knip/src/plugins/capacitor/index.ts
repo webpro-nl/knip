@@ -12,7 +12,7 @@ const enablers = [/^@capacitor\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['capacitor.config.{json,ts}'];
+const config = ['capacitor.config.{json,js,ts}'];
 
 const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFileDir }) => {
   const plugins = config.includePlugins ?? [];

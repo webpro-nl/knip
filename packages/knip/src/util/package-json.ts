@@ -1,5 +1,6 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
+import picomatch from 'picomatch';
 import { IS_DTS } from '../constants.ts';
 import type { PackageJson } from '../types/package-json.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
@@ -36,9 +37,7 @@ const getEntriesFromExports = (obj: any): string[] => {
   for (const prop in obj) {
     if (typeof obj[prop] === 'string') {
       values.push(obj[prop]);
-    } else if (obj[prop] === null) {
-      if (prop !== '.') values.push(`!${prop}`);
-    } else if (typeof obj[prop] === 'object') {
+    } else if (obj[prop] && typeof obj[prop] === 'object') {
       values = values.concat(getEntriesFromExports(obj[prop]));
     }
   }
@@ -58,7 +57,7 @@ export const toDeclarationSpecifier = (specifier: string) => {
   if (IS_DTS.test(specifier)) return specifier;
 };
 
-export const getPublishedTypeManifest = (manifest: PackageJson) => {
+export const getPublishedTypeManifest = (manifest: PackageJson): PackageJson => {
   const { publishConfig } = manifest;
   if (!publishConfig) return manifest;
 
@@ -205,6 +204,48 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
+const expandWildcards = (specifier: string) =>
+  specifier
+    .replace(/\/\*$/, '/**') // /* → /**
+    .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
+    .replace(/\/\*\//, '/**/'); // /*/ → /**/
+
+const withoutDotSlash = (specifier: string) => specifier.replace(/^\.\//, '');
+
+const getHiddenPatternMatch = (nullSubpath: string, key: string) => {
+  const star = key.indexOf('*');
+  const prefix = key.slice(0, star);
+  const suffix = key.slice(star + 1);
+  const nullStar = nullSubpath.indexOf('*');
+  if (nullStar === -1) {
+    const isMatch = nullSubpath.startsWith(prefix) && nullSubpath.endsWith(suffix) && nullSubpath.length >= key.length;
+    return isMatch ? nullSubpath.slice(prefix.length, nullSubpath.length - suffix.length) : undefined;
+  }
+  const head = nullSubpath.slice(0, nullStar);
+  const tail = nullSubpath.slice(nullStar + 1);
+  const isMoreSpecific = head.startsWith(prefix) && (head.length > prefix.length || nullSubpath.length > key.length);
+  if (!isMoreSpecific) return;
+  if (tail.endsWith(suffix)) return `${head.slice(prefix.length)}*${tail.slice(0, tail.length - suffix.length)}`;
+  if (suffix.endsWith(tail)) return `${head.slice(prefix.length)}*`;
+};
+
+const getHiddenExportTargets = (exports: NonNullable<PackageJson['exports']>) => {
+  const entries = getExportEntries(exports);
+  const targets: string[] = [];
+  for (const [nullSubpath, value] of entries) {
+    if (value !== null || nullSubpath === '.') continue;
+    for (const [key, target] of entries) {
+      if (target === null || !key.includes('*')) continue;
+      const patternMatch = getHiddenPatternMatch(nullSubpath, key);
+      if (patternMatch === undefined) continue;
+      for (const item of getEntriesFromExports(target)) {
+        if (item.includes('*')) targets.push(item.replaceAll('*', patternMatch));
+      }
+    }
+  }
+  return targets;
+};
+
 export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   const { main, module, browser, bin, exports, types, typings } = manifest;
 
@@ -221,11 +262,7 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
       if (item === './*' || item.trim() === '') continue;
-      const expanded = item
-        .replace(/\/\*$/, '/**') // /* → /**
-        .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
-        .replace(/\/\*\//, '/**/'); // /*/ → /**/
-      entryPaths.add(expanded);
+      entryPaths.add(expandWildcards(item));
     }
   }
 
@@ -235,6 +272,15 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
       for (const item of getEntriesFromExports(value)) {
         if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
       }
+    }
+  }
+
+  if (exports) {
+    const entries = Array.from(entryPaths, withoutDotSlash);
+    for (const target of getHiddenExportTargets(exports)) {
+      const hidden = expandWildcards(target);
+      const isHidden = picomatch(withoutDotSlash(hidden), { dot: true });
+      if (!entries.some(entry => isHidden(entry))) entryPaths.add(`!${hidden}`);
     }
   }
 
