@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/declaration-dir-source-map-consumer",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@fixtures/declaration-dir-source-map-contracts": "workspace:*"
+  }
+}

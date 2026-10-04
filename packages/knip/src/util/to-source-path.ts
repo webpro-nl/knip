@@ -15,11 +15,12 @@ const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
-const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions): SourceMap => {
+const tsconfigSourceMaps = (dir: string, compilerOptions: CompilerOptions): SourceMap[] => {
   const srcDir = join(dir, 'src');
   const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
   const resolvedSrc = compilerOptions.rootDir ?? (outDirHasSrc ? dir : isDirectory(srcDir) ? srcDir : dir);
-  return { srcDir: resolvedSrc, outDir: compilerOptions.outDir || resolvedSrc };
+  const outDirs = new Set([compilerOptions.outDir || resolvedSrc, compilerOptions.declarationDir]);
+  return [...outDirs].filter((outDir): outDir is string => !!outDir).map(outDir => ({ srcDir: resolvedSrc, outDir }));
 };
 
 export const augmentWorkspace = (
@@ -28,7 +29,7 @@ export const augmentWorkspace = (
   compilerOptions: CompilerOptions | undefined,
   pluginSourceMaps: SourceMap[] = []
 ) => {
-  const all = compilerOptions ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions)] : pluginSourceMaps;
+  const all = compilerOptions ? [...pluginSourceMaps, ...tsconfigSourceMaps(dir, compilerOptions)] : pluginSourceMaps;
   if (all.length === 0) return;
   const seen = new Set<string>();
   const unique: SourceMap[] = [];

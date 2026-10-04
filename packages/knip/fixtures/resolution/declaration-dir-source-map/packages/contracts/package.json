@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/declaration-dir-source-map-contracts",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

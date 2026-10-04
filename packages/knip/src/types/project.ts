@@ -6,6 +6,7 @@ export interface CompilerOptions {
   allowSyntheticDefaultImports?: boolean;
   baseUrl?: string;
   declaration?: boolean;
+  declarationDir?: string;
   declarationMap?: boolean;
   esModuleInterop?: boolean;
   inlineSourceMap?: boolean;

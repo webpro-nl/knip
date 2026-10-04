@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/declaration-dir-source-map",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

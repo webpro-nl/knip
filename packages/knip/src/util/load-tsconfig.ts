@@ -108,8 +108,11 @@ const walkReferences = (
     const refOpts = refConfig.compilerOptions;
     collectPaths(paths, refOpts?.paths, pathsBaseDir(refOpts, refDir));
     const refOutDir = refOpts?.outDir ? absDir(refOpts.outDir, refDir) : undefined;
+    const refDeclarationDir = refOpts?.declarationDir ? absDir(refOpts.declarationDir, refDir) : undefined;
     const refRootDir = refOpts?.rootDir ? absDir(refOpts.rootDir, refDir) : undefined;
     if (refOutDir && refRootDir && refOutDir !== refRootDir) pairs.push({ srcDir: refRootDir, outDir: refOutDir });
+    if (refDeclarationDir && refRootDir && refDeclarationDir !== refRootDir)
+      pairs.push({ srcDir: refRootDir, outDir: refDeclarationDir });
     if (refOutDir && !target.outDir) target.outDir = refOutDir;
     if (refRootDir && !target.rootDir) target.rootDir = refRootDir;
     if (!refOutDir || !refRootDir) walkReferences(target, refConfig.references, refDir, visited, pairs, paths);
@@ -145,6 +148,7 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     const compilerOptions = (config.compilerOptions ?? {}) as CompilerOptions;
 
     if (compilerOptions.outDir) compilerOptions.outDir = absDir(compilerOptions.outDir, dir);
+    if (compilerOptions.declarationDir) compilerOptions.declarationDir = absDir(compilerOptions.declarationDir, dir);
     if (compilerOptions.rootDir) compilerOptions.rootDir = absDir(compilerOptions.rootDir, dir);
     if (compilerOptions.rootDirs) compilerOptions.rootDirs = compilerOptions.rootDirs.map(d => absDir(d, dir));
 
