@@ -2,5 +2,12 @@
   "name": "@fixtures/workspaces-export-fallback-array__library",
   "private": true,
   "type": "module",
-  "exports": ["./dist/index.js", "./dist/fallback.js"]
+  "exports": {
+    ".": ["./dist/index.js", "./dist/fallback.js"],
+    "./conditional": {
+      "browser": "./dist/fallback.js",
+      "import": "./dist/conditional.js",
+      "default": ["./dist/fallback.js"]
+    }
+  }
 }

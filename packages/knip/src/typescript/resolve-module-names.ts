@@ -20,7 +20,8 @@ function pickStringTarget(value: unknown): string | undefined {
     return;
   }
   const obj = value as Record<string, unknown>;
-  for (const key of ['default', 'node', 'import', 'require']) {
+  for (const key of Object.keys(obj)) {
+    if (key !== 'default' && key !== 'node' && key !== 'import' && key !== 'require') continue;
     const v = pickStringTarget(obj[key]);
     if (v) return v;
   }
