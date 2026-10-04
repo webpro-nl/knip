@@ -42,9 +42,17 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   for (const server of [localConfig.webServer].flat()) {
     if (!server?.command) continue;
     const dir = server.cwd ? toAbsolute(server.cwd, configFileDir) : configFileDir;
-    const manifest = options.getManifest(dir) ?? options.manifest;
-    for (const input of options.getInputsFromScripts(server.command, { optionalBinaries: true, cwd: dir, manifest })) {
-      inputs.push({ ...input, dir });
+    for (const input of options.getInputsFromScripts(server.command, {
+      optionalBinaries: true,
+      cwd: dir,
+      manifest: options.getManifest(dir) ?? options.manifest,
+    })) {
+      const inputDir = input.dir ?? dir;
+      inputs.push({
+        ...input,
+        ...(input.type === 'entry' ? { specifier: toAbsolute(input.specifier, inputDir) } : {}),
+        dir: inputDir,
+      });
     }
   }
 
