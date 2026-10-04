@@ -57,7 +57,7 @@ export const toDeclarationSpecifier = (specifier: string) => {
   if (IS_DTS.test(specifier)) return specifier;
 };
 
-export const getPublishedTypeManifest = (manifest: PackageJson) => {
+export const getPublishedTypeManifest = (manifest: PackageJson): PackageJson => {
   const { publishConfig } = manifest;
   if (!publishConfig) return manifest;
 
