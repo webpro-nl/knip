@@ -6,13 +6,13 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/hono');
 
-test('Find Hono application entry files and their imported routers', async () => {
+test('Do not infer Hono entry files from filenames', async () => {
   for (const isProduction of [false, true]) {
     const options = await createOptions({ cwd, isProduction });
     const { issues } = await main(options);
 
     assert(issues.files['src/orphan.ts']);
-    assert.equal(issues.files['src/server.ts'], undefined);
-    assert.equal(issues.files['src/routes.ts'], undefined);
+    assert(issues.files['src/server.ts']);
+    assert(issues.files['src/routes.ts']);
   }
 });
