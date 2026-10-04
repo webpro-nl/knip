@@ -11,7 +11,7 @@ import { dirname, isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
-const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
+const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
@@ -36,7 +36,15 @@ const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions, fileNa
   const sourceFiles = fileNames.filter(
     filePath => !isDeclarationFile.test(filePath) && (compilerOptions.allowJs || !isJavaScriptFile.test(filePath))
   );
-  const inferredRootDir = compilerOptions.composite ? dir : getCommonSourceDirectory(sourceFiles);
+  const commonSourceDirectory = getCommonSourceDirectory(sourceFiles);
+  // `fileNames` contains the config's files/include expansion, not all files in the
+  // program. Keep the historical fallback when it doesn't establish the config
+  // directory as the common root (transitive imports may be outside the list).
+  const inferredRootDir = compilerOptions.composite
+    ? dir
+    : commonSourceDirectory === dir
+      ? commonSourceDirectory
+      : undefined;
   const resolvedSrc =
     compilerOptions.rootDir ?? (outDirHasSrc ? dir : (inferredRootDir ?? (isDirectory(srcDir) ? srcDir : dir)));
   return { srcDir: resolvedSrc, outDir: compilerOptions.outDir || resolvedSrc };
@@ -47,10 +55,11 @@ export const augmentWorkspace = (
   dir: string,
   compilerOptions: CompilerOptions | undefined,
   fileNames: string[],
-  pluginSourceMaps: SourceMap[] = []
+  pluginSourceMaps: SourceMap[] = [],
+  tsconfigDir = dir
 ) => {
   const all = compilerOptions
-    ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions, fileNames)]
+    ? [...pluginSourceMaps, tsconfigSourceMap(tsconfigDir, compilerOptions, fileNames)]
     : pluginSourceMaps;
   if (all.length === 0) return;
   const seen = new Set<string>();
@@ -135,12 +144,10 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const negation = specifier.startsWith('!') ? '!' : '';
-      const id = specifier.slice(negation.length);
-      const absSpecifier = isAbsolute(id) ? id : prependDirToPattern(dir, id);
+      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       const mapped = ws?.sourceMaps && rewritePattern(ws.sourceMaps, absSpecifier, extensions);
-      patterns.add(negation + (mapped ?? absSpecifier));
+      patterns.add(mapped ?? absSpecifier);
     }
 
     const filePaths = await _glob({ patterns: Array.from(patterns), cwd: chief.cwd, dir, label });

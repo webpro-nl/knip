@@ -20,7 +20,7 @@ import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
-import { _glob, _syncGlob, prependDirToPattern as prependDir, removeProductionSuffix } from '../util/glob.ts';
+import { _glob, _syncGlob, negate, prependDirToPattern as prependDir } from '../util/glob.ts';
 import {
   type Input,
   isAlias,
@@ -44,7 +44,6 @@ import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
 import { perfObserver } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
-import { expandIgnorePatterns } from '../util/parse-and-convert-gitignores.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
@@ -195,10 +194,14 @@ export async function build({
     worker.config = config;
 
     const pluginSourceMaps = await worker.resolveSourceMaps();
-    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, tscSourcePaths, [
-      ...pluginSourceMaps,
-      ...sourceMapPairs,
-    ]);
+    augmentWorkspace(
+      workspace,
+      dir,
+      isFile ? compilerOptions : undefined,
+      tscSourcePaths,
+      [...pluginSourceMaps, ...sourceMapPairs],
+      dirname(tsConfigFilePath)
+    );
 
     const inputs = new Set(preprocessorInputs.get(name));
 
@@ -332,23 +335,15 @@ export async function build({
       }
     }
 
-    const developmentMatchers: Array<(filePath: string) => boolean> = [];
+    const negatedEntryPatterns: string[] = [];
     if (options.isProduction) {
-      const toPattern = (pattern: string) => join(isAbsolute(pattern) ? '' : dir, removeProductionSuffix(pattern));
       for (const map of [entryPatterns, entryPatternsSkipExports]) {
-        for (const patterns of map.values()) {
-          const [excluded, included] = partition(patterns, pattern => pattern.startsWith('!'));
-          if (included.length === 0) continue;
-          const ignore = expandIgnorePatterns(excluded.map(pattern => removeProductionSuffix(pattern.slice(1))));
-          developmentMatchers.push(picomatch(included.map(toPattern), { ignore: ignore.map(toPattern), dot: true }));
-        }
+        for (const patterns of map.values()) for (const pattern of patterns) negatedEntryPatterns.push(negate(pattern));
       }
     }
-    const productionPaths = (paths: string[]) =>
-      developmentMatchers.length ? paths.filter(path => !developmentMatchers.some(match => match(path))) : paths;
 
     const userEntryPatterns = options.isProduction
-      ? worker.getProductionEntryFilePatterns()
+      ? worker.getProductionEntryFilePatterns(negatedEntryPatterns)
       : worker.getEntryFilePatterns();
     const userEntryPaths = await _glob({
       ...sharedGlobOptions,
@@ -363,10 +358,11 @@ export async function build({
           ...((!options.isProduction && entryPatterns.get(group)) || []),
           ...((!options.isProduction && group === DEFAULT_GROUP && worker.getPluginConfigPatterns()) || []),
           ...(productionPatterns.get(group) ?? []),
+          ...negatedEntryPatterns,
         ]);
         const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-        principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
+        principal.addEntryPaths(pluginWorkspaceEntryPaths);
       }
 
       {
@@ -389,10 +385,7 @@ export async function build({
     }
 
     const hasExplicitEntries = config.entry.some(pattern => !isDefaultPattern('entry', pattern));
-    principal.addEntryPaths(
-      productionPaths(userEntryPaths),
-      hasExplicitEntries ? { skipExportsAnalysis: false } : undefined
-    );
+    principal.addEntryPaths(userEntryPaths, hasExplicitEntries ? { skipExportsAnalysis: false } : undefined);
 
     if (options.isUseTscFiles && isFile) {
       const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
@@ -418,7 +411,7 @@ export async function build({
       }
     } else {
       const patterns = options.isProduction
-        ? worker.getProductionProjectFilePatterns()
+        ? worker.getProductionProjectFilePatterns(negatedEntryPatterns)
         : worker.getProjectFilePatterns([
             ...(productionPatternsSkipExports.get(DEFAULT_GROUP) ?? []),
             ...projectFilePatterns,
@@ -437,7 +430,7 @@ export async function build({
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 
-      for (const projectPath of productionPaths(projectPaths)) principal.addProjectPath(projectPath);
+      for (const projectPath of projectPaths) principal.addProjectPath(projectPath);
     }
 
     worker.onDispose();
