@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/playwright5",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "@playwright/test": "*"
+  }
+}

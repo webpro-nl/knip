@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/playwright5__app",
+  "scripts": {
+    "serve": "node"
+  }
+}

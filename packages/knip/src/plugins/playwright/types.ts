@@ -45,6 +45,11 @@ type Project = {
   testMatch?: string | RegExp | (string | RegExp)[]; // regexp not supported by Knip
 };
 
+type TestConfigWebServer = {
+  command: string;
+  cwd?: string;
+};
+
 export type PlaywrightTestConfig = {
   projects?: Project[];
   testMatch?: string | RegExp | (string | RegExp)[]; // regexp not supported by Knip
@@ -54,4 +59,5 @@ export type PlaywrightTestConfig = {
     | ReporterDescription[];
   globalSetup?: string | Array<string>;
   globalTeardown?: string | Array<string>;
+  webServer?: TestConfigWebServer | TestConfigWebServer[];
 };

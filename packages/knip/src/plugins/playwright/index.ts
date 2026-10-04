@@ -39,6 +39,15 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
   for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
 
+  for (const server of [localConfig.webServer].flat()) {
+    if (!server?.command) continue;
+    const dir = server.cwd ? toAbsolute(server.cwd, configFileDir) : configFileDir;
+    const manifest = options.getManifest(dir) ?? options.manifest;
+    for (const input of options.getInputsFromScripts(server.command, { optionalBinaries: true, cwd: dir, manifest })) {
+      inputs.push({ ...input, dir });
+    }
+  }
+
   const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
 
   const reporters = [localConfig.reporter].flat().flatMap(reporter => {
