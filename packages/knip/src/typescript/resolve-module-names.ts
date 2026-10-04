@@ -14,16 +14,14 @@ function pickStringTarget(value: unknown, isTypeOnly: boolean): string | undefin
   if (!value || typeof value !== 'object') return;
   if (Array.isArray(value)) {
     for (const item of value) {
-      const target = pickStringTarget(item);
+      const target = pickStringTarget(item, isTypeOnly);
       if (target) return target;
     }
     return;
   }
   const obj = value as Record<string, unknown>;
   const validConditions = new Set(
-    isTypeOnly
-      ? ['types', 'default', 'node', 'import', 'require']
-      : ['default', 'node', 'import', 'require']
+    isTypeOnly ? ['types', 'default', 'node', 'import', 'require'] : ['default', 'node', 'import', 'require']
   );
 
   for (const key of Object.keys(obj)) {
