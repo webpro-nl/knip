@@ -76,7 +76,6 @@ export type Workspace = {
   manifestStr: string;
   ignoreMembers: IgnorePatterns;
   sourceMaps?: SourceMap[];
-  compilerExtensions?: string[];
 };
 
 /**

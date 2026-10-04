@@ -164,6 +164,7 @@ export function createCustomModuleResolver(
   const moduleExtensions = new Set([...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.json', '.jsonc']);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
+  const sourceExtensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
   const resolveSync =
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
@@ -171,7 +172,7 @@ export function createCustomModuleResolver(
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
-      return toSourceFilePath(resolvedFileName) || resolvedFileName;
+      return toSourceFilePath(resolvedFileName, sourceExtensions) || resolvedFileName;
     }
     return resolvedFileName;
   }
@@ -253,7 +254,7 @@ export function createCustomModuleResolver(
       const target = expandPackageTarget(pickStringTarget(workspaceTarget.target), workspaceTarget.patternMatch);
       if (target) {
         const targetPath = toPackagePath(workspaceTarget.dir, target);
-        const sourcePath = targetPath && toSourceFilePath(targetPath);
+        const sourcePath = targetPath && toSourceFilePath(targetPath, sourceExtensions);
         if (sourcePath) return toResult(specifier, containingFile, sourcePath);
       }
 

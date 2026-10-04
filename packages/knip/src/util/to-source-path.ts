@@ -13,8 +13,6 @@ const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
-const sourceExtensions = [...DEFAULT_EXTENSIONS];
-
 const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions): SourceMap => {
   const srcDir = join(dir, 'src');
   const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
@@ -26,11 +24,9 @@ export const augmentWorkspace = (
   workspace: Workspace,
   dir: string,
   compilerOptions: CompilerOptions | undefined,
-  pluginSourceMaps: SourceMap[] = [],
-  compilerExtensions: string[] = []
+  pluginSourceMaps: SourceMap[] = []
 ) => {
   const all = compilerOptions ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions)] : pluginSourceMaps;
-  workspace.compilerExtensions = compilerExtensions;
   if (all.length === 0) return;
   const seen = new Set<string>();
   const unique: SourceMap[] = [];
@@ -87,7 +83,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string | undefined>();
 
-  return (filePath: string) => {
+  return (filePath: string, extensions: string[]) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -96,7 +92,6 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
       for (const { srcDir, outDir } of workspace.sourceMaps) {
         if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
         const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
-        const extensions = [...sourceExtensions, ...(workspace.compilerExtensions ?? [])];
         const srcFilePath = findFileWithExtensions(basePath, extensions);
         if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);

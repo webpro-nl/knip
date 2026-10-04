@@ -194,13 +194,7 @@ export async function build({
     worker.config = config;
 
     const pluginSourceMaps = await worker.resolveSourceMaps();
-    augmentWorkspace(
-      workspace,
-      dir,
-      isFile ? compilerOptions : undefined,
-      [...pluginSourceMaps, ...sourceMapPairs],
-      extensions
-    );
+    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
     const inputs = new Set(preprocessorInputs.get(name));
 
