@@ -26,7 +26,15 @@ import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
   args?: ParsedCLIArgs;
+  configuration?: RawConfiguration;
 }
+
+const copyConfiguration = (configuration: RawConfiguration) => {
+  const copy = { ...configuration };
+  // The issue type filter below deletes invalid keys from `rules` in place
+  if (copy.rules) copy.rules = { ...copy.rules };
+  return copy;
+};
 
 /**
  * - Loads package.json/pnpm-workspace.yaml
@@ -46,22 +54,26 @@ export const createOptions = async (options: CreateOptions) => {
   }
 
   let configFilePath: string | undefined;
-  for (const configPath of args.config ? [args.config] : KNIP_CONFIG_LOCATIONS) {
-    const resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(cwd, configPath);
-    if (resolvedConfigFilePath) {
-      configFilePath = resolvedConfigFilePath;
-      break;
+
+  if (!options.configuration) {
+    for (const configPath of args.config ? [args.config] : KNIP_CONFIG_LOCATIONS) {
+      const resolvedConfigFilePath = isAbsolute(configPath) ? configPath : findFile(cwd, configPath);
+      if (resolvedConfigFilePath) {
+        configFilePath = resolvedConfigFilePath;
+        break;
+      }
+    }
+
+    if (args.config && !configFilePath && !manifest.knip) {
+      throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
     }
   }
 
-  if (args.config && !configFilePath && !manifest.knip) {
-    throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
-  }
-
+  const providedConfig = options.configuration && copyConfiguration(options.configuration);
   const loadedConfig = Object.assign(
     {},
-    manifest.knip,
-    configFilePath ? await loadResolvedConfigFile(configFilePath, args) : {}
+    providedConfig ? undefined : manifest.knip,
+    providedConfig ?? (configFilePath ? await loadResolvedConfigFile(configFilePath, args) : {})
   );
 
   const validIssueTypes = new Set<string>(ISSUE_TYPES);
@@ -86,7 +98,7 @@ export const createOptions = async (options: CreateOptions) => {
 
   const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
 
-  if (!configFilePath && manifest.knip) configFilePath = manifestPath;
+  if (!options.configuration && !configFilePath && manifest.knip) configFilePath = manifestPath;
 
   const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
   const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
@@ -202,7 +214,7 @@ export const createOptions = async (options: CreateOptions) => {
     isTrace,
     isTreatConfigHintsAsErrors: args['treat-config-hints-as-errors'] ?? parsedConfig.treatConfigHintsAsErrors ?? false,
     isTreatTagHintsAsErrors: args['treat-tag-hints-as-errors'] ?? parsedConfig.treatTagHintsAsErrors ?? false,
-    isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath),
+    isUseTscFiles: options.isUseTscFiles ?? args['use-tsconfig-files'] ?? (options.isSession && !configFilePath && !providedConfig),
     isWatch: args.watch ?? options.isWatch ?? false,
     maxIssues: parseNumericOption(args['max-issues'], 'max-issues') ?? 0,
     maxShowIssues: parseNumericOption(args['max-show-issues'], 'max-show-issues'),

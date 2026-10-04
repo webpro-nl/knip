@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/create-options-configuration",
+  "workspaces": ["packages/*", "extra/*"],
+  "knip": {
+    "entry": ["garden.ts"],
+    "rules": {
+      "exports": "off"
+    }
+  }
+}

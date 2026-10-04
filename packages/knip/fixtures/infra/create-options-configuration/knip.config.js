@@ -1,0 +1,1 @@
+throw new Error('knip.config.js must not be loaded when a configuration object is passed');
