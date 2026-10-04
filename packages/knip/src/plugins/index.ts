@@ -47,6 +47,7 @@ import { default as hardhat } from './hardhat/index.ts';
 import { default as hono } from './hono/index.ts';
 import { default as husky } from './husky/index.ts';
 import { default as i18nextParser } from './i18next-parser/index.ts';
+import { default as jasmine } from './jasmine/index.ts';
 import { default as jest } from './jest/index.ts';
 import { default as karma } from './karma/index.ts';
 import { default as knex } from './knex/index.ts';
@@ -238,6 +239,7 @@ export const Plugins = {
   hono,
   husky,
   'i18next-parser': i18nextParser,
+  jasmine,
   jest,
   karma,
   knex,

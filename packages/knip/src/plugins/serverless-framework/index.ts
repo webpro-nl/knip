@@ -34,7 +34,8 @@ const resolveFileVariable = async (value: unknown, dir: string): Promise<unknown
 
 const handlerToEntry = (handler: string) => {
   const dot = handler.lastIndexOf('.');
-  return toProductionEntry(`${handler.slice(0, dot)}.{js,ts}`);
+  const file = handler.slice(0, dot);
+  return toProductionEntry(/\.(?:[cm]?[jt]s|[jt]sx)$/.test(file) ? file : `${file}.{js,ts}`);
 };
 
 const pluginToInput = (plugin: string, dir: string) =>

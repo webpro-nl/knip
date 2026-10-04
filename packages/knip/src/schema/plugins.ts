@@ -61,6 +61,7 @@ export const pluginsSchema = z.object({
   hono: pluginSchema,
   husky: pluginSchema,
   'i18next-parser': pluginSchema,
+  jasmine: pluginSchema,
   jest: pluginSchema,
   karma: pluginSchema,
   knex: pluginSchema,

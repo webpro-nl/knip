@@ -151,6 +151,7 @@ jobs:
 
           - name: InvokeAI
             repo: invoke-ai/InvokeAI
+            ref: 6440706e43c22b24a317cd5afde3da6ccbe50d02 # Last passing commit before the 7.0 migration renamed invokeai/frontend/web to webv1
             sparse-checkout: invokeai/frontend/web
             commands: |
               cd invokeai/frontend/web

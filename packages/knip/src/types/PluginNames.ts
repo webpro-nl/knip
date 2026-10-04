@@ -48,6 +48,7 @@ export type PluginName =
   | 'hono'
   | 'husky'
   | 'i18next-parser'
+  | 'jasmine'
   | 'jest'
   | 'karma'
   | 'knex'
@@ -239,6 +240,7 @@ export const pluginNames = [
   'hono',
   'husky',
   'i18next-parser',
+  'jasmine',
   'jest',
   'karma',
   'knex',

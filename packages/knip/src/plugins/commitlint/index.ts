@@ -26,6 +26,14 @@ const toExtendsSpecifier = (id: string) => {
   return id.startsWith('commitlint-config-') ? id : `commitlint-config-${id}`;
 };
 
+const toPluginSpecifier = (id: string) => {
+  if (!id.startsWith('@')) return id.startsWith('commitlint-plugin-') ? id : `commitlint-plugin-${id}`;
+  const [scope, name] = id.split('/');
+  if (!name) return `${scope}/commitlint-plugin`;
+  if (name === 'commitlint-plugin' || name.startsWith('commitlint-plugin-')) return id;
+  return id.replace('/', '/commitlint-plugin-');
+};
+
 const resolveConfig: ResolveConfig<CommitLintConfig> = async (config, options) => {
   const inputs: Input[] = [];
   const extendsConfigs: string[] = [];
@@ -33,7 +41,10 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async (config, options) =
     if (isInternal(id)) inputs.push(toConfig('commitlint', id, { containingFilePath: options.configFilePath }));
     else extendsConfigs.push(toExtendsSpecifier(id));
   }
-  const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
+  const plugins: string[] = [];
+  for (const id of config.plugins ? [config.plugins].flat() : []) {
+    if (typeof id === 'string') plugins.push(toPluginSpecifier(id));
+  }
   const formatter = config.formatter ? [config.formatter] : [];
   const parserPreset = await config.parserPreset;
   const parserPresetPaths: string[] = parserPreset
