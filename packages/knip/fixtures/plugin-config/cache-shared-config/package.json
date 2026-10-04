@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/plugin-config-cache-shared-config",
+  "devDependencies": {
+    "eslint-plugin-regexp": "*",
+    "vite-plus": "*"
+  }
+}

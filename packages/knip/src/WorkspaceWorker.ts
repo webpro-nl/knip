@@ -96,7 +96,7 @@ export class WorkspaceWorker {
   enabledPlugins: PluginName[] = [];
   enabledPluginsInAncestors: string[];
 
-  cache: CacheConsultant<CacheItem>;
+  cache: CacheConsultant<Partial<Record<PluginName, CacheItem>>>;
 
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
 
@@ -427,8 +427,8 @@ export class WorkspaceWorker {
         const isManifest = basename(configFilePath) === 'package.json';
         const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
 
-        if (fd?.meta?.data && !fd.changed) {
-          const data = fd.meta.data;
+        const data = fd?.changed ? undefined : fd?.meta?.data?.[pluginName];
+        if (data) {
           if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
           if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
           if (data.configFile) addInput(data.configFile);
@@ -504,7 +504,7 @@ export class WorkspaceWorker {
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);
           } else if (fd?.meta) {
-            fd.meta.data = cache;
+            fd.meta.data = { ...fd.meta.data, [pluginName]: cache };
           }
         }
       }
