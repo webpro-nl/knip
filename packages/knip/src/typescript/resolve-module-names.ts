@@ -11,12 +11,23 @@ import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
 function pickStringTarget(value: unknown, isTypeOnly: boolean): string | undefined {
   if (typeof value === 'string') return value;
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const target = pickStringTarget(item);
+      if (target) return target;
+    }
+    return;
+  }
   const obj = value as Record<string, unknown>;
-  const conditions = isTypeOnly
-    ? ['types', 'default', 'node', 'import', 'require']
-    : ['default', 'node', 'import', 'require'];
-  for (const key of conditions) {
+  const validConditions = new Set(
+    isTypeOnly
+      ? ['types', 'default', 'node', 'import', 'require']
+      : ['default', 'node', 'import', 'require']
+  );
+
+  for (const key of Object.keys(obj)) {
+    if (!validConditions.has(key)) continue;
     const v = pickStringTarget(obj[key], isTypeOnly);
     if (v) return v;
   }

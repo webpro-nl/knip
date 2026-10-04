@@ -180,8 +180,263 @@ export function extractNamespaceMembers(
       addMember(d.id.name, d.id.start, stmt.start, stmt.end);
     }
   }
+  if (!prefix && members.length > 0) markNamespaceMemberRefs(decl.body.body, members);
   return members;
 }
+
+type NamespaceScope = { prefix: string; names: Set<string>; own: Set<string>; isShadow?: boolean };
+
+const noNames = new Set<string>();
+
+const addBindingNames = (pattern: any, names: Set<string>) => {
+  if (!pattern) return;
+  if (pattern.type === 'Identifier') names.add(pattern.name);
+  else if (pattern.type === 'ObjectPattern')
+    for (const p of pattern.properties) addBindingNames(p.value ?? p.argument, names);
+  else if (pattern.type === 'ArrayPattern') for (const el of pattern.elements) addBindingNames(el, names);
+  else if (pattern.type === 'AssignmentPattern') addBindingNames(pattern.left, names);
+  else if (pattern.type === 'RestElement') addBindingNames(pattern.argument, names);
+};
+
+const addDeclaredNames = (statements: any[], names: Set<string>) => {
+  for (const stmt of statements) {
+    if (stmt.type === 'VariableDeclaration') for (const d of stmt.declarations) addBindingNames(d.id, names);
+    else if (stmt.type !== 'ExpressionStatement' && stmt.id?.type === 'Identifier') names.add(stmt.id.name);
+  }
+};
+
+const addVarNames = (node: any, names: Set<string>) => {
+  if (!node) return;
+  switch (node.type) {
+    case 'VariableDeclaration':
+      if (node.kind === 'var') for (const d of node.declarations) addBindingNames(d.id, names);
+      return;
+    case 'BlockStatement':
+      for (const stmt of node.body) addVarNames(stmt, names);
+      return;
+    case 'IfStatement':
+      addVarNames(node.consequent, names);
+      addVarNames(node.alternate, names);
+      return;
+    case 'ForStatement':
+      addVarNames(node.init, names);
+      addVarNames(node.body, names);
+      return;
+    case 'ForInStatement':
+    case 'ForOfStatement':
+      addVarNames(node.left, names);
+      addVarNames(node.body, names);
+      return;
+    case 'WhileStatement':
+    case 'DoWhileStatement':
+    case 'LabeledStatement':
+      addVarNames(node.body, names);
+      return;
+    case 'TryStatement':
+      addVarNames(node.block, names);
+      addVarNames(node.handler?.body, names);
+      addVarNames(node.finalizer, names);
+      return;
+    case 'SwitchStatement':
+      for (const c of node.cases) for (const stmt of c.consequent) addVarNames(stmt, names);
+      return;
+  }
+};
+
+const getShadowedNames = (node: any): Set<string> | undefined => {
+  switch (node.type) {
+    case 'BlockStatement':
+    case 'StaticBlock': {
+      const names = new Set<string>();
+      addDeclaredNames(node.body, names);
+      return names;
+    }
+    case 'SwitchStatement': {
+      const names = new Set<string>();
+      for (const c of node.cases) addDeclaredNames(c.consequent, names);
+      return names;
+    }
+    case 'ForStatement':
+    case 'ForInStatement':
+    case 'ForOfStatement': {
+      const init = node.init ?? node.left;
+      if (init?.type !== 'VariableDeclaration') return;
+      const names = new Set<string>();
+      addDeclaredNames([init], names);
+      return names;
+    }
+    case 'CatchClause': {
+      const names = new Set<string>();
+      addBindingNames(node.param, names);
+      return names;
+    }
+    case 'ClassExpression':
+      return node.id?.type === 'Identifier' ? new Set([node.id.name]) : undefined;
+  }
+  const params = node.params;
+  if (!params || node.type === 'TSTypeParameterDeclaration') return;
+  const names = new Set<string>();
+  for (const param of Array.isArray(params) ? params : (params.items ?? [])) {
+    addBindingNames(param.type === 'TSParameterProperty' ? param.parameter : param, names);
+  }
+  if (node.type === 'FunctionExpression' && node.id?.type === 'Identifier') names.add(node.id.name);
+  if (node.body?.type === 'BlockStatement') addVarNames(node.body, names);
+  return names;
+};
+
+const markNamespaceMemberRefs = (body: any[], members: ExportMember[]) => {
+  const byIdentifier = new Map<string, ExportMember>();
+  for (const member of members) byIdentifier.set(member.identifier, member);
+  const scopes: NamespaceScope[] = [];
+
+  const addRef = (name: string, path: string[]) => {
+    for (let i = scopes.length - 1; i >= 0; i--) {
+      const scope = scopes[i];
+      if (!scope.names.has(name)) continue;
+      if (scope.isShadow) return;
+      let id = scope.prefix ? `${scope.prefix}.${name}` : name;
+      for (let j = 0; j <= path.length; j++) {
+        if (!scope.own.has(id)) {
+          const member = byIdentifier.get(id);
+          if (member) member.hasRefsInFile = true;
+        }
+        if (j < path.length) id = `${id}.${path[j]}`;
+      }
+      return;
+    }
+  };
+
+  const visitBinding = (node: any) => {
+    if (!node) return;
+    switch (node.type) {
+      case 'Identifier':
+        visit(node.typeAnnotation);
+        return;
+      case 'ObjectPattern':
+        for (const p of node.properties) {
+          if (p.type === 'RestElement') visitBinding(p);
+          else {
+            if (p.computed) visit(p.key);
+            visitBinding(p.value);
+          }
+        }
+        visit(node.typeAnnotation);
+        return;
+      case 'ArrayPattern':
+        for (const el of node.elements) visitBinding(el);
+        visit(node.typeAnnotation);
+        return;
+      case 'AssignmentPattern':
+        visitBinding(node.left);
+        visit(node.right);
+        return;
+      case 'RestElement':
+        visitBinding(node.argument);
+        visit(node.typeAnnotation);
+        return;
+      case 'TSParameterProperty':
+        visit(node.decorators);
+        visitBinding(node.parameter);
+        return;
+    }
+    visit(node);
+  };
+
+  const visit = (node: any): void => {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      for (const item of node) visit(item);
+      return;
+    }
+    const type = node.type;
+    if (!type) return;
+    if (type === 'Identifier') {
+      addRef(node.name, []);
+      visit(node.typeAnnotation);
+      return;
+    }
+    if (type === 'JSXIdentifier') {
+      addRef(node.name, []);
+      return;
+    }
+    if (type === 'JSXMemberExpression') {
+      visit(node.object);
+      return;
+    }
+    if (type === 'JSXAttribute') {
+      visit(node.value);
+      return;
+    }
+    if (type === 'TSModuleDeclaration' && node.body?.type === 'TSModuleBlock') {
+      visitNamespace(node.body.body, node.id.type === 'Identifier' ? node.id.name : undefined);
+      return;
+    }
+    if (type === 'MemberExpression' || type === 'TSQualifiedName') {
+      const path: string[] = [];
+      let object = node;
+      while (
+        (object.type === 'MemberExpression' && !object.computed && object.property.type === 'Identifier') ||
+        (object.type === 'TSQualifiedName' && object.right.type === 'Identifier')
+      ) {
+        path.unshift(object.type === 'MemberExpression' ? object.property.name : object.right.name);
+        object = object.type === 'MemberExpression' ? object.object : object.left;
+      }
+      if (path.length > 0) {
+        if (object.type === 'Identifier') addRef(object.name, path);
+        else visit(object);
+        return;
+      }
+    }
+    const keys = visitorKeys[type];
+    if (!keys) return;
+    const shadowed = getShadowedNames(node);
+    const shadow: NamespaceScope | undefined =
+      shadowed && shadowed.size > 0 ? { prefix: '', names: shadowed, own: noNames, isShadow: true } : undefined;
+    if (shadow) scopes.push(shadow);
+    for (const key of keys) {
+      const val = node[key];
+      if (!val || key === 'label') continue;
+      if (key === 'key' && !node.computed) continue;
+      if (key === 'id' || (key === 'name' && type === 'TSTypeParameter') || key.startsWith('param')) {
+        if (Array.isArray(val)) for (const item of val) visitBinding(item);
+        else visitBinding(val);
+      } else visit(val);
+    }
+    if (shadow) scopes.pop();
+  };
+
+  const visitNamespace = (statements: any[], name?: string) => {
+    const parent = scopes.at(-1);
+    const prefix = !parent ? '' : parent.prefix ? `${parent.prefix}.${name}` : (name ?? '');
+    const scope: NamespaceScope = { prefix, names: new Set(), own: new Set() };
+    for (const stmt of statements) {
+      const d = stmt.type === 'ExportNamedDeclaration' ? stmt.declaration : stmt;
+      if (d?.type === 'VariableDeclaration') for (const v of d.declarations) addBindingNames(v.id, scope.names);
+      else if (d?.id?.type === 'Identifier') scope.names.add(d.id.name);
+    }
+    scopes.push(scope);
+    for (const stmt of statements) {
+      const d = stmt.type === 'ExportNamedDeclaration' && stmt.declaration ? stmt.declaration : stmt;
+      if (d.type === 'VariableDeclaration') {
+        for (const declarator of d.declarations) {
+          const names = new Set<string>();
+          addBindingNames(declarator.id, names);
+          scope.own = new Set();
+          for (const n of names) scope.own.add(prefix ? `${prefix}.${n}` : n);
+          visitBinding(declarator.id);
+          visit(declarator.init);
+        }
+      } else {
+        scope.own = new Set();
+        if (d.id?.type === 'Identifier') scope.own.add(prefix ? `${prefix}.${d.id.name}` : d.id.name);
+        visit(d);
+      }
+    }
+    scopes.pop();
+  };
+
+  visitNamespace(body);
+};
 
 export const collectAugmentationRefs = (node: TSModuleDeclaration): string[] => {
   if (!node.body || node.body.type !== 'TSModuleBlock') return [];

@@ -19,6 +19,11 @@ test('Find dependencies with the Commitizen plugin', async () => {
   assert(issues.unlisted['commitlint.config.js']['commitlint-plugin-tense']);
   assert(issues.unlisted['commitlint.config.js']['commitlint-config-lerna']);
   assert(issues.unlisted['commitlint.config.js']['@commitlint/format']);
+  assert(issues.unlisted['commitlint.config.js']['@organization/commitlint-config']);
+  assert(issues.unlisted['commitlint.config.js']['@organization/commitlint-plugin-scope']);
+
+  assert(issues.unlisted['commitlint.base.js']['commitlint-plugin-function-rules']);
+  assert(issues.unlisted['commitlint.base.js']['@organization/commitlint-plugin']);
 
   assert(issues.unlisted['package.json']['@commitlint/config-conventional']);
   assert(issues.unlisted['package.json']['commitlint-plugin-tense']);
@@ -26,8 +31,8 @@ test('Find dependencies with the Commitizen plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 9,
-    processed: 1,
-    total: 1,
+    unlisted: 13,
+    processed: 2,
+    total: 2,
   });
 });

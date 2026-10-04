@@ -1,0 +1,3 @@
+beforeAll(() => {
+  globalThis.currency = "EUR";
+});
