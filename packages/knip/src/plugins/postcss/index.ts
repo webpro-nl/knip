@@ -21,7 +21,12 @@ const config = [
 
 const resolveConfig: ResolveConfig<PostCSSConfig> = config => {
   const plugins = config.plugins
-    ? (Array.isArray(config.plugins) ? config.plugins : Object.keys(config.plugins)).flatMap(plugin => {
+    ? (Array.isArray(config.plugins)
+        ? config.plugins
+        : Object.entries(config.plugins)
+            .filter(([, options]) => options !== false)
+            .map(([plugin]) => plugin)
+      ).flatMap(plugin => {
         if (typeof plugin === 'string') return plugin;
         if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
         return [];
