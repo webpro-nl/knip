@@ -484,6 +484,7 @@ export async function build({
         const { specifier } = unresolvedImport;
 
         if (specifier.startsWith('http')) continue;
+        if (specifier.startsWith('cloudflare:')) continue;
 
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
