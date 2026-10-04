@@ -13,6 +13,8 @@ const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
 const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
 
+const sourceExtensions = [...DEFAULT_EXTENSIONS];
+
 const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions): SourceMap => {
   const srcDir = join(dir, 'src');
   const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
@@ -83,7 +85,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string | undefined>();
 
-  return (filePath: string, extensions: string[]) => {
+  return (filePath: string, extensions = sourceExtensions) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
