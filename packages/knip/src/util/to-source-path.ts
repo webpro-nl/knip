@@ -11,7 +11,7 @@ import { dirname, isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
-const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
+const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
@@ -144,10 +144,12 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
+      const negation = specifier.startsWith('!') ? '!' : '';
+      const id = specifier.slice(negation.length);
+      const absSpecifier = isAbsolute(id) ? id : prependDirToPattern(dir, id);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       const mapped = ws?.sourceMaps && rewritePattern(ws.sourceMaps, absSpecifier, extensions);
-      patterns.add(mapped ?? absSpecifier);
+      patterns.add(negation + (mapped ?? absSpecifier));
     }
 
     const filePaths = await _glob({ patterns: Array.from(patterns), cwd: chief.cwd, dir, label });
