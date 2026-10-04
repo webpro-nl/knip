@@ -12,7 +12,7 @@ import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
-import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toAbsolute, toPosix, toRelative } from './path.ts';
 
 type Options = { gitignore: boolean; cwd: string };
 
@@ -288,13 +288,20 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
 const _parseFindGitignores = timerify(findAndParseGitignores);
 
+// An absolute pattern repeats the cwd, which may contain glob syntax (e.g. `/Dropbox (Team)/app`)
+const toCwdRelative = (pattern: string, cwd: string) =>
+  pattern.startsWith('!') ? `!${toRelative(pattern.slice(1), cwd)}` : toRelative(pattern, cwd);
+
 export async function glob(_patterns: string[], options: GlobOptions): Promise<string[]> {
   if (Array.isArray(_patterns) && _patterns.length === 0) return [];
 
   const cachedIgnores = options.gitignore ? cachedGlobIgnores.get(options.dir) : undefined;
 
   const _ignore: string[] = [...GLOBAL_IGNORE_PATTERNS];
-  const [negatedPatterns, patterns] = partition(_patterns, pattern => pattern.startsWith('!'));
+  const [negatedPatterns, patterns] = partition(
+    _patterns.map(pattern => toCwdRelative(pattern, options.cwd)),
+    pattern => pattern.startsWith('!')
+  );
 
   if (!cachedIgnores && options.gitignore && options.label) {
     let dir = options.dir;
