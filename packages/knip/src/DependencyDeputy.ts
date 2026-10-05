@@ -8,6 +8,7 @@ import {
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
 import { getDependencyMetaData } from './manifest/index.ts';
+import { loadPackageManifest } from './manifest/helpers.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
 import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
@@ -97,8 +98,16 @@ export class DependencyDeputy {
     const requiredPeerDependencies = peerDependencies.filter(dep => !optionalPeerDependencies.has(dep));
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
+    const uninstalledOptionalDependencies = new Set(
+      optionalDependencies.filter(dependency => !loadPackageManifest({ dir, packageName: dependency }))
+    );
 
-    const packageNames = [...dependencies, ...peerDependencies, ...(this.isProduction ? [] : devDependencies)];
+    const packageNames = [
+      ...dependencies,
+      ...peerDependencies,
+      ...optionalDependencies,
+      ...(this.isProduction ? [] : devDependencies),
+    ];
 
     if (this.isReportDependencies) {
       const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
@@ -130,6 +139,7 @@ export class DependencyDeputy {
       peerDependencies: new Set(peerDependencies),
       optionalPeerDependencies,
       requiredPeerDependencies,
+      uninstalledOptionalDependencies,
       allDependencies: new Set(allDependencies),
       engines: manifest.engines ?? {},
       isPrivate: Boolean(manifest.private),
@@ -258,6 +268,20 @@ export class DependencyDeputy {
         }
       }
     }
+
+    const optionalDependencies = new Set<string>();
+    for (const name of workspaceNames) {
+      const manifest = this._manifests.get(name);
+      if (!manifest) continue;
+      for (const dependency of manifest.uninstalledOptionalDependencies) {
+        const defaultBinaryName = dependency.replace(/^@[^/]+\//, '');
+        if (defaultBinaryName === binaryName) {
+          optionalDependencies.add(dependency);
+          this.addReferencedDependency(name, dependency);
+        }
+      }
+    }
+    if (optionalDependencies.size) return optionalDependencies;
 
     return;
   }

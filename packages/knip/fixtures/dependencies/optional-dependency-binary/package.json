@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/optional-dependency-binary",
+  "private": true,
+  "scripts": {
+    "optional": "optional"
+  },
+  "optionalDependencies": {
+    "optional": "*"
+  }
+}
