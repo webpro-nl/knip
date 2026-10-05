@@ -1,12 +1,12 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { _glob, _dirGlob } from '../../util/glob.ts';
-import { type Input, toConfig, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
-import { getReportersDependencies, resolveExtensibleConfig } from './helpers.ts';
+import { getReportersDependencies, resolveExtensibleConfig, resolveWithPrefix } from './helpers.ts';
 import type { JestConfig, JestInitialOptions } from './types.ts';
 
 // https://jestjs.io/docs/configuration
@@ -69,18 +69,26 @@ const resolveDependencies = async (
     }
   }
 
-  const runner = config.runner ? [typeof config.runner === 'string' ? config.runner : config.runner[0]] : [];
+  const runner = config.runner
+    ? [resolveWithPrefix('jest-runner-', typeof config.runner === 'string' ? config.runner : config.runner[0], rootDir)]
+    : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
-  const environments =
-    config.testEnvironment === 'jsdom'
-      ? ['jest-environment-jsdom']
-      : config.testEnvironment
-        ? [config.testEnvironment]
-        : [];
+  const environments: Input[] = [];
+  if (config.testEnvironment === 'node') {
+    environments.push(toDependency('jest-environment-node', { optional: true }));
+  } else if (config.testEnvironment) {
+    const environment =
+      config.testEnvironment === 'jsdom'
+        ? 'jest-environment-jsdom'
+        : resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir);
+    environments.push(toDeferResolve(environment));
+  }
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =
-    config.watchPlugins?.map(watchPlugin => (typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0])) ?? [];
+    config.watchPlugins?.map(watchPlugin =>
+      resolveWithPrefix('jest-watch-', typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0], rootDir)
+    ) ?? [];
   const transform: (string | Input)[] = [];
   for (const transformer of config.transform ? Object.values(config.transform) : []) {
     if (typeof transformer === 'string') {
@@ -106,7 +114,9 @@ const resolveDependencies = async (
   const testResultsProcessor = config.testResultsProcessor ? [config.testResultsProcessor] : [];
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const snapshotSerializers = config.snapshotSerializers ?? [];
-  const testSequencer = config.testSequencer ? [config.testSequencer] : [];
+  const testSequencer = config.testSequencer
+    ? [resolveWithPrefix('jest-sequencer-', config.testSequencer, rootDir)]
+    : [];
 
   const setupFiles = config.setupFiles ?? [];
   const setupFilesAfterEnv = config.setupFilesAfterEnv ?? [];
@@ -138,7 +148,7 @@ const resolveDependencies = async (
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ?? configFileDir;
+  const rootDir = toAbsolute(localConfig.rootDir ?? configFileDir, configFileDir);
   const replaceRootDir = (name: string) => name.replace(rootDirRe, rootDir);
 
   const inputs = await resolveDependencies(localConfig, rootDir, options);

@@ -1,6 +1,7 @@
 import type { PluginOptions } from '../../types/config.ts';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { load } from '../../util/plugin.ts';
+import { _resolveSync } from '../../util/resolve.ts';
 import type { JestInitialOptions } from './types.ts';
 
 export const resolveExtensibleConfig = async (configFilePath: string) => {
@@ -15,6 +16,9 @@ export const resolveExtensibleConfig = async (configFilePath: string) => {
   }
   return config;
 };
+
+export const resolveWithPrefix = (prefix: string, id: string, rootDir: string) =>
+  _resolveSync(prefix + id, rootDir) ? prefix + id : id;
 
 const getStringPropOrFallback = (prop: unknown, fallback: string): string => {
   return typeof prop === 'string' ? prop : fallback;
