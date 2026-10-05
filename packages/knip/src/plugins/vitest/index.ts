@@ -174,12 +174,14 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       for (const entry of await getIndexHtmlEntries(viteRoot, publicDir)) inputs.add(entry);
     }
 
-    const root = cfg.test?.root || cfg.root;
-    const vitestRoot =
-      root || !options.isResolvedConfigFile
-        ? toAbsolute(root ?? '.', options.cwd)
+    const testRoot =
+      cfg.test?.root || !options.isResolvedConfigFile
+        ? toAbsolute(cfg.test?.root ?? '.', options.cwd)
         : toAbsolute('.', options.configFileDir);
-    const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, vitestRoot) : vitestRoot;
+    // Vitest falls back to the top-level root, but file projects get their config directory as root
+    const vitestRoot =
+      !cfg.test?.root && cfg.root && !options.isResolvedConfigFile ? toAbsolute(cfg.root, options.cwd) : testRoot;
+    const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, testRoot) : vitestRoot;
 
     if (cfg.test) {
       if (cfg.test?.include) {
