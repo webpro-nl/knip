@@ -1,4 +1,4 @@
-export interface NxProjectConfiguration {
+interface NxProjectConfiguration {
   targets?: {
     [targetName: string]: {
       command?: string;
