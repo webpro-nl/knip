@@ -174,9 +174,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       for (const entry of await getIndexHtmlEntries(viteRoot, publicDir)) inputs.add(entry);
     }
 
+    const root = cfg.test?.root || cfg.root;
     const vitestRoot =
-      cfg.test?.root || !options.isResolvedConfigFile
-        ? toAbsolute(cfg.test?.root ?? '.', options.cwd)
+      root || !options.isResolvedConfigFile
+        ? toAbsolute(root ?? '.', options.cwd)
         : toAbsolute('.', options.configFileDir);
     const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, vitestRoot) : vitestRoot;
 
