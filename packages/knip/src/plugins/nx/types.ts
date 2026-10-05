@@ -17,6 +17,13 @@ export interface NxProjectConfiguration {
   };
 }
 
+export interface NxPackageConfiguration extends NxProjectConfiguration {
+  generatorsFile?: unknown;
+  executorsFile?: unknown;
+  generators?: Record<string, { factory?: string }>;
+  executors?: Record<string, { implementation?: string }>;
+}
+
 export interface NxConfigRoot {
   plugins?: Array<
     | string

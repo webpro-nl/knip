@@ -1,11 +1,13 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { toConfig, toDependency } from '../../util/input.ts';
+import { toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
-import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
+import type { PackageJson } from '../../types/package-json.ts';
+import { get } from '../../util/object.ts';
+import type { NxConfigRoot, NxPackageConfiguration } from './types.ts';
 
 const title = 'Nx';
 
@@ -14,6 +16,12 @@ const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json', 'package.json'];
+
+const getNxPackageConfiguration = (manifest: PackageJson): NxPackageConfiguration => ({
+  ...get(manifest, 'nx'),
+  generatorsFile: get(manifest, 'generators'),
+  executorsFile: get(manifest, 'executors'),
+});
 
 const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
   const targetsDefault = localConfig.targetDefaults
@@ -40,14 +48,28 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
   return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
 };
 
-const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {
+const resolveConfig: ResolveConfig<NxPackageConfiguration | NxConfigRoot> = async (localConfig, options) => {
   const { configFileName } = options;
 
   if (configFileName === 'nx.json') {
     return findNxDependenciesInNxJson(localConfig as NxConfigRoot, options);
   }
 
-  const config = localConfig as NxProjectConfiguration;
+  const config = localConfig as NxPackageConfiguration;
+
+  const metadataConfigs = [config.generatorsFile, config.executorsFile]
+    .filter((file): file is string => typeof file === 'string')
+    .map(file => toConfig('nx', join(options.configFileDir, file)));
+
+  const generatorEntries = Object.values(config.generators ?? {})
+    .map(generator => generator.factory)
+    .filter((factory): factory is string => typeof factory === 'string')
+    .map(factory => toDeferResolveEntry(join(options.configFileDir, factory)));
+
+  const executorEntries = Object.values(config.executors ?? {})
+    .map(executor => executor.implementation)
+    .filter((implementation): implementation is string => typeof implementation === 'string')
+    .map(implementation => toDeferResolveEntry(join(options.configFileDir, implementation)));
 
   const targets = config.targets ? Object.values(config.targets) : [];
 
@@ -107,9 +129,12 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     return configs;
   });
 
-  return compact([...executors, ...inputs, ...configInputs]).map(id =>
-    typeof id === 'string' ? toDependency(id) : id
-  );
+  return [
+    ...compact([...executors, ...inputs, ...configInputs]).map(id => (typeof id === 'string' ? toDependency(id) : id)),
+    ...metadataConfigs,
+    ...generatorEntries,
+    ...executorEntries,
+  ];
 };
 
 const args = {
@@ -125,6 +150,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
+  packageJsonPath: getNxPackageConfiguration,
   config,
   resolveConfig,
   args,

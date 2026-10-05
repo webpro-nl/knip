@@ -1,0 +1,7 @@
+{
+  "executors": {
+    "bar": {
+      "implementation": "./src/bar/executor"
+    }
+  }
+}

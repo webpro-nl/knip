@@ -1,0 +1,7 @@
+{
+  "generators": {
+    "foo": {
+      "factory": "./src/foo/generator"
+    }
+  }
+}
