@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { _glob, _dirGlob } from '../../util/glob.ts';
-import { type Input, toConfig, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
@@ -73,12 +73,16 @@ const resolveDependencies = async (
     ? [resolveWithPrefix('jest-runner-', typeof config.runner === 'string' ? config.runner : config.runner[0], rootDir)]
     : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
-  const environments =
-    config.testEnvironment === 'jsdom'
-      ? ['jest-environment-jsdom']
-      : config.testEnvironment
-        ? [resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir)]
-        : [];
+  const environments: Input[] = [];
+  if (config.testEnvironment === 'node') {
+    environments.push(toDependency('jest-environment-node', { optional: true }));
+  } else if (config.testEnvironment) {
+    const environment =
+      config.testEnvironment === 'jsdom'
+        ? 'jest-environment-jsdom'
+        : resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir);
+    environments.push(toDeferResolve(environment));
+  }
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =

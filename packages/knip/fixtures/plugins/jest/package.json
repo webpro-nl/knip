@@ -4,6 +4,7 @@
   "devDependencies": {
     "jest": "*",
     "jest-environment-jsdom": "*",
+    "jest-environment-node": "*",
     "jest-watch-select-projects": "*"
   }
 }
