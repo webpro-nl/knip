@@ -34,7 +34,7 @@ const resolveDependencies = async (
   rootDir: string,
   options: PluginOptions
 ): Promise<Input[]> => {
-  const { configFileDir, manifest } = options;
+  const { configFileDir } = options;
 
   if (config?.preset) {
     const { preset } = config;
@@ -70,26 +70,20 @@ const resolveDependencies = async (
   }
 
   const runner = config.runner
-    ? [
-        resolveWithPrefix(
-          'jest-runner-',
-          typeof config.runner === 'string' ? config.runner : config.runner[0],
-          manifest
-        ),
-      ]
+    ? [resolveWithPrefix('jest-runner-', typeof config.runner === 'string' ? config.runner : config.runner[0], rootDir)]
     : [];
   const runtime = config.runtime && config.runtime !== 'jest-circus' ? [config.runtime] : [];
   const environments =
     config.testEnvironment === 'jsdom'
       ? ['jest-environment-jsdom']
       : config.testEnvironment
-        ? [resolveWithPrefix('jest-environment-', config.testEnvironment, manifest)]
+        ? [resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir)]
         : [];
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);
   const watchPlugins =
     config.watchPlugins?.map(watchPlugin =>
-      resolveWithPrefix('jest-watch-', typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0], manifest)
+      resolveWithPrefix('jest-watch-', typeof watchPlugin === 'string' ? watchPlugin : watchPlugin[0], rootDir)
     ) ?? [];
   const transform: (string | Input)[] = [];
   for (const transformer of config.transform ? Object.values(config.transform) : []) {
@@ -117,7 +111,7 @@ const resolveDependencies = async (
   const snapshotResolver = config.snapshotResolver ? [config.snapshotResolver] : [];
   const snapshotSerializers = config.snapshotSerializers ?? [];
   const testSequencer = config.testSequencer
-    ? [resolveWithPrefix('jest-sequencer-', config.testSequencer, manifest)]
+    ? [resolveWithPrefix('jest-sequencer-', config.testSequencer, rootDir)]
     : [];
 
   const setupFiles = config.setupFiles ?? [];
@@ -150,7 +144,7 @@ const resolveDependencies = async (
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
   if (typeof localConfig === 'function') localConfig = await localConfig();
-  const rootDir = localConfig.rootDir ?? configFileDir;
+  const rootDir = toAbsolute(localConfig.rootDir ?? configFileDir, configFileDir);
   const replaceRootDir = (name: string) => name.replace(rootDirRe, rootDir);
 
   const inputs = await resolveDependencies(localConfig, rootDir, options);

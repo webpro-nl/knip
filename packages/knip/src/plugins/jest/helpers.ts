@@ -1,8 +1,7 @@
 import type { PluginOptions } from '../../types/config.ts';
-import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import type { Manifest } from '../../util/package-json.ts';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { load } from '../../util/plugin.ts';
+import { _resolveSync } from '../../util/resolve.ts';
 import type { JestInitialOptions } from './types.ts';
 
 export const resolveExtensibleConfig = async (configFilePath: string) => {
@@ -18,19 +17,8 @@ export const resolveExtensibleConfig = async (configFilePath: string) => {
   return config;
 };
 
-export const resolveWithPrefix = (prefix: string, id: string, manifest: Manifest) => {
-  const packageName = getPackageNameFromModuleSpecifier(prefix + id);
-  if (!packageName) return id;
-  for (const dependencies of [
-    manifest.dependencies,
-    manifest.devDependencies,
-    manifest.optionalDependencies,
-    manifest.peerDependencies,
-  ]) {
-    if (dependencies && packageName in dependencies) return prefix + id;
-  }
-  return id;
-};
+export const resolveWithPrefix = (prefix: string, id: string, rootDir: string) =>
+  _resolveSync(prefix + id, rootDir) ? prefix + id : id;
 
 const getStringPropOrFallback = (prop: unknown, fallback: string): string => {
   return typeof prop === 'string' ? prop : fallback;
