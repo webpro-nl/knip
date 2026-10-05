@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/oxlint-runtime-imports",
+  "devDependencies": {
+    "vite-plus": "*",
+    "eslint-plugin-regexp": "*",
+    "eslint-plugin-react-hooks": "*"
+  }
+}

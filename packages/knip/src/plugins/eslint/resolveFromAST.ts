@@ -6,7 +6,7 @@ import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
 import { type ImportSettingKind, importSettingKinds } from './helpers.ts';
 
-export const getInputsFromSettingsAST = (program: Program): Input[] => {
+const getInputsFromSettingsAST = (program: Program): Input[] => {
   const inputs: Input[] = [];
 
   const addResolver = (kind: ImportSettingKind, resolver: string | undefined) => {

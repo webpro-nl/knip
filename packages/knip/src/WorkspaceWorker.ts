@@ -20,7 +20,7 @@ import type { PluginName } from './types/PluginNames.ts';
 import type { PackageJson } from './types/package-json.ts';
 import type { DependencySet } from './types/workspace.ts';
 import { createManifest, type Manifest } from './util/package-json.ts';
-import { collectStringLiterals, isExternalReExportsOnly } from './typescript/ast-helpers.ts';
+import { isExternalReExportsOnly } from './typescript/ast-helpers.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
@@ -31,16 +31,14 @@ import {
   type Input,
   isCatalog,
   isConfig,
-  isDeferResolve,
-  isDependency,
   toConfig,
   toDebugString,
   toEntry,
   toProductionEntry,
 } from './util/input.ts';
-import { getPackageNameFromSpecifier } from './util/modules.ts';
+import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, isInternal, join, toRelative } from './util/path.ts';
+import { basename, dirname, join, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -471,7 +469,7 @@ export class WorkspaceWorker {
                 if (localConfig) {
                   const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
                   if (plugin.isFilterTransitiveDependencies && !isManifest) {
-                    this.filterTransitiveDependencies(inputs, configFilePath);
+                    filterTransitiveDependencies(inputs, configFilePath, this.readRawFile);
                   }
                   for (const input of inputs) addInput(input, configFilePath);
                   cache.resolveConfig = inputs;
@@ -562,28 +560,6 @@ export class WorkspaceWorker {
     debugLogArray(wsName, 'Plugin dependencies', () => compact(inputs.map(input => toDebugString(input, rootCwd))));
 
     return inputs;
-  }
-
-  private filterTransitiveDependencies(inputs: Input[], configFilePath: string) {
-    const literals = new Set<string>();
-    const visited = new Set<string>();
-    const collect = (filePath: string) => {
-      if (visited.has(filePath)) return;
-      visited.add(filePath);
-      const sourceText = this.readRawFile(filePath);
-      if (!sourceText) return;
-      for (const literal of collectStringLiterals(sourceText, filePath)) {
-        literals.add(literal);
-        if (isInternal(literal)) collect(join(dirname(filePath), literal));
-      }
-    };
-    collect(configFilePath);
-    for (const input of inputs) {
-      if (!input.optional && (isDeferResolve(input) || isDependency(input))) {
-        const name = getPackageNameFromSpecifier(input.specifier);
-        if (name && !literals.has(name)) input.optional = true;
-      }
-    }
   }
 
   public getConfigurationHints(
