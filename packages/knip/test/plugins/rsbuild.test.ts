@@ -4,7 +4,6 @@ import { main } from '../../src/index.ts';
 import rsbuild from '../../src/plugins/rsbuild/index.ts';
 import type { RsbuildConfig } from '../../src/plugins/rsbuild/types.ts';
 import type { PluginOptions } from '../../src/types/config.ts';
-import { toProductionEntry } from '../../src/util/input.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -26,31 +25,22 @@ const pluginOptions: PluginOptions = {
   getInputsFromScripts: () => [],
 };
 
-test('Preserve static source entries when a Rspack callback throws', async () => {
-  const nodeEnv = process.env.NODE_ENV;
+test('Propagate Rspack callback errors instead of returning partial inputs', async () => {
+  const error = new Error('Cannot resolve Rspack configuration');
   const config: RsbuildConfig = {
     source: { entry: { app: './app-entry.ts' }, preEntry: './pre-entry-1.ts' },
-    environments: {
-      worker: {
-        source: { entry: { worker: { import: ['./worker-entry.ts'] } }, preEntry: ['./pre-entry-2.ts'] },
-      },
-    },
     tools: {
-      rspack: () => {
-        throw new Error('Cannot resolve Rspack configuration');
-      },
+      rspack: [
+        { entry: './worker-entry.ts' },
+        () => {
+          throw error;
+        },
+      ],
     },
   };
-  assert(rsbuild.resolveConfig);
-  const inputs = await rsbuild.resolveConfig(config, pluginOptions);
-
-  assert.equal(process.env.NODE_ENV, nodeEnv);
-  assert.deepEqual(inputs, [
-    toProductionEntry('./app-entry.ts'),
-    toProductionEntry('./pre-entry-1.ts'),
-    toProductionEntry('./worker-entry.ts'),
-    toProductionEntry('./pre-entry-2.ts'),
-  ]);
+  const resolveConfig = rsbuild.resolveConfig;
+  assert(resolveConfig);
+  await assert.rejects(async () => resolveConfig(config, pluginOptions), error);
 });
 
 test('Read object and callback inputs from a tools.rspack array', async () => {

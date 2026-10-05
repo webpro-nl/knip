@@ -1,6 +1,5 @@
 import type { Configuration } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { debugLogObject } from '../../util/debug.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
@@ -64,16 +63,12 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
           isServer: target === 'node',
           isWebWorker: target === 'web-worker',
         };
-        try {
-          const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
-          const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, {
-            ...options,
-            isProduction: options.isProduction || isProduction,
-          });
-          for (const input of resolvedInputs) inputs.push(input);
-        } catch (error) {
-          debugLogObject('rsbuild', 'Could not resolve tools.rspack', error);
-        }
+        const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
+        const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, {
+          ...options,
+          isProduction: options.isProduction || isProduction,
+        });
+        for (const input of resolvedInputs) inputs.push(input);
       }
     }
   };
