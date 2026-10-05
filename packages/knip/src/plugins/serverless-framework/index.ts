@@ -37,8 +37,12 @@ const handlerToEntry = (handler: string) => {
   return toProductionEntry(`${handler.slice(0, dot)}.{js,ts}`);
 };
 
-const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toProductionEntry(join(dir, plugin)) : toDependency(plugin);
+const pluginToInput = (plugin: string, dir: string, localPath?: string) =>
+  localPath
+    ? toProductionEntry(join(dir, localPath, `${plugin}.{js,ts}`))
+    : isInternal(plugin)
+      ? toProductionEntry(join(dir, plugin))
+      : toDependency(plugin);
 
 const getFunctionEntries = async (functions: unknown, dir: string) => {
   const entries = [];
@@ -60,11 +64,13 @@ const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
 const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
   const functions = await getFunctionEntries(config.functions, options.configFileDir);
   const resolvedPlugins = await resolveFileVariable(config.plugins, options.configFileDir);
+  const pluginConfig = isRecord(resolvedPlugins) ? resolvedPlugins : undefined;
   const pluginModules = Array.isArray(resolvedPlugins)
     ? resolvedPlugins
-    : isRecord(resolvedPlugins) && Array.isArray(resolvedPlugins.modules)
-      ? resolvedPlugins.modules
+    : pluginConfig && Array.isArray(pluginConfig.modules)
+      ? pluginConfig.modules
       : [];
+  const localPath = pluginConfig && typeof pluginConfig.localPath === 'string' ? pluginConfig.localPath : undefined;
   const plugins = pluginModules.filter((plugin): plugin is string => typeof plugin === 'string');
   const esbuild = config.custom?.esbuild || config.build?.esbuild ? [toDependency('esbuild', { optional: true })] : [];
   const injectEntries = [
@@ -74,7 +80,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
 
   return [
     ...functions,
-    ...plugins.map(plugin => pluginToInput(plugin, options.configFileDir)),
+    ...plugins.map(plugin => pluginToInput(plugin, options.configFileDir, localPath)),
     ...esbuild,
     ...injectEntries,
   ];
