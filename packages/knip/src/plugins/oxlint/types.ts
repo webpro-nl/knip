@@ -8,6 +8,7 @@ type JsPlugin =
     };
 
 type Override = {
+  settings?: Settings;
   jsPlugins?: JsPlugin[];
 };
 

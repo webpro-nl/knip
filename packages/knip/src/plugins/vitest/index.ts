@@ -2,11 +2,13 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
+import { filterTransitiveDependencies } from '../../util/filter-transitive-dependencies.ts';
 import { _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolveExtendedConfig } from '../oxlint/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
@@ -133,6 +135,7 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
 
 export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig> = async (localConfig, options) => {
   const inputs = new Set<Input>();
+  const lintInputs: Input[] = [];
 
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
 
@@ -164,6 +167,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   const seenRoots = new Set<string>();
 
   for (const cfg of configs) {
+    const lint = cfg.lint;
+    if (lint && options.enabledPlugins.includes('oxlint')) {
+      for (const input of resolveExtendedConfig(lint, options.configFilePath)) lintInputs.push(input);
+    }
+
     const viteRoot = toAbsolute(cfg.root ?? '.', options.cwd);
     const publicDir =
       cfg.publicDir === false || cfg.publicDir === ''
@@ -232,6 +240,11 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
     const deps = entries.map(specifier => join(viteRoot, specifier)).map(id => toEntry(id));
     for (const dependency of deps) inputs.add(dependency);
+  }
+
+  if (lintInputs.length > 0) {
+    filterTransitiveDependencies(lintInputs, options.configFilePath);
+    for (const input of lintInputs) inputs.add(input);
   }
 
   return Array.from(inputs);
