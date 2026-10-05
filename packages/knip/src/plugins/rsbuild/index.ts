@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import type { RsbuildConfig } from './types.ts';
+import type { RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
 
@@ -13,7 +13,20 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
+// https://rsbuild.rs/guide/configuration/rsbuild#export-function
+const configParams = [
+  { env: 'development', command: 'dev', envMode: 'development' },
+  { env: 'production', command: 'build', envMode: 'production' },
+];
+
+const getConfigs = async (localConfig: RsbuildConfigOrFn) => {
+  if (typeof localConfig !== 'function') return [localConfig];
+  const configs: RsbuildConfig[] = [];
+  for (const params of configParams) configs.push(await localConfig(params));
+  return configs;
+};
+
+const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async localConfig => {
   const entries = new Set<string>();
 
   const checkSource = (source: RsbuildConfig['source']) => {
@@ -35,11 +48,13 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
     }
   };
 
-  checkSource(config.source);
+  for (const cfg of await getConfigs(localConfig)) {
+    checkSource(cfg.source);
 
-  if (config.environments) {
-    for (const environment of Object.values(config.environments)) {
-      checkSource(environment.source);
+    if (cfg.environments) {
+      for (const environment of Object.values(cfg.environments)) {
+        checkSource(environment.source);
+      }
     }
   }
 

@@ -9,3 +9,7 @@ export type RsbuildConfig = {
     [k: string]: Pick<RsbuildConfig, 'plugins' | 'source'>;
   };
 };
+
+type ConfigParams = { env: string; command: string; envMode: string };
+
+export type RsbuildConfigOrFn = RsbuildConfig | ((params: ConfigParams) => RsbuildConfig | Promise<RsbuildConfig>);
