@@ -38,7 +38,7 @@ import {
 } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, join, toRelative } from './util/path.ts';
+import { basename, dirname, join, relative, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -582,14 +582,17 @@ export class WorkspaceWorker {
       return hints;
     }
 
+    // Match relative paths, the workspace dir may contain glob characters
+    const relativePaths = filePaths.map(filePath => relative(this.dir, filePath));
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) continue;
-      const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
+      const id = pattern.replace(/!$/, '');
+      const filePathOrPattern = join(this.dir, id);
       if (includedPaths.has(filePathOrPattern)) {
         hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
       } else {
-        const matcher = picomatch(filePathOrPattern);
-        if (!filePaths.some(filePath => matcher(filePath))) {
+        const matcher = picomatch(id);
+        if (!relativePaths.some(filePath => matcher(filePath))) {
           hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
         }
       }
