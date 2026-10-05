@@ -19,10 +19,12 @@ test('Use the published declaration graph for dependency placement', async () =>
   assert(issues.unlisted['dist/index.d.ts']['virtual-public']);
   assert(!issues.unlisted['dist/features/private.d.ts']?.['private-pattern']);
   assert(!issues.unlisted['src/index.ts']?.['private-source']);
+  assert.deepEqual(Object.keys(issues.files), ['dist/features/private.d.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
+    files: 1,
     unlisted: 5,
     processed: 6,
     total: 6,

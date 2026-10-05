@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/package-entry-points-null-subpath-dist",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js",
+    "./internal/*": null
+  }
+}

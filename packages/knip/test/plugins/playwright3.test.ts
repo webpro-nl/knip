@@ -9,11 +9,13 @@ const cwd = resolve('fixtures/plugins/playwright3');
 
 test('Find dependencies with the Playwright plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    files: 1,
+    processed: 8,
+    total: 8,
   });
+  assert.deepEqual(Object.keys(issues.files), ['launch.mjs']);
 });

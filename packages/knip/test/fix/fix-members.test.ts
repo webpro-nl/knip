@@ -29,6 +29,12 @@ export enum Fruits {
 
   assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
   assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.length']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.spin']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.width']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.height']);
+  assert(issues.namespaceMembers['namespaces.ts']['Shapes.depth']);
+  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 7);
   assert.equal(
     await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
     `export namespace Animals {
@@ -38,6 +44,43 @@ export enum Fruits {
   export namespace Birds {
     export const eagle = 'eagle';
     }
+}
+
+export namespace Shapes {
+  export abstract class Base {}
+  export class Circle extends Base {}
+
+  export namespace Sizes {
+    export type Size = number;
+    export const small: Size = 1;
+  }
+
+  export const area = (size: Sizes.Size) => size;
+
+  export interface Options {
+    sides: number;
+  }
+  export const options: Options = { sides: 4 };
+
+  export function scale(value: number): number;
+  export function scale(value: number) {
+    return value;
+  }
+  export const double = () => scale(2);
+
+  export const perimeter = () => [1, 2].length;
+
+  export function measure() {
+    const width = 2;
+    {
+      var height = 3;
+    }
+    try {
+      return width + height;
+    } catch (depth) {
+      return depth;
+    }
+  }
 }
 `
   );

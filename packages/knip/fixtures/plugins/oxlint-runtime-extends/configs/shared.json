@@ -1,0 +1,7 @@
+{
+  "jsPlugins": [
+    "eslint-plugin-react-hooks",
+    "./extended-plugin.ts",
+    "eslint-plugin-runtime-missing"
+  ]
+}

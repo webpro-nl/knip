@@ -47,6 +47,7 @@ export type PluginName =
   | 'hardhat'
   | 'husky'
   | 'i18next-parser'
+  | 'jasmine'
   | 'jest'
   | 'karma'
   | 'knex'
@@ -238,6 +239,7 @@ export const pluginNames = [
   'hardhat',
   'husky',
   'i18next-parser',
+  'jasmine',
   'jest',
   'karma',
   'knex',

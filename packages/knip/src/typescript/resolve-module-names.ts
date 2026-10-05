@@ -11,9 +11,17 @@ import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
 function pickStringTarget(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const target = pickStringTarget(item);
+      if (target) return target;
+    }
+    return;
+  }
   const obj = value as Record<string, unknown>;
-  for (const key of ['default', 'node', 'import', 'require']) {
+  for (const key of Object.keys(obj)) {
+    if (key !== 'default' && key !== 'node' && key !== 'import' && key !== 'require') continue;
     const v = pickStringTarget(obj[key]);
     if (v) return v;
   }
@@ -164,6 +172,7 @@ export function createCustomModuleResolver(
   const moduleExtensions = new Set([...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.json', '.jsonc']);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
+  const sourceExtensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
   const resolveSync =
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
@@ -171,7 +180,7 @@ export function createCustomModuleResolver(
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
-      return toSourceFilePath(resolvedFileName) || resolvedFileName;
+      return toSourceFilePath(resolvedFileName, sourceExtensions) || resolvedFileName;
     }
     return resolvedFileName;
   }
@@ -253,7 +262,7 @@ export function createCustomModuleResolver(
       const target = expandPackageTarget(pickStringTarget(workspaceTarget.target), workspaceTarget.patternMatch);
       if (target) {
         const targetPath = toPackagePath(workspaceTarget.dir, target);
-        const sourcePath = targetPath && toSourceFilePath(targetPath);
+        const sourcePath = targetPath && toSourceFilePath(targetPath, sourceExtensions);
         if (sourcePath) return toResult(specifier, containingFile, sourcePath);
       }
 

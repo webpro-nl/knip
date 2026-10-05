@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/jest-prefix",
+  "scripts": {},
+  "devDependencies": {
+    "jest": "*",
+    "jest-environment-miniflare": "*",
+    "jest-runner-groups": "*",
+    "jest-sequencer-alphabetical": "*",
+    "jest-watch-typeahead": "*"
+  }
+}

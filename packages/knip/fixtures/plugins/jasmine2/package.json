@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/jasmine2",
+  "scripts": {
+    "test:ci": "jasmine --config=config/jasmine.ci.json --reporter=./reporters/progress.js --require=ts-node/register specs/smoke.js"
+  },
+  "devDependencies": {
+    "jasmine": "*",
+    "ts-node": "*"
+  }
+}

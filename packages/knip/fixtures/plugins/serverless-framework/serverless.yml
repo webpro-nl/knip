@@ -19,7 +19,7 @@ provider:
 
 functions:
   First:
-    handler: function/handler.handler
+    handler: function/handler.js.handler
     events:
       - http:
           path: /first
