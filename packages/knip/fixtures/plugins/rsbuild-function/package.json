@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/rsbuild-function",
+  "scripts": {
+    "dev": "rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "*",
+    "@rsbuild/plugin-react": "*"
+  }
+}

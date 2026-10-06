@@ -29,3 +29,28 @@ test('Find dependencies with the rsbuild plugin (production)', async () => {
     total: 11,
   });
 });
+
+const cwdFn = resolve('fixtures/plugins/rsbuild-function');
+
+test('Find dependencies with the rsbuild plugin (function config)', async () => {
+  const options = await createOptions({ cwd: cwdFn });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 1,
+    processed: 12,
+    total: 12,
+  });
+});
+
+test('Find dependencies with the rsbuild plugin (function config, production)', async () => {
+  const options = await createOptions({ cwd: cwdFn, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 11,
+    total: 11,
+  });
+});

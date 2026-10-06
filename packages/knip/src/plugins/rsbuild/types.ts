@@ -9,3 +9,13 @@ export type RsbuildConfig = {
     [k: string]: Pick<RsbuildConfig, 'plugins' | 'source'>;
   };
 };
+
+export type RsbuildEnv = {
+  command: 'dev' | 'build' | 'preview' | 'inspect';
+  envMode?: string;
+  meta?: { fileUrl: string };
+};
+
+export type RsbuildConfigFn = (env: RsbuildEnv) => RsbuildConfig | Promise<RsbuildConfig>;
+
+export type RsbuildConfigExport = RsbuildConfig | RsbuildConfigFn;
