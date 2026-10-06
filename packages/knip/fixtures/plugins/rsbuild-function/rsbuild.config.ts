@@ -8,7 +8,19 @@ export default defineConfig(async ({ command, env, envMode }) => {
   }
 
   if (command === 'build' && env === 'production') {
-    return { source: { entry: { app: './src/app.ts' } } };
+    return {
+      output: { target: 'node' },
+      environments: {
+        server: {
+          tools: {
+            rspack: (config, { target }) => {
+              if (target !== 'node') throw new Error(`Unexpected Rspack target: ${target}`);
+              config.entry = './src/app.ts';
+            },
+          },
+        },
+      },
+    };
   }
 
   throw new Error(`Unexpected Rsbuild command: ${command}`);
