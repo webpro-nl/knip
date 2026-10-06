@@ -37,6 +37,7 @@ import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
 import { default as fast } from './fast/index.ts';
+import { default as flue } from './flue/index.ts';
 import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
 import { default as githubAction } from './github-action/index.ts';
@@ -229,6 +230,7 @@ export const Plugins = {
   expo,
   'expressive-code': expressiveCode,
   fast,
+  flue,
   fumadocs,
   gatsby,
   'github-action': githubAction,
