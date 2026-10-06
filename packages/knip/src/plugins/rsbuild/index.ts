@@ -1,6 +1,8 @@
+import type { Configuration } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
 import type { RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
@@ -19,15 +21,16 @@ const configParams = [
   { env: 'production', command: 'build', envMode: 'production' },
 ];
 
-const getConfigs = async (localConfig: RsbuildConfigOrFn) => {
-  if (typeof localConfig !== 'function') return [localConfig];
+const getConfigs = async (configOrFn: RsbuildConfigOrFn) => {
+  if (typeof configOrFn !== 'function') return [configOrFn];
   const configs: RsbuildConfig[] = [];
-  for (const params of configParams) configs.push(await localConfig(params));
+  for (const params of configParams) configs.push(await configOrFn(params));
   return configs;
 };
 
-const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async localConfig => {
+const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
   const entries = new Set<string>();
+  const inputs: Input[] = [];
 
   const checkSource = (source: RsbuildConfig['source']) => {
     if (source?.entry) {
@@ -48,17 +51,53 @@ const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async localConfig => {
     }
   };
 
-  for (const cfg of await getConfigs(localConfig)) {
-    checkSource(cfg.source);
+  const checkConfig = async (localConfig: RsbuildConfig, config: RsbuildConfig) => {
+    checkSource(localConfig.source);
 
-    if (cfg.environments) {
-      for (const environment of Object.values(cfg.environments)) {
-        checkSource(environment.source);
+    if (!localConfig.tools?.rspack) return;
+    const target = localConfig.output?.target ?? config.output?.target ?? 'web';
+    const mode = localConfig.mode ?? config.mode;
+    const passes = mode ? [mode === 'production'] : options.isProduction ? [true] : [false, true];
+
+    for (const rspack of [localConfig.tools.rspack].flat()) {
+      for (const isProduction of typeof rspack === 'function' ? passes : [options.isProduction]) {
+        const baseConfig = {
+          mode: mode ?? (isProduction ? 'production' : 'development'),
+          entry: {},
+          resolve: { alias: {} },
+          module: { rules: [] },
+          plugins: [],
+        } satisfies Configuration;
+        const utils = {
+          env: process.env.NODE_ENV ?? '',
+          isDev: baseConfig.mode === 'development',
+          isProd: baseConfig.mode === 'production',
+          target,
+          isServer: target === 'node',
+          isWebWorker: target === 'web-worker',
+        };
+        const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
+        const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, {
+          ...options,
+          isProduction: options.isProduction || isProduction,
+        });
+        for (const input of resolvedInputs) inputs.push(input);
+      }
+    }
+  };
+
+  for (const config of await getConfigs(configOrFn)) {
+    await checkConfig(config, config);
+
+    if (config.environments) {
+      for (const environment of Object.values(config.environments)) {
+        await checkConfig(environment, config);
       }
     }
   }
 
-  return Array.from(entries).map(input => toProductionEntry(input));
+  for (const entry of entries) inputs.push(toProductionEntry(entry));
+  return inputs;
 };
 
 const plugin: Plugin = {

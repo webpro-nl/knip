@@ -395,6 +395,10 @@ The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
 `.svelte` are not available by default. See [compilers][21] for more details on
 how to include them.
 
+Types used only in signatures of used exports are not reported either.
+TypeScript may need them in declaration files, which Knip cannot rule out for
+the project or its consumers. Without such output, un-exporting them is safe.
+
 ### Enum members
 
 Unused enums and unused members of exported enums are reported by default.
