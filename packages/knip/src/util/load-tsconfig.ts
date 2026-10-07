@@ -4,7 +4,7 @@ import type { CompilerOptions } from '../types/project.ts';
 import { compact } from './array.ts';
 import { isFile } from './fs.ts';
 import { _syncGlob } from './glob.ts';
-import { dirname, isAbsolute, join, toAbsolute, toPosix } from './path.ts';
+import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
 
 const hasGlobChar = (p: string) => p.includes('*') || p.includes('?');
 const hasExtension = (p: string) => {
@@ -13,11 +13,12 @@ const hasExtension = (p: string) => {
   return base !== '.' && base !== '..' && base.includes('.');
 };
 
-const resolvePatterns = (patterns: string[] | undefined, dir: string, expandDirs = false): string[] | undefined => {
+// Relative to the tsconfig dir, so the glob layer doesn't strip the dir again
+const toRelativePatterns = (patterns: string[] | undefined, dir: string): string[] | undefined => {
   if (!patterns) return undefined;
   return patterns.map(p => {
-    const resolved = isAbsolute(p) ? p : join(dir, p);
-    return expandDirs && !hasGlobChar(p) && !hasExtension(p) ? join(resolved, '**/*') : resolved;
+    const pattern = isAbsolute(p) ? relative(dir, p) : p;
+    return hasGlobChar(p) || hasExtension(p) ? pattern : join(pattern, '**/*');
   });
 };
 
@@ -66,12 +67,12 @@ const expandFileNames = (
     for (const file of files) result.push(file);
   }
 
-  const effectiveExclude = [...(exclude ?? []), join(dir, 'node_modules/**')];
+  const effectiveExclude = [...(exclude ?? []), 'node_modules/**'];
   if (compilerOptions.outDir) {
-    effectiveExclude.push(join(compilerOptions.outDir, '**'));
+    effectiveExclude.push(join(relative(dir, compilerOptions.outDir), '**'));
   }
 
-  const effectiveInclude = include ?? (files ? undefined : DEFAULT_INCLUDE.map(p => join(dir, p)));
+  const effectiveInclude = include ?? (files ? undefined : DEFAULT_INCLUDE);
   if (effectiveInclude) {
     const negated = effectiveExclude.map(p => `!${p}`);
     const globbed = _syncGlob({ patterns: [...effectiveInclude, ...negated], cwd: dir });
@@ -163,9 +164,9 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
       );
     }
 
-    const include = resolvePatterns(config.include, dir, true);
-    const exclude = resolvePatterns(config.exclude, dir, true);
-    const files = resolvePatterns(config.files, dir);
+    const include = toRelativePatterns(config.include, dir);
+    const exclude = toRelativePatterns(config.exclude, dir);
+    const files = config.files?.map(p => toAbsolute(p, dir));
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
     const paths = Object.keys(tsconfigPaths).length > 0 ? tsconfigPaths : undefined;
 

@@ -411,12 +411,12 @@ export async function build({
       }
       if (extensions.length > 0) {
         const extPart = extensions.length === 1 ? extensions[0] : `.{${extensions.map(ext => ext.slice(1)).join(',')}}`;
-        const bases = include
-          ? new Set(include.map(p => join(dir, picomatch.scan(relative(dir, p)).base)))
-          : new Set([dir]);
+        // include/exclude are relative to the tsconfig dir, which may differ from the workspace dir (--tsConfig)
+        const tsConfigDir = relative(dir, dirname(tsConfigFilePath));
+        const bases = include ? new Set(include.map(p => join(tsConfigDir, picomatch.scan(p).base))) : new Set(['']);
         const patterns = [
-          ...Array.from(bases, base => `${base}/**/*${extPart}`),
-          ...(exclude?.map(p => `!${p}`) ?? []),
+          ...Array.from(bases, base => join(base, `**/*${extPart}`)),
+          ...(exclude?.map(p => `!${join(tsConfigDir, p)}`) ?? []),
         ];
         const compilerPaths = await _glob({ ...sharedGlobOptions, patterns, label: 'compiler extension paths' });
         for (const compilerPath of compilerPaths) {
