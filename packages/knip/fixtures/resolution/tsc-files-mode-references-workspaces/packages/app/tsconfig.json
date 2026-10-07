@@ -1,0 +1,4 @@
+{
+  "include": ["src"],
+  "references": [{ "path": "../ign" }]
+}

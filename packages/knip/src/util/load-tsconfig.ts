@@ -116,29 +116,6 @@ const walkReferences = (
   }
 };
 
-const expandReferencedFileNames = (
-  references: TsConfigJsonResolved['references'],
-  dir: string,
-  visited: Set<string>,
-  fileNames: string[]
-) => {
-  if (!references?.length) return;
-  for (const ref of references) {
-    const refPath = resolveReference(ref.path, dir);
-    if (!refPath || visited.has(refPath)) continue;
-    visited.add(refPath);
-    const refConfig = parseTsconfig(refPath);
-    const refDir = dirname(refPath);
-    const outDir = refConfig.compilerOptions?.outDir;
-    const compilerOptions = outDir ? { outDir: absDir(outDir, refDir) } : {};
-    const include = resolvePatterns(refConfig.include, refDir, true);
-    const exclude = resolvePatterns(refConfig.exclude, refDir, true);
-    const files = resolvePatterns(refConfig.files, refDir);
-    for (const f of expandFileNames(refDir, compilerOptions, include, exclude, files)) fileNames.push(f);
-    expandReferencedFileNames(refConfig.references, refDir, visited, fileNames);
-  }
-};
-
 interface TSConfigInfo {
   isFile: boolean;
   compilerOptions: CompilerOptions;
@@ -158,7 +135,11 @@ const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
   paths: undefined,
 };
 
-export const loadTSConfig = async (tsConfigFilePath: string, isUseTscFiles = false): Promise<TSConfigInfo> => {
+export const loadTSConfig = async (
+  tsConfigFilePath: string,
+  isUseTscFiles = false,
+  visited = new Set([tsConfigFilePath])
+): Promise<TSConfigInfo> => {
   if (!isFile(tsConfigFilePath)) return { isFile: false, ...EMPTY };
 
   try {
@@ -190,7 +171,15 @@ export const loadTSConfig = async (tsConfigFilePath: string, isUseTscFiles = fal
     const exclude = resolvePatterns(config.exclude, dir, true);
     const files = resolvePatterns(config.files, dir);
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
-    if (isUseTscFiles) expandReferencedFileNames(config.references, dir, new Set([tsConfigFilePath]), fileNames);
+    if (isUseTscFiles && config.references) {
+      // References at or below this directory are part of the project, the others are dependencies
+      for (const ref of config.references) {
+        const refPath = resolveReference(ref.path, dir);
+        if (!refPath?.startsWith(`${dir}/`) || visited.has(refPath)) continue;
+        visited.add(refPath);
+        for (const filePath of (await loadTSConfig(refPath, true, visited)).fileNames) fileNames.push(filePath);
+      }
+    }
     const paths = Object.keys(tsconfigPaths).length > 0 ? tsconfigPaths : undefined;
 
     return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs, paths };
