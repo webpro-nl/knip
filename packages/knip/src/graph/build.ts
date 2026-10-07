@@ -152,7 +152,7 @@ export async function build({
       exclude,
       sourceMapPairs,
       paths: tsConfigPaths,
-    } = await loadTSConfig(tsConfigFilePath);
+    } = await loadTSConfig(tsConfigFilePath, options.isUseTscFiles);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     const worker = new WorkspaceWorker({
