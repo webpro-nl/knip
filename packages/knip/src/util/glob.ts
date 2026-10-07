@@ -24,7 +24,7 @@ interface GlobOptions {
 const prepend = (pattern: string, cwd: string, relativePath: string) => {
   const isNegated = pattern.startsWith('!');
   const id = isNegated ? pattern.slice(1) : pattern;
-  if (!isAbsolute(id) && !relativePath) return pattern;
+  if (id && !isAbsolute(id) && !relativePath) return pattern;
   const globPattern = isAbsolute(id) ? relative(cwd, id) : join(relativePath, id);
   return isNegated ? `!${globPattern}` : globPattern;
 };
