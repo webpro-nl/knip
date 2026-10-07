@@ -48,6 +48,7 @@ JavaScript and TypeScript projects.
 - To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
 - For a fix, revert the source change and confirm the new test fails for the reported reason.
 - For a new plugin or a change in how a tool finds files, verify against the tool's source, not only its docs, and run Knip on the tool's examples or starters when available.
+- Follow the [AI contribution policy][11]: before opening an issue or PR, make sure the person you work for understands and stands behind it. Keep descriptions concise.
 
 ## Run & Debug
 
@@ -122,3 +123,4 @@ pnpm build
 [8]: ./packages/knip/src/util/debug.ts
 [9]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
 [10]: ./.agents/COMPILERS.md
+[11]: ./AI_POLICY.md
