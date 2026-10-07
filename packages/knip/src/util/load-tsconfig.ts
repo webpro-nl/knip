@@ -135,7 +135,11 @@ const EMPTY: Omit<TSConfigInfo, 'isFile'> = {
   paths: undefined,
 };
 
-export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigInfo> => {
+export const loadTSConfig = async (
+  tsConfigFilePath: string,
+  isUseTscFiles = false,
+  visited = new Set([tsConfigFilePath])
+): Promise<TSConfigInfo> => {
   if (!isFile(tsConfigFilePath)) return { isFile: false, ...EMPTY };
 
   try {
@@ -167,6 +171,15 @@ export const loadTSConfig = async (tsConfigFilePath: string): Promise<TSConfigIn
     const exclude = resolvePatterns(config.exclude, dir, true);
     const files = resolvePatterns(config.files, dir);
     const fileNames = expandFileNames(dir, compilerOptions, include, exclude, files);
+    if (isUseTscFiles && config.references) {
+      // References at or below this directory are part of the project, the others are dependencies
+      for (const ref of config.references) {
+        const refPath = resolveReference(ref.path, dir);
+        if (!refPath?.startsWith(`${dir}/`) || visited.has(refPath)) continue;
+        visited.add(refPath);
+        for (const filePath of (await loadTSConfig(refPath, true, visited)).fileNames) fileNames.push(filePath);
+      }
+    }
     const paths = Object.keys(tsconfigPaths).length > 0 ? tsconfigPaths : undefined;
 
     return { isFile: true, compilerOptions, fileNames, include, exclude, sourceMapPairs, paths };
