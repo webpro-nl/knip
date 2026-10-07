@@ -24,7 +24,7 @@ JavaScript and TypeScript projects.
 - TypeScript
   - Avoid `any` and type casting (`as`).
   - Avoid runtime overhead just to get the types right.
-- Lint and format from root: `pnpm run ci`
+- Lint and check formatting from root: `pnpm run ci`; format with `pnpm fmt`
 - Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links)
 
 ## Domain Knowledge
@@ -46,6 +46,8 @@ JavaScript and TypeScript projects.
 - When given a bug report, first confirm the behavior is actually wrong. Reproduce, then check if the reported behavior is correct-by-design before writing any fix.
 - Find repositories/CodeSandbox/StackBlitz source files and local fixtures to actually reproduce the issue at hand.
 - To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
+- For a fix, revert the source change and confirm the new test fails for the reported reason.
+- For a new plugin or a change in how a tool finds files, verify against the tool's source, not only its docs, and run Knip on the tool's examples or starters when available.
 
 ## Run & Debug
 
@@ -99,26 +101,7 @@ pnpm build
 pnpm test
 ```
 
-See [TESTS.md][7] for conventions and placements.
-
-## Fixtures
-
-There are plenty of directories with fixtures in `packages/knip/fixtures`.
-
-- In general, tests have their own fixture directory.
-- Plugin fixture directories at `packages/knip/fixtures/plugins/[plugin-name]*`.
-- For trivial changes or fixes, extend an existing fixture.
-- Don't use "foo" or vague names. One fixture should consist of descriptive file
-  and variable names like `module.ts` and `barrel.ts`, or build upon a "theme"
-  such as fruits or animals to indicate relation/hierarchy.
-- Use empty files if sufficient (e.g. to verify import specifier or entry file).
-- For debugging, it might be useful to run Knip from the fixture directory and
-  see output in terminal. Example:
-
-```sh
-cd packages/knip/fixtures/commonjs
-knip
-```
+See [TESTS.md][7] for test and fixture conventions and placements.
 
 ## Build
 
