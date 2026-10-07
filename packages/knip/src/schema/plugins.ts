@@ -51,6 +51,7 @@ export const pluginsSchema = z.object({
   expo: pluginSchema,
   'expressive-code': pluginSchema,
   fast: pluginSchema,
+  flue: pluginSchema,
   fumadocs: pluginSchema,
   gatsby: pluginSchema,
   'github-action': pluginSchema,
