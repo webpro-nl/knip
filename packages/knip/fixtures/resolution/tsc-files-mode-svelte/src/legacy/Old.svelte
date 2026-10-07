@@ -1,4 +1,3 @@
 <script>
-import { used } from './helper.ts';
-console.log(used);
+console.log('excluded by tsconfig');
 </script>
