@@ -11,7 +11,7 @@ const enablers = ['react-native'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['react-native.config.js'];
+const config = ['react-native.config.{js,cjs,mjs,ts}'];
 
 const RN_CLI_PACKAGES = [
   '@react-native-community/cli',
