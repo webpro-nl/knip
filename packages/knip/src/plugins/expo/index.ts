@@ -15,6 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['app.json', 'app.config.{ts,js}'];
 
+// https://docs.expo.dev/router/reference/src-directory/
 const production = ['app/**/*.{js,jsx,ts,tsx}', 'src/app/**/*.{js,jsx,ts,tsx}'];
 
 // https://docs.expo.dev/versions/latest/config/babel/
@@ -25,7 +26,11 @@ const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) =>
   const config = getConfig(localConfig, options);
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
-  if (manifest.main === 'expo-router/entry') {
+  if (
+    manifest.main === 'expo-router/entry' ||
+    manifest.dependencies?.['expo-router'] ||
+    manifest.devDependencies?.['expo-router']
+  ) {
     let patterns = [...production];
 
     const normalizedPlugins =
@@ -43,8 +48,14 @@ const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) =>
     return patterns.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
   }
 
-  return production.map(entry => toProductionEntry(entry)).concat(await getDependencies(localConfig, options));
+  return getDependencies(localConfig, options);
 };
+
+const note = `The \`app\` and \`src/app\` entries (or the \`root\` option of the \`expo-router\` config plugin) are only added in Expo Router projects.
+That's when \`"main"\` is \`"expo-router/entry"\` or \`expo-router\` is listed in \`package.json\`.`;
+
+/** @public */
+export const docs = { note };
 
 const plugin: Plugin = {
   title,
