@@ -14,13 +14,15 @@ test('Provide configuration hints (2)', async () => {
   assert.deepEqual(configurationHints, [
     { type: 'entry-empty', identifier: 'lib/index.js', workspaceName: '.' },
     { type: 'project-empty', identifier: 'lib/**', workspaceName: '.' },
+    { type: 'entry-empty', identifier: 'missing.js', workspaceName: 'packages/lib' },
+    { type: 'project-empty', identifier: 'generated/**', workspaceName: 'packages/lib' },
     { type: 'entry-top-level', identifier: '[src/entry.js, …]' },
     { type: 'project-top-level', identifier: '[src/**]' },
   ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 4,
+    total: 4,
   });
 });

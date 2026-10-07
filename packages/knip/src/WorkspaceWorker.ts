@@ -582,19 +582,23 @@ export class WorkspaceWorker {
       return hints;
     }
 
-    // Match relative paths, the workspace dir may contain glob characters
-    const relativePaths = filePaths.map(filePath => relative(this.dir, filePath));
+    // Match relative paths (the workspace dir may contain glob characters), relativized up to the first match
+    const dir = this.dir;
+    const relativePaths: string[] = [];
+    const hasMatch = (isMatch: (path: string) => boolean) => {
+      for (let i = 0; i < filePaths.length; i++) {
+        if (isMatch((relativePaths[i] ??= relative(dir, filePaths[i])))) return true;
+      }
+      return false;
+    };
+
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) continue;
       const id = pattern.replace(/!$/, '');
-      const filePathOrPattern = join(this.dir, id);
-      if (includedPaths.has(filePathOrPattern)) {
+      if (includedPaths.has(join(dir, id))) {
         hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
-      } else {
-        const matcher = picomatch(id);
-        if (!relativePaths.some(filePath => matcher(filePath))) {
-          hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
-        }
+      } else if (!hasMatch(picomatch(id))) {
+        hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
       }
     }
 

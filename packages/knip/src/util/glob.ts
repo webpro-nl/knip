@@ -24,13 +24,16 @@ interface GlobOptions {
 const prepend = (pattern: string, cwd: string, relativePath: string) => {
   const isNegated = pattern.startsWith('!');
   const id = isNegated ? pattern.slice(1) : pattern;
+  if (!isAbsolute(id) && !relativePath) return pattern;
   const globPattern = isAbsolute(id) ? relative(cwd, id) : join(relativePath, id);
   return isNegated ? `!${globPattern}` : globPattern;
 };
 
 // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
-const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) =>
-  compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, cwd, relative(cwd, dir))))).sort(negatedLast);
+const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
+  const relativePath = dir === cwd ? '' : relative(cwd, dir);
+  return compact(patterns.map(p => removeProductionSuffix(prepend(p, cwd, relativePath)))).sort(negatedLast);
+};
 
 export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
