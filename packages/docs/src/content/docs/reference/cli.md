@@ -43,8 +43,9 @@ Shortcut: `-c`
 ### `--use-tsconfig-files`
 
 Per workspace, take project files from `tsconfig.json` (`files` + `include`,
-minus `exclude`, `node_modules` and `outDir`) instead of the `project` patterns.
-Workspaces without a `tsconfig.json` fall back to their `project` patterns.
+minus `exclude`, `node_modules` and `outDir`) and from the tsconfig files in its
+`references` instead of the `project` patterns. Workspaces without a
+`tsconfig.json` fall back to their `project` patterns.
 
 Implicitly enabled in the [editor extension, MCP server and language server][1]
 when there is no Knip configuration file.

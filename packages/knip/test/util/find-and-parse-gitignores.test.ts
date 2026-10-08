@@ -105,3 +105,32 @@ test('findAndParseGitignores (with .git file in ancestor)', async () => {
     unignores: new Set(),
   });
 });
+
+test('findAndParseGitignores (negated directories)', async () => {
+  const cwd = resolve('fixtures/infra/gitignore-star-negation');
+  const gitignore = await findAndParseGitignores(cwd);
+  assert.deepEqual(gitignore, {
+    gitignoreFiles: [
+      '../../../.gitignore',
+      '../../../../../.gitignore',
+      '.gitignore',
+      'generated/keep/.gitignore',
+      'generated/keep/cache/keep/.gitignore',
+    ],
+    ignores: new Set([
+      '.git/!(hooks)',
+      '**/node_modules',
+      '**/generated/*',
+      'generated/keep/**/cache/*',
+      '**/.DS_Store',
+      '**/.agents',
+      '**/.cache',
+      '**/.claude',
+      '**/.npmrc',
+      '**/packages/*/dist',
+      '**/bin/knip',
+      '**/bin/knip-bun',
+    ]),
+    unignores: new Set(['**/generated/keep', 'generated/keep/**/cache/keep']),
+  });
+});

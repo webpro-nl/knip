@@ -53,23 +53,23 @@ Please consider this before opening a pull request:
   and keep track of.
 - Pull requests may not align with the general philosophy, or may not be
   affordable to maintain, and therefore rejected.
-- Generated ("vibe-coded") pull requests may be rejected without explanation.
-- Read [development][6] instructions and guidelines.
-- If you think your PR is not ready for review yet, [set it as a draft][7].
+- Using AI tools? Read the [AI contribution policy][6].
+- Read [development][7] instructions and guidelines.
+- If you think your PR is not ready for review yet, [set it as a draft][8].
 - No need to worry about commit messages, they will probably be squashed into a
   single commit when merged.
 - After your first PR is merged, you are automatically added to the [list of
-  contributors][8].
+  contributors][9].
 
 ### Contribute a new plugin
 
 Missing a plugin for a tool you use? Contributing one is often the fastest path
-to support — Knip ships with 150+ plugins, and most of them started as a PR from
-a user of the tool.
+to support — Knip ships with 190+ plugins and counting, and most of them started
+as a PR from users!
 
 To get started:
 
-1. Read the [Writing A Plugin][9] guide on knip.dev.
+1. Read the [Writing A Plugin][10] guide on knip.dev.
 
 2. Scaffold the plugin, tests and fixtures with the built-in generator:
 
@@ -78,7 +78,7 @@ To get started:
    pnpm create-plugin --name your-tool
    ```
 
-3. Follow the general [development][6] instructions.
+3. Follow the general [development][7] instructions.
 
 Feel free to open a draft PR early to get feedback, and look at similar plugins
 for inspiration.
@@ -88,7 +88,8 @@ for inspiration.
 [3]: #open-an-issue
 [4]: #open-a-pull-request
 [5]: https://github.com/webpro-nl/knip/releases
-[6]: /.github/DEVELOPMENT.md
-[7]: https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
-[8]: https://knip.dev/#created-by-awesome-contributors
-[9]: https://knip.dev/writing-a-plugin
+[6]: ../AI_POLICY.md
+[7]: /.github/DEVELOPMENT.md
+[8]: https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
+[9]: https://knip.dev/#created-by-awesome-contributors
+[10]: https://knip.dev/writing-a-plugin

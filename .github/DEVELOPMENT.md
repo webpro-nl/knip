@@ -59,14 +59,14 @@ Note that Git `core.symlinks=true` is required for some tests.
 
 ## Agents
 
-Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][15]. Take
-responsibility and make sure to not cause unnecessary review and "wall of text"
-overhead to maintainers. Also [consider this before opening a pull request][16].
+Using coding agents cq AI-powered tooling? Inform it about [AGENTS.md][15] and
+read the [AI contribution policy][16]. Also [consider this before opening a pull
+request][17].
 
 ## Contributing a plugin?
 
 In addition to the generic guidelines in this document, there's a guide for
-[writing a plugin][17].
+[writing a plugin][18].
 
 ## Running Knip
 
@@ -99,7 +99,7 @@ Assuming you've created `test/feature.test.ts` and `fixtures/feature` (the
 plugin create command does for you), here's a few ideas to run and debug Knip
 from a test.
 
-Creating a new plugin? The [plugin guide][18] has a command to set up a test
+Creating a new plugin? The [plugin guide][19] has a command to set up a test
 with fixtures for you.
 
 ### Run single test file
@@ -117,7 +117,7 @@ knip --directory fixtures/feature
 
 ### Attach debugger to Node.js
 
-To debug Knip in an IDE (e.g. [VS Code][19] or [WebStorm][20]), open the
+To debug Knip in an IDE (e.g. [VS Code][20] or [WebStorm][21]), open the
 built-in terminal and allow the debugger to connect:
 
 ```shell
@@ -136,8 +136,8 @@ great way to debug almost anything in Knip.
 - Using Node.js
   - From any test file, run the "Debug test with tsx/Node.js" launch config
 - Using Bun
-  - VS Code: ensure the [Bun extension][21] is enabled
-  - WebStorm: ensure the [Bun plugin][22] is enabled
+  - VS Code: ensure the [Bun extension][22] is enabled
+  - WebStorm: ensure the [Bun plugin][23] is enabled
   - From any test file, run the "Debug test with Bun" launch config
 
 From now on, just set a breakpoint and hit `F5` (Code) or `ctrl-r` (WS) from any
@@ -168,14 +168,14 @@ pnpm test
 
 ## GitHub Action
 
-The [ci.yml][23] workflow runs the tests across Bun, recent Node.js versions,
+The [ci.yml][24] workflow runs the tests across Bun, recent Node.js versions,
 Ubuntu, macOS and Windows. QA in CI must be all green before a pull request can
-be merged. The [integration.yml][24] workflow runs Knip in multiple repositories
+be merged. The [integration.yml][25] workflow runs Knip in multiple repositories
 using Knip, against the latest version of the code.
 
 ## Test Preview Packages
 
-For pull requests and on each push, the [pkg.pr.new][25] bot posts preview URLs
+For pull requests and on each push, the [pkg.pr.new][26] bot posts preview URLs
 for Knip, the language server, and MCP. Replace `PR_NUMBER` below with the pull
 request number, or a published commit hash to test a specific revision.
 
@@ -197,7 +197,7 @@ its bundled fallback, use a project without a locally resolvable Knip.
 
 ## Test VS Code Extension
 
-With Node.js v24+, pnpm, and [vsce][26] installed, check out the branch or pull
+With Node.js v24+, pnpm, and [vsce][27] installed, check out the branch or pull
 request to test, then run from the repository root:
 
 ```shell
@@ -226,14 +226,15 @@ preview and reinstall Knip from the Marketplace.
 [13]: https://github.com/webpro-nl/knip
 [14]: https://cli.github.com/
 [15]: ../AGENTS.md
-[16]: ./CONTRIBUTING.md#open-a-pull-request
-[17]: https://knip.dev/guides/writing-a-plugin/
-[18]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
-[19]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
-[20]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
-[21]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
-[22]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
-[23]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
-[24]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
-[25]: https://pkg.pr.new
-[26]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#vsce
+[16]: ../AI_POLICY.md
+[17]: ./CONTRIBUTING.md#open-a-pull-request
+[18]: https://knip.dev/guides/writing-a-plugin/
+[19]: https://knip.dev/guides/writing-a-plugin#create-a-new-plugin
+[20]: https://code.visualstudio.com/docs/nodejs/nodejs-debugging
+[21]: https://www.jetbrains.com/help/webstorm/running-and-debugging-node-js.html
+[22]: https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode
+[23]: https://www.jetbrains.com/help/webstorm/bun.html#bun_before_you_start
+[24]: https://github.com/webpro-nl/knip/actions/workflows/ci.yml
+[25]: https://github.com/webpro-nl/knip/actions/workflows/integration.yml
+[26]: https://pkg.pr.new
+[27]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#vsce

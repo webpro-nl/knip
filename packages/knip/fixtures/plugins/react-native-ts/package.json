@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/react-native-ts",
+  "dependencies": {
+    "react-native": "*",
+    "react-native-macos": "*",
+    "react-native-vector-icons": "*"
+  }
+}

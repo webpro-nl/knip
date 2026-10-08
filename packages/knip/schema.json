@@ -570,6 +570,10 @@
           "title": "fast plugin configuration (https://knip.dev/reference/plugins/fast)",
           "$ref": "#/definitions/plugin"
         },
+        "flue": {
+          "title": "flue plugin configuration (https://knip.dev/reference/plugins/flue)",
+          "$ref": "#/definitions/plugin"
+        },
         "fumadocs": {
           "title": "fumadocs plugin configuration (https://knip.dev/reference/plugins/fumadocs)",
           "$ref": "#/definitions/plugin"
@@ -772,6 +776,10 @@
         },
         "orval": {
           "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
+          "$ref": "#/definitions/plugin"
+        },
+        "osls": {
+          "title": "osls plugin configuration (https://knip.dev/reference/plugins/osls)",
           "$ref": "#/definitions/plugin"
         },
         "oxfmt": {
