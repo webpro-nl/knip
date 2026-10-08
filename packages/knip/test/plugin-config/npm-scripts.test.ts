@@ -14,10 +14,16 @@ const manifest = await load(join(cwd, 'package.json'));
 test('Get metadata from dependencies (getDependencyMetaData)', async () => {
   const config = {
     dir: cwd,
-    packageNames: [...Object.keys(manifest.dependencies ?? {}), ...Object.keys(manifest.devDependencies ?? {})],
+    packageNames: [
+      ...Object.keys(manifest.dependencies ?? {}),
+      ...Object.keys(manifest.devDependencies ?? {}),
+      'missing-npm-script-dependency',
+    ],
   };
 
-  const { hostDependencies, installedBinaries } = getDependencyMetaData(config);
+  const { hostDependencies, installedBinaries, uninstalledDependencies } = getDependencyMetaData(config);
+
+  assert.deepEqual(uninstalledDependencies, new Set(['missing-npm-script-dependency']));
 
   const expectedHostDependencies = new Map();
   expectedHostDependencies.set('pm2-peer-dep', [{ name: 'pm2', isPeerOptional: false }]);

@@ -15,6 +15,7 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
   const installedBinaries: InstalledBinaries = new Map();
 
   const hasTypesIncluded = new Set<string>();
+  const uninstalledDependencies = new Set<string>();
 
   const addBinary = (key: string, value: string) => {
     const set = installedBinaries.get(key);
@@ -45,6 +46,8 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
       }
 
       if (!isDefinitelyTyped(packageName) && (manifest.types || manifest.typings)) hasTypesIncluded.add(packageName);
+    } else {
+      uninstalledDependencies.add(packageName);
     }
   }
 
@@ -52,6 +55,7 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
     hostDependencies,
     installedBinaries,
     hasTypesIncluded,
+    uninstalledDependencies,
   };
 };
 

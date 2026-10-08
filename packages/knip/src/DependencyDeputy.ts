@@ -97,11 +97,17 @@ export class DependencyDeputy {
     const requiredPeerDependencies = peerDependencies.filter(dep => !optionalPeerDependencies.has(dep));
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
+    const uninstalledOptionalDependencies = new Set<string>();
 
-    const packageNames = [...dependencies, ...peerDependencies, ...(this.isProduction ? [] : devDependencies)];
+    const packageNames = [
+      ...dependencies,
+      ...peerDependencies,
+      ...optionalDependencies,
+      ...(this.isProduction ? [] : devDependencies),
+    ];
 
     if (this.isReportDependencies) {
-      const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
+      const { hostDependencies, installedBinaries, hasTypesIncluded, uninstalledDependencies } = getDependencyMetaData({
         packageNames,
         dir,
       });
@@ -109,6 +115,9 @@ export class DependencyDeputy {
       this.setHostDependencies(name, hostDependencies);
       this.installedBinaries.set(name, installedBinaries);
       this.hasTypesIncluded.set(name, hasTypesIncluded);
+      for (const dependency of optionalDependencies) {
+        if (uninstalledDependencies.has(dependency)) uninstalledOptionalDependencies.add(dependency);
+      }
     }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
@@ -130,6 +139,7 @@ export class DependencyDeputy {
       peerDependencies: new Set(peerDependencies),
       optionalPeerDependencies,
       requiredPeerDependencies,
+      uninstalledOptionalDependencies,
       allDependencies: new Set(allDependencies),
       engines: manifest.engines ?? {},
       isPrivate: Boolean(manifest.private),
@@ -258,6 +268,20 @@ export class DependencyDeputy {
         }
       }
     }
+
+    const optionalDependencies = new Set<string>();
+    for (const name of workspaceNames) {
+      const manifest = this._manifests.get(name);
+      if (!manifest) continue;
+      for (const dependency of manifest.uninstalledOptionalDependencies) {
+        const defaultBinaryName = dependency.replace(/^@[^/]+\//, '');
+        if (defaultBinaryName === binaryName) {
+          optionalDependencies.add(dependency);
+          this.addReferencedDependency(name, dependency);
+        }
+      }
+    }
+    if (optionalDependencies.size) return optionalDependencies;
 
     return;
   }
