@@ -12,3 +12,10 @@ test('Obey gitignore', async () => {
 
   assert.equal(Object.keys(issues.files).length, 0);
 });
+
+test('Obey gitignore (directory with trailing slash)', async () => {
+  const options = await createOptions({ cwd: `${cwd}/`, gitignore: true });
+  const { issues } = await main(options);
+
+  assert.equal(Object.keys(issues.files).length, 0);
+});

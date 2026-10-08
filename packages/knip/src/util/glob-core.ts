@@ -1,8 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-// oxlint-disable-next-line no-restricted-imports
-import { basename } from 'node:path';
-import { fdir } from 'fdir';
+import { readdir, readFileSync } from 'node:fs';
 import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
@@ -191,15 +188,17 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   const rootGitignorePath = join(cwd, '.gitignore');
   if (isFile(rootGitignorePath)) addFile(rootGitignorePath);
 
+  const root = cwd.length > 1 && cwd.endsWith('/') ? cwd.slice(0, -1) : cwd;
+
   // Precompute relevant directories from workspace dirs to avoid walking irrelevant subtrees (e.g. generated output dirs)
   let isRelevantDir: ((absPath: string) => boolean) | undefined;
   if (workspaceDirs && workspaceDirs.size > 0) {
     const relevantAncestors = new Set<string>();
     const nonRootDirs = new Set<string>();
     for (const wsDir of workspaceDirs) {
-      if (wsDir !== cwd) nonRootDirs.add(wsDir);
+      if (wsDir !== root) nonRootDirs.add(wsDir);
       let dir = wsDir;
-      while (dir.length >= cwd.length) {
+      while (dir.length >= root.length) {
         relevantAncestors.add(dir);
         const parent = dirname(dir);
         if (parent === dir) break;
@@ -215,24 +214,28 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     }
   }
 
-  const cwdPrefixLen = cwd.length + 1;
-  const walkGitignores = async () => {
-    await new fdir()
-      .withFullPaths()
-      .exclude((_dirName: string, dirPath: string) => {
-        const absPath = toPosix(dirPath.slice(0, -1));
-        return (isRelevantDir && !isRelevantDir(absPath)) || isExcluded(absPath.slice(cwdPrefixLen));
-      })
-      .filter((filePath: string, isDir: boolean) => {
-        if (isDir || basename(filePath) !== '.gitignore') return false;
-        addFile(filePath);
-        return true;
-      })
-      .crawl(cwd)
-      .withPromise();
-  };
-
-  await walkGitignores();
+  const rootPrefixLen = root.length + 1;
+  await new Promise<void>(resolve => {
+    let pending = 0;
+    const walk = (dir: string) => {
+      pending++;
+      readdir(dir, { withFileTypes: true }, (error, entries) => {
+        if (!error) {
+          for (const entry of entries) {
+            if (entry.name === '.gitignore' && (entry.isFile() || entry.isSymbolicLink())) addFile(`${dir}/.gitignore`);
+          }
+          for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+            const absPath = `${dir}/${entry.name}`;
+            if ((isRelevantDir && !isRelevantDir(absPath)) || isExcluded(absPath.slice(rootPrefixLen))) continue;
+            walk(absPath);
+          }
+        }
+        if (--pending === 0) resolve();
+      });
+    };
+    walk(root);
+  });
 
   // tinyglobby's `ignore` can't express unignores (see tinyglobby/fast-glob #86). Drop cached
   // ignore patterns shadowed by any unignore path (and its ancestor dirs) so glob() sees a

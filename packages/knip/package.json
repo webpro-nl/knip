@@ -95,7 +95,6 @@
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts || true)"
   },
   "dependencies": {
-    "fdir": "^6.5.0",
     "formatly": "^0.7.0",
     "get-tsconfig": "4.14.3",
     "jiti": "^2.7.0",
