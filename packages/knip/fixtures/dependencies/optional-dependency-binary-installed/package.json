@@ -2,9 +2,10 @@
   "name": "@fixtures/optional-dependency-binary-installed",
   "private": true,
   "scripts": {
-    "optional": "optional"
+    "start": "optional && optional-command"
   },
   "optionalDependencies": {
-    "optional": "*"
+    "optional": "*",
+    "optional-provider": "*"
   }
 }

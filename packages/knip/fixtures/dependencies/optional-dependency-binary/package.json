@@ -2,9 +2,10 @@
   "name": "@fixtures/optional-dependency-binary",
   "private": true,
   "scripts": {
-    "optional": "optional"
+    "start": "optional && scoped-optional"
   },
   "optionalDependencies": {
-    "optional": "*"
+    "optional": "*",
+    "@scope/scoped-optional": "*"
   }
 }

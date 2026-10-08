@@ -8,7 +8,6 @@ import {
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
 import { getDependencyMetaData } from './manifest/index.ts';
-import { loadPackageManifest } from './manifest/helpers.ts';
 import { PackagePeeker } from './PackagePeeker.ts';
 import type { ConfigurationHint, Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import type { PackageJson } from './types/package-json.ts';
@@ -98,9 +97,7 @@ export class DependencyDeputy {
     const requiredPeerDependencies = peerDependencies.filter(dep => !optionalPeerDependencies.has(dep));
     const devDependencies = Object.keys(manifest.devDependencies ?? {});
     const allDependencies = [...dependencies, ...devDependencies, ...peerDependencies, ...optionalDependencies];
-    const uninstalledOptionalDependencies = new Set(
-      optionalDependencies.filter(dependency => !loadPackageManifest({ dir, packageName: dependency }))
-    );
+    const uninstalledOptionalDependencies = new Set<string>();
 
     const packageNames = [
       ...dependencies,
@@ -110,7 +107,7 @@ export class DependencyDeputy {
     ];
 
     if (this.isReportDependencies) {
-      const { hostDependencies, installedBinaries, hasTypesIncluded } = getDependencyMetaData({
+      const { hostDependencies, installedBinaries, hasTypesIncluded, uninstalledDependencies } = getDependencyMetaData({
         packageNames,
         dir,
       });
@@ -118,6 +115,9 @@ export class DependencyDeputy {
       this.setHostDependencies(name, hostDependencies);
       this.installedBinaries.set(name, installedBinaries);
       this.hasTypesIncluded.set(name, hasTypesIncluded);
+      for (const dependency of optionalDependencies) {
+        if (uninstalledDependencies.has(dependency)) uninstalledOptionalDependencies.add(dependency);
+      }
     }
 
     const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
