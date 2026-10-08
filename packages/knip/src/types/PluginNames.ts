@@ -36,6 +36,7 @@ export type PluginName =
   | 'eve'
   | 'execa'
   | 'expo'
+  | 'expo-router'
   | 'expressive-code'
   | 'fast'
   | 'flue'
@@ -229,6 +230,7 @@ export const pluginNames = [
   'eve',
   'execa',
   'expo',
+  'expo-router',
   'expressive-code',
   'fast',
   'flue',

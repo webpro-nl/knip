@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/expo-router",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "expo": "*",
+    "expo-router": "*"
+  }
+}

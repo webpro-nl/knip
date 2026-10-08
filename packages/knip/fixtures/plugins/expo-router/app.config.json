@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Knip",
+    "updates": {
+      "enabled": false
+    },
+    "plugins": [["expo-router", { "root": "./src/screens" }]]
+  }
+}

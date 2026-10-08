@@ -74,7 +74,7 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
     inputs.add(toProductionDependency('react-dom'));
 
     // https://github.com/expo/expo/tree/main/packages/@expo/metro-runtime
-    if (!isExpoRouter) {
+    if (!isExpoRouter && !options.enabledPlugins.includes('expo-router')) {
       inputs.add(toDependency('@expo/metro-runtime'));
     }
   }
