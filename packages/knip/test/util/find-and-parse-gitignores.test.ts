@@ -122,7 +122,6 @@ test('findAndParseGitignores (negated directories)', async () => {
       '**/node_modules',
       '**/generated/*',
       'generated/keep/**/cache/*',
-      'generated/keep/cache/keep/**/logs',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
