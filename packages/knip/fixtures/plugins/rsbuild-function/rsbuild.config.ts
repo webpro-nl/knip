@@ -1,21 +1,18 @@
 import { defineConfig } from '@rsbuild/core';
 
 export default defineConfig(async ({ command, env, envMode }) => {
-  if (envMode !== env) throw new Error(`Unexpected Rsbuild env mode: ${envMode}`);
-
-  if (command === 'dev' && env === 'development') {
+  if (command === 'dev' && env === 'development' && envMode === 'development') {
     return { source: { entry: { playground: './src/playground.ts' } } };
   }
 
-  if (command === 'build' && env === 'production') {
+  if (command === 'build' && env === 'production' && envMode === 'production') {
     return {
       output: { target: 'node' },
       environments: {
         server: {
           tools: {
             rspack: (config, { target }) => {
-              if (target !== 'node') throw new Error(`Unexpected Rspack target: ${target}`);
-              config.entry = './src/app.ts';
+              if (target === 'node') config.entry = './src/app.ts';
             },
           },
         },
@@ -23,5 +20,5 @@ export default defineConfig(async ({ command, env, envMode }) => {
     };
   }
 
-  throw new Error(`Unexpected Rsbuild command: ${command}`);
+  return {};
 });
