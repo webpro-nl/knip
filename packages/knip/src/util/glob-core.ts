@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFileSync } from 'node:fs';
-import { glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
+import { escapePath, glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
 import { compact, partition } from './array.ts';
@@ -24,8 +24,18 @@ export type Gitignores = { ignores: Set<string>; unignores: Set<string> };
 
 // ignore patterns are cached per gitignore file
 const cachedGitIgnores = new Map<string, Gitignores>();
-// ignore patterns are cached per directory as a product of .gitignore in current and ancestor directories
+// ignore patterns are cached per directory as a product of .gitignore in current, ancestor and descendant directories
+// (descendants only without unignores, as the reconciler applies all patterns then, and not inside nested workspaces,
+// as their files are excluded from the glob)
 const cachedGlobIgnores = new Map<string, string[]>();
+
+let gitignoreWorkspaceDirs: Set<string> | undefined;
+
+const isInNestedWorkspace = (gitignoreDir: string, dir: string) => {
+  if (!gitignoreWorkspaceDirs) return false;
+  for (let d = gitignoreDir; d.length > dir.length; d = dirname(d)) if (gitignoreWorkspaceDirs.has(d)) return true;
+  return false;
+};
 
 let gitignoreReconciler: ((absPath: string) => boolean) | undefined;
 let gitignoreMatcher = (_filePath: string) => false;
@@ -135,6 +145,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     const patterns = readFileSync(filePath, 'utf8');
 
     const isRoot = base === '' || base.startsWith('..');
+    const escapedBase = escapePath(base);
     for (const { negated, pattern } of parseAndConvertGitignorePatterns(patterns, ancestor)) {
       if (negated) {
         if (isRoot) {
@@ -143,7 +154,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
             unignoresForDir.add(pattern);
           }
         } else if (!unignores.has(pattern)) {
-          const unignore = join(base, pattern);
+          const unignore = join(escapedBase, pattern);
           unignores.add(unignore);
           unignoresForDir.add(unignore);
         }
@@ -151,7 +162,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
         ignores.add(pattern);
         ignoresForDir.add(pattern);
       } else if (!unignores.has(pattern)) {
-        const ignore = join(base, pattern);
+        const ignore = join(escapedBase, pattern);
         ignores.add(ignore);
         ignoresForDir.add(ignore);
       }
@@ -306,6 +317,14 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
       dir = dirname((prev = dir));
       if (prev === dir || dir === '.') break;
     }
+    if (!gitignoreReconciler) {
+      const prefix = `${options.dir}/`;
+      for (const [gitignoreDir, cacheForDir] of cachedGitIgnores) {
+        if (gitignoreDir.startsWith(prefix) && !isInNestedWorkspace(gitignoreDir, options.dir)) {
+          _ignore.push(...cacheForDir.ignores);
+        }
+      }
+    }
     cachedGlobIgnores.set(options.dir, compact(_ignore));
   }
 
@@ -346,6 +365,8 @@ export async function getGitIgnoredHandler(
   workspaceDirs?: Set<string>
 ): Promise<(path: string) => boolean> {
   cachedGitIgnores.clear();
+  cachedGlobIgnores.clear();
+  gitignoreWorkspaceDirs = workspaceDirs;
   gitignoreReconciler = undefined;
   gitignoreMatcher = () => false;
   gitignoreFingerprint = '';
