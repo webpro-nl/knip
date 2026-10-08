@@ -101,22 +101,21 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   const unignores: Set<string> = new Set();
   const gitignoreFiles: string[] = [];
 
-  let deepFilterMatcher: ((str: string) => boolean) | undefined;
-  let prevUnignoreSize = unignores.size;
-  let unignoresArray: string[] = [];
-  const pendingIgnores: string[] = [];
+  let isIgnored = (_path: string) => false;
+  let isUnignored = (_path: string) => false;
+  const pendingIgnores: string[] = Array.from(ignores);
+  const pendingUnignores: string[] = [];
 
-  const getMatcher = () => {
-    if (!deepFilterMatcher) {
-      unignoresArray = Array.from(unignores);
-      deepFilterMatcher = picomatch(Array.from(ignores), { ignore: unignoresArray });
-      pendingIgnores.length = 0;
-    } else if (pendingIgnores.length > 0) {
-      const prev = deepFilterMatcher;
-      const incr = picomatch(pendingIgnores.splice(0), { ignore: unignoresArray });
-      deepFilterMatcher = (path: string) => prev(path) || incr(path);
-    }
-    return deepFilterMatcher;
+  const extend = (matcher: (str: string) => boolean, pending: string[]) => {
+    if (pending.length === 0) return matcher;
+    const incr = picomatch(pending.splice(0));
+    return (path: string) => matcher(path) || incr(path);
+  };
+
+  const isExcluded = (path: string) => {
+    isIgnored = extend(isIgnored, pendingIgnores);
+    isUnignored = extend(isUnignored, pendingUnignores);
+    return isIgnored(path) && !isUnignored(path);
   };
 
   const seenGitignoreFiles = new Set<string>();
@@ -171,10 +170,8 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       cachedGitIgnores.set(cacheDir, { ignores: ignoresForDir, unignores: unignoresForDir });
     }
 
-    if (unignores.size !== prevUnignoreSize) {
-      deepFilterMatcher = undefined;
-      prevUnignoreSize = unignores.size;
-    } else if (ignores.size !== prevIgnoreSize) {
+    for (const p of unignoresForDir) pendingUnignores.push(p);
+    if (ignores.size !== prevIgnoreSize) {
       for (const p of ignoresForDir) if (!GLOBAL_IGNORE_PATTERNS.includes(p)) pendingIgnores.push(p);
     }
   };
@@ -224,7 +221,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
       .withFullPaths()
       .exclude((_dirName: string, dirPath: string) => {
         const absPath = toPosix(dirPath.slice(0, -1));
-        return (isRelevantDir && !isRelevantDir(absPath)) || getMatcher()(absPath.slice(cwdPrefixLen));
+        return (isRelevantDir && !isRelevantDir(absPath)) || isExcluded(absPath.slice(cwdPrefixLen));
       })
       .filter((filePath: string, isDir: boolean) => {
         if (isDir || basename(filePath) !== '.gitignore') return false;
