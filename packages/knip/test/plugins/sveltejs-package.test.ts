@@ -1,11 +1,19 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
+import { parseScripts } from '../../src/plugins/sveltejs-package/helpers.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/sveltejs-package');
+
+test('Read svelte-package options through redirects and shell command wrappers', () => {
+  assert.deepEqual(
+    parseScripts({ build: 'time -p ! { svelte-package -i >build.log src/components -o package; } 2>errors.log' }),
+    [{ input: 'src/components', output: 'package' }]
+  );
+});
 
 test('Find dependencies with the @sveltejs/package plugin (defaults)', async () => {
   const options = await createOptions({ cwd });

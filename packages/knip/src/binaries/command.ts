@@ -3,6 +3,7 @@ import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { type Input, toDeferResolve } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin, isRelativeNodeModulesBin } from '../util/modules.ts';
+import { getCommandWords } from '../util/scripts.ts';
 import { resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
 import KnownResolvers, { isPackageManager } from './resolvers/index.ts';
 import { resolve as resolverFromPlugins } from './plugins.ts';
@@ -10,17 +11,18 @@ import { parseNodeArgs, toCommandBinary } from './util.ts';
 
 type KnownResolver = keyof typeof KnownResolvers;
 
-export const getInputsFromNodeOptions = (prefix: Command['prefix']): Input[] =>
-  prefix
-    .filter(a => a.name === 'NODE_OPTIONS' && a.value)
-    .map(a => a.value!.value)
-    .map(arg => parseNodeArgs(arg.split(' ')))
-    .filter(args => args.require)
-    .flatMap(arg => arg.require)
-    .map(id => toDeferResolve(id));
+export const getInputsFromNodeOptions = (prefix: Command['prefix']): Input[] => {
+  const inputs: Input[] = [];
+  for (const item of prefix) {
+    if (item.type !== 'Assignment' || item.name !== 'NODE_OPTIONS' || item.value.type !== 'Word') continue;
+    const args = parseNodeArgs(item.value.value.split(' '));
+    if (args.require) for (const id of [args.require].flat()) inputs.push(toDeferResolve(id));
+  }
+  return inputs;
+};
 
 export const getDependenciesFromCommand = (
-  node: Command,
+  node: Pick<Command, 'name' | 'prefix' | 'args'>,
   options: BinaryResolverOptions,
   fromWords: (words: Word[], options: GetInputsFromScriptsOptions) => Input[] = options.fromArgs
 ): Input[] => {
@@ -43,7 +45,7 @@ export const getDependenciesFromCommand = (
 
   const { fromArgs } = options;
 
-  const words = node.suffix;
+  const words = getCommandWords(node);
 
   if (binary === '!' || binary === 'test') return fromArgs(words);
 

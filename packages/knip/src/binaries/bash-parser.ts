@@ -1,4 +1,4 @@
-import { type Command, parse, type Script, type Statement, type Word } from 'unbash';
+import { type ArrayValue, type Command, parse, type Script, type Statement, type Word } from 'unbash';
 import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
 import type { Input } from '../util/input.ts';
@@ -9,7 +9,11 @@ import { walkCommands } from '../util/scripts.ts';
 import { getDependenciesFromCommand } from './command.ts';
 import { toScript } from './util.ts';
 
-const collectExpansionScripts = (word: Word, out: Script[]) => {
+const collectExpansionScripts = (word: Word | ArrayValue, out: Script[]) => {
+  if (word.type === 'ArrayValue') {
+    for (const element of word.elements) collectExpansionScripts(element, out);
+    return;
+  }
   if (!word.parts) return;
   for (const part of word.parts) {
     if ((part.type === 'CommandExpansion' || part.type === 'ProcessSubstitution') && part.script) {
@@ -46,7 +50,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   };
 
   const definedFunctions = new Set<string>();
-  const collectFunctionNames = (statements: Statement[]): void => {
+  const collectFunctionNames = (statements: readonly Statement[]): void => {
     for (const stmt of statements) if (stmt.command.type === 'Function') definedFunctions.add(stmt.command.name.text);
   };
 
@@ -63,8 +67,10 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
 
   const processCommand = (node: Command, pending: Script[]): Input[] => {
     if (node.name) collectExpansionScripts(node.name, pending);
-    for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
-    for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
+    for (const prefix of node.prefix) {
+      if (prefix.type === 'Assignment') collectExpansionScripts(prefix.value, pending);
+    }
+    for (const arg of node.args) collectExpansionScripts(arg.type === 'Assignment' ? arg.value : arg, pending);
 
     if (definedFunctions.size && node.name && definedFunctions.has(extractBinary(node.name.value))) return [];
 

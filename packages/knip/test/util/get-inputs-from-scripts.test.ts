@@ -449,6 +449,21 @@ test('getInputsFromScripts (advanced bash syntax)', () => {
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, [toBinary('cat'), toBinary('jq')]);
 });
 
+test('getInputsFromScripts (redirects and shell command wrappers)', () => {
+  t('node >output.log ./script.js', [toBinary('node'), js]);
+  t('>output.log NODE_OPTIONS="--require pkg-a" node ./script.js', [toBinary('node'), js, toDeferResolve('pkg-a')]);
+  t('cross-env >output.log NODE_ENV=test node ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
+  t('time -p ! { node ./script.js; } >output.log', [toBinary('node'), js]);
+  t('time', []);
+  t('!', []);
+});
+
+test('getInputsFromScripts (structured assignments)', () => {
+  t('export RESULT=$(node ./script.js)', [toBinary('export'), toBinary('node'), js]);
+  t('RESULT=($(node ./script.js))', [toBinary('node'), js]);
+  t('NODE_OPTIONS=(--require pkg-a) node ./script.js', [toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (plugins → double-dash)', () => {
   t('eslint --fix -- src/', [toBinary('eslint')]);
   t('vitest -c vitest.unit.config.ts -- --bail 1', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.ts')]);

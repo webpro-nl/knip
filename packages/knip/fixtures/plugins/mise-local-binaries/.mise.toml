@@ -5,7 +5,7 @@ _.path = ["{{ config_root }}/node_modules/.bin/"]
 run = "eslint ."
 
 [tasks.build]
-run = ["NODE_OPTIONS='--require ./preload.ts' cross-env c8 assets build", "c8 terraform apply"]
+run = ['>build.log NODE_OPTIONS="--require ./preload.ts $(git rev-parse HEAD)" cross-env c8 assets build', "c8 terraform apply"]
 
 [tasks.override]
 env.PATH = "/usr/bin"
