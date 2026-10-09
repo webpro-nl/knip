@@ -4,7 +4,6 @@ import type { IgnoreIssues } from './types/config.ts';
 import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.ts';
 import { partition } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
-import { prependDirToPattern } from './util/glob.ts';
 import { initCounters, initIssues } from './util/issue-initializers.ts';
 import { relative } from './util/path.ts';
 import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.ts';
@@ -108,12 +107,11 @@ export class IssueCollector {
     // Pre-compile matchers for each issue type
     const issueTypePatterns = new Map<IssueType, string[]>();
     for (const [pattern, issueTypes] of Object.entries(ignoreIssues)) {
-      const id = prependDirToPattern(this.cwd, pattern);
       for (const issueType of issueTypes) {
         if (!issueTypePatterns.has(issueType)) {
           issueTypePatterns.set(issueType, []);
         }
-        issueTypePatterns.get(issueType)?.push(id);
+        issueTypePatterns.get(issueType)?.push(pattern);
       }
     }
 
@@ -122,10 +120,10 @@ export class IssueCollector {
     }
   }
 
-  private shouldIgnoreIssue(filePath: string, issueType: IssueType): boolean {
+  private shouldIgnoreIssue(relativePath: string, issueType: IssueType): boolean {
     const matcher = this.issueMatchers.get(issueType);
     if (!matcher) return false;
-    return matcher(filePath);
+    return matcher(relativePath);
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -137,17 +135,17 @@ export class IssueCollector {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
-      if (this.isMatch(filePath)) {
-        this.markUsedPatterns(filePath, this.unusedIgnorePatterns);
-        continue;
-      }
-      if (this.isFileMatch(filePath)) {
-        this.markUsedPatterns(filePath, this.unusedIgnoreFilesPatterns);
-        continue;
-      }
-      if (this.shouldIgnoreIssue(filePath, 'files')) continue;
-
       const symbol = relative(this.cwd, filePath);
+      if (this.isMatch(symbol)) {
+        this.markUsedPatterns(symbol, this.unusedIgnorePatterns);
+        continue;
+      }
+      if (this.isFileMatch(symbol)) {
+        this.markUsedPatterns(symbol, this.unusedIgnoreFilesPatterns);
+        continue;
+      }
+      if (this.shouldIgnoreIssue(symbol, 'files')) continue;
+
       this.issues.files[symbol] = {
         [symbol]: { type: 'files', filePath, symbol, workspace: '', severity: this.rules.files, fixes: [] },
       };
@@ -159,13 +157,13 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     if (!this.workspaceFilter(issue.filePath)) return;
-    if (this.isMatch(issue.filePath)) {
-      this.markUsedPatterns(issue.filePath, this.unusedIgnorePatterns);
+    const key = relative(this.cwd, issue.filePath);
+    if (this.isMatch(key)) {
+      this.markUsedPatterns(key, this.unusedIgnorePatterns);
       return;
     }
-    if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
+    if (this.shouldIgnoreIssue(key, issue.type)) return;
     if (this.rules[issue.type] === 'off') return;
-    const key = relative(this.cwd, issue.filePath);
     issue.severity = this.rules[issue.type];
     const issues = this.issues[issue.type];
     issues[key] = issues[key] ?? {};

@@ -4,10 +4,6 @@
     "moduleResolution": "bundler",
     "target": "esnext"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/legacy"
-  ]
+  "include": ["../src/**/*.ts"],
+  "exclude": ["../src/legacy"]
 }

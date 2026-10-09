@@ -38,7 +38,7 @@ import {
 } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, join, toRelative } from './util/path.ts';
+import { basename, dirname, join, relative, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -582,16 +582,23 @@ export class WorkspaceWorker {
       return hints;
     }
 
+    // Match relative paths (the workspace dir may contain glob characters), relativized up to the first match
+    const dir = this.dir;
+    const relativePaths: string[] = [];
+    const hasMatch = (isMatch: (path: string) => boolean) => {
+      for (let i = 0; i < filePaths.length; i++) {
+        if (isMatch((relativePaths[i] ??= relative(dir, filePaths[i])))) return true;
+      }
+      return false;
+    };
+
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) continue;
-      const filePathOrPattern = join(this.dir, pattern.replace(/!$/, ''));
-      if (includedPaths.has(filePathOrPattern)) {
+      const id = pattern.replace(/!$/, '');
+      if (includedPaths.has(join(dir, id))) {
         hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
-      } else {
-        const matcher = picomatch(filePathOrPattern);
-        if (!filePaths.some(filePath => matcher(filePath))) {
-          hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
-        }
+      } else if (!hasMatch(picomatch(id))) {
+        hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
       }
     }
 

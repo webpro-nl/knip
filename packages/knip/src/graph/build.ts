@@ -110,8 +110,8 @@ export async function build({
 
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
 
-  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: prependDir(options.cwd, id), id })));
-  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: prependDir(options.cwd, id), id })));
+  collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: id, id })));
+  collector.addIgnoreFilesPatterns(chief.config.ignoreFiles.map(id => ({ pattern: id, id })));
 
   if (options.configFilePath) {
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
@@ -207,7 +207,7 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    const fn = (id: string) => ({ pattern: prependDir(options.cwd, prependDir(name, id)), id, workspaceName: name });
+    const fn = (id: string) => ({ pattern: prependDir(name, id), id, workspaceName: name });
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
@@ -331,7 +331,10 @@ export async function build({
 
     const developmentMatchers: Array<(filePath: string) => boolean> = [];
     if (options.isProduction) {
-      const toPattern = (pattern: string) => join(isAbsolute(pattern) ? '' : dir, removeProductionSuffix(pattern));
+      const toPattern = (pattern: string) => {
+        const id = removeProductionSuffix(pattern);
+        return isAbsolute(id) ? relative(options.cwd, id) : join(name, id);
+      };
       for (const map of [entryPatterns, entryPatternsSkipExports]) {
         for (const patterns of map.values()) {
           const [excluded, included] = partition(patterns, pattern => pattern.startsWith('!'));
@@ -342,7 +345,12 @@ export async function build({
       }
     }
     const productionPaths = (paths: string[]) =>
-      developmentMatchers.length ? paths.filter(path => !developmentMatchers.some(match => match(path))) : paths;
+      developmentMatchers.length
+        ? paths.filter(path => {
+            const relativePath = relative(options.cwd, path);
+            return !developmentMatchers.some(match => match(relativePath));
+          })
+        : paths;
 
     const userEntryPatterns = options.isProduction
       ? worker.getProductionEntryFilePatterns()
@@ -403,10 +411,12 @@ export async function build({
       }
       if (extensions.length > 0) {
         const extPart = extensions.length === 1 ? extensions[0] : `.{${extensions.map(ext => ext.slice(1)).join(',')}}`;
-        const bases = include ? new Set(include.map(p => picomatch.scan(p).base || dir)) : new Set([dir]);
+        // include/exclude are relative to the tsconfig dir, which may differ from the workspace dir (--tsConfig)
+        const tsConfigDir = relative(dir, dirname(tsConfigFilePath));
+        const bases = include ? new Set(include.map(p => join(tsConfigDir, picomatch.scan(p).base))) : new Set(['']);
         const patterns = [
-          ...Array.from(bases, base => `${base}/**/*${extPart}`),
-          ...(exclude?.map(p => `!${p}`) ?? []),
+          ...Array.from(bases, base => join(base, `**/*${extPart}`)),
+          ...(exclude?.map(p => `!${join(tsConfigDir, p)}`) ?? []),
         ];
         const compilerPaths = await _glob({ ...sharedGlobOptions, patterns, label: 'compiler extension paths' });
         for (const compilerPath of compilerPaths) {

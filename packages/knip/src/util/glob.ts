@@ -20,12 +20,20 @@ interface GlobOptions {
   label?: string;
 }
 
-const prepend = (pattern: string, relativePath: string) =>
-  isAbsolute(pattern.replace(/^!/, '')) ? pattern : prependDirToPattern(relativePath, pattern);
+// Absolute patterns repeat the cwd, which may contain glob characters (e.g. `/Dropbox (Team)/app`)
+const prepend = (pattern: string, cwd: string, relativePath: string) => {
+  const isNegated = pattern.startsWith('!');
+  const id = isNegated ? pattern.slice(1) : pattern;
+  if (id && !isAbsolute(id) && !relativePath) return pattern;
+  const globPattern = isAbsolute(id) ? relative(cwd, id) : join(relativePath, id);
+  return isNegated ? `!${globPattern}` : globPattern;
+};
 
 // Globbing from root as cwd to include all gitignore files and ignore patterns, so we need to prepend dirs to patterns
-const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) =>
-  compact([patterns].flat().map(p => removeProductionSuffix(prepend(p, relative(cwd, dir))))).sort(negatedLast);
+const prependDirToPatterns = (cwd: string, dir: string, patterns: string[]) => {
+  const relativePath = dir === cwd ? '' : relative(cwd, dir);
+  return compact(patterns.map(p => removeProductionSuffix(prepend(p, cwd, relativePath)))).sort(negatedLast);
+};
 
 export const removeProductionSuffix = (pattern: string) => pattern.replace(/!$/, '');
 
@@ -77,7 +85,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
 
 const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] }) => {
   const cacheEnabled = isGlobCacheEnabled();
-  const patternList = Array.isArray(patterns) ? patterns : [patterns];
+  const patternList = [patterns].flat().map(pattern => prepend(pattern, cwd, ''));
   const cacheKey = cacheEnabled
     ? computeGlobCacheKey({ patterns: patternList, cwd, dir: cwd, gitignore: false, gitignoreFingerprint: '' })
     : '';
@@ -86,7 +94,7 @@ const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] 
     if (cached) return cached;
   }
   const tracker = cacheEnabled ? createDirTracker() : undefined;
-  const paths = globSync(patterns, {
+  const paths = globSync(patternList, {
     cwd,
     absolute: true,
     followSymbolicLinks: false,
@@ -98,12 +106,10 @@ const syncGlob = ({ cwd, patterns }: { cwd: string; patterns: string | string[] 
 };
 
 const dirGlob = async ({ cwd, patterns, gitignore = true }: GlobOptions) =>
-  glob(patterns, {
-    cwd,
-    dir: cwd,
-    onlyDirectories: true,
-    gitignore,
-  });
+  glob(
+    patterns.map(pattern => prepend(pattern, cwd, '')),
+    { cwd, dir: cwd, onlyDirectories: true, gitignore }
+  );
 
 export const _glob = timerify(defaultGlob);
 
