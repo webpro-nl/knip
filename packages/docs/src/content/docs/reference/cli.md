@@ -93,8 +93,10 @@ normal parser path.
 Enable caching.
 
 Consecutive runs are 10-40% faster as the results of file analysis (AST
-traversal) are cached. Conservative. Cache strategy based on file meta data
-(modification time + file size).
+traversal) are cached. Conservative. Cached results are reused when the file
+meta data (modification time + file size) is unchanged, the module resolution of
+its imports still has the same results, and the configuration and options that
+shape the analysis are unchanged.
 
 See [stale cache results][6] for limitations and workarounds.
 

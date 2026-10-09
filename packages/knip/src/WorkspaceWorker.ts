@@ -502,7 +502,7 @@ export class WorkspaceWorker {
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);
           } else if (fd?.meta) {
-            fd.meta.data = { ...fd.meta.data, [pluginName]: cache };
+            this.cache.setData(configFilePath, { ...fd.meta.data, [pluginName]: cache });
           }
         }
       }

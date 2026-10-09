@@ -4,7 +4,7 @@ import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
 import { timerify } from '../util/Performance.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, join, toAbsolute, toPosix } from '../util/path.ts';
 import { _createSyncModuleResolver, _resolveModuleSync, resolvePackageManifestPath } from '../util/resolve.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from '../util/to-source-path.ts';
 import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
@@ -71,6 +71,34 @@ function pickExistingPackageTarget(
     if (target) return target;
   }
 }
+
+const isIndexFile = /\/index\.[^/]+$/;
+
+/** A specifier that may resolve through node_modules, a path mapping or a package name */
+export const isBareSpecifier = (specifier: string) => !specifier.startsWith('.') && !isAbsolute(specifier);
+
+/** The directories whose entries decide the resolution of a specifier to an internal file */
+export const getDecidingDirs = (containingFile: string, specifier: string, resolvedFileName: string) => {
+  const dir = dirname(resolvedFileName);
+  const dirs = [dir];
+  if (isIndexFile.test(resolvedFileName)) dirs.push(dirname(dir));
+  if (!isBareSpecifier(specifier)) {
+    const candidate = toAbsolute(specifier, dirname(containingFile));
+    dirs.push(dirname(candidate), candidate);
+  }
+  return dirs;
+};
+
+export const getNodeModulesDirs = (containingFile: string) => {
+  const dirs: string[] = [];
+  let dir = dirname(containingFile);
+  while (true) {
+    dirs.push(join(dir, 'node_modules'));
+    const parent = dirname(dir);
+    if (parent === dir || parent === '.') return dirs;
+    dir = parent;
+  }
+};
 
 type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
 type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;

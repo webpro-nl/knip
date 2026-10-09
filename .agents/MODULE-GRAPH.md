@@ -86,8 +86,11 @@ analyze depends on it being complete by the time build finishes.
   parsed) vs `analyzedFiles` (fully analyzed). Unused files = `projectPaths`
   minus reached.
 - **Cache short-circuits read+parse** for unchanged files (`CacheConsultant`).
-  Warm runs jump straight to the cached `FileNode`; cold and warm timings differ
-  a lot, so benchmark warm runs (see [PERFORMANCE.md][perf]).
+  The cache holds the raw analysis result plus the resolution of each specifier;
+  a hit is validated against those resolutions (directory mtimes, re-resolution
+  of unresolved specifiers) and the graph node is a copy, so build-time
+  post-processing re-runs every run. Cold and warm timings differ a lot, so
+  benchmark warm runs (see [PERFORMANCE.md][perf]).
 - **Analyze never re-parses.** `is-referenced` walks `importedBy` following
   re-export / alias / namespace chains, so a bug in the reverse-index assembly
   surfaces as wrong unused-export results, not a crash.

@@ -16,6 +16,7 @@ import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { fileStamp } from '../util/disk-cache.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
@@ -489,7 +490,9 @@ export async function build({
         cachedFile
       );
 
-      const unresolvedImports = new Set<Import>();
+      const external = new Set(file.imports.external);
+      const externalRefs = new Set(file.imports.externalRefs);
+      const unresolved = new Set<Import>();
       for (const unresolvedImport of file.imports.unresolved) {
         const { specifier } = unresolvedImport;
 
@@ -497,7 +500,7 @@ export async function build({
 
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
-          file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
+          external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
         } else {
           const candidate = join(dirname(filePath), sanitizedSpecifier);
           const ext = extname(sanitizedSpecifier);
@@ -513,7 +516,7 @@ export async function build({
             }
           }
           if (!isIgnored && (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext)))) {
-            unresolvedImports.add(unresolvedImport);
+            unresolved.add(unresolvedImport);
           }
         }
       }
@@ -535,7 +538,7 @@ export async function build({
         if (!packageName) continue;
         const isWorkspace = isInternalWorkspace(packageName);
         if (isWorkspace || wsDependencies.has(packageName)) {
-          file.imports.external.add({ ..._import, specifier: packageName });
+          external.add({ ..._import, specifier: packageName });
           if (isWorkspace && !isGitIgnored(_import.filePath)) {
             principal.addProgramPath(_import.filePath);
           }
@@ -580,30 +583,57 @@ export async function build({
         }
       }
 
-      file.imports.unresolved = unresolvedImports;
-
       const pluginRefs = externalRefsFromInputs?.get(filePath);
-      if (pluginRefs) for (const ref of pluginRefs) file.imports.externalRefs.add(ref);
+      if (pluginRefs) for (const ref of pluginRefs) externalRefs.add(ref);
 
+      // The graph node is a copy: the raw analysis result is what the cache persists
+      const imports = { ...file.imports, external, externalRefs, unresolved };
       const node = graph.get(filePath);
       if (node) {
         node.skipExports = file.skipExports;
-        node.imports = file.imports;
+        node.imports = imports;
         node.exports = file.exports;
         node.duplicates = file.duplicates;
         node.scripts = file.scripts;
         node.importGlobs = file.importGlobs;
-        updateImportMap(node, file.imports.internal, graph);
-        node.internalImportCache = file.imports.internal;
+        updateImportMap(node, imports.internal, graph);
+        node.internalImportCache = imports.internal;
       } else {
-        updateImportMap(file, file.imports.internal, graph);
-        file.internalImportCache = file.imports.internal;
-        graph.set(filePath, file);
+        const node = { ...file, imports };
+        updateImportMap(node, imports.internal, graph);
+        node.internalImportCache = imports.internal;
+        graph.set(filePath, node);
       }
     }
   };
 
-  principal.init();
+  let cacheKey: Record<string, unknown> | undefined;
+  if (options.isCache) {
+    const workspaceKeys: unknown[] = [];
+    for (const { name, dir, config, sourceMaps } of workspaces) {
+      const manifest = chief.getManifestForWorkspace(name);
+      const { name: pkgName, main, exports, imports } = manifest ?? {};
+      workspaceKeys.push([dir, pkgName, config.ignoreExportsUsedInFile, sourceMaps, main, exports, imports]);
+    }
+    // The resolver applies the nearest tsconfig.json of each file, including ones Knip does not load itself
+    const tsConfigStamps: unknown[] = [];
+    const patterns = ['**/tsconfig*.json'];
+    const tsConfigFilePaths = await _glob({
+      cwd: options.cwd,
+      patterns,
+      gitignore: options.gitignore,
+      label: 'tsconfig files',
+    });
+    for (const filePath of tsConfigFilePaths.sort()) tsConfigStamps.push([filePath, fileStamp(filePath)]);
+    for (let dir = dirname(options.cwd); dir !== dirname(dir); dir = dirname(dir)) {
+      const filePath = join(dir, 'tsconfig.json');
+      const stamp = fileStamp(filePath);
+      if (stamp) tsConfigStamps.push([filePath, stamp]);
+    }
+    const visitors = Array.from(registeredVisitorPlugins).sort();
+    cacheKey = { analyzeOpts, visitors, workspaces: workspaceKeys, tsConfigStamps };
+  }
+  principal.init(cacheKey);
 
   streamer.cast('Analyzing source files');
 
@@ -629,7 +659,7 @@ export async function build({
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-  principal.reconcileCache(graph);
+  principal.reconcileCache();
 
   perfObserver.addMemoryMark('build');
 

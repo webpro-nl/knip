@@ -1,3 +1,4 @@
+import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
 import { extractSpecifiers } from './typescript/follow-imports.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
@@ -10,20 +11,80 @@ import type {
   PluginVisitorContext,
   PluginVisitorObject,
 } from './types/config.ts';
-import type { FileNode, ModuleGraph } from './types/module-graph.ts';
+import type { FileNode } from './types/module-graph.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
 import { buildVisitor } from './typescript/visitors/walk.ts';
-import { createCustomModuleResolver, createGlobAliasResolver } from './typescript/resolve-module-names.ts';
+import {
+  createCustomModuleResolver,
+  createGlobAliasResolver,
+  getDecidingDirs,
+  getNodeModulesDirs,
+  isBareSpecifier,
+} from './typescript/resolve-module-names.ts';
 import type { ResolveGlobPattern } from './typescript/resolve-module-names.ts';
 import type { ResolveModule } from './typescript/ast-nodes.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
+import { fileStamp, toFingerprint } from './util/disk-cache.ts';
+import { isExistingFile, statDirMtime } from './util/fs-cache.ts';
 import { timerify } from './util/Performance.ts';
-import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
+import { dirname, extname, isInNodeModules, join, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
+
+type Resolutions = Array<[specifier: string, resolvedFileName: string | undefined]>;
+
+type CacheEntry = { node: FileNode; resolutions: Resolutions; dirMtimes: Record<string, number> };
+
+const nodeModulesDirsByDir = new Map<string, string[]>();
+const decidingDirsByTarget = new Map<string, string[]>();
+
+const getMemoizedDecidingDirs = (filePath: string, specifier: string, resolvedFileName: string) => {
+  if (!isBareSpecifier(specifier)) return getDecidingDirs(filePath, specifier, resolvedFileName);
+  let dirs = decidingDirsByTarget.get(resolvedFileName);
+  if (!dirs) {
+    dirs = getDecidingDirs(filePath, specifier, resolvedFileName);
+    decidingDirsByTarget.set(resolvedFileName, dirs);
+  }
+  return dirs;
+};
+
+const getMemoizedNodeModulesDirs = (filePath: string) => {
+  const dir = dirname(filePath);
+  let dirs = nodeModulesDirsByDir.get(dir);
+  if (!dirs) {
+    dirs = getNodeModulesDirs(filePath);
+    nodeModulesDirsByDir.set(dir, dirs);
+  }
+  return dirs;
+};
+
+const getDirMtimes = (filePath: string, resolutions: Resolutions) => {
+  const dirMtimes: Record<string, number> = {};
+  const add = (dir: string) => {
+    if (dir in dirMtimes) return;
+    const mtime = statDirMtime(dir);
+    if (!Number.isNaN(mtime)) dirMtimes[dir] = mtime;
+  };
+  let hasBareSpecifier = false;
+  for (const [specifier, resolvedFileName] of resolutions) {
+    if (!resolvedFileName) continue;
+    if (isBareSpecifier(specifier)) hasBareSpecifier = true;
+    if (!isInNodeModules(resolvedFileName))
+      for (const dir of getMemoizedDecidingDirs(filePath, specifier, resolvedFileName)) add(dir);
+  }
+  if (hasBareSpecifier) for (const dir of getMemoizedNodeModulesDirs(filePath)) add(dir);
+  return dirMtimes;
+};
+
+const _getDirMtimes = timerify(getDirMtimes);
+
+const hasChangedDir = (dirs: string[], changedDirs: Set<string>) => {
+  for (const dir of dirs) if (changedDirs.has(dir)) return true;
+  return false;
+};
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -52,7 +113,9 @@ export class ProjectPrincipal {
   private tsConfigFile: string | undefined;
   private extensions = new Set(DEFAULT_EXTENSIONS);
 
-  cache: CacheConsultant<FileNode>;
+  cache: CacheConsultant<CacheEntry> | undefined;
+  private analyzed = new Map<string, CacheEntry>();
+  private options: MainOptions;
   toSourceFilePath: ToSourceFilePath;
   private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
   private findWorkspaceNameByFilePath: (filePath: string) => string | undefined;
@@ -72,7 +135,7 @@ export class ProjectPrincipal {
     findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined,
     findWorkspaceNameByFilePath: (filePath: string) => string | undefined
   ) {
-    this.cache = new CacheConsultant('root', options);
+    this.options = options;
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
@@ -84,6 +147,7 @@ export class ProjectPrincipal {
       isSession: options.isSession || options.isWatch,
     });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
+    this.hasSameResolutions = timerify(this.hasSameResolutions.bind(this), 'hasSameResolutions');
   }
 
   addCompilers(workspaceName: string, compilers: Compilers) {
@@ -119,7 +183,7 @@ export class ProjectPrincipal {
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
   }
 
-  init() {
+  init(cacheKey?: Record<string, unknown>) {
     const scopedPaths =
       this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
     const scopedRootDirs =
@@ -132,6 +196,15 @@ export class ProjectPrincipal {
       this.tsConfigFile
     );
     this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
+    if (this.options.isCache) {
+      const compilers = Array.from(this.scopedCompilers, ([ext, byWorkspace]) => [
+        ext,
+        Array.from(byWorkspace, ([name, compiler]) => [name, String(compiler)]),
+      ]);
+      const pnpStamp = process.versions.pnp ? fileStamp(join(this.options.cwd, '.pnp.cjs')) : undefined;
+      const resolverKey = [scopedPaths, scopedRootDirs, compilers, this.tsConfigFile, pnpStamp];
+      this.cache = new CacheConsultant('root', this.options, toFingerprint({ ...cacheKey, resolver: resolverKey }));
+    }
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -272,9 +345,46 @@ export class ProjectPrincipal {
   }
 
   private getCachedFile(filePath: string) {
-    const cachedFile = this.cache.getCachedFile(filePath);
+    if (!this.cache) return undefined;
     const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
-    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+    const isValid = (entry: CacheEntry) =>
+      entry.node.skipExports === skipExports && this.hasSameResolutions(filePath, entry);
+    return this.cache.getCachedFile(filePath, isValid)?.node;
+  }
+
+  private hasSameResolutions(filePath: string, entry: CacheEntry) {
+    const { resolutions, dirMtimes } = entry;
+    let changedDirs: Set<string> | undefined;
+    for (const dir in dirMtimes) {
+      if (statDirMtime(dir) !== dirMtimes[dir]) (changedDirs ??= new Set()).add(dir);
+    }
+    let isNodeModulesChanged: boolean | undefined;
+    for (const [specifier, resolvedFileName] of resolutions) {
+      let isRevalidate = !resolvedFileName;
+      if (resolvedFileName && changedDirs) {
+        if (isBareSpecifier(specifier)) {
+          isNodeModulesChanged ??= hasChangedDir(getMemoizedNodeModulesDirs(filePath), changedDirs);
+          isRevalidate = isNodeModulesChanged;
+        }
+        if (!isRevalidate && !isInNodeModules(resolvedFileName)) {
+          isRevalidate = hasChangedDir(getMemoizedDecidingDirs(filePath, specifier, resolvedFileName), changedDirs);
+        }
+      }
+      if (isRevalidate) {
+        if (this.resolveSpecifier(specifier, filePath) !== resolvedFileName) return false;
+      } else if (resolvedFileName && isInNodeModules(resolvedFileName) && !isExistingFile(resolvedFileName)) {
+        return false;
+      }
+    }
+    if (changedDirs) {
+      for (const dir of changedDirs) {
+        const mtime = statDirMtime(dir);
+        if (Number.isNaN(mtime)) delete dirMtimes[dir];
+        else dirMtimes[dir] = mtime;
+      }
+      this.cache?.setData(filePath, entry);
+    }
+    return true;
   }
 
   analyzeSourceFile(
@@ -303,10 +413,19 @@ export class ProjectPrincipal {
       ? (this._localRefsVisitor ??= buildVisitor(this.pluginVisitorObjects, true))
       : (this._visitor ??= buildVisitor(this.pluginVisitorObjects, false));
 
-    return _getImportsAndExports(
+    const resolutions = this.cache ? new Map<string, string | undefined>() : undefined;
+    const resolveModule: ResolveModule = resolutions
+      ? (specifier, containingFile) => {
+          const module = this.resolveModule(specifier, containingFile);
+          if (!isBuiltin(specifier)) resolutions.set(specifier, module?.resolvedFileName);
+          return module;
+        }
+      : this.resolveModule;
+
+    const node = _getImportsAndExports(
       filePath,
       sourceText,
-      this.resolveModule,
+      resolveModule,
       options,
       ignoreExportsUsedInFile,
       skipExports,
@@ -314,19 +433,25 @@ export class ProjectPrincipal {
       this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
       parseResult
     );
+
+    if (resolutions) {
+      const recorded = Array.from(resolutions);
+      this.analyzed.set(filePath, { node, resolutions: recorded, dirMtimes: _getDirMtimes(filePath, recorded) });
+    }
+
+    return node;
   }
 
   invalidateFile(filePath: string) {
     this.fileManager.invalidate(filePath);
-    this.cache.removeEntry(filePath);
+    this.cache?.removeEntry(filePath);
+    this.analyzed.delete(filePath);
   }
 
-  reconcileCache(graph: ModuleGraph) {
-    for (const [filePath, file] of graph) {
-      const fd = this.cache.getFileDescriptor(filePath);
-      if (!fd?.meta) continue;
-      fd.meta.data = { ...file, internalImportCache: undefined, importedBy: undefined };
-    }
+  reconcileCache() {
+    if (!this.cache) return;
+    for (const [filePath, entry] of this.analyzed) this.cache.setData(filePath, entry);
+    this.analyzed.clear();
     this.cache.reconcile();
   }
 }

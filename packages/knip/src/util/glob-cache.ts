@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import type { FileSystemAdapter } from 'tinyglobby';
 import { createDiskCache } from './disk-cache.ts';
+import { clearFsCache, statDirMtime } from './fs-cache.ts';
 
 interface GlobCacheEntry {
   paths: string[];
@@ -11,17 +12,14 @@ interface GlobCacheEntry {
 
 const store = createDiskCache<GlobCacheEntry>('glob');
 
-// Dir mtimes are constant during a run, so memoize stat across the many cache entries that share dirs.
-const dirMtimeCache = new Map<string, number>();
-
 export const initGlobCache = (cacheLocation: string) => {
-  dirMtimeCache.clear();
+  clearFsCache();
   store.init(cacheLocation);
 };
 export const isGlobCacheEnabled = store.isEnabled;
 export const flushGlobCache = store.flush;
 export const clearGlobCache = () => {
-  dirMtimeCache.clear();
+  clearFsCache();
   store.clear();
 };
 
@@ -46,20 +44,6 @@ export const computeGlobCacheKey = (input: {
     h.update('\0');
   }
   return h.digest('base64url');
-};
-
-const statDirMtime = (dir: string): number => {
-  let mtime = dirMtimeCache.get(dir);
-  if (mtime === undefined) {
-    try {
-      const stat = fs.statSync(dir, { throwIfNoEntry: false });
-      mtime = stat?.isDirectory() ? stat.mtimeMs : Number.NaN;
-    } catch {
-      mtime = Number.NaN;
-    }
-    dirMtimeCache.set(dir, mtime);
-  }
-  return mtime;
 };
 
 const validateEntry = (entry: GlobCacheEntry): boolean => {

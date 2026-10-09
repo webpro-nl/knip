@@ -34,12 +34,19 @@ const create = timerify(createCache);
 
 export class FileEntryCache<T> {
   filePath: string;
+  fingerprint: string;
+  isDirty = false;
   cache = new Map<string, MetaData<T>>();
   normalizedEntries = new Map<string, FileDescriptor<T>>();
 
-  constructor(cacheId: string, _path: string) {
+  constructor(cacheId: string, _path: string, fingerprint = '') {
     this.filePath = path.resolve(_path, cacheId);
-    if (isFile(this.filePath)) this.cache = create(this.filePath) ?? this.cache;
+    this.fingerprint = fingerprint;
+    if (isFile(this.filePath)) {
+      const stored = create(this.filePath);
+      if (stored?.fingerprint === fingerprint && stored.entries instanceof Map) this.cache = stored.entries;
+      else if (stored) debugLog('*', `Discarding cache at ${this.filePath} (fingerprint mismatch)`);
+    }
   }
 
   getFileDescriptor(filePath: string): FileDescriptor<T> {
@@ -61,21 +68,22 @@ export class FileEntryCache<T> {
 
     let meta = this.cache.get(filePath);
     const cSize = fstat.size;
-    const cTime = fstat.mtime.getTime();
+    const cTime = fstat.mtimeMs;
 
     let changed = false;
     if (meta) {
       if (cTime !== meta.mtime || cSize !== meta.size) {
         changed = true;
         meta.data = undefined;
+        meta.mtime = cTime;
+        meta.size = cSize;
       }
-      meta.mtime = cTime;
-      meta.size = cSize;
     } else {
       changed = true;
       meta = { size: cSize, mtime: cTime };
       this.cache.set(filePath, meta);
     }
+    if (changed) this.isDirty = true;
 
     const fd: FileDescriptor<T> = { key: filePath, changed, meta };
     this.normalizedEntries.set(filePath, fd);
@@ -85,14 +93,16 @@ export class FileEntryCache<T> {
   removeEntry(entryName: string) {
     if (!isAbsolute(entryName)) entryName = resolve(entryName);
     this.normalizedEntries.delete(entryName);
-    this.cache.delete(entryName);
+    if (this.cache.delete(entryName)) this.isDirty = true;
   }
 
   reconcile() {
+    if (!this.isDirty) return;
     try {
       const dir = path.dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(this.filePath, serialize(this.cache));
+      fs.writeFileSync(this.filePath, serialize({ fingerprint: this.fingerprint, entries: this.cache }));
+      this.isDirty = false;
     } catch (_err) {
       debugLog('*', `Error writing cache to ${this.filePath}`);
     }

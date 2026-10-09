@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 // oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
@@ -12,6 +13,18 @@ export const mtimeMatches = (filePath: string, mtimeMs: number): boolean => {
     return fs.statSync(filePath, { throwIfNoEntry: false })?.mtimeMs === mtimeMs;
   } catch {
     return false;
+  }
+};
+
+export const toFingerprint = (parts: unknown): string =>
+  createHash('sha1').update(JSON.stringify(parts)).digest('base64url');
+
+export const fileStamp = (filePath: string): [number, number] | undefined => {
+  try {
+    const stat = fs.statSync(filePath, { throwIfNoEntry: false });
+    return stat ? [stat.size, stat.mtimeMs] : undefined;
+  } catch {
+    return undefined;
   }
 };
 

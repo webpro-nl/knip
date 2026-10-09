@@ -103,9 +103,12 @@ KNIP_DISABLE_RAW_TRANSFER=1 knip
 
 ## Stale cache results
 
-With `--cache`, configuration or path alias changes may leave results stale. An
-import may still be reported as unresolved after the missing file is added.
-Newly added `.gitignore` files are also not detected automatically.
+With `--cache`, newly added `.gitignore` files are not detected automatically.
+Neither are in-place edits to files the cache does not track, such as a nested
+`package.json` with `imports` or `main`, or code that a compiler function calls
+outside the Knip configuration file. A new file that takes precedence in a
+multi-target `paths` mapping, in a `rootDirs` list or under `baseUrl` is not
+detected either.
 
 Run without `--cache` for fresh results, or delete the cache directory
 (`node_modules/.cache/knip` by default, configurable with `--cache-location`)
