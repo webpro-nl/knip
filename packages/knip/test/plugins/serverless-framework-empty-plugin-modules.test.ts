@@ -5,10 +5,8 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/serverless-framework-file-variables');
-
-test('Find dependencies with the Serverless Framework plugin (file variables)', async () => {
-  const options = await createOptions({ cwd });
+test('Resolve Serverless handlers with empty object-form plugin modules', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/serverless-framework-empty-plugin-modules') });
   const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
@@ -16,5 +14,6 @@ test('Find dependencies with the Serverless Framework plugin (file variables)', 
     processed: 2,
     total: 2,
   });
+  assert.deepEqual(issues.files, {});
   assert.deepEqual(issues.devDependencies, {});
 });
