@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/rsbuild-function",
+  "devDependencies": {
+    "@rsbuild/core": "*"
+  }
+}

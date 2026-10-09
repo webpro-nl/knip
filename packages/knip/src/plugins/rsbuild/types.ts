@@ -29,3 +29,7 @@ export type RsbuildConfig = {
     [k: string]: Omit<RsbuildConfig, 'environments'>;
   };
 };
+
+export type ConfigParams = { env: string; command: string; envMode: string };
+
+export type RsbuildConfigOrFn = RsbuildConfig | ((params: ConfigParams) => RsbuildConfig | Promise<RsbuildConfig>);

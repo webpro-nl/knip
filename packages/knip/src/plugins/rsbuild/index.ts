@@ -3,7 +3,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
-import type { RsbuildConfig } from './types.ts';
+import type { RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
 
@@ -15,7 +15,20 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
+// https://rsbuild.rs/guide/configuration/rsbuild#export-function
+const configParams = [
+  { env: 'development', command: 'dev', envMode: 'development' },
+  { env: 'production', command: 'build', envMode: 'production' },
+];
+
+const getConfigs = async (configOrFn: RsbuildConfigOrFn) => {
+  if (typeof configOrFn !== 'function') return [configOrFn];
+  const configs: RsbuildConfig[] = [];
+  for (const params of configParams) configs.push(await configOrFn(params));
+  return configs;
+};
+
+const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
   const entries = new Set<string>();
   const inputs: Input[] = [];
 
@@ -38,7 +51,7 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
     }
   };
 
-  const checkConfig = async (localConfig: RsbuildConfig) => {
+  const checkConfig = async (localConfig: RsbuildConfig, config: RsbuildConfig) => {
     checkSource(localConfig.source);
 
     if (!localConfig.tools?.rspack) return;
@@ -73,11 +86,13 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async (config, options) => {
     }
   };
 
-  await checkConfig(config);
+  for (const config of await getConfigs(configOrFn)) {
+    await checkConfig(config, config);
 
-  if (config.environments) {
-    for (const environment of Object.values(config.environments)) {
-      await checkConfig(environment);
+    if (config.environments) {
+      for (const environment of Object.values(config.environments)) {
+        await checkConfig(environment, config);
+      }
     }
   }
 
