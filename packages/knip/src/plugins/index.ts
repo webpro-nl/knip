@@ -35,6 +35,7 @@ import { default as eslint } from './eslint/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
+import { default as expoRouter } from './expo-router/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
 import { default as fast } from './fast/index.ts';
 import { default as flue } from './flue/index.ts';
@@ -228,6 +229,7 @@ export const Plugins = {
   eve,
   execa,
   expo,
+  'expo-router': expoRouter,
   'expressive-code': expressiveCode,
   fast,
   flue,

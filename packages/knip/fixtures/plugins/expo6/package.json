@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/expo6",
+  "main": "src/entry.js",
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "*",
+    "expo": "*",
+    "expo-router": "*",
+    "react-dom": "*",
+    "react-native-web": "*"
+  }
+}

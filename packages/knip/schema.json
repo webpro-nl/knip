@@ -562,6 +562,10 @@
           "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
           "$ref": "#/definitions/plugin"
         },
+        "expo-router": {
+          "title": "Expo Router plugin configuration (https://knip.dev/reference/plugins/expo-router)",
+          "$ref": "#/definitions/plugin"
+        },
         "expressive-code": {
           "title": "expressive-code plugin configuration (https://knip.dev/reference/plugins/expressive-code)",
           "$ref": "#/definitions/plugin"

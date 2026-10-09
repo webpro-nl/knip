@@ -49,6 +49,7 @@ export const pluginsSchema = z.object({
   eve: pluginSchema,
   execa: pluginSchema,
   expo: pluginSchema,
+  'expo-router': pluginSchema,
   'expressive-code': pluginSchema,
   fast: pluginSchema,
   flue: pluginSchema,
