@@ -1,4 +1,4 @@
-import { type Command, parse, type SyntaxNode } from 'unbash';
+import { type Command, parse, type SyntaxNode, type Word } from 'unbash';
 import { extractBinary } from './modules.ts';
 
 export interface ScriptCommand {
@@ -12,7 +12,8 @@ const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 // spaces or acting on operators, globs and expansions the process would have received literally
 export const toShellCommand = (argv: string[]) => argv.map(arg => `'${arg.replaceAll("'", `'\\''`)}'`).join(' ');
 
-export const getCommandWords = (node: Pick<Command, 'args'>) => node.args.filter(arg => arg.type === 'Word');
+export const getCommandWords = (node: Pick<Command, 'args'>) =>
+  node.args.filter((arg): arg is Word => arg.type === 'Word');
 
 export function* walkCommands(node: SyntaxNode): Generator<Command> {
   switch (node.type) {

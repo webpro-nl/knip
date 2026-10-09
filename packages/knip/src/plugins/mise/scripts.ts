@@ -76,7 +76,9 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
       for (const command of walkCommands(statement.command)) {
         const name = command.name?.value;
         const word = command.name && readWord(command.name);
-        const prefix = command.prefix.filter(item => item.type === 'Assignment').map(readAssignment);
+        const prefix = command.prefix
+          .filter((item): item is Assignment => item.type === 'Assignment')
+          .map(readAssignment);
         const words: Word[] = [];
         for (const arg of command.args) {
           if (arg.type === 'Word') words.push(readWord(arg));
