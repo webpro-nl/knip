@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Knip",
+    "platforms": ["ios", "android", "web"],
     "updates": {
       "enabled": false
     },

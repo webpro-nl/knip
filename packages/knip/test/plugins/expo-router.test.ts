@@ -13,10 +13,13 @@ test('Find route entries with the Expo Router plugin', async () => {
 
   assert('src/app/unused.ts' in issues.files);
 
+  assert(issues.dependencies['package.json']['@expo/metro-runtime']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 2,
-    total: 2,
+    dependencies: 1,
+    processed: 3,
+    total: 3,
   });
 });
