@@ -273,8 +273,21 @@ export class ProjectPrincipal {
 
   private getCachedFile(filePath: string) {
     const cachedFile = this.cache.getCachedFile(filePath);
+    if (!cachedFile) return undefined;
     const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
-    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+    if (cachedFile.skipExports === skipExports && !this.hasChangedImports(filePath, cachedFile)) return cachedFile;
+    this.cache.removeEntry(filePath);
+    return undefined;
+  }
+
+  private hasChangedImports(filePath: string, cachedFile: FileNode) {
+    for (const { specifier, filePath: importedFilePath } of cachedFile.imports.imports) {
+      if (importedFilePath && this.resolveSpecifier(specifier, filePath) !== importedFilePath) return true;
+    }
+    for (const { specifier } of cachedFile.imports.unresolved) {
+      if (this.resolveSpecifier(specifier, filePath) !== undefined) return true;
+    }
+    return false;
   }
 
   analyzeSourceFile(
