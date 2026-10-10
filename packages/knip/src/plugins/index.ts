@@ -35,8 +35,10 @@ import { default as eslint } from './eslint/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
+import { default as expoRouter } from './expo-router/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
 import { default as fast } from './fast/index.ts';
+import { default as flue } from './flue/index.ts';
 import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
 import { default as githubAction } from './github-action/index.ts';
@@ -88,6 +90,7 @@ import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
 import { default as openclaw } from './openclaw/index.ts';
 import { default as orval } from './orval/index.ts';
+import { default as osls } from './osls/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
 import { default as pandaCss } from './panda-css/index.ts';
@@ -226,8 +229,10 @@ export const Plugins = {
   eve,
   execa,
   expo,
+  'expo-router': expoRouter,
   'expressive-code': expressiveCode,
   fast,
+  flue,
   fumadocs,
   gatsby,
   'github-action': githubAction,
@@ -279,6 +284,7 @@ export const Plugins = {
   'openapi-ts': openapiTs,
   openclaw,
   orval,
+  osls,
   oxfmt,
   oxlint,
   'panda-css': pandaCss,

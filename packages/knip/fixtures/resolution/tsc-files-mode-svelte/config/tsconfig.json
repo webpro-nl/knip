@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "esnext"
+  },
+  "include": ["../src/**/*.ts"],
+  "exclude": ["../src/legacy"]
+}

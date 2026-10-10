@@ -25,7 +25,7 @@ export const fix = async (issues: Issues, counters: Counters, options: MainOptio
 
   if (options.isFormat) {
     const report = await formatly(Array.from(touchedFiles));
-    if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
+    if (report.ran && report.result.runner !== 'dry-run' && report.result.code === 0) {
       debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
     } else {
       debugLogObject('*', 'Formatting files failed', report);

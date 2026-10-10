@@ -129,15 +129,17 @@ Each of these looks removable but isn't:
 
 - Workspace-relevance pruning of the gitignore walk, which prevents a large RSS
   and time blowup on big monorepos.
-- The incremental gitignore matcher and its asymmetry: a new un-ignore forces a
-  full rebuild, a new ignore only appends. Un-ignores are global to the matcher.
+- The incremental gitignore matcher: ignores and un-ignores are separate
+  append-only matchers. Picomatch's `ignore` option recompiles un-ignores per
+  ignore pattern.
 - The un-ignore shadow filter, which reconciles knip's un-ignore-aware model with
   the underlying glob library that can't express un-ignores.
 - Expanding a directory ignore so it also matches the directory's contents.
 - Git worktree handling (`.git` as a file), `info/exclude` rooting,
   ancestor-gitignore handling, and the gitignore comment and escaping rules.
-- Platform and fast-path details: the directory-walk slicing assumptions, the
-  Windows basename check, and not following symlinks (circular workspaces).
+- Platform and fast-path details: the directory-walk slicing assumptions,
+  reading a directory's `.gitignore` before its subdirectories (readdir order
+  varies by runtime), and not following symlinks (circular workspaces).
 - Cache-invalidation keys: a workspace-set-dependent gitignore cache, and always
   tracking the base directory to catch new top-level entries.
 - Outside glob: char-code constants in hot string scanning (named beats magic

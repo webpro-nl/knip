@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "expo": "*",
+    "expo-router": "*",
     "react": "*",
     "react-native": "*"
   },

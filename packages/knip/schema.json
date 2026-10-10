@@ -562,12 +562,20 @@
           "title": "Expo plugin configuration (https://knip.dev/reference/plugins/expo)",
           "$ref": "#/definitions/plugin"
         },
+        "expo-router": {
+          "title": "Expo Router plugin configuration (https://knip.dev/reference/plugins/expo-router)",
+          "$ref": "#/definitions/plugin"
+        },
         "expressive-code": {
           "title": "expressive-code plugin configuration (https://knip.dev/reference/plugins/expressive-code)",
           "$ref": "#/definitions/plugin"
         },
         "fast": {
           "title": "fast plugin configuration (https://knip.dev/reference/plugins/fast)",
+          "$ref": "#/definitions/plugin"
+        },
+        "flue": {
+          "title": "flue plugin configuration (https://knip.dev/reference/plugins/flue)",
           "$ref": "#/definitions/plugin"
         },
         "fumadocs": {
@@ -772,6 +780,10 @@
         },
         "orval": {
           "title": "orval plugin configuration (https://knip.dev/reference/plugins/orval)",
+          "$ref": "#/definitions/plugin"
+        },
+        "osls": {
+          "title": "osls plugin configuration (https://knip.dev/reference/plugins/osls)",
           "$ref": "#/definitions/plugin"
         },
         "oxfmt": {

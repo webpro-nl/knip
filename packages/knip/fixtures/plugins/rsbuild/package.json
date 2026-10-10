@@ -7,6 +7,9 @@
   },
   "devDependencies": {
     "@rsbuild/core": "*",
-    "@rsbuild/plugin-react": "*"
+    "@rsbuild/plugin-react": "*",
+    "raw-loader": "*",
+    "development-loader": "*",
+    "production-loader": "*"
   }
 }

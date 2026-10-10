@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Knip",
+    "platforms": ["ios", "android", "web"],
+    "updates": {
+      "enabled": false
+    },
+    "plugins": [["expo-router", { "root": "./src/screens" }]]
+  }
+}

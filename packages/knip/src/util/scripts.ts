@@ -1,4 +1,4 @@
-import { type Command, type Node, parse } from 'unbash';
+import { type Command, parse, type SyntaxNode, type Word } from 'unbash';
 import { extractBinary } from './modules.ts';
 
 export interface ScriptCommand {
@@ -12,7 +12,10 @@ const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 // spaces or acting on operators, globs and expansions the process would have received literally
 export const toShellCommand = (argv: string[]) => argv.map(arg => `'${arg.replaceAll("'", `'\\''`)}'`).join(' ');
 
-export function* walkCommands(node: Node): Generator<Command> {
+export const getCommandWords = (node: Pick<Command, 'args'>) =>
+  node.args.filter((arg): arg is Word => arg.type === 'Word');
+
+export function* walkCommands(node: SyntaxNode): Generator<Command> {
   switch (node.type) {
     case 'Command':
       yield node;
@@ -44,7 +47,10 @@ export function* walkCommands(node: Node): Generator<Command> {
       yield* walkCommands(node.body);
       break;
     case 'Statement':
-      yield* walkCommands(node.command);
+    case 'Redirected':
+    case 'Time':
+    case 'Negation':
+      if (node.command) yield* walkCommands(node.command);
       break;
   }
 }
@@ -64,13 +70,14 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
       const text = node.name?.value;
       if (!text) continue;
       const binary = extractBinary(text);
+      const words = getCommandWords(node);
       if (spawningBinaries.has(binary)) {
-        const rest = node.suffix
+        const rest = words
           .filter(word => word.text !== '--')
           .map(word => word.text)
           .join(' ');
         out.push(...getScriptCommands(rest));
-      } else out.push({ binary, args: node.suffix.map(word => word.value) });
+      } else out.push({ binary, args: words.map(word => word.value) });
     }
   }
   return out;

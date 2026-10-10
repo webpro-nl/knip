@@ -19,6 +19,9 @@ Consider implementing `resolve*` functions only for custom plugin-specific needs
 - Clean up the generated template: remove unused arrays (`config`, `entry`,
   `production`), `resolveConfig`, and `types.ts` if not needed.
 - Consult similar plugins and the tool's website before implementation.
+- Below the imports, link the tool's docs in a comment (see template). It's the
+  single source of truth for upstream references; link the tool's source (pinned
+  to a tag or commit) for behavior the docs don't cover.
 - Run tests individually first: `bun test test/plugins/[name].test.ts`
 
 ## `entry` and `config`
@@ -28,6 +31,8 @@ Consider implementing `resolve*` functions only for custom plugin-specific needs
 - `config` — files the plugin parses to extract references (inputs, entries,
   plugins, etc.). `resolveConfig` / `resolveFromAST` run on these; they're
   auto-added as entries.
+- List every config file location the tool searches, taken from its discovery
+  code (e.g. cosmiconfig `searchPlaces`), and link that code in the top comment.
 
 ## `resolveConfig` and `resolveFromAST`
 
@@ -69,11 +74,10 @@ shared in `_custom-elements/`.
 
 ## Fixtures
 
-- Use non-default file names in config fields (e.g. `input: 'src/app.ts'`, not
-  `'index.ts'` or `'main.ts'`) so the test actually verifies the plugin resolves
-  them — default entry patterns would pick those up regardless.
+See [TESTS.md][5] for fixture conventions, including plugin fixtures.
 
 [1]: ../packages/docs/src/content/docs/writing-a-plugin/index.md
 [2]: ../packages/docs/src/content/docs/writing-a-plugin/inputs.md
 [3]: ../packages/docs/src/content/docs/writing-a-plugin/argument-parsing.md
 [4]: ./COMPILERS.md
+[5]: ./TESTS.md#plugin-fixtures

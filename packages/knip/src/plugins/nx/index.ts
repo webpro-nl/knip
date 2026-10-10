@@ -2,8 +2,8 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, Resolve, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
-import { toConfig, toDependency, toDeferResolveEntry } from '../../util/input.ts';
-import { dirname, join } from '../../util/path.ts';
+import { toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { dirname, join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
 import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
@@ -76,7 +76,13 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
         commands = target.options.commands.map(commandConfig =>
           typeof commandConfig === 'string' ? commandConfig : commandConfig.command
         );
-      return options.getInputsFromScripts(commands.map(expand), { cwd: resolveTargetCwd(target.options?.cwd) });
+      const cwd = resolveTargetCwd(target.options?.cwd);
+      // Relative roots keep a cwd with spaces or parentheses out of the command
+      const expandRelative = (command: string) =>
+        command
+          .replaceAll('{projectRoot}', relative(cwd, options.configFileDir))
+          .replaceAll('{workspaceRoot}', relative(cwd, options.rootCwd));
+      return options.getInputsFromScripts(commands.map(expandRelative), { cwd });
     });
 
   const configInputs = targets.flatMap(target => {

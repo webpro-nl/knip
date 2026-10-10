@@ -85,11 +85,16 @@ export const addNsValue = (map: IdToNsToFileMap, id: string, ns: string, value: 
 const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
   const existing = map.get(id);
   if (existing) for (const v of values) existing.add(v);
-  else map.set(id, values);
+  else map.set(id, new Set(values));
 };
 
 const addNsValues = (map: IdToNsToFileMap, id: string, value: IdToFileMap) => {
   const existing = map.get(id);
-  if (existing) for (const [ns, v] of value) addValues(existing, ns, v);
-  else map.set(id, value);
+  if (existing) {
+    for (const [ns, v] of value) addValues(existing, ns, v);
+  } else {
+    const copy: IdToFileMap = new Map();
+    for (const [ns, v] of value) copy.set(ns, new Set(v));
+    map.set(id, copy);
+  }
 };

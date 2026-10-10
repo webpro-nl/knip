@@ -117,7 +117,7 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
       const absSpecifier = isAbsolute(id) ? id : prependDirToPattern(dir, id);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       const mapped = ws?.sourceMaps && rewritePattern(ws.sourceMaps, absSpecifier, extensions);
-      patterns.add(negation + (mapped ?? absSpecifier));
+      patterns.add(negation + (mapped ?? id));
     }
 
     const filePaths = await _glob({ patterns: Array.from(patterns), cwd: chief.cwd, dir, label });

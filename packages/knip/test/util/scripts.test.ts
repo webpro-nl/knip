@@ -15,6 +15,23 @@ test('getScriptCommands keeps options with their command', () => {
   ]);
 });
 
+test('getScriptCommands excludes redirects from arguments', () => {
+  assert.deepEqual(getScriptCommands('>output.log node 2>errors.log ./script.js <input.txt'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env >output.log NODE_ENV=test node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+});
+
+test('getScriptCommands traverses shell command wrappers', () => {
+  assert.deepEqual(getScriptCommands('time -p ! { node ./script.js; } >output.log'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('time'), []);
+  assert.deepEqual(getScriptCommands('!'), []);
+});
+
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);

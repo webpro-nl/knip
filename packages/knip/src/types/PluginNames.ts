@@ -36,8 +36,10 @@ export type PluginName =
   | 'eve'
   | 'execa'
   | 'expo'
+  | 'expo-router'
   | 'expressive-code'
   | 'fast'
+  | 'flue'
   | 'fumadocs'
   | 'gatsby'
   | 'github-action'
@@ -89,6 +91,7 @@ export type PluginName =
   | 'openapi-ts'
   | 'openclaw'
   | 'orval'
+  | 'osls'
   | 'oxfmt'
   | 'oxlint'
   | 'panda-css'
@@ -227,8 +230,10 @@ export const pluginNames = [
   'eve',
   'execa',
   'expo',
+  'expo-router',
   'expressive-code',
   'fast',
+  'flue',
   'fumadocs',
   'gatsby',
   'github-action',
@@ -280,6 +285,7 @@ export const pluginNames = [
   'openapi-ts',
   'openclaw',
   'orval',
+  'osls',
   'oxfmt',
   'oxlint',
   'panda-css',

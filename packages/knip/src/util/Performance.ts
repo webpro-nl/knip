@@ -173,5 +173,6 @@ export const timerify = <T extends (...params: any[]) => any>(fn: T, name: strin
   if (!isTimerifyFunctions) return fn;
   if (timerifyOnlyFnName && !timerifyOnlyFnName.includes(name)) return fn;
   const histogram = perfObserver.registerHistogram(name);
+  // Use Node.js v26.11.0+ if this throws ERR_OUT_OF_RANGE: https://github.com/nodejs/node/issues/41641
   return performance.timerify(Object.defineProperty(fn, 'name', { value: name }), { histogram });
 };

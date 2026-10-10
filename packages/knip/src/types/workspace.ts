@@ -10,6 +10,7 @@ type WorkspaceManifest = {
   peerDependencies: DependencySet;
   optionalPeerDependencies: DependencySet;
   requiredPeerDependencies: DependencyArray;
+  uninstalledOptionalDependencies: DependencySet;
   allDependencies: DependencySet;
   engines: Record<string, string>;
   isPrivate: boolean;

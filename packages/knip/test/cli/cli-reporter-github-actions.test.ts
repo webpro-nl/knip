@@ -166,9 +166,11 @@ const configHints2Cwd = resolve('fixtures/tags-hints/configuration-hints2');
 
 test('knip --reporter github-actions (configuration hints 2)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: configHints2Cwd }).stdout;
-  const expected = `Configuration hints (4)
+  const expected = `Configuration hints (6)
 ::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine entry pattern (no matches): lib/index.js in knip.json
 ::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine project pattern (no matches): lib/** in knip.json
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine entry pattern (no matches): missing.js in knip.json
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine project pattern (no matches): generated/** in knip.json
 ::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level entry to one of "workspaces": [src/entry.js, …] in knip.json
 ::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level project to one of "workspaces": [src/**] in knip.json`;
   if (actual !== expected) showDiff(actual, expected);

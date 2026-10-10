@@ -6,9 +6,9 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/infra/gitignore-negated-basename');
 
-test('Unrelated gitignore negation does not un-ignore a sibling path', async () => {
+test('Gitignore negations un-ignore only the paths they match', async () => {
   const options = await createOptions({ cwd });
   const { issues } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files), ['lib/dist/helper.ts']);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['lib/dist/helper.ts', 'src/draft.ts']);
 });

@@ -2,16 +2,16 @@
 node = "24"
 
 [tasks]
-lint = "npx --no-install eslint ."
+lint = "time -p npx --no-install eslint ."
 
 [tasks.test]
-run = "npm exec -- vitest run"
+run = "! npm exec -- vitest run"
 
 [tasks.build]
 run = [
   { task = "lint" },
   { tasks = ["test", "format"] },
-  "yarn exec assets build",
+  "{ yarn exec assets build; } >build.log",
 ]
 run_windows = "pnpm exec windows-checker"
 

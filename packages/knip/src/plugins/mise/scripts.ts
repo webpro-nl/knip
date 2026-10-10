@@ -1,4 +1,4 @@
-import { parse, type Script, type Word, type WordPart } from 'unbash';
+import { type Assignment, parse, type Script, type Word, type WordPart } from 'unbash';
 import { getDependenciesFromCommand, getInputsFromNodeOptions } from '../../binaries/command.ts';
 import { spawningBinaries } from '../../binaries/fallback.ts';
 import { isWrapper } from '../../binaries/plugins.ts';
@@ -18,7 +18,7 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
   const inputs: Input[] = [];
   const definedFunctions = new Set<string>();
 
-  const readParts = (parts: WordPart[]): { text: string; value: string; hasExpansion: boolean } => {
+  const readParts = (parts: readonly WordPart[]): { text: string; value: string; hasExpansion: boolean } => {
     let text = '';
     let value = '';
     let hasExpansion = false;
@@ -44,7 +44,27 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
   const readWord = (word: Word): Word => {
     if (!word.parts) return word;
     const { text, value, hasExpansion } = readParts(word.parts);
-    return hasExpansion ? { ...word, text, value } : word;
+    return hasExpansion ? { type: 'Word', pos: word.pos, end: word.end, text, value } : word;
+  };
+
+  const readAssignment = (assignment: Assignment): Assignment => {
+    const original = assignment.value;
+    const value: Assignment['value'] =
+      original.type === 'Word'
+        ? readWord(original)
+        : { type: 'ArrayValue', pos: original.pos, end: original.end, elements: original.elements.map(readWord) };
+    if (value === original) return assignment;
+    const text = value.type === 'Word' ? value.text : `(${value.elements.map(word => word.text).join(' ')})`;
+    return {
+      type: 'Assignment',
+      pos: assignment.pos,
+      end: assignment.end,
+      name: assignment.name,
+      index: assignment.index,
+      append: assignment.append,
+      value,
+      text: assignment.text.slice(0, original.pos - assignment.pos) + text,
+    };
   };
 
   const readScript = (parsed: Script) => {
@@ -56,19 +76,20 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
       for (const command of walkCommands(statement.command)) {
         const name = command.name?.value;
         const word = command.name && readWord(command.name);
-        const prefix = command.prefix.map(assignment => {
-          const value = assignment.value && readWord(assignment.value);
-          return value && value !== assignment.value
-            ? { ...assignment, value, text: `${assignment.name}=${value.text}` }
-            : assignment;
-        });
-        const words = command.suffix.map(readWord);
+        const prefix = command.prefix
+          .filter((item): item is Assignment => item.type === 'Assignment')
+          .map(readAssignment);
+        const words: Word[] = [];
+        for (const arg of command.args) {
+          if (arg.type === 'Word') words.push(readWord(arg));
+          else readAssignment(arg);
+        }
         if (!name || !word || definedFunctions.has(name)) continue;
 
         const binary = extractBinary(name);
         const isPackageCommand = isPackageManager(binary);
         const isExplicit = isPackageCommand || name.startsWith('./') || isRelativeNodeModulesBin(name);
-        const isLocal = hasLocalBinPath && !command.prefix.some(assignment => assignment.name === 'PATH');
+        const isLocal = hasLocalBinPath && !prefix.some(assignment => assignment.name === 'PATH');
         const isWrapperCommand = !isPackageCommand && isWrapper(binary);
         if (!isExplicit && !isLocal && !isWrapperCommand && binary !== 'node' && binary !== 'find') continue;
 
@@ -79,10 +100,7 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
             return [];
           };
           const fromArgs: FromArgs = args => fromScript(toScript(args));
-          commandInputs = getDependenciesFromCommand(
-            { ...command, name: word, prefix, suffix: words },
-            { ...options, fromArgs }
-          );
+          commandInputs = getDependenciesFromCommand({ name: word, prefix, args: words }, { ...options, fromArgs });
         } else {
           commandInputs = options.getInputsFromScripts(
             [...prefix.map(assignment => assignment.text), word.text, ...words.map(word => word.text)].join(' '),
