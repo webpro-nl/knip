@@ -24,7 +24,8 @@ const getUri = (filePath: string, cwd: string) =>
     .map(segment => encodeURIComponent(segment))
     .join('/');
 
-const getLocation = ({ filePath, line, col, symbol }: Issue, cwd: string) => ({
+const getLocation = ({ filePath, line, col, symbol, symbolType }: Issue, cwd: string) => ({
+  logicalLocations: [{ name: symbol, ...(symbolType && { kind: symbolType }) }],
   physicalLocation: {
     artifactLocation: { uri: getUri(filePath, cwd) },
     ...(line !== undefined && {
