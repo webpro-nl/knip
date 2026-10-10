@@ -1,7 +1,7 @@
 {
   "executors": {
-    "bar": {
-      "implementation": "./src/bar/executor"
-    }
+    "bar": { "implementation": "./src/bar/executor" },
+    "batch": { "batchImplementation": "./src/bar/batch-executor#run" },
+    "external": "some-other-package:executor"
   }
 }

@@ -1,4 +1,4 @@
-interface NxProjectConfiguration {
+export interface NxProjectConfiguration {
   targets?: {
     [targetName: string]: {
       command?: string;
@@ -17,12 +17,15 @@ interface NxProjectConfiguration {
   };
 }
 
-export interface NxPackageConfiguration extends NxProjectConfiguration {
-  generatorsFile?: unknown;
-  executorsFile?: unknown;
-  generators?: Record<string, { factory?: string }>;
-  executors?: Record<string, { implementation?: string }>;
-}
+type NxCollectionEntry =
+  | string
+  | {
+      factory?: string;
+      implementation?: string;
+      batchImplementation?: string;
+    };
+
+export type NxCollection = Record<string, Record<string, NxCollectionEntry> | undefined>;
 
 export interface NxConfigRoot {
   plugins?: Array<
