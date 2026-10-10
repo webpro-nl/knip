@@ -12,6 +12,7 @@ const commands = new Set([
   'auth',
   'build',
   'c',
+  'check',
   'ci',
   'cloud',
   'completions',
