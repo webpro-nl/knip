@@ -1,0 +1,5 @@
+{
+  "builders": {
+    "qux": { "implementation": "./src/qux/builder" }
+  }
+}
