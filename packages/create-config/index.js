@@ -3,6 +3,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import { EOL } from 'node:os';
 import path from 'node:path';
+import { hasWorkspacesConfig } from './lib/has-workspaces-config.js';
 
 const fileExists = filePath => {
   const stat = fs.statSync(filePath, { throwIfNoEntry: false });
@@ -71,7 +72,7 @@ const hasWorkspaces = manifest => {
   if (hasAccess('pnpm-workspace.yaml')) {
     try {
       const content = fs.readFileSync('pnpm-workspace.yaml', 'utf-8');
-      return /(^|\n)packages:\n/.test(content);
+      return hasWorkspacesConfig(content);
     } catch {
       return false;
     }

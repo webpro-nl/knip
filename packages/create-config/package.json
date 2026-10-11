@@ -29,6 +29,7 @@
     "access": "public"
   },
   "scripts": {
+    "test": "node --test lib/*.test.js",
     "release": "release-it -c ../../.release-it.json"
   }
 }
