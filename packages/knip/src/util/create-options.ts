@@ -21,7 +21,7 @@ import { loadResolvedConfigFile } from './load-config.ts';
 import { _load } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
-import { isAbsolute, isInternal, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { isAbsolute, isInternal, join, resolveCwd, toAbsolute } from './path.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -35,9 +35,7 @@ interface CreateOptions extends Partial<Options> {
  */
 export const createOptions = async (options: CreateOptions) => {
   const { args = {} } = options;
-  const pcwd = toPosix(process.cwd());
-  const normalizedCwd = normalize(toAbsolute(toPosix(options.cwd ?? args.directory ?? pcwd), pcwd));
-  const cwd = /^([A-Za-z]:)?\/$/.test(normalizedCwd) ? normalizedCwd : normalizedCwd.replace(/\/+$/, '');
+  const cwd = resolveCwd(options.cwd ?? args.directory ?? '.');
 
   const manifestPath = findFile(cwd, 'package.json');
   const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
