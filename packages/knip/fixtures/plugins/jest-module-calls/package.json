@@ -3,11 +3,17 @@
   "dependencies": {
     "@babel/core": "*",
     "aliased-search": "*",
+    "lodash": "*",
+    "minimist": "*",
     "mock-clock": "*",
     "mock-network": "*",
     "mock-storage": "*",
+    "picomatch": "*",
+    "prettier": "*",
     "react": "*",
-    "unused-package": "*"
+    "react-dom": "*",
+    "unused-package": "*",
+    "zod": "*"
   },
   "devDependencies": {
     "@jest/globals": "*",

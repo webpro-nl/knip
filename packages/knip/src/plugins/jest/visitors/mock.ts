@@ -3,7 +3,19 @@ import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/c
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 import { isShadowed } from '../../../typescript/visitors/walk.ts';
 
-const mockMethods = new Set(['mock', 'doMock', 'requireActual', 'requireMock', 'createMockFromModule']);
+const mockMethods = new Set([
+  'mock',
+  'doMock',
+  'requireActual',
+  'requireMock',
+  'createMockFromModule',
+  'unmock',
+  'dontMock',
+  'deepUnmock',
+  'setMock',
+  'unstable_mockModule',
+  'unstable_unmockModule',
+]);
 
 export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   const jestNames = new Set<string>();
@@ -46,10 +58,7 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
         return;
 
       const options = node.arguments[2];
-      if (
-        (callee.property.name === 'mock' || callee.property.name === 'doMock') &&
-        options?.type === 'ObjectExpression'
-      ) {
+      if (options?.type === 'ObjectExpression') {
         for (const property of options.properties) {
           if (
             property.type === 'Property' &&
