@@ -1,6 +1,3 @@
 {
-  "name": "@fixtures/imports-prop-access-call",
-  "dependencies": {
-    "picomatch": "*"
-  }
+  "name": "@fixtures/imports-prop-access-call"
 }
