@@ -41,3 +41,10 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     total: 11,
   });
 });
+
+test('Find dependencies with the GitHub Actions plugin when cwd has a trailing slash', async () => {
+  const options = await createOptions({ cwd: `${cwd}/` });
+  const { issues } = await main(options);
+
+  assert(issues.binaries['.github/workflows/test.yml']?.eslint);
+});
