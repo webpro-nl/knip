@@ -16,10 +16,12 @@ test('Find modules used through Jest calls in tests and setup files', async () =
   assert(issues.dependencies['package.json']['unused-package']);
   assert(issues.unlisted['setup.ts']['unlisted-react']);
   assert('ignored-module.ts' in issues.files);
+  assert(issues.exports['mocked-module.ts'].value);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
+    exports: 1,
     dependencies: 1,
     devDependencies: 1,
     unlisted: 1,
