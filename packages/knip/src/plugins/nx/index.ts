@@ -1,11 +1,13 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { toConfig, toDependency } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
+import { isFile, loadJSON } from '../../util/fs.ts';
+import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { get } from '../../util/object.ts';
+import { dirname, join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
-import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
+import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
 const title = 'Nx';
 
@@ -118,6 +120,34 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
   );
 };
 
+const collections = [
+  ['generators', 'schematics'],
+  ['executors', 'builders'],
+] as const;
+
+const resolve: Resolve = async options => {
+  const inputs: Input[] = [];
+  for (const [key, alias] of collections) {
+    const file = get(options.manifest, key) ?? get(options.manifest, alias);
+    if (typeof file !== 'string') continue;
+    const filePath = join(options.cwd, file);
+    if (!isFile(filePath)) continue;
+
+    const collection: NxCollection = await loadJSON(filePath);
+    for (const entries of [collection[key], collection[alias]]) {
+      for (const entry of Object.values(entries ?? {})) {
+        if (!entry || typeof entry !== 'object') continue;
+        for (const id of [entry.implementation || entry.factory, entry.batchImplementation]) {
+          if (typeof id === 'string' && id.length > 0) {
+            inputs.push(toDeferResolveEntry(join(dirname(filePath), substringBefore(id, '#'))));
+          }
+        }
+      }
+    }
+  }
+  return inputs;
+};
+
 const args = {
   fromArgs: (parsed: ParsedArgs) => (parsed._[0] === 'exec' ? [...parsed._.slice(1), ...(parsed['--'] ?? [])] : []),
 };
@@ -133,6 +163,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  resolve,
   args,
 };
 
