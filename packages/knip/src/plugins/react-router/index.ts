@@ -70,6 +70,12 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   return resolved;
 };
 
+const note = `Route modules import their types from \`./+types/<route>\`, which \`react-router typegen\` generates.
+Run \`react-router typegen\` before Knip (e.g. in CI or a fresh checkout), or these imports are reported as unresolved.`;
+
+/** @public */
+export const docs = { note };
+
 const plugin: Plugin = {
   title,
   enablers,
