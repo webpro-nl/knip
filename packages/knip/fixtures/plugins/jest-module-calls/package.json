@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/jest-module-calls",
+  "dependencies": {
+    "@babel/core": "*",
+    "aliased-search": "*",
+    "mock-clock": "*",
+    "mock-network": "*",
+    "mock-storage": "*",
+    "react": "*",
+    "unused-package": "*"
+  },
+  "devDependencies": {
+    "@jest/globals": "*",
+    "jest": "*"
+  }
+}
