@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
+import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
@@ -8,7 +9,9 @@ const cwd = resolve('fixtures/plugins/nx-generators');
 
 test('Find local Nx generator factories and executor implementations', async () => {
   const options = await createOptions({ cwd });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(issues.files['tools/my-plugin/src/foo/factory.ts']);
 
   for (const file of [
     'tools/my-plugin/src/foo/generator.ts',
@@ -20,4 +23,12 @@ test('Find local Nx generator factories and executor implementations', async () 
   ]) {
     assert(!issues.files[file], file);
   }
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    files: 1,
+    processed: 7,
+    total: 7,
+  });
 });

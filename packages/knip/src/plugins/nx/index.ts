@@ -1,8 +1,9 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
-import type { IsPluginEnabled, Plugin, PluginOptions, Resolve, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
-import { toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { get } from '../../util/object.ts';
 import { dirname, join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
@@ -124,20 +125,19 @@ const collections = [
   ['executors', 'builders'],
 ] as const;
 
-const resolveCollections: Resolve = async (options: PluginOptions) => {
-  const inputs = [];
-  const manifest = options.manifest as Record<string, unknown>;
+const resolve: Resolve = async options => {
+  const inputs: Input[] = [];
   for (const [key, alias] of collections) {
-    const file = manifest[key] ?? manifest[alias];
+    const file = get(options.manifest, key) ?? get(options.manifest, alias);
     if (typeof file !== 'string') continue;
     const filePath = join(options.cwd, file);
     if (!isFile(filePath)) continue;
 
-    const collection = (await loadJSON(filePath)) as NxCollection;
+    const collection: NxCollection = await loadJSON(filePath);
     for (const entries of [collection[key], collection[alias]]) {
       for (const entry of Object.values(entries ?? {})) {
-        if (typeof entry === 'string' || !entry || typeof entry !== 'object') continue;
-        for (const id of [entry.implementation, entry.factory, entry.batchImplementation]) {
+        if (!entry || typeof entry !== 'object') continue;
+        for (const id of [entry.implementation || entry.factory, entry.batchImplementation]) {
           if (typeof id === 'string' && id.length > 0) {
             inputs.push(toDeferResolveEntry(join(dirname(filePath), substringBefore(id, '#'))));
           }
@@ -163,7 +163,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
-  resolve: resolveCollections,
+  resolve,
   args,
 };
 
