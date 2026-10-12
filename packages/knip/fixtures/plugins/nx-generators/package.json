@@ -1,0 +1,8 @@
+{
+  "name": "nx-generators-fixture",
+  "private": true,
+  "workspaces": ["tools/*"],
+  "devDependencies": {
+    "nx": "*"
+  }
+}

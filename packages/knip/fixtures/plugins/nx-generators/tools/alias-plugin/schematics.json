@@ -1,0 +1,5 @@
+{
+  "schematics": {
+    "baz": { "factory": "./src/baz/schematic" }
+  }
+}

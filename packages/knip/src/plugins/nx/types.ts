@@ -17,6 +17,16 @@ export interface NxProjectConfiguration {
   };
 }
 
+type NxCollectionEntry =
+  | string
+  | {
+      factory?: string;
+      implementation?: string;
+      batchImplementation?: string;
+    };
+
+export type NxCollection = Record<string, Record<string, NxCollectionEntry> | undefined>;
+
 export interface NxConfigRoot {
   plugins?: Array<
     | string
