@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/eslint-config-inspector",
+  "scripts": {
+    "inspect": "config-inspector",
+    "inspect-alias": "eslint-config-inspector"
+  },
+  "devDependencies": {
+    "@eslint/config-inspector": "*"
+  }
+}

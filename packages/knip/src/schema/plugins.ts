@@ -46,6 +46,7 @@ export const pluginsSchema = z.object({
   eleventy: pluginSchema,
   esbuild: pluginSchema,
   eslint: pluginSchema,
+  'eslint-config-inspector': pluginSchema,
   eve: pluginSchema,
   execa: pluginSchema,
   expo: pluginSchema,

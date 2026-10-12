@@ -33,6 +33,7 @@ export type PluginName =
   | 'eleventy'
   | 'esbuild'
   | 'eslint'
+  | 'eslint-config-inspector'
   | 'eve'
   | 'execa'
   | 'expo'
@@ -227,6 +228,7 @@ export const pluginNames = [
   'eleventy',
   'esbuild',
   'eslint',
+  'eslint-config-inspector',
   'eve',
   'execa',
   'expo',

@@ -550,6 +550,10 @@
           "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
           "$ref": "#/definitions/plugin"
         },
+        "eslint-config-inspector": {
+          "title": "eslint-config-inspector plugin configuration (https://knip.dev/reference/plugins/eslint-config-inspector)",
+          "$ref": "#/definitions/plugin"
+        },
         "eve": {
           "title": "eve plugin configuration (https://knip.dev/reference/plugins/eve)",
           "$ref": "#/definitions/plugin"

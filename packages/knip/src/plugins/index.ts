@@ -32,6 +32,7 @@ import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
+import { default as eslintConfigInspector } from './eslint-config-inspector/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
@@ -226,6 +227,7 @@ export const Plugins = {
   eleventy,
   esbuild,
   eslint,
+  'eslint-config-inspector': eslintConfigInspector,
   eve,
   execa,
   expo,
