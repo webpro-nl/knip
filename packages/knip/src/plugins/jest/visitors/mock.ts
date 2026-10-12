@@ -13,23 +13,6 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
       jestNames.clear();
       jestNames.add('jest');
       for (const statement of node.body) {
-        const declaration =
-          statement.type === 'ExportNamedDeclaration' && statement.declaration ? statement.declaration : statement;
-        if (declaration.type === 'VariableDeclaration') {
-          for (const declarator of declaration.declarations) {
-            if (declarator.id.type === 'Identifier' && declarator.id.name === 'jest') jestNames.delete('jest');
-          }
-        } else if (
-          (declaration.type === 'FunctionDeclaration' || declaration.type === 'ClassDeclaration') &&
-          declaration.id?.name === 'jest'
-        ) {
-          jestNames.delete('jest');
-        }
-        if (statement.type === 'ImportDeclaration') {
-          for (const specifier of statement.specifiers ?? []) {
-            if (specifier.local.name === 'jest') jestNames.delete('jest');
-          }
-        }
         if (
           statement.type !== 'ImportDeclaration' ||
           !isStringLiteral(statement.source) ||

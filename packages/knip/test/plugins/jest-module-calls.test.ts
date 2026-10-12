@@ -23,7 +23,7 @@ test('Find modules used through Jest calls in tests and setup files', async () =
     dependencies: 1,
     devDependencies: 1,
     unlisted: 1,
-    processed: 7,
-    total: 7,
+    processed: 6,
+    total: 6,
   });
 });
