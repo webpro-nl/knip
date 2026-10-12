@@ -1,0 +1,7 @@
+{
+  "name": "buf-plugin-fixture",
+  "private": true,
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "*"
+  }
+}

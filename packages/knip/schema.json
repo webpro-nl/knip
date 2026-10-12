@@ -454,6 +454,10 @@
           "title": "borp plugin configuration (https://knip.dev/reference/plugins/borp)",
           "$ref": "#/definitions/plugin"
         },
+        "buf": {
+          "title": "buf plugin configuration (https://knip.dev/reference/plugins/buf)",
+          "$ref": "#/definitions/plugin"
+        },
         "bumpp": {
           "title": "bumpp plugin configuration (https://knip.dev/reference/plugins/bumpp)",
           "$ref": "#/definitions/plugin"

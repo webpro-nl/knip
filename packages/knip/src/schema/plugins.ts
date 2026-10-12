@@ -22,6 +22,7 @@ export const pluginsSchema = z.object({
   babel: pluginSchema,
   biome: pluginSchema,
   borp: pluginSchema,
+  buf: pluginSchema,
   bumpp: pluginSchema,
   bun: pluginSchema,
   c8: pluginSchema,
