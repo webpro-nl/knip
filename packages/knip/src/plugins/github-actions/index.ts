@@ -45,7 +45,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     const path = action?.with?.path;
     for (const step of steps.steps) {
       const workingDir = step['working-directory'];
-      const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
+      const dir = join(rootCwd, path && workingDir ? relative(path, workingDir) : workingDir ? workingDir : '.');
       if (step.run) {
         const manifest = getManifest(dir) ?? options.manifest;
         const actionPath = relative(dir, configFileDir);

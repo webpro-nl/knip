@@ -33,11 +33,15 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   // resolved relative to the action directory (not reported as unused).
   assert(!('.github/actions/composite/helper.mjs' in issues.files));
 
+  // A `working-directory` nested under the `actions/checkout` `path` is
+  // resolved relative to that path (not from the parent of the repository).
+  assert(!('scripts/from-nested-working-dir-with-path.js' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 8,
     unresolved: 2,
-    processed: 11,
-    total: 11,
+    processed: 12,
+    total: 12,
   });
 });
