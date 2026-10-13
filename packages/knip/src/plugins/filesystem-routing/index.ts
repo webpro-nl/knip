@@ -1,11 +1,12 @@
 import { type CallExpression, Visitor } from 'oxc-parser';
 import { escapePath } from 'tinyglobby';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, resolveObjectArg } from '../../typescript/ast-helpers.ts';
+import { findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getViteRoot } from '../vite/helpers.ts';
 
 // https://github.com/solidjs/filesystem-routing
 // https://github.com/solidjs/filesystem-routing/blob/90a19eeb5c58becb0b5d599527c99452eab6f1c5/src/vite/index.ts
@@ -27,7 +28,7 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   if (config.entry) return [];
   const names = new Set<string>();
   const namespaces = new Set<string>();
-  let root = cwd;
+  const root = getViteRoot(program, cwd);
 
   for (const node of program.body) {
     if (node.type === 'ImportDeclaration' && node.source.value === 'filesystem-routing/vite') {
@@ -39,16 +40,6 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
           if (name === 'fileRoutes') names.add(specifier.local.name);
         }
       }
-    } else if (node.type === 'ExportDefaultDeclaration') {
-      let declaration = node.declaration;
-      while (
-        declaration.type === 'TSSatisfiesExpression' ||
-        declaration.type === 'TSAsExpression' ||
-        declaration.type === 'ParenthesizedExpression'
-      )
-        declaration = declaration.expression;
-      const options = resolveObjectArg(declaration.type === 'CallExpression' ? declaration.arguments[0] : declaration);
-      root = toAbsolute(getStringValue(findProperty(options, 'root')) ?? '.', cwd);
     }
   }
 
