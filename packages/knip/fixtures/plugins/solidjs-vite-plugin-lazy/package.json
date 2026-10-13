@@ -1,5 +1,5 @@
 {
-  "name": "@plugins/solidjs-vite-plugin-entries",
+  "name": "@plugins/solidjs-vite-plugin-lazy",
   "devDependencies": {
     "@solidjs/vite-plugin": "*"
   }
