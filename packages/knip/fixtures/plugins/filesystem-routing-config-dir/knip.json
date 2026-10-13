@@ -1,5 +1,0 @@
-{
-  "filesystem-routing": {
-    "config": ["config/vite.config.ts"]
-  }
-}

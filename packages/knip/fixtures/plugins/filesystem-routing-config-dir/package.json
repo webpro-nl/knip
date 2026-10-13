@@ -1,6 +1,0 @@
-{
-  "name": "@plugins/filesystem-routing-config-dir",
-  "devDependencies": {
-    "filesystem-routing": "*"
-  }
-}
