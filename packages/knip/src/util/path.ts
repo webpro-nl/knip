@@ -17,6 +17,8 @@ export const toPosix = isWin ? (value: string) => value.split(path.sep).join(pat
 
 export const resolve = path.posix.resolve;
 
+export const resolveCwd = (dir: string) => toPosix(path.resolve(dir));
+
 export const relative = (from: string, to: string) => {
   if (to.startsWith(from)) {
     const next = to[from.length];
