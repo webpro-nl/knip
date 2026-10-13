@@ -21,3 +21,6 @@ function withLocalJest(jest) {
 
 withLocalJest({ mock() {} });
 jest.requireMock('shadowed-search');
+
+jest.unstable_mockModule('esm-storage', () => ({}), { virtual: true });
+jest.requireMock('esm-storage');

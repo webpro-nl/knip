@@ -1,11 +1,8 @@
-import { existsSync } from 'node:fs';
 import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 import { getPropertyKey } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 import { isShadowed } from '../../../typescript/visitors/walk.ts';
-import { _syncGlob } from '../../../util/glob.ts';
-import { dirname, extname, isInternal, join } from '../../../util/path.ts';
 
 const mockMethods = new Set([
   'mock',
@@ -24,36 +21,15 @@ const mockMethods = new Set([
 export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   const jestNames = new Set<string>();
   const virtualMocks = new Set<string>();
-  const mockLookups: { specifier: string; pos: number }[] = [];
-  let manualMocks: Map<string, string> | undefined;
-
-  const getManualMock = (specifier: string) => {
-    if (isInternal(specifier)) return;
-    if (!manualMocks) {
-      manualMocks = new Map();
-      let cwd = dirname(ctx.filePath);
-      while (!existsSync(join(cwd, 'package.json'))) {
-        const parent = dirname(cwd);
-        if (parent === cwd) return;
-        cwd = parent;
-      }
-      for (const filePath of _syncGlob({
-        cwd,
-        patterns: ['**/__mocks__/**/*.[jt]s?(x)', '!**/node_modules/**'],
-      })) {
-        const mockPath = filePath.slice(filePath.indexOf('/__mocks__/') + '/__mocks__/'.length);
-        manualMocks.set(mockPath.slice(0, -extname(mockPath).length), filePath);
-      }
-    }
-    return manualMocks.get(specifier);
-  };
+  const virtualEsmMocks = new Set<string>();
+  const mockLookups: { specifier: string; pos: number; isEsm: boolean }[] = [];
 
   return {
     Program(node) {
       jestNames.clear();
       virtualMocks.clear();
+      virtualEsmMocks.clear();
       mockLookups.length = 0;
-      manualMocks = undefined;
       jestNames.add('jest');
       for (const statement of node.body) {
         if (
@@ -103,25 +79,28 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
             property.value.type === 'Literal' &&
             property.value.value === true
           ) {
-            virtualMocks.add(specifier);
+            (method === 'unstable_mockModule' ? virtualEsmMocks : virtualMocks).add(specifier);
             return;
           }
         }
       }
 
-      if (method === 'requireMock') {
-        mockLookups.push({ specifier, pos: argument.start });
+      if (method === 'requireActual' || method === 'createMockFromModule') {
+        const flags = method === 'requireActual' ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS;
+        ctx.addImport(specifier, argument.start, flags);
         return;
       }
 
-      const flags = method === 'requireActual' ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS;
-      const mock = method === 'mock' || method === 'doMock' ? getManualMock(specifier) : undefined;
-      ctx.addImport(mock ?? specifier, argument.start, flags);
+      mockLookups.push({
+        specifier,
+        pos: argument.start,
+        isEsm: method === 'unstable_mockModule' || method === 'unstable_unmockModule',
+      });
     },
     'Program:exit'() {
-      for (const { specifier, pos } of mockLookups) {
-        if (!virtualMocks.has(specifier))
-          ctx.addImport(getManualMock(specifier) ?? specifier, pos, IMPORT_FLAGS.SIDE_EFFECTS);
+      for (const { specifier, pos, isEsm } of mockLookups) {
+        if ((isEsm ? virtualEsmMocks : virtualMocks).has(specifier)) continue;
+        ctx.addImport(specifier, pos, IMPORT_FLAGS.SIDE_EFFECTS);
       }
     },
   };

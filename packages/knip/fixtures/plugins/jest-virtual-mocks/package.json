@@ -2,6 +2,7 @@
   "name": "jest-virtual-mocks",
   "devDependencies": {
     "@jest/globals": "*",
+    "esm-storage": "*",
     "jest": "*"
   }
 }

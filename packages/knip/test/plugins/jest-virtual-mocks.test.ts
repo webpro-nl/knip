@@ -12,19 +12,20 @@ test('Resolve virtual Jest mock lookups within each file', async () => {
   const { issues, counters } = await main(options);
 
   assert.equal(issues.unlisted['virtual.test.ts']?.['virtual-storage'], undefined);
-  assert.equal(issues.unlisted['virtual.test.ts']?.['virtual-network'], undefined);
+  assert.equal(issues.unlisted['virtual.test.ts']?.['virtual-network']?.line, 9);
   assert.equal(issues.unlisted['aliased.test.ts']?.['virtual-clock'], undefined);
   assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-search'], undefined);
   assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-storage'], undefined);
-  assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-network'], undefined);
+  assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-network']?.line, 16);
   assert.equal(issues.unlisted['virtual.test.ts']['virtual-search'].line, 3);
   assert(issues.unlisted['virtual.test.ts']['shadowed-search']);
   assert(issues.unlisted['aliased.test.ts']['virtual-storage']);
+  assert.equal(issues.devDependencies['package.json']?.['esm-storage'], undefined);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 3,
+    unlisted: 5,
     processed: 2,
     total: 2,
   });
