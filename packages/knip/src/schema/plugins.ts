@@ -146,6 +146,7 @@ export const pluginsSchema = z.object({
   'serverless-framework': pluginSchema,
   'simple-git-hooks': pluginSchema,
   'size-limit': pluginSchema,
+  'solidjs-vite-plugin': pluginSchema,
   sst: pluginSchema,
   starlight: pluginSchema,
   stencil: pluginSchema,
