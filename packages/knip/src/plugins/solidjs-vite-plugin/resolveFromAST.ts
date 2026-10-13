@@ -1,15 +1,11 @@
 import { type CallExpression, type Expression, type Program, Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
-import {
-  findImportedCalls,
-  findProperty,
-  getFirstPropertyValue,
-  resolveObjectArg,
-} from '../../typescript/ast-helpers.ts';
+import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
+import { getViteRoot } from '../vite/helpers.ts';
 
 const enabler = '@solidjs/vite-plugin';
 
@@ -55,15 +51,6 @@ const hasEntryFile = (root: string, stem: string) => {
   return false;
 };
 
-const getConfigObject = (program: Program) => {
-  for (const node of program.body) {
-    if (node.type === 'ExportDefaultDeclaration') {
-      const decl = node.declaration;
-      return decl.type === 'CallExpression' ? resolveObjectArg(decl.arguments[0]) : resolveObjectArg(decl);
-    }
-  }
-};
-
 const hasStaticImport = (program: Program) => {
   for (const node of program.body) {
     if (node.type !== 'ImportDeclaration' || node.importKind === 'type' || node.source.value !== enabler) continue;
@@ -87,7 +74,7 @@ const getPluginCalls = (program: Program) => {
 };
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
-  const root = toAbsolute(getFirstPropertyValue(getConfigObject(program), 'root') ?? '.', options.cwd);
+  const root = getViteRoot(program, options.cwd);
   const patterns = new Set<string>();
   const paths = new Set<string>();
 

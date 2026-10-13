@@ -8,11 +8,10 @@ export default async ({ mode }: { mode: string }) => {
   return {
     plugins: [
       modules.solid({
-        ssr: true,
         start: {
-          entryServer: './src/server.tsx',
           entryClient: './src/client.tsx',
           middleware: mode === 'e2e' ? './src/middleware/e2e.ts' : './src/middleware/index.ts',
+          setup: './src/setup.ts',
           env: mode === 'e2e' ? './config/env.ts' : true,
         },
       }),

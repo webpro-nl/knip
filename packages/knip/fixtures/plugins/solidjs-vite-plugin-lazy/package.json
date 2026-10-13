@@ -1,5 +1,5 @@
 {
-  "name": "@plugins/solidjs-vite-plugin-spread",
+  "name": "@plugins/solidjs-vite-plugin-lazy",
   "devDependencies": {
     "@solidjs/vite-plugin": "*"
   }
