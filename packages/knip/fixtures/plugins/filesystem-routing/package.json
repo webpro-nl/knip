@@ -1,7 +1,7 @@
 {
   "name": "@plugins/filesystem-routing",
   "devDependencies": {
-    "@testing-library/dom": "*",
+    "@mdx-js/rollup": "*",
     "filesystem-routing": "*"
   }
 }

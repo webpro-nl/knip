@@ -84,17 +84,6 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   return inputs;
 };
 
-const note = `Reads literal \`dir\` and \`extensions\` from the Vite config, including named and namespace imports.
-Unevaluated extensions use the defaults plus known literals. A custom Vite root, dynamic imports, computed directories, and custom
-\`router\` or \`routers\` instances may need manual entries.
-
-Every matching file is a production entry, regardless of \`httpMethods\`. This includes colocated helpers, components and
-tests: their unused exports are not reported, and test dependencies may be reported as unlisted in strict mode.
-Override the plugin \`entry\` to narrow the files included.`;
-
-/** @public */
-export const docs = { note };
-
 const plugin: Plugin = {
   title,
   enablers,
