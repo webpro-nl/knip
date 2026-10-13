@@ -7,14 +7,22 @@ import {
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
+import { isFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 
 const enabler = '@solidjs/vite-plugin';
 
+const entryExtensions = ['tsx', 'jsx', 'ts', 'js', 'mjs', 'tsrx'];
+
+const entryStems: Record<string, string> = {
+  entryServer: 'src/entry-server',
+  entryClient: 'src/entry-client',
+};
+
 const conventions: Record<string, string> = {
-  entryServer: 'src/entry-server.{tsx,jsx,ts,js,mjs,tsrx}',
-  entryClient: 'src/entry-client.{tsx,jsx,ts,js,mjs,tsrx}',
+  entryServer: `src/entry-server.{${entryExtensions.join(',')}}`,
+  entryClient: `src/entry-client.{${entryExtensions.join(',')}}`,
   app: 'src/{App,app}.{tsx,jsx,ts,js,tsrx}',
   document: 'src/Document.{tsx,jsx,tsrx}',
   env: 'env.{ts,js}',
@@ -26,7 +34,7 @@ const startOptions = ['app', 'document', 'entryServer', 'entryClient', 'middlewa
 
 type Option = { paths: string[]; isDefault: boolean };
 
-const isFalse = (node: Expression | undefined) => node?.type === 'Literal' && node.value === false;
+const isBoolean = (node: Expression | undefined, value: boolean) => node?.type === 'Literal' && node.value === value;
 
 const getOption = (node: Expression | undefined, isEnv: boolean): Option => {
   if (node?.type === 'ConditionalExpression') {
@@ -39,7 +47,12 @@ const getOption = (node: Expression | undefined, isEnv: boolean): Option => {
   }
   const path = getStringValue(node);
   if (path) return { paths: [path], isDefault: false };
-  return { paths: [], isDefault: !(isEnv && isFalse(node)) };
+  return { paths: [], isDefault: !(isEnv && isBoolean(node, false)) };
+};
+
+const hasEntryFile = (root: string, stem: string) => {
+  for (const extension of entryExtensions) if (isFile(root, `${stem}.${extension}`)) return true;
+  return false;
 };
 
 const getConfigObject = (program: Program) => {
@@ -86,11 +99,33 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
     for (const id of configure.paths) paths.add(id);
 
     const start = findProperty(arg, 'start');
-    if (!start || isFalse(start)) continue;
+    if (!start || isBoolean(start, false)) continue;
 
+    const startConfig: Record<string, Option> = {};
     for (const name of startOptions) {
       const value = start.type === 'ObjectExpression' ? findProperty(start, name) : undefined;
-      const option = getOption(value, name === 'env');
+      startConfig[name] = getOption(value, name === 'env');
+    }
+
+    const isAuthored = (name: string) => !startConfig[name].isDefault || hasEntryFile(root, entryStems[name]);
+    const ssr = findProperty(arg, 'ssr');
+    let hasSpread = false;
+    for (const property of arg.properties) if (property.type === 'SpreadElement') hasSpread = true;
+    const isClient = !hasSpread && (!ssr || isBoolean(ssr, false));
+    const isServer = !hasSpread && isBoolean(ssr, true);
+    const skip = new Set<string>();
+    if (isClient) {
+      skip.add('entryServer');
+      skip.add('setup');
+      if (isAuthored('entryClient')) skip.add('app');
+    } else if (isServer && isAuthored('entryServer') && isAuthored('entryClient')) {
+      skip.add('app');
+      skip.add('document');
+    }
+
+    for (const name of startOptions) {
+      if (skip.has(name)) continue;
+      const option = startConfig[name];
       for (const id of option.paths) paths.add(id);
       if (option.isDefault && name in conventions) patterns.add(conventions[name]);
     }

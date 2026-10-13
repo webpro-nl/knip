@@ -14,8 +14,25 @@ const cases = [
     unused: ['env.ts', 'src/App.tsx', 'src/Document.tsx'],
     processed: 10,
   },
-  { name: 'custom root', fixture: '-root', unused: ['src/entry-server.tsx'], processed: 5 },
-  { name: 'lazy plugin', fixture: '-entries', unused: ['src/entry-client.tsx', 'src/entry-server.tsx'], processed: 9 },
+  {
+    name: 'custom root, authored entries',
+    fixture: '-root',
+    unused: ['app/src/App.tsx', 'app/src/Document.tsrx', 'src/entry-server.tsx'],
+    processed: 7,
+  },
+  {
+    name: 'lazy plugin',
+    fixture: '-entries',
+    unused: ['src/App.tsx', 'src/Document.tsx', 'src/entry-client.tsx', 'src/entry-server.tsx'],
+    processed: 11,
+  },
+  {
+    name: 'client mode',
+    fixture: '-client',
+    unused: ['src/App.tsx', 'src/entry-server.tsx', 'src/setup.ts'],
+    processed: 6,
+  },
+  { name: 'spread may override ssr', fixture: '-spread', unused: [], processed: 4 },
   { name: 'start: true', fixture: '-app', unused: [], processed: 3 },
   { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], exports: 1, processed: 5 },
   {
