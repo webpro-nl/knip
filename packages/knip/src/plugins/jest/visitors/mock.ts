@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
+import { getPropertyKey } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
 import { isShadowed } from '../../../typescript/visitors/walk.ts';
 import { _syncGlob } from '../../../util/glob.ts';
@@ -98,8 +99,7 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
           if (
             property.type === 'Property' &&
             !property.computed &&
-            property.key.type === 'Identifier' &&
-            property.key.name === 'virtual' &&
+            getPropertyKey(property) === 'virtual' &&
             property.value.type === 'Literal' &&
             property.value.value === true
           ) {

@@ -14,6 +14,9 @@ test('Resolve virtual Jest mock lookups within each file', async () => {
   assert.equal(issues.unlisted['virtual.test.ts']?.['virtual-storage'], undefined);
   assert.equal(issues.unlisted['virtual.test.ts']?.['virtual-network'], undefined);
   assert.equal(issues.unlisted['aliased.test.ts']?.['virtual-clock'], undefined);
+  assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-search'], undefined);
+  assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-storage'], undefined);
+  assert.equal(issues.unlisted['virtual.test.ts']?.['quoted-network'], undefined);
   assert.equal(issues.unlisted['virtual.test.ts']['virtual-search'].line, 3);
   assert(issues.unlisted['virtual.test.ts']['shadowed-search']);
   assert(issues.unlisted['aliased.test.ts']['virtual-storage']);
