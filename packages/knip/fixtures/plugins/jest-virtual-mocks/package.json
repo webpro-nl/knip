@@ -1,0 +1,7 @@
+{
+  "name": "jest-virtual-mocks",
+  "devDependencies": {
+    "@jest/globals": "*",
+    "jest": "*"
+  }
+}

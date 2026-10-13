@@ -19,10 +19,14 @@ const mockMethods = new Set([
 
 export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorObject {
   const jestNames = new Set<string>();
+  const virtualMocks = new Set<string>();
+  const mockLookups: { specifier: string; pos: number }[] = [];
 
   return {
     Program(node) {
       jestNames.clear();
+      virtualMocks.clear();
+      mockLookups.length = 0;
       jestNames.add('jest');
       for (const statement of node.body) {
         if (
@@ -57,8 +61,13 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
       )
         return;
 
+      const specifier = getStringValue(argument)!;
+      const method = callee.property.name;
       const options = node.arguments[2];
-      if (options?.type === 'ObjectExpression') {
+      if (
+        (method === 'mock' || method === 'doMock' || method === 'unstable_mockModule') &&
+        options?.type === 'ObjectExpression'
+      ) {
         for (const property of options.properties) {
           if (
             property.type === 'Property' &&
@@ -67,13 +76,25 @@ export function createJestMockVisitor(ctx: PluginVisitorContext): PluginVisitorO
             property.key.name === 'virtual' &&
             property.value.type === 'Literal' &&
             property.value.value === true
-          )
+          ) {
+            virtualMocks.add(specifier);
             return;
+          }
         }
       }
 
-      const flags = callee.property.name === 'requireActual' ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS;
-      ctx.addImport(getStringValue(argument)!, argument.start, flags);
+      if (method === 'requireMock') {
+        mockLookups.push({ specifier, pos: argument.start });
+        return;
+      }
+
+      const flags = method === 'requireActual' ? IMPORT_FLAGS.OPAQUE : IMPORT_FLAGS.SIDE_EFFECTS;
+      ctx.addImport(specifier, argument.start, flags);
+    },
+    'Program:exit'() {
+      for (const { specifier, pos } of mockLookups) {
+        if (!virtualMocks.has(specifier)) ctx.addImport(specifier, pos, IMPORT_FLAGS.SIDE_EFFECTS);
+      }
     },
   };
 }
