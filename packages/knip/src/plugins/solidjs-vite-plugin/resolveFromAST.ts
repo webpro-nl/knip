@@ -1,4 +1,4 @@
-import type { Expression, Program } from 'oxc-parser';
+import { type CallExpression, type Expression, type Program, Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import {
   findImportedCalls,
@@ -9,6 +9,8 @@ import {
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
+
+const enabler = '@solidjs/vite-plugin';
 
 const conventions: Record<string, string> = {
   entryServer: 'src/entry-server.{tsx,jsx,ts,js,mjs,tsrx}',
@@ -22,7 +24,23 @@ export const production = Object.values(conventions);
 
 const startOptions = ['app', 'document', 'entryServer', 'entryClient', 'middleware', 'instrument', 'setup', 'env'];
 
+type Option = { paths: string[]; isDefault: boolean };
+
 const isFalse = (node: Expression | undefined) => node?.type === 'Literal' && node.value === false;
+
+const getOption = (node: Expression | undefined, isEnv: boolean): Option => {
+  if (node?.type === 'ConditionalExpression') {
+    const consequent = getOption(node.consequent, isEnv);
+    const alternate = getOption(node.alternate, isEnv);
+    return {
+      paths: [...consequent.paths, ...alternate.paths],
+      isDefault: consequent.isDefault || alternate.isDefault,
+    };
+  }
+  const path = getStringValue(node);
+  if (path) return { paths: [path], isDefault: false };
+  return { paths: [], isDefault: !(isEnv && isFalse(node)) };
+};
 
 const getConfigObject = (program: Program) => {
   for (const node of program.body) {
@@ -33,26 +51,48 @@ const getConfigObject = (program: Program) => {
   }
 };
 
+const hasStaticImport = (program: Program) => {
+  for (const node of program.body) {
+    if (node.type !== 'ImportDeclaration' || node.importKind === 'type' || node.source.value !== enabler) continue;
+    for (const specifier of node.specifiers) {
+      if (specifier.type !== 'ImportSpecifier' || specifier.importKind !== 'type') return true;
+    }
+  }
+  return false;
+};
+
+const getPluginCalls = (program: Program) => {
+  if (hasStaticImport(program)) return findImportedCalls(program, enabler);
+  const calls: CallExpression[] = [];
+  const visitor = new Visitor({
+    CallExpression(node) {
+      calls.push(node);
+    },
+  });
+  visitor.visit(program);
+  return calls;
+};
+
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   const root = toAbsolute(getFirstPropertyValue(getConfigObject(program), 'root') ?? '.', options.cwd);
   const patterns = new Set<string>();
   const paths = new Set<string>();
 
-  for (const call of findImportedCalls(program, '@solidjs/vite-plugin')) {
+  for (const call of getPluginCalls(program)) {
     const arg = call.arguments[0];
     if (arg?.type !== 'ObjectExpression') continue;
 
-    const configure = getStringValue(findProperty(findProperty(arg, 'serverFunctions'), 'configure'));
-    if (configure) paths.add(configure);
+    const configure = getOption(findProperty(findProperty(arg, 'serverFunctions'), 'configure'), false);
+    for (const id of configure.paths) paths.add(id);
 
     const start = findProperty(arg, 'start');
     if (!start || isFalse(start)) continue;
 
     for (const name of startOptions) {
       const value = start.type === 'ObjectExpression' ? findProperty(start, name) : undefined;
-      const path = getStringValue(value);
-      if (path) paths.add(path);
-      else if (name in conventions && !(name === 'env' && isFalse(value))) patterns.add(conventions[name]);
+      const option = getOption(value, name === 'env');
+      for (const id of option.paths) paths.add(id);
+      if (option.isDefault && name in conventions) patterns.add(conventions[name]);
     }
   }
 

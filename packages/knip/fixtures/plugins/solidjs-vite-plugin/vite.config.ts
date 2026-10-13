@@ -10,7 +10,7 @@ export default {
         middleware: './src/middleware.ts',
         instrument: './src/instrument.ts',
         setup: './src/setup.ts',
-        env: false,
+        env: process.env.CI ? './config/env.ci.ts' : false,
       },
       serverFunctions: { configure: './src/configure.ts' },
     }),

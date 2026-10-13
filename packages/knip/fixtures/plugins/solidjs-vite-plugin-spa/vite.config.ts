@@ -1,5 +1,9 @@
-import solid from '@solidjs/vite-plugin';
+import solidPlugin from '@solidjs/vite-plugin';
+
+const solid = solidPlugin;
+
+const timing = (options: { start: { label: string } }) => ({ name: 'timing', options });
 
 export default {
-  plugins: [solid()],
+  plugins: [solid(), timing({ start: { label: 'boot' } })],
 };
