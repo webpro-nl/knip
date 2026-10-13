@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/filesystem-routing-custom",
+  "devDependencies": {
+    "@mdx-js/rollup": "*",
+    "filesystem-routing": "*"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "filesystem-routing": {
+    "entry": ["src/pages/*.tsx"]
+  }
+}
