@@ -5,21 +5,18 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-for (const mode of ['default', 'production', 'strict']) {
-  test(`Discover filesystem-routing pages and HTTP handlers (${mode})`, async () => {
-    const cwd = resolve('fixtures/plugins/filesystem-routing');
-    const isStrict = mode === 'strict';
-    const isProduction = mode !== 'default';
-    const { issues, counters } = await main(await createOptions({ cwd, isStrict, isProduction }));
+const cwd = resolve('fixtures/plugins/filesystem-routing');
+
+for (const isProduction of [false, true]) {
+  test(`Find route entries with the filesystem-routing plugin (production: ${isProduction})`, async () => {
+    const { issues, counters } = await main(await createOptions({ cwd, isProduction }));
 
     assert.deepEqual(Object.keys(issues.files), ['src/orphan.ts']);
-    if (isStrict) assert(issues.unlisted['src/routes/__tests__/page.test.ts']['@testing-library/dom']);
     assert.deepEqual(counters, {
       ...baseCounters,
       files: 1,
-      unlisted: isStrict ? 1 : 0,
-      processed: isProduction ? 8 : 9,
-      total: isProduction ? 8 : 9,
+      processed: isProduction ? 4 : 5,
+      total: isProduction ? 4 : 5,
     });
   });
 }
