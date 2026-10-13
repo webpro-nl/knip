@@ -1,7 +1,7 @@
 import { type CallExpression, Visitor } from 'oxc-parser';
 import { escapePath } from 'tinyglobby';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty } from '../../typescript/ast-helpers.ts';
+import { findProperty, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, relative, toAbsolute } from '../../util/path.ts';
@@ -27,6 +27,7 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   if (config.entry) return [];
   const names = new Set<string>();
   const namespaces = new Set<string>();
+  let root = cwd;
 
   for (const node of program.body) {
     if (node.type === 'ImportDeclaration' && node.source.value === 'filesystem-routing/vite') {
@@ -38,6 +39,16 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
           if (name === 'fileRoutes') names.add(specifier.local.name);
         }
       }
+    } else if (node.type === 'ExportDefaultDeclaration') {
+      let declaration = node.declaration;
+      while (
+        declaration.type === 'TSSatisfiesExpression' ||
+        declaration.type === 'TSAsExpression' ||
+        declaration.type === 'ParenthesizedExpression'
+      )
+        declaration = declaration.expression;
+      const options = resolveObjectArg(declaration.type === 'CallExpression' ? declaration.arguments[0] : declaration);
+      root = toAbsolute(getStringValue(findProperty(options, 'root')) ?? '.', cwd);
     }
   }
 
@@ -60,7 +71,7 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   visitor.visit(program);
   const toEntry = (dir: string, pattern: string) =>
     toProductionEntry(join(cwd, escapePath(relative(cwd, dir)), pattern));
-  if (calls.length === 0) return production.map(pattern => toEntry(cwd, pattern));
+  if (calls.length === 0) return production.map(pattern => toEntry(root, pattern));
 
   const inputs: Input[] = [];
   for (const call of calls) {
@@ -79,13 +90,13 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
     if (useDefaults) for (const extension of defaultExtensions) extensions.add(extension);
     if (extensions.size === 0) continue;
     const suffix = extensions.size === 1 ? [...extensions][0] : `{${[...extensions].join(',')}}`;
-    inputs.push(toEntry(toAbsolute(dir, cwd), `**/*.${suffix}`));
+    inputs.push(toEntry(toAbsolute(dir, root), `**/*.${suffix}`));
   }
   return inputs;
 };
 
-const note = `Reads literal \`dir\` and \`extensions\` from the Vite config, including named and namespace imports.
-Unevaluated extensions use the defaults plus known literals. A custom Vite root, dynamic imports, computed directories, and custom
+const note = `Reads literal \`root\`, \`dir\` and \`extensions\` from the Vite config, including named and namespace imports.
+Unevaluated extensions use the defaults plus known literals. Dynamic imports, computed directories or roots, and custom
 \`router\` or \`routers\` instances may need manual entries.
 
 Every matching file is a production entry, regardless of \`httpMethods\`. This includes colocated helpers, components and

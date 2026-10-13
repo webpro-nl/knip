@@ -40,6 +40,16 @@ const cases = [
     unused: ['src/pages/components/UserLabel.tsx'],
     total: 3,
   },
+  {
+    fixture: 'root',
+    unused: ['pages/unused.ts', 'src/routes/unused.ts'],
+    total: 4,
+  },
+  {
+    fixture: 'config-dir',
+    unused: ['config/src/routes/unused.ts'],
+    total: 3,
+  },
 ];
 
 for (const { fixture, unused, total } of cases) {
@@ -102,5 +112,15 @@ test('Resolve empty, relative and absolute route directories', () => {
     `;
       assert.deepEqual(getInputs(source, root), [toProductionEntry(join(root, '**/*.ts'))]);
     }
+  }
+});
+
+test('Read the Vite root through type assertions', () => {
+  for (const suffix of ['satisfies UserConfig', 'as UserConfig', 'as const satisfies UserConfig']) {
+    const source = `
+      import { fileRoutes } from 'filesystem-routing/vite';
+      export default { root: 'app', plugins: [fileRoutes({ dir: 'pages', extensions: ['ts'] })] } ${suffix};
+    `;
+    assert.deepEqual(getInputs(source), [toProductionEntry(join(cwd, 'app/pages/**/*.ts'))]);
   }
 });
