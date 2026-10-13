@@ -37,7 +37,7 @@ test('Find dependencies with the Nx plugin', async () => {
     devDependencies: 6,
     unlisted: 6,
     files: 3,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });

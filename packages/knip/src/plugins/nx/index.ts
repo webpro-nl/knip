@@ -2,7 +2,7 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
-import { type Input, isDeferResolveEntry, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
 import { dirname, join, relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -84,7 +84,7 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
           .replaceAll('{projectRoot}', relative(cwd, options.configFileDir))
           .replaceAll('{workspaceRoot}', relative(cwd, options.rootCwd));
       const scriptInputs = options.getInputsFromScripts(commands.map(expandRelative), { cwd });
-      for (const input of scriptInputs) if (isDeferResolveEntry(input)) input.dir ??= cwd;
+      for (const input of scriptInputs) input.dir ??= cwd;
       return scriptInputs;
     });
 
