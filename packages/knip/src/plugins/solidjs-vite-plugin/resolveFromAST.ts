@@ -1,14 +1,10 @@
-import type { Expression, Program } from 'oxc-parser';
+import type { Expression } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
-import {
-  findImportedCalls,
-  findProperty,
-  getFirstPropertyValue,
-  resolveObjectArg,
-} from '../../typescript/ast-helpers.ts';
+import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
+import { getViteRoot } from '../vite/helpers.ts';
 
 const conventions: Record<string, string> = {
   entryServer: 'src/entry-server.{tsx,jsx,ts,js,mjs,tsrx}',
@@ -24,17 +20,8 @@ const startOptions = ['app', 'document', 'entryServer', 'entryClient', 'middlewa
 
 const isFalse = (node: Expression | undefined) => node?.type === 'Literal' && node.value === false;
 
-const getConfigObject = (program: Program) => {
-  for (const node of program.body) {
-    if (node.type === 'ExportDefaultDeclaration') {
-      const decl = node.declaration;
-      return decl.type === 'CallExpression' ? resolveObjectArg(decl.arguments[0]) : resolveObjectArg(decl);
-    }
-  }
-};
-
 export const resolveFromAST: ResolveFromAST = (program, options) => {
-  const root = toAbsolute(getFirstPropertyValue(getConfigObject(program), 'root') ?? '.', options.cwd);
+  const root = getViteRoot(program, options.cwd);
   const patterns = new Set<string>();
   const paths = new Set<string>();
 

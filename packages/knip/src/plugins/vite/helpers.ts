@@ -1,6 +1,6 @@
-import type { Program } from 'oxc-parser';
+import type { Expression, Program } from 'oxc-parser';
 import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../compilers/compilers.ts';
-import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
+import { findImportedCalls, findProperty, getStringValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
@@ -103,4 +103,20 @@ export const getVitePluginDirs = (program: Program, specifiers: string[], key: s
     if (collected.length > 0) dirs = collected;
   }
   return dirs;
+};
+
+const unwrapExpression = (node: Expression): Expression =>
+  node.type === 'TSSatisfiesExpression' || node.type === 'TSAsExpression' || node.type === 'ParenthesizedExpression'
+    ? unwrapExpression(node.expression)
+    : node;
+
+export const getViteRoot = (program: Program, cwd: string): string => {
+  for (const node of program.body) {
+    if (node.type !== 'ExportDefaultDeclaration') continue;
+    const declaration = unwrapExpression(node.declaration as Expression);
+    const arg = declaration.type === 'CallExpression' ? declaration.arguments[0] : declaration;
+    const config = resolveObjectArg(arg && arg.type !== 'SpreadElement' ? unwrapExpression(arg) : undefined);
+    return toAbsolute(getStringValue(findProperty(config, 'root')) ?? '.', cwd);
+  }
+  return cwd;
 };

@@ -1,5 +1,0 @@
-{
-  "solidjs-vite-plugin": {
-    "config": ["vite.config.mts"]
-  }
-}
