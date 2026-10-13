@@ -69,6 +69,12 @@
         "command": "tsx {projectRoot}/build.mts",
         "cwd": "{projectRoot}"
       }
+    },
+    "generate-from-workspace-root": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node {projectRoot}/generate.mjs"
+      }
     }
   }
 }
