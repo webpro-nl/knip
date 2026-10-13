@@ -1,7 +1,0 @@
-{
-  "name": "@plugins/solidjs-vite-plugin-spread",
-  "devDependencies": {
-    "@solidjs/vite-plugin": "*",
-    "vite": "*"
-  }
-}

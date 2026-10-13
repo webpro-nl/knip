@@ -1,19 +1,18 @@
 import solid from '@solidjs/vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default {
   plugins: [
     solid({
       ssr: true,
       start: {
-        app: process.env.CUSTOM_APP ? './src/root.tsx' : undefined,
+        app: './src/root.tsx',
         document: './src/shell.tsx',
+        middleware: './src/middleware.ts',
+        instrument: './src/instrument.ts',
         setup: './src/setup.ts',
-        env: process.env.CI ? './config/env.ci.ts' : false,
+        env: false,
       },
-      serverFunctions: {
-        configure: './src/server/configure.ts',
-      },
+      serverFunctions: { configure: './src/configure.ts' },
     }),
   ],
-});
+};
