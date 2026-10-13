@@ -39,6 +39,7 @@ export type PluginName =
   | 'expo-router'
   | 'expressive-code'
   | 'fast'
+  | 'filesystem-routing'
   | 'flue'
   | 'fumadocs'
   | 'gatsby'
@@ -233,6 +234,7 @@ export const pluginNames = [
   'expo-router',
   'expressive-code',
   'fast',
+  'filesystem-routing',
   'flue',
   'fumadocs',
   'gatsby',

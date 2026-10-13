@@ -52,6 +52,7 @@ export const pluginsSchema = z.object({
   'expo-router': pluginSchema,
   'expressive-code': pluginSchema,
   fast: pluginSchema,
+  'filesystem-routing': pluginSchema,
   flue: pluginSchema,
   fumadocs: pluginSchema,
   gatsby: pluginSchema,

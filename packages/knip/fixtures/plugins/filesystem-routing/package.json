@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/filesystem-routing",
+  "devDependencies": {
+    "@testing-library/dom": "*",
+    "filesystem-routing": "*"
+  }
+}

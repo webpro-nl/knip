@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/filesystem-routing-override",
+  "devDependencies": {
+    "filesystem-routing": "*"
+  }
+}
