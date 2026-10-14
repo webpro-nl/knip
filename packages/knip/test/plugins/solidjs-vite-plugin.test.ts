@@ -31,7 +31,7 @@ const cases = [
     unused: ['src/App.tsx', 'src/entry-client.tsx', 'src/entry-server.tsx', 'src/setup.ts'],
     processed: 11,
   },
-  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 5 },
+  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 6 },
 ];
 
 for (const { name, fixture, isProduction = false, unused, processed } of cases) {
