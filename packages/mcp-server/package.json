@@ -34,7 +34,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "knip": "workspace:^",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

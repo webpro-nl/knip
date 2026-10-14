@@ -98,7 +98,7 @@
     "formatly": "^0.11.4",
     "get-tsconfig": "4.14.3",
     "jiti": "^2.7.0",
-    "oxc-parser": "^0.153.0",
+    "oxc-parser": "^0.154.0",
     "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.7",
     "smol-toml": "^1.9.0",
@@ -110,10 +110,10 @@
   },
   "devDependencies": {
     "@jest/types": "^30.5.1",
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "@types/picomatch": "^4.0.3",
     "codeclimate-types": "^0.3.1",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "7.0.2",
     "webpack": "^5.111.1"
