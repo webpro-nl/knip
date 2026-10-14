@@ -18,8 +18,11 @@ report an issue with Knip for false positives).
 
 :::
 
-JSDoc comments always start with `/**` (not `//`) and can be single or
-multi-line.
+Tags also work in regular block comments (`/* ... */`) and standalone line
+comments (`// ...`) before a declaration. These comments keep suppression tags
+out of JSDoc hover information.
+
+Tags in consecutive comments are combined. Trailing `//` comments are ignored.
 
 ## Tags
 
@@ -30,7 +33,7 @@ Example:
 /** @lintignore */
 export const myUnusedExport = 1;
 
-/** @lintignore */
+// @lintignore
 import Unresolved from './generated/lib.js';
 ```
 

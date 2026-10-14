@@ -134,6 +134,7 @@ export type PluginName =
   | 'serverless-framework'
   | 'simple-git-hooks'
   | 'size-limit'
+  | 'solidjs-vite-plugin'
   | 'sst'
   | 'starlight'
   | 'stencil'
@@ -329,6 +330,7 @@ export const pluginNames = [
   'serverless-framework',
   'simple-git-hooks',
   'size-limit',
+  'solidjs-vite-plugin',
   'sst',
   'starlight',
   'stencil',

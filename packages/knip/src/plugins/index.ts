@@ -133,6 +133,7 @@ import { default as sentry } from './sentry/index.ts';
 import { default as serverlessFramework } from './serverless-framework/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
+import { default as solidjsVitePlugin } from './solidjs-vite-plugin/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
 import { default as stencil } from './stencil/index.ts';
@@ -328,6 +329,7 @@ export const Plugins = {
   'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
+  'solidjs-vite-plugin': solidjsVitePlugin,
   sst,
   starlight,
   stencil,
