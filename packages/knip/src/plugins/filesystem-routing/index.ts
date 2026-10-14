@@ -1,7 +1,6 @@
-import { type CallExpression, Visitor } from 'oxc-parser';
 import { escapePath } from 'tinyglobby';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty } from '../../typescript/ast-helpers.ts';
+import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, relative, toAbsolute } from '../../util/path.ts';
@@ -25,41 +24,9 @@ const production = [`${defaultDir}/**/*.{${defaultExtensions.join(',')}}`];
 
 const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   if (config.entry) return [];
-  const names = new Set<string>();
-  const namespaces = new Set<string>();
-
-  for (const node of program.body) {
-    if (node.type === 'ImportDeclaration' && node.source.value === 'filesystem-routing/vite') {
-      for (const specifier of node.specifiers) {
-        if (specifier.type === 'ImportNamespaceSpecifier') namespaces.add(specifier.local.name);
-        else if (specifier.type === 'ImportSpecifier') {
-          const name =
-            specifier.imported.type === 'Identifier' ? specifier.imported.name : getStringValue(specifier.imported);
-          if (name === 'fileRoutes') names.add(specifier.local.name);
-        }
-      }
-    }
-  }
-
-  const calls: CallExpression[] = [];
-  const visitor = new Visitor({
-    CallExpression(node) {
-      const callee = node.callee;
-      if (
-        (callee.type === 'Identifier' && names.has(callee.name)) ||
-        (callee.type === 'MemberExpression' &&
-          callee.object.type === 'Identifier' &&
-          namespaces.has(callee.object.name) &&
-          !callee.computed &&
-          callee.property.type === 'Identifier' &&
-          callee.property.name === 'fileRoutes')
-      )
-        calls.push(node);
-    },
-  });
-  visitor.visit(program);
   const toEntry = (dir: string, pattern: string) =>
     toProductionEntry(join(cwd, escapePath(relative(cwd, dir)), pattern));
+  const calls = findImportedCalls(program, 'filesystem-routing/vite');
   if (calls.length === 0) return production.map(pattern => toEntry(cwd, pattern));
 
   const inputs: Input[] = [];
