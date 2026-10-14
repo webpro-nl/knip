@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/solidjs-vite-plugin-root",
+  "devDependencies": {
+    "@solidjs/vite-plugin": "*",
+    "@tsrx/solid": "*",
+    "vite": "*"
+  }
+}
