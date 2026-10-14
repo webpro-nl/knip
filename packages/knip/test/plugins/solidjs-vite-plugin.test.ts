@@ -21,7 +21,7 @@ const cases = [
   },
   { name: 'custom root', fixture: '-root', unused: ['src/entry-server.tsx'], processed: 7 },
   { name: 'lazy plugin', fixture: '-lazy', unused: ['src/entry-client.tsx'], processed: 11 },
-  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 5 },
+  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 6 },
 ];
 
 for (const { name, fixture, isProduction = false, unused, processed } of cases) {
