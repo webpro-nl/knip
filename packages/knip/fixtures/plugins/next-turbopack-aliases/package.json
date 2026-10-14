@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/next-turbopack-aliases",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "knip": {
+    "includeEntryExports": true
+  }
+}

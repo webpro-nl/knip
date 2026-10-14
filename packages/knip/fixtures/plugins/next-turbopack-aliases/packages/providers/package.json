@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/providers",
+  "private": true,
+  "exports": "./index.ts",
+  "dependencies": {
+    "@fixtures/telemetry": "*"
+  }
+}

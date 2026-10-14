@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/telemetry",
+  "private": true,
+  "exports": {
+    "./client": "./client.ts",
+    "./no-external": "./no-external.ts"
+  }
+}
