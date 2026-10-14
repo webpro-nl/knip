@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/next-entry-re-exports",
+  "scripts": {
+    "dev": "next dev"
+  },
+  "devDependencies": {
+    "next": "*"
+  }
+}
