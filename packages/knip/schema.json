@@ -574,6 +574,10 @@
           "title": "fast plugin configuration (https://knip.dev/reference/plugins/fast)",
           "$ref": "#/definitions/plugin"
         },
+        "filesystem-routing": {
+          "title": "filesystem-routing plugin configuration (https://knip.dev/reference/plugins/filesystem-routing)",
+          "$ref": "#/definitions/plugin"
+        },
         "flue": {
           "title": "flue plugin configuration (https://knip.dev/reference/plugins/flue)",
           "$ref": "#/definitions/plugin"
