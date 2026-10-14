@@ -51,26 +51,19 @@ const hasEntryFile = (root: string, stem: string) => {
   return false;
 };
 
-const hasStaticImport = (program: Program) => {
-  for (const node of program.body) {
-    if (node.type !== 'ImportDeclaration' || node.importKind === 'type' || node.source.value !== enabler) continue;
-    for (const specifier of node.specifiers) {
-      if (specifier.type !== 'ImportSpecifier' || specifier.importKind !== 'type') return true;
-    }
-  }
-  return false;
-};
-
 const getPluginCalls = (program: Program) => {
-  if (hasStaticImport(program)) return findImportedCalls(program, enabler);
   const calls: CallExpression[] = [];
+  let isLazy = false;
   const visitor = new Visitor({
+    ImportExpression(node) {
+      if (getStringValue(node.source) === enabler) isLazy = true;
+    },
     CallExpression(node) {
       calls.push(node);
     },
   });
   visitor.visit(program);
-  return calls;
+  return isLazy ? calls : findImportedCalls(program, enabler);
 };
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {

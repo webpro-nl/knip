@@ -4,12 +4,16 @@ export enum Fruit {
   banana = 'banana',
   /** @knipignore */
   cherry = 'cherry',
+  // @knipignore
+  date = 'date',
 }
 
 export namespace Basket {
   /** @knipignore */
   export const size = 1;
   export const color = 'red';
+  // @knipignore
+  export const depth = 2;
 }
 
 /** @knipignore */

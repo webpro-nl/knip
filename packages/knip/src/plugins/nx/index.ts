@@ -83,7 +83,9 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
         command
           .replaceAll('{projectRoot}', relative(cwd, options.configFileDir))
           .replaceAll('{workspaceRoot}', relative(cwd, options.rootCwd));
-      return options.getInputsFromScripts(commands.map(expandRelative), { cwd });
+      const scriptInputs = options.getInputsFromScripts(commands.map(expandRelative), { cwd });
+      for (const input of scriptInputs) input.dir ??= cwd;
+      return scriptInputs;
     });
 
   const configInputs = targets.flatMap(target => {

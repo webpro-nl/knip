@@ -8,8 +8,15 @@ Read the writing-a-plugin docs first:
 - [Inputs][2] — the `Input` type and helpers like `toEntry` and `toDependency`
 - [Argument Parsing][3] — `Plugin.args` for binaries and arguments in scripts
 
-Consider implementing `resolve*` functions only for custom plugin-specific needs
-(core takes care of module resolution, imports, exports, external dependencies).
+## Implementation
+
+- Consider implementing `resolve*` functions for custom plugin-specific needs.
+  Leave regular module resolution and tracking imports, exports and external
+  dependencies to the core routine.
+- Keep fixes local to the plugin and its tests. Discuss changes to core modules,
+  inputs, import flags, caches before implementing them.
+- Use the existing plugin lifecycle. Do not add core machinery solely to carry
+  one plugin's state.
 
 ## Creating a new plugin
 
@@ -71,6 +78,10 @@ webpack/rspack `require.context`), `addScript` (execa, nano-spawn),
 `markExportRegistered` (custom elements: lit/fast/stencil/catalyst).
 Enabled-only, zero cost when off. Factories in `plugins/[name]/visitors/`,
 shared in `_custom-elements/`.
+
+Visitors collect syntax facts through `ctx`. Keep filesystem access, discovery,
+and module resolution outside AST traversal; discuss unavoidable exceptions
+first.
 
 ## Fixtures
 
