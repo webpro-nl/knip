@@ -8,5 +8,8 @@
     "raw-loader": "*",
     "string-replace-loader": "*",
     "unused-loader": "*"
+  },
+  "dependencies": {
+    "pino": "*"
   }
 }

@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { createComponentStyleUrlsVisitor } from '../_component-style-urls/component-style-urls-visitor.ts';
 import * as karma from '../karma/helpers.ts';
 import type {
   AngularCLIWorkspaceConfiguration,
@@ -171,12 +172,19 @@ type StylesBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['styles'], u
 const PRODUCTION_CONFIG_NAME = 'production';
 const BUILD_TARGET_NAME = 'build';
 
+const isAngularSpecifier = (specifier: string): boolean => specifier === '@angular/core';
+
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createComponentStyleUrlsVisitor(ctx, isAngularSpecifier));
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
 };
 
 export default plugin;

@@ -57,6 +57,23 @@ const production = getEntryFilePatterns();
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
+  const aliasTargets = new Set<string>();
+  const collectAliasTargets = (node: Expression | SpreadElement | null) => {
+    const target = getStringValue(node);
+    if (target) aliasTargets.add(target);
+    else if (node?.type === 'ArrayExpression') {
+      for (const element of node.elements) collectAliasTargets(element);
+    } else if (node?.type === 'ObjectExpression') {
+      collectAliasTargets(findProperty(node, 'browser'));
+    }
+  };
+  const collectTurbopackAliases = (node: Expression | SpreadElement | null) => {
+    const aliases = findProperty(node, 'resolveAlias');
+    if (aliases?.type !== 'ObjectExpression') return;
+    for (const alias of aliases.properties) {
+      if (alias.type === 'Property') collectAliasTargets(alias.value);
+    }
+  };
   const collectLoaders = (node: Expression | SpreadElement | null) => {
     if (node?.type === 'ArrayExpression') {
       for (const element of node.elements) collectLoaders(element);
@@ -71,7 +88,14 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-      const rules = findProperty(findProperty(node, 'turbopack'), 'rules');
+      const turbopack = findProperty(node, 'turbopack');
+      if (turbopack?.type === 'ConditionalExpression') {
+        collectTurbopackAliases(turbopack.consequent);
+        collectTurbopackAliases(turbopack.alternate);
+      } else {
+        collectTurbopackAliases(turbopack);
+      }
+      const rules = findProperty(turbopack, 'rules');
       if (rules?.type !== 'ObjectExpression') return;
       for (const rule of rules.properties) {
         if (rule.type === 'Property') collectLoaders(rule.value);
@@ -84,6 +108,8 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
   const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
   for (const loader of loaders) inputs.push(toDeferResolve(loader));
+  for (const target of aliasTargets)
+    inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
   return inputs;
 };
 

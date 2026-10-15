@@ -2,7 +2,6 @@ Unused exports (23)
 app/composables/usePackageComparison.ts: NoDependencyDisplay
 app/utils/chart-data-correction.ts: movingAverage, smoothing
 app/utils/charts.ts: createAltTextForCompareFacetBarChart, createAltTextForCompareScatterChart
-app/utils/install-scripts.ts: extractNpxDependencies
 app/utils/package-name.ts: levenshteinDistance
 app/utils/versions.ts: TAG_PRIORITY, getTagPriority
 server/utils/atproto/oauth.ts: handleResolver
@@ -18,6 +17,7 @@ shared/utils/constants.ts: ERROR_PACKAGE_REQUIREMENTS_FAILED, ERROR_BLUESKY_URL_
 shared/utils/diff.ts: parseUnifiedDiff
 shared/utils/fetch-cache-config.ts: FETCH_CACHE_ALLOWED_DOMAINS
 shared/utils/git-providers.ts: GITLAB_HOSTS, FORGEJO_HOSTS, GITEA_HOSTS, getProviderConfig, isKnownGitProvider
+shared/utils/install-scripts.ts: extractNpxDependencies
 shared/utils/npm.ts: assertValidUsername
 shared/utils/repository-meta.ts: getRepoMetaLinks
 shared/utils/spdx.ts: SPDX_LICENSE_IDS
