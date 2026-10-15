@@ -1,4 +1,4 @@
-import { type CallExpression, type Expression, type Program, Visitor } from 'oxc-parser';
+import type { Expression } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
@@ -6,8 +6,6 @@ import { isFile } from '../../util/fs.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { getViteRoot } from '../vite/helpers.ts';
-
-const enabler = '@solidjs/vite-plugin';
 
 const entryExtensions = ['tsx', 'jsx', 'ts', 'js', 'mjs', 'tsrx'];
 
@@ -28,42 +26,11 @@ export const production = Object.values(conventions);
 
 const startOptions = ['app', 'document', 'entryServer', 'entryClient', 'middleware', 'instrument', 'setup', 'env'];
 
-type Option = { paths: string[]; isDefault: boolean };
-
 const isBoolean = (node: Expression | undefined, value: boolean) => node?.type === 'Literal' && node.value === value;
-
-const getOption = (node: Expression | undefined, isEnv: boolean): Option => {
-  if (node?.type === 'ConditionalExpression') {
-    const consequent = getOption(node.consequent, isEnv);
-    const alternate = getOption(node.alternate, isEnv);
-    return {
-      paths: [...consequent.paths, ...alternate.paths],
-      isDefault: consequent.isDefault || alternate.isDefault,
-    };
-  }
-  const path = getStringValue(node);
-  if (path) return { paths: [path], isDefault: false };
-  return { paths: [], isDefault: !(isEnv && isBoolean(node, false)) };
-};
 
 const hasEntryFile = (root: string, stem: string) => {
   for (const extension of entryExtensions) if (isFile(root, `${stem}.${extension}`)) return true;
   return false;
-};
-
-const getPluginCalls = (program: Program) => {
-  const calls: CallExpression[] = [];
-  let isLazy = false;
-  const visitor = new Visitor({
-    ImportExpression(node) {
-      if (getStringValue(node.source) === enabler) isLazy = true;
-    },
-    CallExpression(node) {
-      calls.push(node);
-    },
-  });
-  visitor.visit(program);
-  return isLazy ? calls : findImportedCalls(program, enabler);
 };
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
@@ -71,43 +38,39 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   const patterns = new Set<string>();
   const paths = new Set<string>();
 
-  for (const call of getPluginCalls(program)) {
+  for (const call of findImportedCalls(program, '@solidjs/vite-plugin')) {
     const arg = call.arguments[0];
     if (arg?.type !== 'ObjectExpression') continue;
 
-    const configure = getOption(findProperty(findProperty(arg, 'serverFunctions'), 'configure'), false);
-    for (const id of configure.paths) paths.add(id);
+    const configure = getStringValue(findProperty(findProperty(arg, 'serverFunctions'), 'configure'));
+    if (configure) paths.add(configure);
 
     const start = findProperty(arg, 'start');
     if (!start || isBoolean(start, false)) continue;
 
-    const startConfig: Record<string, Option> = {};
+    const values: Record<string, Expression | undefined> = {};
     for (const name of startOptions) {
-      const value = start.type === 'ObjectExpression' ? findProperty(start, name) : undefined;
-      startConfig[name] = getOption(value, name === 'env');
+      values[name] = start.type === 'ObjectExpression' ? findProperty(start, name) : undefined;
     }
 
-    const isAuthored = (name: string) => !startConfig[name].isDefault || hasEntryFile(root, entryStems[name]);
+    const isAuthored = (name: string) => Boolean(getStringValue(values[name])) || hasEntryFile(root, entryStems[name]);
     const ssr = findProperty(arg, 'ssr');
-    let hasSpread = false;
-    for (const property of arg.properties) if (property.type === 'SpreadElement') hasSpread = true;
-    const isClient = !hasSpread && (!ssr || isBoolean(ssr, false));
-    const isServer = !hasSpread && isBoolean(ssr, true);
     const skip = new Set<string>();
-    if (isClient) {
+    if (!ssr || isBoolean(ssr, false)) {
       skip.add('entryServer');
       skip.add('setup');
       if (isAuthored('entryClient')) skip.add('app');
-    } else if (isServer && isAuthored('entryServer') && isAuthored('entryClient')) {
+    } else if (isBoolean(ssr, true) && isAuthored('entryServer') && isAuthored('entryClient')) {
       skip.add('app');
       skip.add('document');
     }
 
     for (const name of startOptions) {
       if (skip.has(name)) continue;
-      const option = startConfig[name];
-      for (const id of option.paths) paths.add(id);
-      if (option.isDefault && name in conventions) patterns.add(conventions[name]);
+      const value = values[name];
+      const path = getStringValue(value);
+      if (path) paths.add(path);
+      else if (name in conventions && !(name === 'env' && isBoolean(value, false))) patterns.add(conventions[name]);
     }
   }
 
