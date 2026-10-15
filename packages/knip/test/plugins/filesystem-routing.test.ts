@@ -17,8 +17,8 @@ for (const isProduction of [false, true]) {
     assert.deepEqual(counters, {
       ...baseCounters,
       files: unused.length,
-      processed: isProduction ? 17 : 18,
-      total: isProduction ? 17 : 18,
+      processed: isProduction ? 13 : 14,
+      total: isProduction ? 13 : 14,
     });
   });
 }
