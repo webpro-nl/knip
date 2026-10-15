@@ -11,7 +11,6 @@ export default {
         entryClient: './src/client.tsx',
         middleware: './src/middleware.ts',
         instrument: './src/instrument.ts',
-        setup: './src/setup.ts',
         env: false,
       },
       serverFunctions: { configure: './src/configure.ts' },
