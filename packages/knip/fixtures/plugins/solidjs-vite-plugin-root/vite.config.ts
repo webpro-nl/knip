@@ -3,5 +3,5 @@ import type { UserConfig } from 'vite';
 
 export default {
   root: 'app',
-  plugins: [solid({ start: true, ssr: true })],
+  plugins: [solid({ start: true })],
 } satisfies UserConfig;
