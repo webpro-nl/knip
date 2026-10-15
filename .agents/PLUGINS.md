@@ -44,8 +44,14 @@ Read the writing-a-plugin docs first:
 ## `resolveConfig` and `resolveFromAST`
 
 Prefer `resolveFromAST` (fast, AST-only, no execution) over `resolveConfig`
-(loads and executes the config). Use `resolveConfig` only when the config is
-JSON or when execution is unavoidable (e.g. function configs).
+(loads and executes the config). Use `resolveConfig` when the config is JSON or
+when execution is unavoidable (e.g. function configs).
+
+Keep `resolveFromAST` to static values. Avoid too many dynamic code patterns
+such as dynamic imports and spreads. When values depend on such patterns,
+consider `resolveConfig` to read them from the loaded config, and keep
+`resolveFromAST` for values the loaded config doesn't expose. Removing a single
+false positive does not always justify the additional complexity.
 
 `resolveConfig` should include `entry` and `production` items, either from the
 parsed config or the plugin defaults (so they can be overriden). Include the
