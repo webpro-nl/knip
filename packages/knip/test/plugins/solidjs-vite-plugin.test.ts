@@ -7,37 +7,70 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cases = [
   {
-    name: 'start options, spread may override ssr',
+    name: 'start options in SSR mode',
     fixture: '',
-    unused: ['env.ts', 'src/App.tsx', 'src/Document.tsx', 'src/entry-client.tsx', 'src/entry-server.tsx'],
-    processed: 15,
+    unused: [
+      'env.ts',
+      'src/App.tsx',
+      'src/Document.tsx',
+      'src/entry-client.tsx',
+      'src/entry-server.tsx',
+      'src/root.tsx',
+      'src/shell.tsx',
+    ],
+    processed: 14,
   },
   {
     name: 'production',
     fixture: '',
     isProduction: true,
-    unused: ['env.ts', 'src/App.tsx', 'src/Document.tsx', 'src/entry-client.tsx', 'src/entry-server.tsx'],
-    processed: 14,
+    unused: [
+      'env.ts',
+      'src/App.tsx',
+      'src/Document.tsx',
+      'src/entry-client.tsx',
+      'src/entry-server.tsx',
+      'src/root.tsx',
+      'src/shell.tsx',
+    ],
+    processed: 13,
   },
   {
-    name: 'custom root, authored entries',
+    name: 'production with entry override',
+    fixture: '',
+    isProduction: true,
+    entry: ['src/App.tsx'],
+    unused: [
+      'env.ts',
+      'src/Document.tsx',
+      'src/entry-client.tsx',
+      'src/entry-server.tsx',
+      'src/root.tsx',
+      'src/shell.tsx',
+    ],
+    processed: 13,
+  },
+  {
+    name: 'custom root in client mode',
     fixture: '-root',
-    unused: ['app/src/App.tsx', 'app/src/Document.tsrx', 'src/entry-server.tsx'],
+    unused: ['app/src/App.tsx', 'app/src/entry-server.tsx', 'src/entry-server.tsx'],
     processed: 7,
   },
+  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 5 },
   {
-    name: 'lazy plugin, client mode',
-    fixture: '-lazy',
-    unused: ['src/App.tsx', 'src/entry-client.tsx', 'src/entry-server.tsx', 'src/setup.ts'],
-    processed: 11,
+    name: 'no start in production',
+    fixture: '-spa',
+    isProduction: true,
+    unused: ['env.ts', 'src/entry-server.tsx'],
+    processed: 4,
   },
-  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 6 },
 ];
 
-for (const { name, fixture, isProduction = false, unused, processed } of cases) {
+for (const { name, fixture, isProduction = false, entry, unused, processed } of cases) {
   test(`Find entries with the @solidjs/vite-plugin plugin (${name})`, async () => {
     const cwd = resolve(`fixtures/plugins/solidjs-vite-plugin${fixture}`);
     const options = await createOptions({ cwd, isProduction });
+    if (entry) options.parsedConfig['solidjs-vite-plugin'] = { entry };
     const { issues, counters } = await main(options);
 
     assert.deepEqual(Object.keys(issues.files).sort(), unused);
