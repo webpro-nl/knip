@@ -55,7 +55,7 @@ export const isReferenced = (
       return false;
     }
 
-    if (isEntryFile && node.skipExports && identifier === 'default') {
+    if (isEntryFile && node.skipExports) {
       isReferenced = true;
       return hasCompleteResult();
     }

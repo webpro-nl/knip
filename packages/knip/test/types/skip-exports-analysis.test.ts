@@ -42,11 +42,10 @@ test('ignore exports (isIncludeEntryExports)', async () => {
 
   assert(issues.exports['lib/used.js'].default);
   assert(issues.exports['lib/used.js'].unused);
-  assert(issues.exports['lib/used.js'].reexport);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 7,
+    exports: 6,
     binaries: 2,
     processed: 7,
     total: 7,
