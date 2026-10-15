@@ -27,3 +27,19 @@ for (const isProduction of [false, true]) {
     });
   });
 }
+
+for (const isProduction of [false, true]) {
+  test(`Find alias targets in both conditional Turbopack branches (production: ${isProduction})`, async () => {
+    const cwd = resolve('fixtures/plugins/next-turbopack-aliases-conditional');
+    const options = await createOptions({ cwd, isProduction, isIncludeEntryExports: true });
+    const { issues, counters } = await main(options);
+
+    assert.deepEqual(Object.keys(issues.files), ['unused.ts']);
+    assert.deepEqual(counters, {
+      ...baseCounters,
+      files: 1,
+      processed: isProduction ? 3 : 4,
+      total: isProduction ? 3 : 4,
+    });
+  });
+}

@@ -67,6 +67,13 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
       collectAliasTargets(findProperty(node, 'browser'));
     }
   };
+  const collectTurbopackAliases = (node: Expression | SpreadElement | null) => {
+    const aliases = findProperty(node, 'resolveAlias');
+    if (aliases?.type !== 'ObjectExpression') return;
+    for (const alias of aliases.properties) {
+      if (alias.type === 'Property') collectAliasTargets(alias.value);
+    }
+  };
   const collectLoaders = (node: Expression | SpreadElement | null) => {
     if (node?.type === 'ArrayExpression') {
       for (const element of node.elements) collectLoaders(element);
@@ -82,11 +89,11 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
       const turbopack = findProperty(node, 'turbopack');
-      const aliases = findProperty(turbopack, 'resolveAlias');
-      if (aliases?.type === 'ObjectExpression') {
-        for (const alias of aliases.properties) {
-          if (alias.type === 'Property') collectAliasTargets(alias.value);
-        }
+      if (turbopack?.type === 'ConditionalExpression') {
+        collectTurbopackAliases(turbopack.consequent);
+        collectTurbopackAliases(turbopack.alternate);
+      } else {
+        collectTurbopackAliases(turbopack);
       }
       const rules = findProperty(turbopack, 'rules');
       if (rules?.type !== 'ObjectExpression') return;
