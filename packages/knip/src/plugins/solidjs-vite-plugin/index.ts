@@ -12,16 +12,17 @@ const enablers = ['@solidjs/vite-plugin'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const note = `Start entries are only added when the Vite config enables \`start\`. Paths like \`start.app\` replace the matching default. \`serverFunctions.configure\` is added with or without \`start\`.`;
+const note = `Without a Vite config, the default entry patterns are used. With a config, start entries are only added when \`start\` is enabled. Paths like \`start.app\` replace the matching default. \`serverFunctions.configure\` is added with or without \`start\`.`;
 
 /** @public */
-export const docs = { note, production };
+export const docs = { note };
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
+  production,
   resolveFromAST,
 };
 
