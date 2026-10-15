@@ -1,7 +1,7 @@
-import { type Expression, type Node, type SpreadElement, Visitor } from 'oxc-parser';
+import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getPropertyKey, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
@@ -67,27 +67,6 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
       collectAliasTargets(findProperty(node, 'browser'));
     }
   };
-  const collectAliases = (node: Node | null | undefined) => {
-    if (node?.type === 'ConditionalExpression') {
-      collectAliases(node.consequent);
-      collectAliases(node.alternate);
-    } else if (node?.type === 'LogicalExpression') {
-      collectAliases(node.left);
-      collectAliases(node.right);
-    } else if (
-      node?.type === 'TSAsExpression' ||
-      node?.type === 'TSSatisfiesExpression' ||
-      node?.type === 'ParenthesizedExpression'
-    ) {
-      collectAliases(node.expression);
-    } else {
-      const aliases = findProperty(node, 'resolveAlias');
-      if (aliases?.type !== 'ObjectExpression') return;
-      for (const alias of aliases.properties) {
-        if (alias.type === 'Property') collectAliasTargets(alias.value);
-      }
-    }
-  };
   const collectLoaders = (node: Expression | SpreadElement | null) => {
     if (node?.type === 'ArrayExpression') {
       for (const element of node.elements) collectLoaders(element);
@@ -100,12 +79,16 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   };
 
   const visitor = new Visitor({
-    Property(node) {
-      if (getPropertyKey(node) === 'turbopack') collectAliases(node.value);
-    },
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-      const rules = findProperty(findProperty(node, 'turbopack'), 'rules');
+      const turbopack = findProperty(node, 'turbopack');
+      const aliases = findProperty(turbopack, 'resolveAlias');
+      if (aliases?.type === 'ObjectExpression') {
+        for (const alias of aliases.properties) {
+          if (alias.type === 'Property') collectAliasTargets(alias.value);
+        }
+      }
+      const rules = findProperty(turbopack, 'rules');
       if (rules?.type !== 'ObjectExpression') return;
       for (const rule of rules.properties) {
         if (rule.type === 'Property') collectLoaders(rule.value);
