@@ -1,5 +1,5 @@
-import { solid, timing } from './plugins.ts';
+import solid from '@solidjs/vite-plugin';
 
 export default {
-  plugins: [solid(), timing({ start: { label: 'boot' } })],
+  plugins: [solid()],
 };
