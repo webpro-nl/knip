@@ -1,7 +1,19 @@
 {
   "name": "@plugins/semantic-release",
+  "scripts": {
+    "release": "semantic-release",
+    "release:fruits": "semantic-release --extends @fruits/release-config,./release.fruits.cjs",
+    "release:herbs": "semantic-release --extends \"@herbs/release-config, ./release.herbs.cjs\"",
+    "release:plain": "semantic-release --extends false",
+    "release:veggies": "semantic-release -e @veggies/release-config -e ./release.veggies.cjs"
+  },
   "devDependencies": {
-    "semantic-release": "*"
+    "@fruits/release-config": "*",
+    "@herbs/release-config": "*",
+    "@shared/release-config": "*",
+    "@veggies/release-config": "*",
+    "semantic-release": "*",
+    "semantic-release-monorepo": "*"
   },
   "release": {
     "branches": [
