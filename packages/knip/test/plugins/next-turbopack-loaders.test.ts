@@ -43,3 +43,16 @@ for (const isProduction of [false, true]) {
     });
   });
 }
+
+for (const isProduction of [false, true]) {
+  test(`Find Turbopack loaders in an imported shared config (production: ${isProduction})`, async () => {
+    const cwd = resolve('fixtures/plugins/next-turbopack-loaders-workspace');
+    const options = await createOptions({ cwd, isProduction });
+    const { issues } = await main(options);
+    assert.deepEqual(issues.dependencies, {});
+    assert.deepEqual(issues.unlisted, {});
+    if (!isProduction) {
+      assert.deepEqual(Object.keys(issues.devDependencies['apps/web/package.json']), ['unused-loader']);
+    }
+  });
+}

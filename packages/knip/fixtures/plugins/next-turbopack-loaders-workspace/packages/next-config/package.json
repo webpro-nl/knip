@@ -1,0 +1,4 @@
+{
+  "name": "@workspace/next-config",
+  "exports": "./index.ts"
+}

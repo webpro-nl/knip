@@ -1,12 +1,13 @@
-import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
+import { type Expression, type Program, type SpreadElement, Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { getStringValue } from '../../typescript/ast-nodes.ts';
+import { findProperty, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { _parseFile, getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { isInNodeModules, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { _resolveModuleSync } from '../../util/resolve.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -54,7 +55,7 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 
 const production = getEntryFilePatterns();
 
-const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
+const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath, readFile }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
   const aliasTargets = new Set<string>();
@@ -85,24 +86,41 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
     }
   };
 
-  const visitor = new Visitor({
-    ObjectExpression(node) {
-      for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-      const turbopack = findProperty(node, 'turbopack');
-      if (turbopack?.type === 'ConditionalExpression') {
-        collectTurbopackAliases(turbopack.consequent);
-        collectTurbopackAliases(turbopack.alternate);
-      } else {
-        collectTurbopackAliases(turbopack);
-      }
-      const rules = findProperty(turbopack, 'rules');
-      if (rules?.type !== 'ObjectExpression') return;
-      for (const rule of rules.properties) {
-        if (rule.type === 'Property') collectLoaders(rule.value);
-      }
-    },
-  });
-  visitor.visit(program);
+  const seen = new Set([configFilePath]);
+  const visitConfig = (program: Program, filePath: string) => {
+    const imports = getImportMap(program);
+    const visitor = new Visitor({
+      CallExpression(node) {
+        if (node.callee.type !== 'Identifier') return;
+        const specifier = imports.get(node.callee.name);
+        if (!specifier) return;
+        const resolved = _resolveModuleSync(specifier, filePath);
+        if (!resolved || isInNodeModules(resolved) || seen.has(resolved)) return;
+        seen.add(resolved);
+        const sourceText = readFile(resolved);
+        if (sourceText) visitConfig(_parseFile(resolved, sourceText).program, resolved);
+      },
+      ObjectExpression(node) {
+        const turbopack = findProperty(node, 'turbopack');
+        if (filePath === configFilePath) {
+          for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
+          if (turbopack?.type === 'ConditionalExpression') {
+            collectTurbopackAliases(turbopack.consequent);
+            collectTurbopackAliases(turbopack.alternate);
+          } else {
+            collectTurbopackAliases(turbopack);
+          }
+        }
+        const rules = findProperty(turbopack, 'rules');
+        if (rules?.type !== 'ObjectExpression') return;
+        for (const rule of rules.properties) {
+          if (rule.type === 'Property') collectLoaders(rule.value);
+        }
+      },
+    });
+    visitor.visit(program);
+  };
+  visitConfig(program, configFilePath);
 
   const extensions = pageExtensions.size > 0 ? [...pageExtensions] : defaultPageExtensions;
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
