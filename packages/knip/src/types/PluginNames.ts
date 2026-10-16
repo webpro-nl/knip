@@ -9,6 +9,7 @@ export type PluginName =
   | 'babel'
   | 'biome'
   | 'borp'
+  | 'buf'
   | 'bumpp'
   | 'bun'
   | 'c8'
@@ -205,6 +206,7 @@ export const pluginNames = [
   'babel',
   'biome',
   'borp',
+  'buf',
   'bumpp',
   'bun',
   'c8',
