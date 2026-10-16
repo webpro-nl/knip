@@ -220,16 +220,16 @@ export class WorkspaceWorker {
     return [patterns, negateWorkspaces, this.ignoredWorkspacePatterns.map(negate)].flat();
   }
 
-  getProductionEntryFilePatterns() {
+  getProductionEntryFilePatterns(negatedPatterns: string[] = []) {
     const entry = this.config.entry.filter(hasProductionSuffix);
     if (entry.length === 0) return [];
     const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
-    return [entry, negatedEntryFiles, this.negatedWorkspacePatterns].flat();
+    return [entry, negatedEntryFiles, negatedPatterns, this.negatedWorkspacePatterns].flat();
   }
 
-  getProductionProjectFilePatterns() {
+  getProductionProjectFilePatterns(negatedPatterns: string[] = []) {
     const project = this.config.project;
-    if (project.length === 0) return this.getProductionEntryFilePatterns();
+    if (project.length === 0) return this.getProductionEntryFilePatterns(negatedPatterns);
     const _project = this.config.project.map(pattern => {
       if (!(pattern.endsWith('!') || pattern.startsWith('!'))) return negate(pattern);
       return pattern;
@@ -243,6 +243,7 @@ export class WorkspaceWorker {
       negatedEntryFiles,
       negatedPluginConfigPatterns,
       negatedPluginProjectFilePatterns,
+      negatedPatterns,
       this.negatedWorkspacePatterns,
     ].flat();
   }

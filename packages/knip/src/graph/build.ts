@@ -195,7 +195,14 @@ export async function build({
     worker.config = config;
 
     const pluginSourceMaps = await worker.resolveSourceMaps();
-    augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
+    augmentWorkspace(
+      workspace,
+      dir,
+      isFile ? compilerOptions : undefined,
+      tscSourcePaths,
+      [...pluginSourceMaps, ...sourceMapPairs],
+      dirname(tsConfigFilePath)
+    );
 
     const inputs = new Set(preprocessorInputs.get(name));
 

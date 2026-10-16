@@ -1,0 +1,7 @@
+{
+  "files": ["api.ts"],
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../dist"
+  }
+}
