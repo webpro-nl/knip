@@ -17,8 +17,24 @@ for (const isProduction of [false, true]) {
     assert.deepEqual(counters, {
       ...baseCounters,
       files: unused.length,
-      processed: isProduction ? 17 : 18,
-      total: isProduction ? 17 : 18,
+      processed: isProduction ? 13 : 14,
+      total: isProduction ? 13 : 14,
     });
   });
 }
+
+test('Find route entries from the Vite root with the filesystem-routing plugin', async () => {
+  const cwd = resolve('fixtures/plugins/filesystem-routing-root');
+  const { issues, counters } = await main(await createOptions({ cwd }));
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['pages/unused.ts', 'src/routes/unused.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 2, processed: 4, total: 4 });
+});
+
+test('Find default route entries from the Vite root with the filesystem-routing plugin', async () => {
+  const cwd = resolve('fixtures/plugins/filesystem-routing-root-default');
+  const { issues, counters } = await main(await createOptions({ cwd }));
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/routes/unused.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 1, processed: 4, total: 4 });
+});

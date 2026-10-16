@@ -5,6 +5,7 @@ import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { getViteRoot } from '../vite/helpers.ts';
 
 // https://github.com/solidjs/filesystem-routing
 // https://github.com/solidjs/filesystem-routing/blob/90a19eeb5c58becb0b5d599527c99452eab6f1c5/src/vite/index.ts
@@ -24,10 +25,11 @@ const production = [`${defaultDir}/**/*.{${defaultExtensions.join(',')}}`];
 
 const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   if (config.entry) return [];
+  const root = getViteRoot(program, cwd);
   const toEntry = (dir: string, pattern: string) =>
     toProductionEntry(join(cwd, escapePath(relative(cwd, dir)), pattern));
   const calls = findImportedCalls(program, 'filesystem-routing/vite');
-  if (calls.length === 0) return production.map(pattern => toEntry(cwd, pattern));
+  if (calls.length === 0) return production.map(pattern => toEntry(root, pattern));
 
   const inputs: Input[] = [];
   for (const call of calls) {
@@ -46,7 +48,7 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
     if (useDefaults) for (const extension of defaultExtensions) extensions.add(extension);
     if (extensions.size === 0) continue;
     const suffix = extensions.size === 1 ? [...extensions][0] : `{${[...extensions].join(',')}}`;
-    inputs.push(toEntry(toAbsolute(dir, cwd), `**/*.${suffix}`));
+    inputs.push(toEntry(toAbsolute(dir, root), `**/*.${suffix}`));
   }
   return inputs;
 };
