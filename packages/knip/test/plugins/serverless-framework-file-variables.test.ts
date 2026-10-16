@@ -9,11 +9,12 @@ const cwd = resolve('fixtures/plugins/serverless-framework-file-variables');
 
 test('Find dependencies with the Serverless Framework plugin (file variables)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 2,
     total: 2,
   });
+  assert.deepEqual(issues.devDependencies, {});
 });
