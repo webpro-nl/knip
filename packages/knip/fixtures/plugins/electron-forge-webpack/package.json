@@ -1,0 +1,49 @@
+{
+  "name": "@plugins/electron-forge-webpack",
+  "scripts": {
+    "start": "electron-forge start",
+    "make": "electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "*",
+    "@electron-forge/maker-squirrel": "*",
+    "@electron-forge/maker-zip": "*",
+    "@electron-forge/plugin-webpack": "*",
+    "electron": "*"
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": ["darwin"]
+        }
+      ],
+      "plugins": [
+        {
+          "name": "@electron-forge/plugin-webpack",
+          "config": {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/renderer/index.html",
+                  "js": "./src/renderer/app.js",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/renderer/bridge.js"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
