@@ -104,6 +104,12 @@ async function loadModules() {
 
 loadModules();
 
+const tasks = [Promise.resolve({ used() {} })];
+const [, spreadNamespace] = await Promise.all([...tasks, import('./promise-all-spread-namespace.js')]);
+spreadNamespace.used();
+const [, { used: spreadUsed }] = await Promise.all([...tasks, import('./promise-all-spread-named.js')]);
+spreadUsed();
+
 const child1 = fn(() => import('./import-c.js'));
 
 const { identifier15 } = await import('./catch.js').catch(() => {

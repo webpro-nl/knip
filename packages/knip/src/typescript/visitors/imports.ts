@@ -154,6 +154,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     const bindings = node.id.elements;
     for (let i = 0; i < imports.length; i++) {
       const imp = imports[i];
+      if (imp?.type === 'SpreadElement') break;
       const binding = bindings[i];
       if (imp?.type === 'ImportExpression' && isStringLiteral(imp.source)) {
         s.handledImportExpressions.add(imp.start);

@@ -14,10 +14,12 @@ test('Support various ways to import modules', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 2,
-    processed: 30,
-    total: 30,
+    processed: 32,
+    total: 32,
   });
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['promise-all-scoped.ts']), ['unused']);
+  assert.equal(issues.exports['promise-all-spread-namespace.ts'], undefined);
+  assert.equal(issues.exports['promise-all-spread-named.ts'], undefined);
 });
