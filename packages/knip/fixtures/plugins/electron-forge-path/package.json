@@ -1,0 +1,16 @@
+{
+  "name": "@plugins/electron-forge-path",
+  "main": "src/index.js",
+  "scripts": {
+    "make": "electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "*",
+    "@electron-forge/maker-dmg": "*",
+    "@electron-forge/publisher-s3": "*",
+    "electron": "*"
+  },
+  "config": {
+    "forge": "./config/forge.config.js"
+  }
+}
