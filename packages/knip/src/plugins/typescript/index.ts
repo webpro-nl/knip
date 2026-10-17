@@ -11,7 +11,7 @@ import { contentMapperResolvers } from './content-mappers.ts';
 
 const title = 'TypeScript';
 
-const enablers = ['typescript', '@typescript/native', '@typescript/native-preview'];
+const enablers = ['typescript', '@typescript/native', '@typescript/native-preview', 'tsrs'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
@@ -64,7 +64,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
 };
 
 const args = {
-  binaries: ['tsc', 'tsgo'],
+  binaries: ['tsc', 'tsgo', 'tsrs'],
   string: ['project'],
   alias: { project: ['p'] },
   config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
