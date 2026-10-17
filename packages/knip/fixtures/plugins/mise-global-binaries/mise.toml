@@ -26,6 +26,7 @@ run = "node --version"
 run = [
   "dotenvx run -- API_URL=https://example.test pnpm exec missing-local-cli",
   'concurrently "c8 pnpm exec missing-concurrent-cli $(git diff --name-only)" "terraform apply"',
+  'ls [$(pnpm exec missing-bracket-cli)]',
 ]
 
 [tasks.template]

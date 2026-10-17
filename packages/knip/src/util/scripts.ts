@@ -1,4 +1,13 @@
-import { type Command, parse, type SyntaxNode, type Word } from 'unbash';
+import {
+  type ArithmeticCommandExpansion,
+  type Command,
+  type CommandExpansionPart,
+  forEachChild,
+  parse,
+  type ProcessSubstitutionPart,
+  type SyntaxNode,
+  type Word,
+} from 'unbash';
 import { extractBinary } from './modules.ts';
 
 export interface ScriptCommand {
@@ -15,70 +24,44 @@ export const toShellCommand = (argv: string[]) => argv.map(arg => `'${arg.replac
 export const getCommandWords = (node: Pick<Command, 'args'>) =>
   node.args.filter((arg): arg is Word => arg.type === 'Word');
 
-export function* walkCommands(node: SyntaxNode): Generator<Command> {
-  switch (node.type) {
-    case 'Command':
-      yield node;
-      break;
-    case 'AndOr':
-    case 'Pipeline':
-      for (const command of node.commands) yield* walkCommands(command);
-      break;
-    case 'If':
-      for (const statement of node.clause.commands) yield* walkCommands(statement.command);
-      for (const statement of node.then.commands) yield* walkCommands(statement.command);
-      if (node.else) yield* walkCommands(node.else);
-      break;
-    case 'While':
-      for (const statement of node.clause.commands) yield* walkCommands(statement.command);
-      for (const statement of node.body.commands) yield* walkCommands(statement.command);
-      break;
-    case 'For':
-    case 'Select':
-    case 'Subshell':
-    case 'BraceGroup':
-      for (const statement of node.body.commands) yield* walkCommands(statement.command);
-      break;
-    case 'CompoundList':
-      for (const statement of node.commands) yield* walkCommands(statement.command);
-      break;
-    case 'Function':
-    case 'Coproc':
-      yield* walkCommands(node.body);
-      break;
-    case 'Statement':
-    case 'Redirected':
-    case 'Time':
-    case 'Negation':
-      if (node.command) yield* walkCommands(node.command);
-      break;
-  }
-}
+// Commands of one script; substitution scripts are separate execution contexts, so the walk stops at the nodes that
+// own them (see bash-parser.ts)
+export const collectCommands = (root: SyntaxNode): Command[] => {
+  const commands: Command[] = [];
+  const visit = (node: SyntaxNode) => {
+    if (node.type === 'Command') commands.push(node);
+    if (!isScriptExpansion(node)) forEachChild(node, visit);
+  };
+  visit(root);
+  return commands;
+};
+
+export const isScriptExpansion = (
+  node: SyntaxNode
+): node is CommandExpansionPart | ProcessSubstitutionPart | ArithmeticCommandExpansion =>
+  node.type === 'CommandExpansion' || node.type === 'ProcessSubstitution' || node.type === 'ArithmeticCommandExpansion';
 
 export const getScriptCommands = (script: string): ScriptCommand[] => {
   if (!script) return [];
-  let parsed: ReturnType<typeof parse>;
+  const out: ScriptCommand[] = [];
   try {
-    parsed = parse(script);
+    for (const statement of parse(script).commands) {
+      for (const node of collectCommands(statement.command)) {
+        const text = node.name?.value;
+        if (!text) continue;
+        const binary = extractBinary(text);
+        const words = getCommandWords(node);
+        if (spawningBinaries.has(binary)) {
+          const rest = words
+            .filter(word => word.text !== '--')
+            .map(word => word.text)
+            .join(' ');
+          out.push(...getScriptCommands(rest));
+        } else out.push({ binary, args: words.map(word => word.value) });
+      }
+    }
   } catch {
     return [];
-  }
-  if (!parsed.commands) return [];
-  const out: ScriptCommand[] = [];
-  for (const statement of parsed.commands) {
-    for (const node of walkCommands(statement.command)) {
-      const text = node.name?.value;
-      if (!text) continue;
-      const binary = extractBinary(text);
-      const words = getCommandWords(node);
-      if (spawningBinaries.has(binary)) {
-        const rest = words
-          .filter(word => word.text !== '--')
-          .map(word => word.text)
-          .join(' ');
-        out.push(...getScriptCommands(rest));
-      } else out.push({ binary, args: words.map(word => word.value) });
-    }
   }
   return out;
 };

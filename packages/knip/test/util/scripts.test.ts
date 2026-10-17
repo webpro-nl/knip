@@ -32,6 +32,13 @@ test('getScriptCommands traverses shell command wrappers', () => {
   assert.deepEqual(getScriptCommands('!'), []);
 });
 
+test('getScriptCommands traverses elif branches', () => {
+  assert.deepEqual(
+    getScriptCommands('if a; then b; elif c; then d; else e; fi').map(command => command.binary),
+    ['a', 'b', 'c', 'd', 'e']
+  );
+});
+
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
@@ -48,8 +55,26 @@ test('getScriptCommands normalizes binary paths', () => {
   assert.deepEqual(getScriptCommands('./node_modules/.bin/bun test'), [{ binary: 'bun', args: ['test'] }]);
 });
 
-test('getScriptCommands returns an empty array for empty or unparseable scripts', () => {
+test('getScriptCommands returns an empty array for empty scripts and recovers from over-deep syntax', () => {
   assert.deepEqual(getScriptCommands(''), []);
+  const deep = `$((${'('.repeat(300)}1${')'.repeat(300)}))`;
+  assert.deepEqual(getScriptCommands(`echo ${deep}`), [{ binary: 'echo', args: [deep] }]);
+});
+
+test('getScriptCommands reaches commands in every compound body', () => {
+  assert.deepEqual(getScriptCommands('case $1 in start) node ./start.js;; *) node ./other.js;; esac'), [
+    { binary: 'node', args: ['./start.js'] },
+    { binary: 'node', args: ['./other.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('for (( i = 0; i < 3; i++ )); do node ./script.js; done'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+});
+
+test('getScriptCommands keeps substitution scripts out of the enclosing script', () => {
+  assert.deepEqual(getScriptCommands('echo $(node ./script.js) <(node ./other.js) >$(node ./target.js)'), [
+    { binary: 'echo', args: ['$(node ./script.js)', '<(node ./other.js)'] },
+  ]);
 });
 
 test('toShellCommand round-trips argv through the script parser', () => {

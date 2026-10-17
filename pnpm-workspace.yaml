@@ -8,6 +8,7 @@ minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - release-it
   - '@release-it/bumper'
+  - unbash
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3

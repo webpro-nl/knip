@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import { parse } from 'unbash';
-import { getCommandWords, walkCommands } from '../../util/scripts.ts';
+import { getCommandWords, collectCommands } from '../../util/scripts.ts';
 
 const BIN = 'svelte-package';
 export const DEFAULT_INPUT = 'src/lib';
@@ -23,7 +23,7 @@ export const parseScripts = (scripts: Record<string, string | undefined> | undef
     try {
       const parsed = parse(script);
       for (const statement of parsed.commands) {
-        for (const node of walkCommands(statement.command)) {
+        for (const node of collectCommands(statement.command)) {
           if (node.name?.value === BIN) out.push(parseCommandIO(getCommandWords(node).map(word => word.value)));
         }
       }

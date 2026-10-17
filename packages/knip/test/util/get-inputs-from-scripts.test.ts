@@ -290,6 +290,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm with-env', [], withEnv);
   t('pnpm loop src/main.ts', [], withEnv);
   t(`pnpm --filter="[$(git rev-parse HEAD~1)]" exec pnpm pack`, [toBinary('git')]);
+  t('pnpm --filter=[$(git rev-parse HEAD~1)] exec pnpm pack', [toBinary('git')]);
   t('pnpm --filter docs typedoc:check', []);
   t('pnpm -r --filter=docs --filter=flarp exec program', [toBinary('program')]);
   t('pnpm program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
@@ -433,16 +434,23 @@ test('getInputsFromScripts (double-dash)', () => {
 
 test('getInputsFromScripts (advanced bash syntax)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
+  t('if test -f a; then make a; elif test -f b; then node ./script.js; fi', [toBinary('make'), toBinary('node'), js]);
   t('node -e "if (NODE_ENV === \'production\'){process.exit(1)} " || make install', [toBinary('node'), toBinary('make')]);
   t('if ! npx pkg --verbose ; then exit 1 ; fi', [toBinary('pkg', opt), toBinary('exit')]);
   t('exec < /dev/tty && node_modules/.bin/cz --hook || true', [toBinary('exec'), toBinary('cz'), toBinary('true')]);
   t('f() { vite build "$@" || (echo content; exit 1;) }; f', [toBinary('vite'), toBinary('echo'), toBinary('exit')]);
   t('var=$(node ./script.js)', [toBinary('node'), js]);
+  t('case $1 in start) node ./script.js;; esac', [toBinary('node'), js]);
+  t('echo ${x:-$(node ./script.js)} "${y:-$(node ./main.ts)}"', [toBinary('echo'), toBinary('node'), js, toBinary('node'), ts]);
+  t('echo {$(node ./script.js),x} @($(node ./main.ts)|y)', [toBinary('echo'), toBinary('node'), js, toBinary('node'), ts]);
+  t('echo $(( $(node ./script.js) + 1 )); (( $(node ./main.ts) ))', [toBinary('echo'), toBinary('node'), js, toBinary('node'), ts]);
+  t('cat <<EOF >$(node ./main.ts)\n$(node ./script.js)\nEOF', [toBinary('cat'), toBinary('node'), js, toBinary('node'), ts]);
+  t('for f in $(node ./script.js); do node ./main.ts; done', [toBinary('node'), js, toBinary('node'), ts]);
   t('var=`node ./script.js`;var=`node ./require.js`', [toBinary('node'), js, toBinary('node'), toDeferResolveEntry('./require.js', opt)]);
   t('diff <(eslint --format json .) expected.json', [toBinary('diff'), toBinary('eslint'), toDependency('eslint-formatter-json', { optional: true })]);
   t('until curl -s localhost:3000; do sleep 1; done', [toBinary('curl'), toBinary('sleep')]);
   t('coproc eslint .', [toBinary('eslint')]);
-  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('lint-staged', opt), toBinary('dirname')]);
+  t('#!/bin/sh\n. "$(dirname "$0")/_/husky.sh"\nnpx lint-staged', [toBinary('dirname'), toBinary('lint-staged', opt)]);
   t(`for S in "s"; do\n\tnpx rc@0.6.0\n\tnpx @scope/rc@0.6.0\ndone`, [toDependency('rc', opt), toDependency('@scope/rc', opt)]);
   t('curl', [], forwardedArgs);
   t('program -- mvn exec:java -Dexec.args="-g -f"', [], forwardedArgs);
