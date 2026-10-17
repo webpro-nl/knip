@@ -94,6 +94,16 @@ const [defaultName5, { default: renamedIdentifier2, namedC }] = await Promise.al
   import('./import-c.js'),
 ]);
 
+const [topLevelModule] = await Promise.all([import('./promise-all-top-level.js')]);
+topLevelModule.used();
+
+async function loadModules() {
+  const [scopedModule] = await Promise.all([import('./promise-all-scoped.js')]);
+  return { plugin: scopedModule.used };
+}
+
+loadModules();
+
 const child1 = fn(() => import('./import-c.js'));
 
 const { identifier15 } = await import('./catch.js').catch(() => {

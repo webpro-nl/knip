@@ -179,6 +179,15 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
           }
         } else if (binding?.type === 'Identifier') {
           s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.DYNAMIC);
+          const resolved = s.resolveModule(specifier, s.filePath);
+          if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+            s.localImportMap.set(binding.name, {
+              importedName: IMPORT_STAR,
+              filePath: resolved.resolvedFileName,
+              isNamespace: true,
+              isDynamicImport: true,
+            });
+          }
         } else {
           s.addImport(
             specifier,

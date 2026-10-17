@@ -9,11 +9,15 @@ const cwd = resolve('fixtures/imports/basic');
 
 test('Support various ways to import modules', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 28,
-    total: 28,
+    exports: 2,
+    processed: 30,
+    total: 30,
   });
+
+  assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['promise-all-scoped.ts']), ['unused']);
 });
