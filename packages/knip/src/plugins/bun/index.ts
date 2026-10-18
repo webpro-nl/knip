@@ -35,8 +35,20 @@ const resolveConfig: ResolveConfig<BunfigConfig> = localConfig => {
   return preload.map(specifier => toDeferResolve(specifier));
 };
 
+// Bun reads only `./`, `../` and `/` arguments as paths; any other argument filters test files by path
+const isPath = (arg: string) => /^\.{0,2}\//.test(arg);
+
+const toFilterPatterns = (filter: string) => {
+  if (/\.\w+$/.test(filter)) return [`**/*${filter}`];
+  return [
+    ...patterns.map(pattern => `**/*${filter}*/${pattern}`),
+    ...patterns.map(pattern => pattern.replace('**/*', `**/*${filter}*`)),
+  ];
+};
+
 const toPatterns = (arg: string) => {
   if (/[*{?]/.test(arg)) return [arg];
+  if (!isPath(arg)) return toFilterPatterns(arg);
   if (/\.\w+$/.test(arg)) return [arg];
   const dir = arg.replace(/\/+$/, '');
   return patterns.map(pattern => `${dir}/${pattern}`);

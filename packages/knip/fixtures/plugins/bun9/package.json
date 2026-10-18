@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/bun9",
+  "scripts": {
+    "test:dom": "bun test .dom.test.tsx",
+    "test:feature": "bun test feature"
+  }
+}
