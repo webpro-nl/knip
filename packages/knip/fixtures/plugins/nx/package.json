@@ -16,12 +16,17 @@
     "@nrwl/storybook": "*",
     "@nrwl/web": "*",
     "@nrwl/workspace": "*",
+    "@nx/eslint-plugin": "*",
     "@tsconfig/node20": "*",
     "@tsconfig/strictest": "*",
+    "@vitest/coverage-v8": "*",
     "jasmine-core": "*",
     "karma": "*",
     "karma-jasmine": "*",
-    "rimraf": "*"
+    "rimraf": "*",
+    "ts-jest": "*",
+    "tslib": "*",
+    "vitest": "*"
   },
   "nx": {
     "targets": {

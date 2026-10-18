@@ -53,13 +53,13 @@
     "test-vitest": {
       "executor": "@nx/vitest:test",
       "options": {
-        "vitestConfig": "libs/b/vitest.config.ts"
+        "vitestConfig": "{projectRoot}/vitest.config.ts"
       }
     },
     "build-webpack": {
       "executor": "@nx/webpack:webpack",
       "options": {
-        "webpackConfig": "libs/b/webpack.config.js"
+        "webpackConfig": "{workspaceRoot}/libs/b/webpack.config.js"
       }
     },
     "build-from-subdir": {

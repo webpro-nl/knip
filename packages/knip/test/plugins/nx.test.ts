@@ -25,6 +25,7 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.unlisted['libs/b/project.json']['@nx/vitest']);
   assert(issues.unlisted['libs/b/project.json']['@nx/webpack']);
   assert(issues.unlisted['libs/b/project.json']['webpack-cli']);
+  assert(issues.unlisted['libs/b/webpack.config.js']['@nx/webpack']);
 
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
@@ -36,9 +37,8 @@ test('Find dependencies with the Nx plugin', async () => {
     ...baseCounters,
     binaries: 6,
     devDependencies: 7,
-    unlisted: 6,
-    files: 3,
-    processed: 7,
-    total: 7,
+    unlisted: 7,
+    processed: 8,
+    total: 8,
   });
 });
