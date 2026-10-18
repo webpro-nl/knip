@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/tsrs",
+  "scripts": {
+    "check": "tsrs --noEmit -p tsconfig.check.json",
+    "check:test": "tsrs --noEmit --project test"
+  },
+  "devDependencies": {
+    "bun-types": "*",
+    "tslib": "*",
+    "tsrs": "*",
+    "vite": "*"
+  }
+}

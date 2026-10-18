@@ -15,7 +15,7 @@ const enablers = ['typescript', '@typescript/native', '@typescript/native-previe
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsconfig.json'];
+export const config = ['tsconfig.json'];
 
 const resolveContentMappers = (localConfig: TsConfigJson) => {
   const inputs: Input[] = [];
@@ -27,19 +27,17 @@ const resolveContentMappers = (localConfig: TsConfigJson) => {
   return inputs;
 };
 
-const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
+export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
-    ? [localConfig.extends]
-        .flat()
-        .map(specifier => toConfig('typescript', specifier, { containingFilePath: options.configFilePath }))
+    ? [localConfig.extends].flat().map(specifier => toConfig(options.pluginName, specifier))
     : [];
 
   const references =
     localConfig.references
       ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
+      .map(reference => toConfig(options.pluginName, reference.path)) ?? [];
 
   const contentMappers = resolveContentMappers(localConfig);
 
@@ -63,7 +61,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   ]);
 };
 
-const args = {
+export const args = {
   binaries: ['tsc', 'tsgo'],
   string: ['project'],
   alias: { project: ['p'] },
