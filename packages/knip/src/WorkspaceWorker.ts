@@ -395,6 +395,7 @@ export class WorkspaceWorker {
 
       const options = {
         ...baseScriptOptions,
+        pluginName,
         config,
         configFilePath: containingFilePath,
         configFileDir: cwd,

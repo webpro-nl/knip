@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/tsrs');
 
-test('Find dependencies in default and project configs when using tsrs without TypeScript', async () => {
+test('Find dependencies in default, extended and project configs when using tsrs without TypeScript', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 

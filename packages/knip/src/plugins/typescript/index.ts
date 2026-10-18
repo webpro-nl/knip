@@ -31,15 +31,13 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
-    ? [localConfig.extends]
-        .flat()
-        .map(specifier => toConfig('typescript', specifier, { containingFilePath: options.configFilePath }))
+    ? [localConfig.extends].flat().map(specifier => toConfig(options.pluginName, specifier))
     : [];
 
   const references =
     localConfig.references
       ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
+      .map(reference => toConfig(options.pluginName, reference.path)) ?? [];
 
   const contentMappers = resolveContentMappers(localConfig);
 

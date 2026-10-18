@@ -131,6 +131,7 @@ type IsPluginEnabledOptions = {
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
 
 export interface PluginOptions extends BaseOptions {
+  pluginName: PluginName;
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
