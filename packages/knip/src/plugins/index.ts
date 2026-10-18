@@ -157,6 +157,7 @@ import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
+import { default as tsrs } from './tsrs/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
 import { default as turbo } from './turbo/index.ts';
@@ -353,6 +354,7 @@ export const Plugins = {
   'ts-node': tsNode,
   tsd,
   tsdown,
+  tsrs,
   tsup,
   tsx,
   turbo,

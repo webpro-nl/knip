@@ -158,6 +158,7 @@ export type PluginName =
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
+  | 'tsrs'
   | 'tsup'
   | 'tsx'
   | 'turbo'
@@ -354,6 +355,7 @@ export const pluginNames = [
   'ts-node',
   'tsd',
   'tsdown',
+  'tsrs',
   'tsup',
   'tsx',
   'turbo',

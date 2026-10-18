@@ -11,11 +11,11 @@ import { contentMapperResolvers } from './content-mappers.ts';
 
 const title = 'TypeScript';
 
-const enablers = ['typescript', '@typescript/native', '@typescript/native-preview', 'tsrs'];
+const enablers = ['typescript', '@typescript/native', '@typescript/native-preview'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsconfig.json'];
+export const config = ['tsconfig.json'];
 
 const resolveContentMappers = (localConfig: TsConfigJson) => {
   const inputs: Input[] = [];
@@ -27,7 +27,7 @@ const resolveContentMappers = (localConfig: TsConfigJson) => {
   return inputs;
 };
 
-const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
+export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
@@ -63,8 +63,8 @@ const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   ]);
 };
 
-const args = {
-  binaries: ['tsc', 'tsgo', 'tsrs'],
+export const args = {
+  binaries: ['tsc', 'tsgo'],
   string: ['project'],
   alias: { project: ['p'] },
   config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
