@@ -44,6 +44,12 @@
         "eslintConfig": "libs/b/.eslintrc.json"
       }
     },
+    "test-karma": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "karmaConfig": "libs/b/karma.conf.js"
+      }
+    },
     "test-vitest": {
       "executor": "@nx/vitest:test",
       "options": {

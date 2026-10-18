@@ -4,6 +4,7 @@
     "nx": "nx"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "*",
     "@nx/next": "*",
     "@nx/linter": "*",
     "@nx/cypress": "*",
@@ -17,6 +18,9 @@
     "@nrwl/workspace": "*",
     "@tsconfig/node20": "*",
     "@tsconfig/strictest": "*",
+    "jasmine-core": "*",
+    "karma": "*",
+    "karma-jasmine": "*",
     "rimraf": "*"
   },
   "nx": {

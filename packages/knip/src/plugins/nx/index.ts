@@ -102,6 +102,10 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
       configs.push(toConfig('jest', opts.jestConfig));
     }
 
+    if ('karmaConfig' in opts && typeof opts.karmaConfig === 'string') {
+      configs.push(toConfig('karma', opts.karmaConfig, { dir: options.rootCwd }));
+    }
+
     if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
       configs.push(toConfig('typescript', opts.tsConfig));
     }
