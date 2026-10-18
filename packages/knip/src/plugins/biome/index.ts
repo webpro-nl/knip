@@ -18,10 +18,10 @@ const isRootConfigReference = (specifier: string) => specifier === '//';
 const resolveExtends = (extendsArray: string[], options: PluginOptions): Input[] => {
   return extendsArray.map(specifier => {
     if (isRootConfigReference(specifier)) {
-      return toConfig('biome', join(options.rootCwd, 'biome'), { containingFilePath: options.configFilePath });
+      return toConfig('biome', join(options.rootCwd, 'biome'));
     }
 
-    return toConfig('biome', specifier, { containingFilePath: options.configFilePath });
+    return toConfig('biome', specifier);
   });
 };
 

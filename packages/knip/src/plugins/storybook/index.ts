@@ -25,7 +25,7 @@ const entry = [...restEntry, ...stories];
 const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir, configFilePath } = options;
+  const { cwd, configFileDir } = options;
   const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
   const relativePatterns = strs?.map(pattern => {
     if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
@@ -55,9 +55,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
     framework?.name === '@storybook/react-vite' &&
     framework?.options?.builder?.viteConfigPath;
 
-  const configs: Input[] = viteConfigPath
-    ? [toConfig('vite', viteConfigPath, { dir: cwd, containingFilePath: configFilePath })]
-    : [];
+  const configs: Input[] = viteConfigPath ? [toConfig('vite', viteConfigPath, { dir: cwd })] : [];
 
   const hasVitestAddon = addons.some(addon => addon === '@storybook/addon-vitest');
   const coverageDeps: Input[] = hasVitestAddon

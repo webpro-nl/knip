@@ -103,7 +103,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           karma.inputsFromFrameworks(['jasmine']).forEach(inputs.add, inputs);
         }
         if (karmaConfig && !karma.configFiles.includes(karmaConfig)) {
-          inputs.add(toConfig('karma', karmaConfig, { containingFilePath: options.configFilePath }));
+          inputs.add(toConfig('karma', karmaConfig));
         }
       }
     }

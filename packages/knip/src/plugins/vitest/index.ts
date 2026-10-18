@@ -151,10 +151,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
             gitignore: false,
           });
           for (const projectFile of projectFiles) {
-            inputs.add(toConfig('vitest', projectFile, { containingFilePath: options.configFilePath }));
+            inputs.add(toConfig('vitest', projectFile));
           }
         } else if (typeof project.extends === 'string') {
-          inputs.add(toConfig('vitest', project.extends, { containingFilePath: options.configFilePath }));
+          inputs.add(toConfig('vitest', project.extends));
         }
       }
     }

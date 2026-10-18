@@ -34,11 +34,11 @@ const toPluginSpecifier = (id: string) => {
   return id.replace('/', '/commitlint-plugin-');
 };
 
-const resolveConfig: ResolveConfig<CommitLintConfig> = async (config, options) => {
+const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   const inputs: Input[] = [];
   const extendsConfigs: string[] = [];
   for (const id of config.extends ? [config.extends].flat() : []) {
-    if (isInternal(id)) inputs.push(toConfig('commitlint', id, { containingFilePath: options.configFilePath }));
+    if (isInternal(id)) inputs.push(toConfig('commitlint', id));
     else extendsConfigs.push(toExtendsSpecifier(id));
   }
   const plugins: string[] = [];

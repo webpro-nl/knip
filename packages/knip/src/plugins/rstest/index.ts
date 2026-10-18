@@ -123,7 +123,7 @@ const resolveConfig: ResolveConfig<RstestConfigOrFn> = async (localConfig, optio
               .catch(() => undefined)
           : undefined;
       if (!project) {
-        inputs.push(toConfig('rstest', filePath, { containingFilePath: configFilePath }));
+        inputs.push(toConfig('rstest', filePath));
         continue;
       }
       inputs.push(toEntry(filePath));
