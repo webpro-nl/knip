@@ -9,6 +9,7 @@ export interface NxProjectConfiguration {
         cwd?: string;
         eslintConfig?: string;
         jestConfig?: string;
+        karmaConfig?: string;
         tsConfig?: string;
         vitestConfig?: string;
         webpackConfig?: string;
