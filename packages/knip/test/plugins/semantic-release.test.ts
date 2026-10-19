@@ -20,7 +20,7 @@ test('Find dependencies with the semantic-release plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 4,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
