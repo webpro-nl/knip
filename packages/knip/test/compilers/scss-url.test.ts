@@ -7,6 +7,7 @@ test('Compile static local SCSS URLs', () => {
 .single { background: url('../single-quoted.jpg'); }
 .unquoted { background: url(assets/unquoted.jpg); }
 .query { background: url("./query.jpg?v=1#image"); }
+.scoped { background: url("@fontsource-variable/archivo/files/archivo.woff2"); }
 .external { background: url("https://cdn.example.com/external.jpg"); }
 .data { background: url('data:image/svg+xml,<svg></svg>'); }
 .protocol-relative { background: url(//cdn.example.com/protocol-relative.jpg); }
@@ -14,6 +15,7 @@ test('Compile static local SCSS URLs', () => {
 .fragment { background: url("#image"); }
 .empty { background: url(""); }
 .variable { background: url($asset); }
+.custom-property { background: url(var(--asset)); }
 .interpolated { background: url("./#{$asset}.jpg"); }
 /* .comment { background: url("./commented.jpg"); } */
 // .line-comment { background: url("./line-commented.jpg"); }
@@ -24,6 +26,7 @@ test('Compile static local SCSS URLs', () => {
     `import _$0 from './double-quoted.jpg';
 import _$1 from '../single-quoted.jpg';
 import _$2 from './assets/unquoted.jpg';
-import _$3 from './query.jpg';`
+import _$3 from './query.jpg';
+import _$4 from '@fontsource-variable/archivo/files/archivo.woff2';`
   );
 });

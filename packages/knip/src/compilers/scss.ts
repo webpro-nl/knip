@@ -1,6 +1,5 @@
-import { ensureRelative, isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
+import { getUrlSpecifier, isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync } from './types.ts';
-import { hasUrlScheme } from '../util/url.ts';
 
 // https://sass-lang.com/documentation/at-rules/
 
@@ -8,26 +7,6 @@ const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
 const dependencyMatcher =
   /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]|url\(\s*(?:["']([^"']*)["']|([^'")\s]+))\s*\)/g;
-
-const getUrlSpecifier = (url: string): string | undefined => {
-  if (
-    !url ||
-    url.startsWith('//') ||
-    url.startsWith('/') ||
-    url.startsWith('#') ||
-    hasUrlScheme(url) ||
-    url.includes('$') ||
-    url.includes('#{')
-  )
-    return;
-  let end = url.length;
-  const queryIndex = url.indexOf('?');
-  if (queryIndex !== -1) end = queryIndex;
-  const fragmentIndex = url.indexOf('#');
-  if (fragmentIndex !== -1 && fragmentIndex < end) end = fragmentIndex;
-  const path = url.slice(0, end);
-  return path ? ensureRelative(path) : undefined;
-};
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);
