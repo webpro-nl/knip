@@ -4,3 +4,8 @@
   font-family: 'Archivo Variable';
   src: url('@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2-variations');
 }
+
+@font-face {
+  font-family: 'Brand';
+  src: url('./fonts/brand.otf') format('opentype');
+}

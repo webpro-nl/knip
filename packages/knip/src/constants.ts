@@ -206,6 +206,7 @@ export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.jpg',
   '.less',
   '.mp3',
+  '.otf',
   '.png',
   '.sass',
   '.scss',
