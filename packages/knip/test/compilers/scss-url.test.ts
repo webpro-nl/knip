@@ -17,6 +17,8 @@ test('Compile static local SCSS URLs', () => {
 .variable { background: url($asset); }
 .custom-property { background: url(var(--asset)); }
 .interpolated { background: url("./#{$asset}.jpg"); }
+.newline { background: url("./new
+line.jpg"); }
 /* .comment { background: url("./commented.jpg"); } */
 // .line-comment { background: url("./line-commented.jpg"); }
 .string { content: 'url("./string.jpg")'; }`;
