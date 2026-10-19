@@ -1,7 +1,7 @@
 import { type Expression, type Program, type SpreadElement, Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getImportMap, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { _parseFile, getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
@@ -55,6 +55,41 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 
 const production = getEntryFilePatterns();
 
+const getFactoryBody = (program: Program, name: string, isExport = false): Program['body'] => {
+  if (isExport) {
+    for (const node of program.body) {
+      if (node.type === 'ExportDefaultDeclaration' && name === 'default') {
+        const declaration = node.declaration;
+        if (declaration.type === 'Identifier') return getFactoryBody(program, declaration.name);
+        if (declaration.type === 'FunctionDeclaration') return [declaration];
+        if (declaration.type === 'ArrowFunctionExpression' || declaration.type === 'FunctionExpression') {
+          return [{ type: 'ExpressionStatement', expression: declaration, start: node.start, end: node.end }];
+        }
+      }
+      if (node.type === 'ExportNamedDeclaration' && !node.source) {
+        for (const specifier of node.specifiers) {
+          const exported =
+            specifier.exported.type === 'Identifier' ? specifier.exported.name : specifier.exported.value;
+          const local = specifier.local.type === 'Identifier' ? specifier.local.name : specifier.local.value;
+          if (exported === name) return getFactoryBody(program, local);
+        }
+      }
+    }
+  }
+  for (const node of program.body) {
+    const declaration = node.type === 'ExportNamedDeclaration' ? node.declaration : node;
+    if (declaration?.type === 'FunctionDeclaration' && declaration.id?.name === name) return [declaration];
+    if (declaration?.type === 'VariableDeclaration') {
+      for (const declarator of declaration.declarations) {
+        if (declarator.id.type === 'Identifier' && declarator.id.name === name) {
+          return [{ ...declaration, declarations: [declarator] }];
+        }
+      }
+    }
+  }
+  return [];
+};
+
 const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath, readFile }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
@@ -86,23 +121,31 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath
     }
   };
 
-  const seen = new Set([configFilePath]);
-  const visitConfig = (program: Program, filePath: string) => {
-    const imports = getImportMap(program);
+  const programs = new Map([[configFilePath, program]]);
+  const seen = new Map<string, Set<string>>();
+  const visitConfig = (program: Program, filePath: string, factory?: string, isExport = false) => {
+    const visited = seen.get(filePath) ?? new Set<string>();
+    const key = `${isExport ? 'export' : 'local'}:${factory}`;
+    if (visited.has(key)) return;
+    visited.add(key);
+    seen.set(filePath, visited);
+    const references = new Set<string>();
     const visitor = new Visitor({
       CallExpression(node) {
-        if (node.callee.type !== 'Identifier') return;
-        const specifier = imports.get(node.callee.name);
-        if (!specifier) return;
-        const resolved = _resolveModuleSync(specifier, filePath);
-        if (!resolved || isInNodeModules(resolved) || seen.has(resolved)) return;
-        seen.add(resolved);
-        const sourceText = readFile(resolved);
-        if (sourceText) visitConfig(_parseFile(resolved, sourceText).program, resolved);
+        if (node.callee.type === 'Identifier') references.add(node.callee.name);
+      },
+      ReturnStatement(node) {
+        if (node.argument?.type === 'Identifier') references.add(node.argument.name);
+      },
+      SpreadElement(node) {
+        if (node.argument.type === 'Identifier') references.add(node.argument.name);
+      },
+      ArrowFunctionExpression(node) {
+        if (node.body.type === 'Identifier') references.add(node.body.name);
       },
       ObjectExpression(node) {
         const turbopack = findProperty(node, 'turbopack');
-        if (filePath === configFilePath) {
+        if (!factory) {
           for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
           if (turbopack?.type === 'ConditionalExpression') {
             collectTurbopackAliases(turbopack.consequent);
@@ -118,7 +161,34 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath
         }
       },
     });
-    visitor.visit(program);
+    visitor.visit(factory ? { ...program, body: getFactoryBody(program, factory, isExport) } : program);
+    for (const reference of references) {
+      if (getFactoryBody(program, reference).length > 0) visitConfig(program, filePath, reference);
+    }
+    for (const node of program.body) {
+      if (node.type !== 'ImportDeclaration' || node.importKind === 'type') continue;
+      for (const specifier of node.specifiers) {
+        if (!references.has(specifier.local.name)) continue;
+        if (specifier.type === 'ImportNamespaceSpecifier') continue;
+        if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type') continue;
+        const imported = specifier.type === 'ImportSpecifier' ? specifier.imported : undefined;
+        const name = imported?.type === 'Identifier' ? imported.name : imported?.value;
+        const factory = specifier.type === 'ImportDefaultSpecifier' ? 'default' : name;
+        if (!factory) continue;
+        const resolved = _resolveModuleSync(node.source.value, filePath);
+        if (!resolved || isInNodeModules(resolved)) continue;
+        const cached = programs.get(resolved);
+        if (cached) {
+          visitConfig(cached, resolved, factory, true);
+        } else {
+          const sourceText = readFile(resolved);
+          if (!sourceText) continue;
+          const parsed = _parseFile(resolved, sourceText).program;
+          programs.set(resolved, parsed);
+          visitConfig(parsed, resolved, factory, true);
+        }
+      }
+    }
   };
   visitConfig(program, configFilePath);
 
