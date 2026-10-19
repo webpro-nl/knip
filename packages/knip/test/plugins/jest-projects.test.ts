@@ -17,7 +17,7 @@ test('Load Jest projects as Jest configs', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 8,
-    total: 8,
+    processed: 9,
+    total: 9,
   });
 });

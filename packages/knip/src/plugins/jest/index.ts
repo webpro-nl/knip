@@ -1,9 +1,8 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { isFile } from '../../util/fs.ts';
-import { _glob, _dirGlob } from '../../util/glob.ts';
+import { _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
+import { extname, isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
@@ -20,35 +19,17 @@ const enablers = ['jest'];
 const isEnabled: IsPluginEnabled = ({ dependencies, manifest }) =>
   hasDependency(dependencies, enablers) || Boolean(manifest.name?.startsWith('jest-presets'));
 
-const config = ['jest.config.{js,ts,mjs,cjs,mts,cts,json}', 'package.json'];
+const configExtensions = ['js', 'ts', 'mjs', 'mts', 'cjs', 'cts', 'json'];
+
+const configPattern = `jest.config.{${configExtensions.join(',')}}`;
+
+const config = [configPattern, 'package.json'];
 
 const mocks = ['**/__mocks__/**/*.[jt]s?(x)'];
 
 const entry = ['**/__tests__/**/*.?(c|m)[jt]s?(x)', '**/?(*.)+(spec|test).?(c|m)[jt]s?(x)', ...mocks];
 
 const rootDirRe = /<rootDir>/;
-
-const configExtensions = ['.js', '.ts', '.mjs', '.mts', '.cjs', '.cts', '.json'];
-
-const findConfigFilePath = (dir: string, cwd: string) => {
-  for (const ext of configExtensions) {
-    const filePath = toAbsolute(join(dir, `jest.config${ext}`), cwd);
-    if (isFile(filePath)) return filePath;
-  }
-};
-
-const getProjectConfigs = async (pattern: string, cwd: string) => {
-  const patterns = [pattern];
-  const configs: Input[] = [];
-  for (const file of await _glob({ patterns, cwd })) {
-    if (configExtensions.some(ext => file.endsWith(ext))) configs.push(toConfig('jest', file));
-  }
-  for (const dir of await _dirGlob({ patterns, cwd })) {
-    const configFilePath = findConfigFilePath(dir, cwd);
-    if (configFilePath) configs.push(toConfig('jest', configFilePath));
-  }
-  return configs;
-};
 
 const isBabelJest = (transformer: [string, unknown]): transformer is [string, BabelConfigObj] =>
   transformer[0] === 'babel-jest';
@@ -73,7 +54,7 @@ const resolveDependencies = async (
     isInternal(preset) ? preset : join(preset, 'jest-preset')
   );
 
-  const projects: (string | Input)[] = [];
+  const projects: Input[] = [];
   for (const project of config.projects ?? []) {
     if (typeof project === 'string') {
       // Special case: Most Jest config settings can resolve <rootDir> later,
@@ -83,7 +64,11 @@ const resolveDependencies = async (
       //
       // Jest uses glob's `{ windowsPathsNoEscape: true }`, which we don't
       // currently implement.
-      projects.push(...(await getProjectConfigs(project.replace(rootDirRe, rootDir), options.cwd)));
+      const pattern = project.replace(rootDirRe, rootDir);
+      const files = await _glob({ patterns: [pattern, join(pattern, configPattern)], cwd: options.cwd });
+      for (const file of files) {
+        if (configExtensions.includes(extname(file).slice(1))) projects.push(toConfig('jest', file));
+      }
     } else {
       const dependencies = await resolveDependencies(project, rootDir, options);
       for (const dependency of dependencies) projects.push(dependency);
