@@ -1,4 +1,4 @@
-Unused exports (23)
+Unused exports (22)
 app/composables/usePackageComparison.ts: NoDependencyDisplay
 app/utils/chart-data-correction.ts: movingAverage, smoothing
 app/utils/charts.ts: createAltTextForCompareFacetBarChart, createAltTextForCompareScatterChart
@@ -15,7 +15,6 @@ server/utils/skills.ts: parseFrontmatter, countSkillFiles, validateSkill
 server/utils/version-downloads.ts: filterLowUsageVersions, groupByMajor, groupByMinor
 shared/utils/constants.ts: ERROR_PACKAGE_REQUIREMENTS_FAILED, ERROR_BLUESKY_URL_FAILED, BLOG_META_TAG_REGEX, META_TAG_TITLE_REGEX
 shared/utils/diff.ts: parseUnifiedDiff
-shared/utils/fetch-cache-config.ts: FETCH_CACHE_ALLOWED_DOMAINS
 shared/utils/git-providers.ts: GITLAB_HOSTS, FORGEJO_HOSTS, GITEA_HOSTS, getProviderConfig, isKnownGitProvider
 shared/utils/install-scripts.ts: extractNpxDependencies
 shared/utils/npm.ts: assertValidUsername
