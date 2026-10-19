@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/typescript-extends-workspaces__a",
+  "dependencies": {
+    "tslib": "*"
+  }
+}
