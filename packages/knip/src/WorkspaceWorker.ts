@@ -38,7 +38,7 @@ import {
 } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, join, relative, toRelative } from './util/path.ts';
+import { basename, dirname, isAbsolute, join, relative, toAbsolute, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -212,7 +212,12 @@ export class WorkspaceWorker {
         patterns.push(...(pluginConfig.config ?? this.getPluginConfig(plugin) ?? []));
       }
     }
-    return patterns;
+    return patterns.filter(pattern => !this.isOutsideRoot(pattern));
+  }
+
+  private isOutsideRoot(filePath: string) {
+    const path = relative(this.options.cwd, toAbsolute(filePath, this.dir));
+    return path === '..' || path.startsWith('../') || isAbsolute(path);
   }
 
   getPluginEntryFilePatterns(patterns: string[]) {
@@ -496,9 +501,11 @@ export class WorkspaceWorker {
         }
 
         if (!isManifest) {
-          inputs.push(toEntry(configFilePath));
+          if (!this.isOutsideRoot(configFilePath)) {
+            inputs.push(toEntry(configFilePath));
+            cache.configFile = toEntry(configFilePath);
+          }
           storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
-          cache.configFile = toEntry(configFilePath);
 
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);
