@@ -191,7 +191,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       !cfg.test?.root && cfg.root && !options.isResolvedConfigFile ? toAbsolute(cfg.root, options.cwd) : testRoot;
     const dir = cfg.test?.dir ? toAbsolute(cfg.test.dir, testRoot) : vitestRoot;
 
-    if (cfg.test) {
+    if (cfg.test || options.pluginName === 'vitest') {
       if (cfg.test?.include) {
         for (const dependency of cfg.test.include) dependency[0] !== '!' && inputs.add(toEntry(join(dir, dependency)));
         const benchmarkInclude = cfg.test.benchmark?.include ?? benchmark;
@@ -201,7 +201,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       }
       if (!options.config.entry) for (const dependency of mocks) inputs.add(toEntry(join(vitestRoot, dependency)));
 
-      if (cfg.test.alias) addAliases(cfg.test.alias);
+      if (cfg.test?.alias) addAliases(cfg.test.alias);
     }
 
     if (cfg.resolve?.alias) addAliases(cfg.resolve.alias);
