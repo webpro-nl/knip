@@ -1,1 +1,6 @@
 @import 'radix-themes-tw';
+
+@font-face {
+  font-family: 'Archivo Variable';
+  src: url('@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2-variations');
+}

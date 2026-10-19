@@ -5,6 +5,11 @@
 @use 'foundation-sites/scss/foundation';
 @use './variables' as vars;
 
+@font-face {
+  font-family: 'Archivo Variable';
+  src: url('@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2') format('woff2-variations');
+}
+
 .text {
   color: vars.$primary;
 }
