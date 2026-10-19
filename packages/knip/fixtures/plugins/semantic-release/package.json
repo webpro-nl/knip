@@ -10,10 +10,12 @@
   "devDependencies": {
     "@fruits/release-config": "*",
     "@herbs/release-config": "*",
+    "@semantic-release/exec": "*",
     "@shared/release-config": "*",
     "@veggies/release-config": "*",
     "semantic-release": "*",
-    "semantic-release-monorepo": "*"
+    "semantic-release-monorepo": "*",
+    "semantic-release-slack-bot": "*"
   },
   "release": {
     "branches": [
