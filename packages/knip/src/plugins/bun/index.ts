@@ -40,7 +40,7 @@ const isPath = (arg: string) => /^\.{0,2}\//.test(arg);
 
 const toFilterPatterns = (filter: string) => {
   if (filter === '.') return patterns;
-  if (/\.\w+$/.test(filter)) return [`**/*${filter}`];
+  if (/\.[cm]?[jt]sx?$/.test(filter)) return [`**/*${filter}`];
   return [
     ...patterns.map(pattern => `**/*${filter}*/${pattern}`),
     ...patterns.map(pattern => pattern.replace('**/*', `**/*${filter}*`)),
