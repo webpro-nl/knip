@@ -1,0 +1,7 @@
+{
+  "name": "~utils",
+  "private": true,
+  "exports": {
+    "./*": "./src/*.ts"
+  }
+}
