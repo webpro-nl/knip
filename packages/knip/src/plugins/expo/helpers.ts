@@ -1,7 +1,7 @@
 import type { PluginOptions, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency, toProductionDependency } from '../../util/input.ts';
+import { type Input, toDeferResolveEntry, toDependency, toProductionDependency } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join } from '../../util/path.ts';
 import type { ExpoConfig } from './types.ts';
 
 const getDummyConfigContext = (options: PluginOptions) => ({
@@ -18,6 +18,20 @@ export const getConfig = (localConfig: ExpoConfig, options: PluginOptions) => {
   return 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 };
 
+const getPluginInputs = (plugins: ReturnType<typeof getConfig>['plugins'] = []) => {
+  const inputs: Input[] = [];
+  for (const plugin of plugins) {
+    const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (isInternal(pluginName)) {
+      inputs.push(toDeferResolveEntry(pluginName));
+      continue;
+    }
+    const packageName = getPackageNameFromModuleSpecifier(pluginName);
+    if (packageName) inputs.push(toDependency(packageName));
+  }
+  return inputs;
+};
+
 // https://docs.expo.dev/versions/latest/config/app
 
 export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
@@ -26,15 +40,7 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   const platforms = config.platforms ?? ['ios', 'android'];
 
-  const pluginPackages =
-    (config.plugins
-      ?.map(plugin => {
-        const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
-        return getPackageNameFromModuleSpecifier(pluginName);
-      })
-      .filter(Boolean) as string[]) ?? [];
-
-  const inputs = new Set<Input>(pluginPackages.map(id => toDependency(id)));
+  const inputs = new Set<Input>(getPluginInputs(config.plugins));
 
   const allowedPackages = ['expo-atlas', 'expo-dev-client'];
   const allowedProductionPackages = ['expo-insights'];

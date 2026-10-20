@@ -14,6 +14,8 @@ const config = {
     ['@config-plugins/detox', { subdomains: '*' }],
     '@sentry/react-native/expo',
     ['expo-splash-screen', { backgroundColor: '#ffffff' }],
+    './plugins/withAndroidManifest',
+    ['./plugins/withIosEntitlements', { team: 'knip' }],
   ],
 };
 
