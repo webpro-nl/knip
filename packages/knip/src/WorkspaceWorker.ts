@@ -38,7 +38,7 @@ import {
 } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, join, relative, toRelative } from './util/path.ts';
+import { basename, dirname, extname, join, relative, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -496,9 +496,11 @@ export class WorkspaceWorker {
         }
 
         if (!isManifest) {
-          inputs.push(toEntry(configFilePath));
+          if (extname(configFilePath)) {
+            inputs.push(toEntry(configFilePath));
+            cache.configFile = toEntry(configFilePath);
+          }
           storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
-          cache.configFile = toEntry(configFilePath);
 
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);
