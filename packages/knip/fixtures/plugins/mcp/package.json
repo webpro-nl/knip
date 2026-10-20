@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/mcp",
+  "devDependencies": {
+    "@modelcontextprotocol/server-filesystem": "*",
+    "@playwright/mcp": "*",
+    "next-devtools-mcp": "*"
+  }
+}

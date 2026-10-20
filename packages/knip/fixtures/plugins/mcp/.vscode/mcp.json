@@ -1,0 +1,11 @@
+{
+  // VS Code uses `servers` instead of `mcpServers`
+  "inputs": [],
+  "servers": {
+    "inventory": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/inventory-server.ts"]
+    }
+  }
+}
