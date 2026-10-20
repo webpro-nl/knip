@@ -6,4 +6,5 @@ type MCPServer = {
 export type MCPConfig = {
   mcpServers?: Record<string, MCPServer>;
   servers?: Record<string, MCPServer>;
+  mcp_servers?: Record<string, MCPServer>;
 };
