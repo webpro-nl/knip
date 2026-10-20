@@ -122,7 +122,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           }
         } else if (declarator.id.type === 'Identifier') {
           const name = declarator.id.name;
-          const fix = s.getFix(exportStart, exportStart + 7);
+          const fix = decl.declarations.length === 1 ? s.getFix(exportStart, exportStart + 7) : undefined;
           const jsDocTags = s.getJSDocTags(exportStart);
 
           let isReExport = false;

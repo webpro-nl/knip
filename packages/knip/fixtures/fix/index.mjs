@@ -1,7 +1,7 @@
 import { d } from './default.mjs';
 import { dx } from './default-x.mjs';
 import _ from 'lodash';
-import { z, f, g, i } from './mod';
+import { z, f, g, i, j } from './mod';
 import { USED } from './access';
 import { identifier } from './exports';
 import { a } from './ignored';
@@ -14,6 +14,7 @@ z;
 f;
 g;
 i;
+j;
 USED;
 identifier;
 a;

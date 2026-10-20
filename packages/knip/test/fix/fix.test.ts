@@ -19,6 +19,10 @@ test('Fix exports and dependencies', async () => {
   assert(issues.exports['mod.ts']['c']);
   assert(issues.exports['mod.ts']['d']);
   assert(issues.exports['mod.ts']['default']);
+  assert(issues.exports['mod.ts']['j'] === undefined);
+  assert(issues.exports['mod.ts']['k']);
+  assert(issues.exports['mod.ts']['l']);
+  assert(issues.exports['mod.ts']['m']);
   assert(issues.exports['mod.ts']['x']);
   assert(issues.exports['mod.ts']['y']);
   assert(issues.exports['reexported.ts']['Three']);
@@ -46,6 +50,10 @@ export const [, ] = [3, 4];
 export const [, f] = [5, 6];
 
 export const [g, , i] = [7, 8, 9];
+
+export const j = 10, k = 11;
+
+export const l = 12, m = 13;
 
 class MyClass {}
 
@@ -178,6 +186,10 @@ export const [c, d] = [3, 4];
 export const [e, f] = [5, 6];
 
 export const [g, h, i] = [7, 8, 9];
+
+export const j = 10, k = 11;
+
+export const l = 12, m = 13;
 
 export default class MyClass {}
 

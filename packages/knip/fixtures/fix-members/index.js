@@ -8,6 +8,7 @@ Fruits.apple;
 
 Animals.cat;
 Animals.swim();
+Animals.fish;
 Animals.Birds.eagle;
 
 const rect = new Rectangle();
