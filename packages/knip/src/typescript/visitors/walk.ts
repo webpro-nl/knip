@@ -419,7 +419,19 @@ const coreVisitorObject: VisitorObject = {
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
-    if (node.kind !== 'global' && isStringLiteral(node.id) && node.body?.type === 'TSModuleBlock') {
+    if (node.kind === 'global' || !isStringLiteral(node.id)) return;
+    if (state.isModuleFile) {
+      const specifier = getStringValue(node.id)!;
+      for (const name of collectAugmentationRefs(node))
+        state.addImport(
+          specifier,
+          name,
+          undefined,
+          undefined,
+          node.id.start,
+          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
+        );
+    } else if (node.body?.type === 'TSModuleBlock') {
       for (const stmt of node.body.body) {
         if (
           (stmt.type === 'ImportDeclaration' ||
@@ -437,18 +449,6 @@ const coreVisitorObject: VisitorObject = {
           );
         }
       }
-    }
-    if (node.kind !== 'global' && state.isModuleFile && isStringLiteral(node.id)) {
-      const specifier = getStringValue(node.id)!;
-      for (const name of collectAugmentationRefs(node))
-        state.addImport(
-          specifier,
-          name,
-          undefined,
-          undefined,
-          node.id.start,
-          IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
-        );
     }
   },
   TSInterfaceDeclaration(node) {
