@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./components.css";
+@import "./card.css";
 
 /*
  * @import "@fixtures/compilers-tailwind/tailwind-theme.css";

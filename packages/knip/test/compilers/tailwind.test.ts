@@ -8,7 +8,7 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/compilers/tailwind');
 
 test('Built-in compiler for Tailwind CSS', async () => {
-  const options = await createOptions({ cwd, includedIssueTypes: ['unresolved', 'cycles'] });
+  const options = await createOptions({ cwd, includedIssueTypes: ['files', 'dependencies', 'unresolved', 'cycles'] });
   const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.cycles).length, 0);
@@ -16,7 +16,7 @@ test('Built-in compiler for Tailwind CSS', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unresolved: 1,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });
