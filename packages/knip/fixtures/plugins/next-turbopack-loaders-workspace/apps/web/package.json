@@ -1,0 +1,12 @@
+{
+  "name": "web",
+  "devDependencies": {
+    "@workspace/next-config": "workspace:*",
+    "next": "*",
+    "unused-loader": "*"
+  },
+  "dependencies": {
+    "@tailwindcss/turbopack": "*",
+    "lodash-es": "*"
+  }
+}

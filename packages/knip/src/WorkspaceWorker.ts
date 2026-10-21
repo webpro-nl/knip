@@ -24,7 +24,7 @@ import { isExternalReExportsOnly } from './typescript/ast-helpers.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
-import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { debugLog, debugLogArray, debugLogObject } from './util/debug.ts';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
 import {
   type ConfigInput,
@@ -478,11 +478,15 @@ export class WorkspaceWorker {
               } catch (error) {
                 if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
-                this.handleConfigLoadError();
                 const relPath = toRelative(configFilePath, this.options.cwd);
                 const cause = formatCauseMessage(error, this.options.cwd);
-                logError(`Error loading ${relPath} (${cause})`);
-                logError('Please fix or visit https://knip.dev/reference/known-issues');
+                if (plugin.isLoadConfigOptional) {
+                  debugLog(wsName, `Error loading ${relPath} (${cause})`);
+                } else {
+                  this.handleConfigLoadError();
+                  logError(`Error loading ${relPath} (${cause})`);
+                  logError('Please fix or visit https://knip.dev/reference/known-issues');
+                }
               }
             }
           }
