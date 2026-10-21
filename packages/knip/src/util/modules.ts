@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { nativeResolverCache } from '../native-resolver-cache.ts';
 import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
-import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
+import { isAbsolute, isInNodeModules, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
   if (!isStartsLikePackageName(specifier) && !isTildePackageName(specifier)) return;
@@ -28,7 +28,8 @@ const getPackageNameFromYarnPnpmStore = (posixPath: string): string | undefined 
   if (yarnPnpmStoreNameCache.has(root)) return yarnPnpmStoreNameCache.get(root);
   let name: string | undefined;
   try {
-    name = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name;
+    const value = nativeResolverCache.readStorePackageName(root);
+    name = value?.json == null ? value?.text : JSON.parse(value.json);
   } catch {}
   yarnPnpmStoreNameCache.set(root, name);
   return name;

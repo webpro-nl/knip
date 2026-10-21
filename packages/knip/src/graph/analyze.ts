@@ -10,6 +10,8 @@ import {
   hasStrictlyEnumReferences,
 } from '../graph-explorer/utils.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
+import { native } from '../native.ts';
+import { createNativeGraphUsage, getNativeProjectGraph, type GraphUsage } from '../native-graph.ts';
 import traceReporter from '../reporters/trace.ts';
 import type { CyclesConfig, IgnoreExportsUsedInFile } from '../types/config.ts';
 import type { Export, ExportMember, ImportMaps, ModuleGraph } from '../types/module-graph.ts';
@@ -19,7 +21,8 @@ import { getPackageNameFromModuleSpecifier } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
-import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
+import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, isAlwaysIgnored } from '../util/tag.ts';
+import { hasTag } from '../util/tag-filter.ts';
 import { INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
@@ -66,38 +69,48 @@ export const analyze = async ({
   const shouldIgnoreTags = getShouldIgnoreTagHandler(options.tags);
 
   const explorer = createGraphExplorer(graph, entryPaths);
+  const nativeGraph = getNativeProjectGraph(graph);
+  let usage: GraphUsage = explorer;
+  const containingExports = new Map<string, Set<Export>>();
 
   const isReferencedInUsedExport = (
     exportedItem: Export,
     filePath: string,
     includeEntryExports: boolean,
-    ignoreExportsUsedInFile: IgnoreExportsUsedInFile,
-    visited?: Set<string>
+    ignoreExportsUsedInFile: IgnoreExportsUsedInFile
   ) => {
     if (!exportedItem.referencedIn) return false;
+    const cached = containingExports.get(filePath);
+    if (cached) return cached.has(exportedItem);
     const file = graph.get(filePath);
     if (!file) return false;
-    for (const containingExport of exportedItem.referencedIn) {
-      const inExport = file.exports.get(containingExport);
-      if (!inExport) continue;
-      if (
-        (inExport.type === 'type' || inExport.type === 'interface' || inExport.type === 'enum') &&
-        !shouldCountRefs(ignoreExportsUsedInFile, inExport.type)
-      ) {
-        continue;
-      }
-      if (inExport.hasRefsInFile || inExport.isRegistered) return true;
-      if (explorer.isReferenced(filePath, containingExport, { traverseEntries: includeEntryExports })[0]) return true;
-      if (inExport.referencedIn) {
-        const v = visited ?? new Set();
-        if (!v.has(containingExport)) {
-          v.add(containingExport);
-          if (isReferencedInUsedExport(inExport, filePath, includeEntryExports, ignoreExportsUsedInFile, v))
-            return true;
-        }
+    const referenced = new Set<string>();
+    for (const item of file.exports.values()) {
+      if (item.referencedIn) {
+        for (const identifier of item.referencedIn) referenced.add(identifier);
       }
     }
-    return false;
+    const records: Parameters<typeof native.liveContainingExports>[0] = [];
+    for (const [identifier, item] of file.exports) {
+      const eligible =
+        (item.type !== 'type' && item.type !== 'interface' && item.type !== 'enum') ||
+        !!shouldCountRefs(ignoreExportsUsedInFile, item.type);
+      const seed =
+        eligible &&
+        referenced.has(identifier) &&
+        (item.hasRefsInFile ||
+          item.isRegistered ||
+          usage.isReferenced(filePath, identifier, { traverseEntries: includeEntryExports })[0]);
+      records.push({ identifier, referencedIn: [...(item.referencedIn ?? [])], eligible, seed });
+    }
+    const results = native.liveContainingExports(records);
+    const live = new Set<Export>();
+    let index = 0;
+    for (const item of file.exports.values()) {
+      if (results[index++]) live.add(item);
+    }
+    containingExports.set(filePath, live);
+    return live.has(exportedItem);
   };
 
   const getMemberIssues = (
@@ -105,7 +118,7 @@ export const analyze = async ({
     filePath: string,
     identifier: string,
     workspace: Workspace,
-    importsForExport: ImportMaps
+    importsForExport: ImportMaps | undefined
   ) => {
     const isEnumMembers = options.includedIssueTypes.enumMembers && exportedItem.type === 'enum';
     const isNsMembers =
@@ -113,9 +126,18 @@ export const analyze = async ({
 
     if (!isEnumMembers && !isNsMembers) return;
     if (exportedItem.members.length === 0) return;
-    if (explorer.isEnumerated(filePath, identifier)) return;
-    if (!options.includedIssueTypes.nsTypes && importsForExport.refs.has(identifier)) return;
-    if (isEnumMembers && hasStrictlyEnumReferences(importsForExport, identifier)) return;
+    if (usage.isEnumerated(filePath, identifier)) return;
+    const hasReference = nativeGraph
+      ? nativeGraph.hasReference(filePath, identifier)
+      : importsForExport?.refs.has(identifier);
+    if (!options.includedIssueTypes.nsTypes && hasReference) return;
+    if (
+      isEnumMembers &&
+      (nativeGraph
+        ? nativeGraph.hasStrictlyEnumReferences(filePath, identifier)
+        : importsForExport && hasStrictlyEnumReferences(importsForExport, identifier))
+    )
+      return;
 
     const issueType: 'enumMembers' | 'namespaceMembers' = isEnumMembers ? 'enumMembers' : 'namespaceMembers';
     const unusedMembers: ExportMember[] = [];
@@ -126,7 +148,7 @@ export const analyze = async ({
       if (shouldIgnore(member.jsDocTags)) continue;
       if (member.hasRefsInFile) continue;
 
-      const [isMemberReferenced] = explorer.isReferenced(filePath, `${identifier}.${member.identifier}`, {
+      const [isMemberReferenced] = usage.isReferenced(filePath, `${identifier}.${member.identifier}`, {
         traverseEntries: true,
         treatStarAtEntryAsReferenced: true,
       });
@@ -153,7 +175,9 @@ export const analyze = async ({
   };
 
   const analyzeGraph = async () => {
+    containingExports.clear();
     if (options.isReportValues || options.isReportTypes) {
+      usage = nativeGraph?.usage ?? createNativeGraphUsage(graph, entryPaths);
       streamer.cast('Connecting the dots');
 
       for (const [filePath, file] of graph) {
@@ -182,8 +206,8 @@ export const analyze = async ({
             const isInternalProd = options.isProduction && exportedItem.jsDocTags.has(INTERNAL_TAG);
             const isIgnored = shouldIgnoreTags(exportedItem.jsDocTags) || isInternalProd;
 
-            if (importsForExport) {
-              const [isReferenced, reExportingEntryFile, reExportedIds] = explorer.isReferenced(filePath, identifier, {
+            if (nativeGraph ? nativeGraph.hasImporters(filePath) : importsForExport) {
+              const [isReferenced, reExportingEntryFile, reExportedIds] = usage.isReferenced(filePath, identifier, {
                 traverseEntries: isIncludeEntryExports,
               });
 
@@ -258,7 +282,7 @@ export const analyze = async ({
               }
             }
 
-            const [hasStrictlyNsRefs, namespace] = explorer.hasStrictlyNsReferences(filePath, identifier);
+            const [hasStrictlyNsRefs, namespace] = usage.hasStrictlyNsReferences(filePath, identifier);
 
             const isType =
               exportedItem.type === 'enum' || exportedItem.type === 'type' || exportedItem.type === 'interface';

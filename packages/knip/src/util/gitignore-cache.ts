@@ -34,6 +34,7 @@ const store = createDiskCache<GitignoreCacheEntry>('gitignore');
 export const initGitignoreCache = store.init;
 export const isGitignoreCacheEnabled = store.isEnabled;
 export const flushGitignoreCache = store.flush;
+export const clearGitignoreCache = store.clear;
 
 const workspaceDirsKey = (workspaceDirs?: Set<string>): string => {
   if (!workspaceDirs || workspaceDirs.size === 0) return '';

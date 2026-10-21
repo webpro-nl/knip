@@ -1,6 +1,5 @@
-import type { IsPluginEnabled, Plugin, RegisterVisitors } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { createZxVisitor } from './visitors/zx.ts';
 
 // https://google.github.io/zx/
 
@@ -10,15 +9,11 @@ const enablers = ['zx'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
-  registerVisitor(createZxVisitor(ctx));
-};
-
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  registerVisitors,
+  nativeVisitors: ['zx'],
 };
 
 export default plugin;

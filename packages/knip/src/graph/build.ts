@@ -49,6 +49,9 @@ import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relati
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
+import { getNativeVisitorPlan } from '../native-visitor-plan.ts';
+import { getNativeFileData, takeNativeFileData } from '../native-analyzer.ts';
+import { setNativeProjectGraph } from '../native-graph.ts';
 
 interface BuildOptions {
   chief: ConfigurationChief;
@@ -78,11 +81,12 @@ export async function build({
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
 
   const enabledPluginsStore = new Map<string, string[]>();
-  const registeredVisitorPlugins = new Set<string>();
+  const registeredVisitorPlugins = new Set<PluginName>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
-  const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
+  const addIssue = (issue: Issue) =>
+    collector.addIssue(issue) && (options.isWatch || options.isSession) && collector.retainIssue(issue);
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
@@ -268,11 +272,7 @@ export async function build({
     for (const id of inputsFromPlugins) inputs.add(Object.assign(id, { skipExportsAnalysis: !id.allowIncludeExports }));
     enabledPluginsStore.set(name, worker.enabledPlugins);
 
-    worker.registerVisitors({
-      ctx: principal.pluginCtx,
-      registerVisitor: visitors => principal.pluginVisitorObjects.push(visitors),
-      registeredPlugins: registeredVisitorPlugins,
-    });
+    worker.registerVisitors(registeredVisitorPlugins);
 
     const DEFAULT_GROUP = 'default';
     type PatternMap = Map<string, Set<string>>;
@@ -451,9 +451,13 @@ export async function build({
     perfObserver.addMemoryMark(name);
   }
 
+  principal.nativeVisitorPlan = getNativeVisitorPlan(registeredVisitorPlugins);
+
   debugLog('*', `Created 1 principal for ${workspaces.length} workspaces`);
 
   const graph: ModuleGraph = new Map();
+  const nativeGraph = principal.nativeGraph;
+  if (nativeGraph) setNativeProjectGraph(graph, nativeGraph);
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
   const entryPaths = new Set<string>();
@@ -488,127 +492,153 @@ export async function build({
         parseResult,
         cachedFile
       );
+      try {
+        const unresolvedImports = new Set<Import>();
+        for (const unresolvedImport of file.imports.unresolved) {
+          const { specifier } = unresolvedImport;
 
-      const unresolvedImports = new Set<Import>();
-      for (const unresolvedImport of file.imports.unresolved) {
-        const { specifier } = unresolvedImport;
+          if (specifier.startsWith('http')) continue;
 
-        if (specifier.startsWith('http')) continue;
-
-        const sanitizedSpecifier = sanitizeSpecifier(specifier);
-        if (isStartsLikePackageName(sanitizedSpecifier)) {
-          file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
-        } else {
-          const candidate = join(dirname(filePath), sanitizedSpecifier);
-          const ext = extname(sanitizedSpecifier);
-          const aliases = extensionAlias[ext];
-          let isIgnored = isGitIgnored(candidate);
-          if (!isIgnored && aliases) {
-            const basePath = candidate.slice(0, -ext.length);
-            for (const alias of aliases) {
-              if (alias !== ext && isGitIgnored(basePath + alias)) {
-                isIgnored = true;
-                break;
+          const sanitizedSpecifier = sanitizeSpecifier(specifier);
+          if (isStartsLikePackageName(sanitizedSpecifier)) {
+            file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
+          } else {
+            const candidate = join(dirname(filePath), sanitizedSpecifier);
+            const ext = extname(sanitizedSpecifier);
+            const aliases = extensionAlias[ext];
+            let isIgnored = isGitIgnored(candidate);
+            if (!isIgnored && aliases) {
+              const basePath = candidate.slice(0, -ext.length);
+              for (const alias of aliases) {
+                if (alias !== ext && isGitIgnored(basePath + alias)) {
+                  isIgnored = true;
+                  break;
+                }
               }
             }
-          }
-          if (!isIgnored && (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext)))) {
-            unresolvedImports.add(unresolvedImport);
-          }
-        }
-      }
-
-      for (const filePath of file.imports.programFiles) {
-        const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) principal.addProgramPath(filePath);
-      }
-
-      for (const filePath of file.imports.entryFiles) {
-        const isIgnored = isGitIgnored(filePath);
-        if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
-      }
-
-      const wsDependencies = deputy.getDependencies(workspace.name);
-      for (const _import of file.imports.imports) {
-        if (!_import.filePath) continue;
-        const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
-        if (!packageName) continue;
-        const isWorkspace = isInternalWorkspace(packageName);
-        if (isWorkspace || wsDependencies.has(packageName)) {
-          file.imports.external.add({ ..._import, specifier: packageName });
-          if (isWorkspace && !isGitIgnored(_import.filePath)) {
-            principal.addProgramPath(_import.filePath);
+            if (!isIgnored && (!ext || (ext !== '.json' && !FOREIGN_FILE_EXTENSIONS.has(ext)))) {
+              unresolvedImports.add(unresolvedImport);
+            }
           }
         }
-      }
 
-      const manifest = chief.getManifestForWorkspace(workspace.name);
-      if (manifest && file.scripts && file.scripts.size > 0) {
-        const dependencies = deputy.getDependencies(workspace.name);
-        const dir = dirname(filePath);
-        const opts = {
-          cwd: dir,
-          rootCwd: options.cwd,
-          containingFilePath: filePath,
-          dependencies,
-          manifest: createManifest(manifest),
-          rootManifest,
-          getManifest,
-        };
-        const inputs = _getInputsFromScripts(file.scripts, opts);
-        for (const input of inputs) {
-          if (isCatalog(input)) {
-            counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
-            continue;
+        for (const filePath of file.imports.programFiles) {
+          const isIgnored = isGitIgnored(filePath);
+          if (!isIgnored) principal.addProgramPath(filePath);
+        }
+
+        for (const filePath of file.imports.entryFiles) {
+          const isIgnored = isGitIgnored(filePath);
+          if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
+        }
+
+        const wsDependencies = deputy.getDependencies(workspace.name);
+        for (const _import of file.imports.imports) {
+          if (!_import.filePath) continue;
+          const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
+          if (!packageName) continue;
+          const isWorkspace = isInternalWorkspace(packageName);
+          if (isWorkspace || wsDependencies.has(packageName)) {
+            file.imports.external.add({ ..._import, specifier: packageName });
+            if (isWorkspace && !isGitIgnored(_import.filePath)) {
+              principal.addProgramPath(_import.filePath);
+            }
           }
-          input.containingFilePath ??= filePath;
-          input.dir ??= dir;
-          const specifierFilePath = handleInput(input, workspace);
-          if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
-      }
 
-      if (file.importGlobs.length > 0) {
-        const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
-        const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
-        for (const importedFilePath of analyzed) {
-          if (!isGitIgnored(importedFilePath)) principal.addProgramPath(importedFilePath);
+        const manifest = chief.getManifestForWorkspace(workspace.name);
+        if (manifest && file.scripts && file.scripts.size > 0) {
+          const dependencies = deputy.getDependencies(workspace.name);
+          const dir = dirname(filePath);
+          const opts = {
+            cwd: dir,
+            rootCwd: options.cwd,
+            containingFilePath: filePath,
+            dependencies,
+            manifest: createManifest(manifest),
+            rootManifest,
+            getManifest,
+          };
+          const inputs = _getInputsFromScripts(file.scripts, opts);
+          for (const input of inputs) {
+            if (isCatalog(input)) {
+              counselor.addReference({ catalogName: input.catalogName, packageName: input.specifier });
+              continue;
+            }
+            input.containingFilePath ??= filePath;
+            input.dir ??= dir;
+            const specifierFilePath = handleInput(input, workspace);
+            if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
+          }
         }
-        const entries = resolveImportGlobs(entryImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
-        for (const importedFilePath of entries) {
-          if (!isGitIgnored(importedFilePath)) principal.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
+
+        if (file.importGlobs.length > 0) {
+          const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
+          const analyzed = resolveImportGlobs(
+            analyzedImportGlobs,
+            filePath,
+            principal.resolveGlobPattern,
+            workspace.dir
+          );
+          for (const importedFilePath of analyzed) {
+            if (!isGitIgnored(importedFilePath)) principal.addProgramPath(importedFilePath);
+          }
+          const entries = resolveImportGlobs(entryImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
+          for (const importedFilePath of entries) {
+            if (!isGitIgnored(importedFilePath))
+              principal.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
+          }
         }
-      }
 
-      file.imports.unresolved = unresolvedImports;
+        file.imports.unresolved = unresolvedImports;
 
-      const pluginRefs = externalRefsFromInputs?.get(filePath);
-      if (pluginRefs) for (const ref of pluginRefs) file.imports.externalRefs.add(ref);
+        const pluginRefs = externalRefsFromInputs?.get(filePath);
+        if (pluginRefs) for (const ref of pluginRefs) file.imports.externalRefs.add(ref);
 
-      const node = graph.get(filePath);
-      if (node) {
-        node.skipExports = file.skipExports;
-        node.imports = file.imports;
-        node.exports = file.exports;
-        node.duplicates = file.duplicates;
-        node.scripts = file.scripts;
-        node.importGlobs = file.importGlobs;
-        updateImportMap(node, file.imports.internal, graph);
-        node.internalImportCache = file.imports.internal;
-      } else {
-        updateImportMap(file, file.imports.internal, graph);
-        file.internalImportCache = file.imports.internal;
-        graph.set(filePath, file);
+        let internalPaths: string[] | undefined;
+        if (nativeGraph) {
+          const compact = getNativeFileData(file);
+          if (!compact) throw new Error('Native graph requires immutable file analysis');
+          internalPaths = nativeGraph.addFile(filePath, compact, file.exports.has('default'));
+          for (const path of internalPaths) if (!graph.has(path)) graph.set(path, createFileNode());
+        }
+        const node = graph.get(filePath);
+        if (node) {
+          node.skipExports = file.skipExports;
+          node.imports = file.imports;
+          node.exports = file.exports;
+          node.duplicates = file.duplicates;
+          node.scripts = file.scripts;
+          node.importGlobs = file.importGlobs;
+          if (!nativeGraph) {
+            updateImportMap(node, file.imports.internal, graph);
+            node.internalImportCache = file.imports.internal;
+          }
+        } else {
+          if (!nativeGraph) {
+            updateImportMap(file, file.imports.internal, graph);
+            file.internalImportCache = file.imports.internal;
+          }
+          graph.set(filePath, file);
+        }
+        return internalPaths;
+      } finally {
+        takeNativeFileData(file);
       }
     }
   };
 
-  principal.init();
+  const configFiles = new Set<string>();
+  for (const configs of configFilesMap.values()) {
+    for (const paths of configs.values()) for (const filePath of paths) configFiles.add(filePath);
+  }
+  principal.initNative(chief, options.isDebug, analyzeOpts, configFiles);
 
   streamer.cast('Analyzing source files');
 
   await principal.walkAndAnalyze((filePath, parseResult, sourceText, cachedFile) => {
-    analyzeSourceFile(filePath, sourceText, parseResult, cachedFile);
+    const internalPaths = analyzeSourceFile(filePath, sourceText, parseResult, cachedFile);
+    if (internalPaths) return internalPaths.filter(path => !isInNodeModules(path));
     const node = graph.get(filePath);
     if (!node) return;
     const paths: string[] = [];
@@ -616,7 +646,7 @@ export async function build({
       if (!isInNodeModules(importPath)) paths.push(importPath);
     }
     return paths;
-  });
+  }, analyzeOpts);
 
   for (const filePath of principal.getUnreferencedFiles()) {
     if (IS_DTS.test(filePath)) {
@@ -628,8 +658,10 @@ export async function build({
     unreferencedFiles.add(filePath);
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
+  nativeGraph?.finalize(entryPaths);
 
-  principal.reconcileCache(graph);
+  if (options.isSession || options.isWatch) principal.reconcileCache(graph);
+  else principal.finishCache(graph);
 
   perfObserver.addMemoryMark('build');
 
@@ -643,6 +675,7 @@ export async function build({
 
   return {
     graph,
+    configFiles,
     entryPaths,
     analyzedFiles,
     unreferencedFiles,

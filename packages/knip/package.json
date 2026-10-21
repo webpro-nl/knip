@@ -61,12 +61,19 @@
   },
   "files": [
     "dist",
+    "native/*.cjs",
+    "native/knip-native.*.node",
+    "native/knip-native.*.json",
+    "native/knip-native.wasm32-wasi.wasm",
+    "native/wasi-worker.mjs",
     "schema.json",
-    "schema-jsonc.json"
+    "schema-jsonc.json",
+    "native/wasi-runtime.LICENSE"
   ],
   "type": "module",
   "types": "./dist/types.d.ts",
   "exports": {
+    "./native": "./native/index.cjs",
     ".": {
       "types": "./dist/types.d.ts",
       "default": "./dist/index.js"
@@ -86,10 +93,17 @@
     "lint": "oxlint",
     "fmt": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.prettierignore",
     "test": "node scripts/run-test.js",
-    "prebuild": "pnpm run generate-plugin-defs && node rmdir.js dist",
+    "build:native": "node scripts/build-native.js",
+    "build:wasi": "node scripts/build-native.js --napi --target wasm32-wasip1-threads",
+    "check:native": "node scripts/check-native-artifacts.js",
+    "collect:native": "node scripts/collect-native-artifacts.js",
+    "test:native-tooling": "node --test scripts/native-artifacts.test.js scripts/native-loader.test.js scripts/wasi-runtime.test.js",
+    "prepack": "pnpm run check:native",
+    "prepublishOnly": "pnpm run check:native --publish",
+    "prebuild": "pnpm run build:native && pnpm run generate-plugin-defs && node rmdir.js dist",
     "build": "tsc",
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm test",
-    "release": "NODE_OPTIONS=--no-deprecation release-it",
+    "release": "KNIP_NATIVE_REVISION=${KNIP_NATIVE_REVISION:-$(git rev-parse HEAD)} NODE_OPTIONS=--no-deprecation release-it",
     "create-plugin": "node ./scripts/create-new-plugin.ts",
     "postcreate-plugin": "pnpm run build && (oxfmt schema.json schema-jsonc.json src/schema/plugins.ts || true)",
     "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts || true)"
@@ -109,14 +123,23 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@emnapi/core": "2.0.0-alpha.6",
+    "@emnapi/runtime": "2.0.0-alpha.6",
     "@jest/types": "^30.5.1",
+    "@napi-rs/cli": "3.10.8",
+    "@napi-rs/wasm-runtime": "1.2.5",
     "@types/bun": "^1.4.3",
     "@types/picomatch": "^4.0.3",
     "codeclimate-types": "^0.3.1",
+    "emnapi": "2.0.0-alpha.6",
     "prettier": "^3.9.10",
+    "rolldown": "1.2.14",
     "tsx": "^4.23.15",
     "typescript": "7.0.2",
     "webpack": "^5.111.1"
+  },
+  "napi": {
+    "binaryName": "knip-native"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

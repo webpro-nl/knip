@@ -84,6 +84,40 @@ Return a string or a Promise-like value that resolves to a string. Knip compiles
 files on demand and awaits asynchronous results; the `async` keyword is
 optional.
 
+### Persistent caching
+
+With `--cache`, Knip reuses analysis from its source-only built-in compilers.
+Custom compilers and plugins that depend on external state run again by default.
+To opt in, set a `cacheKey` property on the compiler function. Its value must be
+a string or a synchronous function returning a string:
+
+```ts title="knip.ts"
+const target = process.env.TARGET ?? 'browser';
+
+const compiler = Object.assign(
+  (source: string) => source.replaceAll('__TARGET__', JSON.stringify(target)),
+  { cacheKey: () => `v1:${target}` }
+);
+
+export default {
+  compilers: { template: compiler },
+};
+```
+
+The key must change whenever an input outside the source file can change the
+compiler's output, including environment variables, captured settings, generated
+maps, external files, and compiler package versions. A compiler whose output
+depends only on its source and filename can use a fixed version string. Knip
+also checks source changes, the compiler function, and statically resolved local
+configuration imports, including helpers outside `project` patterns.
+
+Knip evaluates key functions when initializing the analysis cache. A cache hit
+skips the compiler invocation, so required side effects are incompatible with
+this opt-in. If a key function throws, or configuration dependencies cannot be
+tracked completely, Knip runs the custom compiler again. Package imports are
+currently treated conservatively because a resolved type declaration may not
+identify the implementation that ran.
+
 ### Examples
 
 - [CSS][4]

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { ModuleGraph } from '../../src/types/module-graph.ts';
-import { addValue, createFileNode, createImports, updateImportMap } from '../../src/util/module-graph.ts';
+import { createFileNode, updateImportMap } from '../../src/util/module-graph.ts';
+import { addValue } from '../reference/util/module-graph.ts';
+import { createImports } from '../../src/util/create-imports.ts';
 
 test('Reverse index does not share identifier sets with the importing nodes', () => {
   const graph: ModuleGraph = new Map();

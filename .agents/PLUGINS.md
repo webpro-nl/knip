@@ -75,19 +75,24 @@ mdx/scss/less/ stylus) auto-enable on a known dependency; plugins gate on
 `hasDependency`. Regex extractors, not parsers. The same scope and tradeoffs
 apply when adding new compilers; read [COMPILERS.md][4] first.
 
-## Visitors (`registerVisitors`)
+## Source visitors (`nativeVisitors`)
 
-Library-specific AST patterns that generic traversal misses are caught by
-visitors in core's single walk. A `create*Visitor(ctx)` feeds the graph via
-`ctx`: `addImport` (knex, pino), `addImportGlob` (vite `import.meta.glob`,
-webpack/rspack `require.context`), `addScript` (execa, nano-spawn),
-`markExportRegistered` (custom elements: lit/fast/stencil/catalyst).
-Enabled-only, zero cost when off. Factories in `plugins/[name]/visitors/`,
-shared in `_custom-elements/`.
+Plugins declare ordered `nativeVisitors` IDs on their plugin object. The
+handlers in `packages/knip/native/src/analyzer/plugins.rs` run against the
+same native AST as core analysis. They contribute imports (knex, pino), globs
+(vite, webpack/rspack), scripts (execa, nano-spawn), and runtime export
+registrations (lit, fast, stencil, catalyst).
 
-Visitors collect syntax facts through `ctx`. Keep filesystem access, discovery,
-and module resolution outside AST traversal; discuss unavoidable exceptions
-first.
+Registration follows enabled-plugin order across workspaces and is deduplicated
+by plugin name. Webpack and rspack each register their shared handler; Stencil
+registers custom elements before style URLs. The Bun shell visitor is always on.
+Preserve these ordering rules when adding native visitors.
+
+Keep filesystem loading, discovery, and executable configuration in the host.
+The native analyzer uses synchronous host callbacks where resolution or
+JavaScript RegExp behavior is needed. The original TypeScript factories and
+walker live under `test/reference` as the differential oracle; production must
+not import them.
 
 ## Fixtures
 

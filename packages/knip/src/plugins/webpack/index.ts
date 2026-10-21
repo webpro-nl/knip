@@ -1,7 +1,7 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.ts';
-import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import {
   type Input,
   toAlias,
@@ -15,7 +15,6 @@ import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
-import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
 
 const title = 'webpack';
@@ -198,10 +197,6 @@ const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options)
   return inputs;
 };
 
-const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
-  registerVisitor(createRequireContextVisitor(ctx));
-};
-
 const isFilterTransitiveDependencies = true;
 
 const args: Args = {
@@ -220,7 +215,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
-  registerVisitors,
+  nativeVisitors: ['webpack'],
   isFilterTransitiveDependencies,
   args,
 };

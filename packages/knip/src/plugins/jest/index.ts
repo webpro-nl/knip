@@ -8,7 +8,6 @@ import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
 import { getReportersDependencies, resolveExtensibleConfig, resolveWithPrefix } from './helpers.ts';
 import type { JestConfig, JestInitialOptions } from './types.ts';
-import { createJestMockVisitor } from './visitors/mock.ts';
 
 // https://jestjs.io/docs/configuration
 
@@ -179,10 +178,6 @@ const args = {
   config: true,
 };
 
-const registerVisitors: Plugin['registerVisitors'] = ({ ctx, registerVisitor }) => {
-  registerVisitor(createJestMockVisitor(ctx));
-};
-
 const plugin: Plugin = {
   title,
   enablers,
@@ -191,7 +186,7 @@ const plugin: Plugin = {
   entry,
   resolveConfig,
   args,
-  registerVisitors,
+  nativeVisitors: ['jest'],
 };
 
 export default plugin;

@@ -1,4 +1,5 @@
 import { ResolverFactory } from 'oxc-resolver';
+import { nativeResolverCache, isYarnPnp } from '../native-resolver-cache.ts';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS } from '../constants.ts';
 import { timerify } from './Performance.ts';
 import { toPosix } from './path.ts';
@@ -28,48 +29,16 @@ const declarationResolver = new ResolverFactory({
 
 resolverInstances.push(declarationResolver);
 
-const packageManifestResolver = new ResolverFactory({
-  extensions: ['.json'],
-  exportsFields: [],
-  nodePath: false,
-});
-
-resolverInstances.push(packageManifestResolver);
-
-export const resolvePackageManifestPath = (packageName: string, baseDir: string) => {
-  const resolved = packageManifestResolver.sync(baseDir, `${packageName}/package.json`);
-  if (resolved.path) return toPosix(resolved.path);
-};
+export const resolvePackageManifestPath = (packageName: string, baseDir: string) =>
+  nativeResolverCache.resolvePackageManifestPath(packageName, baseDir) ?? undefined;
 
 const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
-  const baseOptions = {
-    extensions,
-    extensionAlias,
-    conditionNames: ['require', 'import', 'node', 'default'],
-    nodePath: false,
-  };
-  const resolver = new ResolverFactory({
-    tsconfig: tsConfigFile ? { configFile: tsConfigFile, references: 'auto' } : 'auto',
-    ...baseOptions,
-  });
-  const fallbackResolver = new ResolverFactory({
-    ...baseOptions,
-    conditionNames: ['require', 'import', 'browser', 'default'],
-  });
-
-  resolverInstances.push(resolver, fallbackResolver);
-
-  return function resolveSync(specifier: string, basePath: string) {
-    const resolved = resolver.resolveFileSync(basePath, specifier);
-    if (resolved.path) return toPosix(resolved.path);
-    if (resolved.error) {
-      const fallback = fallbackResolver.resolveFileSync(basePath, specifier);
-      if (fallback.path) return toPosix(fallback.path);
-    }
-  };
+  const resolver = nativeResolverCache.createFileResolver(extensions, tsConfigFile, isYarnPnp());
+  return (specifier: string, basePath: string) => resolver.resolveFile(specifier, basePath) ?? undefined;
 };
 
-const resolveModuleSync = createSyncModuleResolver([...DEFAULT_EXTENSIONS, ...DTS_EXTENSIONS, '.json', '.jsonc']);
+const resolveModuleSync = (specifier: string, basePath: string) =>
+  nativeResolverCache.resolveFile(specifier, basePath) ?? undefined;
 
 /**
  * Default module resolver (no custom extensions or path aliases).
@@ -105,7 +74,8 @@ const createSyncResolver = (extensions: string[]) => {
   };
 };
 
-export function clearResolverCache() {
+export function clearResolverCache(recording?: boolean) {
+  nativeResolverCache.clear(recording);
   for (const resolver of resolverInstances) resolver.clearCache();
 }
 

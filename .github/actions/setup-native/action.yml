@@ -1,0 +1,16 @@
+name: Set up native Rust toolchain
+description: Install the repository-pinned toolchain and cache native compilation
+runs:
+  using: composite
+  steps:
+    - name: Read pinned Rust version
+      id: rust
+      shell: bash
+      run: node -e 'const fs=require("node:fs");const version=fs.readFileSync("packages/knip/native/rust-toolchain.toml","utf8").match(/^channel\s*=\s*"([^"]+)"/m)[1];fs.appendFileSync(process.env.GITHUB_OUTPUT,`version=${version}\n`)'
+    - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+      with:
+        toolchain: ${{ steps.rust.outputs.version }}
+        components: rustfmt, clippy
+    - uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97
+      with:
+        workspaces: packages/knip/native

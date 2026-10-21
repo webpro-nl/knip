@@ -37,8 +37,9 @@ test('ignores added file without compiler outside project glob', async () => {
   }
 });
 
-test('reports added MDX file when compiler is enabled', async () => {
+test('reports added MDX project file when compiler is enabled', async () => {
   const options = await createOptions({ cwd, isSession: true });
+  options.parsedConfig.project = ['**/*.{ts,mdx}'];
   const session = await createSession(options);
 
   const mdFilePath = join(cwd, 'notes.mdx');

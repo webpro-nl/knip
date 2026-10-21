@@ -8,7 +8,8 @@ export type { PackageJson } from '../types/package-json.ts';
 export { createOptions, type MainOptions } from '../util/create-options.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 export { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
-export { createSession, type Session } from './session.ts';
+export { createPersistentSession, createSession, type Session, type SessionOptionsLoader } from './session.ts';
+export { SessionRebuildRequiredError } from './incremental.ts';
 export type {
   ContentionDetails,
   ContentionKind,

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { parseSync } from 'oxc-parser';
-import { buildJSDocTagLookup } from '../../src/typescript/visitors/jsdoc.ts';
+import { buildJSDocTagLookup } from '../reference/typescript/visitors/jsdoc.ts';
 
 const cases: [string, string, string[][]][] = [
   ['JSDoc tags', '/** @public */\nexport const value = 1;', [['@public']]],

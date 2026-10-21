@@ -1,4 +1,5 @@
-import type { Program, VisitorObject } from 'oxc-parser';
+import type { NativeVisitorPlan } from '../native-analyzer.ts';
+import type { Program } from 'oxc-parser';
 import type { Word } from 'unbash';
 import type { z } from 'zod/mini';
 import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
@@ -188,34 +189,6 @@ type RegisterCompilersOptions = {
 /** Plugin compilers are registered if the plugin is enabled, but might be gated by `hasDependency` */
 export type RegisterCompilers = (options: RegisterCompilersOptions) => Promise<void> | void;
 
-export type PluginVisitorContext = {
-  filePath: string;
-  sourceText: string;
-  addScript: (script: string) => void;
-  addImport: (specifier: string, pos: number, modifiers: number) => void;
-  markImportExpressionHandled: (pos: number) => void;
-  addImportGlob: (
-    patterns: string[],
-    options?: { base?: string; cwd?: string; filter?: RegExp; analyzeExports?: boolean }
-  ) => void;
-  /**
-   * Credit a local export as used by an in-module runtime registration (e.g. a custom element
-   * registered through a framework decorator), so it isn't reported as an unused export even
-   * when no other file imports it by name. Pass the local binding name (or `'default'`).
-   */
-  markExportRegistered: (name: string) => void;
-};
-
-export type PluginVisitorObject = VisitorObject;
-
-export type RegisterVisitorsOptions = {
-  ctx: PluginVisitorContext;
-  registerVisitor: (visitor: PluginVisitorObject) => void;
-  registeredPlugins: Set<string>;
-};
-
-export type RegisterVisitors = (options: RegisterVisitorsOptions) => void;
-
 export interface Plugin {
   title: string;
   args?: Args;
@@ -241,7 +214,7 @@ export interface Plugin {
   resolveFromAST?: ResolveFromAST;
   isFilterTransitiveDependencies?: boolean;
   registerCompilers?: RegisterCompilers;
-  registerVisitors?: RegisterVisitors;
+  nativeVisitors?: NativeVisitorPlan;
 }
 
 export type PluginMap = Record<PluginName, Plugin>;

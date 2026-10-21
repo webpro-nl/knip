@@ -73,15 +73,15 @@ This is equal to `bunx --bun knip`
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO\_COLOR
+### NO_COLOR
 
-The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
+The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
 
-### KNIP\_DISABLE\_RAW\_TRANSFER
+### KNIP_DISABLE_RAW_TRANSFER
 
 Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
 normal parser path.
@@ -146,11 +146,14 @@ Read more at [Production Mode][8].
 
 Shortcut: `-w`
 
-Watch current directory, and update reported issues when a file is modified,
-added or deleted.
+Watch the selected directory, and update reported issues when a file is
+modified, added or deleted. Source edits that preserve imports and exports reuse
+the graph; structural changes rebuild it. JSON configuration, manifests, and
+gitignore changes reload the project.
 
-Watch mode focuses on imports and exports in source files. During watch mode,
-changes in `package.json` or `node_modules` may not cause an updated report.
+Changes to executable configuration or its imports stop watch mode with a
+restart message. Start Knip again to reload those modules. Changes inside
+`node_modules` are ignored.
 
 ## Scope
 
@@ -399,9 +402,9 @@ The default exit codes:
 
 | Code | Description                                                                                     |
 | :--: | :---------------------------------------------------------------------------------------------- |
-| `0`  | Knip ran successfully, no lint issues                                                           |
-| `1`  | Knip ran successfully, but there is at least one lint issue                                     |
-| `2`  | Knip did not run successfully due to bad input, a plugin config load error or an internal error |
+|  `0` | Knip ran successfully, no lint issues                                                           |
+|  `1` | Knip ran successfully, but there is at least one lint issue                                     |
+|  `2` | Knip did not run successfully due to bad input, a plugin config load error or an internal error |
 
 ## Troubleshooting
 

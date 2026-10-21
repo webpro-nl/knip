@@ -103,7 +103,7 @@ export class ConfigurationChief {
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
-  private availableWorkspaceDirsWithSlash: string[] = [];
+  private availableWorkspaceDirSet = new Set<string>();
   workspaceGraph: WorkspaceGraph = new Map();
   private workspaceByFileCache = new Map<string, Workspace | undefined>();
 
@@ -194,7 +194,7 @@ export class ConfigurationChief {
       .sort(byPathDepth)
       .reverse()
       .map(dir => join(this.cwd, dir));
-    this.availableWorkspaceDirsWithSlash = this.availableWorkspaceDirs.map(dir => `${dir}/`);
+    this.availableWorkspaceDirSet = new Set(this.availableWorkspaceDirs);
 
     this.workspaceGraph = createWorkspaceGraph(this.cwd, this.availableWorkspaceNames, wsPkgNames, packages);
 
@@ -465,11 +465,13 @@ export class ConfigurationChief {
   public findWorkspaceByFilePath(filePath: string) {
     if (this.workspaceByFileCache.has(filePath)) return this.workspaceByFileCache.get(filePath);
     let workspace: Workspace | undefined;
-    for (let i = 0; i < this.availableWorkspaceDirsWithSlash.length; i++) {
-      if (filePath.startsWith(this.availableWorkspaceDirsWithSlash[i])) {
-        workspace = this.workspacesByDir.get(this.availableWorkspaceDirs[i]);
+    for (let index = filePath.lastIndexOf('/'); index >= 0; index = filePath.lastIndexOf('/', index - 1)) {
+      const dir = filePath.slice(0, index);
+      if (this.availableWorkspaceDirSet.has(dir)) {
+        workspace = this.workspacesByDir.get(dir);
         break;
       }
+      if (index === 0) break;
     }
     this.workspaceByFileCache.set(filePath, workspace);
     return workspace;

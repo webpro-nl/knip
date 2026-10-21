@@ -17,6 +17,7 @@ on:
       - 'scripts/check-line-endings.sh'
       # This workflow file
       - '.github/workflows/ci.yml'
+      - '.github/actions/setup-native/**'
   push:
     branches:
       - '**'
@@ -48,9 +49,15 @@ jobs:
         working-directory: packages/knip
       - name: Lint knip
         run: pnpm run ci
+      - uses: ./.github/actions/setup-native
       - name: Build knip
         run: pnpm run build
         working-directory: packages/knip
+      - name: Test native artifact tooling
+        run: pnpm --dir packages/knip test:native-tooling
+      - name: Test Rust
+        run: cargo test --locked
+        working-directory: packages/knip/native
       - name: Test knip
         run: pnpm test --runtime node
         working-directory: packages/knip

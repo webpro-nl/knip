@@ -11,7 +11,6 @@ import { hasDependency } from '../../util/plugin.ts';
 import { resolveExtendedConfig } from '../oxlint/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
-import { createVitestMockVisitor } from './visitors/mock.ts';
 import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
 
 // https://vitest.dev/config/
@@ -278,10 +277,6 @@ const args: Args = {
   },
 };
 
-const registerVisitors: Plugin['registerVisitors'] = ({ ctx, registerVisitor }) => {
-  registerVisitor(createVitestMockVisitor(ctx));
-};
-
 const plugin: Plugin = {
   title,
   enablers,
@@ -290,7 +285,7 @@ const plugin: Plugin = {
   entry,
   resolveConfig,
   args,
-  registerVisitors,
+  nativeVisitors: ['vitest'],
 };
 
 export default plugin;

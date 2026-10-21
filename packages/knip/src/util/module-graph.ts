@@ -1,3 +1,4 @@
+import { createImports } from './create-imports.ts';
 import type {
   FileNode,
   IdToFileMap,
@@ -53,34 +54,6 @@ export const createFileNode = (): FileNode => ({
   importedBy: undefined,
   internalImportCache: undefined,
 });
-
-export const createImports = (): ImportMaps => ({
-  refs: new Set(),
-  enumerated: undefined,
-  import: new Map(),
-  importAs: new Map(),
-  importNs: new Map(),
-  reExport: new Map(),
-  reExportAs: new Map(),
-  reExportNs: new Map(),
-});
-
-export const addValue = (map: IdToFileMap, id: string, value: string) => {
-  const existing = map.get(id);
-  if (existing) existing.add(value);
-  else map.set(id, new Set([value]));
-};
-
-export const addNsValue = (map: IdToNsToFileMap, id: string, ns: string, value: string) => {
-  const inner = map.get(id);
-  if (!inner) {
-    map.set(id, new Map([[ns, new Set([value])]]));
-    return;
-  }
-  const set = inner.get(ns);
-  if (set) set.add(value);
-  else inner.set(ns, new Set([value]));
-};
 
 const addValues = (map: IdToFileMap, id: string, values: Set<string>) => {
   const existing = map.get(id);

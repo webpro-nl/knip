@@ -7,7 +7,8 @@
     "packages/knip": {
       "entry": ["test/**/*.ts"],
       "project": ["src/**/*.ts!", "!src/util/empty.ts", "!**/_template"],
-      "ignoreDependencies": ["prettier"]
+      "ignoreDependencies": ["prettier"],
+      "ignoreBinaries": ["rustc"]
     },
     "packages/docs": {
       "entry": ["{plugins,scripts}/*.ts"]

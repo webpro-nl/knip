@@ -15,6 +15,29 @@ Use the `--debug` and `--performance` flags to find potential bottlenecks.
 
 Use `--cache` to speed up consecutive runs.
 
+## Repeated edits
+
+Use `knip --watch` to keep the project loaded between edits. Eligible source
+edits reuse reachability and reverse imports when their import and export
+structure is unchanged. Built-in compilers that depend only on source text can
+use this shortcut. Structural edits and projects with custom compilers rebuild
+the project.
+
+Integrations can use the same persistent session:
+
+```ts
+import { createOptions, createPersistentSession } from 'knip/session';
+
+const session = await createPersistentSession(() => createOptions({ cwd }));
+await session.handleFileChanges([
+  { type: 'modified', filePath: 'src/index.ts' },
+]);
+const results = session.getResults();
+```
+
+The options factory reloads JSON configuration and manifests when they change.
+Executable configuration and its imports require restarting in a new process.
+
 ## Ignoring files
 
 Files matching the `ignore` patterns are not excluded from the analysis. They're

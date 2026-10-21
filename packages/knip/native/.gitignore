@@ -1,0 +1,8 @@
+/target
+/*.node
+/knip-native.*.json
+/knip-native.wasm32-wasi.wasm
+/knip-native.wasi.cjs
+/wasi-worker.mjs
+/knip-native.wasi-runtime.cjs
+/wasi-runtime.LICENSE

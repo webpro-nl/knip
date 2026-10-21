@@ -20,6 +20,8 @@ on:
       - 'pnpm-workspace.yaml'
       # This workflow and its support files
       - '.github/workflows/integration.yml'
+      - '.github/workflows/native-artifacts.yml'
+      - '.github/actions/setup-native/**'
       - '.github/workflows/scripts/**'
       - '.github/workflows/snapshots/**'
   push:
@@ -35,7 +37,14 @@ concurrency:
 permissions: {}
 
 jobs:
+  native:
+    if: ${{ github.repository_owner == 'webpro-nl' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/native-artifacts.yml
+
   publish:
+    needs: native
     name: Build and publish Knip
     if: ${{ github.repository_owner == 'webpro-nl' }}
     runs-on: ubuntu-latest
@@ -52,8 +61,17 @@ jobs:
       - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
       - run: pnpm install --frozen-lockfile
         working-directory: packages/knip
+      - uses: ./.github/actions/setup-native
       - run: pnpm run build
         working-directory: packages/knip
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: knip-native-${{ needs.native.outputs.revision }}
+          path: native-artifacts
+      - name: Collect and validate native publication artifacts
+        run: node packages/knip/scripts/collect-native-artifacts.js --from native-artifacts --revision '${{ needs.native.outputs.revision }}'
+      - name: Guard preview publication
+        run: pnpm --dir packages/knip check:native --publish --revision '${{ needs.native.outputs.revision }}'
       - id: publish
         run: |
           pnpx pkg-pr-new publish --compact './packages/knip' './packages/language-server' './packages/mcp-server'

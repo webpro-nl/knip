@@ -45,10 +45,15 @@ const main = async () => {
 
     const options = await createOptions({ args });
 
+    if (options.isWatch) {
+      const { watchSession } = await import('./session/watch.ts');
+      await watchSession(options, () => createOptions({ args }));
+      return;
+    }
+
     const { results } = await run(options);
 
-    // These modes have their own reporting mechanism
-    if (options.isWatch || options.isTrace) return;
+    if (options.isTrace) return;
 
     const preprocess = await createPreprocessor(options.preprocessor);
     const finalData = await preprocess(toReporterOptions(options, results, args));

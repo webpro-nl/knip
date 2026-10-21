@@ -1,3 +1,4 @@
+import { shouldIgnore } from './tag-filter.ts';
 import { ALIAS_TAG, BETA_TAG, INTERNAL_TAG, PUBLIC_TAG } from '../constants.ts';
 import type { Tags } from '../types/options.ts';
 
@@ -11,15 +12,6 @@ export const splitTags = (rawTags: string[]) => {
     },
     [[], []]
   );
-};
-
-export const hasTag = (tags: string[], jsDocTags: Set<string>) => tags.some(tag => jsDocTags.has(tag));
-
-export const shouldIgnore = (jsDocTags: Set<string>, tags: Tags) => {
-  const [includeJSDocTags, excludeJSDocTags] = tags;
-  if (includeJSDocTags.length > 0 && !hasTag(includeJSDocTags, jsDocTags)) return true;
-  if (excludeJSDocTags.length > 0 && hasTag(excludeJSDocTags, jsDocTags)) return true;
-  return false;
 };
 
 export const isAlwaysIgnored = (jsDocTags: Set<string>) =>

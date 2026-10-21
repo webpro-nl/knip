@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+export KNIP_NATIVE_REVISION="$(git rev-parse HEAD)"
+pnpm run --dir packages/knip collect:native
+
 source "$(dirname "$0")/preflight.sh"
 
 # Extra args passed to `pnpm release` (after `--`) are forwarded to every release-it invocation,

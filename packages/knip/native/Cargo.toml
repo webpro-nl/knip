@@ -1,0 +1,31 @@
+[package]
+name = "knip_native"
+version = "0.1.0"
+edition = "2024"
+license = "ISC"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+indexmap = "2.13"
+napi = { version = "3.14.2", default-features = false, features = ["napi8"] }
+napi-derive = "=3.6.12"
+oxc_allocator = "=0.154.0"
+oxc_ast = "=0.154.0"
+oxc_ast_visit = "=0.154.0"
+oxc_parser = "=0.154.0"
+oxc_span = "=0.154.0"
+oxc_syntax = { version = "=0.154.0", features = ["to_js_string"] }
+regex = "1"
+oxc_resolver = { version = "=11.24.2", features = ["yarn_pnp"] }
+serde_json = { version = "1", features = ["preserve_order", "raw_value"] }
+
+[build-dependencies]
+napi-build = "2.6.0"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

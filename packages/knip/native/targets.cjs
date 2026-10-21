@@ -1,0 +1,18 @@
+module.exports = {
+  'darwin-arm64': ['aarch64-apple-darwin'],
+  'darwin-x64': ['x86_64-apple-darwin'],
+  'win32-arm64': ['aarch64-pc-windows-msvc'],
+  'win32-x64': ['x86_64-pc-windows-msvc'],
+  'win32-ia32': ['i686-pc-windows-msvc'],
+  'linux-arm64': ['aarch64-unknown-linux-gnu', 'aarch64-unknown-linux-musl'],
+  'linux-x64': ['x86_64-unknown-linux-gnu', 'x86_64-unknown-linux-musl'],
+  'linux-arm': ['armv7-unknown-linux-gnueabihf', 'armv7-unknown-linux-musleabihf'],
+  'linux-ppc64': ['powerpc64le-unknown-linux-gnu'],
+  'linux-riscv64': ['riscv64gc-unknown-linux-gnu', 'riscv64gc-unknown-linux-musl'],
+  'linux-s390x': ['s390x-unknown-linux-gnu'],
+  'freebsd-x64': ['x86_64-unknown-freebsd'],
+  'android-arm64': ['aarch64-linux-android'],
+  'android-arm': ['armv7-linux-androideabi'],
+  'openharmony-arm64': ['aarch64-unknown-linux-ohos'],
+  'wasi-wasm32': ['wasm32-wasip1-threads'],
+};

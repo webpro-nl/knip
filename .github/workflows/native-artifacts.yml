@@ -1,0 +1,231 @@
+name: Native release artifacts
+
+on:
+  workflow_call:
+    inputs:
+      revision:
+        type: string
+        default: ''
+    outputs:
+      revision:
+        value: ${{ jobs.resolve.outputs.revision }}
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Commit to build, or the selected workflow ref
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      revision: ${{ steps.revision.outputs.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ inputs.revision }}
+      - id: revision
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: resolve
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, target: aarch64-apple-darwin }
+          - { os: macos-15-intel, target: x86_64-apple-darwin }
+          - { os: windows-2022, target: aarch64-pc-windows-msvc }
+          - { os: windows-2022, target: x86_64-pc-windows-msvc }
+          - { os: windows-2022, target: i686-pc-windows-msvc }
+          - { os: ubuntu-24.04, target: x86_64-unknown-linux-gnu, cross: gnu }
+          - { os: ubuntu-24.04, target: aarch64-unknown-linux-gnu, cross: gnu }
+          - { os: ubuntu-24.04, target: armv7-unknown-linux-gnueabihf, cross: gnu }
+          - { os: ubuntu-24.04, target: powerpc64le-unknown-linux-gnu, cross: gnu }
+          - { os: ubuntu-24.04, target: s390x-unknown-linux-gnu, cross: gnu }
+          - { os: ubuntu-24.04, target: riscv64gc-unknown-linux-gnu }
+          - { os: ubuntu-24.04, target: x86_64-unknown-linux-musl, cross: zig }
+          - { os: ubuntu-24.04, target: aarch64-unknown-linux-musl, cross: zig }
+          - { os: ubuntu-24.04, target: armv7-unknown-linux-musleabihf, cross: zig }
+          - { os: ubuntu-24.04, target: riscv64gc-unknown-linux-musl, cross: zig }
+          - { os: ubuntu-24.04, target: aarch64-linux-android }
+          - { os: ubuntu-24.04, target: armv7-linux-androideabi }
+          - { os: ubuntu-24.04, target: aarch64-unknown-linux-ohos }
+          - { os: ubuntu-24.04, target: wasm32-wasip1-threads }
+    runs-on: ${{ matrix.os }}
+    name: Build ${{ matrix.target }}
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+      - uses: ./.github/actions/setup-native
+      - run: rustup target add ${{ matrix.target }}
+        working-directory: packages/knip/native
+      - run: pnpm install --frozen-lockfile --ignore-scripts --filter knip
+      - if: matrix.cross == 'zig'
+        uses: goto-bus-stop/setup-zig@abea47f85e598557f500fa1fd2ab7464fcb39406
+        with:
+          version: 0.13.0
+      - if: matrix.cross == 'zig'
+        run: cargo install cargo-zigbuild --version 0.20.1 --locked
+      - if: contains(matrix.target, 'ohos')
+        uses: Boshen/setup-ohos-sdk@edb865a89a712f1f15dbad932dfa9cfce849d95c
+      - if: contains(matrix.target, 'riscv64')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu g++-riscv64-linux-gnu
+          echo 'CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc' >> "$GITHUB_ENV"
+      - name: Build addon and provenance
+        env:
+          NATIVE_TARGET: ${{ matrix.target }}
+          NATIVE_CROSS: ${{ matrix.cross }}
+        run: |
+          args=(--napi --target "$NATIVE_TARGET")
+          if [ -n "$NATIVE_CROSS" ]; then args+=(--cross "$NATIVE_CROSS"); fi
+          node packages/knip/scripts/build-native.js "${args[@]}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-${{ matrix.target }}
+          if-no-files-found: error
+          path: |
+            packages/knip/native/knip-native.*.node
+            packages/knip/native/knip-native.*.json
+            packages/knip/native/knip-native.wasm32-wasi.wasm
+            packages/knip/native/knip-native.wasi.cjs
+            packages/knip/native/knip-native.wasi-runtime.cjs
+            packages/knip/native/wasi-worker.mjs
+            packages/knip/native/wasi-runtime.LICENSE
+
+  freebsd:
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+      - uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641
+        with:
+          operating_system: freebsd
+          version: '14.2'
+          memory: 8G
+          cpu_count: 3
+          shell: bash
+          run: |
+            sudo pkg install -y curl git node22 npm-node22
+            curl -fsSL https://sh.rustup.rs -o /tmp/rustup.sh
+            sh /tmp/rustup.sh -y --profile minimal --default-toolchain none
+            source "$HOME/.cargo/env"
+            sudo npm install -g pnpm@11.7.0
+            pnpm install --frozen-lockfile --ignore-scripts --filter knip
+            node packages/knip/scripts/build-native.js --target x86_64-unknown-freebsd
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-x86_64-unknown-freebsd
+          if-no-files-found: error
+          path: |
+            packages/knip/native/knip-native.x86_64-unknown-freebsd.node
+            packages/knip/native/knip-native.x86_64-unknown-freebsd.json
+
+  aggregate:
+    needs: [resolve, build, freebsd]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: native-*
+          path: native-artifacts
+          merge-multiple: true
+      - name: Validate complete same-revision artifacts
+        run: node packages/knip/scripts/collect-native-artifacts.js --from native-artifacts --revision '${{ needs.resolve.outputs.revision }}'
+      - run: pnpm install --frozen-lockfile --ignore-scripts --filter knip
+      - run: pnpm run generate-plugin-defs && pnpm exec tsc
+        working-directory: packages/knip
+      - run: pnpm --dir packages/knip pack --out '${{ runner.temp }}/knip.tgz'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: knip-native-${{ needs.resolve.outputs.revision }}
+          path: native-artifacts
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: knip-package-${{ needs.resolve.outputs.revision }}
+          path: ${{ runner.temp }}/knip.tgz
+          if-no-files-found: error
+
+  test-package:
+    needs: [resolve, aggregate]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, arch: arm64, node: 24 }
+          - { os: macos-15-intel, arch: x64, node: 24 }
+          - { os: ubuntu-24.04, arch: x64, node: 24 }
+          - { os: ubuntu-24.04-arm, arch: arm64, node: 24 }
+          - { os: windows-2022, arch: x64, node: 24 }
+          - { os: windows-11-arm, arch: arm64, node: 24 }
+          - { os: windows-2022, arch: x86, node: 22 }
+          - { os: ubuntu-24.04, arch: x64, node: 22.12.0 }
+          - { os: ubuntu-24.04, arch: x64, node: 23.0.0 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: ${{ matrix.node }}
+          architecture: ${{ matrix.arch }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: knip-package-${{ needs.resolve.outputs.revision }}
+          path: ${{ runner.temp }}/knip-package
+      - run: npm install --prefix '${{ runner.temp }}/knip-installed' --ignore-scripts '${{ runner.temp }}/knip-package/knip.tgz'
+      - run: node packages/knip/scripts/test-native-package.js '${{ runner.temp }}/knip-installed'
+      - name: Install existing OXC WASI fallback packages for no-addons checks
+        if: matrix.arch != 'x86'
+        run: |
+          parser=$(node -p "require(process.env.RUNNER_TEMP + '/knip-installed/node_modules/oxc-parser/package.json').version")
+          resolver=$(node -p "require(process.env.RUNNER_TEMP + '/knip-installed/node_modules/oxc-resolver/package.json').version")
+          npm install --prefix "$RUNNER_TEMP/knip-installed" --ignore-scripts --no-save --install-strategy=nested --force "@oxc-parser/binding-wasm32-wasi@$parser" "@oxc-resolver/binding-wasm32-wasi@$resolver"
+      - name: Test packed WASI addon and CLI with native addons disabled
+        if: matrix.arch != 'x86'
+        run: node --no-addons packages/knip/scripts/test-native-package.js '${{ runner.temp }}/knip-installed' --webcontainer
+
+  test-musl:
+    needs: [resolve, aggregate]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ needs.resolve.outputs.revision }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: knip-package-${{ needs.resolve.outputs.revision }}
+          path: ${{ runner.temp }}/knip-package
+      - run: |
+          docker run --rm -v "$RUNNER_TEMP/knip-package:/package:ro" -v "$GITHUB_WORKSPACE:/source:ro" node:24.10.0-alpine3.22 sh -c 'npm install --prefix /installed --ignore-scripts /package/knip.tgz && node /source/packages/knip/scripts/test-native-package.js /installed'

@@ -5,6 +5,7 @@ Development in this repository is using:
 - pnpm
 - TypeScript
 - oxc
+- Rust, using the toolchain pinned in `packages/knip/native/rust-toolchain.toml`
 
 This document describes commands and tasks that might help during development.
 Use what fits your workflow best, but make sure [QA][1] passes.
@@ -35,6 +36,7 @@ repo][12] and working with a package manager.
 - Fork the project using the [GitHub website][13] or the [`gh` CLI][14]
 - Clone the repository
 - Install dependencies
+- Install Rust with rustup and put its Cargo bin directory on `PATH`
 
 Example terminal commands on your machine to get started:
 
@@ -70,10 +72,12 @@ In addition to the generic guidelines in this document, there's a guide for
 
 ## Running Knip
 
-Knip is written in TypeScript, run it including your changes directly using
-Node.js v24+ or Bun.
+Knip uses Rust for core analysis and TypeScript for its host. Run the TypeScript
+sources including your changes directly using Node.js v24+ or Bun.
 
-Run Knip without compilation:
+Build the native addon once with `pnpm --dir packages/knip build:native`, and
+rebuild it after changing Rust sources. Then run Knip without TypeScript
+compilation:
 
 ```shell
 node path/to/knip/packages/knip/src/cli.ts
@@ -194,6 +198,76 @@ npm exec --yes --allow-remote=all --package=https://pkg.pr.new/@knip/language-se
 
 Use the client's usual transport. The server prefers project-local Knip; to test
 its bundled fallback, use a project without a locally resolvable Knip.
+
+## Native packages and releases
+
+Published packages contain prebuilt addons; installing or running Knip does not
+require Rust. Source builds use the pinned Rust toolchain and `Cargo.lock`.
+
+Each native build writes a target-named addon and provenance manifest. The
+manifest records the source fingerprint, Git revision, toolchain, build backend,
+and checksums for every artifact file. Local `pnpm pack` accepts a fresh
+host-only build for verification. Publication requires all 19 native targets
+declared by the loader, including Windows ia32, and the WASI fallback. It
+rejects incomplete, stale, mixed-revision, or dirty-source artifacts. The
+ia32 target extends the 18 native targets shared by the parser and resolver;
+the resolver can use its WASI fallback there.
+
+The loader prefers the host addon and falls back to WASI when native addons
+cannot load, including WebContainers and `node --no-addons`. The WASI artifact
+contains the WebAssembly binary, generated loader and worker, bundled runtime,
+and runtime license notices. It needs no Rust toolchain or runtime download.
+The bundled runtime preserves UTF-16 code units across the N-API boundary.
+Its build dependencies are pinned separately from Knip's unchanged Node range.
+
+To build the fallback locally, install its Rust target and build after the
+ordinary host build:
+
+```shell
+cd packages/knip/native
+rustup target add wasm32-wasip1-threads
+cd ..
+pnpm build:wasi
+```
+
+The `Native release artifacts` workflow builds and aggregates the target
+binaries from one revision, then tests the packed package on supported hosted
+runners and Linux musl containers. The no-addons checks include Windows x64
+and arm64, macOS, Linux, and Node 22.12 and 23.0. They provision the existing
+OXC WASI packages for the OXC dependencies and simulate the WebContainer
+process marker; they do not constitute an actual WebContainer test.
+Other cross-compiled targets still need runtime acceptance on their respective
+platforms. Workflow success does not
+establish full runtime coverage for every target.
+
+Before an existing release command, select a successful artifact workflow run
+whose artifacts were built from the exact commit being released. The workflow's
+selected ref can differ when its `revision` input is set:
+
+```shell
+export KNIP_NATIVE_RUN_ID=123456789
+pnpm release
+```
+
+Alternatively, set `KNIP_NATIVE_ARTIFACTS` to an absolute path containing the
+extracted `knip-native-<commit>` artifact. Keep this staging directory separate
+from `packages/knip/native`: release preparation restores its validated binaries
+after the ordinary local build. The existing version bumps, staged npm
+publishing, extension publication, and tagging order are unchanged. One-package
+core releases use the same collection and validation hooks.
+
+For a local package check without publication:
+
+```shell
+pnpm --dir packages/knip build
+pnpm --dir packages/knip pack --out /tmp/knip.tgz
+npm install --prefix /tmp/knip-package-check --ignore-scripts /tmp/knip.tgz
+node packages/knip/scripts/test-native-package.js /tmp/knip-package-check
+```
+
+Extension packaging validates the selected native target and includes a
+validated WASI fallback when it has been built locally. Extension publication
+requires the selected publication targets and WASI before changing package files.
 
 ## Test VS Code Extension
 

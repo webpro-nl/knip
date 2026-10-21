@@ -6,10 +6,12 @@
       "../../scripts/preflight.sh",
       "pnpm lint",
       "pnpm build",
+      "pnpm collect:native",
       "pnpm knip",
       "pnpm knip:production",
       "pnpm test"
-    ]
+    ],
+    "before:npm:release": "pnpm check:native --publish"
   },
   "github": {
     "release": true,

@@ -7,7 +7,6 @@ import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } 
 import { dirname, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency, load } from '../../util/plugin.ts';
 import type { RstestConfigOrFn, RstestProjectConfig } from './types.ts';
-import { createRstestMockVisitor } from './visitors/mock.ts';
 
 // https://rstest.rs/
 
@@ -148,10 +147,6 @@ const args: Args = {
   resolveInputs: parsed => getEnvironmentDependency(parsed.testEnvironment),
 };
 
-const registerVisitors: Plugin['registerVisitors'] = ({ ctx, registerVisitor }) => {
-  registerVisitor(createRstestMockVisitor(ctx));
-};
-
 const plugin: Plugin = {
   title,
   enablers,
@@ -160,7 +155,7 @@ const plugin: Plugin = {
   entry,
   resolveConfig,
   args,
-  registerVisitors,
+  nativeVisitors: ['rstest'],
 };
 
 export default plugin;

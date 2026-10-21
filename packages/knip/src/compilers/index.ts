@@ -1,3 +1,8 @@
+import astroCompiler from '../plugins/astro/compiler.ts';
+import astroMdxCompiler from '../plugins/astro/compiler-mdx.ts';
+import prismaCompiler from '../plugins/prisma/compiler.ts';
+import svelteCompiler from '../plugins/svelte/compiler.ts';
+import tailwindCompiler from '../plugins/tailwind/compiler.ts';
 import type { RawConfiguration } from '../types/config.ts';
 import type { DependencySet } from '../types/workspace.ts';
 import LESS from './less.ts';
@@ -5,7 +10,7 @@ import MDX from './mdx.ts';
 import SCSS from './scss.ts';
 import STYLUS from './stylus.ts';
 import TSRX from './tsrx.ts';
-import type { Compilers, RawCompilers } from './types.ts';
+import type { Compiler, Compilers, RawCompilers } from './types.ts';
 
 export const normalizeCompilerExtension = (ext: string) => ext.replace(/^\.*/, '.');
 
@@ -33,6 +38,17 @@ const builtInCompilers = [
   { extensions: ['.styl', '.stylus'], ...STYLUS },
   { extensions: ['.tsrx'], ...TSRX },
 ];
+
+const sourceOnlyCompilers = new Set<Compiler>([
+  astroCompiler,
+  astroMdxCompiler,
+  prismaCompiler,
+  svelteCompiler,
+  tailwindCompiler,
+]);
+for (const { compiler } of builtInCompilers) sourceOnlyCompilers.add(compiler);
+
+export const isSourceOnlyCompiler = (compiler: Compiler) => sourceOnlyCompilers.has(compiler);
 
 export const getIncludedCompilers = (
   rawCompilers: RawCompilers,

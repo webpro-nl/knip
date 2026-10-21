@@ -81,7 +81,7 @@ export interface ExportMember extends Position {
 
 type ExportMap = Map<Identifier, Export>;
 
-export type Imports = Set<Import>;
+type Imports = Set<Import>;
 
 export type FileNode = {
   skipExports: boolean;

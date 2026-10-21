@@ -24,7 +24,7 @@ export const isReferenced = (
   filePath: string,
   id: Identifier,
   options: { traverseEntries: boolean; treatStarAtEntryAsReferenced?: boolean }
-) => {
+): readonly [boolean, string | undefined, Set<string> | undefined] => {
   const seen = new Set<string>();
   let isReferenced = false;
   let reExportingEntryFile: string | undefined;

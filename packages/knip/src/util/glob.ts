@@ -5,7 +5,9 @@ import {
   createDirTracker,
   getCachedGlob,
   isGlobCacheEnabled,
+  setCachedEmptyGlob,
   setCachedGlob,
+  shouldTrackEmptyGlob,
 } from './glob-cache.ts';
 import { getGitignoreFingerprint, glob, reconcileGitignoredPaths } from './glob-core.ts';
 import { timerify } from './Performance.ts';
@@ -62,11 +64,13 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
     ? computeGlobCacheKey({ patterns: globPatterns, cwd, dir, gitignore, gitignoreFingerprint })
     : '';
   if (cacheEnabled) {
-    const cached = getCachedGlob(cacheKey);
+    const cached = getCachedGlob(cacheKey, !gitignore);
     if (cached) return gitignore ? reconcileGitignoredPaths(cached, cwd) : cached;
   }
 
-  const tracker = cacheEnabled ? createDirTracker() : undefined;
+  const tracker = cacheEnabled
+    ? createDirTracker(!gitignore && shouldTrackEmptyGlob(cacheKey) ? dir : undefined)
+    : undefined;
 
   const paths = await glob(globPatterns, {
     cwd,
@@ -79,6 +83,7 @@ const defaultGlob = async ({ cwd, dir = cwd, patterns, gitignore = true, label }
   });
 
   if (cacheEnabled && paths.length > 0) setCachedGlob(cacheKey, paths, dir, tracker?.dirs);
+  else if (!gitignore && tracker) setCachedEmptyGlob(cacheKey, tracker);
 
   return gitignore ? reconcileGitignoredPaths(paths, cwd) : paths;
 };

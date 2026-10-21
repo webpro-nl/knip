@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
+import nativeTargets from '../../knip/native/targets.cjs';
+import {
+  artifactFiles,
+  expectedRevision,
+  manifestName,
+  validateArtifacts,
+  wasiTarget,
+} from '../../knip/scripts/native-artifacts.js';
 
 // https://marketplace.visualstudio.com/items?itemName=webpro.vscode-knip
 // https://marketplace.visualstudio.com/manage/publishers/webpro
@@ -41,6 +49,26 @@ const targets = {
 };
 
 const currentTarget = `${process.platform}-${process.arch}`;
+const knipTargets = new Map(Object.entries(nativeTargets));
+const selectedTargets = args.target
+  ? [[args.target, targets[args.target]]]
+  : args.publish
+    ? Object.entries(targets)
+    : [[currentTarget, targets[currentTarget]]];
+const selectedNativeTargets = [];
+const nativeSource = join(root, '../knip/native');
+const includeWasi = args.publish || existsSync(join(nativeSource, manifestName(wasiTarget)));
+for (const [target, binding] of selectedTargets) {
+  const nativeTarget = knipTargets.get(target)?.[0];
+  if (!binding || !nativeTarget) throw new Error(`Unsupported extension target: ${target}`);
+  selectedNativeTargets.push(nativeTarget);
+}
+if (includeWasi) selectedNativeTargets.push(wasiTarget);
+validateArtifacts({
+  selected: selectedNativeTargets,
+  strict: args.publish,
+  revision: args.publish ? expectedRevision() : undefined,
+});
 
 const ext = ['vscode', 'oxc-parser', /^@oxc-parser\/binding-/, /^@oxc-resolver\/binding-/, 'jiti', /jiti\/dist/];
 const extSession = [...ext, 'knip/session'];
@@ -66,7 +94,10 @@ const paths = { 'knip/session': '../../knip/session.js' };
 await bundle('../knip/src/session/index.ts', 'node_modules/knip/session.js');
 
 const knipPkg = JSON.parse(readFileSync(join(root, '../knip/package.json'), 'utf8'));
-writeFileSync(join(nm, 'knip/package.json'), JSON.stringify({ name: 'knip', version: knipPkg.version }));
+writeFileSync(
+  join(nm, 'knip/package.json'),
+  JSON.stringify({ name: 'knip', version: knipPkg.version, exports: { './native': './native/index.cjs' } })
+);
 await bundle('../mcp-server/src/tools.js', 'node_modules/@knip/mcp/tools.js', extSession, paths);
 await bundle('../language-server/src/index.js', 'node_modules/@knip/language-server/index.js', extSession, paths);
 await bundle('src/index.js', 'extension.js', [...extSession, '@knip/language-server', '@knip/mcp/tools'], {
@@ -101,12 +132,6 @@ writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 const distPkg = { ...pkg, main: './extension.js' };
 writeFileSync(join(dist, 'package.json'), JSON.stringify(distPkg, null, 2));
 
-const selectedTargets = args.target
-  ? [[args.target, targets[args.target]]]
-  : args.publish
-    ? Object.entries(targets)
-    : [[currentTarget, targets[currentTarget]]];
-
 /**
  * @param {string} scope
  * @param {string} name
@@ -127,22 +152,33 @@ const packNativeBinding = (scope, name, binding, version) => {
   rmSync(tmp, { recursive: true });
 };
 
-for (const [target, binding] of selectedTargets) {
-  packNativeBinding('@oxc-parser', 'parser', binding, oxcParserVersion);
-  packNativeBinding('@oxc-resolver', 'resolver', binding, oxcResolverVersion);
+try {
+  for (const [target, binding] of selectedTargets) {
+    const nativeTarget = knipTargets.get(target)?.[0];
+    if (!nativeTarget) throw new Error(`Unsupported Knip native target: ${target}`);
+    const nativeDestination = join(nm, 'knip/native');
+    rmSync(nativeDestination, { recursive: true, force: true });
+    mkdirSync(nativeDestination, { recursive: true });
+    const artifacts = [...artifactFiles(nativeTarget), manifestName(nativeTarget)];
+    if (includeWasi) artifacts.push(...artifactFiles(wasiTarget), manifestName(wasiTarget));
+    for (const name of ['index.cjs', 'targets.cjs', ...artifacts]) {
+      cpSync(join(nativeSource, name), join(nativeDestination, name));
+    }
+    packNativeBinding('@oxc-parser', 'parser', binding, oxcParserVersion);
+    packNativeBinding('@oxc-resolver', 'resolver', binding, oxcResolverVersion);
 
-  execSync(`pnpm vsce package ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
+    execSync(`pnpm vsce package ${flags} --target ${target}`, { cwd: root, stdio: 'inherit' });
 
-  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  vsixFiles.push(join(root, `${pkg.name}-${target}-${pkg.version}.vsix`));
-}
-
-if (args.publish) {
-  for (const vsix of vsixFiles) {
-    execSync(`pnpm vsce publish --azure-credential --packagePath ${vsix}`, { cwd: root, stdio: 'inherit' });
-    execSync(`ovsx publish ${vsix}`, { cwd: root, stdio: 'inherit' });
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    vsixFiles.push(join(root, `${pkg.name}-${target}-${pkg.version}.vsix`));
   }
-}
 
-// Restore original package.json
-writeFileSync(pkgPath, pkgOriginal);
+  if (args.publish) {
+    for (const vsix of vsixFiles) {
+      execSync(`pnpm vsce publish --azure-credential --packagePath ${vsix}`, { cwd: root, stdio: 'inherit' });
+      execSync(`ovsx publish ${vsix}`, { cwd: root, stdio: 'inherit' });
+    }
+  }
+} finally {
+  writeFileSync(pkgPath, pkgOriginal);
+}

@@ -1,0 +1,135 @@
+import { readFileSync } from 'node:fs';
+import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../../../src/constants.ts';
+import { isAbsolute, isInNodeModules, join, toPosix } from '../../../src/util/path.ts';
+
+export const getPackageNameFromModuleSpecifier = (specifier: string) => {
+  if (!isStartsLikePackageName(specifier) && !isTildePackageName(specifier)) return;
+  let start = 0;
+  if (specifier.charCodeAt(0) === 64) {
+    const slash = specifier.indexOf('/', 1);
+    if (slash === -1) return specifier;
+    start = slash + 1;
+  }
+  for (let i = start; i < specifier.length; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (ch === 47 || ch === 64) return specifier.slice(0, i);
+  }
+  return specifier;
+};
+
+const lastPackageNameMatch = /(?<=node_modules\/)(@[^/]+\/[^/]+|[^/]+)/g;
+const yarnPnpmStorePackageRoot = /^(.*\/node_modules\/\.store\/[^/]+\/package)(?:\/|$)/;
+const yarnPnpmStoreNameCache = new Map<string, string | undefined>();
+
+const getPackageNameFromYarnPnpmStore = (posixPath: string): string | undefined => {
+  const match = posixPath.match(yarnPnpmStorePackageRoot);
+  if (!match) return;
+  const root = match[1];
+  if (yarnPnpmStoreNameCache.has(root)) return yarnPnpmStoreNameCache.get(root);
+  let name: string | undefined;
+  try {
+    name = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).name;
+  } catch {}
+  yarnPnpmStoreNameCache.set(root, name);
+  return name;
+};
+
+export const getPackageNameFromFilePath = (value: string) => {
+  const name = value.startsWith('file://') ? value.slice(7) : value;
+  if (isInNodeModulesBin(name)) return extractBinary(name);
+  const posixPath = toPosix(name);
+  const match = posixPath.match(lastPackageNameMatch);
+  if (match) {
+    const last = match[match.length - 1];
+    return last === '.store' ? (getPackageNameFromYarnPnpmStore(posixPath) ?? last) : last;
+  }
+  return name;
+};
+
+export const getPackageNameFromSpecifier = (specifier: string) =>
+  isInNodeModules(specifier) ? getPackageNameFromFilePath(specifier) : getPackageNameFromModuleSpecifier(specifier);
+
+const isPackageNameStart = (ch: number) => (ch >= 65 && ch <= 90) || (ch >= 97 && ch <= 122) || (ch >= 48 && ch <= 57);
+const isPackageScopeStart = (ch: number) => isPackageNameStart(ch) || ch === 46 || ch === 95 || ch === 126;
+export const isStartsLikePackageName = (specifier: string) => {
+  const ch = specifier.charCodeAt(0);
+  return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
+};
+const isTildePackageName = (specifier: string) =>
+  specifier.charCodeAt(0) === 126 && isPackageNameStart(specifier.charCodeAt(1));
+
+export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
+
+export const isInNodeModulesBin = (value: string) => value.includes('node_modules/.bin/');
+
+export const isRelativeNodeModulesBin = (value: string) => /^(?:\.\.?\/)*node_modules\/\.bin\//.test(value);
+
+const stripNodeModulesFromPath = (command: string) => command.replace(/(?:\.{0,2}\/)*node_modules\//, '');
+
+export const extractBinary = (command: string) =>
+  stripVersionFromSpecifier(
+    stripNodeModulesFromPath(command)
+      .replace(/^(\.bin\/)/, '')
+      .replace(/\$\(npm bin\)\/(\w+)/, '$1') // Removed in npm v9
+  );
+
+export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
+
+export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
+
+export const getDefinitelyTypedFor = (packageName: string) => {
+  if (isDefinitelyTyped(packageName)) return packageName;
+  if (packageName.startsWith('@')) return [DT_SCOPE, packageName.slice(1).replace('/', '__')].join('/');
+  return [DT_SCOPE, packageName].join('/');
+};
+
+export const getPackageFromDefinitelyTyped = (typedDependency: string) => {
+  if (typedDependency.includes('__')) {
+    const [scope, packageName] = typedDependency.split('__');
+    return `@${scope}/${packageName}`;
+  }
+  return typedDependency;
+};
+
+const CHAR_EXCLAMATION = 33; // '!'
+const CHAR_DASH = 45; // '-'
+const CHAR_SLASH = 47; // '/'
+const CHAR_COLON = 58; // ':'
+const CHAR_HASH = 35; // '#'
+const CHAR_QUESTION = 63; // '?'
+
+// Strip `?search` and other proprietary directives from the specifier (e.g. https://webpack.js.org/concepts/loaders/)
+export const sanitizeSpecifier = (specifier: string) => {
+  if (
+    specifier.startsWith('node:') ||
+    isAbsolute(specifier) ||
+    specifier.charCodeAt(0) === CHAR_COLON ||
+    specifier.startsWith(PROTOCOL_VIRTUAL)
+  ) {
+    return specifier;
+  }
+  const isSubpathImport = specifier.charCodeAt(0) === CHAR_HASH;
+  const len = specifier.length;
+  let start = 0;
+  let end = len;
+  let colon = -1;
+  let hasSlash = false;
+  for (let i = 0; i < len; i++) {
+    const ch = specifier.charCodeAt(i);
+    if (i === start && (ch === CHAR_EXCLAMATION || ch === CHAR_DASH)) {
+      start++;
+      continue;
+    }
+    if (ch === CHAR_SLASH && colon === -1) {
+      hasSlash = true;
+    }
+    if (colon === -1 && ch === CHAR_COLON && !hasSlash && !isSubpathImport) {
+      colon = i;
+    }
+    if (ch === CHAR_EXCLAMATION || ch === CHAR_QUESTION || (ch === CHAR_HASH && i > start)) {
+      end = i;
+      break;
+    }
+  }
+  return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
+};

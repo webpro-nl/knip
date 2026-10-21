@@ -11,7 +11,6 @@ import type {
   HandleInput,
   Plugin,
   RegisterCompiler,
-  RegisterVisitorsOptions,
   SourceMap,
   WorkspaceConfiguration,
 } from './types/config.ts';
@@ -281,14 +280,11 @@ export class WorkspaceWorker {
     return pairs;
   }
 
-  public registerVisitors(options: RegisterVisitorsOptions) {
+  public registerVisitors(registeredPlugins: Set<PluginName>) {
     for (const pluginName of this.enabledPlugins) {
-      if (options.registeredPlugins.has(pluginName)) continue;
+      if (registeredPlugins.has(pluginName)) continue;
       const plugin = Plugins[pluginName];
-      if (plugin.registerVisitors) {
-        options.registeredPlugins.add(pluginName);
-        plugin.registerVisitors(options);
-      }
+      if (plugin.nativeVisitors) registeredPlugins.add(pluginName);
     }
   }
 

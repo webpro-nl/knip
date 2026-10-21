@@ -27,7 +27,7 @@ export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Unresolved configuration', options);
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
 
-  clearResolverCache();
+  clearResolverCache(options.isCache);
 
   if (options.isCache) {
     initGlobCache(options.cacheLocation);
@@ -88,18 +88,19 @@ export const run = async (options: MainOptions) => {
     workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))
   );
 
-  const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } = await build({
-    chief,
-    collector,
-    counselor,
-    deputy,
-    principal,
-    isGitIgnored,
-    scriptParserContext,
-    streamer,
-    workspaces,
-    options,
-  });
+  const { graph, configFiles, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } =
+    await build({
+      chief,
+      collector,
+      counselor,
+      deputy,
+      principal,
+      isGitIgnored,
+      scriptParserContext,
+      streamer,
+      workspaces,
+      options,
+    });
 
   const reAnalyze = await analyze({
     analyzedFiles,
@@ -134,6 +135,7 @@ export const run = async (options: MainOptions) => {
       analyze: reAnalyze,
       principal,
       graph,
+      configurationPaths: configFiles,
       isIgnored,
       onFileChange,
       unreferencedFiles,

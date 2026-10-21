@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { nativeResolverCache } from '../native-resolver-cache.ts';
 import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
@@ -85,6 +86,7 @@ interface PathMapping {
 const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
 
 export function clearModuleResolutionCaches() {
+  nativeResolverCache.clearModuleCaches();
   for (const cache of moduleResolutionCaches) cache.clear();
 }
 

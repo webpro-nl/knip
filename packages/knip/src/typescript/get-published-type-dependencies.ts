@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import type { Workspace } from '../ConfigurationChief.ts';
 import { IS_DTS } from '../constants.ts';
+import { nativeGetImportsAndExports } from '../native-analyzer.ts';
 import type { GetImportsAndExportsOptions } from '../types/config.ts';
 import type { FileNode } from '../types/module-graph.ts';
 import type { PackageJson } from '../types/package-json.ts';
@@ -23,8 +24,6 @@ import {
 import { dirname, join, relative } from '../util/path.ts';
 import { _resolveDeclarationSync } from '../util/resolve.ts';
 import type { ResolveModule } from './ast-nodes.ts';
-import { _getImportsAndExports } from './get-imports-and-exports.ts';
-import { buildVisitor } from './visitors/walk.ts';
 
 const options: GetImportsAndExportsOptions = {
   skipTypeOnly: false,
@@ -97,7 +96,6 @@ interface PublishedTypeDependency {
 }
 
 export const createPublishedTypeDependencyAnalyzer = () => {
-  const visitor = buildVisitor([]);
   const packageJsonCache = new Map<string, PackageJson | undefined>();
   const packageTypesCache = new Map<string, boolean>();
 
@@ -153,15 +151,14 @@ export const createPublishedTypeDependencyAnalyzer = () => {
     for (const filePath of files) {
       let file: FileNode;
       try {
-        file = _getImportsAndExports(
+        file = nativeGetImportsAndExports(
           filePath,
           readFileSync(filePath, 'utf8'),
           resolveNothing,
           options,
           false,
           true,
-          visitor,
-          undefined
+          []
         );
       } catch {
         continue;
