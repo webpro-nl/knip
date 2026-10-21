@@ -1,3 +1,4 @@
+import path from 'node:path';
 import withFunction from './plugins/withFunction';
 
 const config = {
@@ -18,6 +19,7 @@ const config = {
     ['expo-splash-screen', { backgroundColor: '#ffffff' }],
     './plugins/withAndroidManifest',
     ['./plugins/withIosEntitlements', { team: 'knip' }],
+    path.join(__dirname, 'plugins/withAbsolute'),
     withFunction,
   ],
 };
