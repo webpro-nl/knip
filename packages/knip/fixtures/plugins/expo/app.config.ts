@@ -1,3 +1,5 @@
+import withFunction from './plugins/withFunction';
+
 const config = {
   name: 'Knip',
   updates: {
@@ -16,6 +18,7 @@ const config = {
     ['expo-splash-screen', { backgroundColor: '#ffffff' }],
     './plugins/withAndroidManifest',
     ['./plugins/withIosEntitlements', { team: 'knip' }],
+    withFunction,
   ],
 };
 

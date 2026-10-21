@@ -15,11 +15,12 @@ test('Find dependencies with the Expo plugin (1)', async () => {
   assert('plugins/withUnused.js' in issues.files);
   assert(!('plugins/withAndroidManifest.js' in issues.files));
   assert(!('plugins/withIosEntitlements.ts' in issues.files));
+  assert(!('plugins/withFunction.ts' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
     files: 1,
     dependencies: 1,
   });

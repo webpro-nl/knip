@@ -30,6 +30,7 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   for (const plugin of config.plugins ?? []) {
     const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (typeof pluginName !== 'string') continue;
     if (isInternal(pluginName)) {
       inputs.add(toDeferResolveEntry(pluginName));
     } else {
