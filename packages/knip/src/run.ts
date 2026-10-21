@@ -140,7 +140,7 @@ export const run = async (options: MainOptions) => {
       entryPaths,
     });
 
-    if (options.isWatch) watch('.', { recursive: true }, session.listener);
+    if (options.isWatch) watch(options.cwd, { recursive: true }, session.listener);
   }
 
   const { issues, counters, tagHints, configurationHints, hasConfigLoadErrors } = collector.getIssues();
