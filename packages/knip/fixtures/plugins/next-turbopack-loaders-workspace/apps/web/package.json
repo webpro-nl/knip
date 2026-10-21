@@ -6,6 +6,7 @@
     "unused-loader": "*"
   },
   "dependencies": {
-    "@tailwindcss/turbopack": "*"
+    "@tailwindcss/turbopack": "*",
+    "lodash-es": "*"
   }
 }

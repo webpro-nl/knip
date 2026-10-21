@@ -1,13 +1,13 @@
-import { type Expression, type Program, type SpreadElement, Visitor } from 'oxc-parser';
+import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { _parseFile, getStringValue } from '../../typescript/ast-nodes.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
 import { isInNodeModules, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { _resolveModuleSync } from '../../util/resolve.ts';
+import type { NextConfigModule } from './types.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -55,42 +55,59 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 
 const production = getEntryFilePatterns();
 
-const getFactoryBody = (program: Program, name: string, isExport = false): Program['body'] => {
-  if (isExport) {
-    for (const node of program.body) {
-      if (node.type === 'ExportDefaultDeclaration' && name === 'default') {
-        const declaration = node.declaration;
-        if (declaration.type === 'Identifier') return getFactoryBody(program, declaration.name);
-        if (declaration.type === 'FunctionDeclaration') return [declaration];
-        if (declaration.type === 'ArrowFunctionExpression' || declaration.type === 'FunctionExpression') {
-          return [{ type: 'ExpressionStatement', expression: declaration, start: node.start, end: node.end }];
-        }
-      }
-      if (node.type === 'ExportNamedDeclaration' && !node.source) {
-        for (const specifier of node.specifiers) {
-          const exported =
-            specifier.exported.type === 'Identifier' ? specifier.exported.name : specifier.exported.value;
-          const local = specifier.local.type === 'Identifier' ? specifier.local.name : specifier.local.value;
-          if (exported === name) return getFactoryBody(program, local);
-        }
-      }
-    }
-  }
-  for (const node of program.body) {
-    const declaration = node.type === 'ExportNamedDeclaration' ? node.declaration : node;
-    if (declaration?.type === 'FunctionDeclaration' && declaration.id?.name === name) return [declaration];
-    if (declaration?.type === 'VariableDeclaration') {
-      for (const declarator of declaration.declarations) {
-        if (declarator.id.type === 'Identifier' && declarator.id.name === name) {
-          return [{ ...declaration, declarations: [declarator] }];
-        }
-      }
-    }
-  }
-  return [];
+const getInputs = (
+  pageExtensions: string[],
+  loaders: Iterable<string>,
+  aliasTargets: Iterable<string>,
+  configFileDir: string
+) => {
+  const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
+  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
+  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
+  for (const loader of loaders) inputs.push(toDeferResolve(loader));
+  for (const target of aliasTargets)
+    inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
+  return inputs;
 };
 
-const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath, readFile }) => {
+const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+// Absolute paths come from `require.resolve()` in the config, which core credits to the module that resolved them
+const addSpecifier = (specifiers: Set<string>, value: unknown) => {
+  if (typeof value === 'string' && !isInNodeModules(value)) specifiers.add(value);
+};
+
+const collectLoaderValues = (value: unknown, loaders: Set<string>) => {
+  if (Array.isArray(value)) for (const item of value) collectLoaderValues(item, loaders);
+  else if (isObject(value)) {
+    addSpecifier(loaders, value.loader);
+    collectLoaderValues(value.loaders, loaders);
+  } else addSpecifier(loaders, value);
+};
+
+const collectAliasTargetValues = (value: unknown, targets: Set<string>) => {
+  if (Array.isArray(value)) for (const item of value) collectAliasTargetValues(item, targets);
+  else if (isObject(value)) collectAliasTargetValues(value.browser, targets);
+  else addSpecifier(targets, value);
+};
+
+const resolveConfig: ResolveConfig<NextConfigModule> = async (localConfig, { configFileDir }) => {
+  const config =
+    typeof localConfig === 'function'
+      ? await localConfig('phase-production-build', { defaultConfig: {} })
+      : localConfig;
+  const pageExtensions = Array.isArray(config?.pageExtensions)
+    ? config.pageExtensions.filter(extension => typeof extension === 'string')
+    : [];
+  const loaders = new Set<string>();
+  for (const rule of Object.values(config?.turbopack?.rules ?? {})) collectLoaderValues(rule, loaders);
+  const aliasTargets = new Set<string>();
+  for (const target of Object.values(config?.turbopack?.resolveAlias ?? {}))
+    collectAliasTargetValues(target, aliasTargets);
+  return getInputs(pageExtensions, loaders, aliasTargets, configFileDir);
+};
+
+const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
   const aliasTargets = new Set<string>();
@@ -121,84 +138,26 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir, configFilePath
     }
   };
 
-  const programs = new Map([[configFilePath, program]]);
-  const seen = new Map<string, Set<string>>();
-  const visitConfig = (program: Program, filePath: string, factory?: string, isExport = false) => {
-    const visited = seen.get(filePath) ?? new Set<string>();
-    const key = `${isExport ? 'export' : 'local'}:${factory}`;
-    if (visited.has(key)) return;
-    visited.add(key);
-    seen.set(filePath, visited);
-    const references = new Set<string>();
-    const visitor = new Visitor({
-      CallExpression(node) {
-        if (node.callee.type === 'Identifier') references.add(node.callee.name);
-      },
-      ReturnStatement(node) {
-        if (node.argument?.type === 'Identifier') references.add(node.argument.name);
-      },
-      SpreadElement(node) {
-        if (node.argument.type === 'Identifier') references.add(node.argument.name);
-      },
-      ArrowFunctionExpression(node) {
-        if (node.body.type === 'Identifier') references.add(node.body.name);
-      },
-      ObjectExpression(node) {
-        const turbopack = findProperty(node, 'turbopack');
-        if (!factory) {
-          for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-          if (turbopack?.type === 'ConditionalExpression') {
-            collectTurbopackAliases(turbopack.consequent);
-            collectTurbopackAliases(turbopack.alternate);
-          } else {
-            collectTurbopackAliases(turbopack);
-          }
-        }
-        const rules = findProperty(turbopack, 'rules');
-        if (rules?.type !== 'ObjectExpression') return;
-        for (const rule of rules.properties) {
-          if (rule.type === 'Property') collectLoaders(rule.value);
-        }
-      },
-    });
-    visitor.visit(factory ? { ...program, body: getFactoryBody(program, factory, isExport) } : program);
-    for (const reference of references) {
-      if (getFactoryBody(program, reference).length > 0) visitConfig(program, filePath, reference);
-    }
-    for (const node of program.body) {
-      if (node.type !== 'ImportDeclaration' || node.importKind === 'type') continue;
-      for (const specifier of node.specifiers) {
-        if (!references.has(specifier.local.name)) continue;
-        if (specifier.type === 'ImportNamespaceSpecifier') continue;
-        if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type') continue;
-        const imported = specifier.type === 'ImportSpecifier' ? specifier.imported : undefined;
-        const name = imported?.type === 'Identifier' ? imported.name : imported?.value;
-        const factory = specifier.type === 'ImportDefaultSpecifier' ? 'default' : name;
-        if (!factory) continue;
-        const resolved = _resolveModuleSync(node.source.value, filePath);
-        if (!resolved || isInNodeModules(resolved)) continue;
-        const cached = programs.get(resolved);
-        if (cached) {
-          visitConfig(cached, resolved, factory, true);
-        } else {
-          const sourceText = readFile(resolved);
-          if (!sourceText) continue;
-          const parsed = _parseFile(resolved, sourceText).program;
-          programs.set(resolved, parsed);
-          visitConfig(parsed, resolved, factory, true);
-        }
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
+      const turbopack = findProperty(node, 'turbopack');
+      if (turbopack?.type === 'ConditionalExpression') {
+        collectTurbopackAliases(turbopack.consequent);
+        collectTurbopackAliases(turbopack.alternate);
+      } else {
+        collectTurbopackAliases(turbopack);
       }
-    }
-  };
-  visitConfig(program, configFilePath);
+      const rules = findProperty(turbopack, 'rules');
+      if (rules?.type !== 'ObjectExpression') return;
+      for (const rule of rules.properties) {
+        if (rule.type === 'Property') collectLoaders(rule.value);
+      }
+    },
+  });
+  visitor.visit(program);
 
-  const extensions = pageExtensions.size > 0 ? [...pageExtensions] : defaultPageExtensions;
-  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
-  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
-  for (const loader of loaders) inputs.push(toDeferResolve(loader));
-  for (const target of aliasTargets)
-    inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
-  return inputs;
+  return getInputs([...pageExtensions], loaders, aliasTargets, configFileDir);
 };
 
 const commands = new Set(['dev', 'build', 'start']);
@@ -212,12 +171,20 @@ const args: Args = {
   },
 };
 
+const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets from the composed configuration,
+including values a shared configuration factory adds. A configuration file that fails to load is analyzed statically.`;
+
+/** @public */
+export const docs = { note };
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
+  isLoadConfigOptional: true,
+  resolveConfig,
   resolveFromAST,
   args,
 };

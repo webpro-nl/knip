@@ -1,10 +1,10 @@
 {
   "name": "combined",
   "devDependencies": {
-    "@workspace/next-config": "workspace:*",
     "next": "*"
   },
   "dependencies": {
+    "@workspace/next-config": "workspace:*",
     "@tailwindcss/turbopack": "*",
     "admin-loader": "*"
   }
