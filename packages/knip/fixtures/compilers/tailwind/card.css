@@ -1,0 +1,6 @@
+@reference "./tokens.css";
+@reference "tw-animate-css";
+
+.card {
+  @apply bg-brand animate-in;
+}
