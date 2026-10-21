@@ -18,20 +18,6 @@ export const getConfig = (localConfig: ExpoConfig, options: PluginOptions) => {
   return 'expo' in expoConfig ? expoConfig.expo : expoConfig;
 };
 
-const getPluginInputs = (plugins: ReturnType<typeof getConfig>['plugins'] = []) => {
-  const inputs: Input[] = [];
-  for (const plugin of plugins) {
-    const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
-    if (isInternal(pluginName)) {
-      inputs.push(toDeferResolveEntry(pluginName));
-      continue;
-    }
-    const packageName = getPackageNameFromModuleSpecifier(pluginName);
-    if (packageName) inputs.push(toDependency(packageName));
-  }
-  return inputs;
-};
-
 // https://docs.expo.dev/versions/latest/config/app
 
 export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, options) => {
@@ -40,7 +26,17 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   const platforms = config.platforms ?? ['ios', 'android'];
 
-  const inputs = new Set<Input>(getPluginInputs(config.plugins));
+  const inputs = new Set<Input>();
+
+  for (const plugin of config.plugins ?? []) {
+    const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (isInternal(pluginName)) {
+      inputs.add(toDeferResolveEntry(pluginName));
+    } else {
+      const packageName = getPackageNameFromModuleSpecifier(pluginName);
+      if (packageName) inputs.add(toDependency(packageName));
+    }
+  }
 
   const allowedPackages = ['expo-atlas', 'expo-dev-client'];
   const allowedProductionPackages = ['expo-insights'];
