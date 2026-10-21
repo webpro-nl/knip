@@ -96,7 +96,7 @@ class IssueFixer {
 
       for (const type of types) {
         const issueMap = issues[type]?.[filePath];
-        if (issueMap) for (const issue of Object.values(issueMap)) issue.isFixed = true;
+        if (issueMap) for (const issue of Object.values(issueMap)) if (issue.fixes.length > 0) issue.isFixed = true;
       }
     }
 

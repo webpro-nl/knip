@@ -144,7 +144,13 @@ export const {  set: setter } = fn();
 `
   );
 
-  assert.equal(counters.exports, 0);
+  assert(issues.exports['mod.ts']['c'].isFixed);
+  assert(issues.exports['mod.ts']['x'].isFixed);
+  assert(!issues.exports['mod.ts']['k'].isFixed);
+  assert(!issues.exports['mod.ts']['l'].isFixed);
+  assert(!issues.exports['mod.ts']['m'].isFixed);
+
+  assert.equal(counters.exports, 3);
   assert.equal(counters.types, 0);
   assert.equal(counters.dependencies, 0);
   assert.equal(counters.devDependencies, 0);
