@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vitest19",
+  "devDependencies": {
+    "vitest": "*"
+  }
+}
