@@ -105,8 +105,8 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
       if (typeof config === 'function') {
         for (const command of ['serve', 'build'] as COMMAND[]) {
           for (const mode of ['development', 'production'] as MODE[]) {
-            for (const ssrBuild of command === 'build' ? [undefined, false, true] : [undefined]) {
-              const cfg = await config({ command, mode, ssrBuild });
+            for (const isSsrBuild of command === 'build' ? [undefined, false, true] : [undefined]) {
+              const cfg = await config({ command, mode, isSsrBuild, ssrBuild: isSsrBuild });
               configs.push(cfg);
               if (cfg.test?.projects) {
                 for (const project of cfg.test.projects) {

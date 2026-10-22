@@ -67,6 +67,7 @@ export type MODE = 'development' | 'production';
 interface Options {
   command: COMMAND;
   mode: MODE;
+  isSsrBuild?: boolean | undefined;
   ssrBuild?: boolean | undefined;
 }
 
