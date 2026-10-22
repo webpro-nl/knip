@@ -48,6 +48,16 @@ export const dx = 1;
 `,
     'default.mjs': `export const d = 1;
 `,
+    'default-function.mjs': `export const df = 1;
+`,
+    'default-class.mjs': `export const dc = 1;
+`,
+    'default-decorated.ts': `function sealed(value: Function) {
+  Object.seal(value);
+}
+
+export const dd = 1;
+`,
     'exports.js': `const identifier = 1;
 const identifier2 = 2;
 
