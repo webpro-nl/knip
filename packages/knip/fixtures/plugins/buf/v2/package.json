@@ -1,0 +1,13 @@
+{
+  "name": "buf-plugin-fixture",
+  "private": true,
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "*",
+    "@bufbuild/protoplugin": "*",
+    "@connectrpc/protoc-gen-connect-es": "*",
+    "@connectrpc/protoc-gen-connect-query": "*",
+    "@protobuf-ts/plugin": "*",
+    "ts-proto": "*",
+    "tsx": "*"
+  }
+}
