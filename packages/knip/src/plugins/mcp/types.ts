@@ -1,6 +1,7 @@
 type MCPServer = {
   command?: string;
   args?: string[];
+  cwd?: string;
 };
 
 export type MCPConfig = {

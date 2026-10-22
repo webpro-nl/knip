@@ -178,14 +178,7 @@
     },
     "preprocessor": {
       "title": "Preprocess the results before providing them to the reporter(s)",
-      "oneOf": [
-        {
-          "type": "string"
-        },
-        {
-          "$ref": "#/definitions/list"
-        }
-      ]
+      "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/list" }]
     },
     "preprocessorOptions": {
       "title": "Extra options to pass to the preprocessor",

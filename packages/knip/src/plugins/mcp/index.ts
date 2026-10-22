@@ -1,5 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
+import type { Input } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
 import type { MCPConfig } from './types.ts';
 
 // https://modelcontextprotocol.io/docs/develop/connect-local-servers
@@ -20,15 +22,21 @@ const config = ['.mcp.json', '.cursor/mcp.json', '.vscode/mcp.json', '.codex/con
 
 const isEnabled: IsPluginEnabled = ({ cwd }) => config.some(file => isFile(cwd, file));
 
+const PROJECT_DIR_VAR = /\$\{(?:workspaceFolder|CLAUDE_PROJECT_DIR(?::-[^}]*)?)\}/g;
+
 const resolveConfig: ResolveConfig<MCPConfig> = async (localConfig, options) => {
   const { cwd, getInputsFromScripts } = options;
   const servers = { ...localConfig.mcpServers, ...localConfig.servers, ...localConfig.mcp_servers };
-  const scripts: string[] = [];
+  const inputs: Input[] = [];
   for (const server of Object.values(servers)) {
-    if (typeof server?.command === 'string') scripts.push([server.command, ...(server.args ?? [])].join(' '));
+    if (typeof server?.command !== 'string') continue;
+    const script = [server.command, ...(server.args ?? [])].join(' ').replace(PROJECT_DIR_VAR, '.');
+    const dir = server.cwd ? toAbsolute(server.cwd.replace(PROJECT_DIR_VAR, '.'), cwd) : cwd;
+    for (const input of getInputsFromScripts(script, { optionalBinaries: true })) {
+      input.dir = dir;
+      inputs.push(input);
+    }
   }
-  const inputs = getInputsFromScripts(scripts, { optionalBinaries: true });
-  for (const input of inputs) input.dir = cwd;
   return inputs;
 };
 

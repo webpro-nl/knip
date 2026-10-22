@@ -11,6 +11,10 @@
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "claude": {
+      "command": "node",
+      "args": ["${CLAUDE_PROJECT_DIR:-.}/scripts/claude-server.ts"]
     }
   }
 }
