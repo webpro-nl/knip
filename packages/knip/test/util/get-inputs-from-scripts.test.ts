@@ -210,6 +210,8 @@ test('getInputsFromScripts (bun)', () => {
   t('bun add zod', [toBinary('bun')]);
   t('bun check', [toBinary('bun')]);
   t('bun dedupe', [toBinary('bun')]);
+  t('bun fmt', [toBinary('bun')]);
+  t('bun fmt --check .', [toBinary('bun')]);
   t('bun install', [toBinary('bun')]);
   t('bun remove webpack', [toBinary('bun')]);
   t('bun update lodash', [toBinary('bun')]);

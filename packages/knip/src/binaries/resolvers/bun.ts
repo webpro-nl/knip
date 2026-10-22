@@ -23,6 +23,7 @@ const commands = new Set([
   'discord',
   'exec',
   'feedback',
+  'fmt',
   'fuzzilli',
   'getcompletes',
   'help',
