@@ -82,9 +82,14 @@ class IssueFixer {
       if (fixes.length === 0) continue;
       const absFilePath = join(this.options.cwd, filePath);
       const originalSource = await readFile(absFilePath, 'utf-8');
-      let sourceFileText = fixes
-        .sort((a, b) => b[0] - a[0])
-        .reduce((text, [start, end, flags]) => removeExport({ text, start, end, flags }), originalSource);
+      const disjointFixes: Fixes = [];
+      for (const fix of fixes.sort((a, b) => a[0] - b[0] || b[1] - a[1])) {
+        if (fix[0] >= (disjointFixes.at(-1)?.[1] ?? 0)) disjointFixes.push(fix);
+      }
+      let sourceFileText = disjointFixes.reduceRight(
+        (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
+        originalSource
+      );
 
       if (MODULE_MARKER.test(originalSource) && !MODULE_MARKER.test(sourceFileText)) {
         sourceFileText = `${sourceFileText.trimEnd()}\n\nexport {};\n`;
