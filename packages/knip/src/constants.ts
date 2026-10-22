@@ -118,6 +118,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'nub',
   'nubx',
   'open',
+  'osascript',
   'paste',
   'pnpm',
   'pnpx',
