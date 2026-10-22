@@ -14,6 +14,9 @@ test('Fix exports and dependencies', async () => {
   assert(issues.exports['access.js']['UNUSED']);
   assert(issues.exports['access.js']['ACCESS']);
   assert(issues.exports['exports.js']['identifier2']);
+  assert(issues.exports['default-class.mjs']['default']);
+  assert(issues.exports['default-decorated.ts']['default']);
+  assert(issues.exports['default-function.mjs']['default']);
   assert(issues.exports['mod.ts']['a']);
   assert(issues.exports['mod.ts']['b']);
   assert(issues.exports['mod.ts']['c']);
@@ -80,6 +83,21 @@ export const dx = 1;
   );
 
   assert.equal(await readFile(join(cwd, 'default.mjs'), 'utf8'), `export const d = 1;\n`);
+
+  assert.equal(await readFile(join(cwd, 'default-function.mjs'), 'utf8'), `export const df = 1;\n`);
+
+  assert.equal(await readFile(join(cwd, 'default-class.mjs'), 'utf8'), `export const dc = 1;\n`);
+
+  assert.equal(
+    await readFile(join(cwd, 'default-decorated.ts'), 'utf8'),
+    `function sealed(value: Function) {
+  Object.seal(value);
+}
+
+
+export const dd = 1;
+`
+  );
 
   assert.equal(
     await readFile(join(cwd, 'exports.js'), 'utf8'),

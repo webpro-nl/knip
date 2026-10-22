@@ -1,4 +1,7 @@
 import { d } from './default.mjs';
+import { df } from './default-function.mjs';
+import { dc } from './default-class.mjs';
+import { dd } from './default-decorated';
 import { dx } from './default-x.mjs';
 import _ from 'lodash';
 import { z, f, g, i, j } from './mod';
@@ -8,6 +11,9 @@ import { a } from './ignored';
 import * as NS from './reexports.mjs';
 
 d;
+df;
+dc;
+dd;
 dx;
 _;
 z;
