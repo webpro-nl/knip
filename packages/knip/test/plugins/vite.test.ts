@@ -12,10 +12,11 @@ test('Find dependencies with the Vite plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert.equal('src/utils/format.ts' in issues.files, false);
+  assert.equal('server/app.ts' in issues.files, false);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 5,
+    total: 5,
   });
 });
