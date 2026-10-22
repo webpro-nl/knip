@@ -3,7 +3,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
 
@@ -35,9 +35,12 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
     : [];
 
   const references =
-    localConfig.references
-      ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig(options.pluginName, reference.path)) ?? [];
+    localConfig.references?.map(({ path }) =>
+      toConfig(
+        options.pluginName,
+        path.endsWith('.json') ? path : toAbsolute(join(path, 'tsconfig.json'), options.configFileDir)
+      )
+    ) ?? [];
 
   const contentMappers = resolveContentMappers(localConfig);
 
