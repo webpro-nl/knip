@@ -20,6 +20,12 @@
   "references": [
     {
       "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./client"
+    },
+    {
+      "path": "./@app/server"
     }
   ]
 }
