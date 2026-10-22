@@ -6,5 +6,6 @@ const title = ref('Home');
 <template>
   <div>
     <AppButton :label="title" />
+    <AppIcon name="home" />
   </div>
 </template>
