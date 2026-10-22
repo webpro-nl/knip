@@ -1,10 +1,10 @@
-import type { Expression, Program, SpreadElement } from 'oxc-parser';
+import type { Expression, ObjectExpression, Program, SpreadElement } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import { type Input, toDeferResolve } from '../../util/input.ts';
 import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
-import { type ImportSettingKind, importSettingKinds } from './helpers.ts';
+import { type ImportSettingKind, importSettingKinds, toParser } from './helpers.ts';
 
 const getInputsFromSettingsAST = (program: Program): Input[] => {
   const inputs: Input[] = [];
@@ -46,7 +46,40 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
   return inputs;
 };
 
+const isParserObjectExpression = (node: ObjectExpression) => {
+  for (const prop of node.properties) {
+    if (prop.type === 'SpreadElement') return true;
+    const key = getPropertyKey(prop);
+    if (key === 'parse' || key === 'parseForESLint') return true;
+  }
+  return false;
+};
+
+const getInputsFromParserOptionsAST = (program: Program): Input[] => {
+  const inputs: Input[] = [];
+
+  const addParser = (name: string | undefined) => {
+    if (name) inputs.push(toParser(name));
+  };
+
+  const visitor = new Visitor({
+    ObjectExpression(node) {
+      const parser = findProperty(findProperty(node, 'parserOptions'), 'parser');
+      if (parser?.type === 'ObjectExpression') {
+        if (isParserObjectExpression(parser)) return;
+        for (const prop of parser.properties) if (prop.type === 'Property') addParser(getStringValue(prop.value));
+      } else {
+        addParser(getStringValue(parser));
+      }
+    },
+  });
+  visitor.visit(program);
+
+  return inputs;
+};
+
 export const getInputsFromFlatConfigAST = (program: Program): Input[] => [
   ...getInputsFromSettingsAST(program),
+  ...getInputsFromParserOptionsAST(program),
   toDeferResolve('eslint-import-resolver-typescript', { optional: true }),
 ];
