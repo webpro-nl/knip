@@ -1,0 +1,7 @@
+version: v1beta1
+plugins:
+  - name: es
+    out: src/gen
+  - name: custom-ts
+    path: protoc-gen-ts
+    out: src/gen

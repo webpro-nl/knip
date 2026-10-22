@@ -5,72 +5,41 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const dependency = '@bufbuild/protoc-gen-es';
+for (const { fixture, processed } of [
+  { fixture: 'v2', processed: 1 },
+  { fixture: 'v1', processed: 1 },
+  { fixture: 'v1beta1', processed: 0 },
+  { fixture: 'templates', processed: 1 },
+]) {
+  test(`Find Buf generator dependencies and entries (${fixture})`, async () => {
+    const cwd = resolve(`fixtures/plugins/buf/${fixture}`);
+    const options = await createOptions({ cwd });
+    const { counters } = await main(options);
 
-const cases = [
-  {
-    fixture: 'local-string',
-    name: 'Find the generator dependency from a local command',
-    unusedDependencies: 0,
-  },
-  {
-    fixture: 'local-array',
-    name: 'Find the generator dependency from a local command array',
-    unusedDependencies: 0,
-  },
-  {
-    fixture: 'remote',
-    name: 'Do not mark the npm generator as used by a remote plugin',
-    unusedDependencies: 1,
-  },
-  {
-    fixture: 'custom-command',
-    name: 'Do not mark the npm generator as used by another local command',
-    unusedDependencies: 1,
-  },
-  {
-    fixture: 'empty-plugins',
-    name: 'Do not mark the generator as used when there are no plugins',
-    unusedDependencies: 1,
-  },
-  {
-    fixture: 'no-config',
-    name: 'Do not mark the generator as used without a Buf configuration',
-    unusedDependencies: 1,
-  },
-];
+    assert.deepEqual(counters, {
+      ...baseCounters,
+      processed,
+      total: processed,
+    });
+  });
+}
 
-for (const { fixture, name, unusedDependencies } of cases) {
-  test(name, async () => {
+for (const fixture of ['remote', 'remote-v1', 'empty-plugins', 'no-config']) {
+  test(`Do not mark the npm generator as used (${fixture})`, async () => {
     const cwd = resolve(`fixtures/plugins/buf/${fixture}`);
     const options = await createOptions({ cwd });
     const { issues, counters } = await main(options);
 
-    assert.equal(Boolean(issues.devDependencies['package.json']?.[dependency]), unusedDependencies === 1);
+    assert.ok(issues.devDependencies['package.json']?.['@bufbuild/protoc-gen-es']);
 
     assert.deepEqual(counters, {
       ...baseCounters,
-      devDependencies: unusedDependencies,
+      devDependencies: 1,
       processed: 0,
       total: 0,
     });
   });
 }
-
-test('Report an unlisted generator dependency from buf.gen.yaml', async () => {
-  const cwd = resolve('fixtures/plugins/buf/unlisted');
-  const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
-
-  assert.ok(issues.unlisted['buf.gen.yaml']?.[dependency]);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    unlisted: 1,
-    processed: 0,
-    total: 0,
-  });
-});
 
 test('Do not make the generated output directory an entry', async () => {
   const cwd = resolve('fixtures/plugins/buf/unreachable-output');

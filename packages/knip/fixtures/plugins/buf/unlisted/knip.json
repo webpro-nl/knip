@@ -1,5 +1,0 @@
-{
-  "buf": true,
-  "entry": [],
-  "project": ["src/**/*.ts"]
-}

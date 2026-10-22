@@ -1,6 +1,8 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency } from '../../util/input.ts';
+import type { Input } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { toShellCommand } from '../../util/scripts.ts';
 import type { BufGenConfig } from './types.ts';
 
 // https://buf.build/docs/configuration/v2/buf-gen-yaml/
@@ -14,12 +16,20 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['buf.gen.yaml'];
 
-const resolveConfig: ResolveConfig<BufGenConfig> = (config, { configFilePath }) => {
+const args: Args = {
+  config: ['template'],
+};
+
+const resolveConfig: ResolveConfig<BufGenConfig> = (config, options) => {
   const inputs: Input[] = [];
   for (const plugin of config.plugins ?? []) {
-    const command = typeof plugin.local === 'string' ? plugin.local : plugin.local?.[0];
-    if (command === 'protoc-gen-es') {
-      inputs.push(toDependency('@bufbuild/protoc-gen-es', { containingFilePath: configFilePath }));
+    const name = plugin.plugin ?? plugin.name;
+    const command = plugin.local ?? plugin.path ?? (name && !name.includes('/') ? `protoc-gen-${name}` : undefined);
+    if (!command) continue;
+    const script = toShellCommand(typeof command === 'string' ? [command] : command);
+    for (const input of options.getInputsFromScripts(script, { optionalBinaries: true })) {
+      input.dir ??= options.cwd;
+      inputs.push(input);
     }
   }
   return inputs;
@@ -30,6 +40,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
+  args,
   resolveConfig,
 };
 

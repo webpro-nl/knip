@@ -1,4 +1,0 @@
-version: v2
-plugins:
-  - local: [protoc-gen-es, --some-argument]
-    out: src/__generated__
