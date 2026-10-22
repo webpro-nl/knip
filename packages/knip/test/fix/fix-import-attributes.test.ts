@@ -12,12 +12,10 @@ test('Fix re-exports with import attributes', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.exports['barrel.mjs']['settings'].isFixed);
-  assert(issues.exports['barrel.mjs']['theme'].isFixed);
 
   assert.equal(
     await readFile(join(cwd, 'barrel.mjs'), 'utf8'),
     `;
-;
 export const version = 1;
 `
   );

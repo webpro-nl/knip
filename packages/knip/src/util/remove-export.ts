@@ -7,43 +7,7 @@ interface FixerOptions {
   flags: number;
 }
 
-const lineTerminatorMatcher = /[\n\r\u2028\u2029]/;
-
-const skipTrivia = (text: string, index: number) => {
-  let i = index;
-  while (i < text.length) {
-    if (/\s/.test(text[i])) i++;
-    else if (text.startsWith('/*', i)) {
-      const end = text.indexOf('*/', i + 2);
-      i = end === -1 ? text.length : end + 2;
-    } else if (text.startsWith('//', i)) {
-      const end = text.slice(i).search(lineTerminatorMatcher);
-      i = end === -1 ? text.length : i + end;
-    } else break;
-  }
-  return i;
-};
-
-const getImportAttributesLength = (text: string) => {
-  const start = skipTrivia(text, 0);
-  const isWith = text.startsWith('with', start);
-  const isAssert = !isWith && text.startsWith('assert', start) && !lineTerminatorMatcher.test(text.slice(0, start));
-  if (!isWith && !isAssert) return 0;
-  let i = skipTrivia(text, start + (isWith ? 4 : 6));
-  if (text[i] !== '{') return 0;
-  i++;
-  while (i < text.length) {
-    const char = text[i];
-    if (char === '}') return i + 1;
-    if (char === "'" || char === '"') {
-      i++;
-      while (i < text.length && text[i] !== char) i += text[i] === '\\' ? 2 : 1;
-      i++;
-    } else if (text.startsWith('/*', i) || text.startsWith('//', i)) i = skipTrivia(text, i);
-    else i++;
-  }
-  return 0;
-};
+const importAttributesMatcher = /^(?:\s*with|[^\S\r\n\u2028\u2029]*assert)\s*\{[^}]*\}/;
 
 const getOpeningBracketIndex = (text: string) => {
   let bracketOpenIndex = -1;
@@ -110,9 +74,8 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
           const specifierQuoteMatch = afterEnd.match(/['"][^'"]+['"]/);
           if (specifierQuoteMatch?.index) {
             const fromSpecifierLength = specifierQuoteMatch.index + specifierQuoteMatch[0].length;
-            const afterSpecifier = afterEnd.substring(fromSpecifierLength);
-            const attributesLength = getImportAttributesLength(afterSpecifier);
-            return beforeBracket.substring(0, exportKeywordOffset) + afterSpecifier.substring(attributesLength);
+            const afterSpecifier = afterEnd.substring(fromSpecifierLength).replace(importAttributesMatcher, '');
+            return beforeBracket.substring(0, exportKeywordOffset) + afterSpecifier;
           }
         }
         return beforeBracket.substring(0, exportKeywordOffset) + afterEnd.substring(closingBracketOffset);

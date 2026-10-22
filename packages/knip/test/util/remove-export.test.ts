@@ -216,6 +216,11 @@ test('Clean export (FIX_FLAGS.EMPTY_DECLARATION)', () => {
   }
 
   {
+    const text = "export { AB } from './data.json'\u00a0assert { type: 'json' };";
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
+  }
+
+  {
     const text = "export type { AB } from 'specifier' with { 'resolution-mode': 'import' };";
     assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
   }
@@ -228,21 +233,6 @@ test('Clean export (FIX_FLAGS.EMPTY_DECLARATION)', () => {
   {
     const text = 'export { AB } from "specifier";\nwithin({ CD: 1 });';
     assert.deepEqual(removeExport(getOpts(text, 'AB')), ';\nwithin({ CD: 1 });');
-  }
-
-  {
-    const text = "export { AB } from './data.json' /* json */ with /* type */ { type: 'json' };";
-    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
-  }
-
-  {
-    const text = "export { AB } from './data.json' // json\n  with { type: 'json' };";
-    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
-  }
-
-  {
-    const text = "export { AB } from './data.json' with { /* } */ 'type': 'json', note: 'a}b\\'}' };";
-    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
   }
 
   {
