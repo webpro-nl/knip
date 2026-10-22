@@ -2,7 +2,7 @@ import { getUrlSpecifier } from '../../compilers/shared.ts';
 import { hasUrlScheme } from '../../util/url.ts';
 
 const directiveMatcher =
-  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@(?:(?:import|config|plugin|reference)\s+['"]([^'"]+)['"]|import\s+url\(\s*(?:['"]([^'"]+)['"]|([^'")\s]+))\s*\))[^;]*;|url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/g;
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|@(?:(?:import|config|plugin|reference)\s+['"]([^'"]+)['"]|import\s+url\(\s*(?:['"]([^'"]+)['"]|([^'")\s]+))\s*\))(?:\s*\{|[^;]*;)|url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/g;
 
 const compiler = (text: string) => {
   if (

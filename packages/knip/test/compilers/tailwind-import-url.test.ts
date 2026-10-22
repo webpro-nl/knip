@@ -60,3 +60,22 @@ import _$2 from './fonts/icons.woff2';
 import _$3 from '../images/spaced.png';`
   );
 });
+
+test('Compile Tailwind CSS @plugin options blocks', () => {
+  const css = `@import "tailwindcss" source("./{app,ui}");
+@plugin "@tailwindcss/forms" { strategy: "class" }
+@plugin "@tailwindcss/typography" {
+  className: wysiwyg
+}
+@import "./base.css" /* { url(./ghost.svg) } */;
+@plugin "./tailwind-plugin.ts" {}`;
+
+  assert.equal(
+    compiler(css),
+    `import _$0 from 'tailwindcss';
+import _$1 from '@tailwindcss/forms';
+import _$2 from '@tailwindcss/typography';
+import _$3 from './base.css';
+import _$4 from './tailwind-plugin.ts';`
+  );
+});

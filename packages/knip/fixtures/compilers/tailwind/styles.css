@@ -6,9 +6,13 @@
  * @import "@fixtures/compilers-tailwind/tailwind-theme.css";
  */
 
-@plugin "@tailwindcss/forms";
-@plugin "@tailwindcss/typography";
+@plugin "@tailwindcss/forms" {
+  strategy: "class";
+}
+@plugin "@tailwindcss/typography" {
+  className: wysiwyg
+}
 
-@plugin "./local-js-plugin.js";
+@plugin "./local-js-plugin.js" {}
 @plugin "./local-ts-plugin.ts";
 @plugin "./missing-plugin.ts";
