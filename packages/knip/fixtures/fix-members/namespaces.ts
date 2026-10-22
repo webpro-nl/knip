@@ -2,6 +2,10 @@ export namespace Animals {
   export const cat = 'cat';
   export const unusedDog = 'dog';
   export function swim() {}
+  export const fish = 'fish',
+    unusedBird = 'bird';
+  export const unusedCow = 'cow',
+    unusedPig = 'pig';
 
   export namespace Birds {
     export const eagle = 'eagle';

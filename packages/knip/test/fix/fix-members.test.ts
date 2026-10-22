@@ -9,7 +9,7 @@ import { createOptions } from '../helpers/create-options.ts';
 test('Fix enum and namespace members', async () => {
   const cwd = await copyFixture('fixtures/fix-members');
   const options = await createOptions({ cwd, isFix: true });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
   assert(issues.enumMembers['enums.ts']['Fruits.orange']);
   assert(issues.enumMembers['enums.ts']['Directions.North']);
@@ -28,18 +28,29 @@ export enum Fruits {
   );
 
   assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog']);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedBird']);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedCow']);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedPig']);
   assert(issues.namespaceMembers['namespaces.ts']['Animals.Birds.unusedParrot']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.length']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.spin']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.width']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.height']);
   assert(issues.namespaceMembers['namespaces.ts']['Shapes.depth']);
-  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 7);
+  assert.equal(Object.keys(issues.namespaceMembers['namespaces.ts']).length, 10);
+  assert(issues.namespaceMembers['namespaces.ts']['Animals.unusedDog'].isFixed);
+  assert(!issues.namespaceMembers['namespaces.ts']['Animals.unusedBird'].isFixed);
+  assert(!issues.namespaceMembers['namespaces.ts']['Animals.unusedCow'].isFixed);
+  assert(!issues.namespaceMembers['namespaces.ts']['Animals.unusedPig'].isFixed);
   assert.equal(
     await readFile(join(cwd, 'namespaces.ts'), 'utf8'),
     `export namespace Animals {
   export const cat = 'cat';
   export function swim() {}
+  export const fish = 'fish',
+    unusedBird = 'bird';
+  export const unusedCow = 'cow',
+    unusedPig = 'pig';
 
   export namespace Birds {
     export const eagle = 'eagle';
@@ -84,4 +95,7 @@ export namespace Shapes {
 }
 `
   );
+
+  assert.equal(counters.enumMembers, 0);
+  assert.equal(counters.namespaceMembers, 3);
 });
