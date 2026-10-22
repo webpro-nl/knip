@@ -12,7 +12,17 @@ import { resolveExtendedConfig } from '../oxlint/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
-import type { AliasOptions, COMMAND, MODE, ViteConfig, ViteConfigOrFn, VitestWorkspaceConfig } from './types.ts';
+import type {
+  AliasOptions,
+  COMMAND,
+  MODE,
+  Options,
+  ViteConfig,
+  ViteConfigOrFn,
+  VitestProject,
+  VitestProjectConfig,
+  VitestWorkspaceConfig,
+} from './types.ts';
 
 // https://vitest.dev/config/
 
@@ -31,6 +41,9 @@ const testEntry = ['**/*.{bench,test,test-d,spec,spec-d}.?(c|m)[jt]s?(x)'];
 const entry = [...testEntry, ...mocks];
 
 const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
+
+const isProjectConfig = (project: string | VitestProject): project is VitestProjectConfig =>
+  typeof project === 'object' && !(project instanceof Promise);
 
 const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions, vitestRoot: string) => {
   const testConfig = localConfig.test;
@@ -74,7 +87,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   const projectsDependencies: Input[] = [];
   if (testConfig.projects !== undefined) {
     for (const projectConfig of testConfig.projects) {
-      if (typeof projectConfig !== 'string') {
+      if (isProjectConfig(projectConfig)) {
         projectsDependencies.push(...findConfigDependencies(projectConfig, options, vitestRoot));
       }
     }
@@ -98,7 +111,7 @@ const getOptimizeDepsIncludePackageName = (specifier: string) => {
   return getPackageNameFromModuleSpecifier(id);
 };
 
-const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) => {
+const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig | VitestProject) => {
   const configs: ViteConfig[] = [];
   for (const config of [localConfig].flat()) {
     if (config && typeof config !== 'string') {
@@ -106,28 +119,27 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
         for (const command of ['serve', 'build'] as COMMAND[]) {
           for (const mode of ['development', 'production'] as MODE[]) {
             for (const isSsrBuild of command === 'build' ? [undefined, false, true] : [undefined]) {
-              const cfg = await config({ command, mode, isSsrBuild, ssrBuild: isSsrBuild });
-              configs.push(cfg);
-              if (cfg.test?.projects) {
-                for (const project of cfg.test.projects) {
-                  if (typeof project !== 'string') {
-                    configs.push(project);
-                  }
-                }
-              }
+              const options = { command, mode, isSsrBuild, ssrBuild: isSsrBuild };
+              const cfg = await config(options);
+              configs.push(cfg, ...(await getProjectConfigs(cfg, options)));
             }
           }
         }
       } else {
-        configs.push(config);
-        if (config.test?.projects) {
-          for (const project of config.test.projects) {
-            if (typeof project !== 'string') {
-              configs.push(project);
-            }
-          }
-        }
+        const cfg = await config;
+        configs.push(cfg, ...(await getProjectConfigs(cfg)));
       }
+    }
+  }
+  return configs;
+};
+
+const getProjectConfigs = async (config: ViteConfig, options?: Options) => {
+  const configs: ViteConfig[] = [];
+  if (config.test?.projects) {
+    for (const project of config.test.projects) {
+      if (typeof project === 'function' && options) configs.push(await project(options));
+      else if (typeof project !== 'string') configs.push(...(await getConfigs(project)));
     }
   }
   return configs;
@@ -153,7 +165,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
           for (const projectFile of projectFiles) {
             inputs.add(toConfig('vitest', projectFile));
           }
-        } else if (typeof project.extends === 'string') {
+        } else if (isProjectConfig(project) && typeof project.extends === 'string') {
           inputs.add(toConfig('vitest', project.extends));
         }
       }

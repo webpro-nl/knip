@@ -13,19 +13,24 @@ test('Find dependencies in vitest configuration (projects with inline and extern
 
   assert(issues.unlisted['vitest.config.ts']['jsdom']);
   assert(issues.unlisted['packages/client/vitest.config.e2e.ts']['happy-dom']);
+  assert(issues.unlisted['vitest.config.ts']['happy-dom']);
   assert(!issues.unlisted['vitest.config.ts']?.['top-level-dep']);
   assert(!issues.unlisted['vitest.config.ts']?.['project-level-dep']);
   assert(!issues.unlisted['vitest.config.ts']?.['project-dedupe-dep']);
   assert(!issues.files['vitest.shared.config.ts']);
   assert(!issues.files['src/shared.setup.ts']);
+  assert(!issues.files['src/dom.setup.ts']);
+  assert(!issues.files['src/example.dom.ts']);
+  assert(!issues.files['src/async.setup.ts']);
+  assert(!issues.files['src/example.promise.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 0,
     devDependencies: 0,
-    unlisted: 2,
+    unlisted: 3,
     unresolved: 0,
-    processed: 9,
-    total: 9,
+    processed: 13,
+    total: 13,
   });
 });
