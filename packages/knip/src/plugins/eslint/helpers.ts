@@ -58,7 +58,7 @@ const getInputsDeprecated = (
 const isParserObject = (value: Record<string, unknown>) =>
   typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
 
-const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+export const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
 
 const getParsers = ({ parser, parserOptions }: BaseConfig) => {
   const inputs: Input[] = [];
