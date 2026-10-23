@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFileSync } from 'node:fs';
-import { escapePath, glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
+import { escapePath, glob as tinyGlob, isDynamicPattern, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
 import { compact, partition } from './array.ts';
@@ -337,7 +337,21 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
     followSymbolicLinks: false,
   };
 
-  const paths = await tinyGlob(patterns, fgOptions);
+  const [dynamicPatterns, literalPatterns] = partition(patterns, pattern => isDynamicPattern(pattern));
+  const isIgnored = ignorePatterns.length > 0 ? picomatch(ignorePatterns, { dot: true }) : undefined;
+  const exists = options.onlyDirectories ? isDirectory : isFile;
+  const paths: string[] = [];
+
+  for (const pattern of literalPatterns) {
+    const filePath = toAbsolute(pattern, options.cwd);
+    if (!exists(filePath)) continue;
+    if (isIgnored?.(relative(options.cwd, filePath))) continue;
+    paths.push(options.absolute ? filePath : relative(options.cwd, filePath));
+  }
+
+  if (dynamicPatterns.length > 0) {
+    for (const filePath of await tinyGlob(dynamicPatterns, fgOptions)) paths.push(filePath);
+  }
 
   debugLogObject(relative(options.cwd, dir), label ? `Finding ${label}` : 'Finding paths', () => ({
     patterns,
