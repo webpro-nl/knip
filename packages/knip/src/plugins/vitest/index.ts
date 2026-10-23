@@ -3,10 +3,11 @@ import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { filterTransitiveDependencies } from '../../util/filter-transitive-dependencies.ts';
-import { _glob } from '../../util/glob.ts';
+import { findFileWithExtensions } from '../../util/fs.ts';
+import { _dirGlob, _glob } from '../../util/glob.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
+import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveExtendedConfig } from '../oxlint/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
@@ -21,6 +22,10 @@ const title = 'Vitest';
 const enablers = ['vitest', 'vite-plus'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+const configExtensions = ['.ts', '.mts', '.cts', '.js', '.mjs', '.cjs'];
+
+const projectConfigFile = /^vite(?:st)?(?:\.[\w-]+)?\.config\./;
 
 const config = ['vitest.config.{js,mjs,ts,cjs,mts,cts}', 'vitest.{workspace,projects}.{js,mjs,ts,cjs,mts,cts,json}'];
 
@@ -141,22 +146,28 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
   const configs = await getConfigs(localConfig);
 
+  const patterns = new Set<string>();
   for (const cfg of configs) {
-    if (cfg.test?.projects) {
-      for (const project of cfg.test.projects) {
-        if (typeof project === 'string') {
-          const projectFiles = await _glob({
-            cwd: options.cwd,
-            patterns: [project],
-            gitignore: false,
-          });
-          for (const projectFile of projectFiles) {
-            inputs.add(toConfig('vitest', projectFile));
-          }
-        } else if (typeof project.extends === 'string') {
-          inputs.add(toConfig('vitest', project.extends));
-        }
-      }
+    for (const project of cfg.test?.projects ?? []) {
+      if (typeof project === 'string') patterns.add(project);
+      else if (typeof project.extends === 'string') inputs.add(toConfig('vitest', project.extends));
+    }
+  }
+
+  if (patterns.size > 0) {
+    const [files, dirs] = await Promise.all([
+      _glob({ cwd: options.cwd, patterns: [...patterns], gitignore: false }),
+      _dirGlob({ cwd: options.cwd, patterns: [...patterns], gitignore: false }),
+    ]);
+    for (const file of files) {
+      if (projectConfigFile.test(basename(file))) inputs.add(toConfig('vitest', file));
+    }
+    for (const dir of dirs) {
+      const projectRoot = toAbsolute(dir, options.cwd);
+      const configFile =
+        findFileWithExtensions(join(projectRoot, 'vitest.config'), configExtensions) ??
+        findFileWithExtensions(join(projectRoot, 'vite.config'), configExtensions);
+      if (configFile) inputs.add(toConfig('vitest', configFile));
     }
   }
 
