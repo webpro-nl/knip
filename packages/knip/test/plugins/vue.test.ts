@@ -41,11 +41,12 @@ test('Detect <script src> and <style src> in .vue SFCs', async () => {
 
   assert(!('badge.ts' in issues.exports));
   assert(issues.exports['Badge.vue']['default']);
+  assert(!('node.ts' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 1,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });
