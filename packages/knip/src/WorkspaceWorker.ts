@@ -476,10 +476,12 @@ export class WorkspaceWorker {
                   cache.resolveConfig = inputs;
                 }
               } catch (error) {
-                if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
                 const relPath = toRelative(configFilePath, this.options.cwd);
-                const cause = formatCauseMessage(error, this.options.cwd);
+                const cause = formatCauseMessage(
+                  error instanceof Error ? error : new Error(String(error)),
+                  this.options.cwd
+                );
                 if (plugin.isLoadConfigOptional) {
                   debugLog(wsName, `Error loading ${relPath} (${cause})`);
                 } else {

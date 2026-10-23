@@ -65,6 +65,7 @@ import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as lunaria } from './lunaria/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as marko } from './marko/index.ts';
+import { default as mcp } from './mcp/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
@@ -263,6 +264,7 @@ export const Plugins = {
   lunaria,
   markdownlint,
   marko,
+  mcp,
   mdx,
   mdxlint,
   metro,

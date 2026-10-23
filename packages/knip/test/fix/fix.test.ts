@@ -88,6 +88,8 @@ export const dx = 1;
 
   assert.equal(await readFile(join(cwd, 'default-class.mjs'), 'utf8'), `export const dc = 1;\n`);
 
+  assert.equal(await readFile(join(cwd, 'default-arrow.mjs'), 'utf8'), `export const da = 1;\n`);
+
   assert.equal(
     await readFile(join(cwd, 'default-decorated.ts'), 'utf8'),
     `function sealed(value: Function) {

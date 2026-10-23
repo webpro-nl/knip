@@ -7,6 +7,8 @@ interface FixerOptions {
   flags: number;
 }
 
+const importAttributesMatcher = /^(?:\s*with|[^\S\r\n\u2028\u2029]*assert)\s*\{[^}]*\}/;
+
 const getOpeningBracketIndex = (text: string) => {
   let bracketOpenIndex = -1;
   let j = text.length - 1;
@@ -72,7 +74,8 @@ export const removeExport = ({ text, start, end, flags }: FixerOptions) => {
           const specifierQuoteMatch = afterEnd.match(/['"][^'"]+['"]/);
           if (specifierQuoteMatch?.index) {
             const fromSpecifierLength = specifierQuoteMatch.index + specifierQuoteMatch[0].length;
-            return beforeBracket.substring(0, exportKeywordOffset) + afterEnd.substring(fromSpecifierLength);
+            const afterSpecifier = afterEnd.substring(fromSpecifierLength).replace(importAttributesMatcher, '');
+            return beforeBracket.substring(0, exportKeywordOffset) + afterSpecifier;
           }
         }
         return beforeBracket.substring(0, exportKeywordOffset) + afterEnd.substring(closingBracketOffset);

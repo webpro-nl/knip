@@ -1,6 +1,7 @@
 import { d } from './default.mjs';
 import { df } from './default-function.mjs';
 import { dc } from './default-class.mjs';
+import { da } from './default-arrow.mjs';
 import { dd } from './default-decorated';
 import { dx } from './default-x.mjs';
 import _ from 'lodash';
@@ -13,6 +14,7 @@ import * as NS from './reexports.mjs';
 d;
 df;
 dc;
+da;
 dd;
 dx;
 _;
