@@ -1,0 +1,3 @@
+{
+  "extends": "@fixtures/tsconfig-import-helpers/tsconfig.json"
+}
