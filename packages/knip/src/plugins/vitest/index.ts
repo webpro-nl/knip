@@ -125,8 +125,7 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
           for (const mode of ['development', 'production'] as MODE[]) {
             for (const isSsrBuild of command === 'build' ? [undefined, false, true] : [undefined]) {
               const cfg = await config({ command, mode, isSsrBuild, ssrBuild: isSsrBuild });
-              configs.push(cfg);
-              if (command === 'serve' && mode === 'development') configs.push(...(await getProjectConfigs(cfg)));
+              configs.push(cfg, ...(await getProjectConfigs(cfg, command === 'serve' && mode === 'development')));
             }
           }
         }
@@ -141,12 +140,13 @@ const getConfigs = async (localConfig: ViteConfigOrFn | VitestWorkspaceConfig) =
 // Vitest calls project functions once, with this env
 const projectEnv: Options = { command: 'serve', mode: 'test', isPreview: false, isSsrBuild: false };
 
-const getProjectConfigs = async (config: ViteConfig) => {
+const getProjectConfigs = async (config: ViteConfig, isCallFunctions = true) => {
   const configs: ViteConfig[] = [];
   if (config.test?.projects) {
     for (const project of config.test.projects) {
-      if (typeof project === 'function') configs.push(await project(projectEnv));
-      else if (typeof project !== 'string') configs.push(await project);
+      if (typeof project === 'function') {
+        if (isCallFunctions) configs.push(await project(projectEnv));
+      } else if (typeof project !== 'string') configs.push(await project);
     }
   }
   return configs;
