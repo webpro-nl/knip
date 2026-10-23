@@ -9,11 +9,13 @@ import { createOptions } from '../helpers/create-options.ts';
 test('Fix catalog entries (pnpm-workspace.yaml)', async () => {
   const cwd = await copyFixture('fixtures/dependencies/catalog-named');
   const options = await createOptions({ cwd, isFix: true });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
-  assert(issues.catalog['pnpm-workspace.yaml']['default.lodash']);
+  assert(issues.catalog['pnpm-workspace.yaml']['default.lodash'].isFixed);
   assert(!issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
-  assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
+  assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify'].isFixed);
+  assert(!issues.catalog['pnpm-workspace.yaml']['tools.prettier'].isFixed);
+  assert.equal(counters.catalog, 1);
 
   assert.equal(
     await readFile(join(cwd, 'pnpm-workspace.yaml'), 'utf8'),
@@ -29,6 +31,7 @@ catalogs:
     "@nu/xt": ^3.0.0
   backend:
     '@ex/press': ^4.18.0
+  tools: { prettier: ^3.0.0 }
 
 overrides:
   '@nu/xt@^3': 'catalog:frontend'
