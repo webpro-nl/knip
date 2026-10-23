@@ -199,4 +199,50 @@ test('Clean export (FIX_FLAGS.EMPTY_DECLARATION)', () => {
     const text = 'export { ,  \ntype    EF, }   from "specifier";';
     assert.deepEqual(removeExport(getOpts(text, 'type    EF')), ';');
   }
+
+  {
+    const text = "export { default as AB } from './data.json' with { type: 'json' };\nexport const CD = 1;";
+    assert.deepEqual(removeExport(getOpts(text, 'default as AB')), ';\nexport const CD = 1;');
+  }
+
+  {
+    const text = 'export { AB } from "./data.json"\n  with { type: "json" };';
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
+  }
+
+  {
+    const text = "export { AB } from './data.json' assert { type: 'json' };";
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
+  }
+
+  {
+    const text = "export { AB } from './data.json'\u00a0assert { type: 'json' };";
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
+  }
+
+  {
+    const text = "export type { AB } from 'specifier' with { 'resolution-mode': 'import' };";
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';');
+  }
+
+  {
+    const text = "export { AB, CD } from './data.json' with { type: 'json' };";
+    assert.deepEqual(removeExport(getOpts(text, 'CD')), "export { AB,  } from './data.json' with { type: 'json' };");
+  }
+
+  {
+    const text = 'export { AB } from "specifier";\nwithin({ CD: 1 });';
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), ';\nwithin({ CD: 1 });');
+  }
+
+  {
+    const text = "export { AB } from './a.mjs'\nassert\n{ CD(); }";
+    assert.deepEqual(removeExport(getOpts(text, 'AB')), '\nassert\n{ CD(); }');
+  }
+
+  {
+    const text = "export { AB, CD } from './data.json' with { type: 'json' };";
+    const once = removeExport(getOpts(text, 'CD'));
+    assert.deepEqual(removeExport(getOpts(once, 'AB')), ';');
+  }
 });
