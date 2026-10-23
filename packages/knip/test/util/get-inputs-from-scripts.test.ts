@@ -13,6 +13,7 @@ const containingFilePath = join(cwd, 'package.json');
 const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Object.fromEntries(scriptNames.map(name => [name, ''])) });
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
+const lifecycle = { cwd, manifest: createManifest({ scripts: { start: 'node --import tsx', test: 'node --import tsx' } }) };
 const forwardedArgs = { cwd, isForwardedArgs: true };
 const opt = { optional: true };
 
@@ -163,6 +164,13 @@ test('getInputsFromScripts (npm)', () => {
   t('npm run program -- node script.js', [toBinary('node'), toDeferResolveEntry('script.js', opt)], pkgScripts);
   t('npm run program -- run --coverage.enabled', [], pkgScripts);
   t('npm run with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('npm run-script with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('npm rum with-env -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], withEnv);
+  t('npm start -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], lifecycle);
+  t('npm test -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], lifecycle);
+  t('npm t -- src/main.ts', [toBinary('node'), toDeferResolveEntry('src/main.ts', opt), toDeferResolve('tsx')], lifecycle);
+  t('npm start', [], lifecycle);
+  t('npm stop -- src/main.ts', [], lifecycle);
 });
 
 test('getInputsFromScripts (npx)', () => {
