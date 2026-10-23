@@ -6,6 +6,15 @@ import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
 import { type ImportSettingKind, importSettingKinds, toParser } from './helpers.ts';
 
+const isParserObjectExpression = (node: ObjectExpression) => {
+  for (const prop of node.properties) {
+    if (prop.type === 'SpreadElement') return true;
+    const key = getPropertyKey(prop);
+    if (key === 'parse' || key === 'parseForESLint') return true;
+  }
+  return false;
+};
+
 const getInputsFromSettingsAST = (program: Program): Input[] => {
   const inputs: Input[] = [];
 
@@ -13,6 +22,10 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
     if (!resolver || resolver === 'node' || isInternal(resolver)) return;
     const dep = kind === 'resolver' ? `eslint-import-resolver-${resolver}` : resolver;
     inputs.push(toDeferResolve(dep, { optional: true }));
+  };
+
+  const addParser = (name: string | undefined) => {
+    if (name) inputs.push(toParser(name));
   };
 
   const addResolvers = (kind: ImportSettingKind, node: Expression | SpreadElement | null) => {
@@ -31,39 +44,15 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       const settingsNode = findProperty(node, 'settings');
-      if (!settingsNode || settingsNode.type !== 'ObjectExpression') return;
-
-      for (const prop of settingsNode.properties ?? []) {
-        if (prop.type !== 'Property') continue;
-        const key = getPropertyKey(prop);
-        const kind = key && importSettingKinds.get(key);
-        if (kind) addResolvers(kind, prop.value);
+      if (settingsNode?.type === 'ObjectExpression') {
+        for (const prop of settingsNode.properties ?? []) {
+          if (prop.type !== 'Property') continue;
+          const key = getPropertyKey(prop);
+          const kind = key && importSettingKinds.get(key);
+          if (kind) addResolvers(kind, prop.value);
+        }
       }
-    },
-  });
-  visitor.visit(program);
 
-  return inputs;
-};
-
-const isParserObjectExpression = (node: ObjectExpression) => {
-  for (const prop of node.properties) {
-    if (prop.type === 'SpreadElement') return true;
-    const key = getPropertyKey(prop);
-    if (key === 'parse' || key === 'parseForESLint') return true;
-  }
-  return false;
-};
-
-const getInputsFromParserOptionsAST = (program: Program): Input[] => {
-  const inputs: Input[] = [];
-
-  const addParser = (name: string | undefined) => {
-    if (name) inputs.push(toParser(name));
-  };
-
-  const visitor = new Visitor({
-    ObjectExpression(node) {
       const parser = findProperty(findProperty(node, 'parserOptions'), 'parser');
       if (parser?.type === 'ObjectExpression') {
         if (isParserObjectExpression(parser)) return;
@@ -80,6 +69,5 @@ const getInputsFromParserOptionsAST = (program: Program): Input[] => {
 
 export const getInputsFromFlatConfigAST = (program: Program): Input[] => [
   ...getInputsFromSettingsAST(program),
-  ...getInputsFromParserOptionsAST(program),
   toDeferResolve('eslint-import-resolver-typescript', { optional: true }),
 ];
