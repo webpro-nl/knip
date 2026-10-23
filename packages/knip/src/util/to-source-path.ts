@@ -7,7 +7,7 @@ import { findFileWithExtensions, isDirectory } from './fs.ts';
 import { _glob, prependDirToPattern } from './glob.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
 import { getPackageMapTarget } from './package-json.ts';
-import { isAbsolute, isInternal, join, toRelative } from './path.ts';
+import { dirname, isAbsolute, isInternal, join, toRelative } from './path.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
@@ -15,10 +15,38 @@ const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
-const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions): SourceMap => {
+const isDeclarationFile = /\.d\.(m|c)?ts$/;
+const isJavaScriptFile = /\.(m|c)?jsx?$/;
+const getCommonSourceDirectory = (filePaths: string[]) => {
+  if (filePaths.length === 0) return undefined;
+  let commonDir = dirname(filePaths[0]);
+  for (const filePath of filePaths.slice(1)) {
+    const fileDir = dirname(filePath);
+    while (fileDir !== commonDir && !fileDir.startsWith(commonDir === '/' ? commonDir : `${commonDir}/`)) {
+      const parent = dirname(commonDir);
+      if (parent === commonDir) break;
+      commonDir = parent;
+    }
+  }
+  return commonDir;
+};
+const tsconfigSourceMap = (dir: string, compilerOptions: CompilerOptions, fileNames: string[]): SourceMap => {
   const srcDir = join(dir, 'src');
   const outDirHasSrc = compilerOptions.outDir && isDirectory(compilerOptions.outDir, 'src');
-  const resolvedSrc = compilerOptions.rootDir ?? (outDirHasSrc ? dir : isDirectory(srcDir) ? srcDir : dir);
+  const sourceFiles = fileNames.filter(
+    filePath => !isDeclarationFile.test(filePath) && (compilerOptions.allowJs || !isJavaScriptFile.test(filePath))
+  );
+  const commonSourceDirectory = getCommonSourceDirectory(sourceFiles);
+  // `fileNames` contains the config's files/include expansion, not all files in the
+  // program. Keep the historical fallback when it doesn't establish the config
+  // directory as the common root (transitive imports may be outside the list).
+  const inferredRootDir = compilerOptions.composite
+    ? dir
+    : commonSourceDirectory === dir
+      ? commonSourceDirectory
+      : undefined;
+  const resolvedSrc =
+    compilerOptions.rootDir ?? (outDirHasSrc ? dir : (inferredRootDir ?? (isDirectory(srcDir) ? srcDir : dir)));
   return { srcDir: resolvedSrc, outDir: compilerOptions.outDir || resolvedSrc };
 };
 
@@ -26,9 +54,13 @@ export const augmentWorkspace = (
   workspace: Workspace,
   dir: string,
   compilerOptions: CompilerOptions | undefined,
-  pluginSourceMaps: SourceMap[] = []
+  fileNames: string[],
+  pluginSourceMaps: SourceMap[] = [],
+  tsconfigDir = dir
 ) => {
-  const all = compilerOptions ? [...pluginSourceMaps, tsconfigSourceMap(dir, compilerOptions)] : pluginSourceMaps;
+  const all = compilerOptions
+    ? [...pluginSourceMaps, tsconfigSourceMap(tsconfigDir, compilerOptions, fileNames)]
+    : pluginSourceMaps;
   if (all.length === 0) return;
   const seen = new Set<string>();
   const unique: SourceMap[] = [];

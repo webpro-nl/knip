@@ -1,0 +1,6 @@
+{
+  "files": ["src/feature/api.ts"],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
+}
