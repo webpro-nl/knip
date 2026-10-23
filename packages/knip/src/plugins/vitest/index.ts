@@ -146,27 +146,28 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
   const configs = await getConfigs(localConfig);
 
+  const patterns = new Set<string>();
   for (const cfg of configs) {
-    if (cfg.test?.projects) {
-      const patterns: string[] = [];
-      for (const project of cfg.test.projects) {
-        if (typeof project === 'string') patterns.push(project);
-        else if (typeof project.extends === 'string') inputs.add(toConfig('vitest', project.extends));
-      }
-      const [files, dirs] = await Promise.all([
-        _glob({ cwd: options.cwd, patterns, gitignore: false }),
-        _dirGlob({ cwd: options.cwd, patterns, gitignore: false }),
-      ]);
-      for (const file of files) {
-        if (projectConfigFile.test(basename(file))) inputs.add(toConfig('vitest', file));
-      }
-      for (const dir of dirs) {
-        const projectRoot = toAbsolute(dir, options.cwd);
-        const configFile =
-          findFileWithExtensions(join(projectRoot, 'vitest.config'), configExtensions) ??
-          findFileWithExtensions(join(projectRoot, 'vite.config'), configExtensions);
-        if (configFile) inputs.add(toConfig('vitest', configFile));
-      }
+    for (const project of cfg.test?.projects ?? []) {
+      if (typeof project === 'string') patterns.add(project);
+      else if (typeof project.extends === 'string') inputs.add(toConfig('vitest', project.extends));
+    }
+  }
+
+  if (patterns.size > 0) {
+    const [files, dirs] = await Promise.all([
+      _glob({ cwd: options.cwd, patterns: [...patterns], gitignore: false }),
+      _dirGlob({ cwd: options.cwd, patterns: [...patterns], gitignore: false }),
+    ]);
+    for (const file of files) {
+      if (projectConfigFile.test(basename(file))) inputs.add(toConfig('vitest', file));
+    }
+    for (const dir of dirs) {
+      const projectRoot = toAbsolute(dir, options.cwd);
+      const configFile =
+        findFileWithExtensions(join(projectRoot, 'vitest.config'), configExtensions) ??
+        findFileWithExtensions(join(projectRoot, 'vite.config'), configExtensions);
+      if (configFile) inputs.add(toConfig('vitest', configFile));
     }
   }
 
