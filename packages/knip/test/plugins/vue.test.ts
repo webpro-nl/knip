@@ -33,3 +33,19 @@ test('Detect imports from <style lang="scss|less|stylus"> in .vue SFCs', async (
     total: 7,
   });
 });
+
+test('Detect <script src> and <style src> in .vue SFCs', async () => {
+  const cwd = resolve('fixtures/plugins/vue-src');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(!('badge.ts' in issues.exports));
+  assert(issues.exports['Badge.vue']['default']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    exports: 1,
+    processed: 6,
+    total: 6,
+  });
+});

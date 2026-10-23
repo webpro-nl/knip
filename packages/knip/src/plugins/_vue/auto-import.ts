@@ -260,9 +260,36 @@ const getImportedComponentImports = (maps: AutoImportMaps, names: Set<string>) =
   return imports;
 };
 
+// Lightweight extraction: tags inside template attribute values also match, character references in src aren't decoded
+const srcBlockMatcher =
+  /<!--[\s\S]*?-->|<(script|style)(?=[\s/>])((?:[^>"']|"[^"]*"|'[^']*')*?)(?:\/>|>[\s\S]*?<\/\1\s*>)/g;
+const attributeMatcher = /([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+
+const getSrc = (attrs: string) => {
+  for (const [, name, double, single, unquoted] of attrs.matchAll(attributeMatcher)) {
+    if (name === 'src') return double ?? single ?? unquoted;
+  }
+};
+
+const getSrcImports = (source: string) => {
+  if (!source.includes('src')) return '';
+  const imports: string[] = [];
+  for (const [, tag, attrs] of source.matchAll(srcBlockMatcher)) {
+    const src = tag && getSrc(attrs);
+    if (!src) continue;
+    const specifier = JSON.stringify(src);
+    if (tag === 'script') {
+      imports.push(`import _sfc_main from ${specifier};\nexport * from ${specifier};\nexport default _sfc_main;`);
+    } else imports.push(`import ${specifier};`);
+  }
+  return imports.join('\n');
+};
+
 const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root: string) => {
   if (maps.importMap.size === 0 && maps.componentMap.size === 0) {
-    return [scriptBodies(source, path), stylePreprocessorImports(source, path)].filter(Boolean).join(';\n');
+    return [scriptBodies(source, path), getSrcImports(source), stylePreprocessorImports(source, path)]
+      .filter(Boolean)
+      .join(';\n');
   }
 
   const sfc = sfcForRoot(root);
@@ -299,6 +326,9 @@ const compileVueSfc = (source: string, path: string, maps: AutoImportMaps, root:
   }
   scripts.push(...getSyntheticImports(maps, identifiers, path, templateTags));
   scripts.push(...getImportedComponentImports(maps, importedComponents));
+
+  const srcImports = getSrcImports(source);
+  if (srcImports) scripts.push(srcImports);
 
   const styles = stylePreprocessorImports(source, path);
   if (styles) scripts.push(styles);

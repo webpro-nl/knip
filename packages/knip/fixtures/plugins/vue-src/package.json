@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/vue-src",
+  "dependencies": {
+    "modern-normalize": "*",
+    "vue": "*"
+  }
+}
