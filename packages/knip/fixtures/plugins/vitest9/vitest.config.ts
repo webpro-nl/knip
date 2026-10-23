@@ -27,11 +27,11 @@ export default {
         },
       },
       'packages/*/vitest.config.e2e.ts',
-      ({ command }) => ({
+      ({ mode }) => ({
         test: {
           name: 'dom',
           include: ['src/**/*.dom.ts'],
-          setupFiles: command === 'serve' ? ['./src/dom.setup.ts'] : [],
+          setupFiles: mode === 'test' ? ['./src/dom.setup.ts'] : [],
           environment: 'happy-dom',
         },
       }),

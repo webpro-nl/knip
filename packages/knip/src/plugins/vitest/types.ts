@@ -62,13 +62,14 @@ export interface ViteConfig extends VitestConfig {
 }
 
 export type COMMAND = 'serve' | 'build';
-export type MODE = 'development' | 'production';
+export type MODE = 'development' | 'production' | 'test';
 
 export interface Options {
   command: COMMAND;
   mode: MODE;
   isSsrBuild?: boolean | undefined;
   ssrBuild?: boolean | undefined;
+  isPreview?: boolean | undefined;
 }
 
 export type ViteConfigOrFn =
