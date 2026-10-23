@@ -678,6 +678,10 @@
           "title": "marko plugin configuration (https://knip.dev/reference/plugins/marko)",
           "$ref": "#/definitions/plugin"
         },
+        "mcp": {
+          "title": "mcp plugin configuration (https://knip.dev/reference/plugins/mcp)",
+          "$ref": "#/definitions/plugin"
+        },
         "mdx": {
           "title": "mdx plugin configuration (https://knip.dev/reference/plugins/mdx)",
           "$ref": "#/definitions/plugin"
