@@ -85,3 +85,16 @@ test('Extract literal dynamic imports from Svelte template expressions', () => {
     ].join(';\n')
   );
 });
+
+test('Keep template imports inside custom elements named style-*', () => {
+  const source = [
+    '<style-panel>',
+    "  {#await import('./LazyChart.svelte') then { default: LazyChart }}<LazyChart />{/await}",
+    '</style-panel>',
+    '<style>',
+    '  p { margin: 0; }',
+    '</style>',
+  ].join('\n');
+
+  assert.equal(dynamicImportsWithinTemplate(source, 'Panel.svelte'), "import('./LazyChart.svelte')");
+});

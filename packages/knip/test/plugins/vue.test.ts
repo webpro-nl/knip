@@ -25,12 +25,13 @@ test('Detect imports from <style lang="scss|less|stylus"> in .vue SFCs', async (
   assert('styles/_unused.scss' in issues.files);
   assert('styles/unused.less' in issues.files);
   assert('styles/unused.styl' in issues.files);
+  assert(!('styles/panel.less' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 3,
-    processed: 7,
-    total: 7,
+    processed: 9,
+    total: 9,
   });
 });
 
