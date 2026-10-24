@@ -18,6 +18,7 @@ export interface GetInputsFromScriptsOptions extends BaseOptions {
   optionalBinaries?: boolean;
   containingFilePath: string;
   expandedScripts?: Set<string>;
+  manifestDir?: string;
 }
 
 export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (

@@ -1,0 +1,12 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*/*.mjs"],
+      "project": ["scripts/**/*.mjs"]
+    },
+    "packages/app": {
+      "entry": ["dev/*.mjs"],
+      "project": ["**/*.mjs"]
+    }
+  }
+}

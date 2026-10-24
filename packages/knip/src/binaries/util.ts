@@ -62,7 +62,8 @@ export const expandScript = (
   const expandedScripts = options.expandedScripts ?? new Set();
   if (expandedScripts.has(name)) return;
   expandedScripts.add(name);
-  return options.fromArgs([source, ...forwardedArgs], { ...opts, expandedScripts });
+  const cwd = options.manifestDir ?? options.cwd;
+  return options.fromArgs([source, ...forwardedArgs], { cwd, manifestDir: undefined, ...opts, expandedScripts });
 };
 
 export const parseNodeArgs = (args: string[]) =>
