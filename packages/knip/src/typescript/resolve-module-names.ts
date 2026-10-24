@@ -82,10 +82,14 @@ interface PathMapping {
   scope: string;
 }
 
-const moduleResolutionCaches: Array<Map<string, Map<string, ResolvedModule | undefined>>> = [];
+const moduleResolutionCaches = new Set<WeakRef<Map<string, Map<string, ResolvedModule | undefined>>>>();
 
 export function clearModuleResolutionCaches() {
-  for (const cache of moduleResolutionCaches) cache.clear();
+  for (const reference of moduleResolutionCaches) {
+    const cache = reference.deref();
+    if (cache) cache.clear();
+    else moduleResolutionCaches.delete(reference);
+  }
 }
 
 function getAttributedPackageName(specifier: string, containingFile: string, resolvedFileName: string) {
@@ -198,7 +202,7 @@ export function createCustomModuleResolver(
   }
 
   const cache = new Map<string, Map<string, ResolvedModule | undefined>>();
-  moduleResolutionCaches.push(cache);
+  moduleResolutionCaches.add(new WeakRef(cache));
 
   function resolveModuleName(name: string, containingFile: string): ResolvedModule | undefined {
     const dir = dirname(containingFile);

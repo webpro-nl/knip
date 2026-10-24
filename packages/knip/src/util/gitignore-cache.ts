@@ -2,6 +2,7 @@ import fs from 'node:fs';
 // oxlint-disable-next-line no-restricted-imports
 import path from 'node:path';
 import { createDiskCache, mtimeMatches } from './disk-cache.ts';
+import { fingerprintsMatch } from './file-fingerprint.ts';
 import type { Gitignores } from './glob-core.ts';
 
 interface SerializedGitignores {
@@ -10,6 +11,7 @@ interface SerializedGitignores {
 }
 
 interface GitignoreCacheEntry {
+  fingerprints: Map<string, string | undefined>;
   /** Relative paths (to cwd) — matches the contract of findAndParseGitignores's return */
   gitignoreFiles: string[];
   /** Parallel array: mtimeMs of each gitignoreFiles[i] at cache write */
@@ -34,6 +36,7 @@ const store = createDiskCache<GitignoreCacheEntry>('gitignore');
 export const initGitignoreCache = store.init;
 export const isGitignoreCacheEnabled = store.isEnabled;
 export const flushGitignoreCache = store.flush;
+export const disableGitignoreCache = store.disable;
 
 const workspaceDirsKey = (workspaceDirs?: Set<string>): string => {
   if (!workspaceDirs || workspaceDirs.size === 0) return '';
@@ -41,6 +44,7 @@ const workspaceDirsKey = (workspaceDirs?: Set<string>): string => {
 };
 
 const validateEntry = (entry: GitignoreCacheEntry, wsKey: string, cwd: string): boolean => {
+  if (!(entry.fingerprints instanceof Map) || !fingerprintsMatch(entry.fingerprints)) return false;
   if (entry.workspaceDirsKey !== wsKey) return false;
   const { gitignoreFiles, mtimes } = entry;
   for (let i = 0; i < gitignoreFiles.length; i++) {
@@ -77,9 +81,10 @@ export const setCachedGitignore = (
   gitignoreFiles: string[],
   ignores: Set<string>,
   unignores: Set<string>,
-  perDirIgnores: Map<string, Gitignores>
+  perDirIgnores: Map<string, Gitignores>,
+  fingerprints: Map<string, string | undefined>
 ): void => {
-  if (!store.isEnabled()) return;
+  if (!store.isEnabled() || !fingerprintsMatch(fingerprints)) return;
   const mtimes: number[] = [];
   const validFiles: string[] = [];
   for (const file of gitignoreFiles) {
@@ -98,6 +103,7 @@ export const setCachedGitignore = (
     perDir[dir] = { ignores: [...data.ignores], unignores: [...data.unignores] };
   }
   store.set(cwd, {
+    fingerprints,
     gitignoreFiles: validFiles,
     mtimes,
     ignores: [...ignores],

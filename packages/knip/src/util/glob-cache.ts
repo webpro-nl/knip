@@ -19,6 +19,10 @@ export const initGlobCache = (cacheLocation: string) => {
   store.init(cacheLocation);
 };
 export const isGlobCacheEnabled = store.isEnabled;
+export const disableGlobCache = () => {
+  dirMtimeCache.clear();
+  store.disable();
+};
 export const flushGlobCache = store.flush;
 export const clearGlobCache = () => {
   dirMtimeCache.clear();

@@ -16,6 +16,7 @@ export const mtimeMatches = (filePath: string, mtimeMs: number): boolean => {
 };
 
 export interface DiskCache<V> {
+  disable: () => void;
   init: (cacheLocation: string) => void;
   isEnabled: () => boolean;
   get: (key: string) => V | undefined;
@@ -32,11 +33,18 @@ export const createDiskCache = <V>(name: string): DiskCache<V> => {
   let isDirty = false;
 
   return {
+    disable() {
+      cacheFilePath = undefined;
+      cache = undefined;
+      isDirty = false;
+    },
     init(cacheLocation: string) {
+      isDirty = false;
       cacheFilePath = path.resolve(cacheLocation, filename);
       if (isFile(cacheFilePath)) {
         try {
-          cache = deserialize(fs.readFileSync(cacheFilePath));
+          const restored: unknown = deserialize(fs.readFileSync(cacheFilePath));
+          cache = restored instanceof Map ? restored : new Map();
         } catch {
           debugLog('*', `Error reading cache from ${cacheFilePath}`);
           cache = new Map();

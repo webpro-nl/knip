@@ -7,6 +7,7 @@ import { compact, partition } from './array.ts';
 import { debugLogObject } from './debug.ts';
 import { isDirectory, isFile } from './fs.ts';
 import { getCachedGitignore, isGitignoreCacheEnabled, setCachedGitignore } from './gitignore-cache.ts';
+import { fileFingerprint } from './file-fingerprint.ts';
 import { timerify } from './Performance.ts';
 import { expandIgnorePatterns, parseAndConvertGitignorePatterns } from './parse-and-convert-gitignores.ts';
 import { dirname, isAbsolute, join, relative, toAbsolute, toPosix } from './path.ts';
@@ -126,11 +127,25 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   };
 
   const seenGitignoreFiles = new Set<string>();
+  const fingerprints = new Map<string, string | undefined>();
+  const track = (filePath: string) => {
+    if (isGitignoreCacheEnabled()) fingerprints.set(filePath, fileFingerprint(filePath));
+  };
+  let ancestor = cwd;
+  for (;;) {
+    track(join(ancestor, '.gitignore'));
+    track(join(ancestor, '.git'));
+    if (isGitRoot(ancestor)) break;
+    const parent = dirname(ancestor);
+    if (parent === ancestor) break;
+    ancestor = parent;
+  }
 
   const addFile = (filePath: string, baseDir?: string) => {
     const absPath = toPosix(filePath);
     if (seenGitignoreFiles.has(absPath)) return;
     seenGitignoreFiles.add(absPath);
+    track(absPath);
 
     gitignoreFiles.push(relative(cwd, filePath));
 
@@ -189,10 +204,12 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   const gitDir = getGitDir(cwd);
   if (gitDir) {
     const commonDirPath = join(gitDir, 'commondir');
+    track(commonDirPath);
     const commonDir = isFile(commonDirPath)
       ? toAbsolute(toPosix(readFileSync(commonDirPath, 'utf8').trim()), gitDir)
       : gitDir;
     const excludePath = join(commonDir, 'info/exclude');
+    track(excludePath);
     if (isFile(excludePath)) addFile(excludePath, cwd);
   }
 
@@ -230,6 +247,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
     let pending = 0;
     const walk = (dir: string) => {
       pending++;
+      track(dir);
       readdir(dir, { withFileTypes: true }, (error, entries) => {
         if (!error) {
           for (const entry of entries) {
@@ -291,7 +309,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
   debugLogObject('*', 'Parsed gitignore files', { gitignoreFiles });
 
   if (isGitignoreCacheEnabled()) {
-    setCachedGitignore(cwd, workspaceDirs, gitignoreFiles, ignores, unignores, cachedGitIgnores);
+    setCachedGitignore(cwd, workspaceDirs, gitignoreFiles, ignores, unignores, cachedGitIgnores, fingerprints);
   }
 
   return { gitignoreFiles, ignores, unignores };

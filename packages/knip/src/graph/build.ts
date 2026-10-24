@@ -16,6 +16,7 @@ import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { fileFingerprint } from '../util/file-fingerprint.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
@@ -603,7 +604,21 @@ export async function build({
     }
   };
 
-  principal.init();
+  principal.init(
+    options.isCache
+      ? JSON.stringify([
+          analyzeOpts,
+          options.configFilePath && fileFingerprint(options.configFilePath),
+          [...registeredVisitorPlugins],
+          workspaces.map(workspace => [
+            workspace.name,
+            workspace.config.ignoreExportsUsedInFile,
+            workspace.manifestStr,
+            workspace.sourceMaps,
+          ]),
+        ])
+      : undefined
+  );
 
   streamer.cast('Analyzing source files');
 
@@ -629,7 +644,7 @@ export async function build({
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-  principal.reconcileCache(graph);
+  principal.reconcileCache();
 
   perfObserver.addMemoryMark('build');
 
