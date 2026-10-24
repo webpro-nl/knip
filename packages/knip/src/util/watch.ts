@@ -3,6 +3,7 @@ import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import { getFileTopology, hasSameTopology, isIncrementalFile } from '../session/incremental.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
@@ -112,6 +113,44 @@ export const getSessionHandler = async (
 
     if (!hasRelevantChanges || (added.size === 0 && deleted.size === 0 && modified.size === 0)) return;
 
+    let incremental = added.size === 0 && deleted.size === 0;
+    if (incremental) {
+      for (const filePath of modified) {
+        const file = graph.get(filePath);
+        if (!file || !analyzedFiles.has(filePath) || !isIncrementalFile(file)) {
+          incremental = false;
+          break;
+        }
+      }
+    }
+    if (incremental) {
+      for (const filePath of modified) {
+        const file = graph.get(filePath);
+        if (!file) {
+          incremental = false;
+          break;
+        }
+        const before = getFileTopology(file);
+        await analyzeSourceFile(filePath);
+        if (!hasSameTopology(before, file)) {
+          incremental = false;
+          break;
+        }
+      }
+    }
+    if (incremental) {
+      invalidateCache(graph, true);
+      collector.purge();
+      collector.getIssues().tagHints.clear();
+      for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
+      await analyze();
+      principal.reconcileCache(graph);
+      modified.clear();
+      const update = createUpdate({ startTime });
+      if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
+      return update;
+    }
+
     clearResolverCache();
     clearModuleResolutionCaches();
     clearGlobCache();
@@ -119,8 +158,8 @@ export const getSessionHandler = async (
 
     const filePaths = await principal.getUsedResolvedFiles();
 
-    unreferencedFiles.clear();
     const cachedUnusedFiles = collector.purge();
+    collector.getIssues().tagHints.clear();
 
     for (const filePath of added) cachedUnusedFiles.add(filePath);
     for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
@@ -146,7 +185,7 @@ export const getSessionHandler = async (
       }
 
       for (const filePath of filePaths) {
-        if (!graph.has(filePath)) {
+        if (!graph.has(filePath) || !analyzedFiles.has(filePath)) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
             await analyzeSourceFile(filePath);
@@ -171,13 +210,11 @@ export const getSessionHandler = async (
       }
     }
 
-    await analyze();
-
     const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
-    collector.addFilesIssues(unusedFiles);
-    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
-
+    unreferencedFiles.clear();
+    for (const filePath of unusedFiles) unreferencedFiles.add(filePath);
     for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
+    await analyze();
 
     added.clear();
     deleted.clear();
