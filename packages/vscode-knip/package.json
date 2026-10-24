@@ -46,7 +46,7 @@
     "package": "node scripts/publish.js",
     "release": "release-it",
     "test": "pnpm test:unit && pnpm package && node test/run.mjs",
-    "test:unit": "node --test test/tree-view-exports.test.js",
+    "test:unit": "node --test test/*.test.js",
     "vscode:prepublish": "node scripts/sync-from-mcp.js"
   },
   "dependencies": {
