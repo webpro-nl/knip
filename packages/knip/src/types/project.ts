@@ -15,6 +15,7 @@ export interface CompilerOptions {
   lib?: string[];
   module?: number;
   moduleResolution?: number;
+  moduleSuffixes?: string[];
   noEmit?: boolean;
   outDir?: string;
   paths?: Record<string, string[]>;
