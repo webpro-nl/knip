@@ -27,6 +27,26 @@ export default {
         },
       },
       'packages/*/vitest.config.e2e.ts',
+      ({ mode }) => ({
+        test: {
+          name: 'dom',
+          include: ['src/**/*.dom.ts'],
+          setupFiles: mode === 'test' ? ['./src/dom.setup.ts'] : [],
+          environment: 'happy-dom',
+        },
+      }),
+      async () => ({
+        test: {
+          name: 'async',
+          setupFiles: ['./src/async.setup.ts'],
+        },
+      }),
+      Promise.resolve({
+        test: {
+          include: ['src/**/*.promise.ts'],
+          name: 'promise',
+        },
+      }),
     ],
     coverage: {
       enabled: false,

@@ -26,7 +26,7 @@ interface VitestConfig {
     setupFiles?: string | string[];
     snapshotSerializers?: string[];
     workspace?: (ViteConfig & { test: VitestConfig['test'] & { workspace: never } })[];
-    projects?: (string | (ViteConfig & { test: VitestConfig['test'] & { projects: never } }))[];
+    projects?: (string | VitestProject)[];
     alias?: AliasOptions;
   };
 }
@@ -62,18 +62,26 @@ export interface ViteConfig extends VitestConfig {
 }
 
 export type COMMAND = 'serve' | 'build';
-export type MODE = 'development' | 'production';
+export type MODE = 'development' | 'production' | 'test';
 
-interface Options {
+export interface Options {
   command: COMMAND;
   mode: MODE;
   isSsrBuild?: boolean | undefined;
   ssrBuild?: boolean | undefined;
+  isPreview?: boolean | undefined;
 }
 
 export type ViteConfigOrFn =
   | ViteConfig
   | ((options: Options) => ViteConfig)
   | ((options: Options) => Promise<ViteConfig>);
+
+export type VitestProjectConfig = ViteConfig & { test: VitestConfig['test'] & { projects: never } };
+
+export type VitestProject =
+  | VitestProjectConfig
+  | Promise<VitestProjectConfig>
+  | ((options: Options) => VitestProjectConfig | Promise<VitestProjectConfig>);
 
 export type VitestWorkspaceConfig = (string | ViteConfig)[];

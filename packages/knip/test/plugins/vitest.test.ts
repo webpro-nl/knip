@@ -24,13 +24,14 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
   assert(issues.unresolved['vitest.config.ts']['snapshot-serializer.js']);
+  assert(!issues.files['test/basic.edge.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 11,
     unresolved: 2,
-    processed: 12,
-    total: 12,
+    processed: 13,
+    total: 13,
   });
 });
 
