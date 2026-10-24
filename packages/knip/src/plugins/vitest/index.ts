@@ -11,7 +11,7 @@ import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveExtendedConfig } from '../oxlint/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
-import { getAliasInputs, getEnvSpecifier, getExternalReporters } from './helpers.ts';
+import { getAliasInputs, getExternalReporters, toEnvDependency } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
 import type {
   AliasOptions,
@@ -57,11 +57,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
 
   const env = testConfig.environment;
   const environments =
-    env && env !== 'node'
-      ? isInternal(env) || isAbsolute(env)
-        ? [toDeferResolve(env)]
-        : [toDependency(getEnvSpecifier(env))]
-      : [];
+    env && env !== 'node' ? (isInternal(env) || isAbsolute(env) ? [toDeferResolve(env)] : [toEnvDependency(env)]) : [];
   const reporters = getExternalReporters(testConfig.reporters).map(specifier =>
     isInternal(specifier) || isAbsolute(specifier)
       ? { ...toDeferResolve(specifier), dir: vitestRoot }
@@ -295,7 +291,7 @@ const args: Args = {
       }
     }
     if (parsed['environment'] && parsed['environment'] !== 'node') {
-      inputs.push(toDependency(getEnvSpecifier(parsed['environment'])));
+      inputs.push(toEnvDependency(parsed['environment']));
     }
     if (typeof parsed['typecheck'] === 'object' && parsed['typecheck'].checker) {
       inputs.push(toDependency(parsed['typecheck'].checker === 'tsc' ? 'typescript' : parsed['typecheck'].checker));

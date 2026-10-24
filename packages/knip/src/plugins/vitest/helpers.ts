@@ -1,4 +1,4 @@
-import { type Input, toAlias } from '../../util/input.ts';
+import { type Input, toAlias, toDependency } from '../../util/input.ts';
 import { join, toPosix } from '../../util/path.ts';
 import type { AliasOptions, ViteConfig } from './types.ts';
 
@@ -23,10 +23,13 @@ const envPackageNames: Record<Exclude<keyof typeof environments, 'node'>, string
   'edge-runtime': '@edge-runtime/vm',
 };
 
-export const getEnvSpecifier = (env: string) => {
+const getEnvSpecifier = (env: string) => {
   if (env in envPackageNames) return envPackageNames[env as Exclude<KnownEnvironment, 'node'>];
   return `vitest-environment-${env}`;
 };
+
+export const toEnvDependency = (env: string) =>
+  toDependency(getEnvSpecifier(env), env === 'nuxt' ? { optional: true } : undefined);
 
 // See full list here:
 // https://github.com/vitest-dev/vitest/blob/v3.2.4/packages/vitest/src/node/reporters/index.ts#L46-L58

@@ -47,6 +47,12 @@ export default {
           name: 'promise',
         },
       }),
+      {
+        test: {
+          name: 'nuxt',
+          environment: 'nuxt',
+        },
+      },
     ],
     coverage: {
       enabled: false,
