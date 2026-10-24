@@ -1,0 +1,11 @@
+{
+  "name": "buf-plugin-fixture",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "*",
+    "@bufbuild/protoplugin": "*",
+    "@connectrpc/protoc-gen-connect-es": "*",
+    "@protobuf-ts/plugin": "*"
+  }
+}

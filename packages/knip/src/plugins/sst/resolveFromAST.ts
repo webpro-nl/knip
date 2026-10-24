@@ -47,7 +47,5 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
     visitor.visit(program);
   } catch {}
 
-  return Array.from(entries).map(specifier =>
-    toDeferResolveProductionEntry(specifier, { containingFilePath: options.configFilePath })
-  );
+  return Array.from(entries).map(specifier => toDeferResolveProductionEntry(specifier));
 };

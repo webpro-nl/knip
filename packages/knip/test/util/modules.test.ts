@@ -45,7 +45,10 @@ test('Should extract package name from module specifier', () => {
   assert.equal(getPackageNameFromModuleSpecifier('@~private/pkg/deep'), '@~private/pkg');
   assert.equal(getPackageNameFromModuleSpecifier('react'), 'react');
   assert.equal(getPackageNameFromModuleSpecifier('react/jsx-runtime'), 'react');
+  assert.equal(getPackageNameFromModuleSpecifier('~utils'), '~utils');
+  assert.equal(getPackageNameFromModuleSpecifier('~utils/greet'), '~utils');
   assert.equal(getPackageNameFromModuleSpecifier('~/something'), undefined);
+  assert.equal(getPackageNameFromModuleSpecifier('~~/root'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('./relative'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('#subpath'), undefined);
 });

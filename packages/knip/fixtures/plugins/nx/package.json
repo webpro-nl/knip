@@ -4,6 +4,7 @@
     "nx": "nx"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "*",
     "@nx/next": "*",
     "@nx/linter": "*",
     "@nx/cypress": "*",
@@ -15,9 +16,17 @@
     "@nrwl/storybook": "*",
     "@nrwl/web": "*",
     "@nrwl/workspace": "*",
+    "@nx/eslint-plugin": "*",
     "@tsconfig/node20": "*",
     "@tsconfig/strictest": "*",
-    "rimraf": "*"
+    "@vitest/coverage-v8": "*",
+    "jasmine-core": "*",
+    "karma": "*",
+    "karma-jasmine": "*",
+    "rimraf": "*",
+    "ts-jest": "*",
+    "tslib": "*",
+    "vitest": "*"
   },
   "nx": {
     "targets": {

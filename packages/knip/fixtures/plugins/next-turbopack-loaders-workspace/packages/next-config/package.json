@@ -1,0 +1,7 @@
+{
+  "name": "@workspace/next-config",
+  "exports": "./index.ts",
+  "dependencies": {
+    "@shared/md-loader": "*"
+  }
+}

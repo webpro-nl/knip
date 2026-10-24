@@ -29,6 +29,12 @@ export const [, f] = [5, 6];
 
 export const [g, , i] = [7, 8, 9];
 
+export const j = 10,
+  k = 11;
+
+export const l = 12,
+  m = 13;
+
 class MyClass {}
 
 /** @lintignore */
@@ -41,6 +47,16 @@ export type U = number;
 export const dx = 1;
 `,
     'default.mjs': `export const d = 1;
+`,
+    'default-function.mjs': `export const df = 1;
+`,
+    'default-class.mjs': `export const dc = 1;
+`,
+    'default-decorated.ts': `function sealed(value: Function) {
+  Object.seal(value);
+}
+
+export const dd = 1;
 `,
     'exports.js': `const identifier = 1;
 const identifier2 = 2;
@@ -132,6 +148,12 @@ export const [c, d] = [3, 4];
 export const [e, f] = [5, 6];
 
 export const [g, h, i] = [7, 8, 9];
+
+export const j = 10,
+  k = 11;
+
+export const l = 12,
+  m = 13;
 
 export default class MyClass {}
 

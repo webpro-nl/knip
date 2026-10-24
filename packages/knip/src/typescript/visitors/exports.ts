@@ -122,7 +122,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           }
         } else if (declarator.id.type === 'Identifier') {
           const name = declarator.id.name;
-          const fix = s.getFix(exportStart, exportStart + 7);
+          const fix = decl.declarations.length === 1 ? s.getFix(exportStart, exportStart + 7) : undefined;
           const jsDocTags = s.getJSDocTags(exportStart);
 
           let isReExport = false;
@@ -275,11 +275,13 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   if (s.skipExports || s.isInNamespace(node)) return;
 
   const decl = node.declaration;
-  const hasDeclarationBody = decl.type === 'ClassDeclaration' || decl.type === 'FunctionDeclaration';
+  const isNamedDeclaration = (decl.type === 'ClassDeclaration' || decl.type === 'FunctionDeclaration') && decl.id;
+  const start =
+    decl.type === 'ClassDeclaration' ? Math.min(node.start, decl.decorators[0]?.start ?? node.start) : node.start;
   const fix: Fix = s.options.isFixExports
-    ? hasDeclarationBody
+    ? isNamedDeclaration
       ? [node.start, decl.start, FIX_FLAGS.NONE]
-      : [node.start, node.end + 1, FIX_FLAGS.NONE]
+      : [start, node.end + 1, FIX_FLAGS.NONE]
     : undefined;
 
   let type: SymbolType = SYMBOL_TYPE.UNKNOWN;

@@ -24,7 +24,7 @@ import { isExternalReExportsOnly } from './typescript/ast-helpers.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
-import { debugLogArray, debugLogObject } from './util/debug.ts';
+import { debugLog, debugLogArray, debugLogObject } from './util/debug.ts';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
 import {
   type ConfigInput,
@@ -38,7 +38,7 @@ import {
 } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
-import { basename, dirname, join, relative, toRelative } from './util/path.ts';
+import { basename, dirname, extname, join, relative, toRelative } from './util/path.ts';
 import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
@@ -395,6 +395,7 @@ export class WorkspaceWorker {
 
       const options = {
         ...baseScriptOptions,
+        pluginName,
         config,
         configFilePath: containingFilePath,
         configFileDir: cwd,
@@ -475,13 +476,19 @@ export class WorkspaceWorker {
                   cache.resolveConfig = inputs;
                 }
               } catch (error) {
-                if (!(error instanceof Error)) throw error;
                 hasLoadConfigError = true;
-                this.handleConfigLoadError();
                 const relPath = toRelative(configFilePath, this.options.cwd);
-                const cause = formatCauseMessage(error, this.options.cwd);
-                logError(`Error loading ${relPath} (${cause})`);
-                logError('Please fix or visit https://knip.dev/reference/known-issues');
+                const cause = formatCauseMessage(
+                  error instanceof Error ? error : new Error(String(error)),
+                  this.options.cwd
+                );
+                if (plugin.isLoadConfigOptional) {
+                  debugLog(wsName, `Error loading ${relPath} (${cause})`);
+                } else {
+                  this.handleConfigLoadError();
+                  logError(`Error loading ${relPath} (${cause})`);
+                  logError('Please fix or visit https://knip.dev/reference/known-issues');
+                }
               }
             }
           }
@@ -495,9 +502,11 @@ export class WorkspaceWorker {
         }
 
         if (!isManifest) {
-          inputs.push(toEntry(configFilePath));
+          if (extname(configFilePath)) {
+            inputs.push(toEntry(configFilePath));
+            cache.configFile = toEntry(configFilePath);
+          }
           storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
-          cache.configFile = toEntry(configFilePath);
 
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);

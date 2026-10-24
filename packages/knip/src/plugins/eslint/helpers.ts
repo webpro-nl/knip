@@ -40,7 +40,7 @@ const getInputsDeprecated = (
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
   const extendConfigs = [...extendsList.filter(isInternal), ...extendsSpecifiers].map(specifier =>
-    toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
+    toConfig('eslint', specifier)
   );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parsers = getParsers(config);
@@ -58,7 +58,7 @@ const getInputsDeprecated = (
 const isParserObject = (value: Record<string, unknown>) =>
   typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
 
-const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+export const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
 
 const getParsers = ({ parser, parserOptions }: BaseConfig) => {
   const inputs: Input[] = [];

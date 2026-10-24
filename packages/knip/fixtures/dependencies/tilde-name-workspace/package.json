@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/tilde-name-workspace",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

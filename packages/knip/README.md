@@ -48,7 +48,7 @@ following projects:
 
 [1]: https://www.npmx.dev/package/knip
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
-[3]: https://img.shields.io/npm/dm/knip?color=f56e0f
+[3]: https://img.shields.io/badge/dynamic/json?url=https://npm-gapless.webpro.nl/downloads/range/last-month/knip&query=$.totalCompact&label=downloads&suffix=/month&color=f56e0f
 [4]: https://github.com/webpro-nl/knip
 [5]:
   https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f

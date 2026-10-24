@@ -88,7 +88,7 @@ const extractScriptsFromTask = (task: TaskfileTask): string[] => {
 const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options) => {
   if (!localConfig || !options.configFilePath) return [];
 
-  const { configFilePath, getInputsFromScripts, isProduction, configFileDir } = options;
+  const { getInputsFromScripts, isProduction, configFileDir } = options;
   const inputs: Input[] = [];
 
   if (localConfig.includes && typeof localConfig.includes === 'object') {
@@ -101,9 +101,7 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
             : undefined;
       if (includePath) {
         const resolvedPath = join(configFileDir, includePath);
-        inputs.push(
-          toConfig('taskfile', relative(configFileDir, resolvedPath), { containingFilePath: configFilePath })
-        );
+        inputs.push(toConfig('taskfile', relative(configFileDir, resolvedPath)));
       }
     }
   }
@@ -111,10 +109,7 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
   if (localConfig.tasks && typeof localConfig.tasks === 'object') {
     for (const task of Object.values(localConfig.tasks)) {
       for (const script of extractScriptsFromTask(task)) {
-        for (const input of getInputsFromScripts([script], {
-          optionalBinaries: true,
-          containingFilePath: configFilePath,
-        })) {
+        for (const input of getInputsFromScripts([script], { optionalBinaries: true })) {
           if (isProduction) Object.assign(input, { optional: true });
           inputs.push({ ...input, dir: configFileDir });
         }

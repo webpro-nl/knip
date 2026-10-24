@@ -3,7 +3,7 @@ import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
 import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
-  if (!isStartsLikePackageName(specifier)) return;
+  if (!isStartsLikePackageName(specifier) && !isTildePackageName(specifier)) return;
   let start = 0;
   if (specifier.charCodeAt(0) === 64) {
     const slash = specifier.indexOf('/', 1);
@@ -55,6 +55,8 @@ export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
   return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
 };
+const isTildePackageName = (specifier: string) =>
+  specifier.charCodeAt(0) === 126 && isPackageNameStart(specifier.charCodeAt(1));
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 

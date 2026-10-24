@@ -1,5 +1,6 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import type { PluginName } from '../../types/PluginNames.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
 import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
@@ -88,6 +89,9 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
       return scriptInputs;
     });
 
+  const toTargetConfig = (pluginName: PluginName, specifier: string) =>
+    toConfig(pluginName, expand(specifier), { dir: options.rootCwd });
+
   const configInputs = targets.flatMap(target => {
     const opts = target.options;
     if (!opts) return [];
@@ -95,23 +99,27 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     const configs = [];
 
     if ('eslintConfig' in opts && typeof opts.eslintConfig === 'string') {
-      configs.push(toConfig('eslint', opts.eslintConfig));
+      configs.push(toTargetConfig('eslint', opts.eslintConfig));
     }
 
     if ('jestConfig' in opts && typeof opts.jestConfig === 'string') {
-      configs.push(toConfig('jest', opts.jestConfig));
+      configs.push(toTargetConfig('jest', opts.jestConfig));
+    }
+
+    if ('karmaConfig' in opts && typeof opts.karmaConfig === 'string') {
+      configs.push(toTargetConfig('karma', opts.karmaConfig));
     }
 
     if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
-      configs.push(toConfig('typescript', opts.tsConfig));
+      configs.push(toTargetConfig('typescript', opts.tsConfig));
     }
 
     if ('vitestConfig' in opts && typeof opts.vitestConfig === 'string') {
-      configs.push(toConfig('vitest', opts.vitestConfig));
+      configs.push(toTargetConfig('vitest', opts.vitestConfig));
     }
 
     if ('webpackConfig' in opts && typeof opts.webpackConfig === 'string') {
-      configs.push(toConfig('webpack', opts.webpackConfig));
+      configs.push(toTargetConfig('webpack', opts.webpackConfig));
     }
 
     return configs;

@@ -131,6 +131,7 @@ type IsPluginEnabledOptions = {
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
 
 export interface PluginOptions extends BaseOptions {
+  pluginName: PluginName;
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
@@ -228,6 +229,8 @@ export interface Plugin {
   project?: string[];
   setup?: PluginSetup;
   isLoadConfig?: IsLoadConfig;
+  /** Fall back to `resolveFromAST` when the config file fails to load, instead of reporting an error */
+  isLoadConfigOptional?: boolean;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   /**

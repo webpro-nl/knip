@@ -130,7 +130,7 @@ export function extractNamespaceMembers(
   if (!decl.body || decl.body.type !== 'TSModuleBlock') return [];
   const members: ExportMember[] = [];
 
-  const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number) => {
+  const addMember = (name: string, pos: number, stmtStart: number, stmtEnd: number, isFixable = true) => {
     const fullName = prefix ? `${prefix}.${name}` : name;
     const tags = getJSDocTags(stmtStart);
     const existing = members.find(m => m.identifier === fullName);
@@ -142,9 +142,10 @@ export function extractNamespaceMembers(
       return;
     }
     const { line, col } = getLineAndCol(lineStarts, pos);
-    const fix: Fix = options.isFixExports
-      ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
-      : undefined;
+    const fix: Fix =
+      options.isFixExports && isFixable
+        ? [stmtStart, stmtEnd, FIX_FLAGS.OBJECT_BINDING | FIX_FLAGS.WITH_NEWLINE]
+        : undefined;
     members.push({
       identifier: fullName,
       type: SYMBOL_TYPE.MEMBER as SymbolType,
@@ -165,7 +166,7 @@ export function extractNamespaceMembers(
     if (d.type === 'VariableDeclaration') {
       for (const declarator of d.declarations) {
         if (declarator.id.type === 'Identifier') {
-          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end);
+          addMember(declarator.id.name, declarator.id.start, stmt.start, stmt.end, d.declarations.length === 1);
         }
       }
     } else if (d.type === 'TSModuleDeclaration' && d.kind !== 'global' && d.id.type === 'Identifier') {

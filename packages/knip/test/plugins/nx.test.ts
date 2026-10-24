@@ -17,6 +17,7 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.devDependencies['package.json']['@nrwl/web']);
   assert(issues.devDependencies['package.json']['@nrwl/workspace']);
   assert(issues.devDependencies['package.json']['rimraf']);
+  assert(issues.devDependencies['package.json']['karma']);
 
   assert(issues.unlisted['package.json']['nx']);
   assert(issues.unlisted['apps/b/project.json']['@js/cypress']);
@@ -24,6 +25,7 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.unlisted['libs/b/project.json']['@nx/vitest']);
   assert(issues.unlisted['libs/b/project.json']['@nx/webpack']);
   assert(issues.unlisted['libs/b/project.json']['webpack-cli']);
+  assert(issues.unlisted['libs/b/webpack.config.js']['@nx/webpack']);
 
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
@@ -34,10 +36,9 @@ test('Find dependencies with the Nx plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 6,
-    devDependencies: 6,
-    unlisted: 6,
-    files: 3,
-    processed: 6,
-    total: 6,
+    devDependencies: 7,
+    unlisted: 7,
+    processed: 8,
+    total: 8,
   });
 });

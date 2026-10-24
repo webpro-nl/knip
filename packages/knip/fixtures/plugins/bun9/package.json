@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/bun9",
+  "scripts": {
+    "test:dom": "bun test .dom.test.tsx",
+    "test:feature": "bun test feature",
+    "test:integration": "bun test .integration",
+    "test:queue": "bun test queue.test.mjs"
+  }
+}

@@ -35,7 +35,7 @@ export const resolveExtendedConfig = (config: OxlintConfig, configFilePath: stri
   for (const entry of config.extends ?? []) {
     if (typeof entry === 'string') {
       const filePath = toAbsolute(entry, dirname(configFilePath));
-      inputs.push(toConfig('oxlint', filePath, { containingFilePath: configFilePath }));
+      inputs.push(toConfig('oxlint', filePath));
     } else {
       for (const input of resolveExtendedConfig(entry, configFilePath)) inputs.push(input);
     }

@@ -9,6 +9,7 @@ export type PluginName =
   | 'babel'
   | 'biome'
   | 'borp'
+  | 'buf'
   | 'bumpp'
   | 'bun'
   | 'c8'
@@ -66,6 +67,7 @@ export type PluginName =
   | 'lunaria'
   | 'markdownlint'
   | 'marko'
+  | 'mcp'
   | 'mdx'
   | 'mdxlint'
   | 'metro'
@@ -159,6 +161,7 @@ export type PluginName =
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
+  | 'tsrs'
   | 'tsup'
   | 'tsx'
   | 'turbo'
@@ -206,6 +209,7 @@ export const pluginNames = [
   'babel',
   'biome',
   'borp',
+  'buf',
   'bumpp',
   'bun',
   'c8',
@@ -263,6 +267,7 @@ export const pluginNames = [
   'lunaria',
   'markdownlint',
   'marko',
+  'mcp',
   'mdx',
   'mdxlint',
   'metro',
@@ -356,6 +361,7 @@ export const pluginNames = [
   'ts-node',
   'tsd',
   'tsdown',
+  'tsrs',
   'tsup',
   'tsx',
   'turbo',

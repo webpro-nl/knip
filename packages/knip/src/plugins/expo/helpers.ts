@@ -1,7 +1,7 @@
 import type { PluginOptions, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency, toProductionDependency } from '../../util/input.ts';
+import { type Input, toDeferResolveEntry, toDependency, toProductionDependency } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join } from '../../util/path.ts';
 import type { ExpoConfig } from './types.ts';
 
 const getDummyConfigContext = (options: PluginOptions) => ({
@@ -26,15 +26,18 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   const platforms = config.platforms ?? ['ios', 'android'];
 
-  const pluginPackages =
-    (config.plugins
-      ?.map(plugin => {
-        const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
-        return getPackageNameFromModuleSpecifier(pluginName);
-      })
-      .filter(Boolean) as string[]) ?? [];
+  const inputs = new Set<Input>();
 
-  const inputs = new Set<Input>(pluginPackages.map(id => toDependency(id)));
+  for (const plugin of config.plugins ?? []) {
+    const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (typeof pluginName !== 'string') continue;
+    if (isInternal(pluginName)) {
+      inputs.add(toDeferResolveEntry(pluginName));
+    } else {
+      const packageName = getPackageNameFromModuleSpecifier(pluginName);
+      if (packageName) inputs.add(toDependency(packageName));
+    }
+  }
 
   const allowedPackages = ['expo-atlas', 'expo-dev-client'];
   const allowedProductionPackages = ['expo-insights'];

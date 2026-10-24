@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/dependencies-ambient-module-reexport",
+  "devDependencies": {
+    "@commander-js/extra-typings": "*",
+    "unused-package": "*"
+  }
+}

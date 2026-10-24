@@ -1,0 +1,22 @@
+{
+  // VS Code uses `servers` instead of `mcpServers`
+  "inputs": [],
+  "servers": {
+    "inventory": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/inventory-server.ts"]
+    },
+    "reports": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/scripts/reports-server.ts"]
+    },
+    "tools": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["server.ts"],
+      "cwd": "${workspaceFolder}/tools/vscode"
+    }
+  }
+}

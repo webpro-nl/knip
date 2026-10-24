@@ -11,8 +11,6 @@ test('Find dependencies with the semantic-release plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.devDependencies['package.json']['semantic-release']);
-
   assert(issues.unlisted['.releaserc']['@semantic-release/changelog']);
   assert(issues.unlisted['.releaserc']['@semantic-release/git']);
 
@@ -21,9 +19,8 @@ test('Find dependencies with the semantic-release plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     unlisted: 4,
-    processed: 0,
-    total: 0,
+    processed: 6,
+    total: 6,
   });
 });

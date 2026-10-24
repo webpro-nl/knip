@@ -3,7 +3,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
 
@@ -15,7 +15,7 @@ const enablers = ['typescript', '@typescript/native', '@typescript/native-previe
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsconfig.json'];
+export const config = ['tsconfig.json'];
 
 const resolveContentMappers = (localConfig: TsConfigJson) => {
   const inputs: Input[] = [];
@@ -27,19 +27,20 @@ const resolveContentMappers = (localConfig: TsConfigJson) => {
   return inputs;
 };
 
-const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
+export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
-    ? [localConfig.extends]
-        .flat()
-        .map(specifier => toConfig('typescript', specifier, { containingFilePath: options.configFilePath }))
+    ? [localConfig.extends].flat().map(specifier => toConfig(options.pluginName, specifier))
     : [];
 
   const references =
-    localConfig.references
-      ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
+    localConfig.references?.map(({ path }) =>
+      toConfig(
+        options.pluginName,
+        path.endsWith('.json') ? path : toAbsolute(join(path, 'tsconfig.json'), options.configFileDir)
+      )
+    ) ?? [];
 
   const contentMappers = resolveContentMappers(localConfig);
 
@@ -63,7 +64,7 @@ const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   ]);
 };
 
-const args = {
+export const args = {
   binaries: ['tsc', 'tsgo'],
   string: ['project'],
   alias: { project: ['p'] },

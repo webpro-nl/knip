@@ -1,0 +1,14 @@
+version: v1
+plugins:
+  - plugin: es
+    out: src/gen
+  - name: connect-es
+    out: src/gen
+  - plugin: custom-ts
+    path: ./node_modules/.bin/protoc-gen-ts
+    out: src/gen
+  - plugin: hello
+    path: [node, "./src/custom generators/protoc-gen-hello's.js"]
+    out: src/gen
+  - plugin: go
+    out: gen/go

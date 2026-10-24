@@ -454,6 +454,10 @@
           "title": "borp plugin configuration (https://knip.dev/reference/plugins/borp)",
           "$ref": "#/definitions/plugin"
         },
+        "buf": {
+          "title": "buf plugin configuration (https://knip.dev/reference/plugins/buf)",
+          "$ref": "#/definitions/plugin"
+        },
         "bumpp": {
           "title": "bumpp plugin configuration (https://knip.dev/reference/plugins/bumpp)",
           "$ref": "#/definitions/plugin"
@@ -676,6 +680,10 @@
         },
         "marko": {
           "title": "marko plugin configuration (https://knip.dev/reference/plugins/marko)",
+          "$ref": "#/definitions/plugin"
+        },
+        "mcp": {
+          "title": "mcp plugin configuration (https://knip.dev/reference/plugins/mcp)",
           "$ref": "#/definitions/plugin"
         },
         "mdx": {
@@ -1040,6 +1048,10 @@
         },
         "tsdown": {
           "title": "tsdown plugin configuration (https://knip.dev/reference/plugins/tsdown)",
+          "$ref": "#/definitions/plugin"
+        },
+        "tsrs": {
+          "title": "tsrs plugin configuration (https://knip.dev/reference/plugins/tsrs)",
           "$ref": "#/definitions/plugin"
         },
         "tsup": {

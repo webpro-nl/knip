@@ -8,6 +8,7 @@ import { default as ava } from './ava/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
 import { default as borp } from './borp/index.ts';
+import { default as buf } from './buf/index.ts';
 import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
@@ -65,6 +66,7 @@ import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as lunaria } from './lunaria/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as marko } from './marko/index.ts';
+import { default as mcp } from './mcp/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
@@ -158,6 +160,7 @@ import { default as travis } from './travis/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
+import { default as tsrs } from './tsrs/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
 import { default as turbo } from './turbo/index.ts';
@@ -205,6 +208,7 @@ export const Plugins = {
   babel,
   biome,
   borp,
+  buf,
   bumpp,
   bun,
   c8,
@@ -262,6 +266,7 @@ export const Plugins = {
   lunaria,
   markdownlint,
   marko,
+  mcp,
   mdx,
   mdxlint,
   metro,
@@ -355,6 +360,7 @@ export const Plugins = {
   'ts-node': tsNode,
   tsd,
   tsdown,
+  tsrs,
   tsup,
   tsx,
   turbo,

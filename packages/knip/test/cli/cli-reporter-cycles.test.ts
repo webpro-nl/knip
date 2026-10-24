@@ -8,7 +8,7 @@ const cwd = resolve('fixtures/imports/circular-dependencies');
 test('knip --cycles --reporter cycles (tree output)', () => {
   const { stdout, stderr, status } = exec('knip --cycles --reporter cycles', { cwd });
   assert.equal(stderr, '');
-  assert.match(stdout, /Circular dependencies \(4\)/);
+  assert.match(stdout, /Circular dependencies \(5\)/);
   assert.match(stdout, /^apricot\.ts:1:10$/m);
   assert.match(stdout, /└── import \.\/banana → banana\.ts:1:10$/m);
   assert.match(stdout, /└── import \.\/apricot → apricot\.ts:1:10 ↩$/m);
@@ -24,7 +24,10 @@ test('knip --cycles --reporter cycles (tree output)', () => {
   assert.match(stdout, /^ping\.ts:1:10$/m);
   assert.match(stdout, /└── import \.\/pong → pong\.ts:1:10$/m);
   assert.match(stdout, /└── import \.\/ping → ping\.ts:1:10 ↩$/m);
+  assert.match(stdout, /^yin\.ts:1:10$/m);
+  assert.match(stdout, /└── namespace import \.\/yin → yin\.ts:1:10 ↩$/m);
   assert.doesNotMatch(stdout, /zucchini\.ts/);
+  assert.doesNotMatch(stdout, /model\.ts|format\.ts/);
   assert.ok(stdout.indexOf('apricot.ts') < stdout.indexOf('ping.ts'));
   assert.ok(stdout.indexOf('citrus.ts') < stdout.indexOf('ping.ts'));
   assert.equal(status, 0);

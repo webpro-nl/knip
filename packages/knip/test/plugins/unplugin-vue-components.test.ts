@@ -15,6 +15,7 @@ test('Resolve auto-imported components with the unplugin-vue-components plugin',
   assert(!('components/AppButton.vue' in issues.files));
   // AppCard is registered but never used in any template → still reported.
   assert('components/AppCard.vue' in issues.files);
+  assert(!('components/app-icon.ts' in issues.files));
 
   assert(issues.dependencies['package.json']['unplugin-vue-components']);
 
@@ -22,7 +23,7 @@ test('Resolve auto-imported components with the unplugin-vue-components plugin',
     ...baseCounters,
     files: 1,
     dependencies: 1,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
   });
 });

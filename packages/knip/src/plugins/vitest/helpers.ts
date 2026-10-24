@@ -51,9 +51,16 @@ const builtInReporters = [
 
 const addStar = (value: string) => (value.endsWith('*') ? value : join(value, '*').replace(/\/\*\*$/, '/*'));
 
+const getAliasEntries = (aliasOptions: AliasOptions) => {
+  if (!Array.isArray(aliasOptions)) return Object.entries(aliasOptions);
+  const entries: [string, string][] = [];
+  for (const { find, replacement } of aliasOptions) if (typeof find === 'string') entries.push([find, replacement]);
+  return entries;
+};
+
 export const getAliasInputs = (aliasOptions: AliasOptions, cwd: string): Input[] => {
   const inputs: Input[] = [];
-  for (const [alias, value] of Object.entries(aliasOptions)) {
+  for (const [alias, value] of getAliasEntries(aliasOptions)) {
     if (!value) continue;
     const prefixes = [value]
       .flat()
