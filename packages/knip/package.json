@@ -98,13 +98,13 @@
     "formatly": "^0.11.4",
     "get-tsconfig": "4.14.3",
     "jiti": "^2.7.0",
-    "oxc-parser": "^0.154.0",
+    "oxc-parser": "^0.155.0",
     "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.7",
     "smol-toml": "^1.9.0",
     "strip-json-comments": "5.0.3",
     "tinyglobby": "^0.2.17",
-    "unbash": "^6.0.0",
+    "unbash": "^6.0.1",
     "yaml": "^2.9.1",
     "zod": "^4.6.5"
   },
@@ -116,7 +116,7 @@
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "7.0.2",
-    "webpack": "^5.111.1"
+    "webpack": "^5.112.0"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

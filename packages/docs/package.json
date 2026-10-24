@@ -21,12 +21,12 @@
     "@astro-community/astro-embed-youtube": "0.5.10",
     "@astrojs/starlight": "0.42.6",
     "@octokit/graphql": "^9.0.5",
-    "astro": "7.3.8",
+    "astro": "7.4.1",
     "sharp": "0.35.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
-    "@astrojs/markdown-satteri": "0.4.3",
+    "@astrojs/check": "0.9.11",
+    "@astrojs/markdown-satteri": "0.4.4",
     "picocolors": "^1.1.1",
     "satteri": "0.10.5",
     "starlight-blog": "^0.30.2",
