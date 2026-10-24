@@ -126,6 +126,7 @@ export const pluginsSchema = z.object({
   preconstruct: pluginSchema,
   prettier: pluginSchema,
   prisma: pluginSchema,
+  purgecss: pluginSchema,
   quasar: pluginSchema,
   qwik: pluginSchema,
   railway: pluginSchema,
