@@ -5,6 +5,8 @@ import { addValue } from '../../util/module-graph.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
+const chainNames: string[] = [];
+
 function markWholeObjectRead(internalImport: ImportMaps, id: string) {
   (internalImport.enumerated ??= new Set()).add(id);
 }
@@ -14,7 +16,12 @@ function isNumericKey(value: string | undefined) {
 }
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
-  if (node.object.type === 'MemberExpression' && node.object.object.type === 'MemberExpression') {
+  if (
+    node.object.type === 'MemberExpression' &&
+    node.object.object.type === 'MemberExpression' &&
+    !node.computed &&
+    node.property.type === 'Identifier'
+  ) {
     s.chainedMemberExprs.add(node.object);
   }
 
@@ -145,33 +152,25 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
 
   if (
     node.object.type === 'MemberExpression' &&
-    !node.object.computed &&
     node.object.object.type === 'MemberExpression' &&
-    !node.object.object.computed &&
-    node.object.object.object.type === 'Identifier' &&
-    node.object.object.property.type === 'Identifier' &&
-    node.object.property.type === 'Identifier' &&
-    !node.computed &&
-    node.property.type === 'Identifier'
+    !s.chainedMemberExprs.has(node)
   ) {
-    const rootName = node.object.object.object.name;
-    if (!isShadowed(rootName, node.object.object.object.start)) {
-      const _import = s.localImportMap.get(rootName);
-      if (_import) {
-        const internalImport = s.internal.get(_import.filePath);
-        if (internalImport) {
-          const a = node.object.object.property.name;
-          const b = node.object.property.name;
-          const c = node.property.name;
-          s.addNsMemberRefs(internalImport, rootName, a);
-          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}`);
-          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
+    chainNames.length = 0;
+    let root: MemberExpression['object'] = node;
+    while (root.type === 'MemberExpression' && !root.computed && root.property.type === 'Identifier') {
+      chainNames.push(root.property.name);
+      root = root.object;
+    }
+    if (root.type === 'Identifier' && !isShadowed(root.name, root.start)) {
+      const _import = s.localImportMap.get(root.name);
+      const internalImport = _import && s.internal.get(_import.filePath);
+      if (internalImport || !_import) {
+        let path = '';
+        for (let i = chainNames.length - 1; i >= 0; i--) {
+          path = path ? `${path}.${chainNames[i]}` : chainNames[i];
+          if (internalImport) s.addNsMemberRefs(internalImport, root.name, path);
+          else s.memberRefsInFile.push(root.name, path);
         }
-      } else {
-        const a = node.object.object.property.name;
-        const b = node.object.property.name;
-        const c = node.property.name;
-        s.memberRefsInFile.push(rootName, a, rootName, `${a}.${b}`, rootName, `${a}.${b}.${c}`);
       }
     }
   }
