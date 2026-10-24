@@ -118,6 +118,14 @@ export class FileEntryCache<T> {
     if (this.cache.delete(entryName)) this.dirty = true;
   }
 
+  clear() {
+    this.normalizedEntries.clear();
+    if (this.cache.size > 0) {
+      this.cache.clear();
+      this.dirty = true;
+    }
+  }
+
   reconcile() {
     for (const filePath of this.cache.keys()) {
       if (!this.normalizedEntries.has(filePath)) this.removeEntry(filePath);

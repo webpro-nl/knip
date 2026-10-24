@@ -182,6 +182,7 @@ export class ProjectPrincipal {
 
   addProjectPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      if (!this.projectPaths.has(filePath)) this.cache.clear();
       this.projectPaths.add(filePath);
       this.deletedFiles.delete(filePath);
     }
@@ -189,7 +190,7 @@ export class ProjectPrincipal {
 
   removeProjectPath(filePath: string) {
     this.entryPaths.delete(filePath);
-    this.projectPaths.delete(filePath);
+    if (this.projectPaths.delete(filePath)) this.cache.clear();
     this.skipExportsAnalysis.delete(filePath);
     this.includeExportsAnalysis.delete(filePath);
     this.invalidateFile(filePath);

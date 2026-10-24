@@ -14,6 +14,7 @@ import { tmpdir } from 'node:os';
 import test, { type TestContext } from 'node:test';
 import { deserialize } from 'node:v8';
 import { main } from '../../src/index.ts';
+import { createSession } from '../../src/session/session.ts';
 import { isGitignoreCacheEnabled } from '../../src/util/gitignore-cache.ts';
 import { isGlobCacheEnabled } from '../../src/util/glob-cache.ts';
 import { join } from '../../src/util/path.ts';
@@ -174,4 +175,30 @@ test('An uncached run does not reuse or update discovery caches from a preceding
     paths.map(path => readFileSync(join(cache, path))),
     before
   );
+});
+
+test('Cached resolutions respect changes to workspace baseUrl', async t => {
+  const { cwd, write, run, parity } = setup(t);
+  write('knip.json', '{"entry":["index.ts"],"project":["**/*.ts"]}');
+  write('index.ts', "import { value } from 'fruit'; console.log(value);");
+  mkdirSync(join(cwd, 'apple'));
+  mkdirSync(join(cwd, 'pear'));
+  write('apple/fruit.ts', 'export const value = 1;');
+  write('pear/fruit.ts', 'export const value = 2;');
+  write('tsconfig.json', '{"compilerOptions":{"baseUrl":"./apple"}}');
+  await run();
+  write('tsconfig.json', '{"compilerOptions":{"baseUrl":"./pear"}}');
+  assert.deepEqual(Object.keys((await parity()).issues.files), ['apple/fruit.ts']);
+});
+
+test('New project files invalidate cached import facts in an existing session', async t => {
+  const { cwd, cache, write } = setup(t);
+  write('index.ts', "import { value } from './fruit'; console.log(value);");
+  const session = await createSession(
+    await createOptions({ cwd, isSession: true, args: { cache: true, 'cache-location': cache } })
+  );
+  assert.ok(session.getIssues().issues.unresolved['index.ts']);
+  write('fruit.ts', 'export const value = 1;');
+  await session.handleFileChanges([{ type: 'added', filePath: join(cwd, 'fruit.ts') }]);
+  assert.deepEqual(session.getIssues().issues.unresolved, {});
 });

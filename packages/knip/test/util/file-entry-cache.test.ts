@@ -3,8 +3,10 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, utimesSync, wri
 import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { serialize } from 'node:v8';
+import { CacheConsultant } from '../../src/CacheConsultant.ts';
 import { FileEntryCache } from '../../src/util/file-entry-cache.ts';
 import { join, toPosix } from '../../src/util/path.ts';
+import { createOptions } from '../helpers/create-options.ts';
 
 test('Persist file metadata in a new nested cache directory', () => {
   const cwd = toPosix(mkdtempSync(join(tmpdir(), 'knip-file-entry-cache-')));
@@ -93,6 +95,25 @@ test('Failed writes remain dirty and are retried', t => {
   rmSync(cache.filePath, { recursive: true });
   cache.reconcile();
   assert.equal(new FileEntryCache<string>('analysis', cwd).getFileDescriptor(filePath).meta?.data, 'apple');
+});
+
+test('Distinct workspace names retain separate plugin cache entries', async t => {
+  const cwd = toPosix(mkdtempSync(join(tmpdir(), 'knip-workspace-cache-')));
+  t.after(() => rmSync(cwd, { recursive: true, force: true }));
+  writeFileSync(join(cwd, 'package.json'), '{}');
+  const firstPath = join(cwd, 'apple.json');
+  const secondPath = join(cwd, 'pear.json');
+  writeFileSync(firstPath, '{}');
+  writeFileSync(secondPath, '{}');
+  const options = await createOptions({ cwd, args: { cache: true, 'cache-location': join(cwd, 'cache') } });
+  const first = new CacheConsultant<string>('plugins-packages/fruit-tree', options);
+  first.setFileData(firstPath, 'apple');
+  first.reconcile();
+  const second = new CacheConsultant<string>('plugins-packages/fruit_tree', options);
+  second.setFileData(secondPath, 'pear');
+  second.reconcile();
+  assert.equal(new CacheConsultant<string>('plugins-packages/fruit-tree', options).getCachedFile(firstPath), 'apple');
+  assert.equal(new CacheConsultant<string>('plugins-packages/fruit_tree', options).getCachedFile(secondPath), 'pear');
 });
 
 test('Recover from a truncated cache file', () => {

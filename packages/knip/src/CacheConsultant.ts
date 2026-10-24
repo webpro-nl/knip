@@ -11,11 +11,12 @@ export class CacheConsultant<T> {
   getFileDescriptor: (filePath: string) => FileDescriptor<T> = () => dummyFileDescriptor;
   reconcile: () => void = () => {};
   removeEntry: (filePath: string) => void = () => {};
+  clear: () => void = () => {};
   setFileData: (filePath: string, data: T) => void = () => {};
 
   constructor(name: string, options: MainOptions, context?: string) {
     if (!options.isCache) return;
-    const cacheName = `${name.replace(/[^a-z0-9]/g, '-').replace(/-*$/, '')}-${options.isProduction ? '-prod' : ''}-${version}`;
+    const cacheName = `${encodeURIComponent(name)}-${options.isProduction ? '-prod' : ''}-${version}`;
     this.cache = new FileEntryCache(
       cacheName,
       options.cacheLocation,
@@ -24,6 +25,7 @@ export class CacheConsultant<T> {
     this.getFileDescriptor = timerify(this.cache.getFileDescriptor.bind(this.cache));
     this.reconcile = timerify(this.cache.reconcile.bind(this.cache));
     this.removeEntry = timerify(this.cache.removeEntry.bind(this.cache));
+    this.clear = this.cache.clear.bind(this.cache);
     this.setFileData = this.cache.setFileData.bind(this.cache);
   }
 
