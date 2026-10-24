@@ -5,6 +5,17 @@ import { extractBinary, isValidBinary, stripVersionFromSpecifier } from '../../u
 import { isInternal } from '../../util/path.ts';
 import { argsAfter, expandScript } from '../util.ts';
 
+const runCommands = new Set(['run', 'run-script', 'rum', 'urn']);
+
+const lifecycleScripts = new Map([
+  ['start', 'start'],
+  ['stop', 'stop'],
+  ['restart', 'restart'],
+  ['test', 'test'],
+  ['t', 'test'],
+  ['tst', 'test'],
+]);
+
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs, manifest } = options;
   const parsed = parseArgs(words, {
@@ -54,8 +65,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const _childArgs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
-  if (command === 'run' && manifest.scriptNames.has(script)) {
-    return expandScript(script, argsAfter(words, '--'), manifest.scripts, options) ?? _childArgs;
+  const name = runCommands.has(command) ? script : lifecycleScripts.get(command);
+  if (name && manifest.scriptNames.has(name)) {
+    return expandScript(name, argsAfter(words, '--'), manifest.scripts, options) ?? _childArgs;
   }
   return [];
 };
