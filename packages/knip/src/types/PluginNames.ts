@@ -30,6 +30,7 @@ export type PluginName =
   | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
+  | 'electron-forge'
   | 'electron-vite'
   | 'eleventy'
   | 'esbuild'
@@ -229,6 +230,7 @@ export const pluginNames = [
   'docusaurus',
   'dotenv',
   'drizzle',
+  'electron-forge',
   'electron-vite',
   'eleventy',
   'esbuild',

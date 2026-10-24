@@ -43,6 +43,7 @@ export const pluginsSchema = z.object({
   docusaurus: pluginSchema,
   dotenv: pluginSchema,
   drizzle: pluginSchema,
+  'electron-forge': pluginSchema,
   'electron-vite': pluginSchema,
   eleventy: pluginSchema,
   esbuild: pluginSchema,

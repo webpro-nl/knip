@@ -1,0 +1,20 @@
+{
+  "name": "@plugins/electron-forge",
+  "scripts": {
+    "start": "electron-forge start",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "*",
+    "@electron-forge/maker-deb": "*",
+    "@electron-forge/maker-squirrel": "*",
+    "@electron-forge/maker-zip": "*",
+    "@electron-forge/plugin-auto-unpack-natives": "*",
+    "@electron-forge/plugin-vite": "*",
+    "@electron-forge/publisher-github": "*",
+    "@electron-forge/shared-types": "*",
+    "electron": "*",
+    "vite": "*"
+  }
+}

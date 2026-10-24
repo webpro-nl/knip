@@ -538,6 +538,10 @@
           "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
           "$ref": "#/definitions/plugin"
         },
+        "electron-forge": {
+          "title": "Electron Forge plugin configuration (https://knip.dev/reference/plugins/electron-forge)",
+          "$ref": "#/definitions/plugin"
+        },
         "electron-vite": {
           "title": "electron-vite plugin configuration (https://knip.dev/reference/plugins/electron-vite)",
           "$ref": "#/definitions/plugin"
