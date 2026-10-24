@@ -95,6 +95,8 @@ const commands = [
 
 const recursiveCommands = ['recursive', 'multi', 'm'];
 
+const testAliases = new Set(['t', 'tst']);
+
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const parseOptions = {
     isStorePositions: true,
@@ -132,7 +134,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const childInputs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
 
-  if (command === 'run') {
+  if (command === 'run' || command === 'run-script') {
     const script = parsed._[1];
     if (script && manifest.scriptNames.has(script)) {
       return expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? childInputs;
@@ -140,8 +142,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
     return childInputs;
   }
 
-  const isScript = manifest.scriptNames.has(command);
-  if (isScript) return expandScript(command, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
+  const name = testAliases.has(command) ? 'test' : command;
+  const isScript = manifest.scriptNames.has(name);
+  if (isScript) return expandScript(name, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
   if (commands.includes(command)) return childInputs;
 
   return command && isValidBinary(command) ? [toBinary(command)] : [];
