@@ -155,7 +155,7 @@ class IssueFixer {
 
         await writeFile(absFilePath, fileContent.split('\n').filter(keep).join('\n'));
 
-        for (const issue of issuesForFile) issue.isFixed = true;
+        for (const issue of issuesForFile) if (issue.fixes.length > 0) issue.isFixed = true;
 
         touchedFiles.add(filePath);
       } else {
