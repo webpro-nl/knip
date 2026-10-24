@@ -15,6 +15,7 @@ import type { PluginName } from '../types/PluginNames.ts';
 import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
+import { ConfigurationFiles } from '../session/configuration.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
@@ -76,13 +77,15 @@ export async function build({
   options,
 }: BuildOptions) {
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
+  const configurationFiles = options.isSession || options.isWatch ? new ConfigurationFiles(options) : undefined;
 
   const enabledPluginsStore = new Map<string, string[]>();
   const registeredVisitorPlugins = new Set<string>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
-  const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
+  const addIssue = (issue: Issue) =>
+    collector.addIssue(issue) && (options.isWatch || options.isSession) && collector.retainIssue(issue);
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
@@ -144,6 +147,8 @@ export async function build({
     const dependencies = deputy.getDependencies(name);
 
     const tsConfigFilePath = join(dir, options.tsConfigFile ?? 'tsconfig.json');
+    configurationFiles?.add(filePath);
+    configurationFiles?.add(tsConfigFilePath);
     const {
       isFile,
       compilerOptions,
@@ -171,6 +176,7 @@ export async function build({
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
       readRawFile: (filePath: string) => principal.fileManager.readRawFile(filePath) ?? '',
       configFilesMap,
+      configurationFiles,
       options,
     });
 
@@ -643,6 +649,7 @@ export async function build({
 
   return {
     graph,
+    configurationFiles,
     entryPaths,
     analyzedFiles,
     unreferencedFiles,

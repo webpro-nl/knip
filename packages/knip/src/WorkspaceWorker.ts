@@ -44,6 +44,7 @@ import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
 import { ELLIPSIS } from './util/string.ts';
+import type { ConfigurationFiles } from './session/configuration.ts';
 
 type WorkspaceManagerOptions = {
   name: string;
@@ -61,6 +62,7 @@ type WorkspaceManagerOptions = {
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
+  configurationFiles?: ConfigurationFiles;
   options: MainOptions;
 };
 
@@ -97,6 +99,7 @@ export class WorkspaceWorker {
   cache: CacheConsultant<Partial<Record<PluginName, CacheItem>>>;
 
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
+  configurationFiles: ConfigurationFiles | undefined;
 
   constructor({
     name,
@@ -114,6 +117,7 @@ export class WorkspaceWorker {
     getManifest,
     readRawFile,
     configFilesMap,
+    configurationFiles,
     options,
   }: WorkspaceManagerOptions) {
     this.name = name;
@@ -126,6 +130,7 @@ export class WorkspaceWorker {
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
     this.configFilesMap = configFilesMap;
+    this.configurationFiles = configurationFiles;
 
     this.handleInput = handleInput;
     this.handleConfigLoadError = handleConfigLoadError;
@@ -422,12 +427,14 @@ export class WorkspaceWorker {
       for (const configFilePath of configFilePaths) {
         if (seenConfigFiles.has(configFilePath)) continue;
         seenConfigFiles.add(configFilePath);
+        this.configurationFiles?.add(configFilePath);
 
         const isManifest = basename(configFilePath) === 'package.json';
         const fd = isManifest ? undefined : this.cache.getFileDescriptor(configFilePath);
 
         const data = fd?.changed ? undefined : fd?.meta?.data?.[pluginName];
         if (data) {
+          if (data.resolveConfig) this.configurationFiles?.add(configFilePath, true);
           if (data.resolveConfig) for (const id of data.resolveConfig) addInput(id, configFilePath);
           if (data.resolveFromAST) for (const id of data.resolveFromAST) addInput(id, configFilePath);
           if (data.configFile) addInput(data.configFile);
@@ -465,6 +472,7 @@ export class WorkspaceWorker {
             const isLoad =
               typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
             if (isLoad) {
+              this.configurationFiles?.add(configFilePath, true);
               try {
                 const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
                 if (localConfig) {
@@ -533,6 +541,7 @@ export class WorkspaceWorker {
     for (const pluginName of this.enabledPlugins) {
       const configFiles = this.configFilesMap.get(wsName);
       const patterns = [...this.getConfigurationFilePatterns(pluginName), ...(configFiles?.get(pluginName) ?? [])];
+      this.configurationFiles?.addPatterns(this.dir, compact(patterns));
       configFiles?.delete(pluginName);
       for (const input of await runPlugin(pluginName, compact(patterns))) inputs.push(input);
     }
