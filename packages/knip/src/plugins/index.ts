@@ -58,6 +58,7 @@ import { default as knex } from './knex/index.ts';
 import { default as ladle } from './ladle/index.ts';
 import { default as laravelVitePlugin } from './laravel-vite-plugin/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
+import { default as lingui } from './lingui/index.ts';
 import { default as lintStaged } from './lint-staged/index.ts';
 import { default as linthtml } from './linthtml/index.ts';
 import { default as lit } from './lit/index.ts';
@@ -258,6 +259,7 @@ export const Plugins = {
   ladle,
   'laravel-vite-plugin': laravelVitePlugin,
   lefthook,
+  lingui,
   'lint-staged': lintStaged,
   linthtml,
   lit,

@@ -72,6 +72,7 @@ export const pluginsSchema = z.object({
   ladle: pluginSchema,
   'laravel-vite-plugin': pluginSchema,
   lefthook: pluginSchema,
+  lingui: pluginSchema,
   'lint-staged': pluginSchema,
   linthtml: pluginSchema,
   lit: pluginSchema,
