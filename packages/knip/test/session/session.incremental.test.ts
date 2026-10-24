@@ -4,11 +4,11 @@ import { tmpdir } from 'node:os';
 import test, { type TestContext } from 'node:test';
 import { ProjectPrincipal } from '../../src/ProjectPrincipal.ts';
 import { createSession, type Session } from '../../src/session/session.ts';
-import { join } from '../../src/util/path.ts';
+import { join, toPosix } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 const setup = async (t: TestContext) => {
-  const cwd = await realpath(await mkdtemp(join(tmpdir(), 'knip-session-incremental-')));
+  const cwd = toPosix(await realpath(await mkdtemp(join(tmpdir(), 'knip-session-incremental-'))));
   t.after(() => rm(cwd, { recursive: true, force: true }));
   await writeFile(join(cwd, 'package.json'), '{"name":"incremental","knip":{"entry":["index.ts"],"project":["*.ts"]}}');
   return cwd;
