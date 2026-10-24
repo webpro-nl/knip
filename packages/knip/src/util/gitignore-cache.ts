@@ -30,6 +30,7 @@ export interface CachedGitignoreResult {
 }
 
 const store = createDiskCache<GitignoreCacheEntry>('gitignore');
+export const clearGitignoreCache = store.clear;
 
 export const initGitignoreCache = store.init;
 export const isGitignoreCacheEnabled = store.isEnabled;

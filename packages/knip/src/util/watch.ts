@@ -3,6 +3,7 @@ import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { ConfigurationFiles, SessionConfigurationChangedError } from '../session/configuration.ts';
 import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
@@ -33,6 +34,7 @@ type WatchOptions = {
   analyze: () => Promise<void>;
   principal: ProjectPrincipal;
   graph: ModuleGraph;
+  configurationFiles?: ConfigurationFiles;
   isIgnored: (path: string) => boolean;
   onFileChange?: OnFileChange;
   unreferencedFiles: Set<string>;
@@ -55,6 +57,7 @@ export const getSessionHandler = async (
     analyze,
     principal,
     graph,
+    configurationFiles,
     isIgnored,
     onFileChange,
     unreferencedFiles,
@@ -64,10 +67,15 @@ export const getSessionHandler = async (
   const added = new Set<string>();
   const deleted = new Set<string>();
   const modified = new Set<string>();
+  if (configurationFiles) principal.collectConfigurationImports(configurationFiles.paths);
+  let configurationError: SessionConfigurationChangedError | undefined;
 
   const processFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
     let hasRelevantChanges = false;
+    const change = configurationFiles?.getChange(changes, options.cwd);
+    if (!configurationError || change?.requiresRestart) configurationError = change;
+    if (configurationError) throw configurationError;
 
     for (const change of changes) {
       const filePath = toAbsolute(change.filePath, options.cwd);

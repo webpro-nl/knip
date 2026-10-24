@@ -149,8 +149,13 @@ Shortcut: `-w`
 Watch current directory, and update reported issues when a file is modified,
 added or deleted.
 
-Watch mode focuses on imports and exports in source files. During watch mode,
-changes in `package.json` or `node_modules` may not cause an updated report.
+Watch mode reloads declarative configuration, such as JSON plugin configs,
+workspace manifests, `tsconfig.json`, and `.gitignore` files. Plugin config
+locations come from the enabled plugins, including configs in child workspaces.
+
+Changing a loaded JavaScript or TypeScript config, or a local module it imports,
+stops watch mode with a message to restart Knip in a new process. Changes inside
+`node_modules` require restarting Knip manually.
 
 ## Scope
 
