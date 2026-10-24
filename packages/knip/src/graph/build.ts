@@ -11,11 +11,13 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { GetImportsAndExportsOptions, RegisterCompiler } from '../types/config.ts';
 import type { Issue } from '../types/issues.ts';
 import type { FileNode, Import, ModuleGraph } from '../types/module-graph.ts';
+import type { CompilerOptions } from '../types/project.ts';
 import type { PluginName } from '../types/PluginNames.ts';
 import { partition } from '../util/array.ts';
 import { createInputHandler, type ExternalRefsFromInputs } from '../util/create-input-handler.ts';
 import type { MainOptions } from '../util/create-options.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
+import { fileFingerprint } from '../util/file-fingerprint.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
@@ -79,6 +81,7 @@ export async function build({
 
   const enabledPluginsStore = new Map<string, string[]>();
   const registeredVisitorPlugins = new Set<string>();
+  const compilerOptionsByWorkspace = new Map<string, CompilerOptions>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
@@ -153,6 +156,7 @@ export async function build({
       sourceMapPairs,
       paths: tsConfigPaths,
     } = await loadTSConfig(tsConfigFilePath, options.isUseTscFiles);
+    compilerOptionsByWorkspace.set(name, compilerOptions);
     const [definitionPaths, tscSourcePaths] = partition(fileNames, filePath => IS_DTS.test(filePath));
 
     const worker = new WorkspaceWorker({
@@ -603,7 +607,22 @@ export async function build({
     }
   };
 
-  principal.init();
+  principal.init(
+    options.isCache
+      ? JSON.stringify([
+          analyzeOpts,
+          options.configFilePath && fileFingerprint(options.configFilePath),
+          [...registeredVisitorPlugins],
+          [...compilerOptionsByWorkspace],
+          workspaces.map(workspace => [
+            workspace.name,
+            workspace.config.ignoreExportsUsedInFile,
+            workspace.manifestStr,
+            workspace.sourceMaps,
+          ]),
+        ])
+      : undefined
+  );
 
   streamer.cast('Analyzing source files');
 
@@ -629,7 +648,7 @@ export async function build({
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-  principal.reconcileCache(graph);
+  principal.reconcileCache();
 
   perfObserver.addMemoryMark('build');
 

@@ -10,7 +10,7 @@ export const extensionAlias: Record<string, string[]> = {
   '.cjs': ['.cjs', '.cts', '.d.cts'],
 };
 
-const resolverInstances: ResolverFactory[] = [];
+const resolverInstances = new Set<WeakRef<ResolverFactory>>();
 
 const declarationResolver = new ResolverFactory({
   extensions: [...DTS_EXTENSIONS, ...DEFAULT_EXTENSIONS],
@@ -26,7 +26,7 @@ const declarationResolver = new ResolverFactory({
   nodePath: false,
 });
 
-resolverInstances.push(declarationResolver);
+resolverInstances.add(new WeakRef(declarationResolver));
 
 const packageManifestResolver = new ResolverFactory({
   extensions: ['.json'],
@@ -34,7 +34,7 @@ const packageManifestResolver = new ResolverFactory({
   nodePath: false,
 });
 
-resolverInstances.push(packageManifestResolver);
+resolverInstances.add(new WeakRef(packageManifestResolver));
 
 export const resolvePackageManifestPath = (packageName: string, baseDir: string) => {
   const resolved = packageManifestResolver.sync(baseDir, `${packageName}/package.json`);
@@ -57,7 +57,8 @@ const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) =
     conditionNames: ['require', 'import', 'browser', 'default'],
   });
 
-  resolverInstances.push(resolver, fallbackResolver);
+  resolverInstances.add(new WeakRef(resolver));
+  resolverInstances.add(new WeakRef(fallbackResolver));
 
   return function resolveSync(specifier: string, basePath: string) {
     const resolved = resolver.resolveFileSync(basePath, specifier);
@@ -97,7 +98,7 @@ const createSyncResolver = (extensions: string[]) => {
     nodePath: false,
   });
 
-  resolverInstances.push(resolver);
+  resolverInstances.add(new WeakRef(resolver));
 
   return function resolveSync(specifier: string, baseDir: string) {
     const resolved = resolver.sync(baseDir, specifier);
@@ -106,7 +107,11 @@ const createSyncResolver = (extensions: string[]) => {
 };
 
 export function clearResolverCache() {
-  for (const resolver of resolverInstances) resolver.clearCache();
+  for (const reference of resolverInstances) {
+    const resolver = reference.deref();
+    if (resolver) resolver.clearCache();
+    else resolverInstances.delete(reference);
+  }
 }
 
 const resolveSync = createSyncResolver([...DEFAULT_EXTENSIONS, '.json', '.jsonc']);

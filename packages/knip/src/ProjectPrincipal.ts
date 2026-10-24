@@ -10,7 +10,7 @@ import type {
   PluginVisitorContext,
   PluginVisitorObject,
 } from './types/config.ts';
-import type { FileNode, ModuleGraph } from './types/module-graph.ts';
+import type { FileNode } from './types/module-graph.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
@@ -57,6 +57,7 @@ export class ProjectPrincipal {
   private findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined;
   private findWorkspaceNameByFilePath: (filePath: string) => string | undefined;
   private isReportExports: boolean;
+  private options: MainOptions;
 
   fileManager: SourceFileManager;
   private resolveModule: ResolveModule = () => undefined;
@@ -72,7 +73,8 @@ export class ProjectPrincipal {
     findWorkspacePackageTarget: WorkspacePackageTargetHandler | undefined,
     findWorkspaceNameByFilePath: (filePath: string) => string | undefined
   ) {
-    this.cache = new CacheConsultant('root', options);
+    this.options = options;
+    this.cache = new CacheConsultant('root', { ...options, isCache: false });
     this.toSourceFilePath = toSourceFilePath;
     this.findWorkspacePackageTarget = findWorkspacePackageTarget;
     this.findWorkspaceNameByFilePath = findWorkspaceNameByFilePath;
@@ -119,7 +121,7 @@ export class ProjectPrincipal {
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
   }
 
-  init() {
+  init(cacheContext?: string) {
     const scopedPaths =
       this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
     const scopedRootDirs =
@@ -132,6 +134,19 @@ export class ProjectPrincipal {
       this.tsConfigFile
     );
     this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
+    if (!this.options.isCache) return;
+    this.cache = new CacheConsultant(
+      'root',
+      this.options,
+      JSON.stringify([
+        cacheContext,
+        scopedPaths,
+        scopedRootDirs,
+        this.tsConfigFile,
+        [...this.compilers.keys()],
+        [...this.projectPaths],
+      ])
+    );
   }
 
   private hasAcceptedExtension(filePath: string) {
@@ -167,6 +182,7 @@ export class ProjectPrincipal {
 
   addProjectPath(filePath: string) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      if (!this.projectPaths.has(filePath)) this.cache.clear();
       this.projectPaths.add(filePath);
       this.deletedFiles.delete(filePath);
     }
@@ -174,7 +190,7 @@ export class ProjectPrincipal {
 
   removeProjectPath(filePath: string) {
     this.entryPaths.delete(filePath);
-    this.projectPaths.delete(filePath);
+    if (this.projectPaths.delete(filePath)) this.cache.clear();
     this.skipExportsAnalysis.delete(filePath);
     this.includeExportsAnalysis.delete(filePath);
     this.invalidateFile(filePath);
@@ -274,7 +290,18 @@ export class ProjectPrincipal {
   private getCachedFile(filePath: string) {
     const cachedFile = this.cache.getCachedFile(filePath);
     const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
-    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+    return cachedFile?.skipExports === skipExports ? this.copyCachedFile(cachedFile) : undefined;
+  }
+
+  private copyCachedFile(file: FileNode): FileNode {
+    return {
+      ...file,
+      imports: {
+        ...file.imports,
+        external: new Set(file.imports.external),
+        externalRefs: new Set(file.imports.externalRefs),
+      },
+    };
   }
 
   analyzeSourceFile(
@@ -303,7 +330,7 @@ export class ProjectPrincipal {
       ? (this._localRefsVisitor ??= buildVisitor(this.pluginVisitorObjects, true))
       : (this._visitor ??= buildVisitor(this.pluginVisitorObjects, false));
 
-    return _getImportsAndExports(
+    const file = _getImportsAndExports(
       filePath,
       sourceText,
       this.resolveModule,
@@ -314,6 +341,8 @@ export class ProjectPrincipal {
       this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
       parseResult
     );
+    if (this.options.isCache) this.cache.setFileData(filePath, this.copyCachedFile(file));
+    return file;
   }
 
   invalidateFile(filePath: string) {
@@ -321,12 +350,7 @@ export class ProjectPrincipal {
     this.cache.removeEntry(filePath);
   }
 
-  reconcileCache(graph: ModuleGraph) {
-    for (const [filePath, file] of graph) {
-      const fd = this.cache.getFileDescriptor(filePath);
-      if (!fd?.meta) continue;
-      fd.meta.data = { ...file, internalImportCache: undefined, importedBy: undefined };
-    }
+  reconcileCache() {
     this.cache.reconcile();
   }
 }

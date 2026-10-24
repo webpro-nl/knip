@@ -12,13 +12,14 @@ import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
-import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
-import { flushGlobCache, initGlobCache } from './util/glob-cache.ts';
+import { disableGitignoreCache, flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
+import { disableGlobCache, flushGlobCache, initGlobCache } from './util/glob-cache.ts';
 import { getGitIgnoredHandler } from './util/glob-core.ts';
 import { isCatalog } from './util/input.ts';
 import { createManifest } from './util/package-json.ts';
 import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { clearResolverCache } from './util/resolve.ts';
+import { clearModuleResolutionCaches } from './typescript/resolve-module-names.ts';
 import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
@@ -28,10 +29,14 @@ export const run = async (options: MainOptions) => {
   debugLogObject('*', 'Included issue types', options.includedIssueTypes);
 
   clearResolverCache();
+  clearModuleResolutionCaches();
 
   if (options.isCache) {
     initGlobCache(options.cacheLocation);
     initGitignoreCache(options.cacheLocation);
+  } else {
+    disableGlobCache();
+    disableGitignoreCache();
   }
 
   const chief = new ConfigurationChief(options);
