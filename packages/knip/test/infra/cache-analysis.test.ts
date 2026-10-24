@@ -17,12 +17,12 @@ import { main } from '../../src/index.ts';
 import { createSession } from '../../src/session/session.ts';
 import { isGitignoreCacheEnabled } from '../../src/util/gitignore-cache.ts';
 import { isGlobCacheEnabled } from '../../src/util/glob-cache.ts';
-import { join } from '../../src/util/path.ts';
+import { join, toPosix } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
 const setup = (t: TestContext) => {
-  const cwd = realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-analysis-')));
-  const cache = realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-data-')));
+  const cwd = toPosix(realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-analysis-'))));
+  const cache = toPosix(realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-data-'))));
   t.after(() => {
     rmSync(cwd, { recursive: true, force: true });
     rmSync(cache, { recursive: true, force: true });

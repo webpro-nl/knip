@@ -19,7 +19,7 @@ import type { Plugin, WorkspaceConfiguration } from '../../src/types/config.ts';
 import type { MainOptions } from '../../src/util/create-options.ts';
 import { toConfig, toDependency, toEntry } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
-import { join } from '../../src/util/path.ts';
+import { join, toPosix } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
@@ -38,7 +38,7 @@ const createConfig = (): WorkspaceConfiguration => ({
 });
 
 const createFixture = (t: TestContext) => {
-  const cwd = mkdtempSync(join(tmpdir(), 'knip-plugin-cache-'));
+  const cwd = toPosix(mkdtempSync(join(tmpdir(), 'knip-plugin-cache-')));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
   writeFileSync(join(cwd, 'package.json'), '{"name":"plugin-cache"}\n');
   return { cwd, cacheLocation: join(cwd, '.cache') };
@@ -315,13 +315,24 @@ test('Executable plugin configs react to environment changes and stay cached on 
   const run = (entry: string) => {
     const result = spawnSync(
       process.execPath,
-      [resolve('src/cli.ts'), '--directory', cwd, '--cache', '--cache-location', cacheLocation, '--reporter', 'json'],
+      [
+        resolve(process.versions.bun ? 'src/cli.ts' : 'dist/cli.js'),
+        '--directory',
+        cwd,
+        '--cache',
+        '--cache-location',
+        cacheLocation,
+        '--reporter',
+        'json',
+      ],
       {
         encoding: 'utf8',
         env: { ...process.env, KNIP_CACHE_TEST_ENTRY: entry, KNIP_CACHE_TEST_SECRET: 'private-value' },
       }
     );
-    assert.equal(result.status, 1, result.stderr);
+    assert.equal(result.error, undefined);
+    assert.equal(result.stderr, '');
+    assert.equal(result.status, 1);
     const report: JSONReport = JSON.parse(result.stdout);
     const files: string[] = [];
     for (const issue of report.issues) if (issue.files?.length) files.push(issue.file);
