@@ -650,6 +650,10 @@
           "title": "lefthook plugin configuration (https://knip.dev/reference/plugins/lefthook)",
           "$ref": "#/definitions/plugin"
         },
+        "lingui": {
+          "title": "lingui plugin configuration (https://knip.dev/reference/plugins/lingui)",
+          "$ref": "#/definitions/plugin"
+        },
         "lint-staged": {
           "title": "lint-staged plugin configuration (https://knip.dev/reference/plugins/lint-staged)",
           "$ref": "#/definitions/plugin"

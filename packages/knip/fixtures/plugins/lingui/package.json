@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/lingui",
+  "devDependencies": {
+    "@lingui/cli": "*",
+    "@lingui/format-po": "*"
+  }
+}
