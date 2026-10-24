@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/kysely-codegen2",
+  "scripts": {
+    "generate": "kysely-codegen",
+    "local": "kysely-codegen --config-file config/local.ts",
+    "ci": "kysely-codegen --config-file=config/ci.ts"
+  },
+  "devDependencies": {
+    "kysely-codegen": "*",
+    "dotenv": "*"
+  }
+}

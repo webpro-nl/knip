@@ -638,6 +638,10 @@
           "title": "knex plugin configuration (https://knip.dev/reference/plugins/knex)",
           "$ref": "#/definitions/plugin"
         },
+        "kysely-codegen": {
+          "title": "kysely-codegen plugin configuration (https://knip.dev/reference/plugins/kysely-codegen)",
+          "$ref": "#/definitions/plugin"
+        },
         "ladle": {
           "title": "ladle plugin configuration (https://knip.dev/reference/plugins/ladle)",
           "$ref": "#/definitions/plugin"

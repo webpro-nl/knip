@@ -55,6 +55,7 @@ import { default as jasmine } from './jasmine/index.ts';
 import { default as jest } from './jest/index.ts';
 import { default as karma } from './karma/index.ts';
 import { default as knex } from './knex/index.ts';
+import { default as kyselyCodegen } from './kysely-codegen/index.ts';
 import { default as ladle } from './ladle/index.ts';
 import { default as laravelVitePlugin } from './laravel-vite-plugin/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
@@ -255,6 +256,7 @@ export const Plugins = {
   jest,
   karma,
   knex,
+  'kysely-codegen': kyselyCodegen,
   ladle,
   'laravel-vite-plugin': laravelVitePlugin,
   lefthook,

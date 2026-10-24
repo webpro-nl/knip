@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/kysely-codegen",
+  "scripts": { "generate": "kysely-codegen" },
+  "devDependencies": {
+    "kysely-codegen": "*",
+    "dotenv": "*"
+  }
+}
