@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "moduleSuffixes": [".ios", ".native", ""]
+  },
+  "include": ["src"]
+}

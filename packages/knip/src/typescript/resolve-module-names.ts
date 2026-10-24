@@ -74,6 +74,7 @@ function pickExistingPackageTarget(
 
 type ScopedPaths = Array<{ scope: string; paths: Record<string, string[]> }>;
 type ScopedRootDirs = Array<{ scope: string; rootDirs: string[] }>;
+type ScopedModuleSuffixes = Array<{ scope: string; moduleSuffixes: string[] }>;
 
 interface PathMapping {
   prefix: string;
@@ -124,6 +125,29 @@ function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRoot
   return scoped;
 }
 
+function compileModuleSuffixes(
+  scopedModuleSuffixes: ScopedModuleSuffixes | undefined
+): ScopedModuleSuffixes | undefined {
+  if (!scopedModuleSuffixes) return undefined;
+  const scoped = scopedModuleSuffixes.filter(({ moduleSuffixes }) => moduleSuffixes.length > 0);
+  if (scoped.length === 0) return undefined;
+  scoped.sort((a, b) => b.scope.length - a.scope.length);
+  return scoped;
+}
+
+function applyModuleSuffix(specifier: string, suffix: string) {
+  if (suffix === '') return specifier;
+  const extension = extname(specifier);
+  if (extension) return specifier.slice(0, -extension.length) + suffix + extension;
+  return specifier + suffix;
+}
+
+function getScopedModuleSuffixes(dir: string, moduleSuffixMappings: ScopedModuleSuffixes) {
+  for (const { scope, moduleSuffixes } of moduleSuffixMappings) {
+    if (dir === scope || dir.startsWith(`${scope}/`)) return moduleSuffixes;
+  }
+}
+
 export type ResolveGlobPattern = (pattern: string, dir: string) => string[];
 
 export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): ResolveGlobPattern {
@@ -162,7 +186,11 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
 }
 
 export function createCustomModuleResolver(
-  compilerOptions: { scopedPaths?: ScopedPaths; scopedRootDirs?: ScopedRootDirs },
+  compilerOptions: {
+    scopedPaths?: ScopedPaths;
+    scopedRootDirs?: ScopedRootDirs;
+    scopedModuleSuffixes?: ScopedModuleSuffixes;
+  },
   customCompilerExtensions: string[],
   toSourceFilePath: ToSourceFilePath,
   findWorkspacePackageTarget?: WorkspacePackageTargetHandler,
@@ -177,6 +205,7 @@ export function createCustomModuleResolver(
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
   const rootDirMappings = compileRootDirs(compilerOptions.scopedRootDirs);
+  const moduleSuffixMappings = compileModuleSuffixes(compilerOptions.scopedModuleSuffixes);
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
@@ -219,12 +248,22 @@ export function createCustomModuleResolver(
 
     if (isBuiltin(specifier)) return undefined;
 
-    const resolvedFileName = resolveSync(specifier, containingFile);
-    if (resolvedFileName) return toResult(specifier, containingFile, resolvedFileName);
+    const dir = dirname(containingFile);
+    const isRelative = !isAbsolute(specifier) && (specifier.startsWith('./') || specifier.startsWith('../'));
+    const suffixList =
+      isRelative && moduleSuffixMappings ? getScopedModuleSuffixes(dir, moduleSuffixMappings) : undefined;
+    if (suffixList?.length) {
+      for (const suffix of suffixList) {
+        const resolved = resolveSync(applyModuleSuffix(specifier, suffix), containingFile);
+        if (resolved) return toResult(specifier, containingFile, resolved);
+      }
+    } else if (suffixList === undefined) {
+      const resolved = resolveSync(specifier, containingFile);
+      if (resolved) return toResult(specifier, containingFile, resolved);
+    }
 
     // Fallback for knip.json#paths not in tsconfig.json#compilerOptions.paths, scoped per workspace
     if (pathMappings) {
-      const dir = dirname(containingFile);
       for (const { prefix, wildcard, values, scope } of pathMappings) {
         if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
         if (wildcard ? specifier.startsWith(prefix) : specifier === prefix) {
@@ -242,7 +281,6 @@ export function createCustomModuleResolver(
     // Fallback for tsconfig#compilerOptions.rootDirs (e.g. SvelteKit `$types`), scoped per workspace.
     // oxc-resolver doesn't apply a nested tsconfig's rootDirs when an ancestor tsconfig.json exists.
     if (rootDirMappings && !isAbsolute(specifier)) {
-      const dir = dirname(containingFile);
       for (const { scope, rootDirs } of rootDirMappings) {
         if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
         for (const rootDir of rootDirs) {
