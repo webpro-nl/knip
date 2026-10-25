@@ -10,7 +10,7 @@ import type {
   PluginVisitorContext,
   PluginVisitorObject,
 } from './types/config.ts';
-import type { FileNode, ModuleGraph } from './types/module-graph.ts';
+import type { FileNode } from './types/module-graph.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
@@ -24,6 +24,16 @@ import type { MainOptions } from './util/create-options.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
+
+// Graph building mutates these sets; keep the cached node pristine
+const copyFileNode = (file: FileNode): FileNode => ({
+  ...file,
+  imports: {
+    ...file.imports,
+    external: new Set(file.imports.external),
+    externalRefs: new Set(file.imports.externalRefs),
+  },
+});
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -274,7 +284,7 @@ export class ProjectPrincipal {
   private getCachedFile(filePath: string) {
     const cachedFile = this.cache.getCachedFile(filePath);
     const skipExports = this.skipExportsAnalysis.has(filePath) || !this.isReportExports;
-    return cachedFile?.skipExports === skipExports ? cachedFile : undefined;
+    return cachedFile?.skipExports === skipExports ? copyFileNode(cachedFile) : undefined;
   }
 
   analyzeSourceFile(
@@ -303,7 +313,7 @@ export class ProjectPrincipal {
       ? (this._localRefsVisitor ??= buildVisitor(this.pluginVisitorObjects, true))
       : (this._visitor ??= buildVisitor(this.pluginVisitorObjects, false));
 
-    return _getImportsAndExports(
+    const file = _getImportsAndExports(
       filePath,
       sourceText,
       this.resolveModule,
@@ -314,6 +324,8 @@ export class ProjectPrincipal {
       this.pluginVisitorObjects.length > 0 ? this.pluginCtx : undefined,
       parseResult
     );
+    if (this.projectPaths.has(filePath)) this.cache.setFileData(filePath, copyFileNode(file));
+    return file;
   }
 
   invalidateFile(filePath: string) {
@@ -321,12 +333,7 @@ export class ProjectPrincipal {
     this.cache.removeEntry(filePath);
   }
 
-  reconcileCache(graph: ModuleGraph) {
-    for (const [filePath, file] of graph) {
-      const fd = this.cache.getFileDescriptor(filePath);
-      if (!fd?.meta) continue;
-      fd.meta.data = { ...file, internalImportCache: undefined, importedBy: undefined };
-    }
+  reconcileCache() {
     this.cache.reconcile();
   }
 }

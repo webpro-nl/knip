@@ -630,7 +630,7 @@ export async function build({
   }
   for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
-  principal.reconcileCache(graph);
+  principal.reconcileCache();
 
   perfObserver.addMemoryMark('build');
 

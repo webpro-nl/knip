@@ -36,6 +36,7 @@ export class FileEntryCache<T> {
   filePath: string;
   cache = new Map<string, MetaData<T>>();
   normalizedEntries = new Map<string, FileDescriptor<T>>();
+  private isDirty = false;
 
   constructor(cacheId: string, _path: string) {
     this.filePath = path.resolve(_path, cacheId);
@@ -77,22 +78,35 @@ export class FileEntryCache<T> {
       this.cache.set(filePath, meta);
     }
 
+    if (changed) this.isDirty = true;
     const fd: FileDescriptor<T> = { key: filePath, changed, meta };
     this.normalizedEntries.set(filePath, fd);
     return fd;
   }
 
+  setFileData(filePath: string, data: T) {
+    const fd = this.getFileDescriptor(filePath);
+    if (!fd.meta) return;
+    fd.meta.data = data;
+    this.isDirty = true;
+  }
+
   removeEntry(entryName: string) {
     if (!isAbsolute(entryName)) entryName = resolve(entryName);
     this.normalizedEntries.delete(entryName);
-    this.cache.delete(entryName);
+    if (this.cache.delete(entryName)) this.isDirty = true;
   }
 
   reconcile() {
+    for (const filePath of this.cache.keys()) {
+      if (!this.normalizedEntries.has(filePath)) this.removeEntry(filePath);
+    }
+    if (!this.isDirty) return;
     try {
       const dir = path.dirname(this.filePath);
       if (!isDirectory(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(this.filePath, serialize(this.cache));
+      this.isDirty = false;
     } catch (_err) {
       debugLog('*', `Error writing cache to ${this.filePath}`);
     }
