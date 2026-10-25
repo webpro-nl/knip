@@ -36,3 +36,19 @@ test('Unreferenced optional peerDependencies in strict mode should not be report
     total: 1,
   });
 });
+
+test('Optional peerDependencies imported in try/catch in strict mode should not be reported as unlisted dependencies', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-try-catch');
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues } = await main(options);
+
+  assert.deepEqual(issues.unlisted, {});
+});
+
+test('Optional peerDependencies imported without try/catch in strict mode should be reported as unlisted dependencies', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-unguarded');
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues } = await main(options);
+
+  assert(issues.unlisted['index.ts']?.['optional-peer']);
+});

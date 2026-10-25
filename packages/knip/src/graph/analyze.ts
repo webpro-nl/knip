@@ -20,7 +20,7 @@ import { relative } from '../util/path.ts';
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
-import { INTERNAL_TAG } from '../constants.ts';
+import { IMPORT_FLAGS, INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -308,13 +308,19 @@ export const analyze = async ({
         if (file.imports.external) {
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
-            const isHandled =
+            const isOptionalPeer =
               packageName &&
-              deputy.maybeAddReferencedExternalDependency(ws, packageName, {
-                specifier: extImport.specifier,
-                isTypeOnly: extImport.isTypeOnly,
-                isResolved: extImport.filePath !== undefined,
-              });
+              !!(extImport.modifiers & IMPORT_FLAGS.OPTIONAL) &&
+              deputy.getOptionalPeerDependencies(ws.name).has(packageName);
+            if (isOptionalPeer) deputy.addReferencedDependency(ws.name, packageName);
+            const isHandled =
+              isOptionalPeer ||
+              (packageName &&
+                deputy.maybeAddReferencedExternalDependency(ws, packageName, {
+                  specifier: extImport.specifier,
+                  isTypeOnly: extImport.isTypeOnly,
+                  isResolved: extImport.filePath !== undefined,
+                }));
             if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
                 type: 'unlisted',

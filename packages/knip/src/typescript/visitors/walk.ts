@@ -8,6 +8,7 @@ import {
   type TSInterfaceDeclaration,
   type TSPropertySignature,
   type TSTypeName,
+  type TryStatement,
   type VariableDeclarator,
   type VisitorObject,
 } from 'oxc-parser';
@@ -82,6 +83,7 @@ interface WalkContext {
   programFiles: Set<string>;
   entryFiles: Set<string>;
   handledImportExpressions: Set<number>;
+  optionalImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -536,6 +538,35 @@ const coreVisitorObject: VisitorObject = {
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
+  },
+  TryStatement(node: TryStatement) {
+    if (!node.handler) return;
+    const collectOptionalImports = (current: any, isAwaited: boolean) => {
+      if (
+        current.type === 'FunctionDeclaration' ||
+        current.type === 'FunctionExpression' ||
+        current.type === 'ArrowFunctionExpression' ||
+        current.type === 'ClassDeclaration' ||
+        current.type === 'ClassExpression'
+      ) {
+        return;
+      }
+      const awaited = isAwaited || current.type === 'AwaitExpression';
+      if (current.type === 'ImportExpression' && awaited) {
+        state.optionalImportExpressions.add(current.start);
+      }
+      for (const key of visitorKeys[current.type] ?? []) {
+        const value = current[key];
+        if (Array.isArray(value)) {
+          for (const child of value) {
+            if (child) collectOptionalImports(child, awaited);
+          }
+        } else if (value) {
+          collectOptionalImports(value, awaited);
+        }
+      }
+    };
+    collectOptionalImports(node.block, false);
   },
   CallExpression(node) {
     handleCallExpression(node, state);
