@@ -51,29 +51,25 @@ test('CLI watch reloads JSON and imported plugin configuration', async t => {
     await exited;
     await rm(cwd, { recursive: true, force: true });
   });
-  const waitFor = async (predicate: () => boolean) => {
+
+  const getLastReport = () => {
+    const reports = stdout.split(/\d+ files \([^)]*\)/);
+    return reports.length > 1 ? reports[reports.length - 2] : '';
+  };
+  const waitForReport = async (predicate: (report: string) => boolean) => {
     const deadline = Date.now() + 10000;
-    while (!predicate() && Date.now() < deadline && !closed) await setTimeout(10);
-    assert.ok(predicate(), `Expected CLI watch update\nstdout:\n${stdout}\nstderr:\n${stderr}`);
+    while (!predicate(getLastReport()) && Date.now() < deadline && !closed) await setTimeout(10);
+    assert.ok(predicate(getLastReport()), `Expected CLI watch update\nstdout:\n${stdout}\nstderr:\n${stderr}`);
   };
 
-  await waitFor(() => /\d+ files \(/.test(stdout));
-  assert.match(stdout, /originalUnused/);
-  assert.match(stdout, /Unused files/);
-  const before = stdout.length;
+  await waitForReport(report => report.includes('originalUnused') && report.includes('Unused files'));
   writeFileSync(join(cwd, 'value.ts'), 'export const value = 1;\nexport const changedUnused = 2;\n');
-  await waitFor(() => /\d+ files \(/.test(stdout.slice(before)));
-  assert.match(stdout.slice(before), /changedUnused/);
-  assert.match(stdout.slice(before), /missing-command/);
+  await waitForReport(report => report.includes('changedUnused') && report.includes('missing-command'));
 
-  const beforeReload = stdout.length;
   writeFileSync(join(cwd, 'knip.json'), '{"entry":["index.ts"],"project":["*.ts"],"ignore":["value.ts"]}');
-  await waitFor(() => /\d+ files \(/.test(stdout.slice(beforeReload)));
-  assert.doesNotMatch(stdout.slice(beforeReload), /changedUnused/);
+  await waitForReport(report => !report.includes('changedUnused') && report.includes('Unused files'));
 
-  const beforeImportReload = stdout.length;
   writeFileSync(join(cwd, 'settings.ts'), "export const include = ['unused.ts'];\n");
-  await waitFor(() => /\d+ files \(/.test(stdout.slice(beforeImportReload)));
-  assert.doesNotMatch(stdout.slice(beforeImportReload), /Unused files/);
+  await waitForReport(report => !report.includes('Unused files'));
   assert.equal(stderr, '');
 });
