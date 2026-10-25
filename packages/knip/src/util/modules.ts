@@ -53,7 +53,9 @@ const isPackageNameStart = (ch: number) => (ch >= 65 && ch <= 90) || (ch >= 97 &
 const isPackageScopeStart = (ch: number) => isPackageNameStart(ch) || ch === 46 || ch === 95 || ch === 126;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
-  return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
+  return ch === 64
+    ? isPackageScopeStart(specifier.charCodeAt(1))
+    : isPackageNameStart(ch) && specifier.charCodeAt(1) !== 58;
 };
 const isTildePackageName = (specifier: string) =>
   specifier.charCodeAt(0) === 126 && isPackageNameStart(specifier.charCodeAt(1));

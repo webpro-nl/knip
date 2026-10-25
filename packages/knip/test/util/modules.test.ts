@@ -32,6 +32,8 @@ test('Should detect specifiers that look like package names', () => {
   assert.equal(isStartsLikePackageName('./relative'), false);
   assert.equal(isStartsLikePackageName('../parent'), false);
   assert.equal(isStartsLikePackageName('/absolute'), false);
+  assert.equal(isStartsLikePackageName('C:/absolute'), false);
+  assert.equal(isStartsLikePackageName('c:\\absolute'), false);
   assert.equal(isStartsLikePackageName('#subpath'), false);
   assert.equal(isStartsLikePackageName('$dollar'), false);
   assert.equal(isStartsLikePackageName('~/alias'), false);
