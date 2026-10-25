@@ -34,7 +34,8 @@ entry files. Here's the default configuration in full:
 Next to the default locations, Knip looks for `entry` files in other places. In
 a monorepo, this is done for each workspace separately.
 
-The values you set override the default values, they are not merged.
+Custom `entry` and `project` values replace these defaults, they are not merged.
+Entry files from the other places on this page are still added.
 
 ## Plugins
 
@@ -44,9 +45,11 @@ more details about this.
 
 ## Scripts in package.json
 
-The `package.json` is scanned for entry files. The `main`, `bin`, and `exports`
-fields may contain entry files. The `scripts` are also parsed to find entry
-files and dependencies. See [Script Parser][3] for more details.
+The `package.json` is scanned for entry files. The `main`, `module`, `browser`,
+`bin`, `types`, `typings`, `exports` and `imports` fields may contain entry
+files. These are added even when `entry` is customized. The `scripts` are also
+parsed to find entry files and dependencies. See [Script Parser][3] for more
+details.
 
 ## Ignored files
 
@@ -64,7 +67,7 @@ and when to use `ignore`.
 Putting it together, Knip discovers entry files from:
 
 - Default locations such as `index.js` and `src/index.ts`
-- The `main`, `bin` and `exports` fields in `package.json`
+- The `main`, `bin`, `exports` and other fields in `package.json`
 - Entry and config files added by enabled plugins (the config files are entry
   files too)
 - Dynamic imports: `require()` and `import()`
