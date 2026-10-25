@@ -1,14 +1,18 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { builtInCompilers } from '../../knip/src/compilers/index.ts';
+import { DEFAULT_EXTENSIONS } from '../../knip/src/constants.ts';
 import type { Plugin } from '../../knip/src/types/config.ts';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
+const compilersDocsPath = path.join(rootDir, 'src/content/docs/features/compilers.md');
 const knipDir = path.join(rootDir, '../../packages/knip');
 const pluginsDir = path.join(knipDir, 'src/plugins');
 const directories = await fs.opendir(pluginsDir);
 const plugins: Array<[string, string]> = [];
+const compilerPlugins = new Map<string, string[]>();
 const srcBaseUrl = new URL('webpro-nl/knip/blob/main/packages/knip/src/plugins', 'https://github.com');
 
 const codeBlock = (value: string, lang = '') => `\`\`\`${lang}\n${value}\n\`\`\``;
@@ -24,6 +28,16 @@ const printCode = (value: unknown): string =>
       ? value.toString()
       : JSON.stringify(value).replace(/([,:])/g, '$1 ');
 
+const collapseScopes = (packageNames: string[]) => {
+  const names = new Set<string>();
+  for (const name of packageNames) {
+    const scope = name.slice(0, name.indexOf('/') + 1);
+    const isShared = name.startsWith('@') && packageNames.filter(n => n.startsWith(scope)).length > 1;
+    names.add(isShared ? `${scope}*` : name);
+  }
+  return [...names];
+};
+
 for await (const dir of directories) {
   if (dir.isDirectory() && !dir.name.startsWith('_')) {
     const pluginName = dir.name;
@@ -32,9 +46,16 @@ for await (const dir of directories) {
     const plugin: Plugin = mod.default;
     const docs: undefined | { note: string; entry?: string[]; production?: string[] } = mod.docs;
 
-    const { title, enablers, args, config, entry, production, project } = plugin;
+    const { title, enablers, args, config, entry, production, project, registerCompilers } = plugin;
 
     plugins.push([title, pluginName]);
+
+    await registerCompilers?.({
+      cwd: knipDir,
+      hasDependency: () => true,
+      registerCompiler: ({ extension }) =>
+        compilerPlugins.set(extension, [...(compilerPlugins.get(extension) ?? []), title]),
+    });
 
     const description = `How Knip's ${title} plugin detects entry files, config files and dependencies.`;
     const frontmatter = `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(description)}\nsidebar:\n  hidden: true\n---`;
@@ -138,3 +159,38 @@ const indexOutput = `${indexFrontmatter}\n\n${indexBody}\n`;
 
 console.log('Writing plugin list to plugins.md');
 await fs.writeFile(path.join(referenceDocsDir, 'plugins.md'), indexOutput);
+
+const collator = new Intl.Collator('en');
+const compilerEnablers = new Map<string, string[]>();
+for (const { extensions, dependencies } of builtInCompilers) {
+  for (const extension of extensions)
+    compilerEnablers.set(
+      extension,
+      collapseScopes(dependencies).map(name => `\`${name}\``)
+    );
+}
+for (const [extension, titles] of compilerPlugins) {
+  if (DEFAULT_EXTENSIONS.has(extension)) continue;
+  titles.sort(collator.compare);
+  compilerEnablers.set(extension, [...(compilerEnablers.get(extension) ?? []), ...titles]);
+}
+
+const compilerGroups = new Map<string, string[]>();
+for (const [extension, names] of [...compilerEnablers].sort(([a], [b]) => (a < b ? -1 : 1))) {
+  const key = names.join(', ');
+  compilerGroups.set(key, [...(compilerGroups.get(key) ?? []), `\`${extension}\``]);
+}
+
+const compilersList = tightList(
+  Array.from(compilerGroups, ([names, extensions]) => `${extensions.join(' + ')} (${names})`)
+);
+const compilersDocs = await fs.readFile(compilersDocsPath, 'utf8');
+
+console.log('Writing compilers list to compilers.md');
+await fs.writeFile(
+  compilersDocsPath,
+  compilersDocs.replace(
+    /(<!-- compilers:start -->\n)[\s\S]*?(\n<!-- compilers:end -->)/,
+    (_, start, end) => `${start}\n${compilersList}\n${end}`
+  )
+);
