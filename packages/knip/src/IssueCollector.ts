@@ -200,6 +200,7 @@ export class IssueCollector {
     }
     this.issues = initIssues();
     this.counters = initCounters();
+    this.tagHints.clear();
     return unusedFiles;
   }
 

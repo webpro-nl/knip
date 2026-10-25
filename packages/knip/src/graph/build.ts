@@ -82,7 +82,8 @@ export async function build({
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
-  const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isWatch && collector.retainIssue(issue);
+  const addIssue = (issue: Issue) =>
+    collector.addIssue(issue) && (options.isWatch || options.isSession) && collector.retainIssue(issue);
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
