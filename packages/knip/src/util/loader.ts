@@ -1,8 +1,9 @@
+import { createRequire } from 'node:module';
 import { LoaderError } from './errors.ts';
 import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
 import { jiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
-import { extname, isInternal } from './path.ts';
+import { extname, isInternal, toNative } from './path.ts';
 
 const load = async (filePath: string) => {
   try {
@@ -48,3 +49,9 @@ const load = async (filePath: string) => {
 };
 
 export const _load = timerify(load);
+
+const { cache } = createRequire(import.meta.url);
+
+export const unload = (filePaths: Iterable<string>) => {
+  for (const filePath of filePaths) delete cache[toNative(filePath)];
+};

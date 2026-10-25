@@ -9,6 +9,7 @@ export { createOptions, type MainOptions } from '../util/create-options.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 export { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
 export { createSession, type Session } from './session.ts';
+export { SessionConfigurationChangedError } from './configuration.ts';
 export type {
   ContentionDetails,
   ContentionKind,

@@ -129,6 +129,20 @@ export class ProjectPrincipal {
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
   }
 
+  collectConfigurationImports(paths: Set<string>) {
+    for (const filePath of paths) {
+      if (!DEFAULT_EXTENSIONS.has(extname(filePath))) continue;
+      const source = this.fileManager.readRawFile(filePath);
+      if (source === undefined) continue;
+      try {
+        for (const specifier of extractSpecifiers(_parseFile(filePath, source), source, filePath)) {
+          const resolved = this.resolveSpecifier(specifier, filePath);
+          if (resolved && !isInNodeModules(resolved)) paths.add(resolved);
+        }
+      } catch {}
+    }
+  }
+
   init() {
     const scopedPaths =
       this.paths.size > 0 ? Array.from(this.paths, ([scope, paths]) => ({ scope, paths })) : undefined;
