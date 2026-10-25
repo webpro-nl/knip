@@ -141,78 +141,70 @@ export const getSessionHandler = async (
     if (incremental) {
       invalidateCache(graph, true);
       collector.purge();
-      collector.getIssues().tagHints.clear();
-      for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
-      await analyze();
-      principal.reconcileCache(graph);
-      modified.clear();
-      const update = createUpdate({ startTime });
-      if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
-      return update;
-    }
-
-    clearResolverCache();
-    clearModuleResolutionCaches();
-    clearGlobCache();
-    invalidateCache(graph);
-
-    const filePaths = await principal.getUsedResolvedFiles();
-
-    const cachedUnusedFiles = collector.purge();
-    collector.getIssues().tagHints.clear();
-
-    for (const filePath of added) cachedUnusedFiles.add(filePath);
-    for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
-
-    if (added.size > 0 || deleted.size > 0) {
-      graph.clear();
-      for (const filePath of filePaths) {
-        const workspace = chief.findWorkspaceByFilePath(filePath);
-        if (workspace) {
-          await analyzeSourceFile(filePath);
-        }
-      }
     } else {
-      for (const [filePath, file] of graph) {
-        if (filePaths.has(filePath)) {
-          file.importedBy = undefined;
-        } else {
-          graph.delete(filePath);
-          analyzedFiles.delete(filePath);
-          const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
-        }
-      }
+      clearResolverCache();
+      clearModuleResolutionCaches();
+      clearGlobCache();
+      invalidateCache(graph);
 
-      for (const filePath of filePaths) {
-        if (!graph.has(filePath) || !analyzedFiles.has(filePath)) {
+      const filePaths = await principal.getUsedResolvedFiles();
+
+      const cachedUnusedFiles = collector.purge();
+
+      for (const filePath of added) cachedUnusedFiles.add(filePath);
+      for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
+
+      if (added.size > 0 || deleted.size > 0) {
+        graph.clear();
+        for (const filePath of filePaths) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
             await analyzeSourceFile(filePath);
           }
         }
-      }
+      } else {
+        for (const [filePath, file] of graph) {
+          if (filePaths.has(filePath)) {
+            file.importedBy = undefined;
+          } else {
+            graph.delete(filePath);
+            analyzedFiles.delete(filePath);
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
+          }
+        }
 
-      for (const filePath of modified) {
-        if (!cachedUnusedFiles.has(filePath)) {
-          const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace) {
-            if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
+        for (const filePath of filePaths) {
+          if (!graph.has(filePath) || !analyzedFiles.has(filePath)) {
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace) {
               await analyzeSourceFile(filePath);
             }
           }
         }
+
+        for (const filePath of modified) {
+          if (!cachedUnusedFiles.has(filePath)) {
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace) {
+              if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
+                await analyzeSourceFile(filePath);
+              }
+            }
+          }
+        }
+
+        for (const filePath of filePaths) {
+          const file = graph.get(filePath);
+          if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
+        }
       }
 
-      for (const filePath of filePaths) {
-        const file = graph.get(filePath);
-        if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
-      }
+      const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
+      unreferencedFiles.clear();
+      for (const filePath of unusedFiles) unreferencedFiles.add(filePath);
     }
 
-    const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
-    unreferencedFiles.clear();
-    for (const filePath of unusedFiles) unreferencedFiles.add(filePath);
     for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
     await analyze();
 
