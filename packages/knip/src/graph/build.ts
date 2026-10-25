@@ -548,6 +548,7 @@ export async function build({
         const dir = dirname(filePath);
         const opts = {
           cwd: dir,
+          manifestDir: workspace.dir,
           rootCwd: options.cwd,
           containingFilePath: filePath,
           dependencies,

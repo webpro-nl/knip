@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/child-process-script-cwd__app",
+  "scripts": {
+    "build": "yarn run pack",
+    "pack": "bun tasks/pack.mjs"
+  }
+}
