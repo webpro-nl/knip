@@ -26,6 +26,7 @@ export const normalizeCompilers = (rawLocalConfig: RawConfiguration): RawCompile
   return compilers;
 };
 
+/** @internal */
 export const builtInCompilers = [
   { extensions: ['.mdx'], ...MDX },
   { extensions: ['.sass', '.scss'], ...SCSS },
