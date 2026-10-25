@@ -9,7 +9,7 @@ const enablers = ['dependency-cruiser'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.dependency-cruiser.{js,cjs,mjs,json}'];
+const entry = ['.dependency-cruiser.{js,cjs,mjs,json}'];
 
 const args = {
   binaries: ['depcruise', 'dependency-cruise', 'dependency-cruiser', 'depcruise-baseline'],
@@ -20,7 +20,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
   args,
 };
 

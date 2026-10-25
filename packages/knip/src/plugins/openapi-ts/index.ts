@@ -10,13 +10,13 @@ const enablers = ['@hey-api/openapi-ts'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', ...toC12config('openapi-ts')];
+const entry = ['package.json', ...toC12config('openapi-ts')];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

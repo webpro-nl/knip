@@ -161,6 +161,9 @@ You should implement `resolveConfig` if any of these are true:
   points][3]
 - The `config` file references dependencies by strings (not import statements)
 
+If neither is true, use `entry` instead of `config` (see the first example).
+Knip would only add the `config` files as entry files anyway.
+
 :::
 
 ## Example 3: entry paths

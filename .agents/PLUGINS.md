@@ -40,6 +40,11 @@ Read the writing-a-plugin docs first:
   auto-added as entries.
 - List every config file location the tool searches, taken from its discovery
   code (e.g. cosmiconfig `searchPlaces`), and link that code in the top comment.
+- Without `resolveConfig` or `resolveFromAST`, use `entry`, not `config`. Core
+  only adds `config` files as entries anyway, after a wasted parse, and the docs
+  would claim the plugin reads them. `args.config` works without `config`. Only
+  files Knip can parse need an entry; JSON, YAML and extensionless rc files add
+  nothing.
 
 ## `resolveConfig` and `resolveFromAST`
 

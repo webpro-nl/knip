@@ -11,13 +11,13 @@ const enablers = ['unocss'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = [...toUnconfig('uno.config'), ...toUnconfig('unocss.config')];
+const entry = [...toUnconfig('uno.config'), ...toUnconfig('unocss.config')];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;
