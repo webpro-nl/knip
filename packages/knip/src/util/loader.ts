@@ -53,5 +53,8 @@ export const _load = timerify(load);
 const { cache } = createRequire(import.meta.url);
 
 export const unload = (filePaths: Iterable<string>) => {
-  for (const filePath of filePaths) delete cache[toNative(filePath)];
+  for (const filePath of filePaths) {
+    delete cache[filePath];
+    delete cache[toNative(filePath)];
+  }
 };
