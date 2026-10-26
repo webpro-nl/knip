@@ -59,6 +59,7 @@ export type PluginName =
   | 'ladle'
   | 'laravel-vite-plugin'
   | 'lefthook'
+  | 'lingui'
   | 'lint-staged'
   | 'linthtml'
   | 'lit'
@@ -259,6 +260,7 @@ export const pluginNames = [
   'ladle',
   'laravel-vite-plugin',
   'lefthook',
+  'lingui',
   'lint-staged',
   'linthtml',
   'lit',
