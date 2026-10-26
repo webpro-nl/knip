@@ -69,12 +69,22 @@ test('Optional peerDependencies imported in try/catch should be referenced when 
   });
 });
 
-test('A dynamic import nested in an awaited promise chain should remain unlisted', async () => {
-  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-try-catch-nested');
+test('Caught optional peer imports declared in a variable should be accepted in strict mode', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-caught-variable');
   const options = await createOptions({ cwd, isStrict: true });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
-  assert(issues.unlisted['index.ts']?.['optional-peer']);
+  assert.deepEqual(issues.unlisted, {});
+  assert.equal(counters.optionalPeerDependencies, 1);
+});
+
+test('Caught optional peer imports in Promise.all should be accepted in strict mode', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-caught-promise-all');
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(issues.unlisted, {});
+  assert.equal(counters.optionalPeerDependencies, 1);
 });
 
 test('A dynamic import nested in Promise.resolve should remain unlisted', async () => {
@@ -107,14 +117,6 @@ test('Caught dynamic imports that are not declared should remain unlisted when u
   const { issues } = await main(options);
 
   assert(issues.unlisted['index.ts']?.['not-listed']);
-});
-
-test('Optional peerDependencies referenced by new URL in strict mode should not be reported as unlisted dependencies', async () => {
-  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-url');
-  const options = await createOptions({ cwd, isStrict: true });
-  const { issues } = await main(options);
-
-  assert.deepEqual(issues.unlisted, {});
 });
 
 test('Caught missing relative dynamic imports should remain unresolved', async () => {

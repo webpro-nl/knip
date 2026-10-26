@@ -18,7 +18,8 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   if (importExpr && isStringLiteral(importExpr.source)) {
     s.handledImportExpressions.add(importExpr.start);
     const specifier = getStringValue(importExpr.source)!;
-    const caughtFlag = s.caughtImportExpressions.has(importExpr.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+    const caughtFlag =
+      init.type === 'AwaitExpression' && s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
 
     if (node.id.type === 'ObjectPattern') {
       for (const prop of node.id.properties) {
@@ -31,14 +32,35 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                 : undefined;
           const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
           const alias = localName !== importedName ? localName : undefined;
-          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+          s.addImport(
+            specifier,
+            importedName,
+            alias,
+            undefined,
+            prop.key?.start ?? prop.start,
+            IMPORT_FLAGS.DYNAMIC | caughtFlag
+          );
         } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
-          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+          s.addImport(
+            specifier,
+            IMPORT_STAR,
+            prop.argument.name,
+            undefined,
+            prop.start,
+            IMPORT_FLAGS.DYNAMIC | caughtFlag
+          );
         }
       }
     } else if (node.id.type === 'Identifier') {
       if (init.type === 'AwaitExpression') {
-        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+        s.addImport(
+          specifier,
+          'default',
+          node.id.name,
+          undefined,
+          importExpr.source.start,
+          IMPORT_FLAGS.DYNAMIC | caughtFlag
+        );
         const resolved = s.resolveModule(specifier, s.filePath);
         if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
           s.localImportMap.set(node.id.name, {
@@ -160,7 +182,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
       if (imp?.type === 'ImportExpression' && isStringLiteral(imp.source)) {
         s.handledImportExpressions.add(imp.start);
         const specifier = getStringValue(imp.source)!;
-        const caughtFlag = s.caughtImportExpressions.has(imp.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+        const caughtFlag = s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
         if (binding?.type === 'ObjectPattern') {
           for (const prop of binding.properties) {
             if (prop.type === 'Property') {
@@ -170,18 +192,18 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
                   : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
                     ? prop.key.value
                     : undefined;
-              s.addImport(
-                specifier,
-                importedName,
-                undefined,
-                undefined,
-                prop.key?.start ?? prop.start,
-                caughtFlag
-              );
+              s.addImport(specifier, importedName, undefined, undefined, prop.key?.start ?? prop.start, caughtFlag);
             }
           }
         } else if (binding?.type === 'Identifier') {
-          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+          s.addImport(
+            specifier,
+            'default',
+            binding.name,
+            undefined,
+            imp.source.start,
+            IMPORT_FLAGS.DYNAMIC | caughtFlag
+          );
           const resolved = s.resolveModule(specifier, s.filePath);
           if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
             s.localImportMap.set(binding.name, {

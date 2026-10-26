@@ -315,7 +315,6 @@ export const analyze = async ({
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
                 isCaught: !!(extImport.modifiers & IMPORT_FLAGS.CAUGHT),
-                isOptional: !!(extImport.modifiers & IMPORT_FLAGS.OPTIONAL),
               });
             if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({

@@ -241,27 +241,6 @@ const getImportsAndExports = (
       if (options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
       if (specifier.startsWith(PROTOCOL_VIRTUAL)) return;
 
-      if (modifiers & IMPORT_FLAGS.CAUGHT) {
-        const sanitizedSpecifier = sanitizeSpecifier(specifier);
-        if (isStartsLikePackageName(sanitizedSpecifier)) {
-          const ePos = specifierPos ?? pos;
-          const { line, col } = getLineAndCol(lineStarts, ePos);
-          external.add({
-            filePath: undefined,
-            specifier: sanitizedSpecifier,
-            identifier: identifier ?? SIDE_EFFECTS,
-            alias,
-            pos: ePos,
-            line,
-            col,
-            isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
-            modifiers,
-            jsDocTags,
-          });
-          return;
-        }
-      }
-
       if (modifiers && modifiers & IMPORT_FLAGS.OPTIONAL) {
         programFiles.add(resolve(dirname(filePath), specifier));
         return;
