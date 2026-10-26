@@ -1,4 +1,3 @@
-import { watch } from 'node:fs';
 import { createScriptParserContext } from './binaries/create-script-parser-context.ts';
 import { _getInputsFromScripts } from './binaries/index.ts';
 import { CatalogCounselor } from './CatalogCounselor.ts';
@@ -9,7 +8,6 @@ import { analyze } from './graph/analyze.ts';
 import { build } from './graph/build.ts';
 import { IssueCollector } from './IssueCollector.ts';
 import { ProjectPrincipal } from './ProjectPrincipal.ts';
-import watchReporter from './reporters/watch.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLogObject } from './util/debug.ts';
 import { flushGitignoreCache, initGitignoreCache } from './util/gitignore-cache.ts';
@@ -19,7 +17,7 @@ import { isCatalog } from './util/input.ts';
 import { createManifest } from './util/package-json.ts';
 import { getModuleSourcePathHandler, getWorkspacePackageTargetHandler } from './util/to-source-path.ts';
 import { clearResolverCache } from './util/resolve.ts';
-import { getSessionHandler, type OnFileChange, type SessionHandler } from './util/watch.ts';
+import { getSessionHandler, type SessionHandler } from './util/watch.ts';
 
 export type Results = Awaited<ReturnType<typeof run>>['results'];
 
@@ -88,7 +86,15 @@ export const run = async (options: MainOptions) => {
     workspaces.map(w => ({ pkgName: w.pkgName, name: w.name, config: w.config, ancestors: w.ancestors }))
   );
 
-  const { graph, entryPaths, analyzedFiles, unreferencedFiles, analyzeSourceFile, enabledPluginsStore } = await build({
+  const {
+    graph,
+    entryPaths,
+    analyzedFiles,
+    unreferencedFiles,
+    analyzeSourceFile,
+    enabledPluginsStore,
+    configurationFiles,
+  } = await build({
     chief,
     collector,
     counselor,
@@ -116,15 +122,11 @@ export const run = async (options: MainOptions) => {
 
   let session: SessionHandler | undefined;
 
-  if (options.isWatch || options.isSession) {
+  if (options.isSession) {
     const isIgnored = (filePath: string) =>
       (!!options.cacheLocation && filePath.startsWith(options.cacheLocation)) ||
       filePath.includes('/.git/') ||
       isGitIgnored(filePath);
-
-    const onFileChange: OnFileChange | undefined = options.isWatch
-      ? ({ issues, duration }) => watchReporter(options, { issues, streamer, size: analyzedFiles.size, duration })
-      : undefined;
 
     session = await getSessionHandler(options, {
       analyzedFiles,
@@ -134,13 +136,11 @@ export const run = async (options: MainOptions) => {
       analyze: reAnalyze,
       principal,
       graph,
+      configurationFiles,
       isIgnored,
-      onFileChange,
       unreferencedFiles,
       entryPaths,
     });
-
-    if (options.isWatch) watch(options.cwd, { recursive: true }, session.listener);
   }
 
   const { issues, counters, tagHints, configurationHints, hasConfigLoadErrors } = collector.getIssues();

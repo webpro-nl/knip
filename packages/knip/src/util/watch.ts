@@ -1,23 +1,17 @@
-import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
+import type { ConfigurationFiles } from '../session/configuration.ts';
 import { getFileTopology, hasSameTopology, isIncrementalFile } from '../session/incremental.ts';
-import type { Issues } from '../types/issues.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
-import { hasErrorCause } from './errors.ts';
-import { isFile } from './fs.ts';
-import { logError } from './log.ts';
 import { updateImportMap } from './module-graph.ts';
-import { toAbsolute, toPosix, toRelative } from './path.ts';
+import { toAbsolute, toRelative } from './path.ts';
 import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
 import { clearGlobCache } from './glob-cache.ts';
 import { clearResolverCache } from './resolve.ts';
-
-export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
 export type WatchChange = {
   type: 'added' | 'deleted' | 'modified';
@@ -34,8 +28,8 @@ type WatchOptions = {
   analyze: () => Promise<void>;
   principal: ProjectPrincipal;
   graph: ModuleGraph;
+  configurationFiles?: ConfigurationFiles;
   isIgnored: (path: string) => boolean;
-  onFileChange?: OnFileChange;
   unreferencedFiles: Set<string>;
   entryPaths: Set<string>;
 };
@@ -56,8 +50,8 @@ export const getSessionHandler = async (
     analyze,
     principal,
     graph,
+    configurationFiles,
     isIgnored,
-    onFileChange,
     unreferencedFiles,
     entryPaths,
   }: WatchOptions
@@ -65,10 +59,13 @@ export const getSessionHandler = async (
   const added = new Set<string>();
   const deleted = new Set<string>();
   const modified = new Set<string>();
+  if (configurationFiles) principal.collectConfigurationImports(configurationFiles.paths);
 
   const processFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
     let hasRelevantChanges = false;
+    const configurationChange = configurationFiles?.getChange(changes, options.cwd);
+    if (configurationChange) throw configurationChange;
 
     for (const change of changes) {
       const filePath = toAbsolute(change.filePath, options.cwd);
@@ -212,11 +209,7 @@ export const getSessionHandler = async (
     deleted.clear();
     modified.clear();
 
-    const update = createUpdate({ startTime });
-
-    if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
-
-    return update;
+    return createUpdate({ startTime });
   };
 
   const clearSourceText = () => principal.fileManager.sourceTextCache.clear();
@@ -227,29 +220,11 @@ export const getSessionHandler = async (
     return update;
   };
 
-  const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
-    debugLog('*', `(raw) ${eventType} ${filePath}`);
-    if (typeof filePath === 'string') {
-      // On Windows, fs.watch provides paths with backslash separators.
-      // Normalize to POSIX separators so downstream posix path utilities work correctly.
-      const normalizedPath = toPosix(filePath);
-      const type = eventType === 'rename' ? (isFile(options.cwd, normalizedPath) ? 'added' : 'deleted') : 'modified';
-      handleFileChanges([{ type, filePath: normalizedPath }]).catch(error => {
-        const message = error instanceof Error ? error.message : String(error);
-        const reason = error instanceof Error && hasErrorCause(error) ? `\nReason: ${error.cause.message}` : '';
-        logError(message + reason);
-        process.exitCode = 2;
-      });
-    }
-  };
-
   const getIssues = () => collector.getIssues();
 
   const getEntryPaths = () => entryPaths;
 
   const getGraph = () => graph;
 
-  if (onFileChange) onFileChange({ issues: getIssues().issues });
-
-  return { listener, handleFileChanges, getEntryPaths, getGraph, getIssues };
+  return { handleFileChanges, getEntryPaths, getGraph, getIssues, configurationFiles };
 };

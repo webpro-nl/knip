@@ -91,7 +91,7 @@ export class ProjectPrincipal {
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: this.compilers,
-      isSession: options.isSession || options.isWatch,
+      isSession: options.isSession,
     });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
@@ -127,6 +127,20 @@ export class ProjectPrincipal {
     if (!rootDirs?.length) return;
     const scoped = this.rootDirs.get(scope) ?? [];
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
+  }
+
+  collectConfigurationImports(paths: Set<string>) {
+    for (const filePath of paths) {
+      if (!DEFAULT_EXTENSIONS.has(extname(filePath))) continue;
+      const source = this.fileManager.readRawFile(filePath);
+      if (source === undefined) continue;
+      try {
+        for (const specifier of extractSpecifiers(_parseFile(filePath, source), source, filePath)) {
+          const resolved = this.resolveSpecifier(specifier, filePath);
+          if (resolved && !isInNodeModules(resolved)) paths.add(resolved);
+        }
+      } catch {}
+    }
   }
 
   init() {

@@ -18,6 +18,7 @@ import { createPreprocessor, toReporterOptions } from './util/preprocessor.ts';
 import { runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
 import { version } from './version.ts';
+import { watchSession } from './session/watch.ts';
 
 let args: ParsedCLIArgs = {};
 try {
@@ -44,6 +45,11 @@ const main = async () => {
     }
 
     const options = await createOptions({ args });
+
+    if (options.isWatch) {
+      await watchSession(options);
+      return;
+    }
 
     const { results } = await run(options);
 

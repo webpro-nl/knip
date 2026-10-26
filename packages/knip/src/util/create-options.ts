@@ -142,6 +142,7 @@ export const createOptions = async (options: CreateOptions) => {
     (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
 
   return {
+    createdFrom: options,
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
     catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
     config: args.config,
@@ -188,7 +189,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.enumMembers ||
       includedIssueTypes.namespaceMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports,
-    isSession: options.isSession ?? false,
+    isSession: options.isSession ?? args.watch ?? options.isWatch ?? false,
     isShowProgress:
       !isDebug &&
       !isTrace &&
