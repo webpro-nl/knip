@@ -6,8 +6,8 @@ import { createSession } from '../../src/session/session.ts';
 import { join } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
 
-const setup = async (t: TestContext) => {
-  const cwd = await realpath(await mkdtemp(join(tmpdir(), 'knip-session-configuration-')));
+const setup = async (t: TestContext, prefix = 'knip-session-configuration-') => {
+  const cwd = await realpath(await mkdtemp(join(tmpdir(), prefix)));
   t.after(() => rm(cwd, { recursive: true, force: true }));
   await mkdir(join(cwd, 'src'));
   await writeFile(join(cwd, 'package.json'), '{"name":"configuration","devDependencies":{"vite":"*"}}');
@@ -147,4 +147,51 @@ test('tsconfig aliases reload without reusing stale resolution caches', async t 
   await writeFile(join(cwd, 'tsconfig.json'), '{"compilerOptions":{"paths":{"@value":["./src/second.ts"]}}}');
   await session.handleFileChanges([{ type: 'modified', filePath: 'tsconfig.json' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts']);
+});
+
+for (const changedFile of ['knip.js', 'helper.js']) {
+  test(`ES module JavaScript configuration reloads when ${changedFile} changes`, async t => {
+    const cwd = await setup(t);
+    await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+    await rm(join(cwd, 'knip.json'));
+    await writeFile(join(cwd, 'helper.js'), "export const ignore = ['src/first.ts'];\n");
+    await writeFile(
+      join(cwd, 'knip.js'),
+      "import { ignore } from './helper.js'; export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore };\n"
+    );
+    const loadOptions = () => createOptions({ cwd, isSession: true });
+    const session = await createSession(await loadOptions(), loadOptions);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+    await writeFile(
+      join(cwd, changedFile),
+      changedFile === 'helper.js'
+        ? "export const ignore = ['src/second.ts'];\n"
+        : "export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore: ['src/second.ts'] };\n"
+    );
+    await session.handleFileChanges([{ type: 'modified', filePath: changedFile }]);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts']);
+  });
+}
+
+test('plugin configuration patterns match in a directory with glob characters', async t => {
+  const cwd = await setup(t, 'knip-session-configuration (team) [1]-');
+  const loadOptions = () => createOptions({ cwd, isSession: true });
+  const session = await createSession(await loadOptions(), loadOptions);
+  await writeFile(join(cwd, 'vite.config.ts'), "export default { test: { include: ['src/first.ts'] } };\n");
+  await session.handleFileChanges([{ type: 'added', filePath: 'vite.config.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+});
+
+test('a new workspace manifest matching the workspace patterns reloads options', async t => {
+  const cwd = await setup(t);
+  await mkdir(join(cwd, 'packages/app'), { recursive: true });
+  await writeFile(join(cwd, 'package.json'), '{"name":"root","workspaces":["packages/*"]}');
+  await writeFile(join(cwd, 'knip.json'), '{}');
+  await writeFile(join(cwd, 'packages/app/index.ts'), 'export {};\n');
+  const loadOptions = () => createOptions({ cwd, isSession: true });
+  const session = await createSession(await loadOptions(), loadOptions);
+  assert.deepEqual(session.getIssues().issues.dependencies, {});
+  await writeFile(join(cwd, 'packages/app/package.json'), '{"name":"app","dependencies":{"left-pad":"*"}}');
+  await session.handleFileChanges([{ type: 'added', filePath: 'packages/app/package.json' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.dependencies), ['packages/app/package.json']);
 });

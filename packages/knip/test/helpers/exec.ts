@@ -2,8 +2,8 @@ import { spawnSync } from 'node:child_process';
 // oxlint-disable-next-line no-restricted-imports
 import { resolve } from 'node:path';
 
-const runtime = process.argv[0];
-const cliPath = runtime.endsWith('bun') ? resolve('src/cli.ts') : resolve('dist/cli.js');
+export const runtime = process.argv[0];
+export const cliPath = runtime.endsWith('bun') ? resolve('src/cli.ts') : resolve('dist/cli.js');
 
 export const exec = (command: string, options: { cwd: string }) => {
   const args = command.replace(/^knip/, '').trim().split(' ').filter(Boolean);

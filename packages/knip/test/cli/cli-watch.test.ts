@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { setTimeout } from 'node:timers/promises';
 import { join } from '../../src/util/path.ts';
+import { cliPath, runtime } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 test('CLI watch reloads JSON and imported plugin configuration', async t => {
@@ -24,8 +25,6 @@ test('CLI watch reloads JSON and imported plugin configuration', async t => {
   await writeFile(join(cwd, 'value.ts'), 'export const value = 1;\nexport const originalUnused = 2;\n');
   await writeFile(join(cwd, 'unused.ts'), 'export {};\n');
 
-  const runtime = process.argv[0];
-  const cliPath = resolve('src/cli.ts');
   const child = spawn(runtime, [cliPath, '--watch', '--debug', '--directory', cwd, '--no-exit-code'], {
     cwd: resolve('.'),
     env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: undefined },
