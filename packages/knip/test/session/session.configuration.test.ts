@@ -21,7 +21,7 @@ const setup = async (t: TestContext, prefix = 'knip-session-configuration-') => 
 test('JSON configuration reloads options and refreshes the existing results object', async t => {
   const cwd = await setup(t);
   const loadOptions = () => createOptions({ cwd, isSession: true });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   const results = session.getResults();
   await writeFile(join(cwd, 'knip.json'), '{"entry":["src/*.ts"],"project":["src/**/*.ts"]}');
   await session.handleFileChanges([{ type: 'modified', filePath: 'knip.json' }]);
@@ -39,7 +39,7 @@ test('a workspace own plugin JSON configuration reloads without restarting the p
   );
   await writeFile(join(cwd, 'vite.settings.json'), '{"test":{"include":["src/first.ts"]}}');
   const loadOptions = () => createOptions({ cwd, isSession: true, args: { cache: true } });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
   await writeFile(join(cwd, 'vite.settings.json'), '{"test":{"include":["src/second.ts"]}}');
   await session.handleFileChanges([{ type: 'modified', filePath: 'vite.settings.json' }]);
@@ -56,7 +56,7 @@ for (const changedFile of ['vite.config.ts', 'config/settings.json']) {
       "import settings from './config/settings.json'; export default { test: settings };\n"
     );
     const loadOptions = () => createOptions({ cwd, isSession: true });
-    const session = await createSession(await loadOptions(), loadOptions);
+    const session = await createSession(await loadOptions());
     assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
     await writeFile(
       join(cwd, changedFile),
@@ -72,7 +72,7 @@ for (const changedFile of ['vite.config.ts', 'config/settings.json']) {
 test('new plugin configs are discovered using the enabled plugin configuration patterns', async t => {
   const cwd = await setup(t);
   const loadOptions = () => createOptions({ cwd, isSession: true });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   await writeFile(join(cwd, 'vite.config.ts'), "export default { test: { include: ['src/first.ts'] } };\n");
   await session.handleFileChanges([{ type: 'added', filePath: 'vite.config.ts' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
@@ -81,22 +81,22 @@ test('new plugin configs are discovered using the enabled plugin configuration p
 test('unrelated config basenames and plugin entry files do not reload options', async t => {
   const cwd = await setup(t);
   await mkdir(join(cwd, 'unrelated'));
-  const loadOptions = t.mock.fn(() => createOptions({ cwd, isSession: true }));
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts', 'src/second.ts']);
+  // A silent config edit only takes effect when the session reloads its options
+  await writeFile(
+    join(cwd, 'knip.json'),
+    '{"entry":["src/index.ts"],"project":["src/**/*.ts"],"ignore":["src/first.ts"]}'
+  );
   await writeFile(join(cwd, 'unrelated/vite.config.ts'), 'export {};\n');
   await writeFile(join(cwd, 'unrelated/package.json'), '{}');
   await session.handleFileChanges([
     { type: 'added', filePath: 'unrelated/vite.config.ts' },
     { type: 'added', filePath: 'unrelated/package.json' },
   ]);
-  assert.equal(loadOptions.mock.callCount(), 1);
-});
-
-test('sessions without an options loader report configuration changes explicitly', async t => {
-  const cwd = await setup(t);
-  const session = await createSession(await createOptions({ cwd, isSession: true }));
-  await writeFile(join(cwd, 'knip.json'), '{"entry":["src/*.ts"]}');
-  await assert.rejects(session.handleFileChanges([{ type: 'modified', filePath: 'knip.json' }]), /recreate/);
+  assert.ok(session.getIssues().issues.files['src/first.ts']);
+  await session.handleFileChanges([{ type: 'modified', filePath: 'knip.json' }]);
+  assert.equal(session.getIssues().issues.files['src/first.ts'], undefined);
 });
 
 test('a child workspace own plugin config reloads when an imported helper changes', async t => {
@@ -114,7 +114,7 @@ test('a child workspace own plugin config reloads when an imported helper change
   await writeFile(join(cwd, 'app/first.ts'), 'export {};\n');
   await writeFile(join(cwd, 'app/second.ts'), 'export {};\n');
   const loadOptions = () => createOptions({ cwd, isSession: true, args: { workspace: 'app' } });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['app/second.ts']);
   await writeFile(join(cwd, 'app/settings.json'), '{"include":["second.ts"]}');
   await session.handleFileChanges([{ type: 'modified', filePath: 'app/settings.json' }]);
@@ -126,7 +126,7 @@ test('invalid JSON reloads recover on a subsequent edit and preserve preprocessi
   await writeFile(join(cwd, 'preprocessor.mjs'), 'export default input => input;\n');
   const loadOptions = () =>
     createOptions({ cwd, isSession: true, args: { preprocessor: [join(cwd, 'preprocessor.mjs')] } });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   await writeFile(join(cwd, 'knip.json'), '{');
   await assert.rejects(session.handleFileChanges([{ type: 'modified', filePath: 'knip.json' }]));
   await writeFile(join(cwd, 'knip.json'), '{"entry":["src/*.ts"],"project":["src/**/*.ts"]}');
@@ -142,7 +142,7 @@ test('tsconfig aliases reload without reusing stale resolution caches', async t 
   await writeFile(join(cwd, 'src/second.ts'), 'export const value = 2;\n');
   await writeFile(join(cwd, 'tsconfig.json'), '{"compilerOptions":{"paths":{"@value":["./src/first.ts"]}}}');
   const loadOptions = () => createOptions({ cwd, isSession: true });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
   await writeFile(join(cwd, 'tsconfig.json'), '{"compilerOptions":{"paths":{"@value":["./src/second.ts"]}}}');
   await session.handleFileChanges([{ type: 'modified', filePath: 'tsconfig.json' }]);
@@ -160,7 +160,7 @@ for (const changedFile of ['knip.js', 'helper.js']) {
       "import { ignore } from './helper.js'; export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore };\n"
     );
     const loadOptions = () => createOptions({ cwd, isSession: true });
-    const session = await createSession(await loadOptions(), loadOptions);
+    const session = await createSession(await loadOptions());
     assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
     await writeFile(
       join(cwd, changedFile),
@@ -176,7 +176,7 @@ for (const changedFile of ['knip.js', 'helper.js']) {
 test('plugin configuration patterns match in a directory with glob characters', async t => {
   const cwd = await setup(t, 'knip-session-configuration (team) [1]-');
   const loadOptions = () => createOptions({ cwd, isSession: true });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   await writeFile(join(cwd, 'vite.config.ts'), "export default { test: { include: ['src/first.ts'] } };\n");
   await session.handleFileChanges([{ type: 'added', filePath: 'vite.config.ts' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
@@ -189,7 +189,7 @@ test('a new workspace manifest matching the workspace patterns reloads options',
   await writeFile(join(cwd, 'knip.json'), '{}');
   await writeFile(join(cwd, 'packages/app/index.ts'), 'export {};\n');
   const loadOptions = () => createOptions({ cwd, isSession: true });
-  const session = await createSession(await loadOptions(), loadOptions);
+  const session = await createSession(await loadOptions());
   assert.deepEqual(session.getIssues().issues.dependencies, {});
   await writeFile(join(cwd, 'packages/app/package.json'), '{"name":"app","dependencies":{"left-pad":"*"}}');
   await session.handleFileChanges([{ type: 'added', filePath: 'packages/app/package.json' }]);

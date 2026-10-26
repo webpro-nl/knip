@@ -1,6 +1,6 @@
 import type { CollectorIssues } from '../IssueCollector.ts';
 import { type Results, run } from '../run.ts';
-import type { MainOptions } from '../util/create-options.ts';
+import { createOptions, type MainOptions } from '../util/create-options.ts';
 import { createPreprocessor, toReporterOptions } from '../util/preprocessor.ts';
 import { clearResolverCache } from '../util/resolve.ts';
 import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
@@ -23,10 +23,7 @@ export interface Session {
   describePackageJson(): PackageJsonFile;
 }
 
-export const createSession = async (
-  options: MainOptions,
-  reloadOptions?: () => Promise<MainOptions>
-): Promise<Session> => {
+export const createSession = async (options: MainOptions): Promise<Session> => {
   const initialize = async (options: MainOptions) => {
     const { session, results } = await run(options);
     if (!session) throw new Error('Unable to initialize watch session');
@@ -58,14 +55,14 @@ export const createSession = async (
       }
       return update;
     } catch (error) {
-      if (!(error instanceof SessionConfigurationChangedError) || !reloadOptions) throw error;
+      if (!(error instanceof SessionConfigurationChangedError)) throw error;
       const startTime = performance.now();
       clearResolverCache();
       clearModuleResolutionCaches();
       clearGlobCache();
       clearGitignoreCache();
       if (current.session.configurationFiles) unload(current.session.configurationFiles.paths);
-      const nextOptions = await reloadOptions();
+      const nextOptions = await createOptions(current.options.createdFrom);
       // Cached per-file resolutions may depend on the previous configuration, so rebuild cold
       current = await initialize({ ...nextOptions, isCache: false });
       Object.assign(results, current.results);

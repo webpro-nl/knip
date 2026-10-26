@@ -6,7 +6,7 @@ import type { WatchChange } from '../util/watch.ts';
 
 export class SessionConfigurationChangedError extends Error {
   constructor(filePath: string) {
-    super(`Configuration changed (${filePath}); recreate the options and session to reload it`);
+    super(`Configuration changed (${filePath})`);
   }
 }
 

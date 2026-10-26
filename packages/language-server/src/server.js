@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { createOptions, createSession, KNIP_CONFIG_LOCATIONS, SessionConfigurationChangedError } from 'knip/session';
+import { createOptions, createSession, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { FileChangeType, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { CodeActionKind, createConnection } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -98,8 +98,6 @@ export class LanguageServer {
 
   /** @type {undefined | Session} */
   session;
-
-  supportsConfigurationReload = false;
 
   /** @type {Rules}  */
   rules = {};
@@ -241,7 +239,7 @@ export class LanguageServer {
     this.connection.console.log(
       `Using bundled knip${readKnipVersion(createRequire(import.meta.url).resolve('knip/session'))}`
     );
-    return { createOptions, createSession, SessionConfigurationChangedError };
+    return { createOptions, createSession };
   }
 
   async start() {
@@ -258,17 +256,12 @@ export class LanguageServer {
         : undefined;
 
       this.connection.console.log('Creating options');
-      const loadOptions = async () => {
-        const options = await knip.createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
-        this.rules = options.rules;
-        return options;
-      };
-      const options = await loadOptions();
-      this.supportsConfigurationReload = typeof knip.SessionConfigurationChangedError === 'function';
+      const options = await knip.createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
+      this.rules = options.rules;
 
       this.connection.console.log('Building module graph...');
       const start = Date.now();
-      const session = await knip.createSession(options, loadOptions);
+      const session = await knip.createSession(options);
       this.connection.console.log(`Finished building module graph (${Date.now() - start}ms)`);
 
       this.session = session;
@@ -313,7 +306,7 @@ export class LanguageServer {
       if (!change.uri.startsWith('file:')) continue;
       const filePath = fileURLToPath(change.uri);
       if (!filePath.startsWith(cwd) || filePath.includes('/.git/')) continue;
-      if (!this.supportsConfigurationReload && RESTART_FOR.has(path.basename(change.uri))) return this.restart();
+      if (RESTART_FOR.has(path.basename(change.uri))) return this.restart();
       const type = FILE_CHANGE_TYPES.get(change.type);
       if (!type) continue;
       changes.push({ type, filePath });

@@ -47,7 +47,7 @@ const main = async () => {
     const options = await createOptions({ args });
 
     if (options.isWatch) {
-      await watchSession(options, () => createOptions({ args }));
+      await watchSession(options);
       return;
     }
 

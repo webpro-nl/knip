@@ -9,12 +9,9 @@ import { logError } from '../util/log.ts';
 import { toPosix } from '../util/path.ts';
 import { createSession } from './session.ts';
 
-export const watchSession = async (options: MainOptions, reloadOptions: () => Promise<MainOptions>) => {
-  const streamer = new ConsoleStreamer({ ...options, isWatch: true });
-  const session = await createSession({ ...options, isSession: true, isWatch: false }, async () => {
-    options = await reloadOptions();
-    return { ...options, isSession: true, isWatch: false };
-  });
+export const watchSession = async (options: MainOptions) => {
+  const streamer = new ConsoleStreamer(options);
+  const session = await createSession(options);
   const report = (duration?: number) => {
     const { issues, counters } = session.getIssues();
     watchReporter(options, { issues, streamer, size: counters.processed - counters.files, duration });
