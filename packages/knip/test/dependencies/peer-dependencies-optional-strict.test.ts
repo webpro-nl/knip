@@ -109,6 +109,29 @@ test('Caught dynamic imports that are not declared should remain unlisted when u
   assert(issues.unlisted['index.ts']?.['not-listed']);
 });
 
+test('Optional peerDependencies referenced by new URL in strict mode should not be reported as unlisted dependencies', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-url');
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues } = await main(options);
+
+  assert.deepEqual(issues.unlisted, {});
+});
+
+test('Caught missing relative dynamic imports should remain unresolved', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-try-catch-local-unresolved');
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues } = await main(options);
+
+  assert(issues.unresolved['index.ts']?.['./missing']);
+});
+
+test('Caught optional peer imports should reference their type dependency in default mode', async () => {
+  const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-try-catch');
+  const options = await createOptions({ cwd });
+  const { issues } = await main(options);
+
+  assert(!issues.devDependencies['package.json']?.['@types/pg']);
+});
 test('Optional peerDependencies imported without try/catch in strict mode should be reported as unlisted dependencies', async () => {
   const cwd = resolve('fixtures/dependencies/peer-dependencies-optional-unguarded');
   const options = await createOptions({ cwd, isStrict: true });
