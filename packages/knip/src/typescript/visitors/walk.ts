@@ -83,7 +83,7 @@ interface WalkContext {
   programFiles: Set<string>;
   entryFiles: Set<string>;
   handledImportExpressions: Set<number>;
-  optionalImportExpressions: Set<number>;
+  caughtImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -94,6 +94,8 @@ export interface WalkState extends WalkContext {
   isJS: boolean;
   isModuleFile: boolean;
   handledImportExpressions: Set<number>;
+  caughtTryBlockEnds: number[];
+  functionCaughtTryBlockEnds: number[][];
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
   nsContainers: Map<string, Map<string, string>>;
@@ -416,8 +418,10 @@ const coreVisitorObject: VisitorObject = {
     state.scopeEnds[state.scopeDepth] = node.end;
     state.scopeDepth++;
   },
-  'BlockStatement:exit'() {
+  'BlockStatement:exit'(node) {
     state.scopeDepth--;
+    if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end)
+      state.caughtTryBlockEnds.pop();
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
@@ -481,6 +485,8 @@ const coreVisitorObject: VisitorObject = {
     state.staticBlockDepth--;
   },
   FunctionDeclaration(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
       state.localDeclarations.set(node.id.name, node);
@@ -488,11 +494,24 @@ const coreVisitorObject: VisitorObject = {
     }
     _addParamShadows(node.params, node.body);
   },
+  'FunctionDeclaration:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   FunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
   },
+  'FunctionExpression:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   ArrowFunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
+  },
+  'ArrowFunctionExpression:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
   },
   CatchClause(node) {
     if (node.param?.type === 'Identifier' && node.body) {
@@ -540,33 +559,12 @@ const coreVisitorObject: VisitorObject = {
     handleImportExpression(node, state);
   },
   TryStatement(node: TryStatement) {
-    if (!node.handler) return;
-    const collectOptionalImports = (current: any, isAwaited: boolean) => {
-      if (
-        current.type === 'FunctionDeclaration' ||
-        current.type === 'FunctionExpression' ||
-        current.type === 'ArrowFunctionExpression' ||
-        current.type === 'ClassDeclaration' ||
-        current.type === 'ClassExpression'
-      ) {
-        return;
-      }
-      const awaited = isAwaited || current.type === 'AwaitExpression';
-      if (current.type === 'ImportExpression' && awaited) {
-        state.optionalImportExpressions.add(current.start);
-      }
-      for (const key of visitorKeys[current.type] ?? []) {
-        const value = current[key];
-        if (Array.isArray(value)) {
-          for (const child of value) {
-            if (child) collectOptionalImports(child, awaited);
-          }
-        } else if (value) {
-          collectOptionalImports(value, awaited);
-        }
-      }
-    };
-    collectOptionalImports(node.block, false);
+    if (node.handler) state.caughtTryBlockEnds.push(node.block.end);
+  },
+  AwaitExpression(node) {
+    if (state.caughtTryBlockEnds.length > 0 && node.argument.type === 'ImportExpression') {
+      state.caughtImportExpressions.add(node.argument.start);
+    }
   },
   CallExpression(node) {
     handleCallExpression(node, state);
@@ -959,6 +957,8 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     localToExports: new Map(),
     customElementRegistries: new Set(),
     classNameStack: [],
+    caughtTryBlockEnds: [],
+    functionCaughtTryBlockEnds: [],
     staticBlockDepth: 0,
     addExport: _addExport,
     getFix: _getFix,

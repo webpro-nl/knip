@@ -66,7 +66,7 @@ const getImportsAndExports = (
   const scripts = new Set<string>();
   const importGlobs: ImportGlob[] = [];
   const handledImportExpressions = new Set<number>();
-  const optionalImportExpressions = new Set<number>();
+  const caughtImportExpressions = new Set<number>();
 
   const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
   const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
@@ -240,6 +240,27 @@ const getImportsAndExports = (
     } else {
       if (options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY) return;
       if (specifier.startsWith(PROTOCOL_VIRTUAL)) return;
+
+      if (modifiers & IMPORT_FLAGS.CAUGHT) {
+        const sanitizedSpecifier = sanitizeSpecifier(specifier);
+        if (isStartsLikePackageName(sanitizedSpecifier)) {
+          const ePos = specifierPos ?? pos;
+          const { line, col } = getLineAndCol(lineStarts, ePos);
+          external.add({
+            filePath: undefined,
+            specifier: sanitizedSpecifier,
+            identifier: identifier ?? SIDE_EFFECTS,
+            alias,
+            pos: ePos,
+            line,
+            col,
+            isTypeOnly: isDts || !!(modifiers & IMPORT_FLAGS.TYPE_ONLY),
+            modifiers,
+            jsDocTags,
+          });
+          return;
+        }
+      }
 
       if (modifiers && modifiers & IMPORT_FLAGS.OPTIONAL) {
         programFiles.add(resolve(dirname(filePath), specifier));
@@ -446,7 +467,7 @@ const getImportsAndExports = (
     programFiles,
     entryFiles,
     handledImportExpressions,
-    optionalImportExpressions,
+    caughtImportExpressions,
     visitor,
     getJSDocTags,
   });

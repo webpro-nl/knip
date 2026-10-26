@@ -1,6 +1,6 @@
 export async function getOptionalPeer() {
   try {
-    return await import('optional-peer');
+    return await import('pg');
   } catch {
     return null;
   }

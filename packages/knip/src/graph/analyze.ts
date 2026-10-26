@@ -308,19 +308,14 @@ export const analyze = async ({
         if (file.imports.external) {
           for (const extImport of file.imports.external) {
             const packageName = getPackageNameFromModuleSpecifier(extImport.specifier);
-            const isOptionalPeer =
-              packageName &&
-              !!(extImport.modifiers & IMPORT_FLAGS.OPTIONAL) &&
-              deputy.getOptionalPeerDependencies(ws.name).has(packageName);
-            if (isOptionalPeer) deputy.addReferencedDependency(ws.name, packageName);
             const isHandled =
-              isOptionalPeer ||
-              (packageName &&
-                deputy.maybeAddReferencedExternalDependency(ws, packageName, {
-                  specifier: extImport.specifier,
-                  isTypeOnly: extImport.isTypeOnly,
-                  isResolved: extImport.filePath !== undefined,
-                }));
+              packageName &&
+              deputy.maybeAddReferencedExternalDependency(ws, packageName, {
+                specifier: extImport.specifier,
+                isTypeOnly: extImport.isTypeOnly,
+                isResolved: extImport.filePath !== undefined,
+                isCaught: !!(extImport.modifiers & IMPORT_FLAGS.CAUGHT),
+              });
             if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
                 type: 'unlisted',
