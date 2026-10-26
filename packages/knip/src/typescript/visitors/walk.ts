@@ -420,8 +420,7 @@ const coreVisitorObject: VisitorObject = {
   },
   'BlockStatement:exit'(node) {
     state.scopeDepth--;
-    if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end)
-      state.caughtTryBlockEnds.pop();
+    if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end) state.caughtTryBlockEnds.pop();
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
@@ -562,8 +561,23 @@ const coreVisitorObject: VisitorObject = {
     if (node.handler) state.caughtTryBlockEnds.push(node.block.end);
   },
   AwaitExpression(node) {
-    if (state.caughtTryBlockEnds.length > 0 && node.argument.type === 'ImportExpression') {
-      state.caughtImportExpressions.add(node.argument.start);
+    if (state.caughtTryBlockEnds.length === 0) return;
+
+    const { argument } = node;
+    if (argument.type === 'ImportExpression') {
+      state.caughtImportExpressions.add(argument.start);
+    } else if (
+      argument.type === 'CallExpression' &&
+      argument.callee.type === 'MemberExpression' &&
+      !argument.callee.computed &&
+      argument.callee.object.type === 'Identifier' &&
+      argument.callee.object.name === 'Promise' &&
+      argument.callee.property.name === 'all' &&
+      argument.arguments[0]?.type === 'ArrayExpression'
+    ) {
+      for (const element of argument.arguments[0].elements) {
+        if (element?.type === 'ImportExpression') state.caughtImportExpressions.add(element.start);
+      }
     }
   },
   CallExpression(node) {
