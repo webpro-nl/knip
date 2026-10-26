@@ -1,6 +1,10 @@
 {
   "name": "@plugins/cspell",
   "devDependencies": {
+    "@cspell/dict-typescript": "*",
     "cspell": "*"
+  },
+  "cspell": {
+    "import": ["@cspell/dict-typescript/cspell-ext.json", "@cspell/dict-node/cspell-ext.json"]
   }
 }
