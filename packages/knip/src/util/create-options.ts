@@ -189,7 +189,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.enumMembers ||
       includedIssueTypes.namespaceMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports,
-    isSession: options.isSession ?? args.watch ?? false,
+    isSession: options.isSession ?? args.watch ?? options.isWatch ?? false,
     isShowProgress:
       !isDebug &&
       !isTrace &&

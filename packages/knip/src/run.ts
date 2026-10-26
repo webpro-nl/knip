@@ -122,7 +122,7 @@ export const run = async (options: MainOptions) => {
 
   let session: SessionHandler | undefined;
 
-  if (options.isWatch || options.isSession) {
+  if (options.isSession) {
     const isIgnored = (filePath: string) =>
       (!!options.cacheLocation && filePath.startsWith(options.cacheLocation)) ||
       filePath.includes('/.git/') ||

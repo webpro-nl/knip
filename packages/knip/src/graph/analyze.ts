@@ -65,7 +65,7 @@ export const analyze = async ({
   const shouldIgnore = getShouldIgnoreHandler(options.isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(options.tags);
 
-  const explorer = createGraphExplorer(graph, entryPaths, options.isSession || options.isWatch);
+  const explorer = createGraphExplorer(graph, entryPaths, options.isSession);
 
   const isReferencedInUsedExport = (
     exportedItem: Export,

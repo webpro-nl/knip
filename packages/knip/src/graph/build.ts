@@ -77,15 +77,14 @@ export async function build({
   options,
 }: BuildOptions) {
   const configFilesMap = new Map<string, Map<PluginName, Set<string>>>();
-  const configurationFiles = options.isSession || options.isWatch ? new ConfigurationFiles(options) : undefined;
+  const configurationFiles = options.isSession ? new ConfigurationFiles(options) : undefined;
 
   const enabledPluginsStore = new Map<string, string[]>();
   const registeredVisitorPlugins = new Set<string>();
 
   const toSourceFilePaths = getToSourcePathsHandler(chief);
 
-  const addIssue = (issue: Issue) =>
-    collector.addIssue(issue) && (options.isWatch || options.isSession) && collector.retainIssue(issue);
+  const addIssue = (issue: Issue) => collector.addIssue(issue) && options.isSession && collector.retainIssue(issue);
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
@@ -480,7 +479,7 @@ export async function build({
     parseResult?: import('oxc-parser').ParseResult,
     cachedFile?: FileNode
   ) => {
-    if (!options.isWatch && !options.isSession && analyzedFiles.has(filePath)) return;
+    if (!options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);

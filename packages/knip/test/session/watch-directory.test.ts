@@ -15,8 +15,7 @@ skipIfBun('Watch the project directory instead of the process working directory'
   syncBuiltinESMExports();
 
   try {
-    const loadOptions = () => createOptions({ cwd, isWatch: true });
-    await watchSession(await loadOptions(), loadOptions);
+    await watchSession(await createOptions({ cwd, isWatch: true }));
     assert.equal(watch.mock.calls[0]?.arguments[0], cwd);
   } finally {
     watch.mock.restore();

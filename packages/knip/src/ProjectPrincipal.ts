@@ -91,7 +91,7 @@ export class ProjectPrincipal {
     this.pluginVisitorObjects.push(createBunShellVisitor(this.pluginCtx));
     this.fileManager = new SourceFileManager({
       compilers: this.compilers,
-      isSession: options.isSession || options.isWatch,
+      isSession: options.isSession,
     });
     this.walkAndAnalyze = timerify(this.walkAndAnalyze.bind(this), 'walkAndAnalyze');
   }
