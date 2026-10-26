@@ -81,6 +81,7 @@ export const pluginsSchema = z.object({
   lunaria: pluginSchema,
   markdownlint: pluginSchema,
   marko: pluginSchema,
+  mastra: pluginSchema,
   mcp: pluginSchema,
   mdx: pluginSchema,
   mdxlint: pluginSchema,

@@ -1,0 +1,17 @@
+{
+  "name": "@plugins/mastra",
+  "type": "module",
+  "scripts": {
+    "dev": "mastra dev",
+    "build": "mastra build"
+  },
+  "dependencies": {
+    "@mastra/core": "*",
+    "@mastra/libsql": "*",
+    "@mastra/memory": "*",
+    "zod": "*"
+  },
+  "devDependencies": {
+    "mastra": "*"
+  }
+}
