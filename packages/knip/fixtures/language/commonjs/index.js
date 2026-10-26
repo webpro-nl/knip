@@ -13,6 +13,8 @@ const dynamicRequire = value => {
   return require(`./dir/${value}`);
 };
 
+const loadWith = require => require('shadowed-require');
+
 const templateStringExternal = value => {
   return require('no-substitution-tpl-literal');
 };

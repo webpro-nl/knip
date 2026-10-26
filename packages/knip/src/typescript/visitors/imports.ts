@@ -3,7 +3,7 @@ import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import type { WalkState } from './walk.ts';
+import { isShadowed, type WalkState } from './walk.ts';
 
 export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
   const init = node.init;
@@ -74,6 +74,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     init.type === 'CallExpression' &&
     init.callee.type === 'Identifier' &&
     init.callee.name === 'require' &&
+    !isShadowed('require', init.callee.start) &&
     init.arguments.length === 1 &&
     isStringLiteral(init.arguments[0])
   ) {

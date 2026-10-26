@@ -120,6 +120,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
   if (
     node.callee.type === 'Identifier' &&
     node.callee.name === 'require' &&
+    !isShadowed('require', node.callee.start) &&
     node.arguments.length === 1 &&
     isStringLiteral(node.arguments[0])
   ) {
@@ -142,6 +143,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     node.callee.type === 'MemberExpression' &&
     node.callee.object.type === 'Identifier' &&
     node.callee.object.name === 'require' &&
+    !isShadowed('require', node.callee.object.start) &&
     !node.callee.computed &&
     node.callee.property.name === 'resolve' &&
     node.arguments.length >= 1 &&
