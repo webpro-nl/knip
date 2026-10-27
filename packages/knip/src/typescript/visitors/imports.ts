@@ -1,9 +1,23 @@
-import type { Expression, ImportExpression, VariableDeclarator } from 'oxc-parser';
+import type { ArrayExpression, Expression, ImportExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
+
+export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
+  if (
+    expression.type === 'CallExpression' &&
+    expression.callee.type === 'MemberExpression' &&
+    !expression.callee.computed &&
+    expression.callee.object.type === 'Identifier' &&
+    expression.callee.object.name === 'Promise' &&
+    expression.callee.property.name === 'all' &&
+    expression.arguments[0]?.type === 'ArrayExpression'
+  ) {
+    return expression.arguments[0].elements;
+  }
+}
 
 export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
   const init = node.init;
@@ -162,18 +176,8 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     return;
   }
 
-  if (
-    init.type === 'AwaitExpression' &&
-    init.argument.type === 'CallExpression' &&
-    init.argument.callee.type === 'MemberExpression' &&
-    !init.argument.callee.computed &&
-    init.argument.callee.object.type === 'Identifier' &&
-    init.argument.callee.object.name === 'Promise' &&
-    init.argument.callee.property.name === 'all' &&
-    init.argument.arguments[0]?.type === 'ArrayExpression' &&
-    node.id.type === 'ArrayPattern'
-  ) {
-    const imports = init.argument.arguments[0].elements;
+  const imports = init.type === 'AwaitExpression' ? getPromiseAllElements(init.argument) : undefined;
+  if (imports && node.id.type === 'ArrayPattern') {
     const bindings = node.id.elements;
     for (let i = 0; i < imports.length; i++) {
       const imp = imports[i];

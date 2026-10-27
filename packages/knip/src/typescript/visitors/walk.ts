@@ -36,7 +36,7 @@ import {
   handleExportNamed,
   handleExpressionStatement,
 } from './exports.ts';
-import { handleImportExpression, handleVariableDeclarator } from './imports.ts';
+import { getPromiseAllElements, handleImportExpression, handleVariableDeclarator } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 
 interface WalkContext {
@@ -566,16 +566,10 @@ const coreVisitorObject: VisitorObject = {
     const { argument } = node;
     if (argument.type === 'ImportExpression') {
       state.caughtImportExpressions.add(argument.start);
-    } else if (
-      argument.type === 'CallExpression' &&
-      argument.callee.type === 'MemberExpression' &&
-      !argument.callee.computed &&
-      argument.callee.object.type === 'Identifier' &&
-      argument.callee.object.name === 'Promise' &&
-      argument.callee.property.name === 'all' &&
-      argument.arguments[0]?.type === 'ArrayExpression'
-    ) {
-      for (const element of argument.arguments[0].elements) {
+    } else {
+      const elements = getPromiseAllElements(argument);
+      if (!elements) return;
+      for (const element of elements) {
         if (element?.type === 'ImportExpression') state.caughtImportExpressions.add(element.start);
       }
     }
