@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/tsconfig-plugins-extends__web",
+  "dependencies": {
+    "next": "*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

@@ -59,7 +59,7 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),
-    ...[...plugins, ...importHelpers].map(id => toDeferResolve(id)),
+    ...[...plugins, ...importHelpers].map(id => toDeferResolve(id, { dir: options.cwd, isOwnerFallback: true })),
     ...jsx,
   ]);
 };

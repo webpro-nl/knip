@@ -102,7 +102,7 @@ export const createInputHandler =
           isTypeOnly: input.isTypeOnly,
         });
 
-        if (input.isTypeOnly && input.containingFilePath) {
+        if ((input.isTypeOnly || input.isOwnerFallback) && input.containingFilePath) {
           const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
           if (owningWorkspace && owningWorkspace !== inputWorkspace) {
             const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owningWorkspace, packageName, {

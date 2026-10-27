@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/tsconfig-plugins-extends__typescript-config",
+  "dependencies": {
+    "tslib": "*"
+  }
+}
