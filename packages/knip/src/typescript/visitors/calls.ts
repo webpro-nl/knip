@@ -1,6 +1,7 @@
 import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
+import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
@@ -186,6 +187,24 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
           arg1.object.type === 'MetaProperty' &&
           arg1.property.name === 'url'))
     ) {
+      s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
+      return;
+    }
+  }
+
+  if (
+    s.hasNodeModuleImport &&
+    ((node.callee.type === 'MemberExpression' &&
+      node.callee.object.type === 'Identifier' &&
+      node.callee.object.name === 'module' &&
+      !node.callee.computed &&
+      node.callee.property.name === 'findPackageJSON') ||
+      (node.callee.type === 'Identifier' && node.callee.name === 'findPackageJSON')) &&
+    node.arguments.length >= 1 &&
+    isStringLiteral(node.arguments[0])
+  ) {
+    const specifier = getStringValue(node.arguments[0])!;
+    if (isStartsLikePackageName(specifier)) {
       s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
       return;
     }
