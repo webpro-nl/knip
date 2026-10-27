@@ -281,7 +281,7 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   const fix: Fix = s.options.isFixExports
     ? isNamedDeclaration
       ? [node.start, decl.start, FIX_FLAGS.NONE]
-      : [start, node.end + 1, FIX_FLAGS.NONE]
+      : [start, /\s/.test(s.sourceText.charAt(node.end)) ? node.end + 1 : node.end, FIX_FLAGS.NONE]
     : undefined;
 
   let type: SymbolType = SYMBOL_TYPE.UNKNOWN;

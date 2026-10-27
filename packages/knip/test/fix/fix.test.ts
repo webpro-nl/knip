@@ -90,6 +90,17 @@ export const dx = 1;
 
   assert.equal(await readFile(join(cwd, 'default-arrow.mjs'), 'utf8'), `export const da = 1;\n`);
 
+  assert.equal(await readFile(join(cwd, 'default-comment.mjs'), 'utf8'), `// comment\nexport const dco = 1;\n`);
+
+  assert.equal(
+    await readFile(join(cwd, 'default-minified.mjs'), 'utf8'),
+    `const config={mode:"x"};export const dm=1;\n`
+  );
+
+  assert.equal(await readFile(join(cwd, 'default-same-line.mjs'), 'utf8'), `export const ds = 1;\n`);
+
+  assert.equal(await readFile(join(cwd, 'default-spaced.mjs'), 'utf8'), `export const dsp = 1;\n`);
+
   assert.equal(
     await readFile(join(cwd, 'default-decorated.ts'), 'utf8'),
     `function sealed(value: Function) {
