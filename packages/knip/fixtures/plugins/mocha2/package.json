@@ -4,6 +4,7 @@
     "file": "hooks/globals.js"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "mocha-junit-reporter": "*"
   }
 }

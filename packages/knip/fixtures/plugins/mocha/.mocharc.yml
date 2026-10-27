@@ -1,5 +1,6 @@
 spec:
   - "**/*.test.ts"
+reporter: spec
 require:
   - ts-node/register
   - hooks.ts

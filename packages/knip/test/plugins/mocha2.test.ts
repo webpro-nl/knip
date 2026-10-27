@@ -15,6 +15,7 @@ test('Find dependencies with the Mocha plugin (file)', async () => {
   assert(!('teardown/index.js' in issues.files));
   assert(!('hooks/globals.js' in issues.files));
   assert('unrelated.js' in issues.files);
+  assert(!issues.devDependencies['package.json']?.['mocha-junit-reporter']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
