@@ -44,6 +44,7 @@ JavaScript and TypeScript projects.
 
 - Use `gh` for PR metadata, diffs, comments, and checks. Reuse retrieved evidence; browse upstream documentation separately.
 - When given a bug report, first confirm the behavior is actually wrong. Reproduce, then check if the reported behavior is correct-by-design before writing any fix.
+- Before fixing a case, check that it occurs in code or configuration people actually write. A correct fix for a contrived case is still code to maintain.
 - Find repositories/CodeSandbox/StackBlitz source files and local fixtures to actually reproduce the issue at hand.
 - To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
 - For a fix, revert the source change and confirm the new test fails for the reported reason.

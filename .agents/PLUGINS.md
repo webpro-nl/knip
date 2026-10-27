@@ -17,6 +17,10 @@ Read the writing-a-plugin docs first:
   inputs, import flags, caches before implementing them.
 - Use the existing plugin lifecycle. Do not add core machinery solely to carry
   one plugin's state.
+- Resolve relative paths from a tool's config against the base the tool uses.
+  Entry patterns are relative to the workspace, `toDeferResolve` specifiers to
+  the config file. When the tool uses another base, prefix the path with
+  `join`, such as `join(options.cwd, path)`.
 
 ## Creating a new plugin
 
@@ -70,6 +74,11 @@ See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 Don't walk and parse `manifest.scripts` manually. Use `Plugin.args` and find
 what core script parser handles. See [Argument Parsing][3] and other plugins
 like prisma, vitest, webpack.
+
+Handle the CLI arguments that change what the tool loads, such as a config file,
+a source directory or extra entry files: `args.config` for config files,
+`args.resolveInputs` for the rest (see react-email). Check that an option means
+the same thing in every command.
 
 ## Compilers (`registerCompilers`)
 

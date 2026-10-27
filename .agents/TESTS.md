@@ -12,6 +12,9 @@ the path is explicit, not relative to the test file.
 - A theme's base test uses the leaf `basic`.
 - `cli/`, `fix/`, `e2e/` intentionally reuse other themes' fixtures by their
   full path (they test the reporter/fixer/toolchain, not the fixture).
+- Runtimes and platforms walk directories in different orders, so issue maps
+  like `issues.files` have no stable key order. Sort the keys before comparing
+  more than one.
 
 ## Structure & placement
 
