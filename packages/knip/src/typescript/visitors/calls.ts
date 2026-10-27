@@ -165,14 +165,19 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     return;
   }
 
+  const nodeModuleFn =
+    node.callee.type === 'Identifier'
+      ? node.callee.name
+      : node.callee.type === 'MemberExpression' &&
+          node.callee.object.type === 'Identifier' &&
+          node.callee.object.name === 'module' &&
+          !node.callee.computed
+        ? node.callee.property.name
+        : undefined;
+
   if (
     s.hasNodeModuleImport &&
-    ((node.callee.type === 'MemberExpression' &&
-      node.callee.object.type === 'Identifier' &&
-      node.callee.object.name === 'module' &&
-      !node.callee.computed &&
-      node.callee.property.name === 'register') ||
-      (node.callee.type === 'Identifier' && node.callee.name === 'register')) &&
+    (nodeModuleFn === 'register' || nodeModuleFn === 'findPackageJSON') &&
     node.arguments.length >= 1 &&
     isStringLiteral(node.arguments[0])
   ) {
@@ -180,8 +185,9 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     const arg1 = node.arguments[1];
     if (
       specifier &&
-      (!specifier.startsWith('.') ||
-        (arg1?.type === 'MemberExpression' &&
+      (!(specifier.startsWith('.') || (nodeModuleFn === 'findPackageJSON' && specifier.startsWith('/'))) ||
+        (nodeModuleFn === 'register' &&
+          arg1?.type === 'MemberExpression' &&
           !arg1.computed &&
           arg1.object.type === 'MetaProperty' &&
           arg1.property.name === 'url'))
