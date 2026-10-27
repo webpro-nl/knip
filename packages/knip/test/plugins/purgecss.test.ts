@@ -5,9 +5,8 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/purgecss');
-
 test('Find dependencies with the PurgeCSS PostCSS plugin', async () => {
+  const cwd = resolve('fixtures/plugins/purgecss');
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
