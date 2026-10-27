@@ -82,7 +82,7 @@ test('unrelated config basenames and plugin entry files do not reload options', 
   const cwd = await setup(t);
   await mkdir(join(cwd, 'unrelated'));
   const session = await createSession(await createOptions({ cwd, isSession: true }));
-  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts', 'src/second.ts']);
+  assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['src/first.ts', 'src/second.ts']);
   // A silent config edit only takes effect when the session reloads its options
   await writeFile(
     join(cwd, 'knip.json'),
