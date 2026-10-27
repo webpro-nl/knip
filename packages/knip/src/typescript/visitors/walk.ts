@@ -8,6 +8,7 @@ import {
   type TSInterfaceDeclaration,
   type TSPropertySignature,
   type TSTypeName,
+  type TryStatement,
   type VariableDeclarator,
   type VisitorObject,
 } from 'oxc-parser';
@@ -35,7 +36,7 @@ import {
   handleExportNamed,
   handleExpressionStatement,
 } from './exports.ts';
-import { handleImportExpression, handleVariableDeclarator } from './imports.ts';
+import { getPromiseAllElements, handleImportExpression, handleVariableDeclarator } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 
 interface WalkContext {
@@ -82,6 +83,7 @@ interface WalkContext {
   programFiles: Set<string>;
   entryFiles: Set<string>;
   handledImportExpressions: Set<number>;
+  caughtImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -92,6 +94,8 @@ export interface WalkState extends WalkContext {
   isJS: boolean;
   isModuleFile: boolean;
   handledImportExpressions: Set<number>;
+  caughtTryBlockEnds: number[];
+  functionCaughtTryBlockEnds: number[][];
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
   nsContainers: Map<string, Map<string, string>>;
@@ -414,8 +418,9 @@ const coreVisitorObject: VisitorObject = {
     state.scopeEnds[state.scopeDepth] = node.end;
     state.scopeDepth++;
   },
-  'BlockStatement:exit'() {
+  'BlockStatement:exit'(node) {
     state.scopeDepth--;
+    if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end) state.caughtTryBlockEnds.pop();
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
@@ -479,6 +484,8 @@ const coreVisitorObject: VisitorObject = {
     state.staticBlockDepth--;
   },
   FunctionDeclaration(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
       state.localDeclarations.set(node.id.name, node);
@@ -486,11 +493,24 @@ const coreVisitorObject: VisitorObject = {
     }
     _addParamShadows(node.params, node.body);
   },
+  'FunctionDeclaration:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   FunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
   },
+  'FunctionExpression:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   ArrowFunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
+  },
+  'ArrowFunctionExpression:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
   },
   CatchClause(node) {
     if (node.param?.type === 'Identifier' && node.body) {
@@ -536,6 +556,23 @@ const coreVisitorObject: VisitorObject = {
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
+  },
+  TryStatement(node: TryStatement) {
+    if (node.handler) state.caughtTryBlockEnds.push(node.block.end);
+  },
+  AwaitExpression(node) {
+    if (state.caughtTryBlockEnds.length === 0) return;
+
+    const { argument } = node;
+    if (argument.type === 'ImportExpression') {
+      state.caughtImportExpressions.add(argument.start);
+    } else {
+      const elements = getPromiseAllElements(argument);
+      if (!elements) return;
+      for (const element of elements) {
+        if (element?.type === 'ImportExpression') state.caughtImportExpressions.add(element.start);
+      }
+    }
   },
   CallExpression(node) {
     handleCallExpression(node, state);
@@ -928,6 +965,8 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     localToExports: new Map(),
     customElementRegistries: new Set(),
     classNameStack: [],
+    caughtTryBlockEnds: [],
+    functionCaughtTryBlockEnds: [],
     staticBlockDepth: 0,
     addExport: _addExport,
     getFix: _getFix,

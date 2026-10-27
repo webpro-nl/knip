@@ -310,4 +310,5 @@ export const IMPORT_FLAGS = {
   AUGMENT: 1 << 7, // module augmentation ref, attribute only if it resolves internally
   DYNAMIC: 1 << 8, // dynamic import(), excluded from cycle detection
   LOADER: 1 << 9, // inline arrow loader in call args: consumes default export only, if the target has one
+  CAUGHT: 1 << 10, // dynamic import() rejection is caught by an enclosing try/catch
 } as const;

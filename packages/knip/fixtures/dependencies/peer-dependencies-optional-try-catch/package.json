@@ -1,0 +1,1 @@
+{"name":"@fixtures/peer-dependencies-optional-try-catch","peerDependencies":{"pg":"*"},"peerDependenciesMeta":{"pg":{"optional":true}},"devDependencies":{"@types/pg":"*"}}

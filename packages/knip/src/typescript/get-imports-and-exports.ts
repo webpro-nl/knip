@@ -66,6 +66,7 @@ const getImportsAndExports = (
   const scripts = new Set<string>();
   const importGlobs: ImportGlob[] = [];
   const handledImportExpressions = new Set<number>();
+  const caughtImportExpressions = new Set<number>();
 
   const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
   const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
@@ -445,6 +446,7 @@ const getImportsAndExports = (
     programFiles,
     entryFiles,
     handledImportExpressions,
+    caughtImportExpressions,
     visitor,
     getJSDocTags,
   });

@@ -20,7 +20,7 @@ import { relative } from '../util/path.ts';
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
-import { INTERNAL_TAG } from '../constants.ts';
+import { IMPORT_FLAGS, INTERNAL_TAG } from '../constants.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -314,6 +314,7 @@ export const analyze = async ({
                 specifier: extImport.specifier,
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
+                isCaught: !!(extImport.modifiers & IMPORT_FLAGS.CAUGHT),
               });
             if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({

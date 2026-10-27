@@ -36,6 +36,7 @@ interface DependencyReferenceOptions {
   isTypeOnly?: boolean;
   isResolved?: boolean;
   isPublishedType?: boolean;
+  isCaught?: boolean;
 }
 
 /**
@@ -202,7 +203,7 @@ export class DependencyDeputy {
   public maybeAddReferencedExternalDependency(
     workspace: Workspace,
     packageName: string,
-    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType }: DependencyReferenceOptions
+    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
     if (specifier.startsWith('node:') || isBuiltin(specifier)) return true;
@@ -211,9 +212,13 @@ export class DependencyDeputy {
     // Ignore self-referenced imports
     if (packageName === workspace.pkgName) return true;
 
+    const optionalPeerDependencies = this.getOptionalPeerDependencies(workspace.name);
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
     const isDevOrTypeOnly = isDevOnly || (isTypeOnly && !isPublishedType);
-    const closestWorkspaceName = workspaceNames.find(name => this.isInDependencies(name, packageName, isDevOrTypeOnly));
+    const isCaughtOptionalPeer = isCaught && optionalPeerDependencies.has(packageName);
+    const closestWorkspaceName = workspaceNames.find(name =>
+      this.isInDependencies(name, packageName, isDevOrTypeOnly, isCaughtOptionalPeer)
+    );
 
     // Prevent false positives by also marking the `@types/packageName` dependency as referenced
     const typesPackageName = !isDefinitelyTyped(packageName) && getDefinitelyTypedFor(packageName);
@@ -286,10 +291,18 @@ export class DependencyDeputy {
     return;
   }
 
-  private isInDependencies(workspaceName: string, packageName: string, isDevOnly?: boolean) {
+  private isInDependencies(
+    workspaceName: string,
+    packageName: string,
+    isDevOnly?: boolean,
+    isCaughtOptionalPeer?: boolean
+  ) {
     const manifest = this._manifests.get(workspaceName);
     if (!manifest) return false;
-    if (this.isStrict && !isDevOnly) return this.getProductionDependencies(workspaceName).includes(packageName);
+    if (this.isStrict && !isDevOnly) {
+      if (isCaughtOptionalPeer && manifest.optionalPeerDependencies.has(packageName)) return true;
+      return this.getProductionDependencies(workspaceName).includes(packageName);
+    }
     return manifest.allDependencies.has(packageName);
   }
 
