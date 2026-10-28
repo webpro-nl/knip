@@ -56,6 +56,7 @@ export type PluginName =
   | 'jest'
   | 'karma'
   | 'knex'
+  | 'kysely-codegen'
   | 'ladle'
   | 'laravel-vite-plugin'
   | 'lefthook'
@@ -257,6 +258,7 @@ export const pluginNames = [
   'jest',
   'karma',
   'knex',
+  'kysely-codegen',
   'ladle',
   'laravel-vite-plugin',
   'lefthook',

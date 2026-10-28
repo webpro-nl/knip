@@ -69,6 +69,7 @@ export const pluginsSchema = z.object({
   jest: pluginSchema,
   karma: pluginSchema,
   knex: pluginSchema,
+  'kysely-codegen': pluginSchema,
   ladle: pluginSchema,
   'laravel-vite-plugin': pluginSchema,
   lefthook: pluginSchema,
