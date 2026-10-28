@@ -115,6 +115,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'purgecss'
   | 'quasar'
   | 'qwik'
   | 'railway'
@@ -317,6 +318,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'prisma',
+  'purgecss',
   'quasar',
   'qwik',
   'railway',

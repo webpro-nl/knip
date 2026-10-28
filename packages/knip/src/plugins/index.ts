@@ -114,6 +114,7 @@ import { default as preCommit } from './pre-commit/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
+import { default as purgecss } from './purgecss/index.ts';
 import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
 import { default as railway } from './railway/index.ts';
@@ -316,6 +317,7 @@ export const Plugins = {
   preconstruct,
   prettier,
   prisma,
+  purgecss,
   quasar,
   qwik,
   railway,

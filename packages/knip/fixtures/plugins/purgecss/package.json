@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/purgecss",
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "*",
+    "purgecss-from-html": "*",
+    "postcss-cli": "*"
+  },
+  "scripts": {
+    "styles": "postcss styles.css"
+  }
+}

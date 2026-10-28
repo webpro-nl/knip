@@ -870,6 +870,10 @@
           "title": "Prisma plugin configuration (https://knip.dev/reference/plugins/prisma)",
           "$ref": "#/definitions/plugin"
         },
+        "purgecss": {
+          "title": "purgecss plugin configuration (https://knip.dev/reference/plugins/purgecss)",
+          "$ref": "#/definitions/plugin"
+        },
         "quasar": {
           "title": "quasar plugin configuration (https://knip.dev/reference/plugins/quasar)",
           "$ref": "#/definitions/plugin"
