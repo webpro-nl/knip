@@ -13,8 +13,8 @@ test('Find dependencies with the SvelteKit plugin (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 18,
-    total: 18,
+    processed: 19,
+    total: 19,
   });
 });
 
@@ -27,8 +27,8 @@ test('Find dependencies with the SvelteKit plugin (development)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    processed: 20,
-    total: 20,
+    processed: 21,
+    total: 21,
   });
 });
 

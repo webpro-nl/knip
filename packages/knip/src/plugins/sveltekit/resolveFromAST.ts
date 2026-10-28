@@ -14,7 +14,7 @@ import { config as viteConfig } from '../vite/index.ts';
 
 const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
-  'src/hooks.{server,client}.{js,ts}',
+  'src/hooks{,.server,.client}.{js,ts}',
   'src/params/*.{js,ts}',
   'src/service-worker.{js,ts}',
   'src/service-worker/index.{js,ts}',
