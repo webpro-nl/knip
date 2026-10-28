@@ -69,6 +69,7 @@ export type PluginName =
   | 'lunaria'
   | 'markdownlint'
   | 'marko'
+  | 'mastra'
   | 'mcp'
   | 'mdx'
   | 'mdxlint'
@@ -272,6 +273,7 @@ export const pluginNames = [
   'lunaria',
   'markdownlint',
   'marko',
+  'mastra',
   'mcp',
   'mdx',
   'mdxlint',

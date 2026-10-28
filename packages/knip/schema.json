@@ -690,6 +690,10 @@
           "title": "marko plugin configuration (https://knip.dev/reference/plugins/marko)",
           "$ref": "#/definitions/plugin"
         },
+        "mastra": {
+          "title": "mastra plugin configuration (https://knip.dev/reference/plugins/mastra)",
+          "$ref": "#/definitions/plugin"
+        },
         "mcp": {
           "title": "mcp plugin configuration (https://knip.dev/reference/plugins/mcp)",
           "$ref": "#/definitions/plugin"
