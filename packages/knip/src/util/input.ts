@@ -20,7 +20,7 @@ export interface Input {
   production?: boolean;
   optional?: boolean;
   isTypeOnly?: boolean;
-  isOwnerFallback?: boolean;
+  alsoReferenceOwner?: boolean;
   dir?: string;
   containingFilePath?: string;
   allowIncludeExports?: boolean;
@@ -52,7 +52,7 @@ interface IgnoreInput extends Input {
 type Options = {
   optional?: boolean;
   isTypeOnly?: boolean;
-  isOwnerFallback?: boolean;
+  alsoReferenceOwner?: boolean;
   dir?: string;
   containingFilePath?: string;
   allowIncludeExports?: boolean;

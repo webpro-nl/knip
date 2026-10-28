@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/resolution/tsconfig-plugins-extends');
 
-test('Attribute extended tsconfig.json compilerOptions.plugins and importHelpers to the workspace', async () => {
+test('Attribute extended tsconfig.json compilerOptions.plugins, importHelpers and jsxImportSource to the workspace', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
