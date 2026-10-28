@@ -58,7 +58,7 @@ const builtInReporters = new Set([
 const isExternalReporter = (reporter: unknown): reporter is string =>
   typeof reporter === 'string' && !builtInReporters.has(reporter);
 
-const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
@@ -67,7 +67,7 @@ const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   inputs.push(...entryPatterns.map(id => toEntry(id)));
   inputs.push(...files.map(id => toDeferResolveEntry(id)));
   inputs.push(...require.map(id => toDeferResolve(id)));
-  if (isExternalReporter(localConfig.reporter)) inputs.push(toDeferResolve(localConfig.reporter));
+  if (isExternalReporter(localConfig.reporter)) inputs.push(toDeferResolve(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
 

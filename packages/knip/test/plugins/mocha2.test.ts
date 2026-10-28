@@ -16,12 +16,12 @@ test('Find dependencies with the Mocha plugin (file)', async () => {
   assert(!('hooks/globals.js' in issues.files));
   assert('unrelated.js' in issues.files);
   assert(!issues.devDependencies['package.json']?.['mocha-junit-reporter']);
+  assert(!('reporters/custom.cjs' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     files: 1,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
