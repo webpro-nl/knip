@@ -9,3 +9,4 @@ module.findPackageJSON('@my-org/cli', import.meta.url);
 findPackageJSON('..', import.meta.url);
 findPackageJSON('./index.ts', import.meta.url);
 module.findPackageJSON('/path/to/file.js');
+findPackageJSON('file:///path/to/file.js');

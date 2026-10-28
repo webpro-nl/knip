@@ -187,7 +187,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
             !arg1.computed &&
             arg1.object.type === 'MetaProperty' &&
             arg1.property.name === 'url'))) ||
-      (nodeModuleMethod === 'findPackageJSON' && isStartsLikePackageName(specifier))
+      (nodeModuleMethod === 'findPackageJSON' && isStartsLikePackageName(specifier) && !URL.canParse(specifier))
     ) {
       s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
       return;
