@@ -87,8 +87,16 @@ export const createOptions = async (options: CreateOptions) => {
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
-  const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
+  let pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
   const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
+
+  for (const source in pnpmWorkspace?.include) {
+    if (!source.startsWith('.')) continue;
+    const filePath = join(cwd, source);
+    const included = await _load(filePath);
+    if (included?.catalog || included?.catalogs) pnpmWorkspacePath = filePath;
+    Object.assign(pnpmWorkspace, included);
+  }
 
   const workspaces =
     pnpmWorkspace?.packages ??
