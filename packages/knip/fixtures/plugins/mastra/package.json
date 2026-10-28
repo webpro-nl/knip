@@ -3,7 +3,10 @@
   "type": "module",
   "scripts": {
     "dev": "mastra dev",
-    "build": "mastra build"
+    "build": "mastra build",
+    "dev:app": "mastra dev --dir app/mastra",
+    "build:tools": "mastra build -t lib/tools/*.ts,lib/extra-tools",
+    "start": "mastra start --dir .mastra/output"
   },
   "dependencies": {
     "@mastra/core": "*",

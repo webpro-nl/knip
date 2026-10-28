@@ -1,0 +1,1 @@
+export const ping = () => 'pong';
