@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/production-plugin-extglob-negation",
+  "exports": {
+    "./client": "./src/testing.ts"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

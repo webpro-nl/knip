@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { EOL } from 'node:os';
 import test from 'node:test';
+import picomatch from 'picomatch';
 import {
   convertGitignoreToPicomatchIgnorePatterns as convert,
+  expandIgnorePatterns as expand,
   parseAndConvertGitignorePatterns as parse,
   toExtendedIgnorePattern as ext,
 } from '../../src/util/parse-and-convert-gitignores.ts';
@@ -33,6 +35,14 @@ test('toExtendedIgnorePattern', () => {
   assert.equal(ext('**/dir'), '**/dir/**');
   assert.equal(ext('root'), 'root/**');
   assert.equal(ext('**/a/b/c'), '**/a/b/c/**');
+});
+
+test('expandIgnorePatterns', () => {
+  const patterns = ['*', '**/dir', '**/.dot/*', 'dir/!(foo)'];
+  const expanded = ['*', '**/dir', '**/dir/**', '**/.dot/*', '**/.dot/*/**', 'dir/!(foo)', 'dir/!(foo)/**'];
+  assert.deepEqual(expand(patterns), expanded);
+  assert.deepEqual(expand(['**/.dot/*'], true), ['**/.dot/*']);
+  assert(picomatch(expand(['dir/!(foo)']))('dir/foobar.ts'));
 });
 
 test('parseAndConvertGitignorePatterns', async () => {

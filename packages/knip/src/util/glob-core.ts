@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readdir, readFileSync } from 'node:fs';
-import { escapePath, glob as tinyGlob, type GlobOptions as TinyGlobOptions } from 'tinyglobby';
+import { escapePath, glob as tinyGlob, type GlobOptions as TinyGlobOptions, isDynamicPattern } from 'tinyglobby';
 import picomatch from 'picomatch';
 import { GLOBAL_IGNORE_PATTERNS } from '../constants.ts';
 import { compact, partition } from './array.ts';
@@ -328,7 +328,12 @@ export async function glob(_patterns: string[], options: GlobOptions): Promise<s
     cachedGlobIgnores.set(options.dir, compact(_ignore));
   }
 
-  const ignorePatterns = (cachedIgnores ?? _ignore).concat(negatedPatterns.map(pattern => pattern.slice(1)));
+  // tinyglobby prunes ignored directories only while crawling; a static-only pattern set starts inside its common prefix
+  const ignores = cachedIgnores ?? _ignore;
+  const isStatic = options.gitignore && !patterns.some(pattern => isDynamicPattern(pattern));
+  const ignorePatterns = (isStatic ? expandIgnorePatterns(ignores) : ignores).concat(
+    negatedPatterns.map(pattern => pattern.slice(1))
+  );
 
   const { dir, label, ...fgOptions } = {
     ...options,
