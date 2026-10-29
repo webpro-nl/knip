@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { toDeferResolve, toDependency, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.ts';
 
@@ -26,10 +26,11 @@ const production = [
 const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConfig, options) => {
   const { configFileName } = options;
 
+  const entries = production.map(id => toProductionEntry(id));
+
   if (configFileName.includes('gatsby-config')) {
-    return (localConfig as GatsbyConfig).plugins
-      .map(plugin => (typeof plugin === 'string' ? plugin : plugin.resolve))
-      .map(id => toDeferResolve(id));
+    const plugins = (localConfig as GatsbyConfig).plugins ?? [];
+    return [...entries, ...plugins.map(plugin => toDeferResolve(typeof plugin === 'string' ? plugin : plugin.resolve))];
   }
 
   if (configFileName.includes('gatsby-node')) {
@@ -39,10 +40,10 @@ const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConf
     if (typeof _config.onCreateBabelConfig === 'function') {
       _config.onCreateBabelConfig({ actions });
     }
-    return Array.from(plugins).map(id => toDependency(id));
+    return [...entries, ...Array.from(plugins, id => toDependency(id))];
   }
 
-  return [];
+  return entries;
 };
 
 const plugin: Plugin = {

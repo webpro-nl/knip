@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/gatsby-no-plugins",
+  "devDependencies": {
+    "gatsby": "*"
+  }
+}

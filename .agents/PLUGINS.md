@@ -64,9 +64,12 @@ consider `resolveConfig` to read them from the loaded config, and keep
 `resolveFromAST` for values the loaded config doesn't expose. Removing a single
 false positive does not always justify the additional complexity.
 
-`resolveConfig` should include `entry` and `production` items, either from the
-parsed config or the plugin defaults (so they can be overriden). Include the
-default `entry` and `production` in the plugin export for the docs generator.
+Core adds the static `entry` and `production` patterns only while no config
+file other than `package.json` has been found or handed over for a plugin with
+`resolveConfig` or `resolveFromAST`. `resolveConfig` should include `entry` and
+`production` items, either from the parsed config or the plugin defaults (so
+they can be overriden). Include the default `entry` and `production` in the
+plugin export for the docs generator.
 
 See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 `collectPropertyValues`. See `ast-helpers.ts` for available utilities.

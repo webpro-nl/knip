@@ -1,5 +1,5 @@
 export type GatsbyConfig = {
-  plugins: (string | { resolve: string })[];
+  plugins?: (string | { resolve: string })[];
 };
 
 export type GatsbyActions = {
