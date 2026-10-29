@@ -25,13 +25,15 @@ JavaScript and TypeScript projects.
   - Avoid `any` and type casting (`as`).
   - Avoid runtime overhead just to get the types right.
 - Lint and check formatting from root: `pnpm run ci`; format with `pnpm fmt`
-- Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links)
+- Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links); it formats the whole tree, so for one file use `pnpm exec remark <file> --frail`
 
 ## Domain Knowledge
 
 - Unused file → unused exports/dependencies is a chain, not a bug
 - Non-JS/TS files (.css, .mdx, .vue) enter the graph via (usually plugin-registered) compilers (`registerCompilers`)
 - Library-specific AST patterns are caught by plugin-registered visitors (`registerVisitors`)
+- `entry` and `project` patterns (including negations) define what is analyzed; `ignore` only suppresses issues in analyzed files, so fix false positives in the scope ([configuring project files][12]).
+- Gitignored files are left out of globbed entry and project files, but stay in the graph when imported.
 - Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][2])
 - If creating, modifying, or reviewing a plugin, read [PLUGINS.md][3] first.
 - If modifying core module graph, AST traversal, or CLI sequence, read [MODULE-GRAPH.md][4] first.
@@ -50,6 +52,8 @@ JavaScript and TypeScript projects.
 - For a fix, revert the source change and confirm the new test fails for the reported reason.
 - For a new plugin or a change in how a tool finds files, verify against the tool's source, not only its docs, and run Knip on the tool's examples or starters when available.
 - Follow the [AI contribution policy][11]: before opening an issue or PR, make sure the person you work for understands and stands behind it. Keep descriptions concise.
+- Breaking changes, such as dropping a Node.js version (#1853), wait for the next major. Check for an issue or PR that already owns them.
+- Ecosystem snapshots (`.github/workflows/snapshots/`): confirm each new finding is real, then commit as `Update <tool> snapshot`. When an upstream repository breaks its job, pin its `ref` in `integration.yml` to the last passing commit.
 
 ## Run & Debug
 
@@ -103,6 +107,9 @@ pnpm build
 pnpm test
 ```
 
+Before pushing, run `pnpm qa` in `packages/knip` (lint, build, dogfood, all
+tests), also for fixture-only changes: fixtures are shared across tests.
+
 See [TESTS.md][7] for test and fixture conventions and placements.
 
 ## Build
@@ -113,6 +120,11 @@ To type-check `knip` with `tsc`:
 cd packages/knip
 pnpm build
 ```
+
+CI also type-checks against TypeScript 5.0.4 (`ci-legacy-5.0.4.yml`), which
+`pnpm build` can't catch. It doesn't narrow through an optional chain, so bind
+`o?.x` to a local before guarding it; missing runtime API declarations go in
+`typescript-5.0.d.ts`.
 
 [1]: https://knip.dev
 [2]: ./packages/knip/src/util/Performance.ts
@@ -125,3 +137,4 @@ pnpm build
 [9]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
 [10]: ./.agents/COMPILERS.md
 [11]: ./AI_POLICY.md
+[12]: ./packages/docs/src/content/docs/guides/configuring-project-files.md

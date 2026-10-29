@@ -2,8 +2,7 @@
 
 What the performance work on knip core has established: where time goes, what
 shipped, what's a proven dead end, what's load-bearing, the architectural
-constraints, and the levers worth pursuing. Kept generic; for exact numbers and
-commits, see the source docs in §10.
+constraints, and the levers worth pursuing.
 
 ## 0. Current state
 
@@ -71,6 +70,9 @@ Don't trust the table blindly. Its blind spots:
   roughly 3% on mid and large repos, 10% on small ones.
 - **Discard the cold run** (jiti, disk, and JIT warmup). Compare two builds
   back-to-back in one session, since system state drifts between sessions.
+- **Measure on an idle machine.** Readings taken while other agents ran swung
+  from +4% to -4% on the same comparison, and a full run on a large repo can
+  exceed 1 GB RSS, so run one at a time.
 - **On macOS:** warm runs drift slowly upward from thermal and disk effects, so
   an identical baseline and change read as noise. `--prof` mis-symbolizes JIT
   frames to the nearest C++ symbol; read the bottom-up profile, or use
@@ -78,8 +80,8 @@ Don't trust the table blindly. Its blind spots:
 - **Correctness gate for every change:** output byte-identical to main (cold and
   warm, cache and no-cache), smoke suite green, tsc clean. Run the full suite for
   fix, format, or reporter changes.
-- **Fixture repos** live under `~/p/knip/exercises/` (real installed projects).
-  Cover both shapes: large single-package and many-workspace monorepo.
+- **Fixture repos** are real projects with dependencies installed. Cover both
+  shapes: large single-package and many-workspace monorepo.
 
 ## 4. Shipped wins
 
@@ -190,15 +192,3 @@ bridge.
 - AST-visitor de-duplication is real but fiddly because of oxc's AST types, and
   needs someone fluent in them. Graph-explorer control-flow cleanups sit in
   reachability-critical code and want careful review.
-
-## 10. Source docs (where the detail and numbers live)
-
-In `.agents/tasks/`: `todo-perf-architecture.md` (the master: profiles, shipped
-and dropped tables, the worker and fork abort data, the tiered roadmap),
-`todo-perf-session-2026-05.md` (caching wins), `todo-perf-glob-fanout.md` (glob
-falsification and resolution floor), `todo-glob-simplify.md` (glob load-bearing
-map), `todo-oxc-fuse.md` and `todo-oxc-semantic.md` (Rust offload),
-`todo-fdir-migration*.md` (walk migration and the load-bearing prune matrix), and
-`todo-oxc-resolver-rootdirs.md`. In memory: the glob/resolution floor, the
-config-cwd constraint, the cold-run-discard rule, and the exercises-repo
-locations.

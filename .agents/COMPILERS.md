@@ -13,6 +13,9 @@ examples.
 
 Tests should cover the intended extraction and the nearby false-positive or
 false-negative cases without turning the built-in compiler into a language
-implementation.
+implementation. Test a new token inside every comment and string form the
+scanner skips. Before changing a shared extractor such as `styleExtractor`,
+check the tag syntax of every compiler that uses it, not only the tested ones
+(Marko's `<style.less>` shorthand also goes through it).
 
 [1]: ../packages/docs/src/content/docs/features/compilers.md

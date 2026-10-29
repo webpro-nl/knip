@@ -9,7 +9,9 @@ stay conservative when removing an `export` could break declaration emit.
 A report is also a promise about `knip --fix`. Keeping a redundant export is a
 missed report; removing a required export can break a build or a downstream
 consumer. Prefer the missed report whenever syntax alone cannot prove removal
-safe.
+safe. The same holds for the fix itself: keep fixes within the compact
+`ExportPosTuple` ranges, and when a declaration can't be fixed within them,
+keep the conservative guard rather than adding a new fix representation.
 
 Types in exported value signatures are the main risk. TypeScript may need an
 apparently unused type name while emitting a `.d.ts`, including from a different
@@ -95,7 +97,11 @@ preference that lets selected local references count.
 `localRefsVisitorObject` collects names in `localRefs` when the option is
 enabled. After the walk, matching exports receive `hasRefsInFile = true`.
 `shouldCountRefs` selects the eligible symbol types. Computed access such as
-`obj[EXPORTED_KEY]` is included.
+`obj[EXPORTED_KEY]` is included. A reference to an imported binding resolves
+through `localToExports` to the name it is exported as, after the walk, since
+`export { x }` may follow the reference. Run every
+`fixtures/ignore-exports-used-in-file/re-export-*` fixture when changing this;
+a fix for one direction can break the other.
 
 The signature-containment path is evaluated independently of this option and
 protects declaration emit. By contrast, a reference such as `typeof X` inside

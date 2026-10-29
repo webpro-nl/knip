@@ -15,6 +15,11 @@ the path is explicit, not relative to the test file.
 - Runtimes and platforms walk directories in different orders, so issue maps
   like `issues.files` have no stable key order. Sort the keys before comparing
   more than one.
+- Assert `assert.deepEqual(counters, { ...baseCounters, ...expected })`.
+  `baseCounters` zeroes every issue type, so assert on `issues.*` only for a
+  non-zero count or a specific identifier.
+- `counters.total` counts project files and `processed` analyzed files; neither
+  counts findings.
 
 ## Structure & placement
 
@@ -53,6 +58,11 @@ round-trip), `util/` & `graph-explorer/` (unit, no fixtures), `session/`.
   names.
 - Use empty files when sufficient (e.g. to verify an import specifier or entry
   file).
+- Don't stretch a regression fixture whose shape exercises a specific heuristic;
+  add a minimal fixture for the new bug instead.
+- In workspace fixtures, cross-workspace imports reach source only through the
+  package's `exports` or committed `node_modules` symlinks. With only `main` the
+  edge silently drops, so confirm it before debugging analysis.
 
 ### Plugin fixtures
 
@@ -64,12 +74,18 @@ round-trip), `util/` & `graph-explorer/` (unit, no fixtures), `session/`.
   so a wrong value leaves an entry file unused. Don't `throw` to assert
   parameters (an error drops all inputs of that config); reserve it for what
   counters can't observe, like call counts.
+- Put files a config references where the config file's own directory wouldn't
+  resolve them, so the test exercises the plugin's path base.
+- Check that package names in plugin fixtures exist on npm; use `"*"` version.
 
 ## Running
 
 `scripts/run-test.js` globs files and hands the list to `bun test` / `node
 --test` (`--runtime`, default bun). CLI tests use `src/cli.ts` on bun but
-`dist/cli.js` on node.
+`dist/cli.js` on node; run `pnpm build` first, since a stale `dist` silently
+reports old behavior. Spawn the CLI only through the `exec` helper in
+`test/cli/`; a hand-rolled `spawnSync` of `src/cli.ts` breaks on the Node 20 CI
+legs. `pnpm build` type-checks `src` only, so type-check changed tests apart.
 
 - default → `test/**/*.test.ts`
 - `--smoke` → `test/!(cli|e2e|fix)/**` — everything except the heavy integration
