@@ -6,6 +6,7 @@ import { hasDependency } from '../../util/plugin.ts';
 import type { MochaConfig } from './types.ts';
 
 // https://mochajs.org/#configuring-mocha-nodejs
+// https://github.com/mochajs/mocha/blob/v12.0.3/lib/reporters/index.cjs
 
 const title = 'Mocha';
 
@@ -19,7 +20,45 @@ const entry = ['**/test/*.{js,cjs,mjs}'];
 
 const defaultExtensions = ['js', 'cjs', 'mjs'];
 
-const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+const builtInReporters = new Set([
+  'Base',
+  'base',
+  'Dot',
+  'dot',
+  'Doc',
+  'doc',
+  'TAP',
+  'tap',
+  'JSON',
+  'json',
+  'HTML',
+  'html',
+  'List',
+  'list',
+  'Min',
+  'min',
+  'Spec',
+  'spec',
+  'Nyan',
+  'nyan',
+  'XUnit',
+  'xunit',
+  'Markdown',
+  'markdown',
+  'Progress',
+  'progress',
+  'Landing',
+  'landing',
+  'JSONStream',
+  'json-stream',
+  'GithubActions',
+  'github-actions',
+]);
+
+const isExternalReporter = (reporter: unknown): reporter is string =>
+  typeof reporter === 'string' && !builtInReporters.has(reporter);
+
+const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
@@ -28,6 +67,7 @@ const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
   inputs.push(...entryPatterns.map(id => toEntry(id)));
   inputs.push(...files.map(id => toDeferResolveEntry(id)));
   inputs.push(...require.map(id => toDeferResolve(id)));
+  if (isExternalReporter(localConfig.reporter)) inputs.push(toDeferResolve(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
 
@@ -86,6 +126,7 @@ const args = {
       else inputs.push(toEntry(value));
     }
     for (const value of [parsed.ignore ?? []].flat()) inputs.push(toEntry(`!${String(value)}`));
+    if (isExternalReporter(parsed.reporter)) inputs.push(toDeferResolve(parsed.reporter));
     return inputs;
   },
 };

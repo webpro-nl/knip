@@ -12,10 +12,12 @@
   "devDependencies": {
     "@types/mocha": "*",
     "mocha": "*",
+    "mocha-multi-reporters": "*",
     "ts-node": "*"
   },
   "scripts": {
     "test:integration": "mocha --recursive integration",
+    "test:ci": "mocha -R mocha-multi-reporters --recursive integration",
     "test:e2e": "mocha \"e2e/*.e2e.mjs\" \"smoke/*.smoke.mjs\""
   }
 }

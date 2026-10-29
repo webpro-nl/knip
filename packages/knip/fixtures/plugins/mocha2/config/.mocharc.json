@@ -1,0 +1,4 @@
+{
+  "spec": ["specs/*.test.js"],
+  "reporter": "./reporters/custom.cjs"
+}
