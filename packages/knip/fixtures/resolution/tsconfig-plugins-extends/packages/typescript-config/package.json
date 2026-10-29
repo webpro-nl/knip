@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/tsconfig-plugins-extends__typescript-config",
   "dependencies": {
+    "@emotion/react": "*",
     "tslib": "*"
   }
 }
