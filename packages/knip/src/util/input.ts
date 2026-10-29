@@ -20,6 +20,7 @@ export interface Input {
   production?: boolean;
   optional?: boolean;
   isTypeOnly?: boolean;
+  /** Also credit the workspace that owns the config file: a value inherited from a shared config may be listed by either side, and the traversal cannot tell which. */
   alsoReferenceOwner?: boolean;
   dir?: string;
   containingFilePath?: string;
