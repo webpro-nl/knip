@@ -1,6 +1,5 @@
 {
   // Biome also loads hidden config files
-  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
-  "root": false,
+  "$schema": "https://biomejs.dev/schemas/2.4.0/schema.json",
   "extends": ["@org/shared-configs/biome"]
 }
