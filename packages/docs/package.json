@@ -19,16 +19,16 @@
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",
-    "@astrojs/starlight": "0.42.6",
+    "@astrojs/starlight": "0.42.7",
     "@octokit/graphql": "^9.0.5",
-    "astro": "7.4.1",
+    "astro": "7.4.2",
     "sharp": "0.35.5"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.11",
-    "@astrojs/markdown-satteri": "0.4.4",
+    "@astrojs/check": "0.9.12",
+    "@astrojs/markdown-satteri": "0.4.5",
     "picocolors": "^1.1.1",
-    "satteri": "0.10.5",
+    "satteri": "0.11.1",
     "starlight-blog": "^0.30.2",
     "typescript": "6.0.3"
   },

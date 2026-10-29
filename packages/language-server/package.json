@@ -24,7 +24,7 @@
   "dependencies": {
     "knip": "workspace:^",
     "vscode-languageserver": "^10.1.2",
-    "vscode-languageserver-textdocument": "^1.0.15"
+    "vscode-languageserver-textdocument": "^1.0.16"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
