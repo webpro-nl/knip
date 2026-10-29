@@ -54,6 +54,9 @@ const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, optio
   const checkConfig = async (localConfig: RsbuildConfig, config: RsbuildConfig) => {
     checkSource(localConfig.source);
 
+    const alias = localConfig.resolve?.alias;
+    if (alias) for (const input of await resolveRspackConfig({ resolve: { alias } }, options)) inputs.push(input);
+
     if (!localConfig.tools?.rspack) return;
     const target = localConfig.output?.target ?? config.output?.target ?? 'web';
     const mode = localConfig.mode ?? config.mode;

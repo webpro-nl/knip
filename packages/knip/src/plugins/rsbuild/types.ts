@@ -21,6 +21,7 @@ export type RsbuildConfig = {
   plugins?: unknown[];
   mode?: 'development' | 'production' | 'none';
   output?: { target?: RspackConfigUtils['target'] };
+  resolve?: { alias?: Record<string, string | string[] | false> };
   source?: { entry?: Entry; preEntry?: string | string[] };
   tools?: {
     rspack?: RspackConfig | RspackConfig[];
