@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { type Input, toEntry } from '../../util/input.ts';
-import { isAbsolute, join } from '../../util/path.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.ts';
 
@@ -26,17 +26,17 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) =>
 
   inputsFromPlugins(config.plugins, options.manifest.devDependencies).forEach(inputs.add, inputs);
 
-  const basePath = config.basePath ?? '';
+  const basePath = toAbsolute(config.basePath ?? '', options.configFileDir);
   if (config.files) {
     for (const fileOrPatternObj of config.files) {
       const fileOrPattern = typeof fileOrPatternObj === 'string' ? fileOrPatternObj : fileOrPatternObj.pattern;
-      const absPath = isAbsolute(fileOrPattern) ? fileOrPattern : join(options.configFileDir, basePath, fileOrPattern);
+      const absPath = toAbsolute(fileOrPattern, basePath);
       inputs.add(toEntry(absPath));
     }
   }
   if (config.exclude) {
     for (const fileOrPattern of config.exclude) {
-      const absPath = isAbsolute(fileOrPattern) ? fileOrPattern : join(options.configFileDir, basePath, fileOrPattern);
+      const absPath = toAbsolute(fileOrPattern, basePath);
       inputs.add(toEntry(`!${absPath}`));
     }
   }
