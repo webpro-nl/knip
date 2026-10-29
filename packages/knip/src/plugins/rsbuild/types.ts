@@ -17,10 +17,17 @@ type RspackConfig =
   | Configuration
   | ((config: Configuration, utils: RspackConfigUtils) => Configuration | void | Promise<Configuration | void>);
 
+type AliasObject = Record<string, string | false | (string | false)[]>;
+
+type Alias = AliasObject | ((aliases: AliasObject) => AliasObject | void);
+
+export type AliasChain = Alias | Alias[];
+
 export type RsbuildConfig = {
   plugins?: unknown[];
   mode?: 'development' | 'production' | 'none';
   output?: { target?: RspackConfigUtils['target'] };
+  resolve?: { alias?: AliasChain };
   source?: { entry?: Entry; preEntry?: string | string[] };
   tools?: {
     rspack?: RspackConfig | RspackConfig[];

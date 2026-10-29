@@ -3,7 +3,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
-import type { RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
+import type { AliasChain, RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
 
@@ -26,6 +26,19 @@ const getConfigs = async (configOrFn: RsbuildConfigOrFn) => {
   const configs: RsbuildConfig[] = [];
   for (const params of configParams) configs.push(await configOrFn(params));
   return configs;
+};
+
+const getAliases = (chain: AliasChain) => {
+  const aliases: Record<string, string[]> = {};
+  for (const item of [chain].flat()) {
+    if (typeof item === 'function') continue;
+    for (const key in item) {
+      const targets: string[] = [];
+      for (const target of [item[key]].flat()) if (typeof target === 'string') targets.push(target);
+      if (targets.length > 0) aliases[key] = targets;
+    }
+  }
+  return aliases;
 };
 
 const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
@@ -53,6 +66,13 @@ const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, optio
 
   const checkConfig = async (localConfig: RsbuildConfig, config: RsbuildConfig) => {
     checkSource(localConfig.source);
+
+    const alias = localConfig.resolve?.alias;
+    if (alias) {
+      for (const input of await resolveRspackConfig({ resolve: { alias: getAliases(alias) } }, options)) {
+        inputs.push(input);
+      }
+    }
 
     if (!localConfig.tools?.rspack) return;
     const target = localConfig.output?.target ?? config.output?.target ?? 'web';

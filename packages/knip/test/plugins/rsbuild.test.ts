@@ -4,6 +4,7 @@ import { main } from '../../src/index.ts';
 import rsbuild from '../../src/plugins/rsbuild/index.ts';
 import type { RsbuildConfig } from '../../src/plugins/rsbuild/types.ts';
 import type { PluginOptions } from '../../src/types/config.ts';
+import { isAlias } from '../../src/util/input.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -62,6 +63,43 @@ test('Read object and callback inputs from a tools.rspack array', async () => {
   assert(inputs.some(input => input.specifier === 'array-loader'));
   assert(inputs.some(input => input.specifier.endsWith('/app-entry.ts')));
   assert(inputs.some(input => input.specifier.endsWith('/pre-entry-1.ts')));
+});
+
+const getAliases = async (config: RsbuildConfig) => {
+  assert(rsbuild.resolveConfig);
+  const inputs = await rsbuild.resolveConfig(config, pluginOptions);
+  return inputs.filter(isAlias).map(({ specifier, prefixes }) => ({ specifier, prefixes }));
+};
+
+const envAliases = [
+  { specifier: '@env', prefixes: ['./src/env.ts'] },
+  { specifier: '@env/*', prefixes: ['src/env.ts/*'] },
+];
+
+test('Read resolve.alias as an object', async () => {
+  const aliases = await getAliases({ resolve: { alias: { '@env': './src/env.ts' } } });
+  assert.deepEqual(aliases, envAliases);
+});
+
+test('Read resolve.alias as a chain of an object and a function', async () => {
+  const aliases = await getAliases({ resolve: { alias: [{ '@env': './src/env.ts' }, alias => alias] } });
+  assert.deepEqual(aliases, envAliases);
+});
+
+test('Skip resolve.alias targets that are false', async () => {
+  const aliases = await getAliases({ resolve: { alias: { '@env': './src/env.ts', '@off': false } } });
+  assert.deepEqual(aliases, envAliases);
+});
+
+test('Skip false in resolve.alias array targets', async () => {
+  const aliases = await getAliases({ resolve: { alias: { '@env': ['./src/env.ts', false], '@none': [false] } } });
+  assert.deepEqual(aliases, envAliases);
+});
+
+test('Skip resolve.alias targets that are not strings', async () => {
+  const alias = { '@env': './src/env.ts', '@maybe': undefined } as unknown as RsbuildConfig['resolve'];
+  const aliases = await getAliases({ resolve: { alias } } as RsbuildConfig);
+  assert.deepEqual(aliases, envAliases);
 });
 
 test('Find dependencies with the rsbuild plugin', async () => {
