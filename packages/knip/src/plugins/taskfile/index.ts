@@ -2,7 +2,6 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { isFile } from '../../util/fs.ts';
 import type { Input } from '../../util/input.ts';
 import { toConfig } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
 import type { TaskfileCommand, TaskfileConfig, TaskfileTask } from './types.ts';
 
 // https://taskfile.dev/
@@ -99,10 +98,7 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
           : includeValue && typeof includeValue === 'object' && 'taskfile' in includeValue
             ? includeValue.taskfile
             : undefined;
-      if (includePath) {
-        const resolvedPath = join(configFileDir, includePath);
-        inputs.push(toConfig('taskfile', relative(configFileDir, resolvedPath)));
-      }
+      if (includePath) inputs.push(toConfig('taskfile', includePath));
     }
   }
 
