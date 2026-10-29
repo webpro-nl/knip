@@ -316,9 +316,6 @@ export class WorkspaceWorker {
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);
     for (const input of productionInputsFromManifest) input.production = true;
 
-    const hasProductionInput = (input: Input) =>
-      productionInputsFromManifest.find(d => d.specifier === input.specifier && d.type === input.type);
-
     const createGetInputsFromScripts =
       (containingFilePath: string): GetInputsFromScriptsPartial =>
       (scripts, options) =>
@@ -369,7 +366,7 @@ export class WorkspaceWorker {
         inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       } else if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
-      } else if (!isProduction || (isProduction && (input.production || hasProductionInput(input)))) {
+      } else if (!isProduction || input.production) {
         inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       }
     }

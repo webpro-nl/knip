@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/npm-scripts-start-overlap-workspace__tools",
+  "dependencies": {
+    "test-provider": "*"
+  }
+}

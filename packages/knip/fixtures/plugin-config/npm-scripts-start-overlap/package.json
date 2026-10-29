@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/npm-scripts-start-overlap",
+  "scripts": {
+    "start": "npx ephemeral-cli",
+    "test": "ephemeral-cli"
+  }
+}
