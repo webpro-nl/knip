@@ -68,6 +68,8 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
     const d = getDependenciesFromConfig((rule as { options: BabelConfigObj }).options).map(d => d.specifier);
     return [useItem, ...d];
   }
+  if (typeof useItem === 'string' && useItem && rule.options && rule.use == null)
+    useItem = { loader: useItem, options: rule.options };
   return [useItem].flat().flatMap((item: RuleSetRule | RuleSetUseItem | undefined | null | false | 0) => {
     if (!item) return [];
     if (hasBabelOptions(item)) {

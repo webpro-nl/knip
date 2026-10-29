@@ -8,6 +8,7 @@
   "devDependencies": {
     "@rsbuild/core": "*",
     "@rsbuild/plugin-react": "*",
+    "@swc/plugin-emotion": "*",
     "raw-loader": "*",
     "development-loader": "*",
     "production-loader": "*"
