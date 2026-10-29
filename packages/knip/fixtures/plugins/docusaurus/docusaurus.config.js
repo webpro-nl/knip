@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 export default {
   title: 'Docusaurus',
   url: 'https://docusaurus.io',
@@ -28,6 +30,8 @@ export default {
     '@my-company/cool/web',
     './plugins/local-plugin.js',
     ['./plugins/local-plugin-with-options.js', { foo: 'bar' }],
+    join(import.meta.dirname, 'plugins/absolute-plugin.js'),
+    [join(import.meta.dirname, 'plugins/absolute-plugin-with-options.js'), { foo: 'bar' }],
   ],
   presets: [
     [

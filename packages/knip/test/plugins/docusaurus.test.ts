@@ -17,7 +17,7 @@ test('Find dependencies with the docusaurus plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 2,
-    processed: 13,
-    total: 13,
+    processed: 15,
+    total: 15,
   });
 });
