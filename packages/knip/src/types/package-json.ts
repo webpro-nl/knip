@@ -36,7 +36,6 @@ export type PackageExtensions = Record<
   string,
   {
     peerDependencies?: Dependencies;
-    peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   }
 >;
 

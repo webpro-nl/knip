@@ -1,6 +1,7 @@
 {
   "name": "@plugins/yarn-consumer",
   "dependencies": {
-    "is-number": "*"
+    "is-number": "*",
+    "react-csv": "*"
   }
 }

@@ -1,6 +1,7 @@
 {
   "name": "@plugins/pnpm-workspace-consumer",
   "dependencies": {
-    "is-number": "*"
+    "is-number": "*",
+    "react-csv": "*"
   }
 }
