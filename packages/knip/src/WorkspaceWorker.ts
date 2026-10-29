@@ -528,8 +528,10 @@ export class WorkspaceWorker {
         for (const id of dependencies) addInput(id, id.containingFilePath ?? containingFilePath);
       }
 
-      // Any negated pattern will move all plugin inputs to new group
-      if (inputs.some(input => input.specifier.startsWith('!'))) for (const input of inputs) input.group = pluginName;
+      // Any negated pattern will move all plugin inputs to new group, except config files (a plugin may exclude its own)
+      if (inputs.some(input => input.specifier.startsWith('!'))) {
+        for (const input of inputs) if (!seenConfigFiles.has(input.specifier)) input.group = pluginName;
+      }
 
       return inputs;
     };

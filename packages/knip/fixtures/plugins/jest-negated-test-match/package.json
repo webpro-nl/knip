@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/jest-negated-test-match",
+  "devDependencies": {
+    "jest": "*"
+  }
+}

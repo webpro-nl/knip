@@ -371,7 +371,6 @@ export async function build({
       {
         const patterns = worker.getPluginEntryFilePatterns([
           ...((!options.isProduction && entryPatterns.get(group)) || []),
-          ...((!options.isProduction && group === DEFAULT_GROUP && worker.getPluginConfigPatterns()) || []),
           ...(productionPatterns.get(group) ?? []),
         ]);
         const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
