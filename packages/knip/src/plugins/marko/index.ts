@@ -53,7 +53,7 @@ const resolveConfig: ResolveConfig<MarkoTagDef> = (localConfig, options) => {
 
   for (const field of tagDefFields) {
     for (const id of [localConfig[field]].flat()) {
-      if (typeof id === 'string') inputs.push(toDeferResolve(join(configFileDir, id)));
+      if (typeof id === 'string') inputs.push(toDeferResolve(id));
     }
   }
   return inputs;

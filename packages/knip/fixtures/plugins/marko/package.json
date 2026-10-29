@@ -5,6 +5,7 @@
     "build": "mtc"
   },
   "dependencies": {
+    "@orchard/marko-migrate": "*",
     "@orchard/marko-tags": "*",
     "@orchard/unused-legacy-marko-tags": "*",
     "@orchard/unused-marko-tags": "*",
