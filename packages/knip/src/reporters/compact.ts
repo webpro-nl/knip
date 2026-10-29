@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue } from '../types/issues.ts';
 import { flattenIssues, getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
 
 const getIssueRecordLines = (issues: Issue[], cwd: string) => {
@@ -7,7 +7,7 @@ const getIssueRecordLines = (issues: Issue[], cwd: string) => {
   return sortedByFilePath.map(issue => getIssueLine(issue, cwd));
 };
 
-export default ({ report, issues, isShowProgress, cwd, write }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, cwd, write }: InternalReporterOptions) => {
   const lines: string[] = [];
   let totalIssues = 0;
 

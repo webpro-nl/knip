@@ -1,12 +1,12 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { stripVTControlCharacters } from 'node:util';
 import internalReporters from '../reporters/index.ts';
-import type { Reporter, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, ReporterOptions } from '../types/issues.ts';
 import { ConfigurationError } from './errors.ts';
 import { _load } from './loader.ts';
-import { dirname, isAbsolute, isInternal, resolve } from './path.ts';
+import { dirname, isAbsolute, isInternal, resolve, toAbsolute, toPosix } from './path.ts';
 
-export const writeStdout = (output: string) => {
+const writeStdout = (output: string) => {
   if (!output) return;
   // See: https://github.com/nodejs/node/issues/6379
   // @ts-expect-error _handle is private
@@ -30,12 +30,14 @@ const getOutputFiles = (reporters: string[], outputFiles: string[], cwd: string)
         `Option --output-file refers to reporter "${name}", but it is not selected with --reporter`
       );
     }
-    targets.set(name, resolve(cwd, filePath));
+    targets.set(name, toAbsolute(toPosix(filePath), cwd));
   }
   return targets;
 };
 
-const loadReporter = (reporter: string): Promise<Reporter> =>
+type InternalReporter = (options: InternalReporterOptions) => void;
+
+const loadReporter = (reporter: string): Promise<InternalReporter> =>
   reporter in internalReporters
     ? Promise.resolve(internalReporters[reporter as keyof typeof internalReporters])
     : _load(isInternal(reporter) && !isAbsolute(reporter) ? resolve(reporter) : reporter);
@@ -50,10 +52,12 @@ export const runReporters = async (reporter: string[], outputFiles: string[], op
       await reporters[i]({ ...options, write: writeStdout });
       continue;
     }
-    const lines: string[] = [];
-    await reporters[i]({ ...options, write: output => lines.push(output) });
-    if (lines.length === 0) continue;
+    let output = '';
+    const write = (text: string) => {
+      if (text) output += `${text}\n`;
+    };
+    await reporters[i]({ ...options, write });
     await mkdir(dirname(target), { recursive: true });
-    await writeFile(target, `${stripVTControlCharacters(lines.join('\n'))}\n`);
+    await writeFile(target, stripVTControlCharacters(output));
   }
 };

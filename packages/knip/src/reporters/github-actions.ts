@@ -1,6 +1,6 @@
 import { ISSUE_TYPE_TITLE } from '../constants.ts';
 import type { Entries } from '../types/entries.ts';
-import type { ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
 import { compareStrings } from '../util/string.ts';
 import { hintPrinters } from './util/configuration-hints.ts';
@@ -80,7 +80,7 @@ export default ({
   isTreatTagHintsAsErrors,
   configFilePath,
   write,
-}: ReporterOptions) => {
+}: InternalReporterOptions) => {
   const lines: string[] = [];
   const core = createGitHubActionsLogger(lines);
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;

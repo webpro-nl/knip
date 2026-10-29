@@ -1,8 +1,8 @@
 import type { Entries } from '../types/entries.ts';
-import type { ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions } from '../types/issues.ts';
 import { flattenIssues, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
-export default ({ report, issues, cwd, write }: ReporterOptions) => {
+export default ({ report, issues, cwd, write }: InternalReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
   const lines: string[] = [];
 

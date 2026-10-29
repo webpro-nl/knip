@@ -1,9 +1,9 @@
 import type { Entries } from '../types/entries.ts';
-import type { ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions } from '../types/issues.ts';
 import { printConfigurationHints, printTagHints } from './util/configuration-hints.ts';
 import { dim, flattenIssues, getColoredTitle, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
-export default (options: ReporterOptions) => {
+export default (options: InternalReporterOptions) => {
   const { report, issues, isDisableConfigHints, isDisableTagHints, isShowProgress } = options;
   const lines: string[] = [];
   let totalIssues = 0;

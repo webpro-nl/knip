@@ -1,9 +1,9 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
 import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
-export default ({ report, issues, cwd, write }: ReporterOptions) => {
+export default ({ report, issues, cwd, write }: InternalReporterOptions) => {
   const lines: string[] = ['# Knip report\n'];
 
   const getFilePath = (issue: Issue) => {

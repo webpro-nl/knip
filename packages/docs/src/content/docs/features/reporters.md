@@ -317,7 +317,7 @@ supports a local JavaScript or TypeScript file or an external dependency.
 The default export of the reporter should be a function with this interface:
 
 ```ts
-type Reporter = (options: ReporterOptions) => void | Promise<void>;
+type Reporter = (options: ReporterOptions) => void;
 
 type ReporterOptions = {
   report: Report;
@@ -330,7 +330,7 @@ type ReporterOptions = {
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
-  write: (output: string) => void;
+  write?: (output: string) => void;
 };
 ```
 
@@ -351,14 +351,16 @@ export default reporter;
 ```
 
 Use `options.write` instead of `console.log` to support [`--output-file`][9]. It
-writes to `stdout` by default, and to the file when one is configured. A
-reporter that never calls `options.write` writes no file:
+writes to `stdout` by default, and to the file when one is configured. Output
+from `console.log` is not redirected. Knip always passes `write` to reporters.
+It's optional in the type so existing code that builds a `ReporterOptions`
+object keeps compiling:
 
 ```ts title="./my-reporter.ts"
 import type { Reporter } from 'knip';
 
 const reporter: Reporter = function (options) {
-  options.write(JSON.stringify(options.counters));
+  options.write?.(JSON.stringify(options.counters));
 };
 
 export default reporter;

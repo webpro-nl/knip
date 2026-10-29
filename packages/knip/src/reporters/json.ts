@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { IssueRecords, Report, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, IssueRecords, Report } from '../types/issues.ts';
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { isFile } from '../util/fs.ts';
 import { relative, resolve } from '../util/path.ts';
@@ -48,7 +48,7 @@ export type JSONReport = {
   issues: Array<JSONReportEntry>;
 };
 
-export default async ({ report, issues, options, cwd, write }: ReporterOptions) => {
+export default async ({ report, issues, options, cwd, write }: InternalReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;

@@ -1,4 +1,4 @@
-import type { Issue, IssueSymbol, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue, IssueSymbol } from '../types/issues.ts';
 import st from '../util/colors.ts';
 import { relative } from '../util/path.ts';
 import { flattenIssues, getColoredTitle, getIssueTypeTitle } from './util/util.ts';
@@ -42,7 +42,7 @@ const sortByFilePath = (cwd: string) => (a: Issue, b: Issue) => {
   return rootLocation === 0 ? a.symbol.localeCompare(b.symbol) : rootLocation;
 };
 
-export default ({ cwd, issues, isShowProgress, write }: ReporterOptions) => {
+export default ({ cwd, issues, isShowProgress, write }: InternalReporterOptions) => {
   const cycles = flattenIssues(issues.cycles).sort(sortByFilePath(cwd));
 
   if (cycles.length === 0) {

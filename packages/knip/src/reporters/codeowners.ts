@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue } from '../types/issues.ts';
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { relative, resolve } from '../util/path.ts';
 import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
@@ -17,7 +17,7 @@ const getIssueRecordLines = (issues: OwnedIssue[], cwd: string) => {
   );
 };
 
-export default ({ report, issues, isShowProgress, options, cwd, write }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, options, cwd, write }: InternalReporterOptions) => {
   const lines: string[] = [];
   let opts: ExtraReporterOptions = {};
   try {

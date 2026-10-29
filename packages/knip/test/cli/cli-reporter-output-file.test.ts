@@ -8,6 +8,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/prettier');
 const reporterCwd = resolve('fixtures/cli-reporter');
+const cyclesCwd = resolve('fixtures/imports/circular-dependencies');
 
 const symbolsOutput = `Unused devDependencies (1)
 prettier  package.json:5:6
@@ -78,24 +79,36 @@ test('knip --output-file reporter=path with unknown reporter is an error', () =>
   assert.match(result.stderr, /nope/);
 });
 
-test('knip --reporter ./summary.ts --output-file path (custom reporter using options.write)', async () => {
-  const outputFile = join(outDir, 'summary.txt');
-  const result = exec(`knip --reporter ./summary.ts --output-file ./summary.ts=${outputFile}`, { cwd: reporterCwd });
-
-  assert.equal(result.stdout, '');
-  assert.equal(await readFile(outputFile, 'utf8'), 'hi from summary reporter\n');
-});
-
-test('knip --reporter ./index.ts --output-file path (custom reporter using console.log writes no file)', async () => {
-  const outputFile = join(outDir, 'ignored.txt');
+test('knip --reporter ./index.ts --output-file path (custom reporter using options.write)', async () => {
+  const outputFile = join(outDir, 'reporter.txt');
   const result = exec(`knip --reporter ./index.ts --output-file ./index.ts=${outputFile}`, { cwd: reporterCwd });
 
-  assert.equal(result.stdout, 'hi from ts reporter');
-  await assert.rejects(readFile(outputFile), { code: 'ENOENT' });
+  assert.equal(result.stdout, '');
+  assert.equal(await readFile(outputFile, 'utf8'), 'hi from ts reporter\n');
 });
 
-test('knip --reporter ./summary.ts (custom reporter using options.write to stdout)', () => {
-  const result = exec('knip --reporter ./summary.ts', { cwd: reporterCwd });
+test('knip --reporter ./index.js --output-file path (custom reporter using console.log writes an empty file)', async () => {
+  const outputFile = join(outDir, 'empty.txt');
+  const result = exec(`knip --reporter ./index.js --output-file ./index.js=${outputFile}`, { cwd: reporterCwd });
 
-  assert.equal(result.stdout, 'hi from summary reporter');
+  assert.equal(result.stdout, 'hi from js reporter');
+  assert.equal(await readFile(outputFile, 'utf8'), '');
+});
+
+test('knip --reporter cycles --output-file path replaces a previous report with an empty report', async () => {
+  const outputFile = join(outDir, 'cycles.txt');
+  exec(`knip --cycles --reporter cycles --output-file ${outputFile}`, { cwd: cyclesCwd });
+
+  assert.match(await readFile(outputFile, 'utf8'), /Circular dependencies \(5\)/);
+
+  const result = exec(`knip --cycles --reporter cycles --output-file ${outputFile}`, { cwd });
+
+  assert.equal(result.status, 0);
+  assert.equal(await readFile(outputFile, 'utf8'), '');
+});
+
+test('knip --reporter ./index.ts (custom reporter using options.write to stdout)', () => {
+  const result = exec('knip --reporter ./index.ts', { cwd: reporterCwd });
+
+  assert.equal(result.stdout, 'hi from ts reporter');
 });
