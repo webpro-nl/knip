@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/yarn-consumer",
+  "dependencies": {
+    "is-number": "*"
+  }
+}
