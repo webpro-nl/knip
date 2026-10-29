@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/taskfile-includes",
+  "devDependencies": {
+    "mocha": "*"
+  }
+}

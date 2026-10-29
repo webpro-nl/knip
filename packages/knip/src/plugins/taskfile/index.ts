@@ -87,7 +87,7 @@ const extractScriptsFromTask = (task: TaskfileTask): string[] => {
 const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options) => {
   if (!localConfig || !options.configFilePath) return [];
 
-  const { getInputsFromScripts, isProduction, configFileDir } = options;
+  const { getInputsFromScripts, isProduction, configFileDir, cwd } = options;
   const inputs: Input[] = [];
 
   if (localConfig.includes && typeof localConfig.includes === 'object') {
@@ -107,7 +107,7 @@ const resolveConfig: ResolveConfig<TaskfileConfig> = async (localConfig, options
       for (const script of extractScriptsFromTask(task)) {
         for (const input of getInputsFromScripts([script], { optionalBinaries: true })) {
           if (isProduction) Object.assign(input, { optional: true });
-          inputs.push({ ...input, dir: configFileDir });
+          inputs.push({ ...input, dir: input.type === 'entry' ? cwd : configFileDir });
         }
       }
     }
