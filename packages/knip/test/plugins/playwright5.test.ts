@@ -7,13 +7,16 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/playwright5');
 
-test('Find webServer commands in other workspaces with the Playwright plugin', async () => {
+test('Find webServer commands in their cwd with the Playwright plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['service/specs/skip.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    files: 1,
+    processed: 4,
+    total: 4,
   });
 });

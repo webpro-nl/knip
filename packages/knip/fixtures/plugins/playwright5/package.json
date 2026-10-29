@@ -2,6 +2,7 @@
   "name": "@plugins/playwright5",
   "workspaces": ["packages/*"],
   "devDependencies": {
-    "@playwright/test": "*"
+    "@playwright/test": "*",
+    "mocha": "*"
   }
 }

@@ -46,12 +46,7 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
       cwd: dir,
       manifest: options.getManifest(dir) ?? options.manifest,
     })) {
-      const inputDir = input.dir ?? dir;
-      inputs.push({
-        ...input,
-        ...(input.type === 'entry' ? { specifier: toAbsolute(input.specifier, inputDir) } : {}),
-        dir: inputDir,
-      });
+      inputs.push({ ...input, dir: input.dir ?? dir });
     }
   }
 

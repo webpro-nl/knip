@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
-import { type Input, isEntry } from '../../util/input.ts';
+import type { Input } from '../../util/input.ts';
 import { basename, dirname, join, toAbsolute } from '../../util/path.ts';
 import type { MiseConfig } from './types.ts';
 
@@ -73,7 +73,6 @@ const resolveConfig: ResolveConfig<MiseConfig> = async (localConfig, options) =>
       for (const input of getInputsFromMiseScript(script, scriptOptions, hasLocalBinPath)) {
         if (isProduction) input.optional = true;
         input.dir ??= dir;
-        if (isEntry(input)) input.specifier = toAbsolute(input.specifier, input.dir);
         inputs.push(input);
       }
     }

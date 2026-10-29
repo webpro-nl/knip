@@ -1,5 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  webServer: { command: 'npm run serve -- server.ts', cwd: 'packages/app' },
+  webServer: [
+    { command: 'npm run serve -- server.ts', cwd: 'packages/app' },
+    { command: 'mocha "specs/*.js" --ignore specs/skip.js', cwd: 'service' },
+  ],
 });

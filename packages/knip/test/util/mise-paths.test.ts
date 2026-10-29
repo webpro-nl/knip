@@ -28,7 +28,5 @@ test('Keep normalized Windows task paths and explicit entry files rooted in thei
   );
 
   assert.deepEqual(directories, ['C:/project/packages/web']);
-  assert.deepEqual(inputs, [
-    { type: 'entry', specifier: 'C:/project/packages/web/scripts/check.ts', dir: 'C:/project/packages/web' },
-  ]);
+  assert.deepEqual(inputs, [{ type: 'entry', specifier: './scripts/check.ts', dir: 'C:/project/packages/web' }]);
 });
