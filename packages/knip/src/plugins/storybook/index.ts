@@ -1,7 +1,7 @@
 import MDX from '../../compilers/mdx.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getBabelInputs } from '../vite/helpers.ts';
 import type { StorybookConfig } from './types.ts';
@@ -27,13 +27,13 @@ const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
 const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
   const { cwd, configFileDir } = options;
   const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
-  const relativePatterns = strs?.map(pattern => {
-    if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
-    return relative(cwd, join(configFileDir, pattern.directory, pattern.files ?? stories[0]));
+  const storyPatterns = strs?.map(pattern => {
+    if (typeof pattern === 'string') return toAbsolute(pattern, configFileDir);
+    return join(toAbsolute(pattern.directory, configFileDir), pattern.files ?? stories[0]);
   });
   const patterns = [
     ...(options.config.entry ?? restEntry),
-    ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories),
+    ...(storyPatterns && storyPatterns.length > 0 ? storyPatterns : stories),
   ];
 
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
