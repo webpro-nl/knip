@@ -1,5 +1,3 @@
-import type { Reporter } from '../../src/types.ts';
-
-const reporter: Reporter = ({ write }) => write?.('hi from ts reporter');
-
-export default reporter;
+export default function () {
+  console.log('hi from ts reporter');
+}

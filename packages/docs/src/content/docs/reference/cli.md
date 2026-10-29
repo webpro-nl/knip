@@ -377,6 +377,10 @@ knip --reporter sarif --output-file knip.sarif
 knip --reporter symbols --reporter json --output-file json=knip.json
 ```
 
+A relative path is resolved from the directory Knip runs in, like `--config`
+and `--trace-file`. With `--directory app --output-file knip.sarif` the file is
+written to `app/knip.sarif`.
+
 Also see [Writing to a file][17].
 
 ### `--no-config-hints`

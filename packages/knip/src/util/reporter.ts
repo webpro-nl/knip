@@ -57,7 +57,12 @@ export const runReporters = async (reporter: string[], outputFiles: string[], op
       if (text) output += `${text}\n`;
     };
     await reporters[i]({ ...options, write });
-    await mkdir(dirname(target), { recursive: true });
-    await writeFile(target, stripVTControlCharacters(output));
+    try {
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, stripVTControlCharacters(output));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new ConfigurationError(`Option --output-file failed to write: ${message}`);
+    }
   }
 };

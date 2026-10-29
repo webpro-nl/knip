@@ -8,6 +8,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/prettier');
 const reporterCwd = resolve('fixtures/cli-reporter');
+const writeReporterCwd = resolve('fixtures/cli-reporter-write');
 const cyclesCwd = resolve('fixtures/imports/circular-dependencies');
 
 const symbolsOutput = `Unused devDependencies (1)
@@ -79,19 +80,26 @@ test('knip --output-file reporter=path with unknown reporter is an error', () =>
   assert.match(result.stderr, /nope/);
 });
 
-test('knip --reporter ./index.ts --output-file path (custom reporter using options.write)', async () => {
-  const outputFile = join(outDir, 'reporter.txt');
-  const result = exec(`knip --reporter ./index.ts --output-file ./index.ts=${outputFile}`, { cwd: reporterCwd });
+test('knip --output-file path that cannot be written is an error', () => {
+  const result = exec('knip --reporter json --output-file .', { cwd });
 
-  assert.equal(result.stdout, '');
-  assert.equal(await readFile(outputFile, 'utf8'), 'hi from ts reporter\n');
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /Option --output-file failed to write/);
 });
 
-test('knip --reporter ./index.js --output-file path (custom reporter using console.log writes an empty file)', async () => {
-  const outputFile = join(outDir, 'empty.txt');
-  const result = exec(`knip --reporter ./index.js --output-file ./index.js=${outputFile}`, { cwd: reporterCwd });
+test('knip --reporter ./index.ts --output-file path (custom reporter using options.write)', async () => {
+  const outputFile = join(outDir, 'reporter.txt');
+  const result = exec(`knip --reporter ./index.ts --output-file ./index.ts=${outputFile}`, { cwd: writeReporterCwd });
 
-  assert.equal(result.stdout, 'hi from js reporter');
+  assert.equal(result.stdout, '');
+  assert.equal(await readFile(outputFile, 'utf8'), 'hi from write reporter\n');
+});
+
+test('knip --reporter ./index.ts --output-file path (custom reporter using console.log writes an empty file)', async () => {
+  const outputFile = join(outDir, 'empty.txt');
+  const result = exec(`knip --reporter ./index.ts --output-file ./index.ts=${outputFile}`, { cwd: reporterCwd });
+
+  assert.equal(result.stdout, 'hi from ts reporter');
   assert.equal(await readFile(outputFile, 'utf8'), '');
 });
 
@@ -108,7 +116,7 @@ test('knip --reporter cycles --output-file path replaces a previous report with 
 });
 
 test('knip --reporter ./index.ts (custom reporter using options.write to stdout)', () => {
-  const result = exec('knip --reporter ./index.ts', { cwd: reporterCwd });
+  const result = exec('knip --reporter ./index.ts', { cwd: writeReporterCwd });
 
-  assert.equal(result.stdout, 'hi from ts reporter');
+  assert.equal(result.stdout, 'hi from write reporter');
 });
