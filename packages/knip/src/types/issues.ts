@@ -80,9 +80,10 @@ export type ReporterOptions = {
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
+  write: (output: string) => void;
 };
 
-export type Reporter = (options: ReporterOptions) => void;
+export type Reporter = (options: ReporterOptions) => void | Promise<void>;
 
 export type Preprocessor = (options: ReporterOptions) => ReporterOptions;
 

@@ -61,7 +61,7 @@ const main = async () => {
 
     if (options.isFix) await fix(finalData.issues, finalData.counters, options);
 
-    await runReporters(args.reporter ?? ['symbols'], finalData);
+    await runReporters(args.reporter ?? ['symbols'], args['output-file'] ?? [], finalData);
 
     const totalErrorCount = (Object.keys(finalData.report) as IssueType[])
       .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')

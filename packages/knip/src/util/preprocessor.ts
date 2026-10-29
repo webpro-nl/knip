@@ -3,6 +3,7 @@ import type { Preprocessor, ReporterOptions } from '../types/issues.ts';
 import type { ParsedCLIArgs } from './cli-arguments.ts';
 import type { MainOptions } from './create-options.ts';
 import { _load } from './loader.ts';
+import { writeStdout } from './reporter.ts';
 
 export const toReporterOptions = (options: MainOptions, results: Results, args?: ParsedCLIArgs): ReporterOptions => ({
   ...results,
@@ -18,6 +19,7 @@ export const toReporterOptions = (options: MainOptions, results: Results, args?:
   maxShowIssues: options.maxShowIssues,
   options: args?.['reporter-options'] ?? '',
   preprocessorOptions: options.preprocessorOptions,
+  write: writeStdout,
 });
 
 export const createPreprocessor = async (processors: string[]) => {

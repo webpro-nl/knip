@@ -48,7 +48,7 @@ export type JSONReport = {
   issues: Array<JSONReportEntry>;
 };
 
-export default async ({ report, issues, options, cwd }: ReporterOptions) => {
+export default async ({ report, issues, options, cwd, write }: ReporterOptions) => {
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -103,10 +103,5 @@ export default async ({ report, issues, options, cwd }: ReporterOptions) => {
   }
 
   const jsonReport: JSONReport = { issues: Object.values(json) };
-  const output = JSON.stringify(jsonReport);
-
-  // See: https://github.com/nodejs/node/issues/6379
-  // @ts-expect-error _handle is private
-  process.stdout._handle?.setBlocking?.(true);
-  process.stdout.write(`${output}\n`);
+  write(JSON.stringify(jsonReport));
 };

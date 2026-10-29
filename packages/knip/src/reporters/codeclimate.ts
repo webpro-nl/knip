@@ -5,7 +5,7 @@ import type { IssueSeverity, IssueSymbol, IssueType, Report, ReporterOptions } f
 import { toRelative } from '../util/path.ts';
 import { flattenIssues, getIssueDescription, getIssuePrefix, getIssueTypeTitle } from './util/util.ts';
 
-export default async ({ report, issues, cwd }: ReporterOptions) => {
+export default async ({ report, issues, cwd, write }: ReporterOptions) => {
   const entries: codeclimate.Issue[] = [];
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
@@ -42,12 +42,7 @@ export default async ({ report, issues, cwd }: ReporterOptions) => {
     }
   }
 
-  const output = JSON.stringify(entries);
-
-  // See: https://github.com/nodejs/node/issues/6379
-  // @ts-expect-error _handle is private
-  process.stdout._handle?.setBlocking?.(true);
-  process.stdout.write(`${output}\n`);
+  write(JSON.stringify(entries));
 };
 
 function convertSeverity(severity?: IssueSeverity): codeclimate.Severity {
