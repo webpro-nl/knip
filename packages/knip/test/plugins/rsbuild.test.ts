@@ -96,6 +96,12 @@ test('Skip false in resolve.alias array targets', async () => {
   assert.deepEqual(aliases, envAliases);
 });
 
+test('Skip resolve.alias targets that are not strings', async () => {
+  const alias = { '@env': './src/env.ts', '@maybe': undefined } as unknown as RsbuildConfig['resolve'];
+  const aliases = await getAliases({ resolve: { alias } } as RsbuildConfig);
+  assert.deepEqual(aliases, envAliases);
+});
+
 test('Find dependencies with the rsbuild plugin', async () => {
   const nodeEnv = process.env.NODE_ENV;
   const options = await createOptions({ cwd });

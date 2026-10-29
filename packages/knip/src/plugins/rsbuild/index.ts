@@ -34,7 +34,7 @@ const getAliases = (chain: AliasChain) => {
     if (typeof item === 'function') continue;
     for (const key in item) {
       const targets: string[] = [];
-      for (const target of [item[key]].flat()) if (target !== false) targets.push(target);
+      for (const target of [item[key]].flat()) if (typeof target === 'string') targets.push(target);
       if (targets.length > 0) aliases[key] = targets;
     }
   }
