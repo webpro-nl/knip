@@ -22,12 +22,31 @@ test('Find dependencies with the tanstack-router plugin', async () => {
   assert(!issues.exports['src/routes/index.tsx']?.['Route']);
   assert(!issues.exports['src/routes/posts/$postId.tsx']?.['Route']);
 
+  assert(!('src/router.tsx' in issues.files));
+  assert(!('src/client.tsx' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 2,
     devDependencies: 2,
     unlisted: 1,
-    processed: 4,
-    total: 4,
+    processed: 6,
+    total: 6,
+  });
+});
+
+test('Find dependencies with the tanstack-router plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(!('src/router.tsx' in issues.files));
+  assert(!('src/client.tsx' in issues.files));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+    unlisted: 1,
+    processed: 6,
+    total: 6,
   });
 });

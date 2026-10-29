@@ -23,7 +23,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['tsr.config.json'];
 
-const production = ['src/routeTree.gen.{ts,js}', 'src/{router,start,client,server}.{js,jsx,ts,tsx}'];
+const routerEntries = ['src/{router,start,client,server}.{js,jsx,ts,tsx}'];
+
+const production = ['src/routeTree.gen.{ts,js}', ...routerEntries];
 
 const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
@@ -31,7 +33,7 @@ const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, o
   const generatedRouteTree = localConfig.generatedRouteTree ?? './src/routeTree.gen.ts';
   const routeTreePath = toAbsolute(generatedRouteTree, configFileDir);
 
-  return [toProductionEntry(routeTreePath)];
+  return [toProductionEntry(routeTreePath), ...routerEntries.map(id => toProductionEntry(id))];
 };
 
 const plugin: Plugin = {
