@@ -90,6 +90,16 @@ export const createOptions = async (options: CreateOptions) => {
   const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
   const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
 
+  const catalog = [await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace)];
+
+  for (const source in pnpmWorkspace?.include) {
+    if (!source.startsWith('.')) continue;
+    const filePath = join(cwd, source);
+    const included = await _load(filePath);
+    if (!included) continue;
+    catalog.push({ filePath, catalog: included.catalog, catalogs: included.catalogs, overrides: included.overrides });
+  }
+
   const workspaces =
     pnpmWorkspace?.packages ??
     (manifest.workspaces
@@ -144,7 +154,7 @@ export const createOptions = async (options: CreateOptions) => {
   return {
     createdFrom: options,
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
-    catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
+    catalog,
     config: args.config,
     configFilePath,
     cwd,

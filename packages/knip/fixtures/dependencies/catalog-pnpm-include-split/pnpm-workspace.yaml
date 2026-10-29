@@ -1,0 +1,10 @@
+include:
+  ./catalogs.pnpm-workspace.yaml: [catalogs.react]
+packages:
+  - "packages/*"
+catalog:
+  zod: ^4.4.3
+  lodash: ^4.0.0
+catalogs:
+  legacy:
+    vue: ^2.7.0
