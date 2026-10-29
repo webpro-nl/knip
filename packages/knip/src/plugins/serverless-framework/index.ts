@@ -39,7 +39,7 @@ const handlerToEntry = (handler: string) => {
 };
 
 const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toProductionEntry(join(dir, plugin)) : toDependency(plugin);
+  isInternal(plugin) ? toProductionEntry(toAbsolute(plugin, dir)) : toDependency(plugin);
 
 const getFunctionEntries = async (functions: unknown, dir: string) => {
   const entries = [];

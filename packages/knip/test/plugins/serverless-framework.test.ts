@@ -26,8 +26,8 @@ test('Find dependencies from Serverless Framework TypeScript plugins', async () 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
   assert.deepEqual(issues.devDependencies, {});
 });
