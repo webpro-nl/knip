@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/module-find-package-json",
+  "devDependencies": {
+    "@my-org/cli": "*",
+    "my-cli": "*"
+  }
+}

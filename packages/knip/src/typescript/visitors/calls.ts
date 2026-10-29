@@ -1,6 +1,7 @@
 import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
+import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowed, type WalkState } from './walk.ts';
 
@@ -165,26 +166,28 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     return;
   }
 
-  if (
-    s.hasNodeModuleImport &&
-    ((node.callee.type === 'MemberExpression' &&
-      node.callee.object.type === 'Identifier' &&
-      node.callee.object.name === 'module' &&
-      !node.callee.computed &&
-      node.callee.property.name === 'register') ||
-      (node.callee.type === 'Identifier' && node.callee.name === 'register')) &&
-    node.arguments.length >= 1 &&
-    isStringLiteral(node.arguments[0])
-  ) {
+  if (s.hasNodeModuleImport && node.arguments.length >= 1 && isStringLiteral(node.arguments[0])) {
+    const { callee } = node;
+    const nodeModuleMethod =
+      callee.type === 'Identifier'
+        ? callee.name
+        : callee.type === 'MemberExpression' &&
+          !callee.computed &&
+          callee.object.type === 'Identifier' &&
+          callee.object.name === 'module' &&
+          callee.property.type === 'Identifier' &&
+          callee.property.name;
     const specifier = getStringValue(node.arguments[0])!;
     const arg1 = node.arguments[1];
     if (
-      specifier &&
-      (!specifier.startsWith('.') ||
-        (arg1?.type === 'MemberExpression' &&
-          !arg1.computed &&
-          arg1.object.type === 'MetaProperty' &&
-          arg1.property.name === 'url'))
+      (nodeModuleMethod === 'register' &&
+        specifier &&
+        (!specifier.startsWith('.') ||
+          (arg1?.type === 'MemberExpression' &&
+            !arg1.computed &&
+            arg1.object.type === 'MetaProperty' &&
+            arg1.property.name === 'url'))) ||
+      (nodeModuleMethod === 'findPackageJSON' && isStartsLikePackageName(specifier) && !URL.canParse(specifier))
     ) {
       s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
       return;
