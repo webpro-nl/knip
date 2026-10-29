@@ -106,7 +106,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 const config = [
   '.nycrc',
   '.nycrc.{json,yml,yaml}',
-  'nyc.config.js',
+  'nyc.config.{js,cjs,mjs}',
   'package.json',
 ];
 
