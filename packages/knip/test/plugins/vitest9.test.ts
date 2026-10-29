@@ -24,6 +24,8 @@ test('Find dependencies in vitest configuration (projects with inline and extern
   assert(!issues.files['src/example.dom.ts']);
   assert(!issues.files['src/async.setup.ts']);
   assert(!issues.files['src/example.promise.ts']);
+  assert(!issues.files['src/fixtures/user.ts']);
+  assert(!issues.unlisted['packages/client/e2e/client.test.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
@@ -31,7 +33,7 @@ test('Find dependencies in vitest configuration (projects with inline and extern
     devDependencies: 0,
     unlisted: 3,
     unresolved: 0,
-    processed: 13,
-    total: 13,
+    processed: 14,
+    total: 14,
   });
 });

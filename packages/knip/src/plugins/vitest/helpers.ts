@@ -1,5 +1,5 @@
 import { type Input, toAlias, toDependency } from '../../util/input.ts';
-import { join, toPosix } from '../../util/path.ts';
+import { join } from '../../util/path.ts';
 import type { AliasOptions, ViteConfig } from './types.ts';
 
 /**
@@ -65,12 +65,9 @@ export const getAliasInputs = (aliasOptions: AliasOptions, cwd: string): Input[]
   const inputs: Input[] = [];
   for (const [alias, value] of getAliasEntries(aliasOptions)) {
     if (!value) continue;
-    const prefixes = [value]
-      .flat()
-      .filter((value): value is string => typeof value === 'string')
-      .map(prefix => (toPosix(prefix).startsWith(cwd) ? prefix : join(cwd, prefix)));
-    if (alias.length > 1) inputs.push(toAlias(alias, prefixes));
-    inputs.push(toAlias(addStar(alias), prefixes.map(addStar)));
+    const prefixes = [value].flat().filter((value): value is string => typeof value === 'string');
+    if (alias.length > 1) inputs.push(toAlias(alias, prefixes, { dir: cwd }));
+    inputs.push(toAlias(addStar(alias), prefixes.map(addStar), { dir: cwd }));
   }
   return inputs;
 };
