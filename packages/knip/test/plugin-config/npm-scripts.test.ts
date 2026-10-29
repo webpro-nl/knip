@@ -75,8 +75,8 @@ test('Unused dependencies in npm scripts', async () => {
     devDependencies: 1,
     binaries: 3,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 
   assert.deepEqual(configurationHints, [
@@ -94,11 +94,13 @@ test('Unused dependencies in npm scripts (strict)', async () => {
   assert(issues.dependencies['package.json']['unused-peer-dep']);
   assert(issues.dependencies['package.json']['@sap/approuter']);
 
+  assert(!('serve.js' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
     dependencies: 3,
-    processed: 2,
-    total: 3,
+    processed: 3,
+    total: 4,
   });
 });

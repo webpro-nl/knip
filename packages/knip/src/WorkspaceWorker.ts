@@ -314,6 +314,7 @@ export class WorkspaceWorker {
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
     const inputsFromManifest = _getInputsFromScripts(Object.values(developmentScripts), baseOptions);
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);
+    for (const input of productionInputsFromManifest) input.production = true;
 
     const hasProductionInput = (input: Input) =>
       productionInputsFromManifest.find(d => d.specifier === input.specifier && d.type === input.type);
