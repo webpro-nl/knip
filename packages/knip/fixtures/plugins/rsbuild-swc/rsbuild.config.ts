@@ -6,7 +6,7 @@ export default defineConfig({
     swc: {
       jsc: {
         experimental: {
-          plugins: [['@swc/plugin-emotion', {}], '@swc/plugin-styled-components'],
+          plugins: [['@swc/plugin-emotion', {}], ['@swc/plugin-styled-components', {}]],
         },
       },
     },

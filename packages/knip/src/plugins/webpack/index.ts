@@ -14,7 +14,8 @@ import { extname, isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
-import type { Argv, Env, ProvidePlugin, SwcOptions, WebpackConfig } from './types.ts';
+import type { SWCConfig } from '../swc/types.ts';
+import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
 import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
 
@@ -84,7 +85,7 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
 const isSwcLoader = (loader: string) =>
   loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
 
-export const getSwcPluginSpecifiers = (options: SwcOptions) => {
+export const getSwcPluginSpecifiers = (options: SWCConfig) => {
   const plugins = options.jsc?.experimental?.plugins;
   if (!Array.isArray(plugins)) return [];
   return plugins.flatMap(plugin => {
