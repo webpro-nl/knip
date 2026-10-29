@@ -1,4 +1,5 @@
 {
+  "ignoreWorkspaces": ["packages/ignored", "packages/app/nested/ignored"],
   "workspaces": {
     ".": {
       "entry": [],
