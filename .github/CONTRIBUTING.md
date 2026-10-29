@@ -64,8 +64,8 @@ Please consider this before opening a pull request:
 ### Contribute a new plugin
 
 Missing a plugin for a tool you use? Contributing one is often the fastest path
-to support — Knip ships with 190+ plugins and counting, and most of them started
-as a PR from users!
+to support — Knip ships with over 200 plugins and counting, and most of them
+started as a PR from users!
 
 To get started:
 
