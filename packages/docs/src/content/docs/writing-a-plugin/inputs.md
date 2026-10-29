@@ -145,11 +145,17 @@ toBinary('esbuild', {
 Knip now looks up the `esbuild` binary in the workspace in the `packages/app`
 directory and marks the package providing it as used.
 
-Entry patterns ignore `dir`:
+Entry patterns resolve from `dir` as well, but `dir` never moves them to another
+workspace: the workspace whose plugin returned the input globs the pattern. A
+negated entry pattern excludes files only from the entry patterns the same
+plugin returns with the same base (`dir`, else the workspace directory): a
+negation from another base does not reach them, even when it resolves to the
+same path. Project patterns ignore `dir`:
 
 | Input type                                          | Relative to                             | Reads `dir` |
 | --------------------------------------------------- | --------------------------------------- | ----------- |
-| `toEntry`, `toProductionEntry`, `toProject`         | the workspace directory                 | no          |
+| `toEntry`, `toProductionEntry`                      | `dir`, else the workspace directory     | base only   |
+| `toProject`                                         | the workspace directory                 | no          |
 | `toDeferResolve`, `toDeferResolveEntry`, `toConfig` | `dir`, else the config file's directory | yes         |
 | `toDependency`, `toBinary`                          | not a path                              | yes         |
 | `toAlias`                                           | `dir`, else the workspace directory     | yes         |

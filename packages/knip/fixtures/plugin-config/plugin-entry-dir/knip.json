@@ -1,0 +1,12 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": ["**/*.ts!"]
+    },
+    "packages/*": {
+      "entry": [],
+      "project": ["**/*.ts!"]
+    }
+  }
+}

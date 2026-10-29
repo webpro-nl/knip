@@ -1,0 +1,10 @@
+{
+  "name": "@plugin-config/plugin-entry-ignored-workspace",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@playwright/test": "*",
+    "mocha": "*"
+  }
+}

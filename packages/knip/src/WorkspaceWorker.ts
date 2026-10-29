@@ -26,6 +26,7 @@ import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.ts';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
+import { expandIgnorePatterns } from './util/parse-and-convert-gitignores.ts';
 import {
   type ConfigInput,
   type Input,
@@ -220,9 +221,15 @@ export class WorkspaceWorker {
     return patterns;
   }
 
-  getPluginEntryFilePatterns(patterns: string[]) {
+  getPluginEntryFilePatterns(patterns: string[], base?: string) {
     const negateWorkspaces = patterns.some(pattern => pattern.startsWith('**/')) ? this.negatedWorkspacePatterns : [];
-    return [patterns, negateWorkspaces, this.ignoredWorkspacePatterns.map(negate)].flat();
+    // Patterns resolved from a base of their own start inside it, where a negated directory alone never prunes the crawl
+    const prefix = `${this.name}/`;
+    const toWorkspaceRelative = (name: string) => (name.startsWith(prefix) ? name.slice(prefix.length) : name);
+    const ignoredWorkspaces = base
+      ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
+      : this.ignoredWorkspacePatterns;
+    return [patterns, negateWorkspaces, ignoredWorkspaces.map(negate)].flat();
   }
 
   getProductionEntryFilePatterns() {

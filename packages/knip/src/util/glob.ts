@@ -44,6 +44,13 @@ export const prependDirToPattern = (dir: string, pattern: string) => {
   return join(dir, pattern);
 };
 
+export const rebasePattern = (pattern: string, base: string, dir: string) => {
+  const isNegated = pattern.startsWith('!');
+  const id = isNegated ? pattern.slice(1) : pattern;
+  const rebased = relative(dir, isAbsolute(id) ? id : join(base, id));
+  return isNegated ? `!${rebased}` : rebased;
+};
+
 export const negate = (pattern: string) => pattern.replace(/^!?/, '!');
 export const hasProductionSuffix = (pattern: string) => pattern.endsWith('!');
 export const hasNoProductionSuffix = (pattern: string) => !pattern.endsWith('!');

@@ -21,8 +21,11 @@ Read the writing-a-plugin docs first:
   absolute `dir`. `toDeferResolve`, `toDeferResolveEntry` and `toConfig` resolve
   from it (default: the config file's directory); `toDependency` and `toBinary`
   use it to select the workspace; `toAlias` uses it as the base of its targets.
-  `toEntry`, `toProductionEntry` and `toProject` are workspace-relative and
-  ignore `dir`.
+  `toEntry` and `toProductionEntry` resolve from it as well (default: the
+  workspace directory) and stay with the workspace that returned them; a
+  negated entry pattern reaches only the plugin's entry patterns with the same
+  base (`dir`, else the workspace directory). `toProject` is workspace-relative
+  and ignores `dir`.
 - Enable a plugin on the tool's package with `hasDependency`. File or manifest
   checks in `isEnabled` add I/O per workspace; reserve them for tools without a
   package, such as package managers, mise, Task or CI configs.

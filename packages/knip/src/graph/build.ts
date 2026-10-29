@@ -21,7 +21,13 @@ import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
-import { _glob, _syncGlob, prependDirToPattern as prependDir, removeProductionSuffix } from '../util/glob.ts';
+import {
+  _glob,
+  _syncGlob,
+  prependDirToPattern as prependDir,
+  rebasePattern,
+  removeProductionSuffix,
+} from '../util/glob.ts';
 import {
   type Input,
   isAlias,
@@ -283,32 +289,44 @@ export async function build({
     type PatternMap = Map<string, Set<string>>;
     const createPatternMap = (): PatternMap => new Map([[DEFAULT_GROUP, new Set()]]);
 
-    const groups = new Set([DEFAULT_GROUP]);
+    // Group → the base its patterns were resolved from, when that is not the workspace directory
+    const groups = new Map<string, string | undefined>([[DEFAULT_GROUP, undefined]]);
     const entryPatterns = createPatternMap();
     const entryPatternsSkipExports = createPatternMap();
     const productionPatterns = createPatternMap();
     const productionPatternsSkipExports = createPatternMap();
     const projectFilePatterns = new Set<string>();
 
-    const addPattern = (map: PatternMap, input: Input, pattern: string) => {
-      if (input.group && !map.has(input.group)) map.set(input.group, new Set());
-      // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
-      map.get(input.group ?? DEFAULT_GROUP)!.add(pattern);
+    const addPattern = (map: PatternMap, group: string, pattern: string) => {
+      let patterns = map.get(group);
+      if (!patterns) map.set(group, (patterns = new Set()));
+      patterns.add(pattern);
     };
 
     const toWorkspaceRelative = (path: string) => (isAbsolute(path) ? relative(dir, path) : path);
 
+    // A pattern with a base of its own globs in a group of its own: the descendant-workspace negations that a `**/`
+    // sibling adds to a glob call (getPluginEntryFilePatterns) must not reach it
+    const addEntryPattern = (map: PatternMap, input: Input) => {
+      const base = input.dir;
+      if (base && base !== dir) {
+        const group = `${input.group ?? DEFAULT_GROUP}:${base}`;
+        groups.set(group, base);
+        addPattern(map, group, rebasePattern(input.specifier, base, dir));
+      } else {
+        addPattern(map, input.group ?? DEFAULT_GROUP, toWorkspaceRelative(input.specifier));
+      }
+    };
+
     for (const input of inputs) {
-      if (input.group) groups.add(input.group);
+      if (input.group) groups.set(input.group, undefined);
       const specifier = input.specifier;
       if (isCatalog(input)) {
         counselor.addReference({ catalogName: input.catalogName, packageName: specifier });
       } else if (isEntry(input)) {
-        const targetMap = input.skipExportsAnalysis ? entryPatternsSkipExports : entryPatterns;
-        addPattern(targetMap, input, toWorkspaceRelative(specifier));
+        addEntryPattern(input.skipExportsAnalysis ? entryPatternsSkipExports : entryPatterns, input);
       } else if (isProductionEntry(input)) {
-        const targetMap = input.skipExportsAnalysis ? productionPatternsSkipExports : productionPatterns;
-        addPattern(targetMap, input, toWorkspaceRelative(specifier));
+        addEntryPattern(input.skipExportsAnalysis ? productionPatternsSkipExports : productionPatterns, input);
       } else if (isProject(input)) {
         projectFilePatterns.add(toWorkspaceRelative(specifier));
       } else if (isAlias(input)) {
@@ -326,7 +344,7 @@ export async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
-            if (!input.optional) addPattern(entryPatternsSkipExports, input, resolvedFilePath);
+            if (!input.optional) addPattern(entryPatternsSkipExports, input.group ?? DEFAULT_GROUP, resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
           }
@@ -367,22 +385,25 @@ export async function build({
       label: 'entry paths',
     });
 
-    for (const group of groups) {
+    for (const [group, base] of groups) {
       {
-        const patterns = worker.getPluginEntryFilePatterns([
-          ...((!options.isProduction && entryPatterns.get(group)) || []),
-          ...(productionPatterns.get(group) ?? []),
-        ]);
+        const patterns = worker.getPluginEntryFilePatterns(
+          [...((!options.isProduction && entryPatterns.get(group)) || []), ...(productionPatterns.get(group) ?? [])],
+          base
+        );
         const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
       }
 
       {
-        const patterns = worker.getPluginEntryFilePatterns([
-          ...((!options.isProduction && entryPatternsSkipExports.get(group)) || []),
-          ...(productionPatternsSkipExports.get(group) ?? []),
-        ]);
+        const patterns = worker.getPluginEntryFilePatterns(
+          [
+            ...((!options.isProduction && entryPatternsSkipExports.get(group)) || []),
+            ...(productionPatternsSkipExports.get(group) ?? []),
+          ],
+          base
+        );
         const label = `entry paths from plugins (ignore exports)${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
         const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
         principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
