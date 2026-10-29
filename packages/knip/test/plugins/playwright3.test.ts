@@ -14,8 +14,8 @@ test('Find dependencies with the Playwright plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 8,
-    total: 8,
+    processed: 9,
+    total: 9,
   });
   assert.deepEqual(Object.keys(issues.files), ['launch.mjs']);
 });
