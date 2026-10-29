@@ -12,10 +12,11 @@ test('Find dependencies with the Vitest plugin when build.lib.entry is resolved 
   const { issues, counters } = await main(options);
 
   assert(!issues.files['src/library.ts']);
+  assert(!issues.files['src/absolute.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
