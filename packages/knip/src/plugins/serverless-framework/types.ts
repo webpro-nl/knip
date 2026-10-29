@@ -6,7 +6,7 @@ export type PluginConfig = {
     esbuild?: EsbuildConfig;
   };
   functions?: Functions | Array<Functions | FileVariable> | FileVariable;
-  plugins?: unknown[] | FileVariable;
+  plugins?: unknown[] | { localPath?: string; modules?: unknown[] } | FileVariable;
 };
 
 type FileVariable = string;
