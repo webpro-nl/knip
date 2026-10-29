@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/github-actions-working-directory",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
