@@ -1,4 +1,5 @@
 import type { Configuration } from 'webpack';
+import type { SwcOptions } from '../webpack/types.ts';
 
 type EntryDescription = Record<string, unknown>;
 
@@ -31,6 +32,7 @@ export type RsbuildConfig = {
   source?: { entry?: Entry; preEntry?: string | string[] };
   tools?: {
     rspack?: RspackConfig | RspackConfig[];
+    swc?: SwcOptions | ((config: SwcOptions) => SwcOptions | void);
   };
   environments?: {
     [k: string]: Omit<RsbuildConfig, 'environments'>;

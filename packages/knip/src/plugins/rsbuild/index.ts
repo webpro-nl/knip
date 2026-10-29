@@ -1,8 +1,9 @@
 import type { Configuration } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
+import { getSwcPluginSpecifiers } from '../webpack/index.ts';
 import type { AliasChain, RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
@@ -72,6 +73,11 @@ const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, optio
       for (const input of await resolveRspackConfig({ resolve: { alias: getAliases(alias) } }, options)) {
         inputs.push(input);
       }
+    }
+
+    const swc = localConfig.tools?.swc;
+    if (swc && typeof swc === 'object') {
+      for (const specifier of getSwcPluginSpecifiers(swc)) inputs.push(toDeferResolve(specifier));
     }
 
     if (!localConfig.tools?.rspack) return;
