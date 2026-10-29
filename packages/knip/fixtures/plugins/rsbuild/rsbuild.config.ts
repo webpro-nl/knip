@@ -21,7 +21,15 @@ export default defineConfig({
   tools: {
     rspack: {
       entry: './app-entry.ts',
-      module: { rules: [{ loader: 'raw-loader' }, { loader: 'builtin:swc-loader' }] },
+      module: {
+        rules: [
+          { loader: 'raw-loader' },
+          {
+            loader: 'builtin:swc-loader',
+            options: { jsc: { experimental: { plugins: [['@swc/plugin-emotion', {}]] } } },
+          },
+        ],
+      },
     },
   },
   environments: {
