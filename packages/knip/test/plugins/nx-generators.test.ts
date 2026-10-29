@@ -20,6 +20,7 @@ test('Find local Nx generator factories and executor implementations', async () 
     'tools/my-plugin/src/bar/batch-executor.ts',
     'tools/alias-plugin/src/baz/schematic.ts',
     'tools/alias-plugin/src/qux/builder.ts',
+    'tools/my-plugin/scripts/bundle.mjs',
   ]) {
     assert(!issues.files[file], file);
   }
@@ -28,7 +29,7 @@ test('Find local Nx generator factories and executor implementations', async () 
     ...baseCounters,
     devDependencies: 1,
     files: 1,
-    processed: 7,
-    total: 7,
+    processed: 8,
+    total: 8,
   });
 });

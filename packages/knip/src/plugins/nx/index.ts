@@ -5,7 +5,7 @@ import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
 import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
-import { dirname, join, relative } from '../../util/path.ts';
+import { dirname, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
 import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
@@ -62,11 +62,8 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
   const expand = (value: string) =>
     value.replaceAll('{projectRoot}', options.configFileDir).replaceAll('{workspaceRoot}', options.rootCwd);
 
-  const resolveTargetCwd = (targetCwd: string | undefined) => {
-    if (!targetCwd) return options.cwd;
-    const expanded = expand(targetCwd);
-    return expanded === targetCwd ? join(options.cwd, targetCwd) : expanded;
-  };
+  const resolveTargetCwd = (targetCwd: string | undefined) =>
+    targetCwd ? toAbsolute(expand(targetCwd), options.rootCwd) : options.cwd;
 
   const inputs = targets
     .filter(target => target.executor === 'nx:run-commands' || target.command)
