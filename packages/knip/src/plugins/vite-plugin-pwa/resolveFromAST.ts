@@ -9,8 +9,8 @@ import {
 import { type Input, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 
-export const defaultSrcDir = 'public';
-export const defaultFilename = 'sw.js';
+const defaultSrcDir = 'public';
+const defaultFilename = 'sw.js';
 
 const isNuxtConfig = (configFileName: string) => configFileName.startsWith('nuxt.config.');
 
