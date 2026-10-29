@@ -6,6 +6,9 @@ post-merge:
 
 pre-push:
   commands:
+    format:
+      root: packages/app/
+      run: npx --no prettier --check .
     eslint:
       files: git diff --name-only HEAD @{push}
       glob: '*.{ts,tsx}'

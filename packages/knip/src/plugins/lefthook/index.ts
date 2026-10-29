@@ -2,7 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { getGitHookPaths } from '../../util/git.ts';
 import { fromBinary, toDependency } from '../../util/input.ts';
 import { findByKeyDeep } from '../../util/object.ts';
-import { extname } from '../../util/path.ts';
+import { extname, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://github.com/evilmartians/lefthook
@@ -38,7 +38,7 @@ const resolveConfig: ResolveConfig = async (localConfig, options) => {
   if (extname(configFileName) !== '') {
     const scripts = findByKeyDeep<Command>(localConfig, 'run').flatMap(command => {
       const deps = getInputsFromScripts([command.run], { ...options, optionalBinaries: true });
-      const dir = command.root ?? cwd;
+      const dir = command.root ? toAbsolute(command.root, options.rootCwd) : cwd;
       return deps.flatMap(dependency => ({ ...dependency, dir }));
     });
 

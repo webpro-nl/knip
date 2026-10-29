@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/lefthook__app",
+  "devDependencies": {
+    "prettier": "*"
+  }
+}
