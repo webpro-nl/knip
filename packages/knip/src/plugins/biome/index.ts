@@ -11,7 +11,7 @@ const enablers = ['@biomejs/biome'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['biome.json', 'biome.jsonc'];
+const config: string[] = ['biome.json', 'biome.jsonc', '.biome.json', '.biome.jsonc'];
 
 const isRootConfigReference = (specifier: string) => specifier === '//';
 
