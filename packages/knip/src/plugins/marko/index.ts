@@ -43,7 +43,7 @@ const tagDefFields = [
 
 const resolveConfig: ResolveConfig<MarkoTagDef> = (localConfig, options) => {
   const { configFileName, configFileDir, cwd } = options;
-  const inputs: Input[] = [];
+  const inputs: Input[] = production.map(pattern => toProductionEntry(pattern));
   if (!localConfig) return inputs;
 
   if (configFileName === 'marko.json') {
