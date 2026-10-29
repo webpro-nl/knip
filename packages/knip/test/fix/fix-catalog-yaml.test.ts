@@ -57,3 +57,34 @@ catalog:
 `
   );
 });
+
+test('Fix catalog entries split across pnpm-workspace.yaml include files', async () => {
+  const cwd = await copyFixture('fixtures/dependencies/catalog-pnpm-include-split');
+  const options = await createOptions({ cwd, isFix: true, fixTypes: ['catalog'] });
+  const { issues } = await main(options);
+
+  assert(issues.catalog['pnpm-workspace.yaml']['default.lodash'].isFixed);
+  assert(issues.catalog['catalogs.pnpm-workspace.yaml']['react.react-dom'].isFixed);
+
+  assert.equal(
+    await readFile(join(cwd, 'pnpm-workspace.yaml'), 'utf8'),
+    `include:
+  ./catalogs.pnpm-workspace.yaml: [catalogs.react]
+packages:
+  - "packages/*"
+catalog:
+  zod: ^4.4.3
+catalogs:
+  legacy:
+    vue: ^2.7.0
+`
+  );
+
+  assert.equal(
+    await readFile(join(cwd, 'catalogs.pnpm-workspace.yaml'), 'utf8'),
+    `catalogs:
+  react:
+    react: ^19.0.0
+`
+  );
+});
