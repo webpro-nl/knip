@@ -32,7 +32,7 @@ const resolveConfig: ResolveConfig<MCPConfig> = async (localConfig, options) => 
     if (typeof server?.command !== 'string') continue;
     const script = [server.command, ...(server.args ?? [])].join(' ').replace(PROJECT_DIR_VAR, '.');
     const dir = server.cwd ? toAbsolute(server.cwd.replace(PROJECT_DIR_VAR, '.'), cwd) : cwd;
-    for (const input of getInputsFromScripts(script, { optionalBinaries: true })) {
+    for (const input of getInputsFromScripts(script, { optionalBinaries: true, cwd: dir })) {
       input.dir = dir;
       inputs.push(input);
     }

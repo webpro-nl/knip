@@ -15,6 +15,11 @@
     "claude": {
       "command": "node",
       "args": ["${CLAUDE_PROJECT_DIR:-.}/scripts/claude-server.ts"]
+    },
+    "catalog": {
+      "command": "bun",
+      "args": ["run", "server.ts"],
+      "cwd": "tools/catalog"
     }
   }
 }

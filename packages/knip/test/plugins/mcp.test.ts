@@ -9,11 +9,13 @@ const cwd = resolve('fixtures/plugins/mcp');
 
 test('Find dependencies with the MCP plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(issues.files, {});
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });
