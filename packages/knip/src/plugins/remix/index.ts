@@ -5,7 +5,7 @@ import { hasDependency } from '../../util/plugin.ts';
 
 const title = 'Remix';
 
-const enablers = [/^@remix-run\//];
+const enablers = ['@remix-run/dev'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
