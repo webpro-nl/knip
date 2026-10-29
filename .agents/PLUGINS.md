@@ -17,10 +17,12 @@ Read the writing-a-plugin docs first:
   inputs, import flags, caches before implementing them.
 - Use the existing plugin lifecycle. Do not add core machinery solely to carry
   one plugin's state.
-- Resolve relative paths from a tool's config against the base the tool uses.
-  Entry patterns are relative to the workspace, `toDeferResolve` specifiers to
-  the config file. When the tool uses another base, prefix the path with
-  `join`, such as `join(options.cwd, path)`.
+- Return specifiers as the tool reads them and name the tool's base with an
+  absolute `dir`. `toDeferResolve`, `toDeferResolveEntry` and `toConfig` resolve
+  from it (default: the config file's directory); `toDependency` and `toBinary`
+  use it to select the workspace; `toAlias` uses it as the base of its targets.
+  `toEntry`, `toProductionEntry` and `toProject` are workspace-relative and
+  ignore `dir`.
 
 ## Creating a new plugin
 
@@ -68,6 +70,22 @@ default `entry` and `production` in the plugin export for the docs generator.
 
 See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 `collectPropertyValues`. See `ast-helpers.ts` for available utilities.
+
+## Path resolution
+
+- `dir` should be absolute (`options.cwd`, `options.configFileDir` or
+  `options.rootCwd`): workspace assignment prefix-matches absolute workspace
+  directories, so a relative `dir` falls back to the workspace of the file the
+  input came from, without a warning.
+- Do not join `options.cwd` onto a specifier that may be a package name. For
+  patterns from another base, `join(base, literal)` is fine for values you
+  control; use `toAbsolute(value, base)` when a config value may already be
+  absolute, because `join` would prefix it again, and keep a leading `!` in
+  front.
+- Root-relative values (Nx `{workspaceRoot}`, GitHub Actions
+  `working-directory`) use `options.rootCwd` as the base. Commands passed to
+  `getInputsFromScripts` are text: expand placeholders into path strings before
+  parsing them (see the `nx` plugin).
 
 ## Script parsing
 

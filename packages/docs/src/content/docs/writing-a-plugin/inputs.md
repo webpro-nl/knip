@@ -105,9 +105,22 @@ argument can be provided.
 
 ### dir
 
-The optional `dir` option assigns the input to a different workspace. For
-instance, GitHub Action workflows are always stored in the root workspace, and
-support `working-directory` in job steps. For example:
+The `dir` option tells Knip which directory a relative specifier is resolved
+from, and which workspace the input belongs to. It must be an absolute directory
+such as `options.cwd`, `options.configFileDir` or `options.rootCwd`: Knip
+matches it against the absolute workspace directories, so a relative `dir` falls
+back to the workspace of the file the input came from.
+
+Use it when a tool resolves values from its working directory rather than from
+its config file:
+
+```ts
+toDeferResolve(specifier, { dir: options.cwd });
+```
+
+And to assign inputs to another workspace. For instance, GitHub Action workflows
+are always stored in the root workspace, and support `working-directory` in job
+steps. For example:
 
 ```yaml
 jobs:
@@ -119,14 +132,27 @@ jobs:
 ```
 
 The GitHub Action plugin understands `working-directory` and adds this `dir` to
-the input:
+the input, an optional binary since workflow steps may run tools the repository
+does not install:
 
 ```ts
-toDependency('esbuild', { dir: 'packages/app' });
+toBinary('esbuild', {
+  optional: true,
+  dir: join(options.rootCwd, 'packages/app'),
+});
 ```
 
-Knip now understands `esbuild` is a dependency of the workspace in the
-`packages/app` directory.
+Knip now looks up the `esbuild` binary in the workspace in the `packages/app`
+directory and marks the package providing it as used.
+
+Entry patterns ignore `dir`:
+
+| Input type                                          | Relative to                             | Reads `dir` |
+| --------------------------------------------------- | --------------------------------------- | ----------- |
+| `toEntry`, `toProductionEntry`, `toProject`         | the workspace directory                 | no          |
+| `toDeferResolve`, `toDeferResolveEntry`, `toConfig` | `dir`, else the config file's directory | yes         |
+| `toDependency`, `toBinary`                          | not a path                              | yes         |
+| `toAlias`                                           | `dir`, else the workspace directory     | yes         |
 
 ### optional
 
