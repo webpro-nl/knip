@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "importHelpers": true,
+    "jsxImportSource": "@emotion/react",
+    "plugins": [{ "name": "next" }]
+  }
+}

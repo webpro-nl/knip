@@ -140,6 +140,13 @@ listed in `compilerOptions.types`. A `@types/pkg` dependency then satisfies the
 reference on its own, without `pkg` itself being installed. Don't use it for
 packages the tool actually loads, even if it does so only at build time.
 
+### alsoReferenceOwner
+
+Use `alsoReferenceOwner` together with `dir` when a shared config file, such as
+an extended `tsconfig.json` preset, is read for another workspace. The
+dependency is then referenced in the `dir` workspace and also in the workspace
+that owns the file, so either one can list it.
+
 ### allowIncludeExports
 
 By default, exports of entry files such as `src/index.ts` or the files in
