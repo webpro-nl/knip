@@ -5,6 +5,7 @@ packageExtensions:
     peerDependencies:
       is-odd: "*"
       is-even: "*"
+      is-number: "*"
     peerDependenciesMeta:
       is-even:
         optional: true

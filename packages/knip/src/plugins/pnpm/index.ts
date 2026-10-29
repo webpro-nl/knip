@@ -28,10 +28,7 @@ const resolveConfig: ResolveConfig<PnpmConfig> = config => {
   if (packageExtensions) {
     for (const extension of Object.values(packageExtensions)) {
       if (extension.peerDependencies) {
-        for (const dep of Object.keys(extension.peerDependencies)) {
-          const optional = extension.peerDependenciesMeta?.[dep]?.optional === true;
-          inputs.push(optional ? toDependency(dep, { optional: true }) : toDependency(dep));
-        }
+        for (const dep of Object.keys(extension.peerDependencies)) inputs.push(toDependency(dep, { optional: true }));
       }
     }
   }
