@@ -1,0 +1,12 @@
+{
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": ["**/*.js"]
+    },
+    "packages/*": {
+      "entry": [],
+      "project": ["**/*.js"]
+    }
+  }
+}
