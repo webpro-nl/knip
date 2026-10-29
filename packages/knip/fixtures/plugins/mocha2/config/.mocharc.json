@@ -1,4 +1,6 @@
 {
   "spec": ["specs/*.test.js"],
+  "require": "./hooks/root.js",
+  "file": "support/fixtures.js",
   "reporter": "./reporters/custom.cjs"
 }

@@ -17,11 +17,13 @@ test('Find dependencies with the Mocha plugin (file)', async () => {
   assert('unrelated.js' in issues.files);
   assert(!issues.devDependencies['package.json']?.['mocha-junit-reporter']);
   assert(!('reporters/custom.cjs' in issues.files));
+  assert(!('hooks/root.js' in issues.files));
+  assert(!('support/fixtures.js' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });

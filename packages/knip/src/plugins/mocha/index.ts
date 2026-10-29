@@ -65,8 +65,8 @@ const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
-  inputs.push(...files.map(id => toDeferResolveEntry(id)));
-  inputs.push(...require.map(id => toDeferResolve(id)));
+  inputs.push(...files.map(id => toDeferResolveEntry(id, { dir: options.cwd })));
+  inputs.push(...require.map(id => toDeferResolve(id, { dir: options.cwd })));
   if (isExternalReporter(localConfig.reporter)) inputs.push(toDeferResolve(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
