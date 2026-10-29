@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
-import { isAbsolute, join } from '../../util/path.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { JasmineConfig } from './types.ts';
 
@@ -22,7 +22,7 @@ const entry = [defaultSpecFiles, 'spec/helpers/**/*.{js,mjs}'];
 const toSpecDirPattern = (specDir: string, pattern: string) => {
   const isNegated = pattern.startsWith('!');
   const id = isNegated ? pattern.slice(1) : pattern;
-  const resolved = isAbsolute(id) ? id : join(specDir, id);
+  const resolved = toAbsolute(id, specDir);
   return isNegated ? `!${resolved}` : resolved;
 };
 

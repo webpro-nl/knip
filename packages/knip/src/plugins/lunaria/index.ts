@@ -1,4 +1,4 @@
-import { isAbsolute, join } from '../../util/path.ts';
+import { toAbsolute } from '../../util/path.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toProductionEntry } from '../../util/input.ts';
@@ -22,9 +22,7 @@ const resolveConfig: ResolveConfig<LunariaConfig> = async (localConfig, options)
 
   const baseDir = options.configFileDir;
 
-  return [...files, ...renderer, ...customCss, ...favicon].map(id =>
-    toProductionEntry(isAbsolute(id) ? id : join(baseDir, id))
-  );
+  return [...files, ...renderer, ...customCss, ...favicon].map(id => toProductionEntry(toAbsolute(id, baseDir)));
 };
 
 const args: Args = {
