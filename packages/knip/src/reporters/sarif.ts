@@ -1,6 +1,6 @@
 import { ISSUE_TYPE_TITLE } from '../constants.ts';
 import type { Entries } from '../types/entries.ts';
-import type { Issue, IssueSeverity, IssueType, Report, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue, IssueSeverity, IssueType, Report } from '../types/issues.ts';
 import { toPosix, toRelative } from '../util/path.ts';
 import { version } from '../version.ts';
 import { flattenIssues, getIssueDescription } from './util/util.ts';
@@ -45,7 +45,7 @@ const sortByLocation = (a: Issue, b: Issue) =>
   (a.col ?? 0) - (b.col ?? 0) ||
   a.symbol.localeCompare(b.symbol);
 
-export default ({ report, issues, cwd }: ReporterOptions) => {
+export default ({ report, issues, cwd, write }: InternalReporterOptions) => {
   const groups: { type: IssueType; issues: Issue[] }[] = [];
 
   for (const [type, isReportType] of Object.entries(report) as Entries<Report>) {
@@ -96,8 +96,5 @@ export default ({ report, issues, cwd }: ReporterOptions) => {
     ],
   });
 
-  // See: https://github.com/nodejs/node/issues/6379
-  // @ts-expect-error _handle is private
-  process.stdout._handle?.setBlocking?.(true);
-  process.stdout.write(`${output}\n`);
+  write(output);
 };

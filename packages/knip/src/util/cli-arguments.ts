@@ -45,6 +45,7 @@ Output
       --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
       --reporter               Select reporter (default: symbols), can be repeated (3)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+      --output-file            Write reporter output to a file instead of stdout ([reporter=]path), can be repeated
       --no-config-hints        Suppress configuration hints
       --no-tag-hints           Suppress tag hints
       --treat-config-hints-as-errors   Exit with non-zero code (1) if there are any configuration hints
@@ -78,6 +79,7 @@ $ knip --workspace @myorg/* --workspace '!@myorg/legacy'
 $ knip --workspace './apps/*' --workspace '@shared/utils'
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
+$ knip --reporter symbols --reporter json --output-file json=knip.json
 $ knip --tags=-lintignore
 
 Website: https://knip.dev`;
@@ -122,6 +124,7 @@ export default function parseCLIArgs() {
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
       'no-tag-hints': { type: 'boolean' },
+      'output-file': { type: 'string', multiple: true },
       performance: { type: 'boolean' },
       'performance-fn': { type: 'string' },
       production: { type: 'boolean', short: 'p' },

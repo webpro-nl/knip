@@ -1,12 +1,12 @@
 import { ISSUE_TYPE_TITLE } from '../constants.ts';
 import type { Entries } from '../types/entries.ts';
-import type { ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions } from '../types/issues.ts';
 import { relative } from '../util/path.ts';
 import { compareStrings } from '../util/string.ts';
 import { hintPrinters } from './util/configuration-hints.ts';
 import { flattenIssues, getIssueTypeTitle } from './util/util.ts';
 
-const createGitHubActionsLogger = () => {
+const createGitHubActionsLogger = (lines: string[]) => {
   const formatAnnotation = (
     level: 'error' | 'warning' | 'notice',
     message: string,
@@ -27,11 +27,11 @@ const createGitHubActionsLogger = () => {
     params.push(`title=✂️ Knip${options.title ? ` / ${options.title}` : ''}`);
 
     const paramString = params.join(',');
-    console.log(`::${level} ${paramString}::${message}`);
+    lines.push(`::${level} ${paramString}::${message}`);
   };
 
   return {
-    info: (message: string) => console.log(message),
+    info: (message: string) => lines.push(message),
     error: (
       message: string,
       options: {
@@ -79,8 +79,10 @@ export default ({
   isTreatConfigHintsAsErrors,
   isTreatTagHintsAsErrors,
   configFilePath,
-}: ReporterOptions) => {
-  const core = createGitHubActionsLogger();
+  write,
+}: InternalReporterOptions) => {
+  const lines: string[] = [];
+  const core = createGitHubActionsLogger(lines);
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
@@ -177,4 +179,6 @@ export default ({
       });
     }
   }
+
+  write(lines.join('\n'));
 };

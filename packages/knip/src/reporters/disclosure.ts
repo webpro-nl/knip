@@ -1,19 +1,22 @@
 import type { Entries } from '../types/entries.ts';
-import type { ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions } from '../types/issues.ts';
 import { flattenIssues, getIssueTypeTitle, getTableForType } from './util/util.ts';
 
-export default ({ report, issues, cwd }: ReporterOptions) => {
+export default ({ report, issues, cwd, write }: InternalReporterOptions) => {
   const reportMultipleGroups = Object.values(report).filter(Boolean).length > 1;
+  const lines: string[] = [];
 
   for (const [reportType, isReportType] of Object.entries(report) as Entries<typeof report>) {
     if (isReportType) {
       const title = reportMultipleGroups ? getIssueTypeTitle(reportType) : undefined;
       const issuesForType = flattenIssues(issues[reportType]);
       if (issuesForType.length > 0) {
-        console.log(`<details>\n${title ? `<summary>${title} (${issuesForType.length})</summary>\n` : ''}\n\`\`\``);
-        console.log(getTableForType(issuesForType, cwd, { isUseColors: false }).toString());
-        console.log('```\n\n</details>\n');
+        lines.push(`<details>\n${title ? `<summary>${title} (${issuesForType.length})</summary>\n` : ''}\n\`\`\``);
+        lines.push(getTableForType(issuesForType, cwd, { isUseColors: false }).toString());
+        lines.push('```\n\n</details>\n');
       }
     }
   }
+
+  write(lines.join('\n'));
 };

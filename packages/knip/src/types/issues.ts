@@ -80,7 +80,10 @@ export type ReporterOptions = {
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
+  write?: (output: string) => void;
 };
+
+export type InternalReporterOptions = ReporterOptions & { write: (output: string) => void };
 
 export type Reporter = (options: ReporterOptions) => void;
 

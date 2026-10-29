@@ -367,6 +367,22 @@ Example:
 knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 ```
 
+### `--output-file [reporter=]path`
+
+Write the output of a reporter to a file instead of `stdout`. Prefix the path
+with the reporter name to target one of multiple reporters. Can be repeated:
+
+```sh
+knip --reporter sarif --output-file knip.sarif
+knip --reporter symbols --reporter json --output-file json=knip.json
+```
+
+A relative path is resolved from the directory Knip runs in, like `--config`
+and `--trace-file`. With `--directory app --output-file knip.sarif` the file is
+written to `app/knip.sarif`.
+
+Also see [Writing to a file][17].
+
 ### `--no-config-hints`
 
 Suppress configuration hints.
@@ -410,7 +426,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][17].
+Show [debug output][18].
 
 ### `--memory`
 
@@ -487,7 +503,7 @@ Total running time: 5s
 - `sum` the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][18]).
+`performance.timerify` ([GitHub issue][19]).
 
 ### `--duration`
 
@@ -517,20 +533,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][19].
+Also see [Trace][20].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][20].
+[--trace][21].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][20].
+Trace export name to see where it's imported. Implies [--trace][21].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][20].
+Trace file to see where its exports are imported. Implies [--trace][21].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -548,7 +564,8 @@ Trace file to see where its exports are imported. Implies [--trace][20].
 [14]: ../features/auto-fix.mdx
 [15]: #--reporter-reporter
 [16]: ../features/reporters.md
-[17]: ../guides/troubleshooting.md#debug
-[18]: https://github.com/oven-sh/bun/issues/9271
-[19]: ../guides/troubleshooting.md#trace
-[20]: #--trace
+[17]: ../features/reporters.md#writing-to-a-file
+[18]: ../guides/troubleshooting.md#debug
+[19]: https://github.com/oven-sh/bun/issues/9271
+[20]: ../guides/troubleshooting.md#trace
+[21]: #--trace

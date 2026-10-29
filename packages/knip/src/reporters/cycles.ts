@@ -1,5 +1,4 @@
-/* oxlint-disable no-console */
-import type { Issue, IssueSymbol, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue, IssueSymbol } from '../types/issues.ts';
 import st from '../util/colors.ts';
 import { relative } from '../util/path.ts';
 import { flattenIssues, getColoredTitle, getIssueTypeTitle } from './util/util.ts';
@@ -43,15 +42,15 @@ const sortByFilePath = (cwd: string) => (a: Issue, b: Issue) => {
   return rootLocation === 0 ? a.symbol.localeCompare(b.symbol) : rootLocation;
 };
 
-export default ({ cwd, issues, isShowProgress }: ReporterOptions) => {
+export default ({ cwd, issues, isShowProgress, write }: InternalReporterOptions) => {
   const cycles = flattenIssues(issues.cycles).sort(sortByFilePath(cwd));
 
   if (cycles.length === 0) {
-    if (isShowProgress) console.log('✂️  No circular dependencies found.');
+    if (isShowProgress) write('✂️  No circular dependencies found.');
     return;
   }
 
-  console.log(getColoredTitle(getIssueTypeTitle('cycles'), cycles.length));
+  const lines: string[] = [getColoredTitle(getIssueTypeTitle('cycles'), cycles.length)];
 
   const rootCounts = new Map<string, number>();
   for (const issue of cycles) {
@@ -74,17 +73,19 @@ export default ({ cwd, issues, isShowProgress }: ReporterOptions) => {
     if (rootLocation !== previousRoot) {
       const count = rootCounts.get(rootLocation) ?? 0;
       const countLabel = count > 1 ? st.dim(` (${count} cycles)`) : '';
-      console.log(`\n${formatFile(root)}${countLabel}`);
+      lines.push(`\n${formatFile(root)}${countLabel}`);
       previousRoot = rootLocation;
     } else {
-      console.log('');
+      lines.push('');
     }
     for (let depth = 1; depth <= files.length; depth++) {
       const isClose = depth === files.length;
       const edge = files[depth - 1];
       const file = isClose ? root : files[depth];
       const connector = st.dim(`${'    '.repeat(depth - 1)}└── `);
-      console.log(`${connector}${formatEdge(edge)}${formatFile(file)}${isClose ? st.dim(' ↩') : ''}`);
+      lines.push(`${connector}${formatEdge(edge)}${formatFile(file)}${isClose ? st.dim(' ↩') : ''}`);
     }
   }
+
+  write(lines.join('\n'));
 };
