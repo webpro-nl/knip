@@ -10,7 +10,7 @@ import {
   toDeferResolveProductionEntry,
   toDependency,
 } from '../../util/input.ts';
-import { extname, isInternal, join, toAbsolute } from '../../util/path.ts';
+import { extname, isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
@@ -171,7 +171,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           } else {
             if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
             for (const prefix of prefixes) {
-              inputs.add(toAlias(addStar(alias), [addStar(toAbsolute(prefix, options.configFileDir))]));
+              inputs.add(toAlias(addStar(alias), [addStar(prefix)], { dir: options.configFileDir }));
             }
           }
         }

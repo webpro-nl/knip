@@ -146,7 +146,7 @@ const resolve: Resolve = async options => {
         if (!entry || typeof entry !== 'object') continue;
         for (const id of [entry.implementation || entry.factory, entry.batchImplementation]) {
           if (typeof id === 'string' && id.length > 0) {
-            inputs.push(toDeferResolveEntry(join(dirname(filePath), substringBefore(id, '#'))));
+            inputs.push(toDeferResolveEntry(substringBefore(id, '#'), { dir: dirname(filePath) }));
           }
         }
       }

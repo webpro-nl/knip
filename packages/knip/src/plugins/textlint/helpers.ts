@@ -1,6 +1,6 @@
 import { toDependency, toDeferResolveEntry } from '../../util/input.ts';
 import type { Manifest } from '../../util/package-json.ts';
-import { isInternal, toAbsolute } from '../../util/path.ts';
+import { isInternal } from '../../util/path.ts';
 
 // https://github.com/textlint/textlint/blob/3fd08dc7d6ce40f366bd5a5bb1899fec2892441a/packages/@textlint/config-loader/src/package-prefix.ts
 
@@ -53,7 +53,7 @@ const toPresetDependency = (key: string, manifest: Manifest) => {
 const toModuleDependency = (prefix: string, key: string, manifest: Manifest) =>
   toPackageDependency(prefix, key, [createFullPackageName(prefix, key), key], manifest);
 
-const toLocalEntry = (key: string, cwd: string) => toDeferResolveEntry(toAbsolute(key, cwd));
+const toLocalEntry = (key: string, cwd: string) => toDeferResolveEntry(key, { dir: cwd });
 
 export const toRuleDependency = (key: string, manifest: Manifest, cwd: string) => {
   if (isInternal(key)) return toLocalEntry(key, cwd);
