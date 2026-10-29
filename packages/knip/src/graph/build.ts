@@ -569,6 +569,7 @@ export async function build({
           }
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
+          if (options.isProduction) input.production = true;
           const specifierFilePath = handleInput(input, workspace);
           if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }

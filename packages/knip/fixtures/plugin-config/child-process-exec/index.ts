@@ -24,6 +24,9 @@ runSync('starfruit');
 spawn(path.join(__dirname, 'scripts', 'worker.js'));
 fork(path.join(__dirname, 'scripts', 'task.js'));
 
+// --require/--import hooks and the positional file are entry files
+execSync('node --require ./scripts/hook.js scripts/task.js');
+
 // options objects and callbacks must never be parsed as inputs
 execSync('lemon', { cwd: '/tmp', encoding: 'utf8' });
 exec('lime', (_error, stdout) => stdout);

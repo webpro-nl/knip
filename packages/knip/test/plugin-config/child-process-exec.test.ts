@@ -58,7 +58,22 @@ test('Reference binaries and entry files in node:child_process calls', async () 
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 22,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
+  });
+});
+
+test('Reference binaries and entry files in node:child_process calls (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters, issues } = await main(options);
+
+  // the --require hook of a script in a production file is a production entry file
+  assert(!('scripts/hook.js' in issues.files));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 22,
+    processed: 4,
+    total: 4,
   });
 });
