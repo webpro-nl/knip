@@ -14,6 +14,7 @@ import { extname, isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
+import type { SWCConfig } from '../swc/types.ts';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
 import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
@@ -84,15 +85,19 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
 const isSwcLoader = (loader: string) =>
   loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
 
-const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
-  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
-  const plugins = (use.options as { jsc?: { experimental?: { plugins?: unknown[] } } }).jsc?.experimental?.plugins;
+export const getSwcPluginSpecifiers = (options: SWCConfig) => {
+  const plugins = options.jsc?.experimental?.plugins;
   if (!Array.isArray(plugins)) return [];
   return plugins.flatMap(plugin => {
     if (typeof plugin === 'string') return [plugin];
     if (Array.isArray(plugin) && typeof plugin[0] === 'string') return [plugin[0]];
     return [];
   });
+};
+
+const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
+  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
+  return getSwcPluginSpecifiers(use.options);
 };
 
 const resolveUseItem = (use: RuleSetUseItem) => {
