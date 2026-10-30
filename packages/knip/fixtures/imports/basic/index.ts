@@ -14,6 +14,10 @@ const dynamicB = () => import('./dir/import-b.js').then(m => m.dynamic);
 
 const dynamicF = () => import('./dir/import-f.js').then(({ dynamic, named: renamed }) => [dynamic, renamed]);
 
+const thenMember = () => import('./then-member.js').then(mod => mod.used);
+
+const thenDestructure = () => import('./then-destructure.js').then(({ used }) => used);
+
 const dynamicG = import('./import-g.js');
 dynamicG.then(module => module.func());
 
@@ -133,6 +137,8 @@ export default fn({
   top,
   dynamicB,
   dynamicF,
+  thenMember,
+  thenDestructure,
   defaultName1,
   defaultName2,
   defaultName3,

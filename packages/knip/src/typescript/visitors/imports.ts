@@ -1,4 +1,11 @@
-import type { ArrayExpression, Expression, ImportExpression, VariableDeclarator } from 'oxc-parser';
+import type {
+  ArrayExpression,
+  BindingPattern,
+  CallExpression,
+  Expression,
+  ImportExpression,
+  VariableDeclarator,
+} from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
@@ -30,80 +37,9 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   }
 
   if (importExpr && isStringLiteral(importExpr.source)) {
-    s.handledImportExpressions.add(importExpr.start);
-    const specifier = getStringValue(importExpr.source)!;
     const caughtFlag =
       init.type === 'AwaitExpression' && s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
-
-    if (node.id.type === 'ObjectPattern') {
-      for (const prop of node.id.properties) {
-        if (prop.type === 'Property') {
-          const importedName =
-            prop.key?.type === 'Identifier'
-              ? prop.key.name
-              : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
-                ? prop.key.value
-                : undefined;
-          const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
-          const alias = localName !== importedName ? localName : undefined;
-          s.addImport(
-            specifier,
-            importedName,
-            alias,
-            undefined,
-            prop.key?.start ?? prop.start,
-            IMPORT_FLAGS.DYNAMIC | caughtFlag
-          );
-        } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
-          s.addImport(
-            specifier,
-            IMPORT_STAR,
-            prop.argument.name,
-            undefined,
-            prop.start,
-            IMPORT_FLAGS.DYNAMIC | caughtFlag
-          );
-        }
-      }
-    } else if (node.id.type === 'Identifier') {
-      if (init.type === 'AwaitExpression') {
-        s.addImport(
-          specifier,
-          'default',
-          node.id.name,
-          undefined,
-          importExpr.source.start,
-          IMPORT_FLAGS.DYNAMIC | caughtFlag
-        );
-        const resolved = s.resolveModule(specifier, s.filePath);
-        if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
-          s.localImportMap.set(node.id.name, {
-            importedName: IMPORT_STAR,
-            filePath: resolved.resolvedFileName,
-            isNamespace: true,
-            isDynamicImport: true,
-          });
-        }
-      } else {
-        s.addImport(
-          specifier,
-          undefined,
-          undefined,
-          undefined,
-          importExpr.source.start,
-          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
-        );
-      }
-    } else {
-      s.addImport(
-        specifier,
-        undefined,
-        undefined,
-        undefined,
-        importExpr.source.start,
-        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
-      );
-    }
+    handleDynamicImportBinding(node.id, importExpr, init.type === 'AwaitExpression', caughtFlag, s);
     return;
   }
 
@@ -352,6 +288,91 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
       }
     }
   }
+}
+
+function handleDynamicImportBinding(
+  id: BindingPattern,
+  importExpr: ImportExpression,
+  isAwaited: boolean,
+  caughtFlag: number,
+  s: WalkState
+) {
+  s.handledImportExpressions.add(importExpr.start);
+  const specifier = getStringValue(importExpr.source)!;
+  if (id.type === 'ObjectPattern') {
+    for (const prop of id.properties) {
+      if (prop.type === 'Property') {
+        const importedName =
+          prop.key?.type === 'Identifier'
+            ? prop.key.name
+            : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
+              ? prop.key.value
+              : undefined;
+        const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
+        const alias = localName !== importedName ? localName : undefined;
+        s.addImport(
+          specifier,
+          importedName,
+          alias,
+          undefined,
+          prop.key?.start ?? prop.start,
+          IMPORT_FLAGS.DYNAMIC | caughtFlag
+        );
+      } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
+        s.addImport(
+          specifier,
+          IMPORT_STAR,
+          prop.argument.name,
+          undefined,
+          prop.start,
+          IMPORT_FLAGS.DYNAMIC | caughtFlag
+        );
+      }
+    }
+  } else if (id.type === 'Identifier') {
+    if (isAwaited) {
+      s.addImport(specifier, 'default', id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+      const resolved = s.resolveModule(specifier, s.filePath);
+      if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+        s.localImportMap.set(id.name, {
+          importedName: IMPORT_STAR,
+          filePath: resolved.resolvedFileName,
+          isNamespace: true,
+          isDynamicImport: true,
+        });
+      }
+    } else {
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        importExpr.source.start,
+        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
+      );
+    }
+  } else {
+    s.addImport(
+      specifier,
+      undefined,
+      undefined,
+      undefined,
+      importExpr.source.start,
+      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
+    );
+  }
+}
+
+export function handleImportThen(node: CallExpression, s: WalkState) {
+  const callee = node.callee;
+  if (callee.type !== 'MemberExpression' || callee.computed || callee.property.name !== 'then') return;
+  if (callee.object.type !== 'ImportExpression' || !isStringLiteral(callee.object.source)) return;
+  const fn = node.arguments[0];
+  if (fn?.type !== 'ArrowFunctionExpression' && fn?.type !== 'FunctionExpression') return;
+  const param = fn.params[0];
+  if (param?.type !== 'Identifier' && param?.type !== 'ObjectPattern') return;
+  const caughtFlag = s.caughtImportExpressions.has(callee.object.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+  handleDynamicImportBinding(param, callee.object, true, caughtFlag, s);
 }
 
 export function handleImportExpression(node: ImportExpression, s: WalkState) {

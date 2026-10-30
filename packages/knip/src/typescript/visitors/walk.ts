@@ -36,7 +36,12 @@ import {
   handleExportNamed,
   handleExpressionStatement,
 } from './exports.ts';
-import { getPromiseAllElements, handleImportExpression, handleVariableDeclarator } from './imports.ts';
+import {
+  getPromiseAllElements,
+  handleImportExpression,
+  handleImportThen,
+  handleVariableDeclarator,
+} from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 
 interface WalkContext {
@@ -575,6 +580,7 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   CallExpression(node) {
+    handleImportThen(node, state);
     handleCallExpression(node, state);
   },
   NewExpression(node) {
