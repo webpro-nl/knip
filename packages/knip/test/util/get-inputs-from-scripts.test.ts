@@ -14,6 +14,7 @@ const toManifest = (scriptNames: string[] = []) => createManifest({ scripts: Obj
 const pkgScripts = { cwd, manifest: toManifest(['program', 'spl:t']) };
 const withEnv = { cwd, manifest: createManifest({ scripts: { 'with-env': 'node --import tsx', loop: 'pnpm loop' } }) };
 const lifecycle = { cwd, manifest: createManifest({ scripts: { start: 'node --import tsx', test: 'node --import tsx' } }) };
+const withBuild = { cwd, manifest: createManifest({ scripts: { build: 'node' } }) };
 const forwardedArgs = { cwd, isForwardedArgs: true };
 const opt = { optional: true };
 
@@ -243,6 +244,22 @@ test('getInputsFromScripts (bun)', () => {
   t('bun exec ./script.sh', [toBinary('bun')]);
   t('bun feedback', [toBinary('bun')]);
   t('bun ci', [toBinary('bun')]);
+  t('bun --bun custom-tool build --require ./missing.cjs', [toBinary('bun'), toBinary('custom-tool')], withBuild);
+  t('bun -b custom-tool build --require ./missing.cjs', [toBinary('bun'), toBinary('custom-tool')], withBuild);
+  t('bun --bun custom-tool serve', [toBinary('bun'), toBinary('custom-tool')]);
+  t('bun --bun vite build', [toBinary('bun'), toBinary('vite')]);
+  t('bun run --bun vite build', [toBinary('bun'), toBinary('vite', opt)]);
+  t('bun --bun x vite', [toBinary('bun'), toBinary('vite', opt)]);
+  t('bun --hot ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun --watch ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun run --watch ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun --smol ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun --if-present ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun --silent custom-tool build', [toBinary('bun'), toBinary('custom-tool')]);
+  t('bun --preload ./require.js custom-tool build', [toBinary('bun'), toBinary('custom-tool')]);
+  t('bun --preload tsx tsx ./main.ts', [toBinary('bun'), toBinary('tsx'), ts]);
+  t('bun --cwd packages/x dev', [toBinary('bun')]);
+  t('bun custom-tool --cwd packages/x build', [toBinary('bun'), toBinary('custom-tool')]);
 });
 
 test('getInputsFromScripts (nub)', () => {

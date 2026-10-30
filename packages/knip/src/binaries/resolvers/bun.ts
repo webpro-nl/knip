@@ -59,7 +59,12 @@ const commands = new Set([
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const binary = toCommandBinary(_binary, options);
-  const parsed = parseArgs(words, { string: ['cwd'] });
+  const parsed = parseArgs(words, {
+    string: ['cwd'],
+    boolean: ['bun', 'hot', 'if-present', 'silent', 'smol', 'watch'],
+    alias: { bun: 'b' },
+    isStorePositions: true,
+  });
   const [command, script] = parsed._;
 
   if (command === 'x') {
@@ -85,7 +90,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  if (command !== 'run') return [binary, ...fromArgs(words, opts)];
+  if (command !== 'run') return [binary, ...fromArgs(dir ? words : words.slice(parsed.positionalIndices![0]), opts)];
 
   const input = toBinary(filePath, { optional: true });
   if (dir) input.dir = dir;
