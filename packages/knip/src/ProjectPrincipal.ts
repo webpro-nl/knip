@@ -10,6 +10,7 @@ import type {
   PluginVisitorContext,
   PluginVisitorObject,
 } from './types/config.ts';
+import type { ConfigurationFiles } from './session/configuration.ts';
 import type { FileNode } from './types/module-graph.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
@@ -129,15 +130,15 @@ export class ProjectPrincipal {
     this.rootDirs.set(scope, compact([...scoped, ...rootDirs]));
   }
 
-  collectConfigurationImports(paths: Set<string>) {
-    for (const filePath of paths) {
+  collectConfigurationImports(configurationFiles: ConfigurationFiles) {
+    for (const filePath of configurationFiles.paths) {
       if (!DEFAULT_EXTENSIONS.has(extname(filePath))) continue;
       const source = this.fileManager.readRawFile(filePath);
       if (source === undefined) continue;
       try {
         for (const specifier of extractSpecifiers(_parseFile(filePath, source), source, filePath)) {
           const resolved = this.resolveSpecifier(specifier, filePath);
-          if (resolved && !isInNodeModules(resolved)) paths.add(resolved);
+          if (resolved && !isInNodeModules(resolved)) configurationFiles.addImport(filePath, resolved);
         }
       } catch {}
     }

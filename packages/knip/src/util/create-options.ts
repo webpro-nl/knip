@@ -26,6 +26,7 @@ import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
   args?: ParsedCLIArgs;
+  isReload?: boolean;
 }
 
 /**
@@ -57,7 +58,7 @@ export const createOptions = async (options: CreateOptions) => {
     throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
 
-  if (options.isSession && configFilePath) unload([configFilePath]);
+  if (options.isSession && !options.isReload && configFilePath) unload([configFilePath]);
 
   const loadedConfig = Object.assign(
     {},

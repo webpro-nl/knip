@@ -12,6 +12,7 @@ export class SessionConfigurationChangedError extends Error {
 
 export class ConfigurationFiles {
   paths = new Set<string>();
+  private importers = new Map<string, Set<string>>();
   private matchers: Array<{ dir: string; isMatch: (filePath: string) => boolean }> = [];
 
   constructor(options: MainOptions) {
@@ -30,6 +31,22 @@ export class ConfigurationFiles {
       else included.push(toRelative(pattern, dir));
     }
     if (included.length > 0) this.matchers.push({ dir, isMatch: picomatch(included, { dot: true, ignore: excluded }) });
+  }
+
+  addImport(importer: string, imported: string) {
+    this.paths.add(imported);
+    const importers = this.importers.get(imported);
+    if (importers) importers.add(importer);
+    else this.importers.set(imported, new Set([importer]));
+  }
+
+  getAffected(changes: WatchChange[], cwd: string) {
+    const affected = new Set<string>();
+    for (const change of changes) affected.add(toAbsolute(toPosix(change.filePath), cwd));
+    for (const filePath of affected) {
+      for (const importer of this.importers.get(filePath) ?? []) affected.add(importer);
+    }
+    return affected;
   }
 
   getChange(changes: WatchChange[], cwd: string) {
