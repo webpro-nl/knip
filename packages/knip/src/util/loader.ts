@@ -1,23 +1,14 @@
-import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.ts';
-import { findFile, loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
+import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
 import { jiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
-import { dirname, extname, isInternal, toNative } from './path.ts';
+import { extname, isInternal, toNative } from './path.ts';
 
 const unloaded = new Map<string, number>();
 
-const isNativeModule = (filePath: string) => {
-  const ext = extname(filePath);
-  if (ext !== '.js') return ext === '.mjs';
-  for (let dir = dirname(filePath); dir !== dirname(dir); dir = dirname(dir)) {
-    const manifestPath = findFile(dir, 'package.json');
-    if (manifestPath) return JSON.parse(readFileSync(manifestPath, 'utf8')).type === 'module';
-  }
-  return false;
-};
+const isReloadable = (ext: string) => ext === '.js' || ext === '.mjs' || ext === '.cjs';
 
 const reload = async (filePath: string, version: number) => {
   let imported;
@@ -67,7 +58,7 @@ const load = async (filePath: string) => {
     }
 
     const version = unloaded.get(filePath);
-    if (version && isNativeModule(filePath)) return await reload(filePath, version);
+    if (version && isReloadable(ext)) return await reload(filePath, version);
 
     return await jiti.import(filePath, { default: true });
   } catch (error) {

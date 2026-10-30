@@ -69,6 +69,19 @@ for (const changedFile of ['vite.config.ts', 'config/settings.json']) {
   });
 }
 
+for (const configFile of ['vite.config.js', 'vite.config.cjs']) {
+  test(`CommonJS workspace plugin configuration reloads when ${configFile} changes`, async t => {
+    const cwd = await setup(t);
+    await writeFile(join(cwd, configFile), "module.exports = { test: { include: ['src/first.ts'] } };\n");
+    const loadOptions = () => createOptions({ cwd, isSession: true });
+    const session = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+    await writeFile(join(cwd, configFile), "module.exports = { test: { include: ['src/second.ts'] } };\n");
+    await session.handleFileChanges([{ type: 'modified', filePath: configFile }]);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts']);
+  });
+}
+
 test('new plugin configs are discovered using the enabled plugin configuration patterns', async t => {
   const cwd = await setup(t);
   const loadOptions = () => createOptions({ cwd, isSession: true });
@@ -196,13 +209,17 @@ test('a new workspace manifest matching the workspace patterns reloads options',
   assert.deepEqual(Object.keys(session.getIssues().issues.dependencies), ['packages/app/package.json']);
 });
 
-for (const configFile of ['knip.ts', 'knip.js']) {
-  test(`a session created after ${configFile} changes reads the new configuration`, async t => {
+for (const { configFile, esm } of [
+  { configFile: 'knip.ts', esm: true },
+  { configFile: 'knip.js', esm: true },
+  { configFile: 'knip.js', esm: false },
+]) {
+  test(`a session created after ${configFile}${esm ? '' : ' (CommonJS)'} changes reads the new configuration`, async t => {
     const cwd = await setup(t);
-    await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+    if (esm) await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
     await rm(join(cwd, 'knip.json'));
     const config = (ignore: string) =>
-      `export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore: ['${ignore}'] };\n`;
+      `${esm ? 'export default' : 'module.exports ='} { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore: ['${ignore}'] };\n`;
     await writeFile(join(cwd, configFile), config('src/first.ts'));
     const loadOptions = () => createOptions({ cwd, isSession: true });
     const first = await createSession(await loadOptions());
