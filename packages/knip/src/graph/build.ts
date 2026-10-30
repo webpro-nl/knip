@@ -387,26 +387,35 @@ export async function build({
 
     for (const [group, base] of groups) {
       {
-        const patterns = worker.getPluginEntryFilePatterns(
-          [...((!options.isProduction && entryPatterns.get(group)) || []), ...(productionPatterns.get(group) ?? [])],
-          base
-        );
-        const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-        principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
+        const raw = [
+          ...((!options.isProduction && entryPatterns.get(group)) || []),
+          ...(productionPatterns.get(group) ?? []),
+        ];
+        // Glob `**/` patterns apart from scoped ones: workspace negations that `**/` adds must not
+        // wipe explicit entries that point into a child workspace (e.g. Vitest project includes).
+        const [recursive, scoped] = partition(raw, pattern => pattern.startsWith('**/'));
+        for (const chunk of [recursive, scoped]) {
+          if (chunk.length === 0) continue;
+          const patterns = worker.getPluginEntryFilePatterns(chunk, base);
+          const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
+          principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
+        }
       }
 
       {
-        const patterns = worker.getPluginEntryFilePatterns(
-          [
-            ...((!options.isProduction && entryPatternsSkipExports.get(group)) || []),
-            ...(productionPatternsSkipExports.get(group) ?? []),
-          ],
-          base
-        );
-        const label = `entry paths from plugins (ignore exports)${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
-        const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-        principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+        const raw = [
+          ...((!options.isProduction && entryPatternsSkipExports.get(group)) || []),
+          ...(productionPatternsSkipExports.get(group) ?? []),
+        ];
+        const [recursive, scoped] = partition(raw, pattern => pattern.startsWith('**/'));
+        for (const chunk of [recursive, scoped]) {
+          if (chunk.length === 0) continue;
+          const patterns = worker.getPluginEntryFilePatterns(chunk, base);
+          const label = `entry paths from plugins (ignore exports)${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
+          principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+        }
       }
     }
 
