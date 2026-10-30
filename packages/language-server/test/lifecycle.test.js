@@ -168,6 +168,20 @@ test('config change does not start a server stopped after a failed start', { tim
   assert.equal(connection.sendNotification.mock.callCount(), 0);
 });
 
+test('source change after a failed start neither restarts nor updates', { timeout: 3000 }, async t => {
+  const server = setup(t);
+  let calls = 0;
+  t.mock.method(knip, 'createOptions', async () => {
+    calls++;
+    throw new Error('invalid config');
+  });
+  await server.start();
+  await server.handleFileChanges(changes);
+  assert.equal(calls, 1);
+  assert.equal(server.getResults(), null);
+  assert.equal(connection.console.error.mock.callCount(), 1);
+});
+
 test('graph updates invalidate descriptors requested during the update and notify without diagnostics', async t => {
   const server = setup(t);
   let session = createSession('before');
