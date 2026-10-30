@@ -100,6 +100,10 @@ export class LanguageServer {
   session;
 
   revision = 0;
+
+  /** @type {undefined | number} */
+  failedRevision;
+
   /** @type {Rules}  */
   rules = {};
 
@@ -276,6 +280,7 @@ export class LanguageServer {
       this.connection.sendNotification(NOTIFICATION_MODULE_GRAPH_BUILT, { duration: Date.now() - start });
     } catch (_error) {
       if (revision !== this.revision) return;
+      this.failedRevision = revision;
       this.connection.console.error(`Error: ${_error}`);
     }
   }
@@ -308,8 +313,8 @@ export class LanguageServer {
   async handleFileChanges(params) {
     this.fileCache = undefined;
     this.packageJsonCache = undefined;
-    if (!this.session) return;
     const session = this.session;
+    if (!session && this.failedRevision !== this.revision) return;
 
     const cwd = this.cwd ?? process.cwd();
 
@@ -325,7 +330,7 @@ export class LanguageServer {
       changes.push({ type, filePath });
     }
 
-    if (changes.length === 0) return;
+    if (!session || changes.length === 0) return;
 
     try {
       const result = await session.handleFileChanges(changes);

@@ -27,6 +27,7 @@ const cwd = mkdtempSync(path.join(tmpdir(), 'knip-ls-lifecycle-'));
 after(() => rmSync(cwd, { recursive: true, force: true }));
 const filePath = path.join(cwd, 'value.js');
 const changes = { changes: [{ uri: pathToFileURL(filePath).href, type: 2 }] };
+const changed = file => ({ changes: [{ uri: pathToFileURL(path.join(cwd, file)).href, type: 2 }] });
 const updated = { duration: 1, mem: 1024 };
 const config = { editor: { exports: { quickfix: { enabled: true } } } };
 const options = { rules: { exports: 'warn' } };
@@ -132,6 +133,53 @@ test('overlapping starts retain the latest session and ignore obsolete startup e
   assert.deepEqual(server.getResults(), { name: 'current' });
   assert.equal(connection.console.error.mock.callCount(), 0);
   assert.equal(connection.sendNotification.mock.callCount(), 1);
+});
+
+for (const file of ['knip.json', 'package.json']) {
+  test(`${file} change restarts after a failed start`, { timeout: 3000 }, async t => {
+    const server = setup(t);
+    let calls = 0;
+    t.mock.method(knip, 'createOptions', async () => {
+      if (++calls === 1) throw new Error('invalid config');
+      return options;
+    });
+    await server.start();
+    assert.equal(server.getResults(), null);
+    assert.equal(connection.console.error.mock.callCount(), 1);
+    await server.handleFileChanges(changed(file));
+    assert.equal(calls, 2);
+    assert.deepEqual(server.getResults(), { name: 'current' });
+    assert.equal(connection.sendNotification.mock.callCount(), 1);
+  });
+}
+
+test('config change does not start a server stopped after a failed start', { timeout: 3000 }, async t => {
+  const server = setup(t);
+  let calls = 0;
+  t.mock.method(knip, 'createOptions', async () => {
+    calls++;
+    throw new Error('invalid config');
+  });
+  await server.start();
+  server.stop();
+  await server.handleFileChanges(changed('knip.json'));
+  assert.equal(calls, 1);
+  assert.equal(server.getResults(), null);
+  assert.equal(connection.sendNotification.mock.callCount(), 0);
+});
+
+test('source change after a failed start neither restarts nor updates', { timeout: 3000 }, async t => {
+  const server = setup(t);
+  let calls = 0;
+  t.mock.method(knip, 'createOptions', async () => {
+    calls++;
+    throw new Error('invalid config');
+  });
+  await server.start();
+  await server.handleFileChanges(changes);
+  assert.equal(calls, 1);
+  assert.equal(server.getResults(), null);
+  assert.equal(connection.console.error.mock.callCount(), 1);
 });
 
 test('graph updates invalidate descriptors requested during the update and notify without diagnostics', async t => {
