@@ -14,7 +14,7 @@ const enablers = ['mocha'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
+const config = ['.mocharc.{js,cjs,mjs,json,jsonc,yml,yaml}', 'package.json'];
 
 const entry = ['**/test/*.{js,cjs,mjs}'];
 

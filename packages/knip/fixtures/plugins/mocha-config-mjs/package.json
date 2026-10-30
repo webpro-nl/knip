@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/mocha-config-mjs",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "mocha-junit-reporter": "*"
+  }
+}
