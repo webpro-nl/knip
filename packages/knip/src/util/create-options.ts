@@ -18,7 +18,7 @@ import {
 } from './get-included-issue-types.ts';
 import { defaultRules } from './issue-initializers.ts';
 import { loadResolvedConfigFile } from './load-config.ts';
-import { _load } from './loader.ts';
+import { _load, unload } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
 import { isAbsolute, isInternal, join, resolveCwd, toAbsolute } from './path.ts';
@@ -56,6 +56,8 @@ export const createOptions = async (options: CreateOptions) => {
   if (args.config && !configFilePath && !manifest.knip) {
     throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
+
+  if (options.isSession && configFilePath) unload([configFilePath]);
 
   const loadedConfig = Object.assign(
     {},

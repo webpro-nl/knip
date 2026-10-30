@@ -195,3 +195,20 @@ test('a new workspace manifest matching the workspace patterns reloads options',
   await session.handleFileChanges([{ type: 'added', filePath: 'packages/app/package.json' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.dependencies), ['packages/app/package.json']);
 });
+
+for (const configFile of ['knip.ts', 'knip.js']) {
+  test(`a session created after ${configFile} changes reads the new configuration`, async t => {
+    const cwd = await setup(t);
+    await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+    await rm(join(cwd, 'knip.json'));
+    const config = (ignore: string) =>
+      `export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore: ['${ignore}'] };\n`;
+    await writeFile(join(cwd, configFile), config('src/first.ts'));
+    const loadOptions = () => createOptions({ cwd, isSession: true });
+    const first = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(first.getIssues().issues.files), ['src/second.ts']);
+    await writeFile(join(cwd, configFile), config('src/second.ts'));
+    const second = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(second.getIssues().issues.files), ['src/first.ts']);
+  });
+}
