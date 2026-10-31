@@ -6,8 +6,7 @@ import { jiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
 import { extname, isInternal, toNative } from './path.ts';
 
-const loaded = new Set<string>();
-const unloaded = new Map<string, number>();
+const versions = new Map<string, number>();
 
 const isReloadable = (ext: string) => ext === '.js' || ext === '.mjs' || ext === '.cjs';
 
@@ -58,8 +57,8 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
-    const version = unloaded.get(filePath);
-    loaded.add(filePath);
+    const version = versions.get(filePath) ?? 0;
+    versions.set(filePath, version);
     if (version && isReloadable(ext)) return await reload(filePath, version);
 
     return await jiti.import(filePath, { default: true });
@@ -76,6 +75,7 @@ export const unload = (filePaths: Iterable<string>) => {
   for (const filePath of filePaths) {
     delete cache[filePath];
     delete cache[toNative(filePath)];
-    if (loaded.has(filePath)) unloaded.set(filePath, (unloaded.get(filePath) ?? 0) + 1);
+    const version = versions.get(filePath);
+    if (version !== undefined) versions.set(filePath, version + 1);
   }
 };
