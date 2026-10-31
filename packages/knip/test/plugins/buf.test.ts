@@ -5,16 +5,35 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-for (const fixture of ['v2', 'v1', 'templates']) {
-  test(`Find Buf generator dependencies and entries (${fixture})`, async () => {
-    const cwd = resolve(`fixtures/plugins/buf/${fixture}`);
-    const options = await createOptions({ cwd });
-    const { counters } = await main(options);
-
-    assert.deepEqual(counters, {
-      ...baseCounters,
-      processed: 1,
-      total: 1,
-    });
+test('Find Buf generator dependencies and entries (v2)', async () => {
+  const cwd = resolve('fixtures/plugins/buf/v2');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
   });
-}
+});
+
+test('Find Buf generator dependencies and entries (v1)', async () => {
+  const cwd = resolve('fixtures/plugins/buf/v1');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});
+
+test('Find Buf generator dependencies and entries (templates)', async () => {
+  const cwd = resolve('fixtures/plugins/buf/templates');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});

@@ -11,34 +11,10 @@ test('Find files in nested and flat Eve workspace members', async () => {
   const options = await createOptions({ cwd });
   const { counters, issues } = await main(options);
 
-  for (const agentRoot of ['agents/support/agent', 'agents/research']) {
-    assert(`${agentRoot}/extensions/search/lib/unused.ts` in issues.files);
-    for (const file of ['extension.ts', 'tools/search.ts', 'lib/used.ts']) {
-      assert(!(`${agentRoot}/extensions/search/${file}` in issues.files));
-    }
-  }
-
-  for (const file of [
-    'agents/support/agent/agent.ts',
-    'agents/support/agent/instructions/brief.ts',
-    'agents/support/agent/instrumentation/audit.ts',
-    'agents/support/agent/extensions/crm.ts',
-    'agents/support/agent/memory/profile.ts',
-    'agents/support/agent/sandbox/sandbox.ts',
-    'agents/support/agent/sandbox/workspace/bootstrap.ts',
-    'agents/support/agent/subagents/remote.ts',
-    'agents/support/agent/subagents/researcher/agent.ts',
-    'agents/support/agent/tools/respond.ts',
-    'agents/support/evals/evals.config.ts',
-    'agents/support/evals/smoke.eval.ts',
-    'agents/research/agent.ts',
-    'agents/research/instructions/brief.ts',
-    'agents/research/tools/search.ts',
-    'agents/research/evals/evals.config.ts',
-    'agents/research/evals/smoke.eval.ts',
-  ]) {
-    assert(!(file in issues.files));
-  }
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'agents/research/extensions/search/lib/unused.ts',
+    'agents/support/agent/extensions/search/lib/unused.ts',
+  ]);
 
   assert(!issues.dependencies['package.json']?.eve);
   assert(issues.dependencies['package.json']['stale-support-client']);

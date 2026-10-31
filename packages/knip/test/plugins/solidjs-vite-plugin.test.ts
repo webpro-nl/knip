@@ -5,91 +5,153 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cases = [
-  {
-    name: 'start options in SSR mode',
-    fixture: '',
-    unused: [
-      'env.ts',
-      'src/App.tsx',
-      'src/Document.tsx',
-      'src/entry-client.tsx',
-      'src/entry-server.tsx',
-      'src/root.tsx',
-      'src/setup.ts',
-      'src/shell.tsx',
-    ],
+test('Find entries with the @solidjs/vite-plugin plugin (start options in SSR mode)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'env.ts',
+    'src/App.tsx',
+    'src/Document.tsx',
+    'src/entry-client.tsx',
+    'src/entry-server.tsx',
+    'src/root.tsx',
+    'src/setup.ts',
+    'src/shell.tsx',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 8,
     processed: 14,
-  },
-  {
-    name: 'production',
-    fixture: '',
-    isProduction: true,
-    unused: [
-      'env.ts',
-      'src/App.tsx',
-      'src/Document.tsx',
-      'src/entry-client.tsx',
-      'src/entry-server.tsx',
-      'src/root.tsx',
-      'src/setup.ts',
-      'src/shell.tsx',
-    ],
-    processed: 13,
-  },
-  {
-    name: 'production with entry override',
-    fixture: '',
-    isProduction: true,
-    entry: ['src/App.tsx'],
-    unused: [
-      'env.ts',
-      'src/Document.tsx',
-      'src/entry-client.tsx',
-      'src/entry-server.tsx',
-      'src/root.tsx',
-      'src/setup.ts',
-      'src/shell.tsx',
-    ],
-    processed: 13,
-  },
-  { name: 'setup with generated entries', fixture: '-generated', unused: [], processed: 3 },
-  {
-    name: 'setup with generated entries in production',
-    fixture: '-generated',
-    isProduction: true,
-    unused: [],
-    processed: 2,
-  },
-  {
-    name: 'custom root in client mode',
-    fixture: '-root',
-    unused: ['app/src/App.tsx', 'app/src/entry-server.tsx', 'src/entry-server.tsx'],
-    processed: 7,
-  },
-  { name: 'no start', fixture: '-spa', unused: ['env.ts', 'src/entry-server.tsx'], processed: 5 },
-  {
-    name: 'no start in production',
-    fixture: '-spa',
-    isProduction: true,
-    unused: ['env.ts', 'src/entry-server.tsx'],
-    processed: 4,
-  },
-];
-
-for (const { name, fixture, isProduction = false, entry, unused, processed } of cases) {
-  test(`Find entries with the @solidjs/vite-plugin plugin (${name})`, async () => {
-    const cwd = resolve(`fixtures/plugins/solidjs-vite-plugin${fixture}`);
-    const options = await createOptions({ cwd, isProduction });
-    if (entry) options.parsedConfig['solidjs-vite-plugin'] = { entry };
-    const { issues, counters } = await main(options);
-
-    assert.deepEqual(Object.keys(issues.files).sort(), unused);
-    assert.deepEqual(counters, {
-      ...baseCounters,
-      files: unused.length,
-      processed,
-      total: processed,
-    });
+    total: 14,
   });
-}
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (production)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin');
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'env.ts',
+    'src/App.tsx',
+    'src/Document.tsx',
+    'src/entry-client.tsx',
+    'src/entry-server.tsx',
+    'src/root.tsx',
+    'src/setup.ts',
+    'src/shell.tsx',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 8,
+    processed: 13,
+    total: 13,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (production with entry override)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin');
+  const options = await createOptions({ cwd, isProduction: true });
+  options.parsedConfig['solidjs-vite-plugin'] = { entry: ['src/App.tsx'] };
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'env.ts',
+    'src/Document.tsx',
+    'src/entry-client.tsx',
+    'src/entry-server.tsx',
+    'src/root.tsx',
+    'src/setup.ts',
+    'src/shell.tsx',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 7,
+    processed: 13,
+    total: 13,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (setup with generated entries)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-generated');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), []);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 0,
+    processed: 3,
+    total: 3,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (setup with generated entries in production)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-generated');
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), []);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 0,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (custom root in client mode)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-root');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'app/src/App.tsx',
+    'app/src/entry-server.tsx',
+    'src/entry-server.tsx',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 3,
+    processed: 7,
+    total: 7,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (no start)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-spa');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['env.ts', 'src/entry-server.tsx']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 5,
+    total: 5,
+  });
+});
+
+test('Find entries with the @solidjs/vite-plugin plugin (no start in production)', async () => {
+  const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-spa');
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['env.ts', 'src/entry-server.tsx']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 4,
+    total: 4,
+  });
+});

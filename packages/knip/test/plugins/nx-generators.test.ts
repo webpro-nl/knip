@@ -11,19 +11,7 @@ test('Find local Nx generator factories and executor implementations', async () 
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.files['tools/my-plugin/src/foo/factory.ts']);
-
-  for (const file of [
-    'tools/my-plugin/src/foo/generator.ts',
-    'tools/my-plugin/src/foo/implementation.ts',
-    'tools/my-plugin/src/bar/executor.ts',
-    'tools/my-plugin/src/bar/batch-executor.ts',
-    'tools/alias-plugin/src/baz/schematic.ts',
-    'tools/alias-plugin/src/qux/builder.ts',
-    'tools/my-plugin/scripts/bundle.mjs',
-  ]) {
-    assert(!issues.files[file], file);
-  }
+  assert.deepEqual(Object.keys(issues.files).sort(), ['tools/my-plugin/src/foo/factory.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
