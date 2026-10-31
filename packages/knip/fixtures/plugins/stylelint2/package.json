@@ -2,10 +2,12 @@
   "name": "@plugins/stylelint2",
   "devDependencies": {
     "postcss-less": "*",
+    "postcss-scss": "*",
     "postcss-styl": "*",
     "stylelint": "*",
     "stylelint-config-recommended": "*",
-    "stylelint-config-standard": "*"
+    "stylelint-config-standard": "*",
+    "stylelint-order": "*"
   },
   "dependencies": {
     "stylelint-config-html": "*"
