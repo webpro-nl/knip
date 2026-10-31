@@ -14,10 +14,17 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = [
   'package.json',
-  'cspell.config.{js,cjs,mjs,ts,mts,json,yaml,yml}',
-  'cspell.{json,yaml,yml}',
+  '{.,}cspell.config.{js,cjs,mjs,ts,cts,mts,json,jsonc,yaml,yml,toml}',
+  '{.,}cspell.{jsonc,yaml,yml}',
   '.c{s,S}pell.json',
   'c{s,S}pell.json',
+  '.vscode/c{s,S}pell.json',
+  '.vscode/.cspell.json',
+  '.config/{.,}cspell.config.{js,cjs,mjs,ts,cts,mts,json,jsonc,yaml,yml,toml}',
+  '.config/.c{s,S}pell.json',
+  '.config/c{s,S}pell.json',
+  '.config/{.,}cspell.jsonc',
+  '.config/cspell.{yaml,yml}',
 ];
 
 const resolveConfig: ResolveConfig<CSpellConfig> = config => {
