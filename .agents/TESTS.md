@@ -67,6 +67,10 @@ round-trip), `util/` & `graph-explorer/` (unit, no fixtures), `session/`.
 ### Plugin fixtures
 
 - Plugin fixtures live in `fixtures/plugins/<plugin-name>*`.
+- Write readable tests. Cover a new config location with one or a few cases in a
+  committed fixture; don't enumerate every supported location, loop over cases
+  or generate config files at test time. Accepted loops are single `[false,
+true]` flags.
 - Use non-default file names in config fields (e.g. `input: 'src/app.ts'`, not
   `'index.ts'` or `'main.ts'`) so the test verifies the plugin resolves them;
   default entry patterns would pick those up regardless.
