@@ -1,0 +1,25 @@
+[
+  {
+    "test": "\\.js$",
+    "jsc": {
+      "parser": {
+        "syntax": "ecmascript"
+      },
+      "experimental": {
+        "plugins": [
+          ["@swc/plugin-styled-components", {}]
+        ]
+      }
+    }
+  },
+  {
+    "test": "\\.ts$",
+    "jsc": {
+      "parser": {
+        "syntax": "typescript"
+      },
+      "externalHelpers": true,
+      "target": "es5"
+    }
+  }
+]
