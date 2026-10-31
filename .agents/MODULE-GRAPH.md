@@ -102,21 +102,21 @@ analyze depends on it being complete by the time build finishes.
 - [PLUGINS.md][plugins]: how plugins contribute entry points and config.
 - [PERFORMANCE.md][perf]: cost map, why the walk is serial, what's load-bearing.
 
-[analyze]: ./packages/knip/src/graph/analyze.ts
-[bash]: ./packages/knip/src/binaries/bash-parser.ts
-[build]: ./packages/knip/src/graph/build.ts
-[cli]: ./packages/knip/src/cli.ts
-[deputy]: ./packages/knip/src/DependencyDeputy.ts
+[analyze]: ../packages/knip/src/graph/analyze.ts
+[bash]: ../packages/knip/src/binaries/bash-parser.ts
+[build]: ../packages/knip/src/graph/build.ts
+[cli]: ../packages/knip/src/cli.ts
+[deputy]: ../packages/knip/src/DependencyDeputy.ts
 [exports]: ./EXPORTS.md
-[gie]: ./packages/knip/src/typescript/get-imports-and-exports.ts
-[graphutil]: ./packages/knip/src/util/module-graph.ts
-[isref]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[ns]: ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
-[opts]: ./packages/knip/src/util/create-options.ts
+[gie]: ../packages/knip/src/typescript/get-imports-and-exports.ts
+[graphutil]: ../packages/knip/src/util/module-graph.ts
+[isref]: ../packages/knip/src/graph-explorer/operations/is-referenced.ts
+[ns]: ../packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
+[opts]: ../packages/knip/src/util/create-options.ts
 [perf]: ./PERFORMANCE.md
 [plugins]: ./PLUGINS.md
-[principal]: ./packages/knip/src/ProjectPrincipal.ts
-[report]: ./packages/knip/src/reporters/symbols.ts
-[run]: ./packages/knip/src/run.ts
-[types]: ./packages/knip/src/types/module-graph.ts
-[worker]: ./packages/knip/src/WorkspaceWorker.ts
+[principal]: ../packages/knip/src/ProjectPrincipal.ts
+[report]: ../packages/knip/src/reporters/symbols.ts
+[run]: ../packages/knip/src/run.ts
+[types]: ../packages/knip/src/types/module-graph.ts
+[worker]: ../packages/knip/src/WorkspaceWorker.ts
