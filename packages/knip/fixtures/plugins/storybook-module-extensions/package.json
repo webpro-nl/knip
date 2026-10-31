@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/storybook-module-extensions",
+  "devDependencies": {
+    "@storybook/html-vite": "*"
+  }
+}
