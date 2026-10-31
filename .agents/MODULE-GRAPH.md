@@ -59,8 +59,10 @@ Defined in [`types/module-graph.ts`][types]; assembled in
 - `importedBy`: **reverse** index. The aggregated `ImportMaps` of every file
   that imports this one. What the analyze phase walks.
 - `exports`: `Map<identifier, Export>` for this file.
-- `imports.external` / `unresolved` / `externalRefs`: npm + unresolved specifiers.
-- `scripts`, `duplicates`, `internalImportCache` (watch-mode incremental rebuild).
+- `imports.external` / `unresolved` / `externalRefs`: npm + unresolved
+  specifiers.
+- `scripts`, `duplicates`, `internalImportCache` (watch-mode incremental
+  rebuild).
 
 `ImportMaps` is the per-edge usage record: `import` / `importAs` / `importNs` /
 `reExport` / `reExportNs` / `reExportAs` (id → source file(s)), plus `refs`
@@ -76,8 +78,8 @@ analyze depends on it being complete by the time build finishes.
 ## Invariants & gotchas
 
 - **One serial walk, one shared `ProjectPrincipal`.** The BFS seeds from entry +
-  program paths and grows its `visited`/`resolvedFiles` set _mid-loop_ as imports
-  resolve. A worker can't know its full input upfront (relevant to any
+  program paths and grows its `visited`/`resolvedFiles` set _mid-loop_ as
+  imports resolve. A worker can't know its full input upfront (relevant to any
   parallelism attempt; see [PERFORMANCE.md][perf]).
 - **Reachable ≠ analyzed.** Project files are fully analyzed (exports + refs).
   Files reached only as bare or non-project imports are parsed _just_ to extract
@@ -94,9 +96,9 @@ analyze depends on it being complete by the time build finishes.
 
 ## Related docs
 
-- [EXPORTS.md][exports]: answering "is this export used?": chain refs, shadowing,
-  DTS correctness, `ignoreExportsUsedInFile`. Read it for anything touching
-  `is-referenced` or the export visitors.
+- [EXPORTS.md][exports]: answering "is this export used?": chain refs,
+  shadowing, DTS correctness, `ignoreExportsUsedInFile`. Read it for anything
+  touching `is-referenced` or the export visitors.
 - [PLUGINS.md][plugins]: how plugins contribute entry points and config.
 - [PERFORMANCE.md][perf]: cost map, why the walk is serial, what's load-bearing.
 

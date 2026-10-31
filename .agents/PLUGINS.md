@@ -22,10 +22,10 @@ Read the writing-a-plugin docs first:
   from it (default: the config file's directory); `toDependency` and `toBinary`
   use it to select the workspace; `toAlias` uses it as the base of its targets.
   `toEntry` and `toProductionEntry` resolve from it as well (default: the
-  workspace directory) and stay with the workspace that returned them; a
-  negated entry pattern reaches only the plugin's entry patterns with the same
-  base (`dir`, else the workspace directory). `toProject` is workspace-relative
-  and ignores `dir`.
+  workspace directory) and stay with the workspace that returned them; a negated
+  entry pattern reaches only the plugin's entry patterns with the same base
+  (`dir`, else the workspace directory). `toProject` is workspace-relative and
+  ignores `dir`.
 - Enable a plugin on the tool's package with `hasDependency`. File or manifest
   checks in `isEnabled` add I/O per workspace; reserve them for tools without a
   package, such as package managers, mise, Task or CI configs.
@@ -37,8 +37,8 @@ Read the writing-a-plugin docs first:
 - For a drop-in replacement of a tool, re-export the original plugin's `config`
   and `resolveConfig` (see `osls`, `tsrs`), so each tool keeps its own key.
 - Choose the input type from [Inputs][2] and match production relevance to the
-  nearest existing plugin. A value documented as a package name is a
-  dependency, not `toConfig`.
+  nearest existing plugin. A value documented as a package name is a dependency,
+  not `toConfig`.
 - Don't emit inputs for `#` subpath imports: core already turns
   `package.json#imports` targets into entries and dependencies.
 - For a loaded shared config, such as an extended preset, set
@@ -93,8 +93,8 @@ Follow imported modules only where they provably form the config value; don't
 follow widely and then make the extra inputs harmless. `toConfig` is for a
 tool's own config files, not for modules a config imports.
 
-Core adds the static `entry` and `production` patterns only while no config
-file other than `package.json` has been found or handed over for a plugin with
+Core adds the static `entry` and `production` patterns only while no config file
+other than `package.json` has been found or handed over for a plugin with
 `resolveConfig` or `resolveFromAST`. `resolveConfig` should include `entry` and
 `production` items, either from the parsed config or the plugin defaults (so
 they can be overriden). Include the default `entry` and `production` in the

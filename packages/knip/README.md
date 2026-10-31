@@ -50,8 +50,7 @@ following projects:
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
 [3]: https://img.shields.io/badge/dynamic/json?url=https://npm-gapless.webpro.nl/downloads/range/last-month/knip&query=$.totalCompact&label=downloads&suffix=/month&color=f56e0f
 [4]: https://github.com/webpro-nl/knip
-[5]:
-  https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f
+[5]: https://img.shields.io/github/stars/webpro-nl/knip?style=flat&color=f56e0f
 [6]: https://knip.dev
 [7]: https://www.npmx.dev/package/@knip/create-config
 [8]: https://www.npmx.dev/package/@knip/language-server
@@ -69,7 +68,6 @@ following projects:
 [20]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
 [21]: https://github.com/pnpm/pnpm/blob/main/LICENSE
 [22]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
-[23]:
-  https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
+[23]: https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
 [24]: https://github.com/npm/json-parse-even-better-errors
 [25]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md

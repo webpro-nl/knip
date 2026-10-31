@@ -78,8 +78,8 @@ Don't trust the table blindly. Its blind spots:
   frames to the nearest C++ symbol; read the bottom-up profile, or use
   `--cpu-prof` with speedscope.
 - **Correctness gate for every change:** output byte-identical to main (cold and
-  warm, cache and no-cache), smoke suite green, tsc clean. Run the full suite for
-  fix, format, or reporter changes.
+  warm, cache and no-cache), smoke suite green, tsc clean. Run the full suite
+  for fix, format, or reporter changes.
 - **Fixture repos** are real projects with dependencies installed. Cover both
   shapes: large single-package and many-workspace monorepo.
 
@@ -89,23 +89,24 @@ The wins that landed were almost all caching, not hot-loop micro-opts: a
 module-resolution cache (keyed by directory and specifier), skip-read-and-parse
 on a cache hit, a glob-result cache, a parsed-gitignore cache, and cache-I/O
 surgery. The fdir migration dropped several transitive deps for a modest
-speedup. Together these roughly halved warm runs and cut peak heap substantially.
+speedup. Together these roughly halved warm runs and cut peak heap
+substantially.
 
 ## 5. Dead ends (measured; don't re-chase)
 
-- **Parallelism (workers and forks).** The per-file pipeline caps at about 2× and
-  plateaus around four cores, while pure parsing scales about 6×. The cause is
-  JS-side per-file allocation contention across isolates, a property of the
+- **Parallelism (workers and forks).** The per-file pipeline caps at about 2×
+  and plateaus around four cores, while pure parsing scales about 6×. The cause
+  is JS-side per-file allocation contention across isolates, a property of the
   workload rather than the dispatch. Net gains land below the worth-shipping bar
   and regress small repos. Revisit only after allocations are reduced.
 - **Moving AST analysis to Rust (an `oxc_semantic` sidecar).** It regressed
-  instead of helping. The sidecar re-parses every file (a double parse), and most
-  of the JS walk and per-file allocations stay, so GC never drops. Extending
-  oxc's raw-transfer buffer with scope data is a dead end (the Rust structures
-  aren't flat), and the upstream request to expose semantics was closed. If
-  revived, the only viable shape is a fused native crate that parses once and
-  returns both AST and scope data, which is weeks of work plus native-binary
-  maintenance.
+  instead of helping. The sidecar re-parses every file (a double parse), and
+  most of the JS walk and per-file allocations stay, so GC never drops.
+  Extending oxc's raw-transfer buffer with scope data is a dead end (the Rust
+  structures aren't flat), and the upstream request to expose semantics was
+  closed. If revived, the only viable shape is a fused native crate that parses
+  once and returns both AST and scope data, which is weeks of work plus
+  native-binary maintenance.
 - **Glob fan-out consolidation.** Recon flagged globbing as a big share on
   many-workspace monorepos, but consolidating per-workspace and per-plugin globs
   either regressed or only helped the no-cache path while regressing the cached
@@ -117,10 +118,11 @@ speedup. Together these roughly halved warm runs and cut peak heap substantially
   safely deduped, because resolution is genuinely directory-dependent (nearest
   tsconfig and node_modules). A prior resolution shortcut already caused a
   correctness divergence.
-- **Allocation and hot-loop micro-opts.** These repeatedly netted noise or worse:
-  inlining blew V8's inline budget, object pooling can't help stored objects, and
-  visitor-dispatch tweaks don't move the needle. Optimize at the call-graph level
-  (the redundant work), not the function body. Measure; don't theorize.
+- **Allocation and hot-loop micro-opts.** These repeatedly netted noise or
+  worse: inlining blew V8's inline budget, object pooling can't help stored
+  objects, and visitor-dispatch tweaks don't move the needle. Optimize at the
+  call-graph level (the redundant work), not the function body. Measure; don't
+  theorize.
 - **A hand-written AST walk switch** is obsolete: oxc-parser already ships a
   generated switch-based walker.
 
@@ -134,8 +136,8 @@ Each of these looks removable but isn't:
 - The incremental gitignore matcher: ignores and un-ignores are separate
   append-only matchers. Picomatch's `ignore` option recompiles un-ignores per
   ignore pattern.
-- The un-ignore shadow filter, which reconciles knip's un-ignore-aware model with
-  the underlying glob library that can't express un-ignores.
+- The un-ignore shadow filter, which reconciles knip's un-ignore-aware model
+  with the underlying glob library that can't express un-ignores.
 - Expanding a directory ignore so it also matches the directory's contents.
 - Git worktree handling (`.git` as a file), `info/exclude` rooting,
   ancestor-gitignore handling, and the gitignore comment and escaping rules.
@@ -149,10 +151,10 @@ Each of these looks removable but isn't:
   cross-cutting config-contract change), and the precomputed workspace-directory
   lookup used per file.
 
-Two engines explain most of the apparent glob redundancy. One matcher can express
-un-ignores (used for the per-file gitignore predicate and the walk); the glob
-crawler can't, so knip bridges down to it. Most of the "redundant" code is that
-bridge.
+Two engines explain most of the apparent glob redundancy. One matcher can
+express un-ignores (used for the per-file gitignore predicate and the walk); the
+glob crawler can't, so knip bridges down to it. Most of the "redundant" code is
+that bridge.
 
 ## 7. Architectural constraints (for any parallelism or restructure)
 
@@ -163,10 +165,10 @@ bridge.
   files' nodes, so graph assembly must stay serial. Workers can only return
   compact per-file records to merge on the main thread.
 - The resolver isn't shareable across threads; each worker needs its own.
-- Config evaluation needs a real working-directory change for some plugins, which
-  is process-global and so mutually exclusive with in-process parallel config
-  eval. It's currently scoped and sequential, so it's safe, but it forecloses
-  that parallelism.
+- Config evaluation needs a real working-directory change for some plugins,
+  which is process-global and so mutually exclusive with in-process parallel
+  config eval. It's currently scoped and sequential, so it's safe, but it
+  forecloses that parallelism.
 - Ordering: config and plugin files first (they affect plugin enablement), and
   ancestor gitignores before the walk.
 
@@ -175,15 +177,15 @@ bridge.
 1. **A fused parse+semantic native crate.** The only path that both cuts
    single-thread cold time and unblocks parallelism: parse once, return AST and
    scope data together. Weeks of work plus ongoing native-binary maintenance.
-2. **Daemon mode.** A different axis. Big speedup on repeat runs (CI, pre-commit,
-   IDE, watch), where startup, module load, and globbing are paid once. The
-   biggest user-facing win. About a week.
+2. **Daemon mode.** A different axis. Big speedup on repeat runs (CI,
+   pre-commit, IDE, watch), where startup, module load, and globbing are paid
+   once. The biggest user-facing win. About a week.
 3. **Bundle knip into one file.** A small cold-run win that also unlocks the V8
    code cache and single-binary distribution.
 4. **Demand-driven two-pass** (an imports-only pass to skip dead-file analysis).
    Project-dependent, and limited because there's no cheap imports-only lexer.
-5. **Re-measure parallelism, but only after allocations are reduced.** That's the
-   one condition under which it might revive.
+5. **Re-measure parallelism, but only after allocations are reduced.** That's
+   the one condition under which it might revive.
 
 ## 9. Open follow-ups (lower stakes)
 

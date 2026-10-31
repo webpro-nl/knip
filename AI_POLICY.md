@@ -11,8 +11,7 @@ it and takes responsibility for it.
 - Prefer typing descriptions, and especially follow-up comments, yourself.
   Generated text is fine when, for example, a language barrier gets in the way.
 - Keep descriptions and comments concise. No "wall of text".
-- Stay involved through review, and answer for everything posted on your
-  behalf.
+- Stay involved through review, and answer for everything posted on your behalf.
 - Follow the [contribution guidelines][1].
 
 AI usage doesn't need to be disclosed.

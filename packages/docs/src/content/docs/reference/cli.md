@@ -73,15 +73,15 @@ This is equal to `bunx --bun knip`
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO\_COLOR
+### NO_COLOR
 
-The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
+The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
 
-### KNIP\_DISABLE\_RAW\_TRANSFER
+### KNIP_DISABLE_RAW_TRANSFER
 
 Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
 normal parser path.
@@ -377,8 +377,8 @@ knip --reporter sarif --output-file knip.sarif
 knip --reporter symbols --reporter json --output-file json=knip.json
 ```
 
-A relative path is resolved from the directory Knip runs in, like `--config`
-and `--trace-file`. With `--directory app --output-file knip.sarif` the file is
+A relative path is resolved from the directory Knip runs in, like `--config` and
+`--trace-file`. With `--directory app --output-file knip.sarif` the file is
 written to `app/knip.sarif`.
 
 Also see [Writing to a file][17].

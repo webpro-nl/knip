@@ -324,7 +324,9 @@ Suffix an item with `!` to enable it only in production mode.
 
 ### `ignoreGlobalBinaries`
 
-Defaults to `true`, suppressing missing-binary reports for common global commands such as `git` and `docker`. Set it to `false` to report these commands where a project dependency is expected:
+Defaults to `true`, suppressing missing-binary reports for common global
+commands such as `git` and `docker`. Set it to `false` to report these commands
+where a project dependency is expected:
 
 ```json title="knip.json"
 {
@@ -333,7 +335,10 @@ Defaults to `true`, suppressing missing-binary reports for common global command
 }
 ```
 
-Dependencies that provide a referenced binary still count as used, and `ignoreBinaries` still applies. Optional commands, including bare CI/hook commands and commands installed on demand, produce no missing-binary reports. Workspaces inherit the top-level value unless they override it.
+Dependencies that provide a referenced binary still count as used, and
+`ignoreBinaries` still applies. Optional commands, including bare CI/hook
+commands and commands installed on demand, produce no missing-binary reports.
+Workspaces inherit the top-level value unless they override it.
 
 ### `ignoreDependencies`
 
