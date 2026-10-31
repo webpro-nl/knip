@@ -1,12 +1,13 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { type Input, toDeferResolve } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { api, resolveName } from './helpers.ts';
 import type { BabelConfig, BabelConfigObj } from './types.ts';
 
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization
+// https://github.com/babel/babel/blob/v7.28.5/packages/babel-core/src/config/config-chain.ts#L668-L705
 // https://github.com/babel/babel/blob/v7.28.5/packages/babel-core/src/config/files/configuration.ts#L27-L43
 
 const title = 'Babel';
@@ -41,12 +42,18 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
   ]);
 };
 
+const getExtendedConfigs = (config: BabelConfigObj): Input[] => [
+  ...(config.extends ? [toConfig('babel', config.extends)] : []),
+  ...Object.values(config.env ?? {}).flatMap(getExtendedConfigs),
+  ...(config.overrides ?? []).flatMap(getExtendedConfigs),
+];
+
 const resolveConfig: ResolveConfig<BabelConfig> = async config => {
   if (typeof config === 'function') config = config(api);
 
   if (!config) return [];
 
-  return getDependenciesFromConfig(config);
+  return [...getExtendedConfigs(config), ...getDependenciesFromConfig(config)];
 };
 
 const plugin: Plugin = {

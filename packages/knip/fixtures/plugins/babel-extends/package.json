@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/babel-extends",
+  "devDependencies": {
+    "@babel/plugin-transform-arrow-functions": "*"
+  }
+}
