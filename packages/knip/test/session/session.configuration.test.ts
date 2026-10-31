@@ -69,6 +69,19 @@ for (const changedFile of ['vite.config.ts', 'config/settings.json']) {
   });
 }
 
+for (const configFile of ['vite.config.js', 'vite.config.cjs']) {
+  test(`CommonJS workspace plugin configuration reloads when ${configFile} changes`, async t => {
+    const cwd = await setup(t);
+    await writeFile(join(cwd, configFile), "module.exports = { test: { include: ['src/first.ts'] } };\n");
+    const loadOptions = () => createOptions({ cwd, isSession: true });
+    const session = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+    await writeFile(join(cwd, configFile), "module.exports = { test: { include: ['src/second.ts'] } };\n");
+    await session.handleFileChanges([{ type: 'modified', filePath: configFile }]);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/first.ts']);
+  });
+}
+
 test('new plugin configs are discovered using the enabled plugin configuration patterns', async t => {
   const cwd = await setup(t);
   const loadOptions = () => createOptions({ cwd, isSession: true });
@@ -194,4 +207,88 @@ test('a new workspace manifest matching the workspace patterns reloads options',
   await writeFile(join(cwd, 'packages/app/package.json'), '{"name":"app","dependencies":{"left-pad":"*"}}');
   await session.handleFileChanges([{ type: 'added', filePath: 'packages/app/package.json' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.dependencies), ['packages/app/package.json']);
+});
+
+for (const { configFile, esm } of [
+  { configFile: 'knip.ts', esm: true },
+  { configFile: 'knip.js', esm: true },
+  { configFile: 'knip.js', esm: false },
+]) {
+  test(`a session created after ${configFile}${esm ? '' : ' (CommonJS)'} changes reads the new configuration`, async t => {
+    const cwd = await setup(t);
+    if (esm) await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+    await rm(join(cwd, 'knip.json'));
+    const config = (ignore: string) =>
+      `${esm ? 'export default' : 'module.exports ='} { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore: ['${ignore}'] };\n`;
+    await writeFile(join(cwd, configFile), config('src/first.ts'));
+    const loadOptions = () => createOptions({ cwd, isSession: true });
+    const first = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(first.getIssues().issues.files), ['src/second.ts']);
+    await writeFile(join(cwd, configFile), config('src/second.ts'));
+    const second = await createSession(await loadOptions());
+    assert.deepEqual(Object.keys(second.getIssues().issues.files), ['src/first.ts']);
+  });
+}
+
+const writeSettingsPackage = async (cwd: string) => {
+  const dir = join(cwd, 'node_modules/config-settings');
+  await mkdir(dir, { recursive: true });
+  await writeFile(
+    join(dir, 'package.json'),
+    '{"name":"config-settings","type":"module","exports":{"import":"./esm.js","require":"./cjs.cjs"}}'
+  );
+  await writeFile(
+    join(dir, 'esm.js'),
+    "export const ignore = ['src/first.ts'];\nexport const entry = './src/first.ts';\n"
+  );
+  await writeFile(join(dir, 'cjs.cjs'), "exports.ignore = [];\nexports.entry = './src/second.ts';\n");
+};
+
+test('the first load of an ES module configuration in a session resolves packages with the import condition', async t => {
+  const cwd = await setup(t);
+  await writeSettingsPackage(cwd);
+  await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+  await rm(join(cwd, 'knip.json'));
+  await writeFile(
+    join(cwd, 'knip.js'),
+    "import { ignore } from 'config-settings'; export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore };\n"
+  );
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+});
+
+test('the first load of a configuration with top-level await and a TypeScript helper in a session', async t => {
+  const cwd = await setup(t);
+  await writeFile(join(cwd, 'package.json'), '{"name":"configuration","type":"module"}');
+  await rm(join(cwd, 'knip.json'));
+  await writeFile(
+    join(cwd, 'helper.ts'),
+    "enum Files { first = 'src/first.ts' }\nexport const ignore = [Files.first];\n"
+  );
+  await writeFile(
+    join(cwd, 'knip.js'),
+    "import { ignore } from './helper.ts'; await Promise.resolve(); export default { entry: ['src/index.ts'], project: ['src/**/*.ts'], ignore };\n"
+  );
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+});
+
+test('a configuration change does not reload untouched configuration files', async t => {
+  const cwd = await setup(t);
+  await writeSettingsPackage(cwd);
+  await writeFile(join(cwd, 'package.json'), '{"name":"configuration","devDependencies":{"webpack":"*"}}');
+  await writeFile(
+    join(cwd, 'knip.json'),
+    '{"entry":["src/index.ts"],"project":["src/**/*.ts"],"webpack":{"config":["webpack.config.js","other.config.cjs"]}}'
+  );
+  await writeFile(
+    join(cwd, 'webpack.config.js'),
+    "import { entry } from 'config-settings'; export default { entry };\n"
+  );
+  await writeFile(join(cwd, 'other.config.cjs'), 'module.exports = { entry: [] };\n');
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
+  await writeFile(join(cwd, 'other.config.cjs'), 'module.exports = { entry: [] };\n\n');
+  await session.handleFileChanges([{ type: 'modified', filePath: 'other.config.cjs' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.files), ['src/second.ts']);
 });

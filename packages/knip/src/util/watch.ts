@@ -59,7 +59,7 @@ export const getSessionHandler = async (
   const added = new Set<string>();
   const deleted = new Set<string>();
   const modified = new Set<string>();
-  if (configurationFiles) principal.collectConfigurationImports(configurationFiles.paths);
+  if (configurationFiles) principal.collectConfigurationImports(configurationFiles);
 
   const processFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();

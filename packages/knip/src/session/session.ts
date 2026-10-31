@@ -61,8 +61,9 @@ export const createSession = async (options: MainOptions): Promise<Session> => {
       clearModuleResolutionCaches();
       clearGlobCache();
       clearGitignoreCache();
-      if (current.session.configurationFiles) unload(current.session.configurationFiles.paths);
-      const nextOptions = await createOptions(current.options.createdFrom);
+      const { configurationFiles } = current.session;
+      if (configurationFiles) unload(configurationFiles.getAffected(changes, current.options.cwd));
+      const nextOptions = await createOptions(current.options.createdFrom, true);
       // Cached per-file resolutions may depend on the previous configuration, so rebuild cold
       current = await initialize({ ...nextOptions, isCache: false });
       Object.assign(results, current.results);
