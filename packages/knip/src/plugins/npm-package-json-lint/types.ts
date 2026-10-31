@@ -1,3 +1,3 @@
 export type NpmPkgJsonLintConfig = {
-  extends?: string;
+  extends?: string | string[];
 };

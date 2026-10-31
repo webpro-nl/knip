@@ -17,7 +17,7 @@ const packageJsonPath = 'npmpackagejsonlint';
 const config = ['package.json', ...toCosmiconfig('npmpackagejsonlint')];
 
 const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
-  return localConfig?.extends ? [localConfig.extends].map(id => toDependency(id)) : [];
+  return localConfig?.extends ? [localConfig.extends].flat().map(id => toDependency(id)) : [];
 };
 
 const plugin: Plugin = {
