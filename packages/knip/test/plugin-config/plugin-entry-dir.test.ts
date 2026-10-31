@@ -100,6 +100,16 @@ test('Keep a pattern with dir out of the workspace negations added for a `**/` s
   assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
 });
 
+// Without `dir`, a scoped path into a child workspace used to share the default group with `**/`
+// patterns and get wiped by the workspace negations those patterns add (Vitest project includes).
+test('Keep a scoped entry into a child workspace out of negations from a `**/` sibling', async t => {
+  const inputs = [toEntry('packages/app/keep.ts'), toEntry('**/test/*.ts')];
+  const { issues, counters } = await run(t, inputs);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+});
+
 test('Resolve plugin entry patterns from the dir of a sibling workspace', async t => {
   const inputs = [
     { ...toEntry('*.ts'), dir: app },
