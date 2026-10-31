@@ -1,0 +1,3 @@
+{
+  "import": ["@cspell/dict-typescript/cspell-ext.json", "@cspell/dict-cryptocurrencies/cspell-ext.json"]
+}
