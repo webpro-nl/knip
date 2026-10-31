@@ -8,6 +8,7 @@ import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.ts';
 import type { EleventyConfig, EleventyConfigOrFn } from './types.ts';
 
 // https://www.11ty.dev/docs/
+// https://github.com/11ty/eleventy/blob/v3.1.7/src/Data/TemplateData.js#L544-L560
 
 const title = 'Eleventy';
 
@@ -17,7 +18,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['.eleventy.js', 'eleventy.config.{js,cjs,mjs}'];
 
-const production = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
+const production = ['posts/**/*.11tydata.{js,cjs,mjs}', '_data/**/*.{js,cjs,mjs}'];
 
 const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, options) => {
   const { configFileDir } = options;
@@ -53,7 +54,7 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
       [
         join(inputDir, dataDir, '**/*.{js,cjs,mjs}'),
         join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
-        join(inputDir, '**/*.11tydata.js'),
+        join(inputDir, '**/*.11tydata.{js,cjs,mjs}'),
         ...copiedEntries,
       ].map(id => toProductionEntry(id))
     );
