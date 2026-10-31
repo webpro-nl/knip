@@ -7,6 +7,7 @@ import type { BabelConfig, BabelConfigObj } from './types.ts';
 
 // https://babeljs.io/docs/configuration
 // https://babeljs.io/docs/options#name-normalization
+// https://github.com/babel/babel/blob/v7.28.5/packages/babel-core/src/config/files/configuration.ts#L27-L43
 
 const title = 'Babel';
 
@@ -14,7 +15,12 @@ const enablers = [/^@babel\//];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['babel.config.{json,js,cjs,mjs,cts,ts}', '.babelrc.{json,js,cjs,mjs,cts}', '.babelrc', 'package.json'];
+const config = [
+  'babel.config.{json,js,cjs,mjs,cts,ts,mts}',
+  '.babelrc.{json,js,cjs,mjs,cts}',
+  '.babelrc',
+  'package.json',
+];
 
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
