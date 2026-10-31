@@ -14,8 +14,7 @@
     "prebuild": "node ./scripts/generate-plugin-docs.ts",
     "build": "astro check && astro build",
     "postbuild": "[ \"$CF_PAGES\" = \"1\" ] && find dist -mindepth 2 -type f -name 'index.html' -exec bash -c 'f=\"$1\"; d=$(dirname \"$f\"); bn=$(basename \"$d\"); mv -v \"$f\" \"$d/../$bn.html\"' _ {} \\; && find dist -mindepth 1 -type d -empty -print -delete || true",
-    "dev": "astro dev",
-    "remark": "remark README.md 'src/content/docs/**/*.md' --verbose -o && mdxlint 'src/content/docs/**/*.mdx' --verbose -o"
+    "dev": "astro dev"
   },
   "dependencies": {
     "@astro-community/astro-embed-youtube": "0.5.10",

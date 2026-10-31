@@ -22,6 +22,7 @@
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
+    "remark": "remark '*.md' '.agents/*.md' '.github/*.md' 'packages/*/README.md' 'packages/docs/src/content/docs/**/*.md' --verbose -o && mdxlint 'packages/docs/src/content/docs/**/*.mdx' --verbose -o",
     "lint": "oxlint",
     "ci": "oxlint && oxfmt --check && installed-check --ignore-dev && ./scripts/check-line-endings.sh",
     "release": "./scripts/release.sh"

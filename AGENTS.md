@@ -25,7 +25,7 @@ JavaScript and TypeScript projects.
   - Avoid `any` and type casting (`as`).
   - Avoid runtime overhead just to get the types right.
 - Lint and check formatting from root: `pnpm run ci`; format with `pnpm fmt`
-- Format Markdown/MDX with `pnpm remark` in `packages/docs` (auto-numbers link refs, validates links); it formats the whole tree, so for one file use `pnpm exec remark <file> --frail`
+- Format Markdown/MDX with `pnpm remark` from the root (auto-numbers link refs, validates links); for one file use `pnpm exec remark <file> --frail`
 
 ## Domain Knowledge
 
