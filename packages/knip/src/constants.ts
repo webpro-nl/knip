@@ -29,6 +29,7 @@ export const ALIAS_TAG = '@alias';
 export const DT_SCOPE = '@types';
 
 export const PROTOCOL_VIRTUAL = 'virtual:';
+export const PROTOCOL_CLOUDFLARE = 'cloudflare:';
 
 /**
  * Binaries that are expected to be globally available. The package at
@@ -195,9 +196,6 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
 export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
 
 export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['node', 'bun', 'deno']);
-
-// Built-in modules of the Cloudflare Workers runtime. Not `cloudflare`, which is a regular npm package.
-export const PROTOCOL_CLOUDFLARE = 'cloudflare:';
 
 export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.avif',
