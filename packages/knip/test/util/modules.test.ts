@@ -73,6 +73,7 @@ test('Should resolve package name from Yarn pnpm-linker store via package.json',
 
 test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('specifier'), 'specifier');
+  assert.equal(sanitizeSpecifier('cloudflare:workers'), 'cloudflare:workers');
   assert.equal(sanitizeSpecifier('/specifier'), '/specifier');
   assert.equal(sanitizeSpecifier('./specifier'), './specifier');
   assert.equal(sanitizeSpecifier('../specifier.ext'), '../specifier.ext');

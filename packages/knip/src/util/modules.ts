@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
+import { DT_SCOPE, PROTOCOL_CLOUDFLARE, PROTOCOL_VIRTUAL } from '../constants.ts';
 import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
@@ -104,6 +104,7 @@ const CHAR_QUESTION = 63; // '?'
 export const sanitizeSpecifier = (specifier: string) => {
   if (
     specifier.startsWith('node:') ||
+    specifier.startsWith(PROTOCOL_CLOUDFLARE) ||
     isAbsolute(specifier) ||
     specifier.charCodeAt(0) === CHAR_COLON ||
     specifier.startsWith(PROTOCOL_VIRTUAL)

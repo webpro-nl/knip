@@ -196,6 +196,9 @@ export const IGNORED_DEPENDENCIES = new Set(['knip', 'typescript']);
 
 export const IGNORED_RUNTIME_DEPENDENCIES = new Set(['node', 'bun', 'deno']);
 
+// Built-in modules of the Cloudflare Workers runtime. Not `cloudflare`, which is a regular npm package.
+export const PROTOCOL_CLOUDFLARE = 'cloudflare:';
+
 export const FOREIGN_FILE_EXTENSIONS = new Set([
   '.avif',
   '.css',
