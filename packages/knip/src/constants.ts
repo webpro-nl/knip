@@ -29,6 +29,7 @@ export const ALIAS_TAG = '@alias';
 export const DT_SCOPE = '@types';
 
 export const PROTOCOL_VIRTUAL = 'virtual:';
+export const PROTOCOL_CLOUDFLARE = 'cloudflare:';
 
 /**
  * Binaries that are expected to be globally available. The package at

@@ -5,6 +5,7 @@ import {
   IGNORE_DEFINITELY_TYPED,
   IGNORED_DEPENDENCIES,
   IGNORED_RUNTIME_DEPENDENCIES,
+  PROTOCOL_CLOUDFLARE,
   ROOT_WORKSPACE_NAME,
 } from './constants.ts';
 import { getDependencyMetaData } from './manifest/index.ts';
@@ -206,7 +207,7 @@ export class DependencyDeputy {
     { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (specifier.startsWith('node:') || isBuiltin(specifier)) return true;
+    if (specifier.startsWith('node:') || specifier.startsWith(PROTOCOL_CLOUDFLARE) || isBuiltin(specifier)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
