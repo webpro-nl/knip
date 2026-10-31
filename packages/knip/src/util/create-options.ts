@@ -26,7 +26,6 @@ import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
   args?: ParsedCLIArgs;
-  isReload?: boolean;
 }
 
 /**
@@ -34,7 +33,7 @@ interface CreateOptions extends Partial<Options> {
  * - Loads & validates knip.json
  * - Creates options
  */
-export const createOptions = async (options: CreateOptions) => {
+export const createOptions = async (options: CreateOptions, isReload = false) => {
   const { args = {} } = options;
   const cwd = resolveCwd(options.cwd ?? args.directory ?? '.');
 
@@ -58,7 +57,7 @@ export const createOptions = async (options: CreateOptions) => {
     throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
 
-  if (options.isSession && !options.isReload && configFilePath) unload([configFilePath]);
+  if (options.isSession && !isReload && configFilePath) unload([configFilePath]);
 
   const loadedConfig = Object.assign(
     {},
