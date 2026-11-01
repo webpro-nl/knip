@@ -41,7 +41,7 @@ Fix
   -F, --format                 Format modified files after --fix using the local formatter
 
 Output
-      --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
+      --preprocessor           Preprocess the results before providing them to the reporter(s), can be repeated
       --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
       --reporter               Select reporter (default: symbols), can be repeated (3)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)

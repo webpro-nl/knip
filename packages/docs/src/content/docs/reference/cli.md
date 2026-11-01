@@ -15,7 +15,7 @@ Prints a summary of this page.
 
 Shortcut: `-V`
 
-Print the version number.
+Prints the version number.
 
 ### `--no-progress`
 
@@ -68,7 +68,7 @@ Run Knip using the Bun runtime (instead of Node.js + jiti).
 knip-bun
 ```
 
-This is equal to `bunx --bun knip`
+This is equivalent to `bunx --bun knip`
 
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
@@ -311,7 +311,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][15].
+Preprocess the results before providing them to the [reporter(s)][15].
 
 Can be repeated. Examples:
 
@@ -500,7 +500,7 @@ Total running time: 5s
 - `min`: the fastest invocation
 - `max`: the slowest invocation
 - `median`: the median invocation
-- `sum` the accumulated time of all invocations
+- `sum`: the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
 `performance.timerify` ([GitHub issue][19]).

@@ -26,7 +26,7 @@ Also see [related tooling][2].
 | [Monorepos][13]              | Workspaces are first-class citizen                                    |
 | [Performance][14]            | Use `--performance` for detailed timing insights                      |
 | [Plugins][15]                | Over 100 plugins with custom entry paths and config parsing           |
-| [Plugins: inputs][16]        | Inputs are an affective mechanism to add entries, dependencies & more |
+| [Plugins: inputs][16]        | Inputs are an effective mechanism to add entries, dependencies & more |
 | [Plugins: CLI arguments][17] | Tool-specific CLI argument parsing make plugins go the extra mile     |
 | [Preprocessors][18]          | Preprocess issues before being reported                               |
 | [Production mode][19]        | Use `--production` to lint only production code                       |
