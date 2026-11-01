@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Ubuntu/Node v24
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Install dependencies
@@ -36,13 +36,13 @@ jobs:
 
 ## Notes
 
-- Use [--cache][1] to speed up consecutive runs (default location:
+- Use [`--cache`][1] to speed up consecutive runs (default location:
   `./node_modules/.cache/knip`).
 - See [Reporters][2] including the GitHub Actions reporter.
 - Consider running Knip twice: a default run and a [production mode][3] run.
 - See [CLI arguments → Output][4] for some relevant options such as
   `--treat-config-hints-as-errors` and `--no-exit-code`.
-- In CI environments, the [--no-progress][5] flag is set automatically.
+- In CI environments, the [`--no-progress`][5] flag is set automatically.
 
 [1]: ../reference/cli.md#--cache
 [2]: ../features/reporters.md
