@@ -1,10 +1,11 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
 import type { StyleLintConfig } from './types.ts';
 
 // https://stylelint.io/user-guide/configure/
+// https://github.com/stylelint/stylelint/blob/17.16.0/lib/augmentConfig.mjs#L240-L288
 
 const title = 'Stylelint';
 
@@ -18,7 +19,7 @@ const resolveConfig: ResolveConfig<StyleLintConfig> = async (config, options) =>
   const inputs: Input[] = [];
   const extend = Array.isArray(config.extends) ? config.extends : config.extends ? [config.extends] : [];
   for (const id of extend) {
-    if (typeof id === 'string') inputs.push(toDeferResolve(id));
+    if (typeof id === 'string') inputs.push(toDeferResolve(id), toConfig('stylelint', id));
     else for (const x of await resolveConfig(id, options)) inputs.push(x);
   }
   for (const plugin of config.plugins ?? []) if (typeof plugin === 'string') inputs.push(toDeferResolve(plugin));
