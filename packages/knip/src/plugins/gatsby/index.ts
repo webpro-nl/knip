@@ -12,7 +12,7 @@ const enablers = ['gatsby', 'gatsby-cli'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['gatsby-{config,node}.{js,jsx,ts,tsx}', 'plugins/**/gatsby-node.{js,jsx,ts,tsx}'];
+const config = ['gatsby-{config,node}.{js,mjs,jsx,ts,tsx}', 'plugins/**/gatsby-node.{js,mjs,jsx,ts,tsx}'];
 
 const production = [
   'gatsby-{browser,ssr}.{js,jsx,ts,tsx}',
