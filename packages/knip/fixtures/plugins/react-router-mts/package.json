@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/react-router-mts",
+  "dependencies": {
+    "isbot": "*",
+    "@react-router/node": "*"
+  },
+  "devDependencies": {
+    "@react-router/dev": "*"
+  }
+}
