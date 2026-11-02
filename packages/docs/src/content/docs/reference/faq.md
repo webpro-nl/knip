@@ -11,7 +11,7 @@ in the npm ecosystem, it creates a comprehensive module graph of your project.
 
 :::note[Rationale]
 
-The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools.
+The JavaScript/TypeScript ecosystem has a vast number of frameworks and tools.
 Additionally, file locations, configuration semantics, command-line arguments
 and so on vary wildly. Files and dependencies are referenced in many ways. Knip
 tries harder than you think to cover it all.
