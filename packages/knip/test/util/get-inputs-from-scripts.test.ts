@@ -181,6 +181,9 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx watch main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
   t('npx -y pkg', [toBinary('pkg', opt)]);
   t('npx --yes pkg', [toBinary('pkg', opt)]);
+  t('npx -s pkg', [toBinary('pkg', opt)]);
+  t('npx --prefer-offline pkg', [toBinary('pkg', opt)]);
+  t('npx --color pkg', [toBinary('pkg', opt)]);
   t('npx --yes pkg@1.0.0', [toDependency('pkg', opt)]);
   t('npx --yes --package pkg@1.0.0 custom-build-cli', [toBinary('custom-build-cli', opt), toDependency('pkg', opt)]);
   t('npx --no pkg --edit ${1}', [toBinary('pkg')]);
@@ -195,6 +198,8 @@ test('getInputsFromScripts (npx)', () => {
   t('npx --package pkg@0.6.0 -- curl --output /dev/null', [toBinary('curl', opt), toDependency('pkg', opt)]);
   t('npx --package @scope/pkg@0.6.0 --package pkg -- curl', [toBinary('curl', opt), toDependency('@scope/pkg', opt), toDependency('pkg', opt)]);
   t("npx --package=pkg -c 'curl --output /dev/null'", [toDependency('pkg', opt), toBinary('curl')]);
+  t('npx concurrently -c "magenta,blue" "node a.js"', [toBinary('concurrently', opt), toBinary('node'), toDeferResolveEntry('a.js', opt)]);
+  t('npx -q concurrently -c "magenta,blue" "node a.js"', [toBinary('concurrently', opt), toBinary('node'), toDeferResolveEntry('a.js', opt)]);
   t('npx license-checker --production --onlyAllow="0BSD;Apache-2.0;BSD-2-Clause;ISC;MIT;"', [toBinary('license-checker', opt)]);
   t('npx license-checker --excludePackages="pkg-a@1.0.0 pkg-b;pkg-c@2.0.0 pkg-d"', [toBinary('license-checker', opt)]);
   t('npx swagger-typescript-api -p http://localhost:3030/swagger.v1.json', [toBinary('swagger-typescript-api', opt)]);
