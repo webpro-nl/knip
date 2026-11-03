@@ -11,8 +11,41 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs } = options;
   const args = {
     isStorePositions: true,
-    boolean: ['yes', 'no', 'quiet'],
-    alias: { yes: 'y', package: 'p', call: 'c' },
+    boolean: [
+      'color',
+      'd',
+      'dangerously-allow-all-scripts',
+      'dd',
+      'ddd',
+      'force',
+      'global',
+      'ignore-scripts',
+      'include-workspace-root',
+      'legacy-peer-deps',
+      'no',
+      'offline',
+      'prefer-offline',
+      'prefer-online',
+      'progress',
+      'quiet',
+      'silent',
+      'strict-allow-scripts',
+      'timing',
+      'verbose',
+      'workspaces',
+      'yes',
+    ],
+    alias: {
+      force: 'f',
+      global: 'g',
+      'include-workspace-root': 'iwr',
+      quiet: 'q',
+      silent: 's',
+      workspaces: 'ws',
+      yes: 'y',
+      package: 'p',
+      call: 'c',
+    },
   };
   const parsed = parseArgs(words, args);
   const commandIndex = parsed.positionalIndices![0] ?? words.length;
