@@ -3,7 +3,7 @@ import type { BinaryResolver } from '../../types/config.ts';
 import { isBinary, toBinary, toDependency } from '../../util/input.ts';
 import { extractBinary, isValidBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
-import { argsAfter, expandScript } from '../util.ts';
+import { argsAfter, expandScript, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
 
 const runCommands = new Set(['run', 'run-script', 'rum', 'urn']);
 
@@ -20,9 +20,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs, manifest } = options;
   const parsed = parseArgs(words, {
     isStorePositions: true,
-    boolean: ['yes', 'no', 'parseable'],
+    boolean: [...npmBooleanFlags, 'parseable'],
     string: ['package', 'call'],
-    alias: { yes: 'y', parseable: 'p', call: 'c' },
+    alias: { ...npmBooleanAliases, parseable: 'p', call: 'c' },
     '--': true,
   });
   const [command, script] = parsed._;

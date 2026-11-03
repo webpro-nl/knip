@@ -37,6 +37,9 @@ test('npm exec finds custom binaries with optional installation', () => {
 test('npm exec keeps npm options separate from executable arguments', () => {
   assert.deepEqual(inputs('npm exec -p custom-build-cli'), [toBinary('custom-build-cli', optional)]);
   assert.deepEqual(inputs('npm -p exec custom-build-cli'), [toBinary('custom-build-cli', optional)]);
+  assert.deepEqual(inputs('npm exec -q custom-build-cli'), [toBinary('custom-build-cli', optional)]);
+  assert.deepEqual(inputs('npm -s exec custom-build-cli'), [toBinary('custom-build-cli', optional)]);
+  assert.deepEqual(inputs('npm exec --prefer-offline custom-build-cli'), [toBinary('custom-build-cli', optional)]);
   assert.deepEqual(inputs('npm exec custom-build-cli --package=custom-provider'), [
     toDependency('custom-provider', optional),
     toBinary('custom-build-cli', optional),

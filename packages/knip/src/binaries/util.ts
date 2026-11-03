@@ -9,6 +9,41 @@ export const toCommandBinary = (
   inputOptions: { dir?: string } = {}
 ) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
+export const npmBooleanFlags = [
+  'color',
+  'd',
+  'dangerously-allow-all-scripts',
+  'dd',
+  'ddd',
+  'force',
+  'global',
+  'ignore-scripts',
+  'include-workspace-root',
+  'legacy-peer-deps',
+  'no',
+  'offline',
+  'prefer-offline',
+  'prefer-online',
+  'progress',
+  'quiet',
+  'silent',
+  'strict-allow-scripts',
+  'timing',
+  'verbose',
+  'workspaces',
+  'yes',
+];
+
+export const npmBooleanAliases = {
+  force: 'f',
+  global: 'g',
+  'include-workspace-root': 'iwr',
+  quiet: 'q',
+  silent: 's',
+  workspaces: 'ws',
+  yes: 'y',
+};
+
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 
 export const toScript = (args: ScriptArg[]): string => {
