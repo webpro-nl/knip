@@ -11,6 +11,8 @@ const options = {
   },
   tsconfigPaths: true,
   jsx: true,
+  // Replaces jiti's default `extensions`, so keep those and add `.jsx`
+  extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx', '.jsx'],
 };
 
 const createLoader = (options: JitiOptions) => createJiti(process.cwd(), options);

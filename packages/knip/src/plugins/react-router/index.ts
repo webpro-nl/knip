@@ -16,7 +16,7 @@ const enablers = ['@react-router/dev'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const viteConfig = typeof vite.config === 'function' ? [] : (vite.config ?? []);
-// `entryExts` in https://github.com/remix-run/react-router/blob/dev/packages/react-router-dev/config/config.ts
+// `entryExts` in https://github.com/remix-run/react-router/blob/react-router@8.5.1/packages/react-router-dev/config/config.ts
 const entryExts = ['js', 'jsx', 'ts', 'tsx', 'mjs', 'mts'];
 const entryExtsGlob = `{${entryExts.join(',')}}`;
 
@@ -59,7 +59,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   // If there are no server entries, then we need to add these as implicit
   // production dependencies, as @react-router/dev will add the
   // default entry.server.tsx automatically which depends on these.
-  // See: https://github.com/remix-run/react-router/blob/dev/packages/react-router-dev/config/defaults/entry.server.node.tsx
+  // See: https://github.com/remix-run/react-router/blob/react-router@8.5.1/packages/react-router-dev/config/defaults/entry.server.node.tsx
   if (serverEntries.length === 0) {
     resolved.push(toProductionDependency('@react-router/node'));
     resolved.push(toProductionDependency('isbot'));

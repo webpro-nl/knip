@@ -59,3 +59,19 @@ test('Find dependencies with the react-router plugin [with .mts and .mjs entries
     total: 6,
   });
 });
+
+test('Find dependencies with the react-router plugin [with .jsx config and routes]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-jsx');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert('app/routes/unused.jsx' in issues.files);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    files: 1,
+    processed: 5,
+    total: 5,
+  });
+});
