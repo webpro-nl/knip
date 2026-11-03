@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/production-explicit-entry",
+  "devDependencies": {
+    "vite-plus": "*"
+  }
+}
