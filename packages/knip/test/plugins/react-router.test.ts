@@ -40,3 +40,38 @@ test('Find dependencies with the react-router plugin [with custom server entry]'
     total: 5,
   });
 });
+
+test('Find dependencies with the react-router plugin [with .mts and .mjs entries]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-mts');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert('src/routes/unused.mts' in issues.files);
+
+  assert(issues.dependencies['package.json']['@react-router/node']);
+  assert(issues.dependencies['package.json']['isbot']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+    files: 1,
+    processed: 6,
+    total: 6,
+  });
+});
+
+test('Find dependencies with the react-router plugin [with .jsx config and routes]', async () => {
+  const cwd = resolve('fixtures/plugins/react-router-jsx');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert('app/routes/unused.jsx' in issues.files);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    devDependencies: 1,
+    files: 1,
+    processed: 5,
+    total: 5,
+  });
+});
