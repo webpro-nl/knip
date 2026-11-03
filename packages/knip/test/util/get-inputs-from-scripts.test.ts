@@ -286,6 +286,29 @@ test('getInputsFromScripts (nub)', () => {
   t('nub exec eslint', [toBinary('nub'), toBinary('eslint', opt)]);
 });
 
+test('getInputsFromScripts (vp)', () => {
+  t('vp exec node tooling/ciReuse/prove-reuse.ts', [toBinary('vp'), toBinary('node'), toDeferResolveEntry('tooling/ciReuse/prove-reuse.ts', opt)]);
+  t('vp exec -- tsc --noEmit', [toBinary('vp'), toBinary('tsc')]);
+  t('vp exec --filter app -- tsc', [toBinary('vp')]);
+  t('vp exec -r --parallel custom-build-cli', [toBinary('vp'), toBinary('custom-build-cli')]);
+  t('vp exec -c "cat package.json | jq -r .name"', [toBinary('vp'), toBinary('cat'), toBinary('jq')]);
+  t('vp exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('vp'), toBinary('program')]);
+  t('vp exec node "./my dir/script.js"', [toBinary('vp'), toBinary('node'), toDeferResolveEntry('./my dir/script.js', opt)]);
+  t('vp exec', [toBinary('vp')]);
+  const app = { dir: join(cwd, 'packages/app') };
+  t('vp -C packages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp -C=packages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp exec vitest --filter smoke', [toBinary('vp'), toBinary('vitest')]);
+  t(`vp -C ${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp -Cpackages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t(`vp -C${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp build', [toBinary('vp')], withBuild);
+  t('vp test', [toBinary('vp')], lifecycle);
+  t('vp check', [toBinary('vp')]);
+  t('vp run build', [toBinary('vp')], withBuild);
+  t('vp install --frozen-lockfile', [toBinary('vp')]);
+});
+
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
   t('pnpm exec -- custom-build-cli', [toBinary('custom-build-cli')]);
