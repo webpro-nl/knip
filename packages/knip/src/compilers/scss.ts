@@ -36,7 +36,7 @@ export const compiler: CompilerSync = text => {
       continue;
     }
     let spec = match[2];
-    if (!spec || hasUrlScheme(spec)) continue;
+    if (!spec || spec.startsWith('//') || hasUrlScheme(spec)) continue;
     let isBare = Boolean(match[1]) || isScopedPackage(spec);
     if (isTildePackage(spec)) {
       spec = spec.slice(1);

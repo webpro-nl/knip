@@ -35,6 +35,7 @@ import _$4 from '@fontsource-variable/archivo/files/archivo.woff2';`
 
 test('Skip SCSS imports with a URL scheme', () => {
   const scss = `@import 'https://fonts.googleapis.com/css2?family=Roboto';
+@import '//fonts.googleapis.com/css2?family=Roboto';
 @import "http://example.com/a.css";
 @use 'sass:math';
 @import './local';`;
