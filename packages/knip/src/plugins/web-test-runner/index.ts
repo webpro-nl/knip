@@ -1,6 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { toEntry } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://modern-web.dev/docs/test-runner/cli-and-configuration/
@@ -33,7 +34,11 @@ const args: Args = {
     'update-snapshots',
     'watch',
   ],
-  resolveInputs: parsed => [...parsed._, ...[parsed.files ?? []].flat()].map(id => toEntry(String(id))),
+  resolveInputs: (parsed, { cwd }) =>
+    [...parsed._, ...[parsed.files ?? []].flat()].map(id => {
+      const pattern = String(id);
+      return toEntry(pattern.startsWith('!') ? `!${toAbsolute(pattern.slice(1), cwd)}` : toAbsolute(pattern, cwd));
+    }),
 };
 
 const plugin: Plugin = {

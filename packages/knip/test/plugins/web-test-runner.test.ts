@@ -10,11 +10,11 @@ test('Find dependencies with the Web Test Runner plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files), ['unused.js']);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['checks.js', 'unused.js']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 6,
-    total: 6,
+    files: 2,
+    processed: 7,
+    total: 7,
   });
 });
