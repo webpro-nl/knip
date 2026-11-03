@@ -17,6 +17,7 @@ interface VitestConfig {
     coverage?: {
       enabled?: boolean;
       provider: string;
+      customProviderModule?: string;
     };
     root?: string;
     dir?: string;
