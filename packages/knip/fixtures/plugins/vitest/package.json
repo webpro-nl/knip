@@ -4,6 +4,8 @@
     "test": "vitest --config vitest-default-coverage.config.ts",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage.provider istanbul",
+    "test:coverage:custom": "vitest --config vitest-custom-coverage.config.ts",
+    "test:coverage:cli": "vitest --root coverage --coverage.provider=custom --coverage.customProviderModule=./cli-provider.ts",
     "test:reporter": "vitest --reporter vitest-sonar-reporter",
     "test:reporter:builtin": "vitest --reporter verbose",
     "test:env": "vitest --environment jsdom",

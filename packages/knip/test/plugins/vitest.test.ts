@@ -25,13 +25,17 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
   assert(issues.unresolved['vitest.config.ts']['snapshot-serializer.js']);
   assert(!issues.files['test/basic.edge.ts']);
+  assert(!issues.files['coverage/config-provider.ts']);
+  assert(!issues.files['coverage/cli-provider.ts']);
+  assert(!issues.unlisted['vitest-custom-coverage.config.ts']);
+  assert(!issues.unlisted['package.json']['@vitest/coverage-custom']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 11,
     unresolved: 2,
-    processed: 13,
-    total: 13,
+    processed: 16,
+    total: 16,
   });
 });
 
@@ -41,12 +45,14 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
 
   assert('src/setupTests.ts' in issues.files);
   assert('src/htmlSnapshotSerializer.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 2);
+  assert('coverage/config-provider.ts' in issues.files);
+  assert('coverage/cli-provider.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 4);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    processed: 2,
-    total: 2,
+    files: 4,
+    processed: 4,
+    total: 4,
   });
 });
