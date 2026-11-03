@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/vue-cjs",
+  "dependencies": {
+    "vue": "*"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "*"
+  }
+}
