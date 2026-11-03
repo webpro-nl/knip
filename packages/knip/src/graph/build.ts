@@ -367,10 +367,9 @@ export async function build({
         }
       }
     }
-    const productionPaths = (paths: string[], explicitPaths?: Set<string>) =>
+    const productionPaths = (paths: string[]) =>
       developmentMatchers.length
         ? paths.filter(path => {
-            if (explicitPaths?.has(path)) return true;
             const relativePath = relative(options.cwd, path);
             return !developmentMatchers.some(match => match(relativePath));
           })
@@ -421,10 +420,7 @@ export async function build({
 
     const hasExplicitEntries = config.entry.some(pattern => !isDefaultPattern('entry', pattern));
     principal.addEntryPaths(
-      productionPaths(
-        userEntryPaths,
-        new Set(userEntryPatterns.map(pattern => join(dir, removeProductionSuffix(pattern))))
-      ),
+      productionPaths(userEntryPaths),
       hasExplicitEntries ? { skipExportsAnalysis: false } : undefined
     );
 
