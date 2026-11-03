@@ -47,6 +47,15 @@ const entry = [...testEntry, ...mocks];
 
 const benchmark = ['**/*.bench.?(c|m)[jt]s?(x)'];
 
+const builtInCoverageProviders = new Set(['v8', 'istanbul', 'c8']);
+
+const getCoverageInputs = (provider: string, customProviderModule: string | undefined, dir: string): Input[] =>
+  builtInCoverageProviders.has(provider)
+    ? [toDependency(`@vitest/coverage-${provider}`)]
+    : customProviderModule
+      ? [{ ...toDeferResolve(customProviderModule), dir }]
+      : [];
+
 const isProjectConfig = (project: string | VitestProject): project is VitestProjectConfig =>
   typeof project === 'object' && !(project instanceof Promise);
 
@@ -65,7 +74,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   );
 
   const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
-  const coverage = hasCoverage ? [`@vitest/coverage-${testConfig.coverage?.provider ?? 'v8'}`] : [];
+  const coverage = hasCoverage
+    ? getCoverageInputs(testConfig.coverage?.provider ?? 'v8', testConfig.coverage?.customProviderModule, vitestRoot)
+    : [];
 
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
@@ -97,7 +108,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
   return [
     ...environments,
     ...reporters,
-    ...coverage.map(id => toDependency(id)),
+    ...coverage,
     ...setupFiles,
     ...snapshotSerializers,
     ...globalSetup,
@@ -277,11 +288,12 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
 const args: Args = {
   config: true,
-  resolveInputs: (parsed: ParsedArgs) => {
+  resolveInputs: (parsed: ParsedArgs, { cwd }) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));
     if (typeof parsed['coverage'] === 'object' && parsed['coverage'].provider) {
-      inputs.push(toDependency(`@vitest/coverage-${parsed['coverage'].provider}`));
+      const { provider, customProviderModule } = parsed['coverage'];
+      inputs.push(...getCoverageInputs(provider, customProviderModule, toAbsolute(parsed['root'] ?? '.', cwd)));
     } else if (parsed['coverage']) {
       inputs.push(toDependency('@vitest/coverage-v8', { optional: true }));
     }
