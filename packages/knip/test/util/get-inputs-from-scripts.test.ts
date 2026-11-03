@@ -294,6 +294,7 @@ test('getInputsFromScripts (vp)', () => {
   t('vp exec -c "cat package.json | jq -r .name"', [toBinary('vp'), toBinary('cat'), toBinary('jq')]);
   t('vp exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('vp'), toBinary('program')]);
   t('vp exec node "./my dir/script.js"', [toBinary('vp'), toBinary('node'), toDeferResolveEntry('./my dir/script.js', opt)]);
+  t('vp exec "./my dir/script.js"', [toBinary('vp'), toEntry('./my dir/script.js')]);
   t('vp exec', [toBinary('vp')]);
   const app = { dir: join(cwd, 'packages/app') };
   t('vp -C packages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);

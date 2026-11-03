@@ -47,7 +47,7 @@ export const resolve: BinaryResolver = (_binary, _words, options) => {
 
   const dir = C ? toAbsolute(C, options.cwd) : undefined;
   const rest = words.slice(commandIndex);
-  const script = rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
+  const script = execOptions['shell-mode'] && rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
   const inputs = options.fromArgs([script], dir ? { cwd: dir } : {});
   if (dir) for (const input of inputs) input.dir ??= dir;
   return [binary, ...inputs];
