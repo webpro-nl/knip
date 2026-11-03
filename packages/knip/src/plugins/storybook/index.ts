@@ -16,7 +16,7 @@ const enablers = [/^@storybook\//, '@nrwl/storybook'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = [
-  '.{storybook,rnstorybook}/main.{js,ts,mjs,mts,cjs,cts}',
+  '.{storybook,rnstorybook}/main.{js,jsx,ts,tsx,mjs,mts,cjs,cts}',
   '.{storybook,rnstorybook}/test-runner.{js,ts,mts}',
 ];
 

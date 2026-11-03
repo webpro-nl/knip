@@ -1,6 +1,7 @@
 {
   "name": "@plugins/storybook-module-extensions",
   "devDependencies": {
+    "@storybook/addon-ondevice-controls": "*",
     "@storybook/html-vite": "*"
   }
 }

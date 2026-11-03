@@ -12,7 +12,7 @@ test('Find dependencies and entries in Storybook module configs', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
