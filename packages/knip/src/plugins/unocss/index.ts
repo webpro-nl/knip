@@ -15,7 +15,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const entry = [...toUnconfig('uno.config'), ...toUnconfig('unocss.config')];
 
 // `uno.css` is the unprefixed name of the `virtual:uno.css` module https://unocss.dev/integrations/vite
-const resolve: Resolve = () => [toIgnore('uno\\.css', 'dependencies')];
+const resolve: Resolve = () => [toIgnore('uno.css', 'dependencies')];
 
 const plugin: Plugin = {
   title,
