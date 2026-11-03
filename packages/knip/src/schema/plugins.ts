@@ -206,6 +206,7 @@ export const pluginsSchema = z.object({
   vitepress: pluginSchema,
   vitest: pluginSchema,
   vue: pluginSchema,
+  'web-test-runner': pluginSchema,
   'webdriver-io': pluginSchema,
   webpack: pluginSchema,
   wireit: pluginSchema,
