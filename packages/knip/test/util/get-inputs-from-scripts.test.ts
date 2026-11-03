@@ -303,6 +303,10 @@ test('getInputsFromScripts (vp)', () => {
   t(`vp -C ${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
   t('vp -Cpackages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
   t(`vp -C${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp exec -w node ./script.js', [toBinary('vp'), toBinary('node', { dir: cwd }), toDeferResolveEntry('./script.js', { ...opt, dir: cwd })], { cwd: app.dir });
+  t('vp exec -c "node ./script.js" --flag', [toBinary('vp'), toBinary('node'), js]);
+  t('vp exec -t node ./script.js', [toBinary('vp'), toBinary('node'), js]);
+  t('vp -C packages/other exec --workspace-root node ./script.js', [toBinary('vp'), toBinary('node', { dir: cwd }), toDeferResolveEntry('./script.js', { ...opt, dir: cwd })], { cwd: app.dir });
   t('vp build', [toBinary('vp')], withBuild);
   t('vp test', [toBinary('vp')], lifecycle);
   t('vp check', [toBinary('vp')]);

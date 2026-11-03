@@ -6,7 +6,7 @@ import { toCommandBinary } from '../util.ts';
 
 const parseOptions = {
   isStorePositions: true,
-  string: ['C', 'filter', 'resume-from'],
+  string: ['filter', 'resume-from'],
   boolean: [
     'fail-if-no-match',
     'parallel',
@@ -43,11 +43,11 @@ export const resolve: BinaryResolver = (_binary, _words, options) => {
   if (commandIndex === undefined) return [binary];
 
   const execOptions = parseArgs(words.slice(execIndex + 1, commandIndex), parseOptions);
-  if (execOptions.filter && !execOptions.recursive) return [binary];
+  if (execOptions.filter) return [binary];
 
-  const dir = C ? toAbsolute(C, options.cwd) : undefined;
+  const dir = execOptions['workspace-root'] ? options.rootCwd : C ? toAbsolute(C, options.cwd) : undefined;
   const rest = words.slice(commandIndex);
-  const script = execOptions['shell-mode'] && rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
+  const script = rest.map(word => (execOptions['shell-mode'] ? word.value : word.text)).join(' ');
   const inputs = options.fromArgs([script], dir ? { cwd: dir } : {});
   if (dir) for (const input of inputs) input.dir ??= dir;
   return [binary, ...inputs];
