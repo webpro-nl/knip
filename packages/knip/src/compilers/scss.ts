@@ -1,5 +1,6 @@
 import { getUrlSpecifier, isScopedPackage, isTildePackage, splitSpec } from './shared.ts';
 import type { CompilerSync } from './types.ts';
+import { hasUrlScheme } from '../util/url.ts';
 
 // https://sass-lang.com/documentation/at-rules/
 
@@ -35,7 +36,7 @@ export const compiler: CompilerSync = text => {
       continue;
     }
     let spec = match[2];
-    if (!spec || spec.startsWith('sass:')) continue;
+    if (!spec || spec.startsWith('//') || hasUrlScheme(spec)) continue;
     let isBare = Boolean(match[1]) || isScopedPackage(spec);
     if (isTildePackage(spec)) {
       spec = spec.slice(1);
