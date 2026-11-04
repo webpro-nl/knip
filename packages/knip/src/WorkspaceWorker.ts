@@ -24,7 +24,7 @@ import type { DependencySet } from './types/workspace.ts';
 import { createManifest, type Manifest } from './util/package-json.ts';
 import { isExternalReExportsOnly } from './typescript/ast-helpers.ts';
 import { _parseFile } from './typescript/ast-nodes.ts';
-import { compact } from './util/array.ts';
+import { compact, partition } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.ts';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
@@ -242,6 +242,34 @@ export class WorkspaceWorker {
   private getNegatedDevelopmentEntryFiles() {
     const { entry } = this.config;
     return entry.filter(pattern => hasNoProductionSuffix(pattern) && !entry.includes(`${pattern}!`)).map(negate);
+  }
+
+  getPluginEntryGlobBatches(patterns: string[], base?: string): Array<{ patterns: string[]; label: string }> {
+    const batches: Array<{ patterns: string[]; label: string }> = [];
+    const [negations, positives] = partition(patterns, pattern => pattern.startsWith('!'));
+    const [recursive, scoped] = partition(positives, pattern => pattern.startsWith('**/'));
+    
+    const prefix = `${this.name}/`;
+    const toWorkspaceRelative = (name: string) => (name.startsWith(prefix) ? name.slice(prefix.length) : name);
+    const ignoredWorkspaces = base
+      ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
+      : this.ignoredWorkspacePatterns;
+
+    if (recursive.length > 0) {
+      batches.push({
+        patterns: [recursive, negations, this.negatedWorkspacePatterns, ignoredWorkspaces.map(negate)].flat(),
+        label: 'recursive',
+      });
+    }
+
+    if (scoped.length > 0) {
+      batches.push({
+        patterns: [scoped, negations, ignoredWorkspaces.map(negate)].flat(),
+        label: 'scoped',
+      });
+    }
+
+    return batches;
   }
 
   getProductionEntryFilePatterns() {
