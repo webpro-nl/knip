@@ -27,6 +27,7 @@ const args: Args = {
   binaries: ['cdk'],
   string: ['app'],
   alias: { app: ['a'] },
+  // a lone word is a cloud assembly directory or a file to run; return words so a quoted command is re-parsed
   fromArgs: parsed => (typeof parsed.app === 'string' && parsed.app.includes(' ') ? parsed.app.split(' ') : []),
 };
 
