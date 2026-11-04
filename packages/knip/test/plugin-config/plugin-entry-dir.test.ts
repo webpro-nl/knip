@@ -110,6 +110,17 @@ test('Keep a scoped entry into a child workspace out of negations from a `**/` s
   assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
 });
 
+test('Apply negations to both recursive and scoped patterns in one group', async t => {
+  const inputs = [
+    { ...toEntry('**/*.ts'), group: 'jest' },
+    { ...toEntry('!**/skip.ts'), group: 'jest' },
+  ];
+  const { issues, counters } = await run(t, inputs);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['packages/app/keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+});
+
 test('Resolve plugin entry patterns from the dir of a sibling workspace', async t => {
   const inputs = [
     { ...toEntry('*.ts'), dir: app },
