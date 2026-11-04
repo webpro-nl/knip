@@ -4,6 +4,7 @@
     "vue": "*"
   },
   "devDependencies": {
-    "@vue/cli-service": "*"
+    "@vue/cli-service": "*",
+    "raw-loader": "*"
   }
 }

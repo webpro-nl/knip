@@ -59,6 +59,7 @@ test('Find vue.config.cjs (vue)', async () => {
 
   assert(!('vue.config.cjs' in issues.files));
   assert(!('aliases.cjs' in issues.files));
+  assert(!issues.devDependencies['package.json']['raw-loader']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
