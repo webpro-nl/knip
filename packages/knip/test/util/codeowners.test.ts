@@ -51,6 +51,17 @@ test('codeowners pattern matching', () => {
   assert.deepEqual(findOwners('api/v1/users.js'), ['@api-deep']);
 });
 
+test('codeowners anchored patterns and explicit wildcard directories', () => {
+  const findOwners = parseCodeowners('docs/* @docs\n*/**/generated/* @generated');
+
+  assert.deepEqual(findOwners('docs/readme.md'), ['@docs']);
+  assert.deepEqual(findOwners('src/docs/readme.md'), []);
+  assert.deepEqual(findOwners('packages/ui/generated/types.ts'), ['@generated']);
+  assert.deepEqual(findOwners('packages/generated/types.ts'), ['@generated']);
+  assert.deepEqual(findOwners('generated/types.ts'), []);
+  assert.deepEqual(findOwners('packages/ui/generated/nested/types.ts'), []);
+});
+
 test('codeowners with multiple owners', () => {
   const content = `
 *.js    @js-owner
