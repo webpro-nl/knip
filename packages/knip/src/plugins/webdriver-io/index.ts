@@ -1,9 +1,11 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency } from '../../util/input.ts';
+import { isAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { WebdriverIOConfig } from './types.ts';
 
 // https://webdriver.io/docs/configuration
+// https://github.com/webdriverio/webdriverio/blob/v10.1.1/packages/wdio-utils/src/initializePlugin.ts#L15-L46
 
 const title = 'WebdriverIO';
 
@@ -13,28 +15,34 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['wdio.conf.{js,cjs,mjs,ts,cts,mts}'];
 
-const resolveConfig: ResolveConfig<WebdriverIOConfig> = async config => {
+const getNames = (plugins: unknown[] = []) =>
+  plugins.flatMap(plugin => {
+    const name = Array.isArray(plugin) ? plugin[0] : plugin;
+    return typeof name === 'string' && !name.startsWith('file://') && !isAbsolute(name) ? [name] : [];
+  });
+
+const toPluginDependency = (name: string, type: string, dependencies: Set<string>) => {
+  if (name.startsWith('@')) return toDependency(name);
+  const scoped = `@wdio/${name.toLowerCase()}-${type}`;
+  const community = `wdio-${name.toLowerCase()}-${type}`;
+  return toDependency(!dependencies.has(scoped) && dependencies.has(community) ? community : scoped);
+};
+
+const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) => {
   const cfg = config?.config;
   if (!cfg) return [];
 
-  const frameworks = cfg.framework ? [`@wdio/${cfg.framework}-framework`] : [];
+  const { dependencies = {}, devDependencies = {} } = options.manifest;
+  const declared = new Set([...Object.keys(dependencies), ...Object.keys(devDependencies)]);
+  const toInputs = (plugins: unknown[] | undefined, type: string) =>
+    getNames(plugins).map(name => toPluginDependency(name, type, declared));
 
-  const runners =
-    cfg.runner && cfg.runner !== 'local'
-      ? [`@wdio/${Array.isArray(cfg.runner) ? cfg.runner[0] : cfg.runner}-runner`]
-      : [];
-
-  const reporters = cfg.reporters
-    ? cfg.reporters
-        .flatMap(reporter => {
-          if (typeof reporter === 'string') return [reporter];
-          if (Array.isArray(reporter) && typeof reporter[0] === 'string') return [reporter[0]];
-          return [];
-        })
-        .map(reporter => `@wdio/${reporter}-reporter`)
-    : [];
-
-  return [...frameworks, ...runners, ...reporters].map(id => toDependency(id));
+  return [
+    ...toInputs([cfg.framework], 'framework'),
+    ...toInputs([cfg.runner], 'runner'),
+    ...toInputs(cfg.reporters, 'reporter'),
+    ...toInputs(cfg.services, 'service'),
+  ];
 };
 
 const plugin: Plugin = {
