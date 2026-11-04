@@ -1,6 +1,0 @@
-{
-  "name": "@plugins/danger-cap",
-  "devDependencies": {
-    "danger": "*"
-  }
-}

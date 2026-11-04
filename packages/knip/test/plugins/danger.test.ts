@@ -13,29 +13,7 @@ test('Find dependencies with the danger plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
-  });
-});
-
-test('Find dependencies with the danger plugin (dangerfile.mts)', async () => {
-  const options = await createOptions({ cwd: resolve('fixtures/plugins/danger-mts') });
-  const { counters } = await main(options);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    processed: 2,
-    total: 2,
-  });
-});
-
-test('Find dependencies with the danger plugin (Dangerfile.ts)', async () => {
-  const options = await createOptions({ cwd: resolve('fixtures/plugins/danger-cap') });
-  const { counters } = await main(options);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

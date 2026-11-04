@@ -1,6 +1,0 @@
-{
-  "name": "@plugins/danger-mts",
-  "devDependencies": {
-    "danger": "*"
-  }
-}
