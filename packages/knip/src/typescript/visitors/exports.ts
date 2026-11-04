@@ -5,6 +5,7 @@ import type {
   ObjectExpression,
   TSExportAssignment,
   ExpressionStatement,
+  Span,
 } from 'oxc-parser';
 import { ALIAS_TAG, FIX_FLAGS, IMPORT_FLAGS, IMPORT_STAR, SYMBOL_TYPE } from '../../constants.ts';
 import type { Fix } from '../../types/exports.ts';
@@ -37,6 +38,21 @@ const hasExplicitFunctionReturnType = (node: { type: string; returnType?: unknow
     node.type === 'FunctionExpression' ||
     node.type === 'FunctionDeclaration') &&
   Boolean(node.returnType);
+
+const isIdChar = (char: string | undefined) => !!char && (char > '\x7f' || /[\w$]/.test(char));
+
+const isReferencedOutside = (text: string, name: string, start: number, end: number) => {
+  for (let i = text.indexOf(name); i !== -1; i = text.indexOf(name, i + name.length)) {
+    if (i >= start && i < end) continue;
+    if (!isIdChar(text[i - 1]) && !isIdChar(text[i + name.length])) return true;
+  }
+  return false;
+};
+
+const getBindingFix = (s: WalkState, decl: Span, name: string, start: number, end: number, flags: number): Fix =>
+  s.options.isFixExports && !isReferencedOutside(s.sourceText, name, decl.start, decl.end)
+    ? [start, end, flags]
+    : undefined;
 
 export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
   if (s.skipExports || s.isInNamespace(node)) return;
@@ -80,19 +96,19 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           for (const p of declarator.id.properties) {
             if (p.type === 'RestElement' && p.argument?.type === 'Identifier') {
               const name = p.argument.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
+              const fix = getBindingFix(s, declarator, name, p.start, p.end, FIX_FLAGS.OBJECT_BINDING);
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.argument.start, [], fix, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'Identifier') {
               const name = p.value.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
+              const fix = getBindingFix(s, declarator, name, p.start, p.end, FIX_FLAGS.OBJECT_BINDING);
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], fix, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'AssignmentPattern' && p.value.left?.type === 'Identifier') {
               const name = p.value.left.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
+              const fix = getBindingFix(s, declarator, name, p.start, p.end, FIX_FLAGS.OBJECT_BINDING);
               s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.left.start, [], fix, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
@@ -101,12 +117,12 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         } else if (declarator.id.type === 'ArrayPattern') {
           for (const el of declarator.id.elements) {
             if (el?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
+              const fix = getBindingFix(s, declarator, el.name, el.start, el.end, FIX_FLAGS.NONE);
               s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], fix, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, el.name, false);
               s.destructuredExports.add(el.name);
             } else if (el?.type === 'RestElement' && el.argument?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
+              const fix = getBindingFix(s, declarator, el.argument.name, el.start, el.end, FIX_FLAGS.NONE);
               s.addExport(
                 el.argument.name,
                 SYMBOL_TYPE.UNKNOWN,
