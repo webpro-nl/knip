@@ -236,7 +236,7 @@ export class WorkspaceWorker {
     const batches: Array<{ patterns: string[]; label: string }> = [];
     const [negations, positives] = partition(patterns, pattern => pattern.startsWith('!'));
     const [recursive, scoped] = partition(positives, pattern => pattern.startsWith('**/'));
-    
+
     const prefix = `${this.name}/`;
     const toWorkspaceRelative = (name: string) => (name.startsWith(prefix) ? name.slice(prefix.length) : name);
     const ignoredWorkspaces = base
