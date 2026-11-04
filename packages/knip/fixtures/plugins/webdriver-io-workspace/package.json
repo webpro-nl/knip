@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/webdriver-io-workspace",
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    "wdio-obsidian-reporter": "*",
+    "wdio-obsidian-service": "*"
+  }
+}

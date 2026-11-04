@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency } from '../../util/input.ts';
+import type { Manifest } from '../../util/package-json.ts';
 import { isAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { WebdriverIOConfig } from './types.ts';
@@ -21,6 +22,16 @@ const getNames = (plugins: unknown[] = []) =>
     return typeof name === 'string' && !name.startsWith('file://') && !isAbsolute(name) ? [name] : [];
   });
 
+const getDeclaredDependencies = (manifests: (Manifest | undefined)[]) =>
+  new Set(
+    manifests.flatMap(manifest => [
+      ...Object.keys(manifest?.dependencies ?? {}),
+      ...Object.keys(manifest?.devDependencies ?? {}),
+      ...Object.keys(manifest?.optionalDependencies ?? {}),
+      ...Object.keys(manifest?.peerDependencies ?? {}),
+    ])
+  );
+
 const toPluginDependency = (name: string, type: string, dependencies: Set<string>) => {
   if (name.startsWith('@')) return toDependency(name);
   const scoped = `@wdio/${name.toLowerCase()}-${type}`;
@@ -32,8 +43,7 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) 
   const cfg = config?.config;
   if (!cfg) return [];
 
-  const { dependencies = {}, devDependencies = {} } = options.manifest;
-  const declared = new Set([...Object.keys(dependencies), ...Object.keys(devDependencies)]);
+  const declared = getDeclaredDependencies([options.manifest, options.rootManifest]);
   const toInputs = (plugins: unknown[] | undefined, type: string) =>
     getNames(plugins).map(name => toPluginDependency(name, type, declared));
 
