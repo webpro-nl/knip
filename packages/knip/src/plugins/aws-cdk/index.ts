@@ -17,7 +17,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['cdk.json'];
 
 const resolveConfig: ResolveConfig<AwsCdkConfig> = (localConfig, options) => {
-  const scripts = [localConfig.build, localConfig.app].filter(script => typeof script === 'string');
+  const scripts = [localConfig.build, localConfig.app].filter((script): script is string => typeof script === 'string');
   const inputs = options.getInputsFromScripts(scripts, { optionalBinaries: true, cwd: options.configFileDir });
   for (const id of localConfig.plugin ?? []) inputs.push(toDeferResolve(id));
   return inputs;
