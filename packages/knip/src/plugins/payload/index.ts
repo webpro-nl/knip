@@ -11,7 +11,7 @@ const enablers = ['payload'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['payload.config.ts', 'src/payload.config.ts'];
+const config = ['payload.config.{js,ts}', 'src/payload.config.{js,ts}'];
 
 const resolveConfig: ResolveConfig<PayloadConfig> = async config => {
   const awaitedConfig = await config;
