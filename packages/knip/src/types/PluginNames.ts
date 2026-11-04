@@ -6,6 +6,7 @@ export type PluginName =
   | 'astro-markdoc'
   | 'astro-og-canvas'
   | 'ava'
+  | 'aws-cdk'
   | 'babel'
   | 'biome'
   | 'borp'
@@ -210,6 +211,7 @@ export const pluginNames = [
   'astro-markdoc',
   'astro-og-canvas',
   'ava',
+  'aws-cdk',
   'babel',
   'biome',
   'borp',
