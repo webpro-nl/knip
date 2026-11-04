@@ -1,0 +1,1 @@
+globalThis.setup = true;

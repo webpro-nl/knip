@@ -138,7 +138,7 @@ export const createInputHandler =
           if (internalPath && isInternal(internalPath) && !isGitIgnored(internalPath)) return internalPath;
         }
 
-        if (isHandled) return;
+        if (isHandled && (deputy.isReportDependencies || !isDeferResolve(input))) return;
       }
     }
 
