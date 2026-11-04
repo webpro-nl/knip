@@ -12,13 +12,17 @@ import {
   isLoaderError,
   isModuleNotFoundError,
 } from './util/errors.ts';
-import { logError } from './util/log.ts';
+import { logError, logWarning } from './util/log.ts';
 import { perfObserver } from './util/Performance.ts';
 import { createPreprocessor, toReporterOptions } from './util/preprocessor.ts';
 import { runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
 import { version } from './version.ts';
 import { watchSession } from './session/watch.ts';
+
+process.on('unhandledRejection', error => {
+  logWarning(`Unhandled rejection (${error instanceof Error ? error.message : String(error)})`);
+});
 
 let args: ParsedCLIArgs = {};
 try {
