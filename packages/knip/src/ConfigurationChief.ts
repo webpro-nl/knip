@@ -155,7 +155,7 @@ export class ConfigurationChief {
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
     for (const [pluginName, pluginConfig] of Object.entries(rawConfig)) {
-      if (isPluginName(pluginName)) {
+      if (isPluginName(pluginName) && pluginConfig !== undefined) {
         rootPluginConfigs[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
       }
     }
@@ -444,7 +444,7 @@ export class ConfigurationChief {
     }
 
     for (const [pluginName, pluginConfig] of Object.entries(workspaceConfig)) {
-      if (isPluginName(pluginName)) {
+      if (isPluginName(pluginName) && pluginConfig !== undefined) {
         plugins[pluginName] = normalizePluginConfig(pluginConfig as RawPluginConfiguration);
       }
     }
