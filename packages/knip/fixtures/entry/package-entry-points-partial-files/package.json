@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/package-entry-points-partial-files",
+  "exports": {
+    ".": "./dist/feature/api.js"
+  }
+}

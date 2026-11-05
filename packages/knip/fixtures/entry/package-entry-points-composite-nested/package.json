@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/package-entry-points-composite-nested",
+  "exports": {
+    ".": "./dist/api.js"
+  }
+}

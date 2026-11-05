@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/package-entry-points-inferred-root-dir",
+  "exports": {
+    "./src": "./dist/src/index.js",
+    "./lib": "./dist/lib/index.js"
+  }
+}

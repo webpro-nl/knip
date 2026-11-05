@@ -5,6 +5,7 @@ export interface CompilerOptions {
   allowNonTsExtensions?: boolean;
   allowSyntheticDefaultImports?: boolean;
   baseUrl?: string;
+  composite?: boolean;
   declaration?: boolean;
   declarationMap?: boolean;
   esModuleInterop?: boolean;
