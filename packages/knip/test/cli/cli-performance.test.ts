@@ -13,6 +13,14 @@ test('Select plugin timings without enabling every performance timer', () => {
   assert.doesNotMatch(stdout, /walkAndAnalyze/);
 });
 
+test('Report run time with additional startup time without function instrumentation', () => {
+  const { stdout, stderr, status } = exec('knip --duration', { cwd });
+  assert.equal(status, 0);
+  assert.equal(stderr, '');
+  assert.match(stdout, /^Total running time: \S+ \(\+\S+ startup\)$/);
+  assert.doesNotMatch(stdout, /walkAndAnalyze/);
+});
+
 test('Measure configuration and analysis phases independently', () => {
   const names = ['loadResolvedConfigFile', 'parseConfiguration', 'createOptions', 'build', 'analyzeGraph'];
   const args: string[] = [];

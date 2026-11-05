@@ -20,6 +20,7 @@ import { prettyMilliseconds } from './util/string.ts';
 import { watchSession } from './session/watch.ts';
 
 export const runCLI = async (args: ParsedCLIArgs) => {
+  if (perfObserver.isEnabled || perfObserver.isDurationEnabled) perfObserver.startRun();
   try {
     const options = await createOptions({ args });
 
@@ -44,14 +45,15 @@ export const runCLI = async (args: ParsedCLIArgs) => {
       .filter(reportGroup => finalData.report[reportGroup] && options.rules[reportGroup] === 'error')
       .reduce((errorCount: number, reportGroup) => errorCount + finalData.counters[reportGroup], 0);
 
-    if (perfObserver.isEnabled) await perfObserver.finalize();
+    if (perfObserver.isEnabled || perfObserver.isDurationEnabled) perfObserver.finalize();
     if (perfObserver.isTimerifyFunctions) console.log(`\n${perfObserver.getTimerifiedFunctionsTable()}`);
     if (perfObserver.isMemoryUsageEnabled && !args['memory-realtime'])
       console.log(`\n${perfObserver.getMemoryUsageTable()}`);
 
     if (perfObserver.isEnabled || perfObserver.isDurationEnabled) {
       const duration = perfObserver.getCurrentDurationInMs();
-      console.log('\nTotal running time:', prettyMilliseconds(duration));
+      const startup = perfObserver.getProcessDurationInMs() - duration;
+      console.log(`\nTotal running time: ${prettyMilliseconds(duration)} (+${prettyMilliseconds(startup)} startup)`);
       perfObserver.reset();
     }
 
