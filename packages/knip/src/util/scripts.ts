@@ -8,7 +8,10 @@ import {
   type SyntaxNode,
   type Word,
 } from 'unbash';
+import { argsFrom } from '../binaries/util.ts';
+import c8 from '../plugins/c8/index.ts';
 import { extractBinary } from './modules.ts';
+import parseArgs from './parse-args.ts';
 
 export interface ScriptCommand {
   binary: string;
@@ -52,11 +55,9 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
         const binary = extractBinary(text);
         const words = getCommandWords(node);
         if (spawningBinaries.has(binary)) {
-          const rest = words
-            .filter(word => word.text !== '--')
-            .map(word => word.text)
-            .join(' ');
-          out.push(...getScriptCommands(rest));
+          const command = parseArgs(words, { boolean: c8.args?.boolean })._[0];
+          const rest = command ? argsFrom(words, command) : [];
+          out.push(...getScriptCommands(rest.map(word => word.text).join(' ')));
         } else out.push({ binary, args: words.map(word => word.value) });
       }
     }
