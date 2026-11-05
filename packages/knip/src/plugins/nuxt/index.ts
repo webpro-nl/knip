@@ -33,13 +33,16 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['nuxt.config.{js,cjs,mjs,ts,cts,mts}'];
 
-const entry = ['app.config.ts', '**/*.d.vue.ts'];
+// Nuxt scans these with `nuxt.options.extensions` (all JS/TS variants by default)
+const scriptExt = '{js,mjs,cjs,jsx,ts,mts,cts,tsx}';
+
+const entry = [`app.config.${scriptExt}`, '**/*.d.vue.ts'];
 
 const app = ['app.{vue,jsx,tsx}', 'error.{vue,jsx,tsx}', 'router.options.ts'];
 const layout = (dir = 'layouts') => join(dir, '**/*.{vue,jsx,tsx}');
-const middleware = (dir = 'middleware') => join(dir, '**/*.ts');
+const middleware = (dir = 'middleware') => join(dir, `**/*.${scriptExt}`);
 const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
-const plugins = (dir = 'plugins') => join(dir, '**/*.ts');
+const plugins = (dir = 'plugins') => join(dir, `**/*.${scriptExt}`);
 const modules = 'modules/**/*.{ts,vue}';
 const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
 
