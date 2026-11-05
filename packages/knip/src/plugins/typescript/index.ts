@@ -1,3 +1,4 @@
+import { parseTsconfig } from 'get-tsconfig';
 import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
@@ -27,8 +28,17 @@ const resolveContentMappers = (localConfig: TsConfigJson) => {
   return inputs;
 };
 
+const getCompilerOptions = (localConfig: TsConfigJson, configFilePath: string) => {
+  if (!localConfig.extends) return localConfig.compilerOptions;
+  try {
+    return parseTsconfig(configFilePath).compilerOptions;
+  } catch {
+    return localConfig.compilerOptions;
+  }
+};
+
 export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
-  const { compilerOptions } = localConfig;
+  const compilerOptions = getCompilerOptions(localConfig, options.configFilePath);
 
   const extend = localConfig.extends
     ? [localConfig.extends].flat().map(specifier => toConfig(options.pluginName, specifier))

@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/typescript-extends-workspaces__b",
+  "dependencies": {
+    "tslib": "*"
+  },
+  "devDependencies": {
+    "@fixtures/tsconfig-import-helpers": "*"
+  }
+}
