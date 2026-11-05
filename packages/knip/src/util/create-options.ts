@@ -1,6 +1,4 @@
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
-import { knipConfigurationSchema } from '../schema/configuration.ts';
-import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
@@ -21,6 +19,7 @@ import { loadResolvedConfigFile } from './load-config.ts';
 import { _load, unload } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
+import { parseConfiguration } from './parse-configuration.ts';
 import { isAbsolute, isInternal, join, resolveCwd, toAbsolute } from './path.ts';
 import { splitTags } from './tag.ts';
 
@@ -85,7 +84,7 @@ export const createOptions = async (options: CreateOptions, isReload = false) =>
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
+  const parsedConfig = parseConfiguration(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
