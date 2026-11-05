@@ -1,5 +1,5 @@
 import { isBuiltin } from 'node:module';
-import type { Workspace } from './ConfigurationChief.ts';
+import type { IgnoreItem, Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
   IGNORE_DEFINITELY_TYPED,
@@ -28,8 +28,20 @@ import {
 } from './util/modules.ts';
 import { findMatch, toRegexOrString } from './util/regex.ts';
 
-const filterIsProduction = (id: string | RegExp, isProduction: boolean): string | RegExp | never[] =>
-  typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : []) : id;
+const filterIsProduction = (id: string | RegExp, isProduction: boolean) =>
+  typeof id === 'string' ? (isProduction || !id.endsWith('!') ? id.replace(/!$/, '') : undefined) : id;
+
+const toIgnoreMap = (items: IgnoreItem[], toId: (id: string | RegExp) => string | RegExp | undefined = id => id) => {
+  const ids = new Set<string | RegExp>();
+  const ignores = new Map<string | RegExp, string | undefined>();
+  for (const item of items) {
+    const id = toId(item.value);
+    if (id === undefined || ids.has(id)) continue;
+    ids.add(id);
+    ignores.set(toRegexOrString(id), item.configKey);
+  }
+  return ignores;
+};
 
 interface DependencyReferenceOptions {
   specifier: string;
@@ -83,9 +95,9 @@ export class DependencyDeputy {
     manifestPath: string;
     manifestStr: string;
     manifest: PackageJson;
-    ignoreDependencies: (string | RegExp)[];
-    ignoreBinaries: (string | RegExp)[];
-    ignoreUnresolved: (string | RegExp)[];
+    ignoreDependencies: IgnoreItem[];
+    ignoreBinaries: IgnoreItem[];
+    ignoreUnresolved: IgnoreItem[];
   }) {
     const dependencies = Object.keys(manifest.dependencies ?? {});
     const peerDependencies = Object.keys(manifest.peerDependencies ?? {});
@@ -122,20 +134,24 @@ export class DependencyDeputy {
       }
     }
 
-    const ignoreDependencies = id.flatMap(id => filterIsProduction(id, this.isProduction)).map(toRegexOrString);
-    const ignoreBinaries = ib.flatMap(ib => filterIsProduction(ib, this.isProduction)).map(toRegexOrString);
-    const ignoreUnresolved = iu.map(toRegexOrString);
+    const toId = (id: string | RegExp) => filterIsProduction(id, this.isProduction);
+    const ignoreConfigKeys = {
+      ignoreDependencies: toIgnoreMap(id, toId),
+      ignoreBinaries: toIgnoreMap(ib, toId),
+      ignoreUnresolved: toIgnoreMap(iu),
+    };
 
     this._manifests.set(name, {
       workspaceDir: dir,
       manifestPath,
       manifestStr,
-      ignoreDependencies,
-      ignoreBinaries,
-      ignoreUnresolved,
-      unusedIgnoreDependencies: new Set(ignoreDependencies),
-      unusedIgnoreBinaries: new Set(ignoreBinaries),
-      unusedIgnoreUnresolved: new Set(ignoreUnresolved),
+      ignoreDependencies: [...ignoreConfigKeys.ignoreDependencies.keys()],
+      ignoreBinaries: [...ignoreConfigKeys.ignoreBinaries.keys()],
+      ignoreUnresolved: [...ignoreConfigKeys.ignoreUnresolved.keys()],
+      unusedIgnoreDependencies: new Set(ignoreConfigKeys.ignoreDependencies.keys()),
+      unusedIgnoreBinaries: new Set(ignoreConfigKeys.ignoreBinaries.keys()),
+      unusedIgnoreUnresolved: new Set(ignoreConfigKeys.ignoreUnresolved.keys()),
+      ignoreConfigKeys,
       dependencies,
       devDependencies,
       peerDependencies: new Set(peerDependencies),
@@ -496,16 +512,18 @@ export class DependencyDeputy {
     const configurationHints: ConfigurationHint[] = [];
 
     for (const [workspaceName, manifest] of this._manifests) {
+      const toHint = (type: keyof typeof manifest.ignoreConfigKeys, identifier: string | RegExp): ConfigurationHint => {
+        const configKey = manifest.ignoreConfigKeys[type].get(identifier);
+        return configKey ? { workspaceName, identifier, type, configKey } : { workspaceName, identifier, type };
+      };
       for (const identifier of manifest.unusedIgnoreDependencies) {
-        configurationHints.push({ workspaceName, identifier, type: 'ignoreDependencies' });
+        configurationHints.push(toHint('ignoreDependencies', identifier));
       }
-
       for (const identifier of manifest.unusedIgnoreBinaries) {
-        configurationHints.push({ workspaceName, identifier, type: 'ignoreBinaries' });
+        configurationHints.push(toHint('ignoreBinaries', identifier));
       }
-
       for (const identifier of manifest.unusedIgnoreUnresolved) {
-        configurationHints.push({ workspaceName, identifier, type: 'ignoreUnresolved' });
+        configurationHints.push(toHint('ignoreUnresolved', identifier));
       }
     }
 

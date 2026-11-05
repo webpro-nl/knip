@@ -75,6 +75,15 @@ export type Workspace = {
   manifestStr: string;
   ignoreMembers: IgnorePatterns;
   sourceMaps?: SourceMap[];
+  configKey: string | undefined;
+};
+
+export type IgnoreItem = { value: string | RegExp; configKey: string | undefined };
+
+const toIgnoreItems = (values: (string | RegExp)[] | undefined, configKey?: string): IgnoreItem[] => {
+  const items: IgnoreItem[] = [];
+  if (values) for (const value of values) if (value) items.push({ value, configKey });
+  return items;
 };
 
 /**
@@ -328,6 +337,7 @@ export class ConfigurationChief {
           manifestPath,
           manifestStr,
           ignoreMembers,
+          configKey: this.getConfigKey(name),
         };
       });
   }
@@ -368,6 +378,21 @@ export class ConfigurationChief {
       .map(workspaceName => `!${workspaceName.replace(endMatch, '/**')}`);
   }
 
+  public countWorkspacesForConfigKey(configKey: string) {
+    let count = 0;
+    for (const workspace of this.workspacesByDir.values()) if (workspace.configKey === configKey) count++;
+    return count;
+  }
+
+  private getConfigKey(workspaceName: string) {
+    if (workspaceName === ROOT_WORKSPACE_NAME) {
+      const workspaces = this.rawConfig?.workspaces;
+      return workspaces && ROOT_WORKSPACE_NAME in workspaces ? ROOT_WORKSPACE_NAME : undefined;
+    }
+    const key = this.getConfigKeyForWorkspace(workspaceName);
+    return key !== workspaceName ? key : undefined;
+  }
+
   private getConfigKeyForWorkspace(workspaceName: string) {
     return this.getConfiguredWorkspaceKeys()
       .sort(byPathDepth)
@@ -391,20 +416,14 @@ export class ConfigurationChief {
 
   public getIgnores(workspaceName: string) {
     const workspaceConfig = this.getWorkspaceConfig(workspaceName);
-    const ignoreBinaries = workspaceConfig.ignoreBinaries ?? [];
-    const ignoreDependencies = workspaceConfig.ignoreDependencies ?? [];
-    const ignoreUnresolved = workspaceConfig.ignoreUnresolved ?? [];
-    if (workspaceName === ROOT_WORKSPACE_NAME) {
-      const {
-        ignoreBinaries: rootIgnoreBinaries,
-        ignoreDependencies: rootIgnoreDependencies,
-        ignoreUnresolved: rootIgnoreUnresolved,
-      } = this.rawConfig ?? {};
-      return {
-        ignoreBinaries: compact([...ignoreBinaries, ...(rootIgnoreBinaries ?? [])]),
-        ignoreDependencies: compact([...ignoreDependencies, ...(rootIgnoreDependencies ?? [])]),
-        ignoreUnresolved: compact([...ignoreUnresolved, ...(rootIgnoreUnresolved ?? [])]),
-      };
+    const configKey = this.getConfigKey(workspaceName);
+    const ignoreBinaries = toIgnoreItems(workspaceConfig.ignoreBinaries, configKey);
+    const ignoreDependencies = toIgnoreItems(workspaceConfig.ignoreDependencies, configKey);
+    const ignoreUnresolved = toIgnoreItems(workspaceConfig.ignoreUnresolved, configKey);
+    if (workspaceName === ROOT_WORKSPACE_NAME && this.rawConfig && workspaceConfig !== this.rawConfig) {
+      ignoreBinaries.push(...toIgnoreItems(this.rawConfig.ignoreBinaries));
+      ignoreDependencies.push(...toIgnoreItems(this.rawConfig.ignoreDependencies));
+      ignoreUnresolved.push(...toIgnoreItems(this.rawConfig.ignoreUnresolved));
     }
     return { ignoreBinaries, ignoreDependencies, ignoreUnresolved };
   }

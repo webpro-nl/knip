@@ -1,5 +1,6 @@
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { getUnusedIgnorePatternHints, settleConfigurationHints } from '../configuration-hints.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
@@ -30,6 +31,7 @@ interface AnalyzeOptions {
   deputy: DependencyDeputy;
   entryPaths: Set<string>;
   graph: ModuleGraph;
+  isGitIgnored: (filePath: string) => boolean;
   streamer: ConsoleStreamer;
   unreferencedFiles: Set<string>;
   options: MainOptions;
@@ -58,6 +60,7 @@ export const analyze = async ({
   deputy,
   entryPaths,
   graph,
+  isGitIgnored,
   streamer,
   unreferencedFiles,
   options,
@@ -401,11 +404,19 @@ export const analyze = async ({
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
 
-    for (const hint of collector.getUnusedIgnorePatternHints(options)) {
-      collector.addConfigurationHint(hint);
+    if (options.isReportFiles) {
+      const patterns = collector.getUnusedIgnorePatterns();
+      const filePaths = [graph.keys(), unreferencedFiles];
+      const context = { cwd: options.cwd, filePaths, isGitIgnored };
+      for (const hint of getUnusedIgnorePatternHints(patterns, context)) collector.addConfigurationHint(hint);
     }
 
     for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
+
+    const hints = settleConfigurationHints(collector.getConfigurationHintCandidates(), {
+      countWorkspaces: configKey => chief.countWorkspacesForConfigKey(configKey),
+    });
+    collector.setConfigurationHints(hints);
   }, 'analyzeGraph');
 
   await analyzeGraph();

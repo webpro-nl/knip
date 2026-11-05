@@ -168,6 +168,7 @@ export const build = timerify(async function build({
     const worker = new WorkspaceWorker({
       name,
       dir,
+      configKey: workspace.configKey,
       config: baseConfig,
       manifest,
       dependencies,
@@ -218,7 +219,12 @@ export const build = timerify(async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    const fn = (id: string) => ({ pattern: prependDir(name, id), id, workspaceName: name });
+    const fn = (id: string) => ({
+      pattern: prependDir(name, id),
+      id,
+      workspaceName: name,
+      configKey: workspace.configKey,
+    });
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
