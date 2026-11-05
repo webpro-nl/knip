@@ -6,6 +6,7 @@ import type { IssueSeverity, IssueType } from '../types/issues.ts';
 import type { PluginName } from '../types/PluginNames.ts';
 import { ConfigurationValidationError } from './errors.ts';
 import { isPluginName } from './is-plugin-name.ts';
+import { timerify } from './Performance.ts';
 import {
   type Check,
   type Fields,
@@ -88,8 +89,8 @@ const rootFields = {
 const checkConfiguration: Check<RawConfiguration> = (value, path, errors): value is RawConfiguration =>
   checkObject(value, path, errors, rootFields, getPluginCheck);
 
-export const parseConfiguration = (value: unknown): RawConfiguration => {
+export const parseConfiguration = timerify((value: unknown): RawConfiguration => {
   const errors: string[] = [];
   if (!checkConfiguration(value, '', errors)) throw new ConfigurationValidationError(errors);
   return value;
-};
+}, 'parseConfiguration');

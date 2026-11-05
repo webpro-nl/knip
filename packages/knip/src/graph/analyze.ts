@@ -152,7 +152,7 @@ export const analyze = async ({
     }
   };
 
-  const analyzeGraph = async () => {
+  const analyzeGraph = timerify(async () => {
     if (options.isReportValues || options.isReportTypes) {
       streamer.cast('Connecting the dots');
 
@@ -406,7 +406,7 @@ export const analyze = async ({
     }
 
     for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
-  };
+  }, 'analyzeGraph');
 
   await analyzeGraph();
 

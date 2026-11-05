@@ -49,7 +49,7 @@ import { createPublishedTypeDependencyAnalyzer } from '../typescript/get-publish
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
-import { perfObserver } from '../util/Performance.ts';
+import { perfObserver, timerify } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { expandIgnorePatterns } from '../util/parse-and-convert-gitignores.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
@@ -70,7 +70,7 @@ interface BuildOptions {
   options: MainOptions;
 }
 
-export async function build({
+export const build = timerify(async function build({
   chief,
   collector,
   counselor,
@@ -681,4 +681,4 @@ export async function build({
     },
     enabledPluginsStore,
   };
-}
+});

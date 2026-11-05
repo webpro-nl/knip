@@ -1,10 +1,4 @@
-import {
-  type PerformanceEntry,
-  PerformanceObserver,
-  type RecordableHistogram,
-  createHistogram,
-  performance,
-} from 'node:perf_hooks';
+import { type RecordableHistogram, createHistogram, performance } from 'node:perf_hooks';
 import { memoryUsage } from 'node:process';
 import { parseArgs } from 'node:util';
 import { Table } from './table.ts';
@@ -33,16 +27,14 @@ type MemInfo = {
   rss: number;
 };
 
-interface MemoryEntry extends PerformanceEntry {
-  detail: MemInfo;
-}
-
 const getMemInfo = (label: string): MemInfo => {
   const usage = memoryUsage();
   return { label, heapUsed: usage.heapUsed, heapTotal: usage.heapTotal, rss: usage.rss };
 };
 
 const twoFixed = (value: any) => (typeof value === 'number' ? value.toFixed(2) : value);
+const formatDuration = (ms: unknown) =>
+  typeof ms === 'number' ? (ms < 0.01 ? `${(ms * 1000).toFixed(2)}µs` : `${ms.toFixed(2)}ms`) : String(ms);
 const inMB = (bytes: number) => bytes / 1024 / 1024;
 
 const keys = ['heapUsed', 'heapTotal', 'rss'] as const;
@@ -58,11 +50,11 @@ class Performance {
   readonly isMemoryUsageEnabled: boolean;
   readonly isDurationEnabled: boolean;
 
-  private readonly startTime = performance.now();
+  private startTime = performance.now();
+  private endTime: number | undefined;
   private readonly memId = `mem-${Math.floor(performance.now() * 100)}`;
   private readonly histograms = new Map<string, RecordableHistogram>();
-  private readonly memEntries: MemoryEntry[] = [];
-  private readonly memObserver?: PerformanceObserver;
+  private readonly memEntries: MemInfo[] = [];
 
   constructor({ isTimerifyFunctions = false, isMemoryUsageEnabled = false, isDurationEnabled = false }) {
     this.isEnabled = isTimerifyFunctions || isMemoryUsageEnabled;
@@ -71,10 +63,6 @@ class Performance {
     this.isDurationEnabled = isDurationEnabled;
 
     if (isMemoryUsageEnabled) {
-      this.memObserver = new PerformanceObserver(items => {
-        for (const entry of items.getEntries() as MemoryEntry[]) this.memEntries.push(entry);
-      });
-      this.memObserver.observe({ type: 'mark' });
       if (isMemoryRealtime) logHead();
       this.addMemoryMark('start');
     }
@@ -93,24 +81,44 @@ class Performance {
     if (!this.isMemoryUsageEnabled) return;
     const detail = getMemInfo(label);
     performance.mark(`${this.memId}:${label}`, { detail });
+    this.memEntries.push(detail);
     if (isMemoryRealtime) log(detail);
   }
 
-  getTimerifiedFunctionsTable() {
-    const totalDuration = this.getCurrentDurationInMs();
-    const table = new Table({ header: true });
+  getSnapshot() {
+    const processMs = this.getProcessDurationInMs();
+    const functions = [];
     for (const [name, h] of this.histograms) {
       if (h.count === 0) continue;
       const meanMs = h.mean / 1e6;
-      const sumMs = meanMs * h.count;
+      functions.push({
+        name,
+        count: h.count,
+        minMs: h.min / 1e6,
+        maxMs: h.max / 1e6,
+        meanMs,
+        medianMs: h.percentile(50) / 1e6,
+        p95Ms: h.percentile(95) / 1e6,
+        sumMs: meanMs * h.count,
+      });
+    }
+    const memory = [];
+    for (const entry of this.memEntries) memory.push({ ...entry });
+    return { durationMs: processMs - this.startTime, processMs, functions, memory };
+  }
+
+  getTimerifiedFunctionsTable() {
+    const { durationMs, functions } = this.getSnapshot();
+    const table = new Table({ header: true });
+    for (const entry of functions) {
       table.row();
-      table.cell('Name', name);
-      table.cell('size', h.count);
-      table.cell('min', h.min / 1e6, twoFixed);
-      table.cell('max', h.max / 1e6, twoFixed);
-      table.cell('median', h.percentile(50) / 1e6, twoFixed);
-      table.cell('sum', sumMs, twoFixed);
-      table.cell('%', (sumMs / totalDuration) * 100, v => (typeof v === 'number' ? `${v.toFixed(0)}%` : ''));
+      table.cell('Name', entry.name);
+      table.cell('size', entry.count);
+      table.cell('min', entry.minMs, formatDuration);
+      table.cell('max', entry.maxMs, formatDuration);
+      table.cell('median', entry.medianMs, formatDuration);
+      table.cell('sum', entry.sumMs, formatDuration);
+      table.cell('%', (entry.sumMs / durationMs) * 100, v => (typeof v === 'number' ? `${v.toFixed(0)}%` : ''));
     }
     table.sort('sum', 'desc');
     return table.toString();
@@ -122,8 +130,7 @@ class Performance {
     let peakHeapUsed = 0;
     let peakRss = 0;
     for (const entry of this.memEntries) {
-      if (!entry.detail) continue;
-      const { label, heapUsed, rss } = entry.detail;
+      const { label, heapUsed, rss } = entry;
       const delta = heapUsed - prevHeapUsed;
       if (heapUsed > peakHeapUsed) peakHeapUsed = heapUsed;
       if (rss > peakRss) peakRss = rss;
@@ -143,7 +150,16 @@ class Performance {
   }
 
   getCurrentDurationInMs() {
-    return performance.now() - this.startTime;
+    return this.getProcessDurationInMs() - this.startTime;
+  }
+
+  getProcessDurationInMs() {
+    return this.endTime ?? performance.now();
+  }
+
+  startRun() {
+    this.startTime = performance.now();
+    this.endTime = undefined;
   }
 
   getMemHeapUsage() {
@@ -154,16 +170,17 @@ class Performance {
     return twoFixed(inMB(this.getMemHeapUsage()));
   }
 
-  async finalize() {
-    if (!this.isEnabled) return;
+  finalize() {
+    if (!this.isEnabled && !this.isDurationEnabled) return;
+    this.endTime = performance.now();
     this.addMemoryMark('end');
-    await new Promise(resolve => setTimeout(resolve, 1));
   }
 
   reset() {
-    this.histograms.clear();
+    for (const histogram of this.histograms.values()) histogram.reset();
+    for (const entry of this.memEntries) performance.clearMarks(`${this.memId}:${entry.label}`);
     this.memEntries.length = 0;
-    this.memObserver?.disconnect();
+    this.startRun();
   }
 }
 
