@@ -274,7 +274,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const _entry = cfg.build?.lib?.entry ?? [];
     const entries =
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
-    const deps = entries.map(specifier => toAbsolute(specifier, viteRoot)).map(id => toEntry(id));
+    const deps = entries.map(specifier => toAbsolute(specifier, viteRoot)).map(id => toProductionEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
 
