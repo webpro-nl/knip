@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/next-config-files",
+  "devDependencies": {
+    "next": "*"
+  }
+}

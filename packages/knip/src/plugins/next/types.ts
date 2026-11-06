@@ -2,6 +2,9 @@
 
 type NextConfig = {
   pageExtensions?: string[];
+  images?: { loaderFile?: string };
+  cacheHandler?: string;
+  cacheHandlers?: Record<string, string | undefined>;
   turbopack?: {
     rules?: Record<string, unknown>;
     resolveAlias?: Record<string, unknown>;
