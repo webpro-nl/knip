@@ -31,8 +31,8 @@ On large repos, in rough order of cost:
    resolution, the JS visitor walk, and per-file record building.
 2. **Unused-detection analysis** (walking the reverse import graph per export).
    Second-heaviest, and it can go super-linear on barrel-heavy or
-   re-export-heavy code. This phase isn't instrumented, so `--performance`
-   doesn't show it.
+   re-export-heavy code. `analyzeGraph` measures initial analysis and session
+   re-analysis.
 3. **gitignore tree walk.** O(everything on disk). Historically the OOM source;
    now pruned to workspace-relevant directories.
 4. **Per-workspace plugin pass.** Config-file globbing plus dynamically
@@ -52,13 +52,21 @@ more than it helps single-thread wall time.
 ## 2. Instrumentation
 
 `--performance` times a hand-picked set of functions. `--performance-fn <name>`
-filters to one and is repeatable. `--memory` samples heap at phase marks. `-u`
-prints total wall time only. Add `-n` and `NO_COLOR=1` for clean output.
+filters to one and is repeatable, including plugin methods without also passing
+`--performance`. Config and analysis boundaries include
+`loadResolvedConfigFile`, `parseConfiguration`, `createOptions`, `build`, and
+`analyzeGraph`.
+
+`--memory` samples heap at phase marks. `-u` prints run time with additional
+startup time in parentheses, without function instrumentation. Run time starts
+before option creation; startup includes Node initialization, module loading,
+and argument parsing. Timing stops before performance tables are printed, so use
+external timing for complete spawn-to-exit latency. Add `-n` and `NO_COLOR=1`
+for clean output.
 
 Don't trust the table blindly. Its blind spots:
 
-- Native oxc parse is invisible; only the thin JS parse wrapper is timed.
-- The unused-detection analysis phase isn't instrumented at all.
+- Native oxc internal phases are not broken out from the JS parse wrapper.
 - Parent and child timings overlap (the walk loop contains parse, visitor, and
   imports/exports), so percentages sum well past 100%.
 - GC, I/O wait, reporting, and fixing aren't captured separately.

@@ -29,6 +29,7 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(!issues.files['coverage/cli-provider.ts']);
   assert(!issues.unlisted['vitest-custom-coverage.config.ts']);
   assert(!issues.unlisted['package.json']['@vitest/coverage-custom']);
+  assert(!issues.unresolved['package.json']?.['./cli-provider.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

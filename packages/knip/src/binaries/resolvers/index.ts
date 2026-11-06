@@ -6,6 +6,7 @@ import * as npx from './npx.ts';
 import * as nub from './nub.ts';
 import * as pnpm from './pnpm.ts';
 import * as pnpx from './pnpx.ts';
+import * as vp from './vp.ts';
 import * as yarn from './yarn.ts';
 
 const packageManagerResolvers = {
@@ -19,6 +20,7 @@ const packageManagerResolvers = {
   pn: pnpm.resolve,
   pnpx: pnpx.resolve,
   pnx: pnpx.resolve,
+  vp: vp.resolve,
   yarn: yarn.resolve,
 };
 

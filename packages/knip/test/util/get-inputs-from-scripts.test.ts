@@ -215,9 +215,9 @@ test('getInputsFromScripts (bun)', () => {
   t('bunx my-cli --arg value', [toBinary('my-cli', opt)]);
   t('bunx --bun biome format --write', [toBinary('biome', opt)]);
   t('bun x pkg', [toBinary('bun'), toBinary('pkg', opt)]);
-  t('bun ./main.ts', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
-  t('bun run script.js', [toBinary('bun'), toEntry(join(cwd, 'script.js'))]);
-  t('bun run ./main', [toBinary('bun'), toEntry(join(cwd, 'main.ts'))]);
+  t('bun ./main.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'main.ts'), opt)]);
+  t('bun run script.js', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'script.js'), opt)]);
+  t('bun run ./main', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'main.ts'), opt)]);
   t('bun run orval --config orval.config.ts', [toBinary('bun'), toBinary('orval', opt)]);
   t('bun run --cwd packages/knip watch', [toBinary('bun'), toBinary('watch', { optional: true, dir: join(cwd, 'packages/knip') })]);
   t('bun test', [toBinary('bun')]);
@@ -255,11 +255,11 @@ test('getInputsFromScripts (bun)', () => {
   t('bun --bun vite build', [toBinary('bun'), toBinary('vite')]);
   t('bun run --bun vite build', [toBinary('bun'), toBinary('vite', opt)]);
   t('bun --bun x vite', [toBinary('bun'), toBinary('vite', opt)]);
-  t('bun --hot ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
-  t('bun --watch ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
-  t('bun run --watch ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
-  t('bun --smol ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
-  t('bun --if-present ./server.ts', [toBinary('bun'), toEntry(join(cwd, 'server.ts'))]);
+  t('bun --hot ./server.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'server.ts'), opt)]);
+  t('bun --watch ./server.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'server.ts'), opt)]);
+  t('bun run --watch ./server.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'server.ts'), opt)]);
+  t('bun --smol ./server.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'server.ts'), opt)]);
+  t('bun --if-present ./server.ts', [toBinary('bun'), toDeferResolveEntry(join(cwd, 'server.ts'), opt)]);
   t('bun --silent custom-tool build', [toBinary('bun'), toBinary('custom-tool')]);
   t('bun --preload ./require.js custom-tool build', [toBinary('bun'), toBinary('custom-tool')]);
   t('bun --preload tsx tsx ./main.ts', [toBinary('bun'), toBinary('tsx'), ts]);
@@ -275,8 +275,8 @@ test('getInputsFromScripts (nub)', () => {
   t('nub --inspect ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt)]);
   t('nub --import tsx ./main.ts', [toBinary('nub'), toBinary('node'), toDeferResolveEntry('./main.ts', opt), toDeferResolve('tsx')]);
   t('nub --test --test-reporter=custom-reporter', [toBinary('nub'), toBinary('node'), toDeferResolve('custom-reporter')]);
-  t('nub watch ./main.ts', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
-  t('nub run ./main', [toBinary('nub'), toEntry(join(cwd, 'main.ts'))]);
+  t('nub watch ./main.ts', [toBinary('nub'), toDeferResolveEntry(join(cwd, 'main.ts'), opt)]);
+  t('nub run ./main', [toBinary('nub'), toDeferResolveEntry(join(cwd, 'main.ts'), opt)]);
   t('nub run program', [toBinary('nub')], pkgScripts);
   t('nub -r build', [toBinary('nub')]);
   t('nub --filter pkg build', [toBinary('nub')]);
@@ -289,6 +289,34 @@ test('getInputsFromScripts (nub)', () => {
   t('nub node install 26', [toBinary('nub')]);
   t('nub dlx eslint', [toBinary('nub'), toBinary('eslint', opt)]);
   t('nub exec eslint', [toBinary('nub'), toBinary('eslint', opt)]);
+});
+
+test('getInputsFromScripts (vp)', () => {
+  t('vp exec node tooling/ciReuse/prove-reuse.ts', [toBinary('vp'), toBinary('node'), toDeferResolveEntry('tooling/ciReuse/prove-reuse.ts', opt)]);
+  t('vp exec -- tsc --noEmit', [toBinary('vp'), toBinary('tsc')]);
+  t('vp exec --filter app -- tsc', [toBinary('vp')]);
+  t('vp exec -r --parallel custom-build-cli', [toBinary('vp'), toBinary('custom-build-cli')]);
+  t('vp exec -c "cat package.json | jq -r .name"', [toBinary('vp'), toBinary('cat'), toBinary('jq')]);
+  t('vp exec program --onlyAllow="0BSD;MIT" --report="summary out"', [toBinary('vp'), toBinary('program')]);
+  t('vp exec node "./my dir/script.js"', [toBinary('vp'), toBinary('node'), toDeferResolveEntry('./my dir/script.js', opt)]);
+  t('vp exec "./my dir/script.js"', [toBinary('vp'), toEntry('./my dir/script.js')]);
+  t('vp exec', [toBinary('vp')]);
+  const app = { dir: join(cwd, 'packages/app') };
+  t('vp -C packages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp -C=packages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp exec vitest --filter smoke', [toBinary('vp'), toBinary('vitest')]);
+  t(`vp -C ${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp -Cpackages/app exec node ./scripts/task.mjs', [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t(`vp -C${app.dir} exec node ./scripts/task.mjs`, [toBinary('vp'), toBinary('node', app), toDeferResolveEntry('./scripts/task.mjs', { ...opt, ...app })]);
+  t('vp exec -w node ./script.js', [toBinary('vp'), toBinary('node', { dir: cwd }), toDeferResolveEntry('./script.js', { ...opt, dir: cwd })], { cwd: app.dir });
+  t('vp exec -c "node ./script.js" --flag', [toBinary('vp'), toBinary('node'), js]);
+  t('vp exec -t node ./script.js', [toBinary('vp'), toBinary('node'), js]);
+  t('vp -C packages/other exec --workspace-root node ./script.js', [toBinary('vp'), toBinary('node', { dir: cwd }), toDeferResolveEntry('./script.js', { ...opt, dir: cwd })], { cwd: app.dir });
+  t('vp build', [toBinary('vp')], withBuild);
+  t('vp test', [toBinary('vp')], lifecycle);
+  t('vp check', [toBinary('vp')]);
+  t('vp run build', [toBinary('vp')], withBuild);
+  t('vp install --frozen-lockfile', [toBinary('vp')]);
 });
 
 test('getInputsFromScripts (pnpm)', () => {

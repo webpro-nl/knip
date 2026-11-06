@@ -1,10 +1,11 @@
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { createJiti, type JitiOptions } from 'jiti';
+import type { Jiti, JitiOptions } from 'jiti';
 import { join } from './path.ts';
 
 const empty = join(fileURLToPath(import.meta.url), '../empty.js');
 
-const options = {
+const options: JitiOptions = {
   alias: {
     '@rushstack/eslint-config/patch/modern-module-resolution': empty,
     '@rushstack/eslint-patch/modern-module-resolution': empty,
@@ -15,6 +16,12 @@ const options = {
   extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx', '.jsx'],
 };
 
-const createLoader = (options: JitiOptions) => createJiti(process.cwd(), options);
+const cwd = process.cwd();
+const require = createRequire(import.meta.url);
+let jiti: Jiti | undefined;
 
-export const jiti = createLoader(options);
+export const getJiti = () => {
+  if (jiti) return jiti;
+  const { createJiti }: typeof import('jiti') = require('jiti');
+  return (jiti = createJiti(cwd, options));
+};

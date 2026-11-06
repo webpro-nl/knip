@@ -288,6 +288,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
 const args: Args = {
   config: true,
+  alias: { root: ['r'] },
   resolveInputs: (parsed: ParsedArgs, { cwd }) => {
     const inputs: Input[] = [];
     if (parsed['ui']) inputs.push(toDependency('@vitest/ui', { optional: true }));

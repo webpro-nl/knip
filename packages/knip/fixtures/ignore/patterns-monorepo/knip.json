@@ -1,8 +1,15 @@
 {
   "ignore": ["build/**"],
+  "ignoreDependencies": ["top-level-dep", "^react"],
+  "ignoreBinaries": ["root-dep"],
   "workspaces": {
-    "packages/lib": {
-      "ignore": ["output/**", "cache/**"]
+    ".": {
+      "ignore": ["tmp/**"],
+      "ignoreDependencies": ["root-dep", "^react"],
+      "ignoreUnresolved": ["^virtual:"]
+    },
+    "packages/*": {
+      "ignore": ["output/**", "cache/**", "../shared/**"]
     }
   }
 }

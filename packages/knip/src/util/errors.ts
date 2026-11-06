@@ -1,13 +1,19 @@
-import { core } from 'zod/mini';
 import { substringBefore } from './string.ts';
-
-const isZodErrorLike = (error: unknown): error is core.$ZodError<any> => error instanceof core.$ZodError;
 
 interface ErrorWithCause extends Error {
   cause: Error;
 }
 
 export class ConfigurationError extends Error {}
+
+export class ConfigurationValidationError extends Error {
+  errors: string[];
+
+  constructor(errors: string[]) {
+    super(errors.join('\n'));
+    this.errors = errors;
+  }
+}
 
 export class CompilerError extends Error {}
 
@@ -17,10 +23,9 @@ export const isKnownError = (error: Error) =>
   error instanceof ConfigurationError ||
   error instanceof CompilerError ||
   error instanceof LoaderError ||
-  isZodErrorLike(error);
+  error instanceof ConfigurationValidationError;
 
-export const hasErrorCause = (error: Error): error is ErrorWithCause =>
-  !isZodErrorLike(error) && error.cause instanceof Error;
+export const hasErrorCause = (error: Error): error is ErrorWithCause => error.cause instanceof Error;
 
 export const isConfigurationError = (error: Error) => error instanceof ConfigurationError;
 
@@ -35,17 +40,6 @@ export const formatCauseMessage = (error: Error, cwd: string) => {
 };
 
 export const getKnownErrors = (error: Error) => {
-  if (isZodErrorLike(error))
-    return Array.from(error.issues, error => {
-      let message = error.message;
-      const details = [];
-      if (error.path.length > 0) details.push(`location: ${error.path.join('.')}`);
-      // @ts-expect-error
-      if (typeof error.expected === 'string') details.push(`expected: ${error.expected}`);
-      // @ts-expect-error
-      if (Array.isArray(error.keys)) details.push(`${error.code}: ${error.keys.join(', ')}`);
-      if (details.length > 0) message += ` (${details.join(', ')})`;
-      return new Error(message);
-    });
+  if (error instanceof ConfigurationValidationError) return Array.from(error.errors, message => new Error(message));
   return [error];
 };
