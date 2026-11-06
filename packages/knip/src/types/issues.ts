@@ -115,11 +115,15 @@ export type ConfigurationHintType =
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
+export type UnusedIgnorePatternReason = 'no-issues' | 'gitignored' | 'no-matches';
+
 export type ConfigurationHint = {
   type: ConfigurationHintType;
   identifier: string | RegExp;
   filePath?: string;
   workspaceName?: string;
+  configKey?: string;
+  reason?: UnusedIgnorePatternReason;
   size?: number;
 };
 
