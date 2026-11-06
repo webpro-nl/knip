@@ -35,6 +35,7 @@ export type PluginName =
   | 'eleventy'
   | 'esbuild'
   | 'eslint'
+  | 'evalite'
   | 'eve'
   | 'execa'
   | 'expo'
@@ -239,6 +240,7 @@ export const pluginNames = [
   'eleventy',
   'esbuild',
   'eslint',
+  'evalite',
   'eve',
   'execa',
   'expo',
