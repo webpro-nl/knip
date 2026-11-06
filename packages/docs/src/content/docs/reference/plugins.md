@@ -1,5 +1,5 @@
 ---
-title: Plugins (177)
+title: Plugins (178)
 description: 'The full list of Knip plugins for frameworks, build tools, test runners and linters, each linking to its reference page.'
 tableOfContents: false
 ---
@@ -67,6 +67,7 @@ tableOfContents: false
 - [markdownlint][59]
 - [MDX][60]
 - [mdxlint][61]
+- [MikroORM][178]
 - [Metro][62]
 - [Mocha][63]
 - [moonrepo][64]
@@ -363,3 +364,4 @@ tableOfContents: false
 [175]: /reference/plugins/yarn
 [176]: /reference/plugins/yorkie
 [177]: /reference/plugins/zx
+[178]: /reference/plugins/mikro-orm
