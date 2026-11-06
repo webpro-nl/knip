@@ -2,6 +2,7 @@ import type { ParsedCLIArgs } from './cli-arguments.ts';
 import { debugLogObject } from './debug.ts';
 import { ConfigurationError } from './errors.ts';
 import { _load } from './loader.ts';
+import { timerify } from './Performance.ts';
 
 const unwrapFunction = async (maybeFunction: unknown, options: ParsedCLIArgs) => {
   if (typeof maybeFunction === 'function') {
@@ -17,7 +18,10 @@ const unwrapFunction = async (maybeFunction: unknown, options: ParsedCLIArgs) =>
 
 const isObject = (value: unknown) => typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export async function loadResolvedConfigFile(configPath: string, options: ParsedCLIArgs) {
+export const loadResolvedConfigFile = timerify(async function loadResolvedConfigFile(
+  configPath: string,
+  options: ParsedCLIArgs
+) {
   const loadedValue = await _load(configPath);
   let config;
   try {
@@ -27,4 +31,4 @@ export async function loadResolvedConfigFile(configPath: string, options: Parsed
   }
   if (!isObject(config)) throw new ConfigurationError(`Expected an object as configuration from ${configPath}`);
   return config;
-}
+});

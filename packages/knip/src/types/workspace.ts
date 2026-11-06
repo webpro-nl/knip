@@ -20,6 +20,10 @@ type WorkspaceManifest = {
   unusedIgnoreDependencies: Set<string | RegExp>;
   unusedIgnoreBinaries: Set<string | RegExp>;
   unusedIgnoreUnresolved: Set<string | RegExp>;
+  ignoreConfigKeys: Record<
+    'ignoreDependencies' | 'ignoreBinaries' | 'ignoreUnresolved',
+    Map<string | RegExp, string | undefined>
+  >;
 };
 
 export type WorkspaceManifests = Map<string, WorkspaceManifest>;

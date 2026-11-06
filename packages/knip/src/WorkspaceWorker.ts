@@ -44,12 +44,12 @@ import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
-import { ELLIPSIS } from './util/string.ts';
 import type { ConfigurationFiles } from './session/configuration.ts';
 
 type WorkspaceManagerOptions = {
   name: string;
   dir: string;
+  configKey?: string;
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
@@ -79,6 +79,7 @@ const nullConfig: EnsuredPluginConfiguration = { config: null, entry: null, proj
 export class WorkspaceWorker {
   name: string;
   dir: string;
+  configKey: string | undefined;
   config: WorkspaceConfiguration;
   manifest: Manifest;
   rootManifest: Manifest | undefined;
@@ -105,6 +106,7 @@ export class WorkspaceWorker {
   constructor({
     name,
     dir,
+    configKey,
     config,
     manifest,
     dependencies,
@@ -123,6 +125,7 @@ export class WorkspaceWorker {
   }: WorkspaceManagerOptions) {
     this.name = name;
     this.dir = dir;
+    this.configKey = configKey;
     this.config = config;
     this.manifest = createManifest(manifest);
     this.rootManifest = rootManifest;
@@ -595,13 +598,17 @@ export class WorkspaceWorker {
     const hints: ConfigurationHint[] = [];
     const entries = this.config[type].filter(pattern => !pattern.startsWith('!'));
     const workspaceName = this.name;
+    const configKey = this.configKey;
+    const hint = (type: ConfigurationHint['type'], identifier: string): ConfigurationHint =>
+      configKey ? { type, identifier, workspaceName, configKey } : { type, identifier, workspaceName };
     const userDefinedPatterns = entries.filter(id => !isDefaultPattern(type, id));
 
     if (userDefinedPatterns.length === 0) return hints;
 
     if (filePaths.length === 0) {
-      const identifier = `[${entries[0]}${entries.length > 1 ? `, ${ELLIPSIS}` : ''}]`;
-      hints.push({ type: `${type}-empty`, identifier, workspaceName });
+      for (const pattern of userDefinedPatterns) {
+        hints.push(hint(`${type}-empty`, pattern.replace(/!$/, '')));
+      }
       return hints;
     }
 
@@ -619,9 +626,9 @@ export class WorkspaceWorker {
       if (pattern.startsWith('!')) continue;
       const id = pattern.replace(/!$/, '');
       if (includedPaths.has(join(dir, id))) {
-        hints.push({ type: `${type}-redundant`, identifier: pattern, workspaceName });
+        hints.push(hint(`${type}-redundant`, pattern));
       } else if (!hasMatch(picomatch(id))) {
-        hints.push({ type: `${type}-empty`, identifier: pattern, workspaceName });
+        hints.push(hint(`${type}-empty`, pattern));
       }
     }
 
@@ -633,13 +640,13 @@ export class WorkspaceWorker {
           patternExtensions.add(ext);
           if (seen.has(ext) || DEFAULT_EXTENSIONS.has(ext) || compilerExtensions.has(ext)) continue;
           seen.add(ext);
-          hints.push({ type: 'project-extension-unregistered', identifier: ext, workspaceName });
+          hints.push(hint('project-extension-unregistered', ext));
         }
       }
       if (patternExtensions.size > 0) {
         for (const ext of compilerExtensions) {
           if (patternExtensions.has(ext)) continue;
-          hints.push({ type: 'project-extension-excluded', identifier: ext, workspaceName });
+          hints.push(hint('project-extension-excluded', ext));
         }
       }
     }

@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/configuration-hints-glob-key__app",
+  "dependencies": {
+    "svelte": "*"
+  }
+}

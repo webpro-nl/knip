@@ -49,7 +49,7 @@ import { createPublishedTypeDependencyAnalyzer } from '../typescript/get-publish
 import { loadTSConfig } from '../util/load-tsconfig.ts';
 import { createFileNode, updateImportMap } from '../util/module-graph.ts';
 import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpecifier } from '../util/modules.ts';
-import { perfObserver } from '../util/Performance.ts';
+import { perfObserver, timerify } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { expandIgnorePatterns } from '../util/parse-and-convert-gitignores.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
@@ -70,7 +70,7 @@ interface BuildOptions {
   options: MainOptions;
 }
 
-export async function build({
+export const build = timerify(async function build({
   chief,
   collector,
   counselor,
@@ -168,6 +168,7 @@ export async function build({
     const worker = new WorkspaceWorker({
       name,
       dir,
+      configKey: workspace.configKey,
       config: baseConfig,
       manifest,
       dependencies,
@@ -218,7 +219,12 @@ export async function build({
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
 
-    const fn = (id: string) => ({ pattern: prependDir(name, id), id, workspaceName: name });
+    const fn = (id: string) => ({
+      pattern: prependDir(name, id),
+      id,
+      workspaceName: name,
+      configKey: workspace.configKey,
+    });
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
@@ -681,4 +687,4 @@ export async function build({
     },
     enabledPluginsStore,
   };
-}
+});
