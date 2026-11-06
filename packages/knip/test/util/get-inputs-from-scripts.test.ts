@@ -448,6 +448,7 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup -p ./require.js', [toBinary('rollup'), req]);
   t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
+  t('rollup -p', [toBinary('rollup')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
@@ -547,6 +548,8 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
   t('prettier --write --config=my-prettier-settings.js', [toBinary('prettier'), toConfig('prettier', 'my-prettier-settings.js')]);
+  t('lingui extract --config', [toBinary('lingui')]);
+  t('prettier --config --write', [toBinary('prettier')]);
 });
 
 test('getInputsFromScripts (find -exec)', () => {
