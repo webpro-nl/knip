@@ -554,6 +554,14 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('prettier --config --write', [toBinary('prettier')]);
 });
 
+test('getInputsFromScripts (plugins → fromArgs)', () => {
+  t('glob --cmd', [toBinary('glob')]);
+  t('glob -c', [toBinary('glob')]);
+  t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('nodemon --exec', [toBinary('nodemon')]);
+});
+
 test('getInputsFromScripts (find -exec)', () => {
   t("find blah -exec node -r {} ';'", [toBinary('find'), toBinary('node')]);
   t('find blah -exec node -r {} \\;', [toBinary('find'), toBinary('node')]);

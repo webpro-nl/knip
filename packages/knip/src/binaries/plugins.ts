@@ -35,6 +35,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
     ...(pluginArgs.string ?? []),
   ];
   for (const value of config) string.push(typeof value === 'string' ? value : value[0]);
+  if (Array.isArray(pluginArgs.fromArgs)) string.push(...pluginArgs.fromArgs);
 
   const parsed = parseArgs(args, {
     string,
