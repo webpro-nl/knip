@@ -49,3 +49,21 @@ for (const [value, message] of [
     });
   }
 }
+
+test('Floating rejection in config does not crash the run', async () => {
+  const cwd = await copyFixture('fixtures/plugins/next-page-extensions');
+  try {
+    const configPath = join(cwd, 'next.config.js');
+    const config = await readFile(configPath, 'utf8');
+    await writeFile(configPath, `Promise.reject(new Error('boom'));\n${config}`);
+
+    const result = exec('knip --no-progress --reporter json --include files', { cwd });
+    assert.equal(result.stderr, 'WARNING: Unhandled rejection (boom)');
+    assert.equal(result.status, 1);
+    assert.deepEqual(JSON.parse(result.stdout), {
+      issues: [{ file: 'src/unused.ts', files: [{ name: 'src/unused.ts' }] }],
+    });
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
