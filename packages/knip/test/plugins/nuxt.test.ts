@@ -18,7 +18,7 @@ test('Find dependencies with the Nuxt plugin without a config file', async () =>
     ...baseCounters,
     dependencies: 1,
     exports: 1,
-    processed: 7,
-    total: 7,
+    processed: 10,
+    total: 10,
   });
 });
