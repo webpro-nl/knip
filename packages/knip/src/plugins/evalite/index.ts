@@ -1,7 +1,7 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toEntry } from '../../util/input.ts';
+import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
+import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
+import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import type { EvaliteConfig } from './types.ts';
 
 // https://www.evalite.dev/guides/configuration
 // https://github.com/mattpocock/evalite/blob/evalite@0.19.0/packages/evalite/src/config.ts
@@ -15,12 +15,13 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['evalite.config.{ts,mts,js,mjs}'];
 
-// Evalite passes a fixed `include` to Vitest (run-evalite.ts), so this is not configurable
 const entry = ['**/*.eval.?(m)ts'];
 
-const resolveConfig: ResolveConfig<EvaliteConfig> = async localConfig => {
-  const setupFiles = (localConfig?.setupFiles ?? []).map(specifier => toDeferResolve(specifier));
-  return [...entry.map(toEntry), ...setupFiles];
+const resolveFromAST: ResolveFromAST = (program, options) => {
+  const inputs: Input[] = [];
+  for (const id of options.config.entry ?? entry) inputs.push(toEntry(id));
+  for (const id of collectPropertyValues(program, 'setupFiles')) inputs.push(toDeferResolve(id));
+  return inputs;
 };
 
 const plugin: Plugin = {
@@ -29,7 +30,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   entry,
-  resolveConfig,
+  resolveFromAST,
 };
 
 export default plugin;
