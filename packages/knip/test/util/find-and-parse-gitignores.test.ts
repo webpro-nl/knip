@@ -172,3 +172,24 @@ test('findAndParseGitignores (nested explicit wildcard directories and negation)
     await fs.rm(cwd, { recursive: true, force: true });
   }
 });
+
+test('findAndParseGitignores (anchored pattern names cwd)', async () => {
+  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/app/data');
+  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), []);
+  assert(isIgnored(join(cwd, 'nested/file.ts')));
+});
+
+test('findAndParseGitignores (unanchored pattern names cwd)', async () => {
+  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/lib');
+  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), []);
+  assert(isIgnored(join(cwd, 'nested/file.ts')));
+});
+
+test('findAndParseGitignores (negated pattern names cwd)', async () => {
+  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/packages/web');
+  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), ['index.ts']);
+  assert(isIgnored(join(cwd, 'debug.log')));
+});

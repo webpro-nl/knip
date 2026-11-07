@@ -103,6 +103,16 @@ test('parseAndConvertGitignorePatterns (root wildcard in ancestor)', () => {
   ]);
 });
 
+test('parseAndConvertGitignorePatterns (pattern names cwd or its ancestor)', () => {
+  const ignoreAll = [{ negated: false, pattern: '**' }];
+  assert.deepEqual(parse('app/data/', 'app/data/'), ignoreAll);
+  assert.deepEqual(parse('/app', 'app/data/'), ignoreAll);
+  assert.deepEqual(parse('app/', 'app/'), ignoreAll);
+  assert.deepEqual(parse('data/', 'app/data/'), ignoreAll);
+  assert.deepEqual(parse('*.log\n!app/data/\n!app/', 'app/data/'), [{ negated: false, pattern: '**/*.log' }]);
+  assert.deepEqual(parse('app\n/app/dat/', 'application/data/'), [{ negated: false, pattern: '**/app' }]);
+});
+
 test('parseAndConvertGitignorePatterns (explicit wildcard directories in ancestor)', () => {
   assert.deepEqual(parse('*/**/generated/*.ts\n!*/**/generated/keep.ts', 'packages/ui/'), [
     { negated: false, pattern: '**/generated/*.ts' },

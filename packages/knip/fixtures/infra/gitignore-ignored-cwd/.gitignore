@@ -1,0 +1,5 @@
+*.log
+app/data/
+lib/
+packages/*
+!packages/web/

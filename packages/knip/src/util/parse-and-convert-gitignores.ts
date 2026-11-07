@@ -35,7 +35,12 @@ export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: st
       const original = line.replace(/^\\(?=#)/, '').trim();
       const converted = convertGitignoreToPicomatchIgnorePatterns(original);
       const { negated, pattern } = converted;
-      if (!ancestor || pattern === '**' || pattern.startsWith('**/')) return [converted];
+      if (!ancestor || pattern === '**') return [converted];
+      const isDeep = pattern.startsWith('**/');
+      if (isDeep ? `/${ancestor}`.includes(`/${pattern.slice(3)}/`) : ancestor.startsWith(`${pattern}/`)) {
+        return negated ? [] : [{ negated, pattern: '**' }];
+      }
+      if (isDeep) return [converted];
       if (pattern === '*') return original.startsWith(negated ? '!/' : '/') ? [] : [converted];
       if (pattern.startsWith('*/**/')) return [{ negated, pattern: pattern.slice(2) }];
       return pattern.startsWith(ancestor) ? [{ negated, pattern: pattern.slice(ancestor.length) }] : [];
