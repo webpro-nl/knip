@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "test": "yarn --cwd browser wtr --node-resolve --files checks.js",
-    "test:custom": "wtr --config config/runner.cjs --node-resolve custom-checks.js"
+    "test:custom": "wtr --config config/runner.cjs --node-resolve custom-checks.js",
+    "test:after": "wtr -- spec/after-terminator.js"
   },
   "devDependencies": {
     "@esm-bundle/chai": "*",

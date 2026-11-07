@@ -1,7 +1,13 @@
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 import options from './runner-options.js';
 
-export default {
+const assets = { name: 'assets', files: ['spec/decorated/only.js'] };
+
+const config = {
   ...options,
-  plugins: [esbuildPlugin({ js: true })],
+  files: ['spec/listed.js', '!spec/skipped.js'],
+  groups: [{ name: 'integration', files: ['spec/integration-only.js'] }],
+  plugins: [esbuildPlugin({ js: true }), assets],
 };
+
+export default config;
