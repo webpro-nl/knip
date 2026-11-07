@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import type { Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
@@ -24,6 +23,7 @@ import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
   getPackageNameFromModuleSpecifier,
+  isBuiltin,
   isDefinitelyTyped,
 } from './util/modules.ts';
 import { findMatch, toRegexOrString } from './util/regex.ts';
@@ -207,12 +207,7 @@ export class DependencyDeputy {
     { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (
-      specifier.startsWith('node:') ||
-      specifier.startsWith(PROTOCOL_CLOUDFLARE) ||
-      (specifier !== 'ws' && isBuiltin(specifier))
-    )
-      return true;
+    if (isBuiltin(specifier) || specifier.startsWith(PROTOCOL_CLOUDFLARE)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
@@ -233,8 +228,6 @@ export class DependencyDeputy {
 
     if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
       this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
-
-    if (specifier === 'ws' && isBuiltin(specifier)) return true;
 
     if (closestWorkspaceName) {
       this.addReferencedDependency(closestWorkspaceName, packageName);

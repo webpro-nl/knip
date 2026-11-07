@@ -6,7 +6,8 @@
   "dependencies": {
     "next": "*",
     "micromatch": "*",
-    "type-only-production-types": "*"
+    "type-only-production-types": "*",
+    "ws": "*"
   },
   "devDependencies": {
     "@types/estree": "*",

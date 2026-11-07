@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
@@ -8,6 +7,7 @@ import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
+  isBuiltin,
   isStartsLikePackageName,
   sanitizeSpecifier,
 } from '../util/modules.ts';
@@ -170,8 +170,6 @@ const getImportsAndExports = (
         jsDocTags,
       };
       if (modifiers & IMPORT_FLAGS.RE_EXPORT) imports.add(_import);
-      if (specifier === 'ws' && !(options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY))
-        external.add({ ..._import, specifier, modifiers: modifiers & ~IMPORT_FLAGS.RE_EXPORT });
       return _import;
     }
 
