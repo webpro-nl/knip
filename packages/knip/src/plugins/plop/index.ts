@@ -9,7 +9,7 @@ const enablers = ['plop'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['plopfile.{cjs,mjs,js,ts}'];
+const entry = ['plopfile.{js,cjs,mjs,ts,cts,mts}'];
 
 const plugin: Plugin = {
   title,
