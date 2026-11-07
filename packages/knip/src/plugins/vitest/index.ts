@@ -5,7 +5,14 @@ import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../.
 import { filterTransitiveDependencies } from '../../util/filter-transitive-dependencies.ts';
 import { findFileWithExtensions } from '../../util/fs.ts';
 import { _dirGlob, _glob } from '../../util/glob.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import {
+  type Input,
+  toConfig,
+  toDeferResolve,
+  toDeferResolveProductionEntry,
+  toDependency,
+  toEntry,
+} from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -265,7 +272,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       typeof _input === 'string' ? [_input] : Array.isArray(_input) ? _input : Object.values(_input).flat();
     for (const specifier of inputSpecifiers) {
       const resolved = toAbsolute(specifier, viteRoot);
-      inputs.add(toProductionEntry(resolved));
+      inputs.add(toDeferResolveProductionEntry(resolved));
       if (resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved, viteRoot, publicDir)) inputs.add(input);
       }
@@ -274,7 +281,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const _entry = cfg.build?.lib?.entry ?? [];
     const entries =
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
-    const deps = entries.map(specifier => toAbsolute(specifier, viteRoot)).map(id => toProductionEntry(id));
+    const deps = entries.map(specifier => toAbsolute(specifier, viteRoot)).map(id => toDeferResolveProductionEntry(id));
     for (const dependency of deps) inputs.add(dependency);
   }
 

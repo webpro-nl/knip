@@ -352,7 +352,7 @@ export const build = timerify(async function build({
           if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
             if (!input.optional) addPattern(entryPatternsSkipExports, input.group ?? DEFAULT_GROUP, resolvedFilePath);
           } else {
-            principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
+            principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
         }
       }

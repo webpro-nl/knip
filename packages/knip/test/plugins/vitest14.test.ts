@@ -16,7 +16,22 @@ test('Find dependencies with the Vitest plugin when build.lib.entry is resolved 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    files: 2,
+    processed: 7,
+    total: 7,
   });
 });
+
+for (const isProduction of [false, true]) {
+  test(`Resolve Vite library and Rollup inputs as literal paths (isProduction: ${isProduction})`, async () => {
+    const { issues, counters } = await main(await createOptions({ cwd, isProduction }));
+
+    assert.deepEqual(Object.keys(issues.files).sort(), ['src/p/app.ts', 'src/v/entry.ts']);
+    assert.deepEqual(counters, {
+      ...baseCounters,
+      files: 2,
+      processed: isProduction ? 6 : 7,
+      total: isProduction ? 6 : 7,
+    });
+  });
+}
