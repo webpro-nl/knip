@@ -76,7 +76,7 @@ monorepos][2].
 
 If a workspace is not configured as such in `package.json#workspaces` (or
 `pnpm-workspace.yaml`) it can be added to the Knip configuration manually. Add
-their path to the `workspaces` configuration object the same way as
+its path to the `workspaces` configuration object the same way as
 `"packages/cli": {}` in the example above.
 
 ## Source mapping

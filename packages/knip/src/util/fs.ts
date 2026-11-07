@@ -1,10 +1,11 @@
 import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { parse as parseYAMLContents } from 'yaml';
-import { parse as parseTOML } from 'smol-toml';
+import { createRequire } from 'node:module';
 import stripJsonComments from 'strip-json-comments';
 import { LoaderError } from './errors.ts';
 import { extname, join, toPosix } from './path.ts';
+
+const require = createRequire(import.meta.url);
 
 export const isDirectory = (cwdOrPath: string, name?: string) => {
   try {
@@ -75,6 +76,7 @@ export const loadYAML = async (filePath: string) => {
 
 export const loadTOML = async (filePath: string) => {
   const contents = await loadFile(filePath);
+  const { parse: parseTOML }: typeof import('smol-toml') = require('smol-toml');
   return parseTOML(contents);
 };
 
@@ -88,6 +90,7 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 };
 
 export const parseYAML = (contents: string) => {
+  const { parse: parseYAMLContents }: typeof import('yaml') = require('yaml');
   return parseYAMLContents(contents, { logLevel: 'error' });
 };
 

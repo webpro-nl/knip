@@ -1,5 +1,4 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import { formatly } from 'formatly';
 import type { Fixes } from './types/exports.ts';
 import type { Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import { DEFAULT_CATALOG } from './util/catalog.ts';
@@ -24,6 +23,7 @@ export const fix = async (issues: Issues, counters: Counters, options: MainOptio
   }
 
   if (options.isFormat) {
+    const { formatly } = await import('formatly');
     const report = await formatly(Array.from(touchedFiles));
     if (report.ran && report.result.runner !== 'dry-run' && report.result.code === 0) {
       debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);

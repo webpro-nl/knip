@@ -73,7 +73,7 @@ export const unusedFunction = () => {};
 ```
 
 This tag can also be used to make exceptions in entry files when using
-[--include-entry-exports][3].
+[`--include-entry-exports`][3].
 
 [JSDoc: @public][4] and [TSDoc: @public][5]
 
@@ -120,7 +120,7 @@ duplicates from being reported.
 
 ## `@beta`
 
-Works identical to [`@public`][9]. Knip ignores other tags like `@alpha` and
+Works identically to [`@public`][9]. Knip ignores other tags like `@alpha` and
 `@experimental`.
 
 [TSDoc: @beta][10]

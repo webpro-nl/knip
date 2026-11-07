@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/vite-lib-entry",
+  "type": "module",
+  "exports": {
+    ".": "./src/library.ts"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}
