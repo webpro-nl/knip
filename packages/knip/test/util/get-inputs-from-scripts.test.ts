@@ -449,6 +449,9 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
   t('rollup -p', [toBinary('rollup')]);
+  t('rollup --config', [toBinary('rollup')]);
+  t('rollup --config --watch', [toBinary('rollup')]);
+  t('rollup --config rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
