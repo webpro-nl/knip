@@ -16,6 +16,7 @@
     "@types/node": "*",
     "@types/unused": "*",
     "@types/without-the-package": "*",
+    "@types/ws": "*",
     "mocha": "*"
   }
 }

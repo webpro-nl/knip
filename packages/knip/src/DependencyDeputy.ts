@@ -223,7 +223,12 @@ export class DependencyDeputy {
     { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
     if (!this.isReportDependencies) return true;
-    if (specifier.startsWith('node:') || specifier.startsWith(PROTOCOL_CLOUDFLARE) || isBuiltin(specifier)) return true;
+    if (
+      specifier.startsWith('node:') ||
+      specifier.startsWith(PROTOCOL_CLOUDFLARE) ||
+      (specifier !== 'ws' && isBuiltin(specifier))
+    )
+      return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports
@@ -244,6 +249,8 @@ export class DependencyDeputy {
 
     if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
       this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+
+    if (specifier === 'ws' && isBuiltin(specifier)) return true;
 
     if (closestWorkspaceName) {
       this.addReferencedDependency(closestWorkspaceName, packageName);

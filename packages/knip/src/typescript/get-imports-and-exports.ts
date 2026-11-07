@@ -170,6 +170,8 @@ const getImportsAndExports = (
         jsDocTags,
       };
       if (modifiers & IMPORT_FLAGS.RE_EXPORT) imports.add(_import);
+      if (specifier === 'ws' && !(options.skipTypeOnly && modifiers & IMPORT_FLAGS.TYPE_ONLY))
+        external.add({ ..._import, specifier, modifiers: modifiers & ~IMPORT_FLAGS.RE_EXPORT });
       return _import;
     }
 
