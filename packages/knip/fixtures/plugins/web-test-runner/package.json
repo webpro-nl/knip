@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/web-test-runner",
+  "type": "module",
+  "scripts": {
+    "test": "yarn --cwd browser wtr --node-resolve --files checks.js",
+    "test:custom": "wtr --config config/runner.cjs --node-resolve custom-checks.js"
+  },
+  "devDependencies": {
+    "@esm-bundle/chai": "*",
+    "@web/dev-server-esbuild": "*",
+    "@web/dev-server-rollup": "*",
+    "@web/test-runner": "*"
+  }
+}
