@@ -5,7 +5,7 @@ import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
-import { isInNodeModules, join } from '../../util/path.ts';
+import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NextConfigModule } from './types.ts';
 
@@ -59,6 +59,7 @@ const getInputs = (
   pageExtensions: string[],
   loaders: Iterable<string>,
   aliasTargets: Iterable<string>,
+  files: Iterable<string>,
   configFileDir: string
 ) => {
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
@@ -67,6 +68,7 @@ const getInputs = (
   for (const loader of loaders) inputs.push(toDeferResolve(loader));
   for (const target of aliasTargets)
     inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
+  for (const file of files) inputs.push(toProductionEntry(toAbsolute(file, configFileDir)));
   return inputs;
 };
 
@@ -104,13 +106,18 @@ const resolveConfig: ResolveConfig<NextConfigModule> = async (localConfig, { con
   const aliasTargets = new Set<string>();
   for (const target of Object.values(config?.turbopack?.resolveAlias ?? {}))
     collectAliasTargetValues(target, aliasTargets);
-  return getInputs(pageExtensions, loaders, aliasTargets, configFileDir);
+  const files = new Set<string>();
+  addSpecifier(files, config?.images?.loaderFile);
+  addSpecifier(files, config?.cacheHandler);
+  for (const handler of Object.values(config?.cacheHandlers ?? {})) addSpecifier(files, handler);
+  return getInputs(pageExtensions, loaders, aliasTargets, files, configFileDir);
 };
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
   const aliasTargets = new Set<string>();
+  const files = new Set<string>();
   const collectAliasTargets = (node: Expression | SpreadElement | null) => {
     const target = getStringValue(node);
     if (target) aliasTargets.add(target);
@@ -141,6 +148,9 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
+      addSpecifier(files, getStringValue(findProperty(findProperty(node, 'images'), 'loaderFile')));
+      addSpecifier(files, getStringValue(findProperty(node, 'cacheHandler')));
+      for (const handler of getPropertyValues(node, 'cacheHandlers')) addSpecifier(files, handler);
       const turbopack = findProperty(node, 'turbopack');
       if (turbopack?.type === 'ConditionalExpression') {
         collectTurbopackAliases(turbopack.consequent);
@@ -157,7 +167,7 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   });
   visitor.visit(program);
 
-  return getInputs([...pageExtensions], loaders, aliasTargets, configFileDir);
+  return getInputs([...pageExtensions], loaders, aliasTargets, files, configFileDir);
 };
 
 const commands = new Set(['dev', 'build', 'start']);
