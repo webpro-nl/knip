@@ -120,7 +120,7 @@ duplicates from being reported.
 
 ## `@beta`
 
-Works identical to [`@public`][9]. Knip ignores other tags like `@alpha` and
+Works identically to [`@public`][9]. Knip ignores other tags like `@alpha` and
 `@experimental`.
 
 [TSDoc: @beta][10]
