@@ -91,7 +91,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
         : [];
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
-  const mapToConfigPattern =(value: string | [string, (value: string) => string]) => {
+  const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
     if (typeof value === 'string')
       return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], inputOpts)] : [];
     const [id, fn] = value;
