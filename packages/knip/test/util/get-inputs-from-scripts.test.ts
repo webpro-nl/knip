@@ -455,6 +455,8 @@ test('getInputsFromScripts ("positionals")', () => {
   t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toDeferResolve('./script.js')]);
   t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --transpile-only ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --prefer-ts-exts ./main.ts', [toBinary('ts-node'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toDeferResolve('script.js')]);
