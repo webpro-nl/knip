@@ -19,6 +19,7 @@ import { ConfigurationFiles } from '../session/configuration.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
+import { escapePath } from 'tinyglobby';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
 import {
@@ -350,7 +351,12 @@ export const build = timerify(async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
-            if (!input.optional) addPattern(entryPatternsSkipExports, input.group ?? DEFAULT_GROUP, resolvedFilePath);
+            if (!input.optional)
+              addPattern(
+                entryPatternsSkipExports,
+                input.group ?? DEFAULT_GROUP,
+                escapePath(relative(dir, resolvedFilePath))
+              );
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }

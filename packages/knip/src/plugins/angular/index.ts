@@ -1,6 +1,14 @@
 import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import {
+  type Input,
+  toConfig,
+  toDeferResolve,
+  toDeferResolveEntry,
+  toDeferResolveProductionEntry,
+  toDependency,
+  toEntry,
+} from '../../util/input.ts';
 import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createComponentStyleUrlsVisitor } from '../_component-style-urls/component-style-urls-visitor.ts';
@@ -54,7 +62,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         if (opts.maybeExternal && !isInternal(specifier) && !existsSync(normalizedPath)) {
           return toDeferResolve(specifier);
         }
-        return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
+        return opts.isProduction ? toDeferResolveProductionEntry(normalizedPath) : toDeferResolveEntry(normalizedPath);
       };
       for (const [configName, entriesByOption] of entriesByOptionByConfig) {
         for (const [option, entries] of entriesByOption) {

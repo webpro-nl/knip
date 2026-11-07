@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDeferResolveEntry, toEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PlaywrightTestConfig } from './types.ts';
@@ -35,8 +35,9 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   const { configFileDir } = options;
 
   const inputs: Input[] = [];
-  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
-  for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
+  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toDeferResolveEntry(toAbsolute(id, configFileDir)));
+  for (const id of arrayify(localConfig.globalTeardown))
+    inputs.push(toDeferResolveEntry(toAbsolute(id, configFileDir)));
 
   for (const server of [localConfig.webServer].flat()) {
     if (!server?.command) continue;

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toEntry, toProject } from '../../util/input.ts';
+import { toDeferResolveEntry, toProject } from '../../util/input.ts';
 import { relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getActionDependencies } from '../github-actions/index.ts';
@@ -22,7 +22,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   for (const filePath of new Set(filePaths)) {
     const relativePath = relative(options.cwd, filePath);
     if (isAssumeArtifact(relativePath)) inputs.push(toProject(`!${relativePath}`));
-    else inputs.push(toEntry(relativePath));
+    else inputs.push(toDeferResolveEntry(filePath));
   }
   return inputs;
 };

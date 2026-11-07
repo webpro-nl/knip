@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { toDeferResolveProductionEntry, toDependency } from '../../util/input.ts';
 import { _load } from '../../util/loader.ts';
 import { get } from '../../util/object.ts';
 import { isInternal, join, toAbsolute } from '../../util/path.ts';
@@ -32,16 +32,16 @@ const resolveFileVariable = async (value: unknown, dir: string): Promise<unknown
   }
 };
 
-const handlerToEntry = (handler: string) => {
+const handlerToEntry = (handler: string, dir: string) => {
   const dot = handler.lastIndexOf('.');
   const file = handler.slice(0, dot);
-  return toProductionEntry(/\.(?:[cm]?[jt]s|[jt]sx)$/.test(file) ? file : `${file}.{js,ts}`);
+  return toDeferResolveProductionEntry(file, { dir });
 };
 
 const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toProductionEntry(toAbsolute(plugin, dir)) : toDependency(plugin);
+  isInternal(plugin) ? toDeferResolveProductionEntry(toAbsolute(plugin, dir)) : toDependency(plugin);
 
-const getFunctionEntries = async (functions: unknown, dir: string) => {
+const getFunctionEntries = async (functions: unknown, dir: string, cwd: string) => {
   const entries = [];
   const resolved = await resolveFileVariable(functions, dir);
   for (const group of Array.isArray(resolved) ? resolved : [resolved]) {
@@ -49,17 +49,19 @@ const getFunctionEntries = async (functions: unknown, dir: string) => {
     if (!isRecord(fns)) continue;
     for (const name in fns) {
       const fn = await resolveFileVariable(fns[name], dir);
-      if (isRecord(fn) && typeof fn.handler === 'string') entries.push(handlerToEntry(fn.handler));
+      if (isRecord(fn) && typeof fn.handler === 'string') entries.push(handlerToEntry(fn.handler, cwd));
     }
   }
   return entries;
 };
 
 const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
-  esbuild && typeof esbuild === 'object' ? arrayify(esbuild.inject).map(id => toProductionEntry(join(dir, id))) : [];
+  esbuild && typeof esbuild === 'object'
+    ? arrayify(esbuild.inject).map(id => toDeferResolveProductionEntry(join(dir, id)))
+    : [];
 
 export const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
-  const functions = await getFunctionEntries(config.functions, options.configFileDir);
+  const functions = await getFunctionEntries(config.functions, options.configFileDir, options.cwd);
   const resolvedPlugins = await resolveFileVariable(config.plugins, options.configFileDir);
   const plugins = Array.isArray(resolvedPlugins)
     ? resolvedPlugins.filter((plugin): plugin is string => typeof plugin === 'string')

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toDeferResolveProductionEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { WranglerConfig } from './types.ts';
 
@@ -13,8 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['wrangler.{json,jsonc,toml}'];
 
-const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
-  return (config.main ? [config.main] : []).map(id => toProductionEntry(id));
+const resolveConfig: ResolveConfig<WranglerConfig> = async (config, { cwd }) => {
+  return (config.main ? [config.main] : []).map(id => toDeferResolveProductionEntry(id, { dir: cwd }));
 };
 
 const plugin: Plugin = {
