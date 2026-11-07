@@ -1,12 +1,14 @@
+import type { Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
-import type { BinaryResolver } from '../types/config.ts';
+import type { Args } from '../types/args.ts';
+import type { BinaryResolver, ScriptArg } from '../types/config.ts';
 import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { isWrapper as isFallbackWrapper, resolve as fallbackResolve } from './fallback.ts';
-import { toCommandBinary, toWordArgs } from './util.ts';
+import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
+import { argsFrom, toCommandBinary, toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
@@ -15,20 +17,18 @@ const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loade
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
-export const resolve: BinaryResolver = (binary, words, options) => {
-  const { cwd, fromArgs, containingFilePath, manifest } = options;
-  const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
+const spawningArgs: Args = {
+  fromArgs: (parsed, args) => (parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? [])),
+};
 
-  if (!pluginArgs) return fallbackResolve(binary, words, options);
-
-  const inputOpts = {};
-  if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });
-
+const toArgs = (pluginArgs: Args, words: Word[]) => {
   const values: string[] = [];
   for (const word of words) values.push(word.value);
-  const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
+  return typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
+};
 
-  const parsed = parseArgs(args, {
+const parse = (pluginArgs: Args, args: string[]) =>
+  parseArgs(args, {
     string: [
       ...(pluginArgs.nodeImportArgs ? ['import'] : []),
       ...(pluginArgs.config === true ? ['config'] : []),
@@ -42,6 +42,26 @@ export const resolve: BinaryResolver = (binary, words, options) => {
     },
     '--': true,
   });
+
+export const getWrappedCommand = (binary: string, words: Word[]): ScriptArg[] | undefined => {
+  const pluginArgs = pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningArgs : undefined);
+  const fromArgs = pluginArgs?.fromArgs;
+  if (!pluginArgs || typeof fromArgs !== 'function') return;
+  const args = toArgs(pluginArgs, words);
+  return toWordArgs(fromArgs(parse(pluginArgs, args), args), words);
+};
+
+export const resolve: BinaryResolver = (binary, words, options) => {
+  const { cwd, fromArgs, containingFilePath, manifest } = options;
+  const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
+
+  if (!pluginArgs) return fallbackResolve(binary, words, options);
+
+  const inputOpts = {};
+  if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });
+
+  const args = toArgs(pluginArgs, words);
+  const parsed = parse(pluginArgs, args);
 
   const positionals = [];
   if (pluginArgs.positional && parsed._[0]) {

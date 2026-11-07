@@ -8,7 +8,20 @@ const title = 'c8';
 
 const args = {
   args: (args: string[]) => args.filter(arg => arg !== 'check-coverage'),
-  boolean: ['all', 'check-coverage', 'clean', 'exclude-after-remap', 'per-file', 'skip-full'],
+  boolean: [
+    '100',
+    'all',
+    'allowExternal',
+    'check-coverage',
+    'clean',
+    'exclude-after-remap',
+    'exclude-node-modules',
+    'experimental-monocart',
+    'merge-async',
+    'omit-relative',
+    'per-file',
+    'skip-full',
+  ],
   fromArgs: (parsed: ParsedArgs, args: string[]) => (parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? [])),
 };
 

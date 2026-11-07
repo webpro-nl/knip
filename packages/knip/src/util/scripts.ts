@@ -8,17 +8,14 @@ import {
   type SyntaxNode,
   type Word,
 } from 'unbash';
-import { argsFrom } from '../binaries/util.ts';
-import c8 from '../plugins/c8/index.ts';
+import { getWrappedCommand } from '../binaries/plugins.ts';
+import { toScript } from '../binaries/util.ts';
 import { extractBinary } from './modules.ts';
-import parseArgs from './parse-args.ts';
 
 export interface ScriptCommand {
   binary: string;
   args: string[];
 }
-
-const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 
 // Argv arrays are spawned without a shell, so single-quote each element to keep the script parser from splitting on
 // spaces or acting on operators, globs and expansions the process would have received literally
@@ -54,11 +51,9 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
         if (!text) continue;
         const binary = extractBinary(text);
         const words = getCommandWords(node);
-        if (spawningBinaries.has(binary)) {
-          const command = parseArgs(words, { boolean: c8.args?.boolean })._[0];
-          const rest = command ? argsFrom(words, command) : [];
-          out.push(...getScriptCommands(rest.map(word => word.text).join(' ')));
-        } else out.push({ binary, args: words.map(word => word.value) });
+        const command = getWrappedCommand(binary, words);
+        if (command?.length) out.push(...getScriptCommands(toScript(command)));
+        else out.push({ binary, args: words.map(word => word.value) });
       }
     }
   } catch {

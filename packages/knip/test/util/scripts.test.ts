@@ -50,6 +50,10 @@ test('getScriptCommands skips options of spawning binaries', () => {
     { binary: 'node', args: ['--test'] },
   ]);
   assert.deepEqual(getScriptCommands('c8 -r lcov --all bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('c8 --100 node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(getScriptCommands('retry-cli --retries 3 node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
 });
 
 test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {
