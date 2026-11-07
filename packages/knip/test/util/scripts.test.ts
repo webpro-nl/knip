@@ -54,6 +54,9 @@ test('getScriptCommands skips options of spawning binaries', () => {
   assert.deepEqual(getScriptCommands('retry-cli --retries 3 node ./script.js'), [
     { binary: 'node', args: ['./script.js'] },
   ]);
+  assert.deepEqual(getScriptCommands('retry-cli --randomize node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
 });
 
 test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {

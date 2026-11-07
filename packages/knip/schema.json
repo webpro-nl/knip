@@ -926,6 +926,10 @@
           "title": "Remix plugin configuration (https://knip.dev/reference/plugins/remix)",
           "$ref": "#/definitions/plugin"
         },
+        "retry-cli": {
+          "title": "retry-cli plugin configuration (https://knip.dev/reference/plugins/retry-cli)",
+          "$ref": "#/definitions/plugin"
+        },
         "rolldown": {
           "title": "rolldown plugin configuration (https://knip.dev/reference/plugins/rolldown)",
           "$ref": "#/definitions/plugin"

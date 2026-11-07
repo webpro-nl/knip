@@ -129,6 +129,7 @@ import { default as relay } from './relay/index.ts';
 import { default as releaseIt } from './release-it/index.ts';
 import { default as remark } from './remark/index.ts';
 import { default as remix } from './remix/index.ts';
+import { default as retryCli } from './retry-cli/index.ts';
 import { default as rolldown } from './rolldown/index.ts';
 import { default as rollup } from './rollup/index.ts';
 import { default as rsbuild } from './rsbuild/index.ts';
@@ -334,6 +335,7 @@ export const Plugins = {
   'release-it': releaseIt,
   remark,
   remix,
+  'retry-cli': retryCli,
   rolldown,
   rollup,
   rsbuild,

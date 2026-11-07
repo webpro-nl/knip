@@ -130,6 +130,7 @@ export type PluginName =
   | 'release-it'
   | 'remark'
   | 'remix'
+  | 'retry-cli'
   | 'rolldown'
   | 'rollup'
   | 'rsbuild'
@@ -335,6 +336,7 @@ export const pluginNames = [
   'release-it',
   'remark',
   'remix',
+  'retry-cli',
   'rolldown',
   'rollup',
   'rsbuild',
