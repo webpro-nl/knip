@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
-import { findAndParseGitignores } from '../../src/util/glob-core.ts';
+import {
+  findAndParseGitignores,
+  getGitIgnoredHandler,
+  glob,
+  reconcileGitignoredPaths,
+} from '../../src/util/glob-core.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
 
@@ -17,11 +23,8 @@ test('findAndParseGitignores', async () => {
       '**/.claude',
       '.git/!(hooks)',
       '**/node_modules',
-      '**/packages/*/dist',
-      '**/a/b/c',
+      'a/b/c',
       '**/.npmrc',
-      '**/bin/knip',
-      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -35,15 +38,12 @@ test('findAndParseGitignores (/a)', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      '**/packages/*/dist',
-      '**/b/c',
+      'b/c',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
-      '**/bin/knip',
-      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -63,15 +63,12 @@ test('findAndParseGitignores (/a/b', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      '**/packages/*/dist',
-      '**/c',
+      'c',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
-      '**/bin/knip',
-      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -120,17 +117,58 @@ test('findAndParseGitignores (negated directories)', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      '**/generated/*',
-      'generated/keep/**/cache/*',
+      'generated/*',
+      'generated/keep/cache/*',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
-      '**/packages/*/dist',
-      '**/bin/knip',
-      '**/bin/knip-bun',
     ]),
-    unignores: new Set(['**/generated/keep', 'generated/keep/**/cache/keep']),
+    unignores: new Set(['generated/keep', 'generated/keep/cache/keep']),
   });
+});
+
+test('findAndParseGitignores (ancestor root wildcard with unignored project)', async () => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'knip-gitignore-'));
+  const cwd = join(root, 'app');
+  try {
+    await fs.mkdir(join(root, '.git'));
+    await fs.mkdir(cwd);
+    await fs.writeFile(join(root, '.gitignore'), '/*\n!/app/');
+    await fs.writeFile(join(cwd, 'index.ts'), '');
+    await fs.writeFile(join(cwd, 'orphan.ts'), '');
+
+    const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+    const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
+    assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), ['index.ts', 'orphan.ts']);
+    assert(!isIgnored(join(cwd, 'orphan.ts')));
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test('findAndParseGitignores (nested explicit wildcard directories and negation)', async () => {
+  const cwd = await fs.mkdtemp(join(tmpdir(), 'knip-gitignore-'));
+  try {
+    await fs.mkdir(join(cwd, '.git'));
+    await fs.mkdir(join(cwd, 'src/packages/ui/generated'), { recursive: true });
+    await fs.mkdir(join(cwd, 'src/generated'));
+    await fs.writeFile(join(cwd, 'src/.gitignore'), '*/**/generated/*.ts\n!*/**/generated/keep.ts');
+    await fs.writeFile(join(cwd, 'src/packages/ui/generated/types.ts'), '');
+    await fs.writeFile(join(cwd, 'src/packages/ui/generated/keep.ts'), '');
+    await fs.writeFile(join(cwd, 'src/generated/types.ts'), '');
+
+    const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+    const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
+    assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), [
+      'src/generated/types.ts',
+      'src/packages/ui/generated/keep.ts',
+    ]);
+    assert(isIgnored(join(cwd, 'src/packages/ui/generated/types.ts')));
+    assert(!isIgnored(join(cwd, 'src/packages/ui/generated/keep.ts')));
+    assert(!isIgnored(join(cwd, 'src/generated/types.ts')));
+  } finally {
+    await fs.rm(cwd, { recursive: true, force: true });
+  }
 });
