@@ -19,7 +19,7 @@ const entry = ['**/*.eval.?(m)ts'];
 
 const resolveFromAST: ResolveFromAST = (program, options) => {
   const inputs: Input[] = [];
-  for (const id of options.config.entry ?? entry) inputs.push(toEntry(id));
+  if (!options.config.entry) for (const id of entry) inputs.push(toEntry(id));
   for (const id of collectPropertyValues(program, 'setupFiles')) inputs.push(toDeferResolve(id));
   return inputs;
 };
