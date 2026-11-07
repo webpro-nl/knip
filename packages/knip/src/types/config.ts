@@ -1,13 +1,11 @@
 import type { Program, VisitorObject } from 'oxc-parser';
 import type { Word } from 'unbash';
-import type { z } from 'zod/mini';
 import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
-import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
-import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
 import type { Input } from '../util/input.ts';
 import type { Manifest } from '../util/package-json.ts';
 import type { Args } from './args.ts';
+import type { RawConfiguration } from './configuration.ts';
 import type { IssueType, SymbolType } from './issues.ts';
 import type { Tags } from './options.ts';
 import type { PluginName } from './PluginNames.ts';
@@ -41,27 +39,23 @@ export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
 
 export type BinaryResolver = (binary: string, words: Word[], options: BinaryResolverOptions) => Input[];
 
-export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
+export type { RawConfiguration, RawPluginConfiguration, WorkspaceProjectConfig } from './configuration.ts';
 
 export type RawConfigurationOrFn =
   | RawConfiguration
   | ((options: ParsedCLIArgs) => RawConfiguration | Promise<RawConfiguration>);
 
-export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
-
-export type WorkspaceProjectConfig = z.infer<typeof workspaceConfigurationSchema>;
-
 export type IgnorePatterns = (string | RegExp)[];
 
 type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
-export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+export type IgnoreExportsUsedInFile = boolean | { [K in IgnorableExport]?: boolean | undefined };
 
 export type IgnoreIssues = Record<string, IssueType[]>;
 
 export type CyclesConfig = {
-  allow?: string[][];
-  dynamicImports?: boolean;
+  allow?: string[][] | undefined;
+  dynamicImports?: boolean | undefined;
 };
 
 export type GetImportsAndExportsOptions = {

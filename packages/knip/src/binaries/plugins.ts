@@ -27,13 +27,17 @@ const toArgs = (pluginArgs: Args, words: Word[]) => {
   return typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
 };
 
-const parse = (pluginArgs: Args, args: string[]) =>
-  parseArgs(args, {
-    string: [
-      ...(pluginArgs.nodeImportArgs ? ['import'] : []),
-      ...(pluginArgs.config === true ? ['config'] : []),
-      ...(pluginArgs.string ?? []),
-    ],
+const parse = (pluginArgs: Args, args: string[]) => {
+  const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
+  const string = [
+    ...(pluginArgs.nodeImportArgs ? ['import'] : []),
+    ...(pluginArgs.resolve ?? []),
+    ...(pluginArgs.string ?? []),
+  ];
+  for (const value of config) string.push(typeof value === 'string' ? value : value[0]);
+
+  return parseArgs(args, {
+    string,
     boolean: ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
     alias: {
       ...(pluginArgs.nodeImportArgs ? nodeLoadersArgs : {}),
@@ -42,6 +46,7 @@ const parse = (pluginArgs: Args, args: string[]) =>
     },
     '--': true,
   });
+};
 
 export const getWrappedCommand = (binary: string, words: Word[]): ScriptArg[] | undefined => {
   const pluginArgs = pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningArgs : undefined);
@@ -86,7 +91,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
         : [];
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
-  const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
+  const mapToConfigPattern =(value: string | [string, (value: string) => string]) => {
     if (typeof value === 'string')
       return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], inputOpts)] : [];
     const [id, fn] = value;

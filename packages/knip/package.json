@@ -91,8 +91,8 @@
     "qa": "pnpm lint && pnpm build && pnpm knip && pnpm knip:production && pnpm test",
     "release": "NODE_OPTIONS=--no-deprecation release-it",
     "create-plugin": "node ./scripts/create-new-plugin.ts",
-    "postcreate-plugin": "pnpm run build && (oxfmt schema.json schema-jsonc.json src/schema/plugins.ts || true)",
-    "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts src/schema/plugins.ts || true)"
+    "postcreate-plugin": "pnpm run build && (oxfmt schema.json schema-jsonc.json || true)",
+    "generate-plugin-defs": "node ./scripts/generate-plugin-defs.js && (oxfmt src/plugins/index.ts src/types/PluginNames.ts || true)"
   },
   "dependencies": {
     "formatly": "^0.11.4",
@@ -105,8 +105,7 @@
     "strip-json-comments": "5.0.3",
     "tinyglobby": "^0.2.17",
     "unbash": "^6.0.1",
-    "yaml": "^2.9.1",
-    "zod": "^4.6.5"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@jest/types": "^30.5.1",

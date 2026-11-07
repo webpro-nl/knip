@@ -121,21 +121,16 @@ export default ({
 
     const sortedHints = configurationHints.toSorted((a, b) => compareStrings(a.filePath ?? '', b.filePath ?? ''));
     for (const hint of sortedHints) {
-      const hintPrinter = hintPrinters.get(hint.type);
-      const message =
-        hintPrinter?.print({
-          ...hint,
-          filePath: hint.filePath ?? configFilePath ?? '',
-          configFilePath,
-        }) ?? '';
-
       const file = hint.filePath
         ? relative(cwd, hint.filePath)
         : configFilePath
           ? relative(cwd, configFilePath)
           : 'knip.json';
 
-      const hintMessage = `${message}: ${hint.identifier} in ${file}`;
+      const hintPrinter = hintPrinters.get(hint.type);
+      const message = hintPrinter?.print({ ...hint, filePath: file, configFilePath }) ?? '';
+
+      const hintMessage = `${message}: ${hint.identifier}`;
 
       if (isTreatConfigHintsAsErrors) {
         core.error(hintMessage, {

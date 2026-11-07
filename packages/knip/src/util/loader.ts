@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.ts';
 import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
-import { jiti } from './jiti.ts';
+import { getJiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
 import { extname, isInternal, toNative } from './path.ts';
 
@@ -11,6 +11,7 @@ const versions = new Map<string, number>();
 const isReloadable = (ext: string) => ext === '.js' || ext === '.mjs' || ext === '.cjs';
 
 const reload = async (filePath: string, version: number) => {
+  const jiti = getJiti();
   let imported;
   try {
     imported = jiti(filePath);
@@ -61,7 +62,7 @@ const load = async (filePath: string) => {
     versions.set(filePath, version);
     if (version && isReloadable(ext)) return await reload(filePath, version);
 
-    return await jiti.import(filePath, { default: true });
+    return await getJiti().import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }

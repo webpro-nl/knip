@@ -388,7 +388,7 @@ To exclude false positives from the report, there are a few options:
 ### Missing unused exports?
 
 Did you expect certain exports in the report, but are they missing? They might
-be exported from an entry file. In that case, use [--include-entry-exports][40]
+be exported from an entry file. In that case, use [`--include-entry-exports`][40b]
 to make Knip also report unused exports in entry files.
 
 The exports of non-standard extensions like `.astro`, `.mdx`, `.vue` or
@@ -411,7 +411,7 @@ knip --exclude enumMembers
 Individual enum members can be [tagged using JSDoc syntax][44].
 
 Enums exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][40] to make Knip also report members of unused exports
+[`--include-entry-exports`][40b] to make Knip also report members of unused exports
 in entry files.
 
 ### Namespace members
@@ -426,7 +426,7 @@ knip --exclude namespaceMembers
 Individual namespace members can be [tagged using JSDoc syntax][44].
 
 Namespaces exported from entry files are ignored, and so are their members. Use
-[--include-entry-exports][40] to make Knip also report members of unused exports
+[`--include-entry-exports`][40b] to make Knip also report members of unused exports
 in entry files.
 
 ## Unused dependencies
@@ -675,6 +675,7 @@ issue on GitHub. It'll make Knip better for everyone!
 [38]: #custom-elements
 [39]: ./working-with-commonjs.md
 [40]: ../reference/configuration.md#includeentryexports
+[40b]: ../reference/cli.md#--include-entry-exports
 [41]: ../guides/namespace-imports.md
 [42]: ../features/custom-elements.md
 [43]: ../reference/configuration.md#ignoreexportsusedinfile

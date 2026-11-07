@@ -6,7 +6,7 @@ description: What entry files are and how Knip and its plugins find them automat
 Entry files are the starting point for Knip to determine what files are used in
 the codebase. More entry files lead to increased coverage of the codebase. This
 also leads to more dependencies to be discovered. This page explains how Knip
-and its plugins try to find entry files so you don't need to configure them
+and its plugins discover entry files so you don't have to configure them
 yourself.
 
 ## Default entry file patterns
@@ -31,7 +31,7 @@ entry files. Here's the default configuration in full:
 }
 ```
 
-Next to the default locations, Knip looks for `entry` files in other places. In
+In addition to the default locations, Knip looks for `entry` files in other places. In
 a monorepo, this is done for each workspace separately.
 
 Custom `entry` and `project` values replace these defaults, they are not merged.
@@ -41,7 +41,7 @@ Entry files from the other places on this page are still added.
 
 Plugins often add entry files. For instance, the Remix, Storybook and Vitest
 plugins add additional entry files. See [the next page about plugins][2] for
-more details about this.
+more details.
 
 ## Scripts in package.json
 

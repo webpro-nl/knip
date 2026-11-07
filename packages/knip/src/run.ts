@@ -115,6 +115,7 @@ export const run = async (options: MainOptions) => {
     deputy,
     entryPaths,
     graph,
+    isGitIgnored,
     streamer,
     unreferencedFiles,
     options,

@@ -538,15 +538,15 @@ Also see [Trace][20].
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][21].
+[`--trace`][21].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][21].
+Trace export name to see where it's imported. Implies [`--trace`][21].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][21].
+Trace file to see where its exports are imported. Implies [`--trace`][21].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
