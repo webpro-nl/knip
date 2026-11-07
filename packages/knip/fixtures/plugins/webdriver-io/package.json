@@ -12,6 +12,10 @@
     "@wdio/dot-reporter": "*",
     "@wdio/junit-reporter": "*",
     "@wdio/allure-reporter": "*",
-    "@wdio/json-reporter": "*"
+    "@wdio/json-reporter": "*",
+    "@wdio/local-runner": "*",
+    "@wdio/appium-service": "*",
+    "wdio-obsidian-reporter": "*",
+    "wdio-obsidian-service": "*"
   }
 }

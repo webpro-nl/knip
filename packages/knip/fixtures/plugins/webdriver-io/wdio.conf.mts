@@ -1,3 +1,5 @@
 export const config = {
-  reporters: ['json'],
+  runner: 'local',
+  reporters: ['json', 'obsidian'],
+  services: ['appium', ['obsidian', {}]],
 };
