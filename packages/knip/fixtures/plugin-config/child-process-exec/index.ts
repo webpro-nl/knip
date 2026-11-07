@@ -45,6 +45,10 @@ exec(`melon ${target} --watch`);
 const bin = 'watermelon';
 execSync(`${bin} phantomserve`);
 
+// a plugin binary with a dynamic --config value must not drop the file's other inputs
+const config = 'lingui.config.ts';
+spawnSync('lingui', ['extract', '--config', config]);
+
 // not referenced: dynamic command, and a non-child_process `.exec`
 const dynamic = 'kiwi';
 execSync(dynamic);
