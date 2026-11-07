@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import test from 'node:test';
 import {
   findAndParseGitignores,
@@ -130,47 +129,24 @@ test('findAndParseGitignores (negated directories)', async () => {
 });
 
 test('findAndParseGitignores (ancestor root wildcard with unignored project)', async () => {
-  const root = await fs.mkdtemp(join(tmpdir(), 'knip-gitignore-'));
-  const cwd = join(root, 'app');
-  try {
-    await fs.mkdir(join(root, '.git'));
-    await fs.mkdir(cwd);
-    await fs.writeFile(join(root, '.gitignore'), '/*\n!/app/');
-    await fs.writeFile(join(cwd, 'index.ts'), '');
-    await fs.writeFile(join(cwd, 'orphan.ts'), '');
-
-    const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-    const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
-    assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), ['index.ts', 'orphan.ts']);
-    assert(!isIgnored(join(cwd, 'orphan.ts')));
-  } finally {
-    await fs.rm(root, { recursive: true, force: true });
-  }
+  const cwd = resolve('fixtures/infra/gitignore-ancestor-root-wildcard/app');
+  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+  const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
+  assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), ['index.ts', 'orphan.ts']);
+  assert(!isIgnored(join(cwd, 'orphan.ts')));
 });
 
 test('findAndParseGitignores (nested explicit wildcard directories and negation)', async () => {
-  const cwd = await fs.mkdtemp(join(tmpdir(), 'knip-gitignore-'));
-  try {
-    await fs.mkdir(join(cwd, '.git'));
-    await fs.mkdir(join(cwd, 'src/packages/ui/generated'), { recursive: true });
-    await fs.mkdir(join(cwd, 'src/generated'));
-    await fs.writeFile(join(cwd, 'src/.gitignore'), '*/**/generated/*.ts\n!*/**/generated/keep.ts');
-    await fs.writeFile(join(cwd, 'src/packages/ui/generated/types.ts'), '');
-    await fs.writeFile(join(cwd, 'src/packages/ui/generated/keep.ts'), '');
-    await fs.writeFile(join(cwd, 'src/generated/types.ts'), '');
-
-    const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-    const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
-    assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), [
-      'src/generated/types.ts',
-      'src/packages/ui/generated/keep.ts',
-    ]);
-    assert(isIgnored(join(cwd, 'src/packages/ui/generated/types.ts')));
-    assert(!isIgnored(join(cwd, 'src/packages/ui/generated/keep.ts')));
-    assert(!isIgnored(join(cwd, 'src/generated/types.ts')));
-  } finally {
-    await fs.rm(cwd, { recursive: true, force: true });
-  }
+  const cwd = resolve('fixtures/infra/gitignore-explicit-wildcard-dirs');
+  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
+  const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
+  assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), [
+    'src/generated/types.ts',
+    'src/packages/ui/generated/keep.ts',
+  ]);
+  assert(isIgnored(join(cwd, 'src/packages/ui/generated/types.ts')));
+  assert(!isIgnored(join(cwd, 'src/packages/ui/generated/keep.ts')));
+  assert(!isIgnored(join(cwd, 'src/generated/types.ts')));
 });
 
 test('findAndParseGitignores (anchored pattern names cwd)', async () => {
