@@ -28,12 +28,16 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   for (const word of words) values.push(word.value);
   const args = typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
 
+  const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
+  const string = [
+    ...(pluginArgs.nodeImportArgs ? ['import'] : []),
+    ...(pluginArgs.resolve ?? []),
+    ...(pluginArgs.string ?? []),
+  ];
+  for (const value of config) string.push(typeof value === 'string' ? value : value[0]);
+
   const parsed = parseArgs(args, {
-    string: [
-      ...(pluginArgs.nodeImportArgs ? ['import'] : []),
-      ...(pluginArgs.config === true ? ['config'] : []),
-      ...(pluginArgs.string ?? []),
-    ],
+    string,
     boolean: ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
     alias: {
       ...(pluginArgs.nodeImportArgs ? nodeLoadersArgs : {}),
@@ -65,7 +69,6 @@ export const resolve: BinaryResolver = (binary, words, options) => {
         ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];
 
-  const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
   const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
     if (typeof value === 'string')
       return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], inputOpts)] : [];
