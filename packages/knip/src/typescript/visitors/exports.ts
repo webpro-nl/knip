@@ -416,6 +416,7 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
         if (memberName) {
           const alias = exportName !== memberName ? exportName : undefined;
           s.addImport(specifier, memberName, alias, undefined, right.object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
+          s.handledImportExpressions.add(right.object.start);
           isReExport = true;
         }
       }

@@ -8,6 +8,9 @@ const all = require('./dir/mod');
 const { staticResolve } = require('./dir/mod');
 const { add } = require('./dir/exports');
 const ts = require('./ts-ext');
+const assigned = require('./dir/members').assigned;
+const inArray = [require('./dir/members').inArray];
+require('./dir/members').called();
 
 const dynamicRequire = value => {
   return require(`./dir/${value}`);
@@ -52,3 +55,5 @@ named;
 all;
 staticResolve;
 add;
+assigned;
+inArray;
