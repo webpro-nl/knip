@@ -4,7 +4,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../
 import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { toConfig, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NextConfigModule } from './types.ts';
@@ -68,7 +68,7 @@ const getInputs = (
   for (const loader of loaders) inputs.push(toDeferResolve(loader));
   for (const target of aliasTargets)
     inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
-  for (const file of files) inputs.push(toProductionEntry(toAbsolute(file, configFileDir)));
+  for (const file of files) inputs.push(toDeferResolveProductionEntry(toAbsolute(file, configFileDir)));
   return inputs;
 };
 

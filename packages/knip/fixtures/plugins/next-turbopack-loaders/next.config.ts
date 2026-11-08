@@ -9,7 +9,7 @@ const unrelated = {
 export default {
   images: {
     loader: 'custom',
-    loaderFile: './lib/image-loader.ts',
+    loaderFile: './app/[locale]/image-loader.ts',
   },
   cacheHandler: './cache/incremental.ts',
   cacheHandlers: {
