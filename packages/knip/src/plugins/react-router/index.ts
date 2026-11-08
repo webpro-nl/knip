@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
+import { toDeferResolveProductionEntry, toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency, load } from '../../util/plugin.ts';
 import vite from '../vite/index.ts';
@@ -48,7 +48,7 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // routes and entries are part of the actual build
     toProductionEntry(join(appDir, `root.${entryExtsGlob}`)),
     toProductionEntry(join(appDir, `entry.{client,server}.${entryExtsGlob}`)),
-    ...routes.map(id => toProductionEntry(id)),
+    ...routes.map(id => toDeferResolveProductionEntry(id)),
   ];
 
   const serverEntries = await _glob({

@@ -39,6 +39,7 @@ const copyFileNode = (file: FileNode): FileNode => ({
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
   projectPaths = new Set<string>();
+  private claimedEntryPaths = new Map<string, boolean>();
   programPaths = new Set<string>();
   skipExportsAnalysis = new Set<string>();
   private includeExportsAnalysis = new Set<string>();
@@ -159,12 +160,13 @@ export class ProjectPrincipal {
     this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
   }
 
-  private hasAcceptedExtension(filePath: string) {
+  hasAcceptedExtension(filePath: string) {
     return this.extensions.has(extname(filePath));
   }
 
   addEntryPath(filePath: string, options?: { skipExportsAnalysis: boolean }) {
     if (!isInNodeModules(filePath) && this.hasAcceptedExtension(filePath)) {
+      this.claimedEntryPaths.delete(filePath);
       this.entryPaths.add(filePath);
       this.projectPaths.add(filePath);
       if (options) {
@@ -197,7 +199,24 @@ export class ProjectPrincipal {
     }
   }
 
+  claimEntryPath(filePath: string) {
+    if (this.entryPaths.has(filePath) || isInNodeModules(filePath) || !this.hasAcceptedExtension(filePath)) return;
+    this.claimedEntryPaths.set(filePath, this.projectPaths.has(filePath));
+    this.entryPaths.add(filePath);
+    this.projectPaths.add(filePath);
+    this.onPathAdded?.(filePath);
+  }
+
+  releaseEntryClaims() {
+    for (const [filePath, isProjectPath] of this.claimedEntryPaths) {
+      this.entryPaths.delete(filePath);
+      if (!isProjectPath) this.projectPaths.delete(filePath);
+    }
+    this.claimedEntryPaths.clear();
+  }
+
   removeProjectPath(filePath: string) {
+    this.claimedEntryPaths.delete(filePath);
     this.entryPaths.delete(filePath);
     this.projectPaths.delete(filePath);
     this.skipExportsAnalysis.delete(filePath);
@@ -212,22 +231,37 @@ export class ProjectPrincipal {
       parseResult: ParseResult | undefined,
       sourceText: string,
       cachedFile?: FileNode
-    ) => Iterable<string> | undefined
+    ) => Iterable<string> | undefined,
+    onSpecifier: (specifier: string, filePath: string) => void
   ) {
     this.resolvedFiles.clear();
-    const visited = new Set([...this.entryPaths, ...this.programPaths]);
-    this.onPathAdded = p => visited.add(p);
+    const visited = new Set(this.entryPaths);
+    for (const filePath of this.programPaths) visited.add(filePath);
+    const queue = [...visited];
+    const extracted = new Set<string>();
+    const enqueue = (p: string) => {
+      if (!visited.has(p)) {
+        visited.add(p);
+        queue.push(p);
+      }
+    };
+    this.onPathAdded = p => {
+      if (this.projectPaths.has(p) && extracted.delete(p)) queue.push(p);
+      else enqueue(p);
+    };
 
     try {
-      for (const filePath of visited) {
+      for (let i = 0; i < queue.length; i++) {
+        const filePath = queue[i];
         const isProjectPath = this.projectPaths.has(filePath);
+        if (!isProjectPath) extracted.add(filePath);
 
         // Cached project files: skip read+parse and pass the cached FileNode through.
         const cachedFile = isProjectPath ? this.getCachedFile(filePath) : undefined;
 
         if (cachedFile) {
           const internalPaths = analyzeFile(filePath, undefined, '', cachedFile);
-          if (internalPaths) for (const p of internalPaths) visited.add(p);
+          if (internalPaths) for (const p of internalPaths) enqueue(p);
           continue;
         }
 
@@ -244,11 +278,12 @@ export class ProjectPrincipal {
 
           if (isProjectPath) {
             const internalPaths = analyzeFile(filePath, result, sourceText);
-            if (internalPaths) for (const p of internalPaths) visited.add(p);
+            if (internalPaths) for (const p of internalPaths) enqueue(p);
           } else {
             for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+              onSpecifier(specifier, filePath);
               const resolved = this.resolveSpecifier(specifier, filePath);
-              if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
+              if (resolved && !isInNodeModules(resolved)) enqueue(resolved);
             }
           }
         } catch {
@@ -262,24 +297,30 @@ export class ProjectPrincipal {
     this.resolvedFiles = visited;
   }
 
-  async getUsedResolvedFiles() {
+  async getUsedResolvedFiles(onSpecifier: (specifier: string, filePath: string) => void) {
     this.resolvedFiles.clear();
     const visited = new Set([...this.entryPaths, ...this.programPaths]);
+    this.onPathAdded = p => visited.add(p);
 
-    for (const filePath of visited) {
-      const loaded = this.fileManager.loadSourceText(filePath);
-      const sourceText = typeof loaded === 'string' ? loaded : await loaded;
-      if (!sourceText) continue;
+    try {
+      for (const filePath of visited) {
+        const loaded = this.fileManager.loadSourceText(filePath);
+        const sourceText = typeof loaded === 'string' ? loaded : await loaded;
+        if (!sourceText) continue;
 
-      try {
-        const result = _parseFile(filePath, sourceText);
-        for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-          const resolved = this.resolveSpecifier(specifier, filePath);
-          if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
+        try {
+          const result = _parseFile(filePath, sourceText);
+          for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+            onSpecifier(specifier, filePath);
+            const resolved = this.resolveSpecifier(specifier, filePath);
+            if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
+          }
+        } catch {
+          // Parse error — skip this file
         }
-      } catch {
-        // Parse error — skip this file
       }
+    } finally {
+      this.onPathAdded = undefined;
     }
 
     this.resolvedFiles = visited;

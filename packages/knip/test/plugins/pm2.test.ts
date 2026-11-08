@@ -8,18 +8,19 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/plugins/pm2');
 const cwdEcosystem = resolve('fixtures/plugins/pm2-ecosystem');
 
-test('Find entry files with the pm2 plugin', async () => {
+test('Find literal entry files with the pm2 plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert(!('src/another.js' in issues.files));
   assert('src/unused.js' in issues.files);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/unused.js', 'src/v/worker.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 3,
-    total: 3,
+    files: 2,
+    processed: 5,
+    total: 5,
   });
 });
 

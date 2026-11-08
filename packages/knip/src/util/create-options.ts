@@ -179,6 +179,7 @@ export const createOptions = timerify(async (options: CreateOptions, isReload = 
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
     isFormat: args.format ?? options.isFormat ?? false,
     isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
+    isIncludeSubpathExports: args['include-subpath-exports'] ?? options.isIncludeSubpathExports ?? false,
     isProduction,
     isReportDependencies:
       includedIssueTypes.dependencies ||

@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/angular');
 
-test('Find dependencies with the Angular plugin', async () => {
+test('Find dependencies and literal script entries with the Angular plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -16,14 +16,16 @@ test('Find dependencies with the Angular plugin', async () => {
   assert(issues.devDependencies['package.json']['karma']);
   assert('src/app/unused.scss' in issues.files);
   assert('src/app/other.component.scss' in issues.files);
+  assert(issues.files['src/v/bootstrap.js']);
+  assert(!issues.files['src/[variant]/bootstrap.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    files: 2,
+    files: 3,
     unlisted: 1,
     unresolved: 1,
-    processed: 15,
-    total: 15,
+    processed: 17,
+    total: 17,
   });
 });

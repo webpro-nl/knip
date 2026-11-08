@@ -39,6 +39,7 @@ export type JSONReportEntry = {
   nsExports?: Array<JSONReportItem>;
   nsTypes?: Array<JSONReportItem>;
   optionalPeerDependencies?: Array<JSONReportItem>;
+  subpaths?: Array<JSONReportItem>;
   types?: Array<JSONReportItem>;
   unlisted?: Array<JSONReportNamedItem>;
   unresolved?: Array<JSONReportItem>;
@@ -79,6 +80,7 @@ export default async ({ report, issues, options, cwd, write }: InternalReporterO
       ...(report.nsExports && { nsExports: [] }),
       ...(report.nsTypes && { nsTypes: [] }),
       ...(report.optionalPeerDependencies && { optionalPeerDependencies: [] }),
+      ...(report.subpaths && { subpaths: [] }),
       ...(report.types && { types: [] }),
       ...(report.unlisted && { unlisted: [] }),
       ...(report.unresolved && { unresolved: [] }),

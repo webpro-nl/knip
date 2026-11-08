@@ -1,7 +1,7 @@
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import type { OpenClawManifest } from './types.ts';
 
 const title = 'OpenClaw';
@@ -14,9 +14,9 @@ const config = ['package.json', 'openclaw.plugin.json'];
 
 const isLoadConfig: IsLoadConfig = ({ configFileName }) => configFileName === 'package.json';
 
-const toEntries = (value: unknown): Input[] =>
+const toEntries = (value: unknown, dir: string): Input[] =>
   (Array.isArray(value) ? value : [value]).flatMap(entry =>
-    typeof entry === 'string' ? [toProductionEntry(entry)] : []
+    typeof entry === 'string' ? [toDeferResolveProductionEntry(entry, { dir })] : []
   );
 
 const toHookEntries = (value: unknown): Input[] =>
@@ -39,15 +39,17 @@ const resolveConfig: ResolveConfig<OpenClawManifest> = (localConfig, options) =>
     );
 
   return [
-    ...toEntries(localConfig.extensions),
-    ...toEntries(localConfig.runtimeExtensions),
-    ...toEntries(localConfig.setupEntry),
-    ...toEntries(localConfig.runtimeSetupEntry),
-    ...toEntries(localConfig.providerCatalogEntry),
-    ...toEntries(localConfig.channel?.configuredState?.specifier),
-    ...toEntries(localConfig.channel?.persistedAuthState?.specifier),
+    ...toEntries(localConfig.extensions, options.cwd),
+    ...toEntries(localConfig.runtimeExtensions, options.cwd),
+    ...toEntries(localConfig.setupEntry, options.cwd),
+    ...toEntries(localConfig.runtimeSetupEntry, options.cwd),
+    ...toEntries(localConfig.providerCatalogEntry, options.cwd),
+    ...toEntries(localConfig.channel?.configuredState?.specifier, options.cwd),
+    ...toEntries(localConfig.channel?.persistedAuthState?.specifier, options.cwd),
     ...toHookEntries(localConfig.hooks),
-    ...toEntries(localConfig.build?.staticAssets?.map(asset => asset.source)),
+    ...(localConfig.build?.staticAssets ?? []).flatMap(asset =>
+      typeof asset.source === 'string' ? [toProductionEntry(asset.source)] : []
+    ),
     ...assetScriptInputs,
   ];
 };
@@ -56,7 +58,9 @@ const resolveFromAST: ResolveFromAST = (_, options) => {
   if (options.configFileName !== 'openclaw.plugin.json') return [];
   const sourceText = options.readFile(options.configFilePath).replace(/^\uFEFF/, '');
   const { program } = _parseFile(`${options.configFilePath}.ts`, `(${sourceText}\n)`);
-  return Array.from(collectPropertyValues(program, 'providerCatalogEntry'), entry => toProductionEntry(entry));
+  return Array.from(collectPropertyValues(program, 'providerCatalogEntry'), entry =>
+    toDeferResolveProductionEntry(entry, { dir: options.cwd })
+  );
 };
 
 const plugin: Plugin = {

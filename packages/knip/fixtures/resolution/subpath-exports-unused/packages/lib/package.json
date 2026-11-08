@@ -1,0 +1,22 @@
+{
+  "name": "@fixtures/lib",
+  "exports": {
+    ".": "./index.js",
+    "./feature": {
+      "types": "./feature.d.ts",
+      "default": "./feature.js"
+    },
+    "./unused": "./unused.js",
+    "./unused-conditional": {
+      "node": "./unused-node.js",
+      "default": "./unused-default.js"
+    },
+    "./patterns/*": "./patterns/*.js",
+    "./unused-patterns/*": "./unused-patterns/*.js",
+    "./internal/*": null,
+    "./package.json": "./package.json",
+    "./styles.css": "./styles.css",
+    "./self": "./self.js",
+    "./aliased": "./aliased.js"
+  }
+}

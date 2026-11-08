@@ -35,6 +35,7 @@ const parse = (pluginArgs: Args, args: string[]) => {
     ...(pluginArgs.string ?? []),
   ];
   for (const value of config) string.push(typeof value === 'string' ? value : value[0]);
+  if (Array.isArray(pluginArgs.fromArgs)) string.push(...pluginArgs.fromArgs);
 
   return parseArgs(args, {
     string,
@@ -85,7 +86,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
 
   const resolvedFromArgs =
     typeof pluginArgs.fromArgs === 'function'
-      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args), words))
+      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args, { cwd }), words))
       : Array.isArray(pluginArgs.fromArgs)
         ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];

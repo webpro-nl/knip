@@ -504,6 +504,36 @@ This will also enable reporting unused members of exported enums and namespaces.
 Set this option at root level to enable this globally, or within workspace
 configurations individually.
 
+### `includeSubpathExports`
+
+By default, the targets of the `exports` field in `package.json` are entry files
+and its subpaths are not reported, since other packages may import them. When a
+workspace is only consumed within the repository, you may want to include its
+`exports` when reporting unused subpaths:
+
+```json title="knip.json"
+{
+  "includeSubpathExports": true
+}
+```
+
+If enabled, a subpath in `exports` that is not imported anywhere is reported as
+an unused subpath, and its targets are entry files only when the subpath is
+imported. An unreferenced `.` subpath means nothing imports the package at all.
+Subpaths whose targets are not module files, such as `./package.json` or a
+stylesheet, are not reported.
+
+The `imports` field (subpath imports) is always reported this way, since subpath
+imports are internal to the package by design.
+
+Dependent workspaces must be part of the analysis to find the references. In
+[strict mode][13] combined with `--workspace` they are not, so `exports` are
+treated as public in that case.
+
+Set this option at root level to enable this globally, or within workspace
+configurations individually. A workspace that is private altogether typically
+also sets [`includeEntryExports`][14].
+
 ## Compilers
 
 Knip supports custom compilers to transform files before analysis.
@@ -519,7 +549,7 @@ files (`.js` or `.ts`), not in JSON configuration files.
 
 Override built-in compilers or add custom compilers for additional file types.
 
-Also see [Compilers][13].
+Also see [Compilers][15].
 
 [1]: ../reference/dynamic-configuration.mdx
 [2]: ../overview/configuration.md
@@ -533,4 +563,6 @@ Also see [Compilers][13].
 [10]: ../guides/configuring-project-files.md
 [11]: ../features/production-mode.md
 [12]: ../guides/handling-issues.mdx#unused-dependencies
-[13]: ../features/compilers.md
+[13]: ../features/production-mode.md#strict-mode
+[14]: #includeentryexports
+[15]: ../features/compilers.md

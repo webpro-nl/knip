@@ -21,13 +21,15 @@ enum McEnum {}
 
 export const z = x + y;
 
-export const {} = { a: 1, b: 1 };
+export const { a, b } = { a: 1, b: 1 };
 
-export const [,] = [3, 4];
+export const [c, d] = [3, 4];
 
-export const [, f] = [5, 6];
+export const { n, o = n } = { n: 14 };
 
-export const [g, , i] = [7, 8, 9];
+export const [e, f] = [5, 6];
+
+export const [g, h, i] = [7, 8, 9];
 
 export const j = 10,
   k = 11;
@@ -84,7 +86,7 @@ export const One = 1;
 
 const fn = () => ({ get: () => 1, set: () => 1 });
 
-export const { set: setter } = fn();
+export const { get: getter, set: setter } = fn();
 `,
     'package.json': `{
   "name": "@fixtures/fix",
@@ -144,6 +146,8 @@ export const z = x + y;
 export const { a, b } = { a: 1, b: 1 };
 
 export const [c, d] = [3, 4];
+
+export const { n, o = n } = { n: 14 };
 
 export const [e, f] = [5, 6];
 

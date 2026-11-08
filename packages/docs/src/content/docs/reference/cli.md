@@ -115,6 +115,17 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][7].
 
+### `--include-subpath-exports`
+
+Report unused subpaths in the `exports` field of `package.json`, for packages
+that are only consumed within the repository:
+
+```sh
+knip --include-subpath-exports
+```
+
+Also see [includeSubpathExports][8].
+
 ### `--no-gitignore`
 
 Ignore `.gitignore` files.
@@ -131,16 +142,16 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][9].
 
 ### `--strict`
 
 Shortcut: `-s`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][9].
+mode][10].
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][9].
 
 ### `--watch`
 
@@ -163,7 +174,7 @@ workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][10] for more details and examples.
+See [filter workspaces][11] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -194,13 +205,14 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-`nsExports` and `nsTypes` are [off by default][11]; including only those _adds_
+`nsExports` and `nsTypes` are [off by default][12]; including only those _adds_
 them to the default report instead of narrowing it.
 
-Available [issue types][12] when filtering output using `--include` or
+Available [issue types][13] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
+- `subpaths`
 - `dependencies`
 - `unlisted`
 - `binaries`
@@ -247,7 +259,7 @@ Shortcut to report only circular dependencies:
 --include cycles
 ```
 
-Also see the [cycles reporter][13].
+Also see the [cycles reporter][14].
 
 ### `--tags`
 
@@ -289,13 +301,13 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][14].
+Read more at [auto-fix][15].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][12]
+More info about fixable types at [issue types][13]
 
 ### `--allow-remove-files`
 
@@ -311,7 +323,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing them to the [reporter(s)][15].
+Preprocess the results before providing them to the [reporter(s)][16].
 
 Can be repeated. Examples:
 
@@ -325,7 +337,7 @@ knip --preprocessor preprocessor-package
 
 Preprocessors can also be configured in the Knip configuration file.
 
-Also see [Reporters & Preprocessors][16].
+Also see [Reporters & Preprocessors][17].
 
 ### `--preprocessor-options [json]`
 
@@ -355,7 +367,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][16].
+Also see [Reporters & Preprocessors][17].
 
 ### `--reporter-options [json]`
 
@@ -381,7 +393,7 @@ A relative path is resolved from the directory Knip runs in, like `--config` and
 `--trace-file`. With `--directory app --output-file knip.sarif` the file is
 written to `app/knip.sarif`.
 
-Also see [Writing to a file][17].
+Also see [Writing to a file][18].
 
 ### `--no-config-hints`
 
@@ -426,7 +438,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][18].
+Show [debug output][19].
 
 ### `--memory`
 
@@ -503,7 +515,7 @@ Total running time: 5s
 - `sum`: the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][19]).
+`performance.timerify` ([GitHub issue][20]).
 
 ### `--duration`
 
@@ -533,20 +545,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][20].
+Also see [Trace][21].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[`--trace`][21].
+[`--trace`][22].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [`--trace`][21].
+Trace export name to see where it's imported. Implies [`--trace`][22].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [`--trace`][21].
+Trace file to see where its exports are imported. Implies [`--trace`][22].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -555,17 +567,18 @@ Trace file to see where its exports are imported. Implies [`--trace`][21].
 [5]: https://www.npmx.dev/package/picocolors
 [6]: ./known-issues.md#stale-cache-results
 [7]: ./configuration.md#includeentryexports
-[8]: ../features/production-mode.md
-[9]: #--production
-[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[11]: ../guides/namespace-imports.md
-[12]: ./issue-types.md
-[13]: ../features/reporters.md#cycles
-[14]: ../features/auto-fix.mdx
-[15]: #--reporter-reporter
-[16]: ../features/reporters.md
-[17]: ../features/reporters.md#writing-to-a-file
-[18]: ../guides/troubleshooting.md#debug
-[19]: https://github.com/oven-sh/bun/issues/9271
-[20]: ../guides/troubleshooting.md#trace
-[21]: #--trace
+[8]: ./configuration.md#includesubpathexports
+[9]: ../features/production-mode.md
+[10]: #--production
+[11]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[12]: ../guides/namespace-imports.md
+[13]: ./issue-types.md
+[14]: ../features/reporters.md#cycles
+[15]: ../features/auto-fix.mdx
+[16]: #--reporter-reporter
+[17]: ../features/reporters.md
+[18]: ../features/reporters.md#writing-to-a-file
+[19]: ../guides/troubleshooting.md#debug
+[20]: https://github.com/oven-sh/bun/issues/9271
+[21]: ../guides/troubleshooting.md#trace
+[22]: #--trace

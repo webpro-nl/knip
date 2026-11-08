@@ -222,7 +222,6 @@ export class DependencyDeputy {
     packageName: string,
     { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
-    if (!this.isReportDependencies) return true;
     if (specifier.startsWith('node:') || specifier.startsWith(PROTOCOL_CLOUDFLARE) || isBuiltin(specifier)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 

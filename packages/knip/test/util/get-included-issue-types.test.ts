@@ -132,6 +132,7 @@ test('Resolve included issue types (all)', async () => {
       'namespaceMembers',
       'duplicates',
       'files',
+      'subpaths',
       'catalog',
       'catalogReferences',
       'cycles',

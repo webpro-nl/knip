@@ -1,11 +1,11 @@
 import { type ObjectExpression, Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { collectFirstPropertyValue, collectPropertyValues, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { type Input, toConfig, toEntry, toProductionEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolveProductionEntry, toEntry, toProductionEntry } from '../../util/input.ts';
 
 export const entry = ['**/*.spec.{ts,tsx}', '**/*.e2e.{ts,tsx}'];
 
-export const resolveFromAST: ResolveFromAST = program => {
+export const resolveFromAST: ResolveFromAST = (program, { cwd }) => {
   const inputs: Input[] = [];
 
   const srcDir = collectFirstPropertyValue(program, 'srcDir') ?? 'src';
@@ -14,11 +14,11 @@ export const resolveFromAST: ResolveFromAST = program => {
   for (const pattern of entry) inputs.push(toEntry(pattern));
 
   for (const script of collectPropertyValues(program, 'globalScript')) {
-    inputs.push(toProductionEntry(script));
+    inputs.push(toDeferResolveProductionEntry(script, { dir: cwd }));
   }
 
   for (const style of collectPropertyValues(program, 'globalStyle')) {
-    inputs.push(toProductionEntry(style));
+    inputs.push(toDeferResolveProductionEntry(style, { dir: cwd }));
   }
 
   // v5: outputTargets: [{ type: 'global-style', input: 'src/global.scss' }]
@@ -26,7 +26,8 @@ export const resolveFromAST: ResolveFromAST = program => {
     ObjectExpression(node: ObjectExpression) {
       const typeValues = getPropertyValues(node, 'type');
       if (!typeValues.has('global-style')) return;
-      for (const input of getPropertyValues(node, 'input')) inputs.push(toProductionEntry(input));
+      for (const input of getPropertyValues(node, 'input'))
+        inputs.push(toDeferResolveProductionEntry(input, { dir: cwd }));
     },
   }).visit(program);
 

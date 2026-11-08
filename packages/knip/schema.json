@@ -100,6 +100,9 @@
     "includeEntryExports": {
       "$ref": "#/definitions/includeEntryExports"
     },
+    "includeSubpathExports": {
+      "$ref": "#/definitions/includeSubpathExports"
+    },
     "tags": {
       "title": "Exclude (-) or include (+) exports with the specified JSDoc/TSDoc tags",
       "examples": ["+custom", "-lintignore", "-@internal"],
@@ -163,6 +166,9 @@
           "$ref": "#/definitions/ruleValue"
         },
         "nsTypes": {
+          "$ref": "#/definitions/ruleValue"
+        },
+        "subpaths": {
           "$ref": "#/definitions/ruleValue"
         },
         "types": {
@@ -232,6 +238,10 @@
       "title": "Include entry files when reporting unused exports",
       "type": "boolean"
     },
+    "includeSubpathExports": {
+      "title": "Report unused subpaths in package.json#exports",
+      "type": "boolean"
+    },
     "ignoreExportsUsedInFile": {
       "title": "Ignore exports used in file",
       "examples": [
@@ -288,6 +298,7 @@
         "type": "string",
         "enum": [
           "files",
+          "subpaths",
           "dependencies",
           "devDependencies",
           "optionalPeerDependencies",
@@ -386,6 +397,9 @@
         },
         "includeEntryExports": {
           "$ref": "#/definitions/includeEntryExports"
+        },
+        "includeSubpathExports": {
+          "$ref": "#/definitions/includeSubpathExports"
         }
       }
     },
@@ -560,6 +574,10 @@
         },
         "eslint": {
           "title": "ESLint plugin configuration (https://knip.dev/reference/plugins/eslint)",
+          "$ref": "#/definitions/plugin"
+        },
+        "evalite": {
+          "title": "evalite plugin configuration (https://knip.dev/reference/plugins/evalite)",
           "$ref": "#/definitions/plugin"
         },
         "eve": {

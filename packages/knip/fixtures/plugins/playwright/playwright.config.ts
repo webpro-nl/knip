@@ -2,6 +2,7 @@ import { devices } from '@playwright/test';
 import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
+  globalSetup: './setup/[browser]/prepare.ts',
   projects: [
     {
       name: 'chromium',

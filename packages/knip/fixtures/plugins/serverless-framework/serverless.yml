@@ -18,6 +18,8 @@ provider:
       Resource: !Sub 'arn:aws:s3:::${self:custom.bucket}/*'
 
 functions:
+  Module:
+    handler: function/module.run
   First:
     handler: function/handler.js.handler
     events:
