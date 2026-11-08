@@ -8,7 +8,7 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/plugins/next-turbopack-loaders');
 
 for (const isProduction of [false, true]) {
-  test(`Find Next.js Turbopack loaders and alias targets (production: ${isProduction})`, async () => {
+  test(`Find Next.js Turbopack loaders, alias targets and config file paths (production: ${isProduction})`, async () => {
     const options = await createOptions({ cwd, isProduction, isIncludeEntryExports: true });
     const { issues, counters } = await main(options);
 
@@ -22,8 +22,8 @@ for (const isProduction of [false, true]) {
       ...baseCounters,
       devDependencies: isProduction ? 0 : 1,
       files: isProduction ? 2 : 1,
-      processed: isProduction ? 6 : 7,
-      total: isProduction ? 6 : 7,
+      processed: isProduction ? 9 : 10,
+      total: isProduction ? 9 : 10,
     });
   });
 }

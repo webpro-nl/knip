@@ -7,6 +7,14 @@ const unrelated = {
 };
 
 export default {
+  images: {
+    loader: 'custom',
+    loaderFile: './lib/image-loader.ts',
+  },
+  cacheHandler: './cache/incremental.ts',
+  cacheHandlers: {
+    remote: './cache/remote.ts',
+  },
   turbopack: {
     resolveAlias: {
       canvas: './empty-module.ts',
