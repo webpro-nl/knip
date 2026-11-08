@@ -17,31 +17,32 @@ export const expandIgnorePatterns = (patterns: Iterable<string>, shallow = false
   return result;
 };
 
-export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
+// A slash at the start or in the middle anchors a pattern to the directory of its .gitignore
+export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string, isAnchored = false) => {
   const negated = pattern[0] === '!';
   if (negated) pattern = pattern.slice(1);
   if (pattern.endsWith('/')) pattern = pattern.slice(0, -1);
+  if (!isAnchored && pattern.startsWith('*/**/')) pattern = pattern.slice(5);
   if (pattern === '*' || pattern === '**') return { negated, pattern };
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else if (!pattern.includes('/')) pattern = `**/${pattern}`;
+  else if (isAnchored ? !pattern.includes('/') : !pattern.startsWith('**/')) pattern = `**/${pattern}`;
   return { negated, pattern };
 };
 
-export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string) =>
-  patterns
+export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string, isAnchored = !ancestor) => {
+  const matchFrom = ancestor ? new RegExp(`^(!?/?)(${ancestor})`) : undefined;
+  return patterns
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
     .flatMap(line => {
-      const original = line.replace(/^\\(?=#)/, '').trim();
-      const converted = convertGitignoreToPicomatchIgnorePatterns(original);
-      const { negated, pattern } = converted;
-      if (!ancestor || pattern === '**') return [converted];
-      const isDeep = pattern.startsWith('**/');
-      if (isDeep ? `/${ancestor}`.includes(`/${pattern.slice(3)}/`) : ancestor.startsWith(`${pattern}/`)) {
-        return negated ? [] : [{ negated, pattern: '**' }];
+      const pattern = line.replace(/^\\(?=#)/, '').trim();
+      if (ancestor && matchFrom) {
+        if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
+        if (pattern.startsWith('/**/')) return [pattern.slice(1)];
+        if (pattern.startsWith('!/**/')) return [`!${pattern.slice(2)}`];
+        if (pattern.startsWith('/') || pattern.startsWith('!/')) return [];
       }
-      if (isDeep) return [converted];
-      if (pattern === '*') return original.startsWith(negated ? '!/' : '/') ? [] : [converted];
-      if (pattern.startsWith('*/**/')) return [{ negated, pattern: pattern.slice(2) }];
-      return pattern.startsWith(ancestor) ? [{ negated, pattern: pattern.slice(ancestor.length) }] : [];
-    });
+      return [pattern];
+    })
+    .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern, isAnchored));
+};

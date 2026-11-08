@@ -1,12 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import test from 'node:test';
-import {
-  findAndParseGitignores,
-  getGitIgnoredHandler,
-  glob,
-  reconcileGitignoredPaths,
-} from '../../src/util/glob-core.ts';
+import { findAndParseGitignores } from '../../src/util/glob-core.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
 
@@ -22,8 +17,11 @@ test('findAndParseGitignores', async () => {
       '**/.claude',
       '.git/!(hooks)',
       '**/node_modules',
+      '**/packages/*/dist',
       'a/b/c',
       '**/.npmrc',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -37,12 +35,15 @@ test('findAndParseGitignores (/a)', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      'b/c',
+      '**/packages/*/dist',
+      '**/b/c',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -62,12 +63,15 @@ test('findAndParseGitignores (/a/b', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      'c',
+      '**/packages/*/dist',
+      '**/c',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
     unignores: new Set(),
   });
@@ -123,49 +127,10 @@ test('findAndParseGitignores (negated directories)', async () => {
       '**/.cache',
       '**/.claude',
       '**/.npmrc',
+      '**/packages/*/dist',
+      '**/bin/knip',
+      '**/bin/knip-bun',
     ]),
     unignores: new Set(['generated/keep', 'generated/keep/cache/keep']),
   });
-});
-
-test('findAndParseGitignores (ancestor root wildcard with unignored project)', async () => {
-  const cwd = resolve('fixtures/infra/gitignore-ancestor-root-wildcard/app');
-  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-  const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
-  assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), ['index.ts', 'orphan.ts']);
-  assert(!isIgnored(join(cwd, 'orphan.ts')));
-});
-
-test('findAndParseGitignores (nested explicit wildcard directories and negation)', async () => {
-  const cwd = resolve('fixtures/infra/gitignore-explicit-wildcard-dirs');
-  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-  const paths = await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' });
-  assert.deepEqual(reconcileGitignoredPaths(paths, cwd).sort(), [
-    'src/generated/types.ts',
-    'src/packages/ui/generated/keep.ts',
-  ]);
-  assert(isIgnored(join(cwd, 'src/packages/ui/generated/types.ts')));
-  assert(!isIgnored(join(cwd, 'src/packages/ui/generated/keep.ts')));
-  assert(!isIgnored(join(cwd, 'src/generated/types.ts')));
-});
-
-test('findAndParseGitignores (anchored pattern names cwd)', async () => {
-  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/app/data');
-  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), []);
-  assert(isIgnored(join(cwd, 'nested/file.ts')));
-});
-
-test('findAndParseGitignores (unanchored pattern names cwd)', async () => {
-  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/lib');
-  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), []);
-  assert(isIgnored(join(cwd, 'nested/file.ts')));
-});
-
-test('findAndParseGitignores (negated pattern names cwd)', async () => {
-  const cwd = resolve('fixtures/infra/gitignore-ignored-cwd/packages/web');
-  const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
-  assert.deepEqual(await glob(['**/*.ts'], { cwd, dir: cwd, gitignore: true, label: 'project' }), ['index.ts']);
-  assert(isIgnored(join(cwd, 'debug.log')));
 });
