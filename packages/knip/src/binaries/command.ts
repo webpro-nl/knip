@@ -63,7 +63,7 @@ export const getDependenciesFromCommand = (
   if (spawningBinaries.includes(binary)) {
     return [
       toCommandBinary(binary, options),
-      ...fromWords(getWrappedCommand(binary, words) ?? [], options),
+      ...fromWords(getWrappedCommand(binary, words, options.cwd) ?? [], options),
       ...fromNodeOptions,
     ];
   }

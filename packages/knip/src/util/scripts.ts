@@ -41,7 +41,7 @@ export const isScriptExpansion = (
 ): node is CommandExpansionPart | ProcessSubstitutionPart | ArithmeticCommandExpansion =>
   node.type === 'CommandExpansion' || node.type === 'ProcessSubstitution' || node.type === 'ArithmeticCommandExpansion';
 
-export const getScriptCommands = (script: string): ScriptCommand[] => {
+export const getScriptCommands = (script: string, cwd = process.cwd()): ScriptCommand[] => {
   if (!script) return [];
   const out: ScriptCommand[] = [];
   try {
@@ -51,8 +51,8 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
         if (!text) continue;
         const binary = extractBinary(text);
         const words = getCommandWords(node);
-        const command = getWrappedCommand(binary, words);
-        if (command?.length) out.push(...getScriptCommands(toScript(command)));
+        const command = getWrappedCommand(binary, words, cwd);
+        if (command?.length) out.push(...getScriptCommands(toScript(command), cwd));
         else out.push({ binary, args: words.map(word => word.value) });
       }
     }

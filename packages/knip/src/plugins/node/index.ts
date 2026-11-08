@@ -18,14 +18,14 @@ const patterns = [
 
 const hasNodeTestCache = new WeakMap<Record<string, string>, boolean>();
 
-const hasNodeTest = (scripts: Record<string, string> | undefined) => {
+const hasNodeTest = (scripts: Record<string, string> | undefined, cwd: string) => {
   if (!scripts) return false;
   const cached = hasNodeTestCache.get(scripts);
   if (cached !== undefined) return cached;
   const result = Object.values(scripts).some(
     script =>
       typeof script === 'string' &&
-      getScriptCommands(script).some(
+      getScriptCommands(script, cwd).some(
         ({ binary, args }) => (binary === 'node' || binary === 'nub') && args.includes('--test')
       )
   );
@@ -42,7 +42,10 @@ const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
 const resolve: Resolve = options => {
   const entries = entry.map(id => toProductionEntry(id));
 
-  if (hasNodeTest(options.manifest.scripts) || hasNodeTest(options.rootManifest?.scripts)) {
+  if (
+    hasNodeTest(options.manifest.scripts, options.cwd) ||
+    hasNodeTest(options.rootManifest?.scripts, options.rootCwd)
+  ) {
     entries.push(...patterns.map(toEntry));
   }
 

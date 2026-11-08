@@ -103,3 +103,12 @@ test('toShellCommand round-trips argv through the script parser', () => {
   t(['node', "it's/server.js"]);
   t(['node', 'lib/*.js']);
 });
+
+test('getScriptCommands passes the working directory to wrappers', () => {
+  assert.deepEqual(getScriptCommands('cdk --app "cloud assembly"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'cdk', args: ['--app', 'cloud assembly'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cdk --app "node --test"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'node', args: ['--test'] },
+  ]);
+});

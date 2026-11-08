@@ -47,13 +47,13 @@ const parse = (pluginArgs: Args, args: string[]) => {
   });
 };
 
-export const getWrappedCommand = (binary: string, words: Word[]): ScriptArg[] | undefined => {
+export const getWrappedCommand = (binary: string, words: Word[], cwd = process.cwd()): ScriptArg[] | undefined => {
   const pluginArgs =
     pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningPluginArgs : undefined);
   const fromArgs = pluginArgs?.fromArgs;
   if (!pluginArgs || typeof fromArgs !== 'function') return;
   const args = toArgs(pluginArgs, words);
-  return toWordArgs(fromArgs(parse(pluginArgs, args), args), words);
+  return toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
 };
 
 export const resolve: BinaryResolver = (binary, words, options) => {
