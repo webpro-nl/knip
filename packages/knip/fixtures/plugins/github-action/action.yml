@@ -2,5 +2,6 @@ name: 'My Action'
 description: 'My Action'
 runs:
   using: 'node20'
+  pre: '[variant]/prepare.js'
   main: 'dist/index.js'
   post: 'dist/index.js'

@@ -7,9 +7,11 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/tanstack-router');
 
-test('Find dependencies with the tanstack-router plugin', async () => {
+test('Find dependencies and literal generated entries with the tanstack-router plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['src/l/tree.ts']);
 
   assert(issues.unlisted['src/routes/__root.tsx']['@tanstack/router-devtools']);
 
@@ -30,14 +32,17 @@ test('Find dependencies with the tanstack-router plugin', async () => {
     dependencies: 2,
     devDependencies: 2,
     unlisted: 1,
-    processed: 6,
-    total: 6,
+    files: 1,
+    processed: 8,
+    total: 8,
   });
 });
 
-test('Find dependencies with the tanstack-router plugin (production)', async () => {
+test('Find dependencies and literal generated entries with the tanstack-router plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['src/l/tree.ts']);
 
   assert(!('src/router.tsx' in issues.files));
   assert(!('src/client.tsx' in issues.files));
@@ -46,7 +51,8 @@ test('Find dependencies with the tanstack-router plugin (production)', async () 
     ...baseCounters,
     dependencies: 2,
     unlisted: 1,
-    processed: 6,
-    total: 6,
+    files: 1,
+    processed: 8,
+    total: 8,
   });
 });

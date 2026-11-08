@@ -3,7 +3,7 @@ import { join } from 'node:path';
 export default {
   title: 'Docusaurus',
   url: 'https://docusaurus.io',
-  scripts: ['/js/custom.js', { src: '/js/analytics.js', async: true }, 'https://example.com/external.js'],
+  scripts: ['/js/custom.js', { src: '/js/analytics.js', async: true }, 'https://example.com/external.js', '/js/[variant]/client.js'],
   stylesheets: ['/css/custom.css', { href: '/css/theme.css' }, 'https://example.com/external.css'],
   future: {
     experimental_faster: true,

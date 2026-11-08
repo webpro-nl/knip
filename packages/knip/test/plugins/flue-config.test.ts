@@ -7,16 +7,17 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/flue-config');
 
-test('Find dependencies with the Flue plugin and custom entries', async () => {
+test('Find dependencies with the Flue plugin and literal custom entries', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert('.flue/app.ts' in issues.files);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['.flue/app.ts', 'server/v/routes.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 5,
-    total: 5,
+    files: 2,
+    processed: 7,
+    total: 7,
   });
 });

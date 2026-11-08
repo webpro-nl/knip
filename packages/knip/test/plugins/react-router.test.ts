@@ -5,15 +5,18 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-test('Find dependencies with the react-router plugin', async () => {
+test('Find dependencies and literal route entries with the react-router plugin', async () => {
   const cwd = resolve('fixtures/plugins/react-router');
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['app/routes/sitemap.xml.tsx']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 10,
-    total: 10,
+    files: 1,
+    processed: 12,
+    total: 12,
   });
 });
 

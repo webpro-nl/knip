@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/typedoc');
 
-test('Find dependencies with the typedoc plugin', async () => {
+test('Find dependencies and literal entry files with the typedoc plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -18,13 +18,15 @@ test('Find dependencies with the typedoc plugin', async () => {
   assert(issues.unresolved['tsconfig.json']['typedoc-plugin-zod']);
   assert(issues.unresolved['typedoc.json']['./dist/index.cjs']);
   assert(!('custom.js' in issues.files));
+  assert.deepEqual(Object.keys(issues.files), ['t/custom.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 1,
     unresolved: 4,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
