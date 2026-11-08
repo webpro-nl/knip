@@ -49,19 +49,20 @@ The `package.json` is scanned for entry files. The `main`, `module`, `browser`,
 `bin`, `types`, `typings` and `exports` fields may contain entry files. These
 are added even when `entry` is customized. The targets of a key in the `imports`
 field (subpath imports) are entry files only when the key is imported somewhere;
-otherwise the key is reported as an unused subpath. The `scripts` are also
-parsed to find entry files and dependencies. See [Script Parser][3] for more
-details.
+otherwise the key is reported as an unused subpath. With
+[`includeSubpathExports`][3] the same applies to the `exports` field. The
+`scripts` are also parsed to find entry files and dependencies. See [Script
+Parser][4] for more details.
 
 ## Ignored files
 
 Knip respects `.gitignore` files. By default, ignored files are not added as
-entry files. This behavior can be disabled by using the [`--no-gitignore`][4]
+entry files. This behavior can be disabled by using the [`--no-gitignore`][5]
 flag on the CLI.
 
 ## Configuring project files
 
-See [configuring project files][5] for guidance on tuning `entry` and `project`
+See [configuring project files][6] for guidance on tuning `entry` and `project`
 and when to use `ignore`.
 
 ## Where Knip looks for entry files
@@ -78,7 +79,7 @@ Putting it together, Knip discovers entry files from:
 - `new Worker(…)` and `child_process` `fork`/`spawn`/`execFile` when the target
   is `path.join(__dirname, …)`
 - `module.register('./loader.js')` loader registration
-- Scripts the [script parser][3] extracts: `package.json` scripts, CI workflow
+- Scripts the [script parser][4] extracts: `package.json` scripts, CI workflow
   `run` commands, and source-code calls (tagged `$` templates,
   `node:child_process`, `execa`, `nano-spawn`)
 
@@ -87,6 +88,7 @@ further entry files recursively until none remain.
 
 [1]: ../overview/configuration.md#defaults
 [2]: ./plugins.md
-[3]: ../features/script-parser.md
-[4]: ../reference/cli.md#--no-gitignore
-[5]: ../guides/configuring-project-files.md
+[3]: ../reference/configuration.md#includesubpathexports
+[4]: ../features/script-parser.md
+[5]: ../reference/cli.md#--no-gitignore
+[6]: ../guides/configuring-project-files.md

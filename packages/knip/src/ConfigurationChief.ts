@@ -61,6 +61,7 @@ const defaultConfig: Configuration = {
   ignoreWorkspaces: [],
   ignoreExportsUsedInFile: false,
   isIncludeEntryExports: false,
+  isIncludeSubpathExports: false,
   compilers: new Map(),
   rootPluginConfigs: {},
 };
@@ -97,6 +98,7 @@ export class ConfigurationChief {
   isProduction: boolean;
   isStrict: boolean;
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
   config: Configuration;
   workspace: string | string[] | undefined;
   selectedWorkspaces: Set<string> | undefined;
@@ -120,6 +122,7 @@ export class ConfigurationChief {
     this.isProduction = options.isProduction;
     this.isStrict = options.isStrict;
     this.isIncludeEntryExports = options.isIncludeEntryExports;
+    this.isIncludeSubpathExports = options.isIncludeSubpathExports;
     this.workspace = options.workspace;
     this.workspaces = options.workspaces;
     this.rawConfig = options.parsedConfig;
@@ -159,6 +162,7 @@ export class ConfigurationChief {
     const ignoreIssues = rawConfig.ignoreIssues ?? {};
     const ignoreWorkspaces = rawConfig.ignoreWorkspaces ?? defaultConfig.ignoreWorkspaces;
     const isIncludeEntryExports = rawConfig.includeEntryExports ?? this.isIncludeEntryExports;
+    const isIncludeSubpathExports = rawConfig.includeSubpathExports ?? this.isIncludeSubpathExports;
 
     const rootPluginConfigs: Partial<PluginsConfiguration> = {};
 
@@ -181,6 +185,7 @@ export class ConfigurationChief {
       ignoreIssues,
       ignoreWorkspaces,
       isIncludeEntryExports,
+      isIncludeSubpathExports,
       compilers: normalizeCompilers(rawConfig),
       rootPluginConfigs,
     };
@@ -454,6 +459,9 @@ export class ConfigurationChief {
     const ignoreGlobalBinaries = workspaceConfig.ignoreGlobalBinaries ?? this.config.ignoreGlobalBinaries;
     const ignoreExportsUsedInFile = workspaceConfig.ignoreExportsUsedInFile ?? this.config.ignoreExportsUsedInFile;
     const isIncludeEntryExports = workspaceConfig.includeEntryExports ?? this.config.isIncludeEntryExports;
+    const isIncludeSubpathExports =
+      !(this.isStrict && this.selectedWorkspaces) &&
+      (workspaceConfig.includeSubpathExports ?? this.config.isIncludeSubpathExports);
 
     const plugins: Partial<PluginsConfiguration> = {};
 
@@ -476,6 +484,7 @@ export class ConfigurationChief {
       ignoreGlobalBinaries,
       ignoreExportsUsedInFile,
       isIncludeEntryExports,
+      isIncludeSubpathExports,
       ...plugins,
     };
   }

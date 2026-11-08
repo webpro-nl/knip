@@ -32,7 +32,7 @@ const parseJson = (raw: string): ExtendedPackageJson => {
   return result;
 };
 
-const getEntriesFromExports = (obj: any): string[] => {
+export const getEntriesFromExports = (obj: any): string[] => {
   if (typeof obj === 'string') return [obj];
   let values: string[] = [];
   for (const prop in obj) {
@@ -210,7 +210,7 @@ const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
   if (parts.join(patternMatch) === candidate) return { patternMatch };
 };
 
-const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
+export const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
   if (!Array.isArray(exports) && typeof exports === 'object') {
     const entries = Object.entries(exports);
     if (entries.some(([key]) => key.startsWith('.'))) return entries.filter(([key]) => key.startsWith('.'));
@@ -290,8 +290,9 @@ const getHiddenExportTargets = (exports: NonNullable<PackageJson['exports']>) =>
   return targets;
 };
 
-export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
-  const { main, module, browser, bin, exports, types, typings } = manifest;
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson, isIncludeSubpathExports = false) => {
+  const { main, module, browser, bin, types, typings } = manifest;
+  const exports = isIncludeSubpathExports ? undefined : manifest.exports;
 
   const entryPaths = new Set<string>();
 

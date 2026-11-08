@@ -5,9 +5,9 @@ import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
 import type { Issue } from '../types/issues.ts';
 import { isFile } from '../util/fs.ts';
 import type { Input } from '../util/input.ts';
-import { sanitizeSpecifier } from '../util/modules.ts';
-import { getPackageTargetPaths } from '../util/package-json.ts';
-import { join } from '../util/path.ts';
+import { getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
+import { getEntriesFromExports, getExportEntries, getPackageTargetPaths } from '../util/package-json.ts';
+import { extname, join } from '../util/path.ts';
 import type { WorkspacePackageTargetHandler } from '../util/to-source-path.ts';
 
 type InputReference = [specifier: string, containingFilePath: string];
@@ -40,9 +40,15 @@ export class SubpathReferences {
     this.isGitIgnored = isGitIgnored;
   }
 
+  private isSubpathSpecifier(specifier: string) {
+    if (specifier.startsWith('#')) return true;
+    const packageName = getPackageNameFromModuleSpecifier(specifier);
+    return packageName !== undefined && this.chief.availableWorkspacePkgNames.has(packageName);
+  }
+
   addInput(input: Input, owner: string) {
     const { specifier, containingFilePath, dir } = input;
-    if (!containingFilePath || !specifier.startsWith('#')) return;
+    if (!containingFilePath || !this.isSubpathSpecifier(specifier)) return;
     const filePath = dir ? join(dir, 'package.json') : containingFilePath;
     const references = this.inputs.get(owner);
     if (references) references.push([specifier, filePath]);
@@ -51,13 +57,11 @@ export class SubpathReferences {
   }
 
   add(specifier: string, containingFilePath: string) {
-    const sanitizedSpecifier = sanitizeSpecifier(specifier);
-    if (!sanitizedSpecifier.startsWith('#')) return;
     const workspace = this.chief.findWorkspaceByFilePath(containingFilePath);
-    const id = `${workspace?.name ?? ''}\0${sanitizedSpecifier}`;
+    const id = `${workspace?.name ?? ''}\0${specifier}`;
     if (this.seen.has(id)) return;
     this.seen.add(id);
-    const target = this.findWorkspacePackageTarget(sanitizedSpecifier, containingFilePath);
+    const target = this.findWorkspacePackageTarget(sanitizeSpecifier(specifier), containingFilePath);
     if (!target) return;
     const subpaths = this.referenced.get(target.name);
     if (subpaths) subpaths.add(target.subpath);
@@ -86,23 +90,36 @@ export class SubpathReferences {
 
   getIssues() {
     const issues: Issue[] = [];
-    for (const { name, manifestPath, manifestStr } of this.workspaces) {
-      const imports = this.chief.getManifestForWorkspace(name)?.imports;
-      if (!imports) continue;
+    for (const { name, manifestPath, manifestStr, config } of this.workspaces) {
+      const manifest = this.chief.getManifestForWorkspace(name);
+      if (!manifest) continue;
       const referenced = this.referenced.get(name);
       const peeker = new PackagePeeker(manifestStr);
-      for (const key in imports) {
-        if (!key.startsWith('#') || imports[key] === null || referenced?.has(key)) continue;
+      const addIssue = (section: 'imports' | 'exports', key: string) => {
         issues.push({
           type: 'subpaths',
           filePath: manifestPath,
           workspace: name,
           symbol: key,
-          ...peeker.getPropertyLocation('imports', key),
+          ...(peeker.getPropertyLocation(section, key) ?? peeker.getPropertyLocation(section)),
           fixes: [],
         });
+      };
+      if (manifest.imports) {
+        for (const key in manifest.imports) {
+          if (key.startsWith('#') && manifest.imports[key] !== null && !referenced?.has(key)) addIssue('imports', key);
+        }
+      }
+      if (manifest.exports && config.isIncludeSubpathExports) {
+        for (const [key, value] of getExportEntries(manifest.exports)) {
+          if (value !== null && !referenced?.has(key) && this.hasModuleTarget(value)) addIssue('exports', key);
+        }
       }
     }
     return issues;
+  }
+
+  private hasModuleTarget(value: unknown) {
+    return getEntriesFromExports(value).some(target => !extname(target) || this.principal.hasAcceptedExtension(target));
   }
 }

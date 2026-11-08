@@ -18,6 +18,7 @@ Mode
       --cache                  Enable caching
       --cache-location         Change cache location (default: node_modules/.cache/knip)
       --include-entry-exports  Include entry files when reporting unused exports
+      --include-subpath-exports  Report unused subpaths in package.json#exports
       --no-gitignore           Don't respect .gitignore
   -p, --production             Analyze only production source files (e.g. no test files, devDependencies)
   -s, --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
@@ -115,6 +116,7 @@ export default function parseCLIArgs() {
       help: { type: 'boolean', short: 'h' },
       include: { type: 'string', multiple: true },
       'include-entry-exports': { type: 'boolean' },
+      'include-subpath-exports': { type: 'boolean' },
       'max-issues': { type: 'string' },
       'max-show-issues': { type: 'string' },
       memory: { type: 'boolean' },

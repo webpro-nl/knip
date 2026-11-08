@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/app",
+  "dependencies": {
+    "@fixtures/lib": "*"
+  }
+}

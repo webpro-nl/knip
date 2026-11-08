@@ -303,6 +303,25 @@ export interface RawConfiguration extends RawPluginsConfiguration {
    */
   includeEntryExports?: boolean | undefined;
   /**
+   * Report unused subpaths of the `exports` field in `package.json`. Enable this for
+   * workspaces that are only consumed within the repository: their `exports` targets
+   * are entry files only when the subpath is imported somewhere.
+   *
+   * @default false
+   *
+   * @example
+   * ```json title="knip.json"
+   * {
+   *   "includeSubpathExports": true
+   * }
+   * ```
+   *
+   * @remarks
+   * Set this option at root level to enable this globally, or within workspace
+   * configurations individually.
+   */
+  includeSubpathExports?: boolean | undefined;
+  /**
    * Override built-in compilers or add custom compilers for additional file types.
    *
    * @see {@link https://knip.dev/features/compilers | Compilers}
@@ -450,5 +469,6 @@ export type WorkspaceProjectConfig = Pick<
   | 'ignoreExportsUsedInFile'
   | 'ignoreIssues'
   | 'includeEntryExports'
+  | 'includeSubpathExports'
 > &
   RawPluginsConfiguration;

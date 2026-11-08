@@ -236,7 +236,7 @@ export const build = timerify(async function build({
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
-    const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
+    const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest, config.isIncludeSubpathExports);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
       if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
@@ -542,6 +542,7 @@ export const build = timerify(async function build({
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
+          subpathReferences.add(sanitizedSpecifier, filePath);
         } else {
           const candidate = join(dirname(filePath), sanitizedSpecifier);
           const ext = extname(sanitizedSpecifier);
@@ -584,9 +585,7 @@ export const build = timerify(async function build({
         const isWorkspace = isInternalWorkspace(packageName);
         if (isWorkspace || wsDependencies.has(packageName)) {
           file.imports.external.add({ ..._import, specifier: packageName });
-          if (isWorkspace && !isGitIgnored(_import.filePath)) {
-            principal.addProgramPath(_import.filePath);
-          }
+          if (isWorkspace) subpathReferences.add(_import.specifier, filePath);
         }
       }
 

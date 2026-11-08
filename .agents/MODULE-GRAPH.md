@@ -87,7 +87,8 @@ analyze depends on it being complete by the time build finishes.
   straight: `projectPaths` (globbed candidates) ⊇ `resolvedFiles` (reached +
   parsed) vs `analyzedFiles` (fully analyzed). Unused files = `projectPaths`
   minus reached.
-- **Entry paths can grow mid-walk.** Targets of a `package.json#imports` key
+- **Entry paths can grow mid-walk.** Targets of a `package.json#imports` key,
+  and of an `exports` key when the workspace sets `includeSubpathExports`,
   become entry files only once a specifier references the key.
   `SubpathReferences` (`src/graph/SubpathReferences.ts`) resolves each specifier
   it is handed to a workspace subpath, records the subpath and claims the key's
