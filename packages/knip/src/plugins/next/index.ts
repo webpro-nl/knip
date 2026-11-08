@@ -231,7 +231,8 @@ const args: Args = {
   },
 };
 
-const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets from the composed configuration,
+const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets, the custom image loader
+(\`images.loaderFile\`) and cache handlers (\`cacheHandler\`, \`cacheHandlers\`) from the composed configuration,
 including values a shared configuration factory adds. A configuration file that fails to load is analyzed statically.`;
 
 /** @public */
