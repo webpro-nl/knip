@@ -93,7 +93,7 @@ export const createInputHandler =
         isConfig(input))
     ) {
       // Attempt fast path first for external dependencies (including internal workspaces)
-      const isWorkspace = chief.workspacesByPkgName.has(packageName);
+      const isWorkspace = chief.findWorkspaceByPackageName(packageName, containingFilePath) !== undefined;
       const inputWorkspace = getWorkspaceFor(input, chief, workspace);
 
       if (inputWorkspace) {

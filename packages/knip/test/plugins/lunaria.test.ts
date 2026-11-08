@@ -5,15 +5,18 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-test('Find dependencies with the lunaria core scenario', async () => {
+test('Find dependencies and literal renderers with the lunaria core scenario', async () => {
   const cwd = resolve('fixtures/plugins/lunaria/core');
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['t/renderer.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
 

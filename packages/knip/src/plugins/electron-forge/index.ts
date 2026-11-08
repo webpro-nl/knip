@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDependency, toProductionEntry } from '../../util/input.ts';
+import { type Input, toConfig, toDependency, toDeferResolveProductionEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
@@ -43,7 +43,7 @@ const getPluginInputs = async (name: unknown, opts: unknown, options: PluginOpti
   const { cwd, configFilePath } = options;
   const inputs: Input[] = [];
   const addEntry = (value: unknown) => {
-    for (const id of toStrings(value)) inputs.push(toProductionEntry(toAbsolute(id, cwd)));
+    for (const id of toStrings(value)) inputs.push(toDeferResolveProductionEntry(toAbsolute(id, cwd)));
   };
   const addConfig = async (pluginName: 'vite' | 'webpack', value: unknown) => {
     if (typeof value === 'string') {

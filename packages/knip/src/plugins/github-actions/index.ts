@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { hasFileWithExtension } from '../../util/fs.ts';
-import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { type Input, isDeferResolveEntry, toDeferResolveEntry } from '../../util/input.ts';
 import { findByKeyDeep } from '../../util/object.ts';
 import { join, relative } from '../../util/path.ts';
 import type { Job, Runs } from './types.ts';
@@ -61,7 +61,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     }
   }
 
-  return [...inputs, ...getActionDependencies(config, options).map(id => toEntry(id))];
+  return [...inputs, ...getActionDependencies(config, options).map(id => toDeferResolveEntry(id))];
 };
 
 const plugin: Plugin = {

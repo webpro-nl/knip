@@ -7,9 +7,11 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/github-actions');
 
-test('Find dependencies with the GitHub Actions plugin', async () => {
+test('Find dependencies and literal action entries with the GitHub Actions plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['.github/actions/node-b/v/prepare.js']);
 
   assert(issues.unresolved['.github/workflows/test.yml']['esbuild-register']);
 
@@ -41,8 +43,9 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
     ...baseCounters,
     binaries: 8,
     unresolved: 2,
-    processed: 12,
-    total: 12,
+    files: 1,
+    processed: 14,
+    total: 14,
   });
 });
 
@@ -56,7 +59,8 @@ test('Find dependencies with the GitHub Actions plugin when cwd has a trailing s
     ...baseCounters,
     binaries: 8,
     unresolved: 2,
-    processed: 12,
-    total: 12,
+    files: 1,
+    processed: 14,
+    total: 14,
   });
 });

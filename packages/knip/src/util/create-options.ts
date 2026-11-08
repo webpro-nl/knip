@@ -1,6 +1,4 @@
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
-import { knipConfigurationSchema } from '../schema/configuration.ts';
-import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
@@ -21,6 +19,8 @@ import { loadResolvedConfigFile } from './load-config.ts';
 import { _load, unload } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
+import { parseConfiguration } from './parse-configuration.ts';
+import { timerify } from './Performance.ts';
 import { isAbsolute, isInternal, join, resolveCwd, toAbsolute } from './path.ts';
 import { splitTags } from './tag.ts';
 
@@ -33,7 +33,7 @@ interface CreateOptions extends Partial<Options> {
  * - Loads & validates knip.json
  * - Creates options
  */
-export const createOptions = async (options: CreateOptions, isReload = false) => {
+export const createOptions = timerify(async (options: CreateOptions, isReload = false) => {
   const { args = {} } = options;
   const cwd = resolveCwd(options.cwd ?? args.directory ?? '.');
 
@@ -85,7 +85,7 @@ export const createOptions = async (options: CreateOptions, isReload = false) =>
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
+  const parsedConfig = parseConfiguration(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
@@ -179,6 +179,7 @@ export const createOptions = async (options: CreateOptions, isReload = false) =>
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
     isFormat: args.format ?? options.isFormat ?? false,
     isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
+    isIncludeSubpathExports: args['include-subpath-exports'] ?? options.isIncludeSubpathExports ?? false,
     isProduction,
     isReportDependencies:
       includedIssueTypes.dependencies ||
@@ -231,6 +232,6 @@ export const createOptions = async (options: CreateOptions, isReload = false) =>
     workspace,
     workspaces,
   };
-};
+}, 'createOptions');
 
 export type MainOptions = Awaited<ReturnType<typeof createOptions>>;

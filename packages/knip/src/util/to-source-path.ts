@@ -8,6 +8,7 @@ import { _glob, prependDirToPattern } from './glob.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
 import { getPackageMapTarget } from './package-json.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
+import type { Exports } from '../types/package-json.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
@@ -58,7 +59,7 @@ const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extension
 export type WorkspacePackageTargetHandler = (
   specifier: string,
   filePath: string
-) => { dir: string; target: unknown; patternMatch?: string } | undefined;
+) => { name: string; dir: string; target: Exports; subpath: string; patternMatch?: string } | undefined;
 
 export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): WorkspacePackageTargetHandler => {
   return (specifier, filePath) => {
@@ -70,7 +71,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
     } else {
       const packageName = getPackageNameFromModuleSpecifier(specifier);
       if (!packageName) return;
-      workspace = chief.workspacesByPkgName.get(packageName);
+      workspace = chief.findWorkspaceByPackageName(packageName, filePath);
       key = packageName === specifier ? '.' : `.${specifier.slice(packageName.length)}`;
     }
     if (!workspace) return;
@@ -78,7 +79,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
     const map = isImports ? manifest?.imports : manifest?.exports;
     if (!manifest || !map) return;
     const result = getPackageMapTarget(map, key);
-    if (result) return { dir: workspace.dir, ...result };
+    if (result) return { name: workspace.name, dir: workspace.dir, ...result };
   };
 };
 

@@ -3,7 +3,7 @@ import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../
 import { findImportedCalls, findProperty, getStringValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolveProductionEntry } from '../../util/input.ts';
 import { dirname, join, toAbsolute } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 
@@ -76,7 +76,7 @@ export const getHtmlScriptEntries = async (
   if (!isFile(htmlPath)) return [];
 
   const html = await loadFile(htmlPath);
-  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toProductionEntry(src));
+  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toDeferResolveProductionEntry(src));
 };
 
 export const getIndexHtmlEntries = (rootDir: string, publicDir?: string): Promise<Input[]> =>

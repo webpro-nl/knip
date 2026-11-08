@@ -77,33 +77,33 @@ test('Find entries with the @solidjs/vite-plugin plugin (production with entry o
   });
 });
 
-test('Find entries with the @solidjs/vite-plugin plugin (setup with generated entries)', async () => {
+test('Find entries with the @solidjs/vite-plugin plugin (setup with a literal path and generated entries)', async () => {
   const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-generated');
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files).sort(), []);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/s/setup.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 0,
-    processed: 3,
-    total: 3,
+    files: 1,
+    processed: 4,
+    total: 4,
   });
 });
 
-test('Find entries with the @solidjs/vite-plugin plugin (setup with generated entries in production)', async () => {
+test('Find entries with the @solidjs/vite-plugin plugin (setup with a literal path and generated entries in production)', async () => {
   const cwd = resolve('fixtures/plugins/solidjs-vite-plugin-generated');
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files).sort(), []);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/s/setup.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 0,
-    processed: 2,
-    total: 2,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
 

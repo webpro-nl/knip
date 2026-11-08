@@ -18,7 +18,7 @@ test('Respect ignored unresolved imports, including regex, show config hints', a
   });
 
   assert.deepEqual(configurationHints, [
-    { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-root' },
+    { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-root', configKey: '.' },
     { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-top-level' },
     { type: 'ignoreUnresolved', workspaceName: '.', identifier: './unresolved-workspace' },
     { type: 'ignoreUnresolved', workspaceName: 'packages/client', identifier: 'unused-workspace' },

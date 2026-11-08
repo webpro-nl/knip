@@ -269,6 +269,7 @@ export const IGNORE_DEFINITELY_TYPED = new Set([
 
 export const ISSUE_TYPES = [
   'files',
+  'subpaths',
   'dependencies',
   'devDependencies',
   'optionalPeerDependencies',
@@ -289,6 +290,7 @@ export const ISSUE_TYPES = [
 
 export const ISSUE_TYPE_TITLE = {
   files: 'Unused files',
+  subpaths: 'Unused subpaths',
   dependencies: 'Unused dependencies',
   devDependencies: 'Unused devDependencies',
   optionalPeerDependencies: 'Referenced optional peerDependencies',

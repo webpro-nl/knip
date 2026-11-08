@@ -2,8 +2,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import picomatch from 'picomatch';
 import { IS_DTS } from '../constants.ts';
-import type { PackageJson } from '../types/package-json.ts';
+import type { Exports, PackageJson } from '../types/package-json.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
+import { join } from './path.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -31,7 +32,7 @@ const parseJson = (raw: string): ExtendedPackageJson => {
   return result;
 };
 
-const getEntriesFromExports = (obj: any): string[] => {
+export const getEntriesFromExports = (obj: any): string[] => {
   if (typeof obj === 'string') return [obj];
   let values: string[] = [];
   for (const prop in obj) {
@@ -121,20 +122,26 @@ export const getPublishedTypeEntrySpecifiers = (manifest: PackageJson) => {
   return { candidates, versioned };
 };
 
-export const getPackageMapTarget = (map: unknown, key: string) => {
-  if (!map || typeof map !== 'object' || Array.isArray(map)) return key === '.' ? { target: map } : undefined;
-
-  const entries = Object.entries(map);
-  let hasSubpaths = false;
-  for (const [subpath, target] of entries) {
-    if (!subpath.startsWith('.') && !subpath.startsWith('#')) continue;
-    hasSubpaths = true;
-    if (subpath === key) return { target };
+export const getPackageMapTarget = (map: Exports, key: string) => {
+  if (map === null || typeof map !== 'object' || Array.isArray(map)) {
+    return key === '.' ? { target: map, subpath: '.' } : undefined;
   }
-  if (!hasSubpaths) return key === '.' ? { target: map } : undefined;
 
-  let best: { target: unknown; patternMatch: string; prefixLength: number; subpathLength: number } | undefined;
-  for (const [subpath, target] of entries) {
+  let hasSubpaths = false;
+  for (const subpath in map) {
+    if (subpath.startsWith('.') || subpath.startsWith('#')) {
+      hasSubpaths = true;
+      break;
+    }
+  }
+  if (!hasSubpaths) return key === '.' ? { target: map, subpath: '.' } : undefined;
+  if (Object.hasOwn(map, key)) return { target: map[key], subpath: key };
+
+  let best:
+    | { target: Exports; subpath: string; patternMatch: string; prefixLength: number; subpathLength: number }
+    | undefined;
+  for (const subpath in map) {
+    const target = map[subpath];
     const starIndex = subpath.indexOf('*');
     if (starIndex < 0) continue;
     const prefix = subpath.slice(0, starIndex);
@@ -147,13 +154,50 @@ export const getPackageMapTarget = (map: unknown, key: string) => {
     ) {
       best = {
         target,
+        subpath,
         patternMatch: key.slice(prefix.length, key.length - suffix.length),
         prefixLength: prefix.length,
         subpathLength: subpath.length,
       };
     }
   }
-  if (best) return { target: best.target, patternMatch: best.patternMatch };
+  if (best) return { target: best.target, subpath: best.subpath, patternMatch: best.patternMatch };
+};
+
+const invalidSegments = /(^|\\|\/)((\.|%2e)(\.|%2e)?|node_modules)(\\|\/|$)/i;
+
+export const expandPackageTarget = (target: string | undefined, patternMatch: string | undefined) => {
+  if (!target?.startsWith('./') || invalidSegments.test(target.slice(2))) return;
+  if (!target.includes('*')) return target;
+  if (patternMatch === undefined || invalidSegments.test(patternMatch)) return;
+  return target.replaceAll('*', patternMatch);
+};
+
+export const toPackagePath = (dir: string, target: string) => {
+  const candidate = join(dir, target);
+  return candidate.startsWith(`${dir}/`) ? candidate : undefined;
+};
+
+export const getPackageTargetPaths = (
+  value: unknown,
+  dir: string,
+  patternMatch: string | undefined,
+  isIncludeTypes: boolean,
+  paths: string[] = []
+) => {
+  if (typeof value === 'string') {
+    const target = expandPackageTarget(value, patternMatch);
+    const candidate = target && toPackagePath(dir, target);
+    if (candidate) paths.push(candidate);
+  } else if (Array.isArray(value)) {
+    for (const item of value) getPackageTargetPaths(item, dir, patternMatch, isIncludeTypes, paths);
+  } else if (value && typeof value === 'object') {
+    for (const [condition, child] of Object.entries(value)) {
+      if (isIncludeTypes || condition !== 'types')
+        getPackageTargetPaths(child, dir, patternMatch, isIncludeTypes, paths);
+    }
+  }
+  return paths;
 };
 
 const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
@@ -166,7 +210,7 @@ const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
   if (parts.join(patternMatch) === candidate) return { patternMatch };
 };
 
-const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
+export const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
   if (!Array.isArray(exports) && typeof exports === 'object') {
     const entries = Object.entries(exports);
     if (entries.some(([key]) => key.startsWith('.'))) return entries.filter(([key]) => key.startsWith('.'));
@@ -246,8 +290,9 @@ const getHiddenExportTargets = (exports: NonNullable<PackageJson['exports']>) =>
   return targets;
 };
 
-export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
-  const { main, module, browser, bin, exports, types, typings } = manifest;
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson, isIncludeSubpathExports = false) => {
+  const { main, module, browser, bin, types, typings } = manifest;
+  const exports = isIncludeSubpathExports ? undefined : manifest.exports;
 
   const entryPaths = new Set<string>();
 
@@ -263,15 +308,6 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
     for (const item of getEntriesFromExports(exports)) {
       if (item === './*' || item.trim() === '') continue;
       entryPaths.add(expandWildcards(item));
-    }
-  }
-
-  if (manifest.imports) {
-    for (const [key, value] of Object.entries(manifest.imports)) {
-      if (!key.startsWith('#')) continue;
-      for (const item of getEntriesFromExports(value)) {
-        if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
-      }
     }
   }
 

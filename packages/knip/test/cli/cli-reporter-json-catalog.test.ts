@@ -21,6 +21,7 @@ test('knip --reporter json (catalog)', () => {
         files: [],
         namespaceMembers: [],
         optionalPeerDependencies: [],
+        subpaths: [],
         types: [],
         unlisted: [],
         unresolved: [],

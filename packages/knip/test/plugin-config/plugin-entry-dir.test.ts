@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
 import { main } from '../../src/index.ts';
-import { type Input, toEntry, toProductionEntry } from '../../src/util/input.ts';
+import { type Input, toDeferResolveProductionEntry, toEntry, toProductionEntry } from '../../src/util/input.ts';
 import { join } from '../../src/util/path.ts';
 import { WorkspaceWorker } from '../../src/WorkspaceWorker.ts';
 import baseCounters from '../helpers/baseCounters.ts';
@@ -12,16 +12,48 @@ const cwd = resolve('fixtures/plugin-config/plugin-entry-dir');
 const app = join(cwd, 'packages/app');
 
 // Plugin inputs are injected into one workspace's worker, so the spelling, base and group of a pattern are exact
-const run = async (t: TestContext, inputs: Input[], { isProduction = false, workspace = '.' } = {}) => {
+const run = async (
+  t: TestContext,
+  inputs: Input[],
+  { isProduction = false, isIncludeEntryExports = false, workspace = '.' } = {}
+) => {
   const runPlugins = t.mock.method(WorkspaceWorker.prototype, 'runPlugins', async function (this: WorkspaceWorker) {
     return this.name === workspace ? inputs : [];
   });
   try {
-    return await main(await createOptions({ cwd, isProduction }));
+    return await main(await createOptions({ cwd, isProduction, isIncludeEntryExports }));
   } finally {
     runPlugins.mock.restore();
   }
 };
+
+for (const isProduction of [false, true]) {
+  test(`Include exports from resolved plugin entries when opted in (isProduction: ${isProduction})`, async t => {
+    const inputs = [
+      toDeferResolveProductionEntry('keep.ts', {
+        dir: cwd,
+        containingFilePath: join(app, 'package.json'),
+        allowIncludeExports: true,
+      }),
+    ];
+    const { issues, counters } = await run(t, inputs, { isProduction, isIncludeEntryExports: true });
+
+    assert.deepEqual(Object.keys(issues.exports['keep.ts']), ['keep']);
+    assert.deepEqual(counters, { ...baseCounters, exports: 1, files: 3, processed: 4, total: 4 });
+  });
+
+  test(`Skip exports from resolved plugin entries by default (isProduction: ${isProduction})`, async t => {
+    const inputs = [
+      toDeferResolveProductionEntry('keep.ts', {
+        dir: cwd,
+        containingFilePath: join(app, 'package.json'),
+      }),
+    ];
+    const { counters } = await run(t, inputs, { isProduction, isIncludeEntryExports: true });
+
+    assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+  });
+}
 
 const spellings = {
   'relative positive, relative negative': ['*.ts', '!skip.ts'],

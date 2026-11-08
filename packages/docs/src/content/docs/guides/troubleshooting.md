@@ -89,7 +89,7 @@ a regex that works too:
 
 <img src="/screenshots/trace-dependency.png" alt="trace dependency" class="mw500" />
 
-Use [--workspace \[filter\]][8] to filter accordingly.
+Use [`--workspace [filter]`][8] to filter accordingly.
 
 #### Legend
 

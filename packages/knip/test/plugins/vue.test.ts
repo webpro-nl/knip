@@ -51,3 +51,21 @@ test('Detect <script src> and <style src> in .vue SFCs', async () => {
     total: 8,
   });
 });
+
+test('Find vue.config.cjs (vue)', async () => {
+  const cwd = resolve('fixtures/plugins/vue-cjs');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(!('vue.config.cjs' in issues.files));
+  assert(!('aliases.cjs' in issues.files));
+  assert(!issues.devDependencies['package.json']['raw-loader']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    devDependencies: 1,
+    processed: 2,
+    total: 2,
+  });
+});

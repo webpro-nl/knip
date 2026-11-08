@@ -14,7 +14,7 @@ Studio Code:
   <source src="/screenshots/watch-fix.webm" type="video/webm" />
 </video>
 
-This works in any terminal. See [--watch][1] and [auto-fix][2] for more details.
+This works in any terminal. See [`--watch`][1] and [auto-fix][2] for more details.
 
 ## Trace
 
@@ -35,7 +35,7 @@ An example screenshot showing `--performance` output for the Knip codebase:
 
 <img src="/screenshots/performance.png" alt="performance" class="mw500" />
 
-Also see [--performance][4].
+Also see [`--performance`][4].
 
 [1]: ../reference/cli.md#--watch
 [2]: ../features/auto-fix.mdx

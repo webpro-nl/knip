@@ -136,3 +136,9 @@ export const sanitizeSpecifier = (specifier: string) => {
   }
   return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
 };
+
+export const getSubpathImport = (specifier: string) => {
+  if (!specifier.includes('#')) return;
+  const sanitized = sanitizeSpecifier(specifier);
+  if (sanitized.charCodeAt(0) === CHAR_HASH) return sanitized;
+};

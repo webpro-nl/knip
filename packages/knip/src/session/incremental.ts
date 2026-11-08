@@ -45,6 +45,7 @@ export const getFileTopology = (file: FileNode) => {
     imports: facts(file.imports.imports),
     external: facts(file.imports.external),
     unresolved: facts(file.imports.unresolved),
+    subpathImports: file.imports.subpathImports,
     externalRefs: file.imports.externalRefs,
     exports,
     skipExports: file.skipExports,
