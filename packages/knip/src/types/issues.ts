@@ -33,6 +33,7 @@ export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
   files: IssueRecords;
+  subpaths: IssueRecords;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;

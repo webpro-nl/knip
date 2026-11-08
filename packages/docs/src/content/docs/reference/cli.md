@@ -201,6 +201,7 @@ Available [issue types][12] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
+- `subpaths`
 - `dependencies`
 - `unlisted`
 - `binaries`

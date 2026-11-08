@@ -165,6 +165,9 @@
         "nsTypes": {
           "$ref": "#/definitions/ruleValue"
         },
+        "subpaths": {
+          "$ref": "#/definitions/ruleValue"
+        },
         "types": {
           "$ref": "#/definitions/ruleValue"
         },
@@ -288,6 +291,7 @@
         "type": "string",
         "enum": [
           "files",
+          "subpaths",
           "dependencies",
           "devDependencies",
           "optionalPeerDependencies",

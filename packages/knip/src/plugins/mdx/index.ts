@@ -30,7 +30,9 @@ const bundledPlugins = ['remark-mdx-frontmatter'];
 export const resolveContentMapperOptions = (options: Record<string, unknown>) => {
   const inputs = takeDependencies(options.remarkPlugins).filter(input => !bundledPlugins.includes(input.specifier));
   const provider = options.providerImportSource;
-  if (typeof provider === 'string' && isInternal(provider)) inputs.push(toDeferResolveProductionEntry(provider));
+  if (typeof provider === 'string' && (isInternal(provider) || provider.startsWith('#'))) {
+    inputs.push(toDeferResolveProductionEntry(provider));
+  }
   return inputs;
 };
 

@@ -66,7 +66,7 @@ Troubleshooting
       --trace-export [name]    Show trace output for named export(s)
       --trace-file [file]      Show trace output for exports in file
 
-(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, catalogReferences, cycles
+(1) Issue types: files, subpaths, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, catalogReferences, cycles
 (2) Fixable issue types: dependencies, exports, types, files, catalog
 (3) Built-in reporters: symbols (default), compact, codeowners, cycles, json, codeclimate, markdown, disclosure, github-actions, sarif
 

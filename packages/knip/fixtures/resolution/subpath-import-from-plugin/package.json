@@ -6,6 +6,9 @@
       "default": "./lib/dep-polyfill.js"
     }
   },
+  "scripts": {
+    "start": "node --import=#dep entry.ts"
+  },
   "dependencies": {
     "dep-node-native": "^1.0.0"
   }

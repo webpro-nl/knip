@@ -31,8 +31,8 @@ entry files. Here's the default configuration in full:
 }
 ```
 
-In addition to the default locations, Knip looks for `entry` files in other places. In
-a monorepo, this is done for each workspace separately.
+In addition to the default locations, Knip looks for `entry` files in other
+places. In a monorepo, this is done for each workspace separately.
 
 Custom `entry` and `project` values replace these defaults, they are not merged.
 Entry files from the other places on this page are still added.
@@ -46,8 +46,10 @@ more details.
 ## Scripts in package.json
 
 The `package.json` is scanned for entry files. The `main`, `module`, `browser`,
-`bin`, `types`, `typings`, `exports` and `imports` fields may contain entry
-files. These are added even when `entry` is customized. The `scripts` are also
+`bin`, `types`, `typings` and `exports` fields may contain entry files. These
+are added even when `entry` is customized. The targets of a key in the `imports`
+field (subpath imports) are entry files only when the key is imported somewhere;
+otherwise the key is reported as an unused subpath. The `scripts` are also
 parsed to find entry files and dependencies. See [Script Parser][3] for more
 details.
 
