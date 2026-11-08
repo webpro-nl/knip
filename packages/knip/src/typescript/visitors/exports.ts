@@ -325,7 +325,9 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
       if (internalImport) {
-        if (_import.importedName !== 'default') {
+        if (_import.isNamespace) {
+          addValue(internalImport.reExportNs, 'default', s.filePath);
+        } else if (_import.importedName !== 'default') {
           addNsValue(internalImport.reExportAs, _import.importedName, 'default', s.filePath);
         } else {
           addValue(internalImport.reExport, 'default', s.filePath);
