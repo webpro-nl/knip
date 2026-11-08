@@ -40,9 +40,9 @@ const entry = [`app.config.${scriptExt}`, '**/*.d.vue.ts'];
 
 const app = ['app.{vue,jsx,tsx}', 'error.{vue,jsx,tsx}', 'router.options.ts'];
 const layout = (dir = 'layouts') => join(dir, '**/*.{vue,jsx,tsx}');
-const middleware = (dir = 'middleware') => join(dir, `**/*.${scriptExt}`);
+const middleware = (dir = 'middleware') => join(dir, `{*,*/index}.${scriptExt}`);
 const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
-const plugins = (dir = 'plugins') => join(dir, `**/*.${scriptExt}`);
+const plugins = (dir = 'plugins') => join(dir, `{*,*/index}.${scriptExt}`);
 const modules = 'modules/**/*.{ts,vue}';
 const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
 
@@ -152,6 +152,12 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   for (const id of localConfig.modules ?? []) {
     if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
     if (typeof id === 'string') addModule(id);
+  }
+
+  // Plugins listed in the config are loaded even outside the scanned top level of `plugins`
+  for (const id of localConfig.plugins ?? []) {
+    if (typeof id === 'string') addModule(id);
+    else if (id && typeof id.src === 'string') addModule(id.src);
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
