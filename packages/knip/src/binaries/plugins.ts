@@ -8,7 +8,7 @@ import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, to
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
-import { argsFrom, toCommandBinary, toWordArgs } from './util.ts';
+import { spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
@@ -17,9 +17,7 @@ const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loade
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
-const spawningArgs: Args = {
-  fromArgs: (parsed, args) => (parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? [])),
-};
+const spawningPluginArgs: Args = { fromArgs: spawningArgs };
 
 const toArgs = (pluginArgs: Args, words: Word[]) => {
   const values: string[] = [];
@@ -50,7 +48,8 @@ const parse = (pluginArgs: Args, args: string[]) => {
 };
 
 export const getWrappedCommand = (binary: string, words: Word[]): ScriptArg[] | undefined => {
-  const pluginArgs = pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningArgs : undefined);
+  const pluginArgs =
+    pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningPluginArgs : undefined);
   const fromArgs = pluginArgs?.fromArgs;
   if (!pluginArgs || typeof fromArgs !== 'function') return;
   const args = toArgs(pluginArgs, words);
