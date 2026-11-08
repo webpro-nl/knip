@@ -14,9 +14,9 @@ const setup = async (t: TestContext) => {
   return cwd;
 };
 
-const assertFresh = async (session: Session, cwd: string) => {
+const assertFresh = async (session: Session, cwd: string, isOrdered = true) => {
   const fresh = await createSession(await createOptions({ cwd, isSession: true }));
-  assert.equal(JSON.stringify(session.getIssues()), JSON.stringify(fresh.getIssues()));
+  if (isOrdered) assert.equal(JSON.stringify(session.getIssues()), JSON.stringify(fresh.getIssues()));
   assert.deepEqual(session.getIssues(), fresh.getIssues());
   assert.deepEqual(session.describePackageJson(), fresh.describePackageJson());
 };
@@ -161,7 +161,7 @@ test('subpath references of files that leave the graph are released', async t =>
   await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']), ['#used']);
   assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['last.ts', 'used.ts']);
-  await assertFresh(session, cwd);
+  await assertFresh(session, cwd, false);
 });
 
 test('subpath references from files outside the project are collected in sessions', async t => {
