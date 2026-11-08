@@ -1,4 +1,5 @@
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import type { SubpathReferences } from '../graph/SubpathReferences.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
@@ -23,6 +24,7 @@ export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
 type WatchOptions = {
   analyzedFiles: Set<string>;
   analyzeSourceFile: (filePath: string) => Promise<void>;
+  subpathReferences: SubpathReferences;
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
@@ -45,6 +47,7 @@ export const getSessionHandler = async (
   {
     analyzedFiles,
     analyzeSourceFile,
+    subpathReferences,
     chief,
     collector,
     analyze,
@@ -91,6 +94,7 @@ export const getSessionHandler = async (
           deleted.add(filePath);
           added.delete(filePath);
           analyzedFiles.delete(filePath);
+          subpathReferences.release(filePath);
           principal.removeProjectPath(filePath);
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
@@ -100,6 +104,7 @@ export const getSessionHandler = async (
             continue;
           }
           modified.add(filePath);
+          subpathReferences.release(filePath);
           debugLog(workspace.name, `Watcher: ± ${relativePath}`);
           break;
         }
@@ -144,7 +149,10 @@ export const getSessionHandler = async (
       clearGlobCache();
       invalidateCache(graph);
 
-      const filePaths = await principal.getUsedResolvedFiles();
+      subpathReferences.reset();
+      const filePaths = await principal.getUsedResolvedFiles((specifier, filePath) =>
+        subpathReferences.add(specifier, filePath)
+      );
 
       const cachedUnusedFiles = collector.purge();
 

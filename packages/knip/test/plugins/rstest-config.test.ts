@@ -7,17 +7,20 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/rstest-config');
 
-test('Find entries in a function-form rstest config', async () => {
+test('Find literal entries in a function-form rstest config', async () => {
   const options = await createOptions({ cwd });
   const { counters, issues } = await main(options);
 
-  assert('src/skipped.check.ts' in issues.files);
-  assert('src/ignored.check.ts' in issues.files);
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'src/f/render.check.ts',
+    'src/ignored.check.ts',
+    'src/skipped.check.ts',
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    processed: 6,
-    total: 6,
+    files: 3,
+    processed: 8,
+    total: 8,
   });
 });

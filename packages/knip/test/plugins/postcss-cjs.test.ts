@@ -11,13 +11,12 @@ test('Find dependencies with the PostCSS plugin (function)', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert(issues.unresolved['package.json']['autoprefixer']);
+  assert(issues.unlisted['package.json']['autoprefixer']);
   assert(issues.unlisted['postcss.config.cjs']['autoprefixer']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 1,
-    unresolved: 1,
+    unlisted: 2,
     processed: 1,
     total: 1,
   });

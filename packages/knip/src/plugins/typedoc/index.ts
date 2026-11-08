@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDeferResolveEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { TypeDocConfig } from './types.ts';
@@ -32,7 +32,7 @@ const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConf
   const themes = arrayify(cfg?.theme);
   const inputs: Input[] = [...plugins, ...themes].map(id => toDeferResolve(id));
   for (const file of [cfg?.customCss, cfg?.customJs]) {
-    if (file) inputs.push(toEntry(join(options.configFileDir, file)));
+    if (file) inputs.push(toDeferResolveEntry(join(options.configFileDir, file)));
   }
   return inputs;
 };

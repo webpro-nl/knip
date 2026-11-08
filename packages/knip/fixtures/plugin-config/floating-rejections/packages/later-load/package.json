@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/floating-rejections-later-load",
+  "dependencies": {
+    "next": "*"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}

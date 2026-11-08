@@ -8,9 +8,11 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/plugins/graphql-codegen');
 const scriptConfigCwd = resolve('fixtures/plugins/graphql-codegen-script-config');
 
-test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', async () => {
+test('Find dependencies and literal outputs with the graphql-codegen plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['src/l/generated.ts']);
 
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/near-operation-file-preset']);
   assert(issues.unlisted['codegen.ts']['@graphql-codegen/schema-ast']);
@@ -34,8 +36,9 @@ test('Find dependencies with the graphql-codegen plugin (codegen.ts function)', 
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 16,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
 

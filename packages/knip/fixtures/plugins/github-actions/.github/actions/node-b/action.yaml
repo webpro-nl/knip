@@ -3,4 +3,5 @@ description: Description
 
 runs:
   using: 'node20'
+  pre: '[variant]/prepare.js'
   main: main.js

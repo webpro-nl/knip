@@ -5,6 +5,9 @@ allowBuilds:
   esbuild: false
   sharp: false
 minimumReleaseAge: 4320
+minimumReleaseAgeExclude:
+  - '@astrojs/internal-helpers@0.13.1'
+  - '@astrojs/markdown-satteri@0.4.7'
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3

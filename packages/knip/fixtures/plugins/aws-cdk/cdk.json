@@ -1,0 +1,5 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/infra.ts",
+  "build": "npx projen bundle",
+  "plugin": ["cdk-assume-role-credential-plugin"]
+}

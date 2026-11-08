@@ -24,19 +24,24 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
   assert(issues.unresolved['vitest.config.ts']['snapshot-serializer.js']);
+  assert(issues.unlisted['vitest.config.ts']['installed-pkg']);
   assert(!issues.files['test/basic.edge.ts']);
   assert(!issues.files['coverage/config-provider.ts']);
   assert(!issues.files['coverage/cli-provider.ts']);
   assert(!issues.unlisted['vitest-custom-coverage.config.ts']);
   assert(!issues.unlisted['package.json']['@vitest/coverage-custom']);
   assert(!issues.unresolved['package.json']?.['./cli-provider.ts']);
+  assert(!issues.files['src/setupBare.ts']);
+  assert(issues.files['shared-state.ts']);
+  assert(issues.files['installed-pkg.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 11,
+    files: 2,
+    unlisted: 12,
     unresolved: 2,
-    processed: 16,
-    total: 16,
+    processed: 19,
+    total: 19,
   });
 });
 
@@ -48,12 +53,31 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   assert('src/htmlSnapshotSerializer.ts' in issues.files);
   assert('coverage/config-provider.ts' in issues.files);
   assert('coverage/cli-provider.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 4);
+  assert('src/setupBare.ts' in issues.files);
+  assert('shared-state.ts' in issues.files);
+  assert('installed-pkg.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 7);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 4,
-    processed: 4,
-    total: 4,
+    files: 7,
+    processed: 7,
+    total: 7,
+  });
+});
+
+test('Find dependencies with the Vitest plugin (files only)', async () => {
+  const options = await createOptions({ cwd, includedIssueTypes: ['files'] });
+  const { issues, counters } = await main(options);
+
+  assert(!issues.files['src/setupBare.ts']);
+  assert(issues.files['shared-state.ts']);
+  assert(issues.files['installed-pkg.ts']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 19,
+    total: 19,
   });
 });

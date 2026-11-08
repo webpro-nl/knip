@@ -61,6 +61,7 @@ const workspaceFields = {
   ignoreExportsUsedInFile: checkIgnoreExports,
   ignoreIssues: checkRecord(checkIssueTypes),
   includeEntryExports: checkBoolean,
+  includeSubpathExports: checkBoolean,
 } satisfies Fields<Omit<WorkspaceProjectConfig, PluginName>>;
 const checkWorkspace: Check<WorkspaceProjectConfig> = (value, path, errors): value is WorkspaceProjectConfig =>
   checkObject(value, path, errors, workspaceFields, getPluginCheck);

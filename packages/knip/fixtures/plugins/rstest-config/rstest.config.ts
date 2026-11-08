@@ -5,7 +5,7 @@ export default defineConfig(({ envMode }) => ({
   root: 'src',
   include: ['**/*.check.ts', '!**/ignored.check.ts'],
   exclude: {
-    patterns: ['skipped.check.ts'],
+    patterns: ['skipped.check.ts', 'f/render.check.ts'],
   },
   setupFiles: './setup/per-file.ts',
   globalSetup: './setup/global.ts',

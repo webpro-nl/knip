@@ -89,7 +89,7 @@ export type Args = {
    *
    * @default undefined
    */
-  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[]) => string[]);
+  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[], options: { cwd: string }) => string[]);
 
   /**
    * Return inputs from parsed arguments

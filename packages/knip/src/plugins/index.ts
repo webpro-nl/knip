@@ -5,6 +5,7 @@ import { default as astroDb } from './astro-db/index.ts';
 import { default as astroMarkdoc } from './astro-markdoc/index.ts';
 import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
+import { default as awsCdk } from './aws-cdk/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
 import { default as borp } from './borp/index.ts';
@@ -34,6 +35,7 @@ import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
+import { default as evalite } from './evalite/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
@@ -209,6 +211,7 @@ export const Plugins = {
   'astro-markdoc': astroMarkdoc,
   'astro-og-canvas': astroOgCanvas,
   ava,
+  'aws-cdk': awsCdk,
   babel,
   biome,
   borp,
@@ -238,6 +241,7 @@ export const Plugins = {
   eleventy,
   esbuild,
   eslint,
+  evalite,
   eve,
   execa,
   expo,

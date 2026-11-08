@@ -185,7 +185,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
     const result = readAndParseFile(file);
-    for (const p of collectLocalImportPaths(file, result)) inputs.push(toProductionEntry(p));
+    for (const p of collectLocalImportPaths(file, result)) inputs.push(toDeferResolveProductionEntry(p));
   }
 
   // In case typescript isn't listed

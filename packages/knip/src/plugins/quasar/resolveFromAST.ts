@@ -7,7 +7,7 @@ import {
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 
 const sourceFilesEntries: [string, string[]][] = [
@@ -43,8 +43,6 @@ const getConfigObject = (program: Program) => {
   }
 };
 
-const withExtensions = (id: string) => (id.includes('.') ? id : `${id}.{js,ts}`);
-
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   const { configFileDir } = options;
   const inputs: Input[] = [];
@@ -53,9 +51,8 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   const sourceFiles = findProperty(config, 'sourceFiles');
   for (const [key, defaults] of sourceFilesEntries) {
     const override = getFirstPropertyValue(sourceFiles, key);
-    for (const id of override ? [withExtensions(override)] : defaults) {
-      inputs.push(toProductionEntry(join(configFileDir, id)));
-    }
+    if (override) inputs.push(toDeferResolveProductionEntry(join(configFileDir, override)));
+    else for (const id of defaults) inputs.push(toProductionEntry(join(configFileDir, id)));
   }
   for (const id of staticEntries) inputs.push(toProductionEntry(join(configFileDir, id)));
 
@@ -63,13 +60,13 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   if (boot?.type === 'ArrayExpression') {
     for (const element of boot.elements ?? []) {
       const id = getStringValue(element) ?? getFirstPropertyValue(element, 'path');
-      if (id) inputs.push(toProductionEntry(join(configFileDir, 'src/boot', withExtensions(id))));
+      if (id) inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/boot', id)));
     }
   }
 
   for (const id of getStringValues(findProperty(config, 'css'))) {
     if (id.startsWith('~')) inputs.push(toDeferResolve(id.slice(1)));
-    else inputs.push(toProductionEntry(join(configFileDir, 'src/css', id)));
+    else inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/css', id)));
   }
 
   return inputs;

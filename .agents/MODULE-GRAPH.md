@@ -87,6 +87,24 @@ analyze depends on it being complete by the time build finishes.
   straight: `projectPaths` (globbed candidates) ⊇ `resolvedFiles` (reached +
   parsed) vs `analyzedFiles` (fully analyzed). Unused files = `projectPaths`
   minus reached.
+- **Entry paths can grow mid-walk.** Targets of a `package.json#imports` key,
+  and of an `exports` key when the workspace sets `includeSubpathExports`,
+  become entry files only once a specifier references the key.
+  `SubpathReferences` (`src/graph/SubpathReferences.ts`) resolves each specifier
+  it is handed to a workspace subpath, records the subpath and claims the key's
+  target files as entries (`claimEntryPath`). `onPathAdded` enqueues a claimed
+  target, and re-queues it when it was already reached as a non-project import
+  so it gets fully analyzed. Specifiers come from three places: inputs of
+  plugins and scripts (`addInput`, logged per owner), the imports of analyzed
+  files (fresh or cached), and files the walk reaches but doesn't analyze, whose
+  specifiers `walkAndAnalyze` hands to its `onSpecifier` callback. Nothing is
+  released one by one: a session calls `reset()` before each reachability walk
+  (`getUsedResolvedFiles`), which drops the references and the claimed entries
+  (`releaseEntryClaims`), replays the logged inputs and lets the walk rebuild
+  the rest from every reached file; a modified or deleted file only forgets its
+  logged inputs (`release`). A plain `addEntryPath` makes a claimed target a
+  permanent entry. `analyze.ts` reports the unreferenced keys from
+  `SubpathReferences` on every run, so sessions never retain `subpaths` issues.
 - **Cache short-circuits read+parse** for unchanged files (`CacheConsultant`).
   Warm runs jump straight to the cached `FileNode`; cold and warm timings differ
   a lot, so benchmark warm runs (see [PERFORMANCE.md][perf]).

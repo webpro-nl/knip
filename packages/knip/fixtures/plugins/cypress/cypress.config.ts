@@ -7,5 +7,6 @@ export default defineConfig({
   e2e: {
     ...nxE2EPreset(__dirname, {}),
     ...cypressJsonConfig,
+    supportFile: 'cypress/support/[variant]/setup.ts',
   },
 });

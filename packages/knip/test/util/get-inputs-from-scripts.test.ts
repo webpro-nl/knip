@@ -448,6 +448,10 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup -p ./require.js', [toBinary('rollup'), req]);
   t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
+  t('rollup -p', [toBinary('rollup')]);
+  t('rollup --config', [toBinary('rollup')]);
+  t('rollup --config --watch', [toBinary('rollup')]);
+  t('rollup --config rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
@@ -455,6 +459,8 @@ test('getInputsFromScripts ("positionals")', () => {
   t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toDeferResolve('./script.js')]);
   t('ts-node --require pkg/register ./main.ts', [toBinary('ts-node'), ts, toDeferResolve('pkg/register')]);
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --transpile-only ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --prefer-ts-exts ./main.ts', [toBinary('ts-node'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toDeferResolve('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toDeferResolve('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toDeferResolve('script.js')]);
@@ -547,6 +553,16 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
   t('prettier --write --config=my-prettier-settings.js', [toBinary('prettier'), toConfig('prettier', 'my-prettier-settings.js')]);
+  t('lingui extract --config', [toBinary('lingui')]);
+  t('prettier --config --write', [toBinary('prettier')]);
+});
+
+test('getInputsFromScripts (plugins → fromArgs)', () => {
+  t('glob --cmd', [toBinary('glob')]);
+  t('glob -c', [toBinary('glob')]);
+  t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('nodemon --exec', [toBinary('nodemon')]);
 });
 
 test('getInputsFromScripts (find -exec)', () => {

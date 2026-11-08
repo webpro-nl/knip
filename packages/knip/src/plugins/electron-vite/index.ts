@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getHtmlScriptEntries } from '../vite/helpers.ts';
@@ -44,7 +44,7 @@ const resolveConfig: ResolveConfig<ElectronViteConfig> = async (localConfig, opt
     const patterns = ids.length > 0 ? ids : [defaultEntry[name]];
     for (const id of patterns) {
       const resolved = toAbsolute(id, configFileDir);
-      inputs.push(toProductionEntry(resolved));
+      inputs.push(ids.length > 0 ? toDeferResolveProductionEntry(resolved) : toProductionEntry(resolved));
       if (name === 'renderer' && resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved)) inputs.push(input);
       }

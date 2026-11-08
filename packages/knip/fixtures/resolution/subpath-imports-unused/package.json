@@ -1,0 +1,31 @@
+{
+  "name": "@fixtures/subpath-imports-unused",
+  "type": "module",
+  "exports": "./exports.js",
+  "imports": {
+    "#used": "./used.js",
+    "#unused": "./unused.js",
+    "#conditional": {
+      "node": "./conditional-node.js",
+      "default": "./conditional-default.js"
+    },
+    "#unused-conditional": {
+      "node": "./unused-conditional-node.js",
+      "default": "./unused-conditional-default.js"
+    },
+    "#patterns/*": "./patterns/*.js",
+    "#patterns/private/*": null,
+    "#unused-patterns/*": "./unused-patterns/*.js",
+    "#query": "./query.js",
+    "#via-bridge": {
+      "node": "./via-bridge-node.js",
+      "default": "./via-bridge-default.js"
+    },
+    "#promoted": "./bridge/promoted.js",
+    "#typed": {
+      "types": "./typed.d.ts",
+      "default": "./typed.js"
+    },
+    "#loaded": "./loaded.js"
+  }
+}
