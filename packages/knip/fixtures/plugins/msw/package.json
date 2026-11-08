@@ -7,6 +7,6 @@
     "msw": "*"
   },
   "msw": {
-    "workerDirectory": "bob"
+    "workerDirectory": ["bob", "storybook/public"]
   }
 }

@@ -19,6 +19,7 @@ import { ConfigurationFiles } from '../session/configuration.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
+import { escapePath } from 'tinyglobby';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
 import {
@@ -56,6 +57,7 @@ import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relati
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
+import type { SubpathReferences } from './SubpathReferences.ts';
 
 interface BuildOptions {
   chief: ConfigurationChief;
@@ -66,6 +68,7 @@ interface BuildOptions {
   isGitIgnored: (path: string) => boolean;
   scriptParserContext: ScriptParserContext;
   streamer: ConsoleStreamer;
+  subpathReferences: SubpathReferences;
   workspaces: Workspace[];
   options: MainOptions;
 }
@@ -79,6 +82,7 @@ export const build = timerify(async function build({
   isGitIgnored,
   scriptParserContext,
   streamer,
+  subpathReferences,
   workspaces,
   options,
 }: BuildOptions) {
@@ -94,7 +98,11 @@ export const build = timerify(async function build({
 
   const externalRefsFromInputs: ExternalRefsFromInputs | undefined = options.isSession ? new Map() : undefined;
 
-  const handleInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const resolveInput = createInputHandler(deputy, chief, isGitIgnored, addIssue, externalRefsFromInputs, options);
+  const handleInput = (input: Input, workspace: Workspace, owner = workspace.manifestPath) => {
+    subpathReferences.addInput(input, owner);
+    return resolveInput(input, workspace);
+  };
   const getPublishedTypeDependencies = options.isReportDependencies
     ? createPublishedTypeDependencyAnalyzer()
     : undefined;
@@ -228,7 +236,7 @@ export const build = timerify(async function build({
     collector.addIgnorePatterns(config.ignore.map(fn));
     collector.addIgnoreFilesPatterns(config.ignoreFiles.map(fn));
 
-    const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest);
+    const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest, config.isIncludeSubpathExports);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
       if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
@@ -350,9 +358,14 @@ export const build = timerify(async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
-            if (!input.optional) addPattern(entryPatternsSkipExports, input.group ?? DEFAULT_GROUP, resolvedFilePath);
+            if (!input.optional)
+              addPattern(
+                entryPatternsSkipExports,
+                input.group ?? DEFAULT_GROUP,
+                escapePath(relative(dir, resolvedFilePath))
+              );
           } else {
-            principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: true });
+            principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
         }
       }
@@ -487,9 +500,6 @@ export const build = timerify(async function build({
   const graph: ModuleGraph = new Map();
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
-  const entryPaths = new Set<string>();
-
-  const isInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
 
   const analyzeOpts: GetImportsAndExportsOptions = {
     isFixExports: options.isFixUnusedExports,
@@ -507,6 +517,7 @@ export const build = timerify(async function build({
   ) => {
     if (!options.isSession && analyzedFiles.has(filePath)) return;
     analyzedFiles.add(filePath);
+    subpathReferences.release(filePath);
 
     const workspace = chief.findWorkspaceByFilePath(filePath);
 
@@ -529,6 +540,7 @@ export const build = timerify(async function build({
         const sanitizedSpecifier = sanitizeSpecifier(specifier);
         if (isStartsLikePackageName(sanitizedSpecifier)) {
           file.imports.external.add({ ...unresolvedImport, specifier: sanitizedSpecifier });
+          subpathReferences.add(sanitizedSpecifier, filePath);
         } else {
           const candidate = join(dirname(filePath), sanitizedSpecifier);
           const ext = extname(sanitizedSpecifier);
@@ -559,17 +571,19 @@ export const build = timerify(async function build({
         if (!isIgnored) principal.addEntryPath(filePath, { skipExportsAnalysis: true });
       }
 
+      if (file.imports.subpathImports) {
+        for (const specifier of file.imports.subpathImports) subpathReferences.add(specifier, filePath);
+      }
+
       const wsDependencies = deputy.getDependencies(workspace.name);
       for (const _import of file.imports.imports) {
         if (!_import.filePath) continue;
         const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
         if (!packageName) continue;
-        const isWorkspace = isInternalWorkspace(packageName);
+        const isWorkspace = chief.isWorkspacePackageName(packageName);
         if (isWorkspace || wsDependencies.has(packageName)) {
           file.imports.external.add({ ..._import, specifier: packageName });
-          if (isWorkspace && !isGitIgnored(_import.filePath)) {
-            principal.addProgramPath(_import.filePath);
-          }
+          if (isWorkspace) subpathReferences.add(_import.specifier, filePath);
         }
       }
 
@@ -596,7 +610,7 @@ export const build = timerify(async function build({
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           if (options.isProduction) input.production = true;
-          const specifierFilePath = handleInput(input, workspace);
+          const specifierFilePath = handleInput(input, workspace, filePath);
           if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }
       }
@@ -638,18 +652,23 @@ export const build = timerify(async function build({
 
   principal.init();
 
+  subpathReferences.reset();
+
   streamer.cast('Analyzing source files');
 
-  await principal.walkAndAnalyze((filePath, parseResult, sourceText, cachedFile) => {
-    analyzeSourceFile(filePath, sourceText, parseResult, cachedFile);
-    const node = graph.get(filePath);
-    if (!node) return;
-    const paths: string[] = [];
-    for (const importPath of node.imports.internal.keys()) {
-      if (!isInNodeModules(importPath)) paths.push(importPath);
-    }
-    return paths;
-  });
+  await principal.walkAndAnalyze(
+    (filePath, parseResult, sourceText, cachedFile) => {
+      analyzeSourceFile(filePath, sourceText, parseResult, cachedFile);
+      const node = graph.get(filePath);
+      if (!node) return;
+      const paths: string[] = [];
+      for (const importPath of node.imports.internal.keys()) {
+        if (!isInNodeModules(importPath)) paths.push(importPath);
+      }
+      return paths;
+    },
+    (specifier, filePath) => subpathReferences.add(specifier, filePath)
+  );
 
   for (const filePath of principal.getUnreferencedFiles()) {
     if (IS_DTS.test(filePath)) {
@@ -660,7 +679,6 @@ export const build = timerify(async function build({
     }
     unreferencedFiles.add(filePath);
   }
-  for (const filePath of principal.entryPaths) entryPaths.add(filePath);
 
   principal.reconcileCache();
 
@@ -677,7 +695,7 @@ export const build = timerify(async function build({
   return {
     graph,
     configurationFiles,
-    entryPaths,
+    entryPaths: principal.entryPaths,
     analyzedFiles,
     unreferencedFiles,
     analyzeSourceFile: async (filePath: string) => {

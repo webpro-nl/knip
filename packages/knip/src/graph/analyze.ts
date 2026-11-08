@@ -22,6 +22,7 @@ import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
 import { IMPORT_FLAGS, INTERNAL_TAG } from '../constants.ts';
+import type { SubpathReferences } from './SubpathReferences.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -33,6 +34,7 @@ interface AnalyzeOptions {
   graph: ModuleGraph;
   isGitIgnored: (filePath: string) => boolean;
   streamer: ConsoleStreamer;
+  subpathReferences: SubpathReferences;
   unreferencedFiles: Set<string>;
   options: MainOptions;
 }
@@ -62,6 +64,7 @@ export const analyze = async ({
   graph,
   isGitIgnored,
   streamer,
+  subpathReferences,
   unreferencedFiles,
   options,
 }: AnalyzeOptions) => {
@@ -378,6 +381,8 @@ export const analyze = async ({
     if (options.isReportFiles) collector.addFilesIssues(unusedFiles);
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
+
+    for (const issue of subpathReferences.getIssues()) collector.addIssue(issue);
 
     if (options.isReportDependencies) {
       const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();

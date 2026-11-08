@@ -6,6 +6,7 @@ import { ConsoleStreamer } from './ConsoleStreamer.ts';
 import { DependencyDeputy } from './DependencyDeputy.ts';
 import { analyze } from './graph/analyze.ts';
 import { build } from './graph/build.ts';
+import { SubpathReferences } from './graph/SubpathReferences.ts';
 import { IssueCollector } from './IssueCollector.ts';
 import { ProjectPrincipal } from './ProjectPrincipal.ts';
 import type { MainOptions } from './util/create-options.ts';
@@ -76,6 +77,13 @@ export const run = async (options: MainOptions) => {
     findWorkspacePackageTarget,
     filePath => chief.findWorkspaceByFilePath(filePath)?.name
   );
+  const subpathReferences = new SubpathReferences({
+    chief,
+    principal,
+    workspaces,
+    findWorkspacePackageTarget,
+    isGitIgnored,
+  });
 
   collector.setWorkspaceFilter(chief.workspaceFilePathFilter);
   collector.setSelectedWorkspaces(chief.selectedWorkspaces);
@@ -103,6 +111,7 @@ export const run = async (options: MainOptions) => {
     isGitIgnored,
     scriptParserContext,
     streamer,
+    subpathReferences,
     workspaces,
     options,
   });
@@ -117,6 +126,7 @@ export const run = async (options: MainOptions) => {
     graph,
     isGitIgnored,
     streamer,
+    subpathReferences,
     unreferencedFiles,
     options,
   });
@@ -132,6 +142,7 @@ export const run = async (options: MainOptions) => {
     session = await getSessionHandler(options, {
       analyzedFiles,
       analyzeSourceFile,
+      subpathReferences,
       chief,
       collector,
       analyze: reAnalyze,

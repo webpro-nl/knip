@@ -79,6 +79,7 @@ export interface Configuration {
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
   compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
@@ -100,6 +101,7 @@ interface BaseWorkspaceConfiguration {
   ignoreGlobalBinaries: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
 }
 
 type PluginConfiguration = EnsuredPluginConfiguration | boolean;

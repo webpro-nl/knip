@@ -1,5 +1,5 @@
 import type { PluginOptions as Options } from '../../types/config.ts';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDeferResolveProductionEntry } from '../../util/input.ts';
 import { isAbsolute, toAbsolute } from '../../util/path.ts';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
 import type { ConfigItem, ModuleType, PluginOptions, PresetOptions } from './types.ts';
@@ -71,9 +71,9 @@ const resolveArrayConfig = ([name, config]: [string, unknown], type: ModuleType,
   if (typeof name !== 'string') return [];
 
   const sidebarPath = type !== 'theme' ? resolveSidebarPath(config as PresetOptions | PluginOptions) : undefined;
-  const sidebar = sidebarPath ? [toProductionEntry(sidebarPath)] : [];
+  const sidebar = sidebarPath ? [toDeferResolveProductionEntry(sidebarPath, { dir: cwd })] : [];
 
-  if (isLocalPath(name)) return [toProductionEntry(toAbsolute(name, cwd)), ...sidebar];
+  if (isLocalPath(name)) return [toDeferResolveProductionEntry(toAbsolute(name, cwd)), ...sidebar];
 
   return [toDeferResolve(resolveModuleName(name, type)), ...sidebar];
 };
@@ -87,7 +87,7 @@ export const resolveConfigItems = async (items: ConfigItem[], type: ModuleType, 
     if (!item) continue;
 
     if (typeof item === 'string') {
-      if (isLocalPath(item)) inputs.add(toProductionEntry(toAbsolute(item, options.cwd)));
+      if (isLocalPath(item)) inputs.add(toDeferResolveProductionEntry(toAbsolute(item, options.cwd)));
       else inputs.add(toDeferResolve(resolveModuleName(item, type)));
     } else if (Array.isArray(item)) {
       for (const input of resolveArrayConfig(item, type, options.cwd)) inputs.add(input);

@@ -58,6 +58,8 @@ round-trip), `util/` & `graph-explorer/` (unit, no fixtures), `session/`.
   names.
 - Use empty files when sufficient (e.g. to verify an import specifier or entry
   file).
+- Use committed fixtures; don't generate fixture files at test time. Ignored
+  files and nested `.gitignore` files can be force-added.
 - Don't stretch a regression fixture whose shape exercises a specific heuristic;
   add a minimal fixture for the new bug instead.
 - In workspace fixtures, cross-workspace imports reach source only through the

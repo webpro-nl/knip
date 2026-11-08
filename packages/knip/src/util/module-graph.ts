@@ -45,6 +45,7 @@ export const createFileNode = (): FileNode => ({
     programFiles: new Set(),
     entryFiles: new Set(),
     imports: new Set(),
+    subpathImports: undefined,
   },
   exports: new Map(),
   duplicates: new Set(),

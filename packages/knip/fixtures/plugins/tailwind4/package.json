@@ -2,7 +2,7 @@
   "name": "@plugins/tailwind4",
   "type": "module",
   "scripts": {
-    "build:css": "tailwindcss -i ./src/theme.css -o ./dist/app.css --minify"
+    "build:css": "tailwindcss -i './src/[theme]/theme.css' -o ./dist/app.css --minify"
   },
   "devDependencies": {
     "@tailwindcss/cli": "*",

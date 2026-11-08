@@ -449,6 +449,9 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup --plugin @rollup/plugin-node-resolve', [toBinary('rollup'), toDeferResolve('@rollup/plugin-node-resolve')]);
   t('rollup --configPlugin @rollup/plugin-typescript', [toBinary('rollup'), toDeferResolve('@rollup/plugin-typescript')]);
   t('rollup -p', [toBinary('rollup')]);
+  t('rollup --config', [toBinary('rollup')]);
+  t('rollup --config --watch', [toBinary('rollup')]);
+  t('rollup --config rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
@@ -552,6 +555,14 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('prettier --write --config=my-prettier-settings.js', [toBinary('prettier'), toConfig('prettier', 'my-prettier-settings.js')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
+});
+
+test('getInputsFromScripts (plugins → fromArgs)', () => {
+  t('glob --cmd', [toBinary('glob')]);
+  t('glob -c', [toBinary('glob')]);
+  t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
+  t('nodemon --exec', [toBinary('nodemon')]);
 });
 
 test('getInputsFromScripts (find -exec)', () => {

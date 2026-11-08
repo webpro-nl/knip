@@ -8,22 +8,24 @@ import { resolve } from '../helpers/resolve.ts';
 const cwd = resolve('fixtures/plugins/next-turbopack-loaders');
 
 for (const isProduction of [false, true]) {
-  test(`Find Next.js Turbopack loaders and alias targets (production: ${isProduction})`, async () => {
+  test(`Find Next.js Turbopack loaders, alias targets and config file paths (production: ${isProduction})`, async () => {
     const options = await createOptions({ cwd, isProduction, isIncludeEntryExports: true });
     const { issues, counters } = await main(options);
 
     assert.deepEqual(issues.dependencies, {});
     assert.deepEqual(
       Object.keys(issues.files).sort(),
-      isProduction ? ['loaders/server.cjs', 'unused.ts'] : ['unused.ts']
+      isProduction
+        ? ['app/l/image-loader.ts', 'loaders/server.cjs', 'unused.ts']
+        : ['app/l/image-loader.ts', 'unused.ts']
     );
     if (!isProduction) assert.deepEqual(Object.keys(issues.devDependencies['package.json']), ['unused-loader']);
     assert.deepEqual(counters, {
       ...baseCounters,
       devDependencies: isProduction ? 0 : 1,
-      files: isProduction ? 2 : 1,
-      processed: isProduction ? 6 : 7,
-      total: isProduction ? 6 : 7,
+      files: isProduction ? 3 : 2,
+      processed: isProduction ? 10 : 11,
+      total: isProduction ? 10 : 11,
     });
   });
 }
