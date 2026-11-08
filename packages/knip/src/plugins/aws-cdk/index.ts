@@ -1,6 +1,8 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { isDirectory } from '../../util/fs.ts';
 import { toDeferResolve } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { AwsCdkConfig } from './types.ts';
 
@@ -27,8 +29,11 @@ const args: Args = {
   binaries: ['cdk'],
   string: ['app'],
   alias: { app: ['a'] },
-  // a lone word is a cloud assembly directory or a file to run; return words so a quoted command is re-parsed
-  fromArgs: parsed => (typeof parsed.app === 'string' && parsed.app.includes(' ') ? parsed.app.split(' ') : []),
+  // a lone word or an existing directory is a cloud assembly or a file to run; return words so a quoted command is re-parsed
+  fromArgs: (parsed, _, { cwd }) =>
+    typeof parsed.app === 'string' && parsed.app.includes(' ') && !isDirectory(toAbsolute(parsed.app, cwd))
+      ? parsed.app.split(' ')
+      : [],
 };
 
 const plugin: Plugin = {
