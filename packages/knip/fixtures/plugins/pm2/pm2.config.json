@@ -7,6 +7,10 @@
     {
       "name": "another",
       "script": "./src/another.js"
+    },
+    {
+      "name": "literal",
+      "script": "./src/[variant]/worker.js"
     }
   ]
 }

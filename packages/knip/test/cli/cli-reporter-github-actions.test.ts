@@ -72,10 +72,10 @@ Unused exports (1)
 Unused exported types (1)
 ::error file=packages/shared/types.ts,line=3,endLine=3,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedEnum in packages/shared/types.ts
 Configuration hints (4)
-::notice file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/backend/package.json
-::notice file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
-::notice file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/shared/package.json
-::notice file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/tools/package.json`;
+::notice file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in apps/backend/package.json: ./index.js
+::notice file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in apps/frontend/package.json: ./index.js
+::notice file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in packages/shared/package.json: ./index.js
+::notice file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in packages/tools/package.json: ./index.js`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -121,10 +121,10 @@ Unused exports (1)
 Unused exported types (1)
 ::error file=packages/shared/types.ts,line=3,endLine=3,col=13,endColumn=13,title=✂️ Knip / Unused exported types::UnusedEnum in packages/shared/types.ts
 Configuration hints (4)
-::error file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/backend/package.json
-::error file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in apps/frontend/package.json
-::error file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/shared/package.json
-::error file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found: ./index.js in packages/tools/package.json`;
+::error file=apps/backend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in apps/backend/package.json: ./index.js
+::error file=apps/frontend/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in apps/frontend/package.json: ./index.js
+::error file=packages/shared/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in packages/shared/package.json: ./index.js
+::error file=packages/tools/package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Package entry file not found in packages/tools/package.json: ./index.js`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -148,8 +148,8 @@ test('knip --reporter github-actions (configuration hints)', () => {
   const expected = `Unused files (1)
 ::error file=src/entry.js,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::src/entry.js
 Configuration hints (2)
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level entry to one of "workspaces": [src/entry.js] in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level project to one of "workspaces": [src/**] in knip.json`;
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove unused knip.json → entry, or move to "workspaces": [src/entry.js]
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove unused knip.json → project, or move to "workspaces": [src/**]`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -167,12 +167,12 @@ const configHints2Cwd = resolve('fixtures/tags-hints/configuration-hints2');
 test('knip --reporter github-actions (configuration hints 2)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: configHints2Cwd }).stdout;
   const expected = `Configuration hints (6)
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine entry pattern (no matches): lib/index.js in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine project pattern (no matches): lib/** in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine entry pattern (no matches): missing.js in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine project pattern (no matches): generated/** in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level entry to one of "workspaces": [src/entry.js, …] in knip.json
-::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove, or move unused top-level project to one of "workspaces": [src/**] in knip.json`;
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine knip.json → (root) → entry pattern (no matches): lib/index.js
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine knip.json → (root) → project pattern (no matches): lib/**
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine knip.json → packages/lib → entry pattern (no matches): missing.js
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Refine knip.json → packages/lib → project pattern (no matches): generated/**
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove unused knip.json → entry, or move to "workspaces": [src/entry.js, …]
+::notice file=knip.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove unused knip.json → project, or move to "workspaces": [src/**]`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -184,7 +184,7 @@ test('knip --reporter github-actions --treat-config-hints-as-errors', () => {
     cwd: treatConfigHintsAsErrorsCwd,
   }).stdout;
   const expected = `Configuration hints (1)
-::error file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove from ignoreDependencies: pineapple in package.json`;
+::error file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove from package.json → knip → ignoreDependencies: pineapple`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });
@@ -194,7 +194,7 @@ const treatConfigHintsAsErrors2Cwd = resolve('fixtures/treat-config-hints-as-err
 test('knip --reporter github-actions (treatConfigHintsAsErrors: true)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: treatConfigHintsAsErrors2Cwd }).stdout;
   const expected = `Configuration hints (1)
-::error file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove from ignoreDependencies: bananas in package.json`;
+::error file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Configuration hints::Remove from package.json → knip → ignoreDependencies: bananas`;
   if (actual !== expected) showDiff(actual, expected);
   assert.equal(actual, expected);
 });

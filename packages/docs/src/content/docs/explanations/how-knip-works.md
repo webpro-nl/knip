@@ -32,7 +32,7 @@ edges already recorded:
 - a **dependency** is unused when no file imports it (and _unlisted_ when a file
   imports it but `package.json` doesn't list it)
 
-Analysis happens by quering the graph. Your results are only as accurate as the
+Analysis happens by querying the graph. Your results are only as accurate as the
 graph is complete. And the graph depends on your entry files.
 
 ## Entry files decide what Knip can see

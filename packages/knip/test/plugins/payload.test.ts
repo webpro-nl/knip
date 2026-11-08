@@ -12,8 +12,8 @@ const { counters, issues } = await main(options);
 test('Find dependencies with the Payload CMS plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
 

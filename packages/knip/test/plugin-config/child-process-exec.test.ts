@@ -49,15 +49,18 @@ test('Reference binaries and entry files in node:child_process calls', async () 
   assert(binaries.melon);
   assert(!binaries.phantomserve);
 
+  // a plugin binary with a dynamic --config value is still referenced
+  assert(binaries.lingui);
+
   // dynamic command and a non-child_process `.exec` are not referenced
   assert(!binaries.kiwi);
   assert(!binaries.banana);
 
-  assert.equal(Object.keys(binaries).length, 22);
+  assert.equal(Object.keys(binaries).length, 23);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 22,
+    binaries: 23,
     processed: 4,
     total: 4,
   });
@@ -72,7 +75,7 @@ test('Reference binaries and entry files in node:child_process calls (production
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 22,
+    binaries: 23,
     processed: 4,
     total: 4,
   });

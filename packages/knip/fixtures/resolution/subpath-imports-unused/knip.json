@@ -1,0 +1,3 @@
+{
+  "project": ["*.{js,ts}!", "patterns/**!", "unused-patterns/**!"]
+}

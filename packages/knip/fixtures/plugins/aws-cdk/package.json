@@ -1,0 +1,17 @@
+{
+  "name": "@plugins/aws-cdk",
+  "scripts": {
+    "deploy": "cdk deploy --app cdk.out",
+    "deploy:assembly": "cdk deploy --app \"cloud assembly\"",
+    "synth:nag": "cdk synth --app 'npx ts-node --prefer-ts-exts bin/nag.ts'"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "*"
+  },
+  "devDependencies": {
+    "aws-cdk": "*",
+    "cdk-assume-role-credential-plugin": "*",
+    "projen": "*",
+    "ts-node": "*"
+  }
+}

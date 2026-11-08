@@ -191,13 +191,17 @@ even with the option enabled. This is because certain tools and frameworks
 consume named exports from entry files, causing false positives.
 
 The `allowIncludeExports` option allows the exports of entry files to be
-reported as unused when using `--include-entry-exports`. This option is
-typically used with the [toProductionEntry][2] input type.
+reported as unused when using `--include-entry-exports`. Use it with
+[toProductionEntry][2] for entry patterns or `toDeferResolveProductionEntry` for
+literal file paths.
 
 Example:
 
 ```ts
 toProductionEntry('./entry.ts', { allowIncludeExports: true });
+toDeferResolveProductionEntry('./src/[variant]/entry.ts', {
+  allowIncludeExports: true,
+});
 ```
 
 [1]: #toentry

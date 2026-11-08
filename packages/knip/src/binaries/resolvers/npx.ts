@@ -3,7 +3,7 @@ import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toDependency } from '../../util/input.ts';
 import { stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
-import { argsFrom } from '../util.ts';
+import { argsFrom, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
 
 const noInstallFlags = new Set(['--no', '--no-install', '--yes=false', '--no-yes']);
 
@@ -11,41 +11,8 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs } = options;
   const args = {
     isStorePositions: true,
-    boolean: [
-      'color',
-      'd',
-      'dangerously-allow-all-scripts',
-      'dd',
-      'ddd',
-      'force',
-      'global',
-      'ignore-scripts',
-      'include-workspace-root',
-      'legacy-peer-deps',
-      'no',
-      'offline',
-      'prefer-offline',
-      'prefer-online',
-      'progress',
-      'quiet',
-      'silent',
-      'strict-allow-scripts',
-      'timing',
-      'verbose',
-      'workspaces',
-      'yes',
-    ],
-    alias: {
-      force: 'f',
-      global: 'g',
-      'include-workspace-root': 'iwr',
-      quiet: 'q',
-      silent: 's',
-      workspaces: 'ws',
-      yes: 'y',
-      package: 'p',
-      call: 'c',
-    },
+    boolean: npmBooleanFlags,
+    alias: { ...npmBooleanAliases, package: 'p', call: 'c' },
   };
   const parsed = parseArgs(words, args);
   const commandIndex = parsed.positionalIndices![0] ?? words.length;

@@ -6,6 +6,7 @@ export type PluginName =
   | 'astro-markdoc'
   | 'astro-og-canvas'
   | 'ava'
+  | 'aws-cdk'
   | 'babel'
   | 'biome'
   | 'borp'
@@ -35,6 +36,7 @@ export type PluginName =
   | 'eleventy'
   | 'esbuild'
   | 'eslint'
+  | 'evalite'
   | 'eve'
   | 'execa'
   | 'expo'
@@ -210,6 +212,7 @@ export const pluginNames = [
   'astro-markdoc',
   'astro-og-canvas',
   'ava',
+  'aws-cdk',
   'babel',
   'biome',
   'borp',
@@ -239,6 +242,7 @@ export const pluginNames = [
   'eleventy',
   'esbuild',
   'eslint',
+  'evalite',
   'eve',
   'execa',
   'expo',

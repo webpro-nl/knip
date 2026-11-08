@@ -25,5 +25,5 @@
       "inline": "./favicon.svg"
     }
   },
-  "renderer": "./renderer.ts"
+  "renderer": "./[theme]/renderer.ts"
 }

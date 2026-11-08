@@ -3,7 +3,7 @@ import type { ResolveFromAST } from '../../types/config.ts';
 import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile } from '../../util/fs.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { getViteRoot } from '../vite/helpers.ts';
 
@@ -76,6 +76,6 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
 
   const inputs: Input[] = [];
   for (const pattern of patterns) inputs.push(toProductionEntry(join(root, pattern)));
-  for (const id of paths) inputs.push(toProductionEntry(toAbsolute(id, root)));
+  for (const id of paths) inputs.push(toDeferResolveProductionEntry(toAbsolute(id, root)));
   return inputs;
 };

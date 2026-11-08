@@ -5,8 +5,8 @@ import { resolve } from 'node:path';
 export const runtime = process.argv[0];
 export const cliPath = runtime.endsWith('bun') ? resolve('src/cli.ts') : resolve('dist/cli.js');
 
-export const exec = (command: string, options: { cwd: string }) => {
-  const args = command.replace(/^knip/, '').trim().split(' ').filter(Boolean);
+export const exec = (command: string | string[], options: { cwd: string }) => {
+  const args = Array.isArray(command) ? command : command.replace(/^knip/, '').trim().split(' ').filter(Boolean);
   const output = spawnSync(runtime, [cliPath, ...args], {
     cwd: options.cwd,
     env: {

@@ -8,6 +8,7 @@ import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
+  getSubpathImport,
   isStartsLikePackageName,
   sanitizeSpecifier,
 } from '../util/modules.ts';
@@ -60,6 +61,7 @@ const getImportsAndExports = (
   const programFiles = new Set<string>();
   const entryFiles = new Set<string>();
   const imports: Imports = new Set();
+  let subpathImports: Set<string> | undefined;
   const exports = new Map<string, Export>();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const specifierExportNames = new Set<string>();
@@ -174,6 +176,9 @@ const getImportsAndExports = (
     }
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
+
+    const subpathImport = getSubpathImport(specifier);
+    if (subpathImport) (subpathImports ??= new Set()).add(subpathImport);
 
     if (
       modifiers & IMPORT_FLAGS.AUGMENT &&
@@ -479,7 +484,16 @@ const getImportsAndExports = (
 
   return {
     skipExports,
-    imports: { internal, external, externalRefs: new Set(), programFiles, entryFiles, imports, unresolved },
+    imports: {
+      internal,
+      external,
+      externalRefs: new Set(),
+      programFiles,
+      entryFiles,
+      imports,
+      unresolved,
+      subpathImports,
+    },
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,

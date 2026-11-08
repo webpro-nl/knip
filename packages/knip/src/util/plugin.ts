@@ -22,22 +22,18 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
 export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
   if (typeof pluginConfig === 'boolean') return pluginConfig;
 
-  const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
+  if (typeof pluginConfig === 'string' || Array.isArray(pluginConfig)) {
+    return { config: pluginConfig ? arrayify(pluginConfig) : null, entry: null, project: [] };
+  }
 
-  const config = isObject
-    ? 'config' in pluginConfig
-      ? arrayify(pluginConfig.config)
-      : null
-    : pluginConfig
-      ? arrayify(pluginConfig)
-      : null;
+  const config = pluginConfig.config === undefined ? null : arrayify(pluginConfig.config);
 
-  const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
+  const entry = pluginConfig.entry === undefined ? null : arrayify(pluginConfig.entry);
 
   const project =
-    isObject && 'project' in pluginConfig
-      ? arrayify(pluginConfig.project)
-      : (entry ?? []).filter(pattern => !pattern.startsWith('!'));
+    pluginConfig.project === undefined
+      ? (entry ?? []).filter(pattern => !pattern.startsWith('!'))
+      : arrayify(pluginConfig.project);
 
   return { config, entry, project };
 };

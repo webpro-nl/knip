@@ -9,7 +9,7 @@ const enablers = ['danger'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const entry = ['dangerfile.{js,cjs,mjs,ts}'];
+const entry = ['dangerfile.{js,cjs,mjs,ts,mts}', 'Dangerfile.{js,mjs,ts,mts}'];
 
 const plugin: Plugin = {
   title,

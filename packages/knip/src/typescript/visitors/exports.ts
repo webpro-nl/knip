@@ -80,20 +80,33 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           for (const p of declarator.id.properties) {
             if (p.type === 'RestElement' && p.argument?.type === 'Identifier') {
               const name = p.argument.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.argument.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(
+                name,
+                SYMBOL_TYPE.UNKNOWN,
+                p.argument.start,
+                [],
+                undefined,
+                false,
+                s.getJSDocTags(exportStart)
+              );
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'Identifier') {
               const name = p.value.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], undefined, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'AssignmentPattern' && p.value.left?.type === 'Identifier') {
               const name = p.value.left.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.left.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(
+                name,
+                SYMBOL_TYPE.UNKNOWN,
+                p.value.left.start,
+                [],
+                undefined,
+                false,
+                s.getJSDocTags(exportStart)
+              );
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             }
@@ -101,18 +114,16 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         } else if (declarator.id.type === 'ArrayPattern') {
           for (const el of declarator.id.elements) {
             if (el?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
-              s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], undefined, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, el.name, false);
               s.destructuredExports.add(el.name);
             } else if (el?.type === 'RestElement' && el.argument?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
               s.addExport(
                 el.argument.name,
                 SYMBOL_TYPE.UNKNOWN,
                 el.argument.start,
                 [],
-                fix,
+                undefined,
                 false,
                 s.getJSDocTags(exportStart)
               );
@@ -314,7 +325,9 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
       if (internalImport) {
-        if (_import.importedName !== 'default') {
+        if (_import.isNamespace) {
+          addValue(internalImport.reExportNs, 'default', s.filePath);
+        } else if (_import.importedName !== 'default') {
           addNsValue(internalImport.reExportAs, _import.importedName, 'default', s.filePath);
         } else {
           addValue(internalImport.reExport, 'default', s.filePath);

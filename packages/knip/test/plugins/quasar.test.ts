@@ -7,16 +7,17 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/quasar');
 
-test('Find entries with the quasar plugin', async () => {
+test('Resolve literal extensionless boot entries with the quasar plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
   assert('src/boot/forgotten.ts' in issues.files);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/boot/forgotten.ts', 'src/boot/literal.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 7,
-    total: 7,
+    files: 2,
+    processed: 9,
+    total: 9,
   });
 });

@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { collectFirstPropertyValue } from '../../typescript/ast-helpers.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
@@ -35,7 +35,7 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
 
   for (const name of entryNames) {
     const filePath = collectFirstPropertyValue(program, name);
-    if (filePath) inputs.push(toProductionEntry(join(configFileDir, filePath)));
+    if (filePath) inputs.push(toDeferResolveProductionEntry(join(configFileDir, filePath)));
     else inputs.push(toProductionEntry(join(sourceRoot, `${name}.${extensions}`)));
   }
 

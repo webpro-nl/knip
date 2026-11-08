@@ -14,7 +14,7 @@ Use [ESLint][1], [Biome][2] or [oxlint][3] to find unused variables within
 files.
 
 Use [remove-unused-vars][4] to remove unused code within files, but in a more
-valiant way. Using input from any of the above linters, it actually removes a
+aggressive way. Using input from any of the above linters, it actually removes a
 lot more unused code. This pairs great with Knip.
 
 ## Unused properties

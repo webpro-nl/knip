@@ -1,11 +1,18 @@
-import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
+import {
+  type AssignmentTarget,
+  type ExportDefaultDeclarationKind,
+  type Expression,
+  type Program,
+  type SpreadElement,
+  Visitor,
+} from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
-import { isInNodeModules, join } from '../../util/path.ts';
+import { toConfig, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NextConfigModule } from './types.ts';
 
@@ -59,6 +66,7 @@ const getInputs = (
   pageExtensions: string[],
   loaders: Iterable<string>,
   aliasTargets: Iterable<string>,
+  files: Iterable<string>,
   configFileDir: string
 ) => {
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
@@ -67,6 +75,7 @@ const getInputs = (
   for (const loader of loaders) inputs.push(toDeferResolve(loader));
   for (const target of aliasTargets)
     inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
+  for (const file of files) inputs.push(toDeferResolveProductionEntry(toAbsolute(file, configFileDir)));
   return inputs;
 };
 
@@ -104,13 +113,64 @@ const resolveConfig: ResolveConfig<NextConfigModule> = async (localConfig, { con
   const aliasTargets = new Set<string>();
   for (const target of Object.values(config?.turbopack?.resolveAlias ?? {}))
     collectAliasTargetValues(target, aliasTargets);
-  return getInputs(pageExtensions, loaders, aliasTargets, configFileDir);
+  const files = new Set<string>();
+  addSpecifier(files, config?.images?.loaderFile);
+  addSpecifier(files, config?.cacheHandler);
+  for (const handler of Object.values(config?.cacheHandlers ?? {})) addSpecifier(files, handler);
+  return getInputs(pageExtensions, loaders, aliasTargets, files, configFileDir);
+};
+
+const isModuleExports = (node: AssignmentTarget) =>
+  node.type === 'MemberExpression' &&
+  node.object.type === 'Identifier' &&
+  node.object.name === 'module' &&
+  node.property.type === 'Identifier' &&
+  node.property.name === 'exports';
+
+const getConfigObject = (program: Program) => {
+  const declarations = new Map<string, Expression>();
+  let node: ExportDefaultDeclarationKind | SpreadElement | undefined;
+  for (const statement of program.body) {
+    if (statement.type === 'VariableDeclaration') {
+      for (const declaration of statement.declarations) {
+        if (declaration.id.type === 'Identifier' && declaration.init)
+          declarations.set(declaration.id.name, declaration.init);
+      }
+    } else if (statement.type === 'ExportDefaultDeclaration') {
+      node = statement.declaration;
+    } else if (
+      statement.type === 'ExpressionStatement' &&
+      statement.expression.type === 'AssignmentExpression' &&
+      isModuleExports(statement.expression.left)
+    ) {
+      node = statement.expression.right;
+    }
+  }
+  while (node) {
+    if (
+      node.type === 'TSSatisfiesExpression' ||
+      node.type === 'TSAsExpression' ||
+      node.type === 'ParenthesizedExpression'
+    )
+      node = node.expression;
+    else if (node.type === 'CallExpression') node = node.arguments[0];
+    else if (node.type === 'Identifier') {
+      const init = declarations.get(node.name);
+      declarations.delete(node.name);
+      node = init;
+    } else return resolveObjectArg(node);
+  }
 };
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
   const aliasTargets = new Set<string>();
+  const files = new Set<string>();
+  const config = getConfigObject(program);
+  addSpecifier(files, getStringValue(findProperty(findProperty(config, 'images'), 'loaderFile')));
+  addSpecifier(files, getStringValue(findProperty(config, 'cacheHandler')));
+  for (const handler of getPropertyValues(config, 'cacheHandlers')) addSpecifier(files, handler);
   const collectAliasTargets = (node: Expression | SpreadElement | null) => {
     const target = getStringValue(node);
     if (target) aliasTargets.add(target);
@@ -157,7 +217,7 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   });
   visitor.visit(program);
 
-  return getInputs([...pageExtensions], loaders, aliasTargets, configFileDir);
+  return getInputs([...pageExtensions], loaders, aliasTargets, files, configFileDir);
 };
 
 const commands = new Set(['dev', 'build', 'start']);
@@ -171,7 +231,8 @@ const args: Args = {
   },
 };
 
-const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets from the composed configuration,
+const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets, the custom image loader
+(\`images.loaderFile\`) and cache handlers (\`cacheHandler\`, \`cacheHandlers\`) from the composed configuration,
 including values a shared configuration factory adds. A configuration file that fails to load is analyzed statically.`;
 
 /** @public */
