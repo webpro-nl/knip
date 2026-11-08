@@ -7,6 +7,7 @@ import type { Plugin } from '../../types/config.ts';
 const title = 'retry-cli';
 
 const args = {
+  binaries: ['retry', 'retry-cli'],
   string: ['factor', 'max-timeout', 'min-timeout', 'retries'],
   boolean: ['help', 'randomize'],
   alias: { factor: ['f'], help: ['h'], 'min-timeout': ['t'], retries: ['n'] },
