@@ -71,6 +71,7 @@ export type Workspace = {
   pkgName: string;
   dir: string;
   ancestors: string[];
+  aliases: Map<string, string>;
   config: WorkspaceConfiguration;
   manifestPath: string;
   manifestStr: string;
@@ -112,6 +113,7 @@ export class ConfigurationChief {
   additionalWorkspaceNames = new Set<string>();
   availableWorkspaceNames: string[] = [];
   availableWorkspacePkgNames = new Set<string>();
+  workspaceAliasNames = new Set<string>();
   availableWorkspaceDirs: string[] = [];
   private availableWorkspaceDirsWithSlash: string[] = [];
   workspaceGraph: WorkspaceGraph = new Map();
@@ -200,6 +202,7 @@ export class ConfigurationChief {
     const [packages, wsPkgNames] = await mapWorkspaces(this.cwd, [...workspaceNames, '.']);
 
     this.workspacePackages = packages;
+    for (const pkg of packages.values()) for (const alias of pkg.aliases.keys()) this.workspaceAliasNames.add(alias);
 
     this.availableWorkspaceNames = this.getAvailableWorkspaceNames(packages.keys());
     this.availableWorkspacePkgNames = wsPkgNames;
@@ -290,6 +293,15 @@ export class ConfigurationChief {
 
     const getAncestors = (name: string) => this.availableWorkspaceNames.filter(a => isAncestor(name, a));
 
+    const getAliases = (name: string, ancestors: string[]) => {
+      const aliases = new Map<string, string>();
+      for (const workspaceName of ancestors.toSorted(byPathDepth).concat(name)) {
+        const pkg = this.workspacePackages.get(workspaceName);
+        if (pkg) for (const [alias, pkgName] of pkg.aliases) aliases.set(alias, pkgName);
+      }
+      return aliases;
+    };
+
     const workspaceNames = selectedWorkspaces
       ? Array.from(selectedWorkspaces).flatMap(name => [...getAncestors(name), name])
       : this.availableWorkspaceNames;
@@ -333,12 +345,14 @@ export class ConfigurationChief {
         const manifestStr = pkg?.manifestStr ?? '';
         const workspaceConfig = this.getWorkspaceConfig(name);
         const ignoreMembers = workspaceConfig.ignoreMembers?.map(toRegexOrString) ?? [];
+        const ancestors = getAncestors(name);
         return {
           name,
           pkgName,
           dir,
           config: this.getConfigForWorkspace(name),
-          ancestors: getAncestors(name),
+          ancestors,
+          aliases: getAliases(name, ancestors),
           manifestPath,
           manifestStr,
           ignoreMembers,
@@ -487,6 +501,17 @@ export class ConfigurationChief {
       isIncludeSubpathExports,
       ...plugins,
     };
+  }
+
+  public isWorkspacePackageName(packageName: string) {
+    return this.availableWorkspacePkgNames.has(packageName) || this.workspaceAliasNames.has(packageName);
+  }
+
+  public findWorkspaceByPackageName(packageName: string, filePath: string) {
+    const workspace = this.workspacesByPkgName.get(packageName);
+    if (workspace || !this.workspaceAliasNames.has(packageName)) return workspace;
+    const pkgName = this.findWorkspaceByFilePath(filePath)?.aliases.get(packageName);
+    if (pkgName) return this.workspacesByPkgName.get(pkgName);
   }
 
   public findWorkspaceByFilePath(filePath: string) {

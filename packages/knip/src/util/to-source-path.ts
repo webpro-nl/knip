@@ -71,7 +71,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
     } else {
       const packageName = getPackageNameFromModuleSpecifier(specifier);
       if (!packageName) return;
-      workspace = chief.workspacesByPkgName.get(packageName);
+      workspace = chief.findWorkspaceByPackageName(packageName, filePath);
       key = packageName === specifier ? '.' : `.${specifier.slice(packageName.length)}`;
     }
     if (!workspace) return;

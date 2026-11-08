@@ -79,4 +79,5 @@ export type WorkspacePackage = {
   manifest: PackageJson;
   manifestPath: string;
   manifestStr: string;
+  aliases: Map<string, string>;
 };

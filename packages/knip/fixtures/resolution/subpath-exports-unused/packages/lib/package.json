@@ -16,6 +16,7 @@
     "./internal/*": null,
     "./package.json": "./package.json",
     "./styles.css": "./styles.css",
-    "./self": "./self.js"
+    "./self": "./self.js",
+    "./aliased": "./aliased.js"
   }
 }

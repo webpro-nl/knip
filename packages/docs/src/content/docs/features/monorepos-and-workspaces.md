@@ -83,6 +83,13 @@ its path to the `workspaces` configuration object the same way as
 
 See [Source Mapping][3].
 
+## Package aliases
+
+A workspace package referenced through a `workspace:` alias in `package.json`,
+such as `"test-utils": "workspace:@org/test-utils@*"`, resolves to the aliased
+workspace in the workspace that declares the alias and in the workspaces nested
+in it. This includes imports of its `exports` subpaths through the alias.
+
 ## Additional options
 
 The following options are available inside workspace configurations:

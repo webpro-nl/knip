@@ -43,7 +43,7 @@ export class SubpathReferences {
   private isSubpathSpecifier(specifier: string) {
     if (specifier.startsWith('#')) return true;
     const packageName = getPackageNameFromModuleSpecifier(specifier);
-    return packageName !== undefined && this.chief.availableWorkspacePkgNames.has(packageName);
+    return packageName !== undefined && this.chief.isWorkspacePackageName(packageName);
   }
 
   addInput(input: Input, owner: string) {

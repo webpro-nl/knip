@@ -34,8 +34,8 @@ test('Report unused subpath exports of workspaces with includeSubpathExports', a
     ...baseCounters,
     files: 6,
     subpaths: 4,
-    processed: 15,
-    total: 15,
+    processed: 16,
+    total: 16,
   });
 });
 
@@ -50,8 +50,19 @@ test('Report unused subpath exports of all workspaces with --include-subpath-exp
     ...baseCounters,
     files: 6,
     subpaths: 5,
-    processed: 15,
-    total: 15,
+    processed: 16,
+    total: 16,
+  });
+});
+
+test('Include the workspace a package alias refers to when filtering workspaces', async () => {
+  const options = await createOptions({ cwd, workspace: 'packages/other' });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
   });
 });
 
@@ -61,7 +72,7 @@ test('Treat subpath exports as public in strict mode with a workspace filter', a
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
 });

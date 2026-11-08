@@ -501,8 +501,6 @@ export const build = timerify(async function build({
   const analyzedFiles = new Set<string>();
   const unreferencedFiles = new Set<string>();
 
-  const isInternalWorkspace = (packageName: string) => chief.availableWorkspacePkgNames.has(packageName);
-
   const analyzeOpts: GetImportsAndExportsOptions = {
     isFixExports: options.isFixUnusedExports,
     isFixTypes: options.isFixUnusedTypes,
@@ -582,7 +580,7 @@ export const build = timerify(async function build({
         if (!_import.filePath) continue;
         const packageName = getPackageNameFromModuleSpecifier(_import.specifier);
         if (!packageName) continue;
-        const isWorkspace = isInternalWorkspace(packageName);
+        const isWorkspace = chief.isWorkspacePackageName(packageName);
         if (isWorkspace || wsDependencies.has(packageName)) {
           file.imports.external.add({ ..._import, specifier: packageName });
           if (isWorkspace) subpathReferences.add(_import.specifier, filePath);

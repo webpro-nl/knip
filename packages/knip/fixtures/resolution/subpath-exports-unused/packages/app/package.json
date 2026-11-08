@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/app",
   "dependencies": {
-    "@fixtures/lib": "*"
+    "@fixtures/lib": "*",
+    "lib-alias": "workspace:@fixtures/lib@*"
   }
 }
