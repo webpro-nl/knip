@@ -4,6 +4,9 @@ const unrelated = {
   loader: 'unused-loader',
   loaders: ['unused-loader'],
   resolveAlias: { unused: './unused.ts' },
+  images: { loaderFile: './unused.ts' },
+  cacheHandler: './unused.ts',
+  cacheHandlers: { unused: './unused.ts' },
 };
 
 export default {

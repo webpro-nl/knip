@@ -1,7 +1,14 @@
-import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
+import {
+  type AssignmentTarget,
+  type ExportDefaultDeclarationKind,
+  type Expression,
+  type Program,
+  type SpreadElement,
+  Visitor,
+} from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
@@ -113,11 +120,57 @@ const resolveConfig: ResolveConfig<NextConfigModule> = async (localConfig, { con
   return getInputs(pageExtensions, loaders, aliasTargets, files, configFileDir);
 };
 
+const isModuleExports = (node: AssignmentTarget) =>
+  node.type === 'MemberExpression' &&
+  node.object.type === 'Identifier' &&
+  node.object.name === 'module' &&
+  node.property.type === 'Identifier' &&
+  node.property.name === 'exports';
+
+const getConfigObject = (program: Program) => {
+  const declarations = new Map<string, Expression>();
+  let node: ExportDefaultDeclarationKind | SpreadElement | undefined;
+  for (const statement of program.body) {
+    if (statement.type === 'VariableDeclaration') {
+      for (const declaration of statement.declarations) {
+        if (declaration.id.type === 'Identifier' && declaration.init)
+          declarations.set(declaration.id.name, declaration.init);
+      }
+    } else if (statement.type === 'ExportDefaultDeclaration') {
+      node = statement.declaration;
+    } else if (
+      statement.type === 'ExpressionStatement' &&
+      statement.expression.type === 'AssignmentExpression' &&
+      isModuleExports(statement.expression.left)
+    ) {
+      node = statement.expression.right;
+    }
+  }
+  while (node) {
+    if (
+      node.type === 'TSSatisfiesExpression' ||
+      node.type === 'TSAsExpression' ||
+      node.type === 'ParenthesizedExpression'
+    )
+      node = node.expression;
+    else if (node.type === 'CallExpression') node = node.arguments[0];
+    else if (node.type === 'Identifier') {
+      const init = declarations.get(node.name);
+      declarations.delete(node.name);
+      node = init;
+    } else return resolveObjectArg(node);
+  }
+};
+
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
   const aliasTargets = new Set<string>();
   const files = new Set<string>();
+  const config = getConfigObject(program);
+  addSpecifier(files, getStringValue(findProperty(findProperty(config, 'images'), 'loaderFile')));
+  addSpecifier(files, getStringValue(findProperty(config, 'cacheHandler')));
+  for (const handler of getPropertyValues(config, 'cacheHandlers')) addSpecifier(files, handler);
   const collectAliasTargets = (node: Expression | SpreadElement | null) => {
     const target = getStringValue(node);
     if (target) aliasTargets.add(target);
@@ -148,9 +201,6 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-      addSpecifier(files, getStringValue(findProperty(findProperty(node, 'images'), 'loaderFile')));
-      addSpecifier(files, getStringValue(findProperty(node, 'cacheHandler')));
-      for (const handler of getPropertyValues(node, 'cacheHandlers')) addSpecifier(files, handler);
       const turbopack = findProperty(node, 'turbopack');
       if (turbopack?.type === 'ConditionalExpression') {
         collectTurbopackAliases(turbopack.consequent);
