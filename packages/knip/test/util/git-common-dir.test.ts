@@ -28,12 +28,14 @@ for (const gitdir of ['directory', 'relative', 'absolute']) {
         await fs.writeFile(join(gitDir, 'info/exclude'), '/local-only.ts\n');
       }
       const excludePath = join(commonDir, 'info/exclude');
-      await fs.writeFile(excludePath, '/.local-backups/\n');
+      await fs.writeFile(excludePath, '/.local-backups/\ndata/*\n');
       const parsed = await findAndParseGitignores(cwd);
       assert.deepEqual(parsed.gitignoreFiles, [relative(cwd, excludePath)]);
       const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });
       assert.equal(isIgnored(join(cwd, '.local-backups/unused.ts')), true);
       assert.equal(isIgnored(join(cwd, 'nested/.local-backups/unused.ts')), false);
+      assert.equal(isIgnored(join(cwd, 'data/unused.ts')), true);
+      assert.equal(isIgnored(join(cwd, 'src/data/unused.ts')), false);
       assert.equal(isIgnored(join(cwd, 'local-only.ts')), false);
     });
   }

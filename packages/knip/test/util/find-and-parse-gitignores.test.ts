@@ -89,6 +89,7 @@ test('findAndParseGitignores (with .git file)', async () => {
       '.git/!(hooks)',
       '**/node_modules',
       '**/worktree-exclude-ignored',
+      'data/*',
       '**/worktree-ignored',
       'subdir/**/subdir-ignored',
     ]),

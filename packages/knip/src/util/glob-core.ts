@@ -146,8 +146,7 @@ export const findAndParseGitignores = async (cwd: string, workspaceDirs?: Set<st
 
     const isRoot = base === '' || base.startsWith('..');
     const escapedBase = escapePath(base);
-    // info/exclude belongs to the repository root, which may be above cwd
-    for (const { negated, pattern } of parseAndConvertGitignorePatterns(patterns, ancestor, !ancestor && !baseDir)) {
+    for (const { negated, pattern } of parseAndConvertGitignorePatterns(patterns, ancestor)) {
       if (negated) {
         if (isRoot) {
           if (!unignores.has(pattern)) {
