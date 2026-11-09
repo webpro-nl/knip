@@ -1,7 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolveProductionEntry, toDependency } from '../../util/input.ts';
-import { isInternal } from '../../util/path.ts';
+import { type Input, toDeferResolveProductionEntry, toDependency, toProductionDependency } from '../../util/input.ts';
+import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { _resolveModuleSync, _resolveSync } from '../../util/resolve.ts';
 import type { MdxConfig } from './types.ts';
 
 const title = 'MDX';
@@ -27,11 +28,16 @@ export const contentMappers = ['mdx-content-mapper', '@mdx-js/content-mapper'];
 
 const bundledPlugins = ['remark-mdx-frontmatter'];
 
-export const resolveContentMapperOptions = (options: Record<string, unknown>) => {
+export const resolveContentMapperOptions = (options: Record<string, unknown>, dir: string) => {
   const inputs = takeDependencies(options.remarkPlugins).filter(input => !bundledPlugins.includes(input.specifier));
   const provider = options.providerImportSource;
-  if (typeof provider === 'string' && (isInternal(provider) || provider.startsWith('#'))) {
-    inputs.push(toDeferResolveProductionEntry(provider));
+  if (typeof provider === 'string') {
+    if (isInternal(provider) || provider.startsWith('#')) inputs.push(toDeferResolveProductionEntry(provider));
+    else {
+      const resolved = _resolveModuleSync(provider, join(dir, 'file.ts'));
+      const isAlias = resolved !== undefined && isInternal(resolved) && !_resolveSync(provider, dir);
+      inputs.push(isAlias ? toDeferResolveProductionEntry(resolved) : toProductionDependency(provider));
+    }
   }
   return inputs;
 };
