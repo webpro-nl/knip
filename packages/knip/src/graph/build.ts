@@ -34,8 +34,8 @@ import {
   isAlias,
   isCatalog,
   isConfig,
+  isDeferResolve,
   isDeferResolveEntry,
-  isDeferResolveProductionEntry,
   isEntry,
   isIgnore,
   isProductionEntry,
@@ -357,7 +357,7 @@ export const build = timerify(async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
-          if (isDeferResolveEntry(input) && options.isProduction && !isDeferResolveProductionEntry(input)) {
+          if ((isDeferResolveEntry(input) || isDeferResolve(input)) && options.isProduction && !input.production) {
             if (!input.optional)
               addPattern(
                 entryPatternsSkipExports,

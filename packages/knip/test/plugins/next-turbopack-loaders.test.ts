@@ -13,19 +13,14 @@ for (const isProduction of [false, true]) {
     const { issues, counters } = await main(options);
 
     assert.deepEqual(issues.dependencies, {});
-    assert.deepEqual(
-      Object.keys(issues.files).sort(),
-      isProduction
-        ? ['app/l/image-loader.ts', 'loaders/server.cjs', 'unused.ts']
-        : ['app/l/image-loader.ts', 'unused.ts']
-    );
+    assert.deepEqual(Object.keys(issues.files).sort(), ['app/l/image-loader.ts', 'unused.ts']);
     if (!isProduction) assert.deepEqual(Object.keys(issues.devDependencies['package.json']), ['unused-loader']);
     assert.deepEqual(counters, {
       ...baseCounters,
       devDependencies: isProduction ? 0 : 1,
-      files: isProduction ? 3 : 2,
-      processed: isProduction ? 10 : 11,
-      total: isProduction ? 10 : 11,
+      files: 2,
+      processed: isProduction ? 9 : 11,
+      total: isProduction ? 9 : 11,
     });
   });
 }

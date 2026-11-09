@@ -49,20 +49,16 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert('src/setupTests.ts' in issues.files);
-  assert('src/htmlSnapshotSerializer.ts' in issues.files);
-  assert('coverage/config-provider.ts' in issues.files);
   assert('coverage/cli-provider.ts' in issues.files);
-  assert('src/setupBare.ts' in issues.files);
   assert('shared-state.ts' in issues.files);
   assert('installed-pkg.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 7);
+  assert.equal(Object.keys(issues.files).length, 3);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 7,
-    processed: 7,
-    total: 7,
+    files: 3,
+    processed: 3,
+    total: 3,
   });
 });
 

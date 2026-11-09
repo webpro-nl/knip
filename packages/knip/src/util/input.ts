@@ -132,9 +132,6 @@ export const toDeferResolveProductionEntry = (specifier: string, options: Option
   ...options,
 });
 
-export const isDeferResolveProductionEntry = (input: Input) =>
-  input.type === 'deferResolveEntry' && input.production === true;
-
 export const toDeferResolveEntry = (specifier: string, options: Options = {}): Input => ({
   type: 'deferResolveEntry',
   specifier,

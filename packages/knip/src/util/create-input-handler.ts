@@ -147,10 +147,6 @@ export const createInputHandler =
       }
     }
 
-    if (isDeferResolve(input) && deputy.isProduction && !input.production) {
-      return;
-    }
-
     // oxc-resolver does not resolve "file" or "file.ts" without "./" so we best-guess-absolutify
     const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
     const resolvedFilePath = _resolveModuleSync(filePath, basePath);
@@ -159,7 +155,7 @@ export const createInputHandler =
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
     }
 
-    if (input.optional) return;
+    if (input.optional || (isDeferResolve(input) && deputy.isProduction && !input.production)) return;
 
     if (!isInternal(filePath)) {
       addIssue({
