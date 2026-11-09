@@ -1,11 +1,31 @@
 {
-  "compilerOptions": { "jsx": "react-jsx" },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": {
+      "@site/mdx-components": ["./src/aliased-mdx-components.tsx"],
+      "components/mdx": ["./src/unscoped-mdx-components.tsx"]
+    }
+  },
   "contentMappers": [
     {
       "package": "mdx-content-mapper",
       "extensions": [".mdx"],
       "options": {
         "providerImportSource": "#mdx-components"
+      }
+    },
+    {
+      "package": "mdx-content-mapper",
+      "extensions": [".mdx"],
+      "options": {
+        "providerImportSource": "@site/mdx-components"
+      }
+    },
+    {
+      "package": "mdx-content-mapper",
+      "extensions": [".mdx"],
+      "options": {
+        "providerImportSource": "components/mdx"
       }
     }
   ]

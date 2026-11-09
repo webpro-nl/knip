@@ -17,12 +17,12 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['tsconfig.json'];
 
-const resolveContentMappers = (localConfig: TsConfigJson) => {
+const resolveContentMappers = (localConfig: TsConfigJson, dir: string) => {
   const inputs: Input[] = [];
   for (const { package: name, options } of localConfig.contentMappers ?? []) {
     inputs.push(toDependency(name));
     const resolveOptions = contentMapperResolvers.get(name);
-    if (resolveOptions && options) inputs.push(...resolveOptions(options));
+    if (resolveOptions && options) inputs.push(...resolveOptions(options, dir));
   }
   return inputs;
 };
@@ -42,7 +42,7 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
       )
     ) ?? [];
 
-  const contentMappers = resolveContentMappers(localConfig);
+  const contentMappers = resolveContentMappers(localConfig, options.configFileDir);
 
   if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
 
