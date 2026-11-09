@@ -1,4 +1,4 @@
-export type MikroOrmDirectoryConfig = {
+type MikroOrmDirectoryConfig = {
   path?: string;
   pathTs?: string;
   glob?: string;
@@ -15,9 +15,13 @@ export type MikroOrmOptions = {
 };
 
 export type MikroOrmPackageJson = {
-  'mikro-orm'?: {
-    configPaths?: string | string[];
-  };
+  configPaths?: string | string[];
 };
 
-export type MikroOrmConfig = MikroOrmOptions | MikroOrmOptions[] | MikroOrmPackageJson;
+export type MikroOrmConfigFactory = (
+  contextName: string
+) => MikroOrmOptions | MikroOrmOptions[] | Promise<MikroOrmOptions | MikroOrmOptions[]>;
+
+export type MikroOrmConfigItem = MikroOrmOptions | MikroOrmConfigFactory;
+
+export type MikroOrmConfig = MikroOrmConfigItem | MikroOrmConfigItem[] | MikroOrmPackageJson;
