@@ -1,14 +1,15 @@
-import type { Word } from 'unbash';
+import { parse as parseScript, type Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
-import type { BinaryResolver, ScriptArg } from '../types/config.ts';
+import type { BinaryResolver, GetScriptCommands, ScriptArg, ScriptCommand } from '../types/config.ts';
 import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
+import { collectCommands, getCommandWords } from '../util/scripts.ts';
 import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
-import { spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
+import { spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
@@ -54,6 +55,27 @@ export const getWrappedCommand = (binary: string, words: Word[], cwd = process.c
   if (!pluginArgs || typeof fromArgs !== 'function') return;
   const args = toArgs(pluginArgs, words);
   return toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
+};
+
+export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()) => {
+  if (!script) return [];
+  const out: ScriptCommand[] = [];
+  try {
+    for (const statement of parseScript(script).commands) {
+      for (const node of collectCommands(statement.command)) {
+        const text = node.name?.value;
+        if (!text) continue;
+        const binary = extractBinary(text);
+        const words = getCommandWords(node);
+        const command = getWrappedCommand(binary, words, cwd);
+        if (command?.length) out.push(...getScriptCommands(toScript(command), cwd));
+        else out.push({ binary, args: words.map(word => word.value) });
+      }
+    }
+  } catch {
+    return [];
+  }
+  return out;
 };
 
 export const resolve: BinaryResolver = (binary, words, options) => {

@@ -3,19 +3,10 @@ import {
   type Command,
   type CommandExpansionPart,
   forEachChild,
-  parse,
   type ProcessSubstitutionPart,
   type SyntaxNode,
   type Word,
 } from 'unbash';
-import { getWrappedCommand } from '../binaries/plugins.ts';
-import { toScript } from '../binaries/util.ts';
-import { extractBinary } from './modules.ts';
-
-export interface ScriptCommand {
-  binary: string;
-  args: string[];
-}
 
 // Argv arrays are spawned without a shell, so single-quote each element to keep the script parser from splitting on
 // spaces or acting on operators, globs and expansions the process would have received literally
@@ -40,24 +31,3 @@ export const isScriptExpansion = (
   node: SyntaxNode
 ): node is CommandExpansionPart | ProcessSubstitutionPart | ArithmeticCommandExpansion =>
   node.type === 'CommandExpansion' || node.type === 'ProcessSubstitution' || node.type === 'ArithmeticCommandExpansion';
-
-export const getScriptCommands = (script: string, cwd = process.cwd()): ScriptCommand[] => {
-  if (!script) return [];
-  const out: ScriptCommand[] = [];
-  try {
-    for (const statement of parse(script).commands) {
-      for (const node of collectCommands(statement.command)) {
-        const text = node.name?.value;
-        if (!text) continue;
-        const binary = extractBinary(text);
-        const words = getCommandWords(node);
-        const command = getWrappedCommand(binary, words, cwd);
-        if (command?.length) out.push(...getScriptCommands(toScript(command), cwd));
-        else out.push({ binary, args: words.map(word => word.value) });
-      }
-    }
-  } catch {
-    return [];
-  }
-  return out;
-};

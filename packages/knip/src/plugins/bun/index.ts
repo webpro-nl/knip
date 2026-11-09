@@ -1,8 +1,7 @@
-import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import { type Input, toDeferResolve, toEntry, toIgnore } from '../../util/input.ts';
 import parseArgs from '../../util/parse-args.ts';
-import { getScriptCommands } from '../../util/scripts.ts';
 import type { BunfigConfig } from './types.ts';
 
 // https://bun.sh/docs/cli/test
@@ -14,7 +13,7 @@ const enablers =
 
 const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
 
-const getBunTest = (script: string, cwd: string) => {
+const getBunTest = (script: string, cwd: string, getScriptCommands: GetScriptCommands) => {
   for (const { binary, args } of getScriptCommands(script, cwd)) {
     if (binary !== 'bun') continue;
     const parsed = parseArgs(args, { string: ['timeout', 'rerun-each', 'preload'] });
@@ -22,11 +21,12 @@ const getBunTest = (script: string, cwd: string) => {
   }
 };
 
-const hasBunTest = (scripts: Record<string, string> | undefined, cwd: string) =>
-  scripts && Object.values(scripts).some(script => typeof script === 'string' && getBunTest(script, cwd));
+const hasBunTest = (scripts: Record<string, string> | undefined, cwd: string, getScriptCommands: GetScriptCommands) =>
+  scripts &&
+  Object.values(scripts).some(script => typeof script === 'string' && getBunTest(script, cwd, getScriptCommands));
 
-const isEnabled: IsPluginEnabled = ({ cwd, manifest }) =>
-  isFile(cwd, 'bun.lock') || isFile(cwd, 'bun.lockb') || !!hasBunTest(manifest.scripts, cwd);
+const isEnabled: IsPluginEnabled = ({ cwd, manifest, getScriptCommands }) =>
+  isFile(cwd, 'bun.lock') || isFile(cwd, 'bun.lockb') || !!hasBunTest(manifest.scripts, cwd, getScriptCommands);
 
 const config = ['bunfig.toml'];
 
@@ -60,7 +60,8 @@ const resolve: Resolve = options => {
   const inputs: Input[] = [toIgnore('bun', 'dependencies')];
   for (const [name, script] of Object.entries(scripts)) {
     if (typeof script !== 'string') continue;
-    const parsed = getBunTest(script, options.manifest.scripts?.[name] !== undefined ? options.cwd : options.rootCwd);
+    const cwd = options.manifest.scripts?.[name] !== undefined ? options.cwd : options.rootCwd;
+    const parsed = getBunTest(script, cwd, options.getScriptCommands);
     if (!parsed) continue;
     const targets = parsed._.slice(1);
     for (const pattern of targets.length === 0 ? patterns : targets.flatMap(toPatterns)) inputs.push(toEntry(pattern));

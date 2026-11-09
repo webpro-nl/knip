@@ -29,6 +29,13 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
+export interface ScriptCommand {
+  binary: string;
+  args: string[];
+}
+
+export type GetScriptCommands = (script: string, cwd?: string) => ScriptCommand[];
+
 export type ScriptArg = string | Word;
 
 export type FromArgs = (args: ScriptArg[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
@@ -123,6 +130,7 @@ type IsPluginEnabledOptions = {
   manifest: Manifest;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
+  getScriptCommands: GetScriptCommands;
 };
 
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
@@ -138,6 +146,7 @@ export interface PluginOptions extends BaseOptions {
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
+  getScriptCommands: GetScriptCommands;
 }
 
 type PluginSetup = () => Promise<void> | void;

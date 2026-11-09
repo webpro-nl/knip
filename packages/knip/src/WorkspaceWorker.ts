@@ -1,5 +1,6 @@
 import picomatch from 'picomatch';
 import { _getInputsFromScripts } from './binaries/index.ts';
+import { getScriptCommands } from './binaries/plugins.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
 import { isDefaultPattern, type Workspace } from './ConfigurationChief.ts';
 import { DEFAULT_EXTENSIONS, ROOT_WORKSPACE_NAME } from './constants.ts';
@@ -173,7 +174,13 @@ export class WorkspaceWorker {
       if (
         isEnabledInAncestor ||
         (typeof plugin.isEnabled === 'function' &&
-          (await plugin.isEnabled({ cwd: this.dir, manifest, dependencies: this.dependencies, config: this.config })))
+          (await plugin.isEnabled({
+            cwd: this.dir,
+            manifest,
+            dependencies: this.dependencies,
+            config: this.config,
+            getScriptCommands,
+          })))
       ) {
         this.enabledPluginsMap[pluginName] = true;
         enabledPlugins.push(pluginName);
@@ -324,7 +331,7 @@ export class WorkspaceWorker {
     const baseOptions = { manifest, rootManifest, cwd, rootCwd, containingFilePath, getManifest };
 
     // Get dependencies from package.json#scripts
-    const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins };
+    const baseScriptOptions = { ...baseOptions, isProduction, enabledPlugins: this.enabledPlugins, getScriptCommands };
     const [productionScripts, developmentScripts] = getFilteredScripts(manifest.scripts ?? {});
     const inputsFromManifest = _getInputsFromScripts(Object.values(developmentScripts), baseOptions);
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);

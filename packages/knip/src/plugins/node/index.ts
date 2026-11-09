@@ -1,6 +1,5 @@
-import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
+import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import { toEntry, toProductionEntry } from '../../util/input.ts';
-import { getScriptCommands } from '../../util/scripts.ts';
 import type { RegisterVisitors } from '../../types/config.ts';
 import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
 
@@ -18,7 +17,11 @@ const patterns = [
 
 const hasNodeTestCache = new WeakMap<Record<string, string>, boolean>();
 
-const hasNodeTest = (scripts: Record<string, string> | undefined, cwd: string) => {
+const hasNodeTest = (
+  scripts: Record<string, string> | undefined,
+  cwd: string,
+  getScriptCommands: GetScriptCommands
+) => {
   if (!scripts) return false;
   const cached = hasNodeTestCache.get(scripts);
   if (cached !== undefined) return cached;
@@ -43,8 +46,8 @@ const resolve: Resolve = options => {
   const entries = entry.map(id => toProductionEntry(id));
 
   if (
-    hasNodeTest(options.manifest.scripts, options.cwd) ||
-    hasNodeTest(options.rootManifest?.scripts, options.rootCwd)
+    hasNodeTest(options.manifest.scripts, options.cwd, options.getScriptCommands) ||
+    hasNodeTest(options.rootManifest?.scripts, options.rootCwd, options.getScriptCommands)
   ) {
     entries.push(...patterns.map(toEntry));
   }

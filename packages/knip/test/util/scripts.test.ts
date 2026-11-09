@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getScriptCommands, toShellCommand } from '../../src/util/scripts.ts';
+import { getScriptCommands } from '../../src/binaries/plugins.ts';
+import { toShellCommand } from '../../src/util/scripts.ts';
 
 test('getScriptCommands splits chained commands', () => {
   assert.deepEqual(getScriptCommands('bun run build && bun test'), [
