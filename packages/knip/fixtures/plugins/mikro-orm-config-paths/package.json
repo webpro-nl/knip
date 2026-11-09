@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/mikro-orm-config-paths",
+  "private": true,
+  "devDependencies": {
+    "@mikro-orm/cli": "*"
+  },
+  "scripts": {
+    "migrate": "bun -b mikro-orm migration:up"
+  },
+  "mikro-orm": {
+    "configPaths": ["./config/orm.config.ts"]
+  }
+}

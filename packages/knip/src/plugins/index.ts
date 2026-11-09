@@ -75,6 +75,7 @@ import { default as mcp } from './mcp/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
+import { default as mikroOrm } from './mikro-orm/index.ts';
 import { default as mise } from './mise/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
@@ -283,6 +284,7 @@ export const Plugins = {
   mdx,
   mdxlint,
   metro,
+  'mikro-orm': mikroOrm,
   mise,
   mocha,
   moonrepo,
