@@ -1,23 +1,24 @@
-import type { Program } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { getStringValue } from '../../typescript/ast-nodes.ts';
+import { type Input, toDependency, toProductionEntry } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
+import { toProviderInput } from '../mdx/index.ts';
 
 export const production = ['{src/,}mdx-components.{js,jsx,ts,tsx}'];
 
-const getMdxPlugins = (program: Program) => {
+export const resolveFromAST: ResolveFromAST = (program, options) => {
+  const inputs: Input[] = production.map(id => toProductionEntry(id));
   const plugins = new Set<string>();
   for (const call of findImportedCalls(program, '@next/mdx')) {
-    const options = findProperty(call.arguments?.[0], 'options');
-    if (options?.type !== 'ObjectExpression') continue;
+    const mdxOptions = findProperty(call.arguments?.[0], 'options');
+    if (mdxOptions?.type !== 'ObjectExpression') continue;
     for (const pluginType of ['remarkPlugins', 'rehypePlugins', 'recmaPlugins']) {
-      for (const v of getStringValues(findProperty(options, pluginType))) plugins.add(v);
+      for (const id of getStringValues(findProperty(mdxOptions, pluginType))) plugins.add(id);
     }
+    const provider = getStringValue(findProperty(mdxOptions, 'providerImportSource'));
+    if (provider && !isInternal(provider)) inputs.push(toProviderInput(provider, options.configFileDir));
   }
-  return plugins;
+  for (const id of plugins) inputs.push(toDependency(id));
+  return inputs;
 };
-
-export const resolveFromAST: ResolveFromAST = program => [
-  ...production.map(id => toProductionEntry(id)),
-  ...Array.from(getMdxPlugins(program)).map(id => toDependency(id)),
-];

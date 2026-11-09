@@ -4,8 +4,9 @@ import { findImportedCalls, findProperty, getStringValues, resolveObjectArg } fr
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
 import { type Input, toDeferResolveProductionEntry } from '../../util/input.ts';
-import { dirname, join, toAbsolute } from '../../util/path.ts';
+import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
+import { toProviderInput } from '../mdx/index.ts';
 
 const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
 
@@ -23,6 +24,15 @@ export const getBabelInputs = (program: Program): Input[] => {
       presets.push(...getStringValues(findProperty(config, 'presets')));
     }
     inputs.push(...getDependenciesFromConfig({ plugins, presets }));
+  }
+  return inputs;
+};
+
+export const getMdxInputs = (program: Program, dir: string): Input[] => {
+  const inputs: Input[] = [];
+  for (const call of findImportedCalls(program, '@mdx-js/rollup')) {
+    const provider = getStringValue(findProperty(call.arguments?.[0], 'providerImportSource'));
+    if (provider && !isInternal(provider)) inputs.push(toProviderInput(provider, dir));
   }
   return inputs;
 };

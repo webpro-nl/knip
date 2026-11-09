@@ -27,7 +27,7 @@ export const contentMappers = ['mdx-content-mapper', '@mdx-js/content-mapper'];
 
 const bundledPlugins = ['remark-mdx-frontmatter'];
 
-const toProviderInput = (provider: string, dir: string): Input =>
+export const toProviderInput = (provider: string, dir: string): Input =>
   isInternal(provider) || provider.startsWith('#')
     ? toDeferResolveProductionEntry(provider)
     : { ...toDeferResolve(provider, { dir }), production: true };

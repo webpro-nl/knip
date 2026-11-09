@@ -2,7 +2,7 @@ import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, Resolve, ResolveFromAST } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveConfig } from '../vitest/index.ts';
-import { getBabelInputs, getIndexHtmlEntries } from './helpers.ts';
+import { getBabelInputs, getIndexHtmlEntries, getMdxInputs } from './helpers.ts';
 import { createImportMetaGlobVisitor } from './visitors/importMetaGlob.ts';
 
 // https://vitejs.dev/config/
@@ -15,7 +15,10 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 export const config = ['vite.config.{js,mjs,ts,cjs,mts,cts}'];
 
-const resolveFromAST: ResolveFromAST = getBabelInputs;
+const resolveFromAST: ResolveFromAST = (program, options) => [
+  ...getBabelInputs(program),
+  ...getMdxInputs(program, options.configFileDir),
+];
 
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createImportMetaGlobVisitor(ctx));

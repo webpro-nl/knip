@@ -10,10 +10,12 @@
     "many-components": "*",
     "shared-state": "*",
     "upstream-esm": "*",
-    "native-renderer": "*"
+    "native-renderer": "*",
+    "nextra": "*"
   },
   "devDependencies": {
     "@babel/preset-typescript": "*",
+    "@mdx-js/rollup": "*",
     "@emotion/babel-plugin": "*",
     "@vitejs/plugin-react": "*",
     "vite": "*"
