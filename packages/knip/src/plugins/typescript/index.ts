@@ -5,6 +5,7 @@ import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolveTsNodeConfig } from '../ts-node/index.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
 
 // https://www.typescriptlang.org/tsconfig
@@ -44,7 +45,12 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
 
   const contentMappers = resolveContentMappers(localConfig, options.configFileDir);
 
-  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
+  const tsNode =
+    localConfig['ts-node'] && options.enabledPlugins.includes('ts-node')
+      ? resolveTsNodeConfig(localConfig['ts-node'])
+      : [];
+
+  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...tsNode, ...extend, ...references]);
 
   const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(id => ({
     ...toProductionDependency(id),
@@ -60,6 +66,7 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
 
   return compact([
     ...contentMappers,
+    ...tsNode,
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd, alsoReferenceOwner: true })),
