@@ -22,22 +22,25 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.object.callee.name === 'require' &&
     node.object.arguments.length === 1 &&
     isStringLiteral(node.object.arguments[0]) &&
-    !node.computed &&
-    node.property.type === 'Identifier' &&
     !s.handledImportExpressions.has(node.object.start)
   ) {
-    const specifier = getStringValue(node.object.arguments[0])!;
-    const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
-    s.addImport(
-      specifier,
-      node.property.name,
-      undefined,
-      undefined,
-      node.object.arguments[0].start,
-      IMPORT_FLAGS.NONE,
-      undefined,
-      reqTags
-    );
+    let memberName: string | undefined;
+    if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
+    else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+    if (memberName) {
+      const specifier = getStringValue(node.object.arguments[0])!;
+      const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
+      s.addImport(
+        specifier,
+        memberName,
+        undefined,
+        undefined,
+        node.object.arguments[0].start,
+        IMPORT_FLAGS.NONE,
+        undefined,
+        reqTags
+      );
+    }
     return;
   }
 

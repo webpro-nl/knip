@@ -11,6 +11,7 @@ const ts = require('./ts-ext');
 const assigned = require('./dir/members').assigned;
 const inArray = [require('./dir/members').inArray];
 require('./dir/members').called();
+const computed = require('./dir/members')['computed'];
 
 const dynamicRequire = value => {
   return require(`./dir/${value}`);
@@ -57,3 +58,4 @@ staticResolve;
 add;
 assigned;
 inArray;
+computed;
