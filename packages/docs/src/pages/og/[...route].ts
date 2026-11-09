@@ -1,10 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
-
-const require = createRequire(import.meta.url);
-// ts-expect-error TS80005
-const sharp = require('sharp');
+import sharp from 'sharp';
 
 const template = readFileSync(resolve('src/assets/og-template.svg'), 'utf-8');
 const cacheDir = resolve('node_modules/.astro/og');
