@@ -194,6 +194,10 @@ export class DependencyDeputy {
     return deps;
   }
 
+  getAllDependencies(workspaceName: string): DependencySet {
+    return this._manifests.get(workspaceName)?.allDependencies ?? new Set();
+  }
+
   addReferencedDependency(workspaceName: string, packageName: string) {
     if (!this.referencedDependencies.has(workspaceName)) {
       this.referencedDependencies.set(workspaceName, new Set());

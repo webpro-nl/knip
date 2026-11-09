@@ -180,6 +180,7 @@ export const build = timerify(async function build({
       config: baseConfig,
       manifest,
       dependencies,
+      allDependencies: deputy.getAllDependencies(name),
       rootManifest,
       handleInput: (input: Input) => handleInput(input, workspace),
       handleConfigLoadError: () => collector.addConfigLoadError(),

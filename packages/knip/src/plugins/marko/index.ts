@@ -58,9 +58,9 @@ const resolveConfig: ResolveConfig<MarkoTagDef> = (localConfig, options) => {
   return inputs;
 };
 
-const registerCompilers: RegisterCompilers = async ({ cwd, registerCompiler, hasDependency }) => {
+const registerCompilers: RegisterCompilers = async ({ cwd, dependencies, registerCompiler, hasDependency }) => {
   if (hasDependency('marko')) {
-    const { tagDependencies, fallbackDependencies } = await getTaglibDependencies(cwd);
+    const { tagDependencies, fallbackDependencies } = await getTaglibDependencies(cwd, dependencies);
     registerCompiler({ extension: '.marko', compiler: createCompiler(tagDependencies, fallbackDependencies) });
   }
 };

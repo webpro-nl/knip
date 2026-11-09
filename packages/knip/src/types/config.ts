@@ -178,6 +178,7 @@ export type ResolveFromAST = (
 
 type RegisterCompilersOptions = {
   cwd: string;
+  dependencies: Set<string>;
   hasDependency: HasDependency;
   registerCompiler: RegisterCompiler;
 };

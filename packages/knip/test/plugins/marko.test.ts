@@ -18,6 +18,8 @@ test('Find dependencies with the marko plugin', async () => {
   assert(!issues.dependencies['package.json']['@orchard/marko-migrate']);
   assert(!issues.dependencies['package.json']['combined-marko-tags']);
   assert(!issues.dependencies['package.json']['legacy-marko-tags']);
+  assert(issues.optionalPeerDependencies['package.json']['combined-marko-tags']);
+  assert(!issues.dependencies['packages/app/package.json']);
   assert(issues.files['src/components/fruit-basket/seasonal-price-helper.ts']);
   assert.deepEqual(issues.unlisted, {});
   assert.deepEqual(issues.unresolved, {});
@@ -26,7 +28,8 @@ test('Find dependencies with the marko plugin', async () => {
     ...baseCounters,
     files: 1,
     dependencies: 3,
-    processed: 11,
-    total: 11,
+    optionalPeerDependencies: 1,
+    processed: 12,
+    total: 12,
   });
 });

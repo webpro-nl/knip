@@ -53,6 +53,7 @@ type WorkspaceManagerOptions = {
   config: WorkspaceConfiguration;
   manifest: PackageJson;
   dependencies: DependencySet;
+  allDependencies: DependencySet;
   rootManifest: Manifest | undefined;
   handleInput: HandleInput;
   handleConfigLoadError: () => void;
@@ -84,6 +85,7 @@ export class WorkspaceWorker {
   manifest: Manifest;
   rootManifest: Manifest | undefined;
   dependencies: DependencySet;
+  allDependencies: DependencySet;
   handleInput: HandleInput;
   handleConfigLoadError: () => void;
   findWorkspaceByFilePath: (filePath: string) => Workspace | undefined;
@@ -110,6 +112,7 @@ export class WorkspaceWorker {
     config,
     manifest,
     dependencies,
+    allDependencies,
     rootManifest,
     negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
@@ -130,6 +133,7 @@ export class WorkspaceWorker {
     this.manifest = createManifest(manifest);
     this.rootManifest = rootManifest;
     this.dependencies = dependencies;
+    this.allDependencies = allDependencies;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
@@ -275,7 +279,7 @@ export class WorkspaceWorker {
       if (!plugin.registerCompilers) continue;
       if (this.config[pluginName] === false) continue;
       if (this.options.cwd !== this.dir && plugin.isRootOnly) continue;
-      await plugin.registerCompilers({ cwd, hasDependency, registerCompiler });
+      await plugin.registerCompilers({ cwd, dependencies: this.allDependencies, hasDependency, registerCompiler });
     }
   }
 
