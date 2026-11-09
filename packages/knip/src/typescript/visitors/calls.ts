@@ -3,7 +3,8 @@ import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import { isShadowed, type WalkState } from './walk.ts';
+import { isShadowedIn } from './shadow.ts';
+import type { WalkState } from './walk.ts';
 
 /**
  * Credits the class registered by a native custom-element call `<registry>.define('tag', Class)`. The
@@ -22,7 +23,7 @@ function getRegisteredCustomElement(node: CallExpression, s: WalkState): string 
   if (object.type === 'Identifier') {
     isRegistry =
       (object.name === 'customElements' || s.customElementRegistries.has(object.name)) &&
-      !isShadowed(object.name, object.start);
+      !isShadowedIn(s, object.name, object.start);
   } else {
     isRegistry =
       object.type === 'MemberExpression' &&
@@ -33,7 +34,7 @@ function getRegisteredCustomElement(node: CallExpression, s: WalkState): string 
   if (!isRegistry) return undefined;
 
   const arg = node.arguments[1];
-  if (arg?.type === 'Identifier') return isShadowed(arg.name, arg.start) ? undefined : arg.name;
+  if (arg?.type === 'Identifier') return isShadowedIn(s, arg.name, arg.start) ? undefined : arg.name;
   if (arg?.type === 'ThisExpression' && s.staticBlockDepth > 0)
     return s.classNameStack[s.classNameStack.length - 1] || undefined;
   return undefined;
@@ -48,7 +49,7 @@ export function trackCustomElementRegistry(node: VariableDeclarator, s: WalkStat
   if (node.id.type !== 'Identifier' || !node.init) return;
   const init = node.init;
   if (
-    (init.type === 'Identifier' && init.name === 'customElements' && !isShadowed('customElements', init.start)) ||
+    (init.type === 'Identifier' && init.name === 'customElements' && !isShadowedIn(s, 'customElements', init.start)) ||
     (init.type === 'MemberExpression' &&
       !init.computed &&
       init.property.type === 'Identifier' &&

@@ -43,6 +43,7 @@ import {
   handleVariableDeclarator,
 } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
+import { isShadowedIn } from './shadow.ts';
 
 interface WalkContext {
   lineStarts: number[];
@@ -363,16 +364,7 @@ const _addRefInExport = (name: string, exportName: string) => {
 const _isInNamespace = (node: Span) =>
   state.nsRanges.length > 0 && state.nsRanges.some(([start, end]) => node.start >= start && node.end <= end);
 
-export const isShadowed = (name: string, pos: number): boolean => {
-  if (state.shadowScopes.size === 0) return false;
-  const ranges = state.shadowScopes.get(name);
-  if (!ranges) return false;
-  if (state.localImportMap.get(name)?.isDynamicImport) return false;
-  for (const range of ranges) {
-    if (pos >= range[0] && pos <= range[1]) return true;
-  }
-  return false;
-};
+export const isShadowed = (name: string, pos: number): boolean => isShadowedIn(state, name, pos);
 
 const _addLocalRef = (name: string, pos: number) => {
   if (isShadowed(name, pos)) return;

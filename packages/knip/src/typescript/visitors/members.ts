@@ -3,7 +3,8 @@ import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import type { ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import { isShadowed, type WalkState } from './walk.ts';
+import { isShadowedIn } from './shadow.ts';
+import type { WalkState } from './walk.ts';
 
 const chainNames: string[] = [];
 
@@ -55,7 +56,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
 
   if (node.object.type === 'Identifier') {
     const localName = node.object.name;
-    const shadowed = isShadowed(localName, node.object.start);
+    const shadowed = isShadowedIn(s, localName, node.object.start);
     const _import = !shadowed ? s.localImportMap.get(localName) : undefined;
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
@@ -128,7 +129,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.object.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
-    if (!isShadowed(rootName, node.object.object.start)) {
+    if (!isShadowedIn(s, rootName, node.object.object.start)) {
       const _import = s.localImportMap.get(rootName);
       if (_import?.isNamespace) {
         const internalImport = s.internal.get(_import.filePath);
@@ -152,7 +153,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
-    if (!isShadowed(rootName, node.object.object.start)) {
+    if (!isShadowedIn(s, rootName, node.object.object.start)) {
       const _import = s.localImportMap.get(rootName);
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
@@ -189,7 +190,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
       chainNames.push(root.property.name);
       root = root.object;
     }
-    if (root.type === 'Identifier' && !isShadowed(root.name, root.start)) {
+    if (root.type === 'Identifier' && !isShadowedIn(s, root.name, root.start)) {
       const _import = s.localImportMap.get(root.name);
       const internalImport = _import && s.internal.get(_import.filePath);
       if (internalImport || !_import) {
