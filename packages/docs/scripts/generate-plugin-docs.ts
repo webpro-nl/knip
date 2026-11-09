@@ -52,6 +52,7 @@ for await (const dir of directories) {
 
     await registerCompilers?.({
       cwd: knipDir,
+      dependencies: new Set(),
       hasDependency: () => true,
       registerCompiler: ({ extension }) =>
         compilerPlugins.set(extension, [...(compilerPlugins.get(extension) ?? []), title]),
