@@ -41,8 +41,23 @@ test('getScriptCommands traverses elif branches', () => {
 
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('retry -n 3 -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);
+});
+
+test('getScriptCommands skips options of spawning binaries', () => {
+  assert.deepEqual(getScriptCommands('c8 --reporter=lcov --reporter text node --test'), [
+    { binary: 'node', args: ['--test'] },
+  ]);
+  assert.deepEqual(getScriptCommands('c8 -r lcov --all bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('c8 --100 node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(getScriptCommands('retry --retries 3 node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('retry --randomize node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
 });
 
 test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {
@@ -87,4 +102,13 @@ test('toShellCommand round-trips argv through the script parser', () => {
   t(['node', '$HOME/server.js']);
   t(['node', "it's/server.js"]);
   t(['node', 'lib/*.js']);
+});
+
+test('getScriptCommands passes the working directory to wrappers', () => {
+  assert.deepEqual(getScriptCommands('cdk --app "cloud assembly"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'cdk', args: ['--app', 'cloud assembly'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cdk --app "node --test"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'node', args: ['--test'] },
+  ]);
 });

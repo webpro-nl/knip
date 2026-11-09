@@ -14,19 +14,19 @@ const enablers =
 
 const patterns = ['**/*.{test,spec}.{js,jsx,ts,tsx}', '**/*_{test,spec}.{js,jsx,ts,tsx}'];
 
-const getBunTest = (script: string) => {
-  for (const { binary, args } of getScriptCommands(script)) {
+const getBunTest = (script: string, cwd: string) => {
+  for (const { binary, args } of getScriptCommands(script, cwd)) {
     if (binary !== 'bun') continue;
     const parsed = parseArgs(args, { string: ['timeout', 'rerun-each', 'preload'] });
     if (parsed._[0] === 'test') return parsed;
   }
 };
 
-const hasBunTest = (scripts: Record<string, string> | undefined) =>
-  scripts && Object.values(scripts).some(script => typeof script === 'string' && getBunTest(script));
+const hasBunTest = (scripts: Record<string, string> | undefined, cwd: string) =>
+  scripts && Object.values(scripts).some(script => typeof script === 'string' && getBunTest(script, cwd));
 
 const isEnabled: IsPluginEnabled = ({ cwd, manifest }) =>
-  isFile(cwd, 'bun.lock') || isFile(cwd, 'bun.lockb') || !!hasBunTest(manifest.scripts);
+  isFile(cwd, 'bun.lock') || isFile(cwd, 'bun.lockb') || !!hasBunTest(manifest.scripts, cwd);
 
 const config = ['bunfig.toml'];
 
@@ -58,9 +58,9 @@ const toPatterns = (arg: string) => {
 const resolve: Resolve = options => {
   const scripts = { ...options.rootManifest?.scripts, ...options.manifest.scripts };
   const inputs: Input[] = [toIgnore('bun', 'dependencies')];
-  for (const script of Object.values(scripts)) {
+  for (const [name, script] of Object.entries(scripts)) {
     if (typeof script !== 'string') continue;
-    const parsed = getBunTest(script);
+    const parsed = getBunTest(script, options.manifest.scripts?.[name] !== undefined ? options.cwd : options.rootCwd);
     if (!parsed) continue;
     const targets = parsed._.slice(1);
     for (const pattern of targets.length === 0 ? patterns : targets.flatMap(toPatterns)) inputs.push(toEntry(pattern));

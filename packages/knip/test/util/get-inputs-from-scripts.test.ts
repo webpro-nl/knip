@@ -143,6 +143,8 @@ test('getInputsFromScripts (cross-env/env vars)', () => {
   t("NODE_OPTIONS='--import ./instrumentation.mjs' pnpm exec next dev", [toBinary('next'), toDeferResolve('./instrumentation.mjs')]);
   t("NODE_OPTIONS='--require pkg-a --require pkg-b' cross-env program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-a'), toDeferResolve('pkg-b')]);
   t("NODE_OPTIONS='--require pkg-a' retry-cli program", [toBinary('retry-cli'), toBinary('program'), toDeferResolve('pkg-a')]);
+  t('retry-cli --retries 3 node ./script.js', [toBinary('retry-cli'), toBinary('node'), js]);
+  t('retry-cli --randomize node ./script.js', [toBinary('retry-cli'), toBinary('node'), js]);
   t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toDeferResolve('pkg-b'), toDeferResolve('pkg-a')]);
 });
 
@@ -478,6 +480,7 @@ test('getInputsFromScripts (c8)', () => {
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toDeferResolve('@org/rep')]);
+  t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
 });
 
 test('getInputsFromScripts (nodemon)', () => {

@@ -1,5 +1,5 @@
-import { type Command, forEachChild, parse, type Script, type Statement, type SyntaxNode, type Word } from 'unbash';
-import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
+import { type Command, forEachChild, parse, type Script, type Statement, type SyntaxNode } from 'unbash';
+import type { FromArgs, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
 import type { Input } from '../util/input.ts';
 import { extractBinary, isValidBinary } from '../util/modules.ts';
@@ -24,13 +24,8 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     });
   };
 
-  const fromWords = (words: Word[], opts: GetInputsFromScriptsOptions): Input[] => {
-    const script = words
-      .filter(word => word.text !== '--')
-      .map(word => word.text)
-      .join(' ');
-    return getDependenciesFromScript(script, opts);
-  };
+  const fromWords = (args: ScriptArg[], opts: GetInputsFromScriptsOptions): Input[] =>
+    getDependenciesFromScript(toScript(args), opts);
 
   const definedFunctions = new Set<string>();
   const collectFunctionNames = (statements: readonly Statement[]): void => {

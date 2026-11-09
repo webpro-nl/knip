@@ -1,5 +1,5 @@
 import type { Word } from 'unbash';
-import parseArgs from '../util/parse-args.ts';
+import parseArgs, { type ParsedArgs } from '../util/parse-args.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
 import { type Input, toBinary } from '../util/input.ts';
 
@@ -58,6 +58,9 @@ export const toScript = (args: ScriptArg[]): string => {
 
 export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) =>
   args.slice(args.findIndex(arg => valueOf(arg) === from));
+
+export const spawningArgs = (parsed: ParsedArgs, args: string[]) =>
+  parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? []);
 
 export const argsAfter = <T extends string | Word>(args: readonly T[], token: string) => {
   const index = args.findIndex(arg => valueOf(arg) === token);

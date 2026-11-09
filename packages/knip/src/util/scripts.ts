@@ -8,14 +8,14 @@ import {
   type SyntaxNode,
   type Word,
 } from 'unbash';
+import { getWrappedCommand } from '../binaries/plugins.ts';
+import { toScript } from '../binaries/util.ts';
 import { extractBinary } from './modules.ts';
 
 export interface ScriptCommand {
   binary: string;
   args: string[];
 }
-
-const spawningBinaries = new Set(['c8', 'cross-env', 'retry-cli']);
 
 // Argv arrays are spawned without a shell, so single-quote each element to keep the script parser from splitting on
 // spaces or acting on operators, globs and expansions the process would have received literally
@@ -41,7 +41,7 @@ export const isScriptExpansion = (
 ): node is CommandExpansionPart | ProcessSubstitutionPart | ArithmeticCommandExpansion =>
   node.type === 'CommandExpansion' || node.type === 'ProcessSubstitution' || node.type === 'ArithmeticCommandExpansion';
 
-export const getScriptCommands = (script: string): ScriptCommand[] => {
+export const getScriptCommands = (script: string, cwd = process.cwd()): ScriptCommand[] => {
   if (!script) return [];
   const out: ScriptCommand[] = [];
   try {
@@ -51,13 +51,9 @@ export const getScriptCommands = (script: string): ScriptCommand[] => {
         if (!text) continue;
         const binary = extractBinary(text);
         const words = getCommandWords(node);
-        if (spawningBinaries.has(binary)) {
-          const rest = words
-            .filter(word => word.text !== '--')
-            .map(word => word.text)
-            .join(' ');
-          out.push(...getScriptCommands(rest));
-        } else out.push({ binary, args: words.map(word => word.value) });
+        const command = getWrappedCommand(binary, words, cwd);
+        if (command?.length) out.push(...getScriptCommands(toScript(command), cwd));
+        else out.push({ binary, args: words.map(word => word.value) });
       }
     }
   } catch {

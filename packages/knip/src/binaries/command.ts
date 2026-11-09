@@ -1,12 +1,12 @@
-import type { Command, Word } from 'unbash';
+import type { Command } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
-import type { BinaryResolverOptions, GetInputsFromScriptsOptions } from '../types/config.ts';
+import type { BinaryResolverOptions, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
 import { type Input, toDeferResolve } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin, isRelativeNodeModulesBin } from '../util/modules.ts';
 import { getCommandWords } from '../util/scripts.ts';
 import { resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
 import KnownResolvers, { isPackageManager } from './resolvers/index.ts';
-import { resolve as resolverFromPlugins } from './plugins.ts';
+import { getWrappedCommand, resolve as resolverFromPlugins } from './plugins.ts';
 import { parseNodeArgs, toCommandBinary } from './util.ts';
 
 type KnownResolver = keyof typeof KnownResolvers;
@@ -24,7 +24,7 @@ export const getInputsFromNodeOptions = (prefix: Command['prefix']): Input[] => 
 export const getDependenciesFromCommand = (
   node: Pick<Command, 'name' | 'prefix' | 'args'>,
   options: BinaryResolverOptions,
-  fromWords: (words: Word[], options: GetInputsFromScriptsOptions) => Input[] = options.fromArgs
+  fromWords: (args: ScriptArg[], options: GetInputsFromScriptsOptions) => Input[] = options.fromArgs
 ): Input[] => {
   const text = node.name?.value;
   if (!text) return [];
@@ -61,7 +61,11 @@ export const getDependenciesFromCommand = (
   }
 
   if (spawningBinaries.includes(binary)) {
-    return [toCommandBinary(binary, options), ...fromWords(words, options), ...fromNodeOptions];
+    return [
+      toCommandBinary(binary, options),
+      ...fromWords(getWrappedCommand(binary, words, options.cwd) ?? [], options),
+      ...fromNodeOptions,
+    ];
   }
 
   if (binary in Plugins) {
