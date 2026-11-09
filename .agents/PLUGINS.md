@@ -39,8 +39,8 @@ Read the writing-a-plugin docs first:
 - Choose the input type from [Inputs][2] and match production relevance to the
   nearest existing plugin. A value documented as a package name is a dependency,
   not `toConfig`.
-- Don't emit inputs for `#` subpath imports: core already turns
-  `package.json#imports` targets into entries and dependencies.
+- Emit `#` subpath imports like any other specifier: core resolves them through
+  `package.json#imports`, marks the key as used and credits a package target.
 - For a loaded shared config, such as an extended preset, set
   `isFilterTransitiveDependencies` so the preset's own dependencies don't become
   the project's (see prettier, metro, webpack).

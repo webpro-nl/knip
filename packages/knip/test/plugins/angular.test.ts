@@ -14,6 +14,7 @@ test('Find dependencies and literal script entries with the Angular plugin', asy
   assert(issues.unlisted['angular.json']['@angular-devkit/build-angular']);
   assert(issues.unresolved['tsconfig.spec.json']['jasmine']);
   assert(issues.devDependencies['package.json']['karma']);
+  assert.deepEqual(issues.dependencies, {});
   assert('src/app/unused.scss' in issues.files);
   assert('src/app/other.component.scss' in issues.files);
   assert(issues.files['src/v/bootstrap.js']);

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@angular/core": "*",
+    "@angular/localize": "*",
     "zone.js": "*"
   },
   "devDependencies": {

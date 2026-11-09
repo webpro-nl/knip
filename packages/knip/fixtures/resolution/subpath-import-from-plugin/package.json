@@ -4,12 +4,14 @@
     "#dep": {
       "node": "dep-node-native",
       "default": "./lib/dep-polyfill.js"
-    }
+    },
+    "#dep-pkg": "dep-pkg/feature"
   },
   "scripts": {
-    "start": "node --import=#dep entry.ts"
+    "start": "node --import=#dep --import=#dep-pkg entry.ts"
   },
   "dependencies": {
-    "dep-node-native": "^1.0.0"
+    "dep-node-native": "^1.0.0",
+    "dep-pkg": "^1.0.0"
   }
 }

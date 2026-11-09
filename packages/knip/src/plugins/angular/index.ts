@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
 import {
   type Input,
@@ -9,7 +8,6 @@ import {
   toDependency,
   toEntry,
 } from '../../util/input.ts';
-import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createComponentStyleUrlsVisitor } from '../_component-style-urls/component-style-urls-visitor.ts';
 import * as karma from '../karma/helpers.ts';
@@ -53,37 +51,25 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
       const productionEntriesByOption: EntriesByOption =
         entriesByOptionByConfig.get(PRODUCTION_CONFIG_NAME) ?? new Map();
       const isBuildTarget = targetName === BUILD_TARGET_NAME;
-      const maybeExternal = (option: string) => option === 'polyfills';
-      const toInput = (specifier: string, opts: { isProduction: boolean; maybeExternal: boolean }): Input => {
-        const normalizedPath = join(options.cwd, specifier);
-        // 👇 `isInternal` will report `false` for specifiers not starting with `.`
-        //    However, relative imports are usually specified in `angular.json` without `.` prefix
-        //    Hence checking also that file doesn't exist before considering it external
-        if (opts.maybeExternal && !isInternal(specifier) && !existsSync(normalizedPath)) {
-          return toDeferResolve(specifier);
+      const toInput = (option: string, specifier: string, isProduction: boolean): Input => {
+        const opts = { dir: options.cwd };
+        if (option === 'polyfills') {
+          return isProduction
+            ? { ...toDeferResolve(specifier, opts), production: true }
+            : toDeferResolve(specifier, opts);
         }
-        return opts.isProduction ? toDeferResolveProductionEntry(normalizedPath) : toDeferResolveEntry(normalizedPath);
+        return isProduction ? toDeferResolveProductionEntry(specifier, opts) : toDeferResolveEntry(specifier, opts);
       };
       for (const [configName, entriesByOption] of entriesByOptionByConfig) {
         for (const [option, entries] of entriesByOption) {
           for (const entry of entries) {
-            inputs.add(
-              toInput(entry, {
-                isProduction: isBuildTarget && configName === PRODUCTION_CONFIG_NAME,
-                maybeExternal: maybeExternal(option),
-              })
-            );
+            inputs.add(toInput(option, entry, isBuildTarget && configName === PRODUCTION_CONFIG_NAME));
           }
         }
       }
       for (const [option, entries] of defaultEntriesByOption) {
         for (const entry of entries) {
-          inputs.add(
-            toInput(entry, {
-              isProduction: isBuildTarget && !productionEntriesByOption.get(option)?.length,
-              maybeExternal: maybeExternal(option),
-            })
-          );
+          inputs.add(toInput(option, entry, isBuildTarget && !productionEntriesByOption.get(option)?.length));
         }
       }
       if (target.builder && isAngularBuilderRefWithName({ builderRef: target.builder, name: 'karma' }) && opts) {
