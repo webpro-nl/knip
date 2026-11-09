@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import type { IgnoreItem, Workspace } from './ConfigurationChief.ts';
 import {
   DT_SCOPE,
@@ -24,6 +23,7 @@ import {
   getDefinitelyTypedFor,
   getPackageFromDefinitelyTyped,
   getPackageNameFromModuleSpecifier,
+  isBuiltin,
   isDefinitelyTyped,
 } from './util/modules.ts';
 import { findMatch, toRegexOrString } from './util/regex.ts';
@@ -222,7 +222,7 @@ export class DependencyDeputy {
     packageName: string,
     { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
   ): boolean {
-    if (specifier.startsWith('node:') || specifier.startsWith(PROTOCOL_CLOUDFLARE) || isBuiltin(specifier)) return true;
+    if (isBuiltin(specifier) || specifier.startsWith(PROTOCOL_CLOUDFLARE)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
 
     // Ignore self-referenced imports

@@ -1,8 +1,12 @@
 import { existsSync } from 'node:fs';
-import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
+import {
+  getPackageNameFromFilePath,
+  getPackageNameFromModuleSpecifier,
+  isBuiltin,
+  sanitizeSpecifier,
+} from '../util/modules.ts';
 import { expandPackageTarget, getPackageTargetPaths, toPackagePath } from '../util/package-json.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';

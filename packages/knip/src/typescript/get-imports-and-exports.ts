@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
@@ -9,6 +8,7 @@ import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
   getSubpathImport,
+  isBuiltin,
   isStartsLikePackageName,
   sanitizeSpecifier,
 } from '../util/modules.ts';

@@ -1,6 +1,6 @@
-import { isBuiltin } from 'node:module';
 import { IMPORT_FLAGS, IMPORT_STAR } from '../../constants.ts';
 import type { FileNode, Import, ModuleGraph } from '../../types/module-graph.ts';
+import { isBuiltin } from '../../util/modules.ts';
 import { getCachedExportTable, setCachedExportTable } from '../cache.ts';
 import {
   forEachAliasReExport,
