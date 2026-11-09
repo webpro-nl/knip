@@ -79,7 +79,13 @@ const getImportsAndExports = (
 
   const localImportMap = new Map<
     string,
-    { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
+    {
+      importedName: string;
+      filePath: string;
+      isNamespace: boolean;
+      isDynamicImport?: boolean;
+      scope?: [number, number];
+    }
   >();
   let builtinImports: Map<string, Import> | undefined;
   const localDeclarationTypes = new Map<string, SymbolType>();

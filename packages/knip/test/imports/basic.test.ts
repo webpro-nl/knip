@@ -13,9 +13,9 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 4,
-    processed: 37,
-    total: 37,
+    exports: 5,
+    processed: 42,
+    total: 42,
   });
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
@@ -27,4 +27,9 @@ test('Support various ways to import modules', async () => {
   assert.equal(issues.exports['then-namespace-arg.ts'], undefined);
   assert.equal(issues.exports['then-namespace-arg-member.ts'], undefined);
   assert.equal(issues.exports['await-namespace-arg.ts'], undefined);
+  assert.equal(issues.exports['then-namespace-return.ts'], undefined);
+  assert.equal(issues.exports['then-namespace-assign.ts'], undefined);
+  assert.equal(issues.exports['then-namespace-spread.ts'], undefined);
+  assert.equal(issues.exports['await-namespace-alias.ts'], undefined);
+  assert.deepEqual(Object.keys(issues.exports['then-namespace-scope.ts']), ['unused']);
 });

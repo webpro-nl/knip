@@ -3,7 +3,6 @@ import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import { markDynamicNamespaceOpaque } from './imports.ts';
 import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
@@ -251,16 +250,17 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     return;
   }
 
-  const markRefIfNs = (name: string) => {
+  const markRefIfNs = (name: string, pos: number) => {
     const _import = s.localImportMap.get(name);
     if (_import?.isNamespace) {
       const internalImport = s.internal.get(_import.filePath);
-      if (internalImport) internalImport.refs.add(name);
+      if (!internalImport) return;
+      if (!_import.isDynamicImport) internalImport.refs.add(name);
+      else if (!isShadowedIn(s, name, pos)) addValue(internalImport.import, OPAQUE, s.filePath);
     }
-    markDynamicNamespaceOpaque(name, s);
   };
   for (const arg of node.arguments) {
-    if (arg.type === 'Identifier') markRefIfNs(arg.name);
+    if (arg.type === 'Identifier') markRefIfNs(arg.name, arg.start);
     else if (arg.type === 'ArrowFunctionExpression' && arg.expression) {
       const body = arg.body.type === 'AwaitExpression' ? arg.body.argument : arg.body;
       if (body.type === 'ImportExpression' && isStringLiteral(body.source)) {
@@ -277,13 +277,14 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       }
     } else if (arg.type === 'ArrayExpression') {
       for (const el of arg.elements ?? []) {
-        if (el?.type === 'Identifier') markRefIfNs(el.name);
+        if (el?.type === 'Identifier') markRefIfNs(el.name, el.start);
       }
     } else if (arg.type === 'ObjectExpression') {
       for (const prop of arg.properties ?? []) {
         if (prop.type === 'Property' && !prop.computed && prop.value?.type === 'Identifier')
-          markRefIfNs(prop.value.name);
-        if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') markRefIfNs(prop.argument.name);
+          markRefIfNs(prop.value.name, prop.value.start);
+        if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier')
+          markRefIfNs(prop.argument.name, prop.argument.start);
       }
     }
   }

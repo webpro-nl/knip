@@ -69,7 +69,13 @@ interface WalkContext {
   internal: ImportMap;
   localImportMap: Map<
     string,
-    { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
+    {
+      importedName: string;
+      filePath: string;
+      isNamespace: boolean;
+      isDynamicImport?: boolean;
+      scope?: [number, number];
+    }
   >;
   localDeclarationTypes: Map<string, SymbolType>;
   importAliases: Map<string, Set<{ id: string; filePath: string }>>;
@@ -551,9 +557,6 @@ const coreVisitorObject: VisitorObject = {
   VariableDeclarator(node) {
     handleVariableDeclarator(node, state);
     trackCustomElementRegistry(node, state);
-    if (node.id.type === 'Identifier' && node.init?.type === 'Identifier') {
-      markDynamicNamespaceOpaque(node.init.name, state);
-    }
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
@@ -623,13 +626,15 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   ReturnStatement(node) {
-    if (node.argument?.type === 'Identifier') markDynamicNamespaceOpaque(node.argument.name, state);
+    if (node.argument?.type === 'Identifier')
+      markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
   },
   AssignmentExpression(node) {
-    if (node.right?.type === 'Identifier') markDynamicNamespaceOpaque(node.right.name, state);
+    if (node.right?.type === 'Identifier') markDynamicNamespaceOpaque(node.right.name, node.right.start, state);
   },
   SpreadElement(node) {
-    if (node.argument?.type === 'Identifier') markDynamicNamespaceOpaque(node.argument.name, state);
+    if (node.argument?.type === 'Identifier')
+      markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
   },
   TSQualifiedName(node) {
     let left: TSTypeName = node;
