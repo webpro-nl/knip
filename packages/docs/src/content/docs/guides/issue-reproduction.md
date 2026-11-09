@@ -28,6 +28,9 @@ reproduce and demonstrate the issue. Having this as a basis has many benefits:
 - Serves as a "contract" to fix the actual issue
 - Files serve as a fixture to the project
 
+Share the files themselves, ready to review, copy or clone. A script that
+generates them only adds steps on both ends.
+
 Providing this with an issue description will help us help you and improve the
 chances the issue can be looked into efficiently and in a timely manner.
 

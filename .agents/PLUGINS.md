@@ -44,6 +44,8 @@ Read the writing-a-plugin docs first:
 - For a loaded shared config, such as an extended preset, set
   `isFilterTransitiveDependencies` so the preset's own dependencies don't become
   the project's (see prettier, metro, webpack).
+- Flag re-derived facts core owns, such as the set of declared dependencies from
+  `options.manifest` and `rootManifest`.
 
 ## Creating a new plugin
 
@@ -74,6 +76,9 @@ Read the writing-a-plugin docs first:
   files Knip can parse need an entry; JSON, YAML and extensionless rc files add
   nothing.
 - Leave out patterns Knip already covers globally, such as `index.*`.
+- Match the tool's scan depth. For instance, where Nuxt reads `plugins/*` and
+  `plugins/*/index`, `plugins/**/*` turns an unimported helper below them into
+  an entry and hides it from the unused files report (#2312).
 - Keep brace alternatives within one path segment. An alternative containing `/`
   (`{mise,.config/mise}/conf.d/*.toml`) disables directory pruning.
 
@@ -90,8 +95,9 @@ consider `resolveConfig` to read them from the loaded config, and keep
 false positive does not always justify the additional complexity.
 
 Follow imported modules only where they provably form the config value; don't
-follow widely and then make the extra inputs harmless. `toConfig` is for a
-tool's own config files, not for modules a config imports.
+follow widely. Read a value from the exported config and its documented nesting,
+not from every object with a matching key. `toConfig` is for a tool's own config
+files, not for modules a config imports.
 
 Core adds the static `entry` and `production` patterns only while no config file
 other than `package.json` has been found or handed over for a plugin with

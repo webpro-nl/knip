@@ -57,7 +57,7 @@ Please consider this before opening a pull request:
 - Read [development][7] instructions and guidelines.
 - If you think your PR is not ready for review yet, [set it as a draft][8].
 - No need to worry about commit messages, they will probably be squashed into a
-  single commit when merged.
+  single commit when merged. Please do write them in English.
 - After your first PR is merged, you are automatically added to the [list of
   contributors][9].
 

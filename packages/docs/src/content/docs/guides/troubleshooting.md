@@ -84,8 +84,8 @@ screenshot:
 It's like a reversed module graph. Instead of traversing imports it goes in the
 opposite direction and shows where exports are imported.
 
-The `--trace-dependency` option accepts strings for exact matches, but if it looks like
-a regex that works too:
+The `--trace-dependency` option accepts strings for exact matches, but if it
+looks like a regex that works too:
 
 <img src="/screenshots/trace-dependency.png" alt="trace dependency" class="mw500" />
 
