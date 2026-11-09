@@ -12,6 +12,16 @@ import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import type { WalkState } from './walk.ts';
 
+export function markDynamicNamespaceOpaque(name: string, s: WalkState) {
+  const _import = s.localImportMap.get(name);
+  if (!_import) return;
+  if (!_import.isNamespace) return;
+  if (!_import.isDynamicImport) return;
+  const internalImport = s.internal.get(_import.filePath);
+  if (!internalImport) return;
+  addValue(internalImport.import, OPAQUE, s.filePath);
+}
+
 export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
   if (
     expression.type === 'CallExpression' &&

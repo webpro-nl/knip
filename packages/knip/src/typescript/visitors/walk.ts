@@ -41,6 +41,7 @@ import {
   handleImportExpression,
   handleImportThen,
   handleVariableDeclarator,
+  markDynamicNamespaceOpaque,
 } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 import { isShadowedIn } from './shadow.ts';
@@ -550,6 +551,9 @@ const coreVisitorObject: VisitorObject = {
   VariableDeclarator(node) {
     handleVariableDeclarator(node, state);
     trackCustomElementRegistry(node, state);
+    if (node.id.type === 'Identifier' && node.init?.type === 'Identifier') {
+      markDynamicNamespaceOpaque(node.init.name, state);
+    }
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
@@ -617,6 +621,15 @@ const coreVisitorObject: VisitorObject = {
         if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
       }
     }
+  },
+  ReturnStatement(node) {
+    if (node.argument?.type === 'Identifier') markDynamicNamespaceOpaque(node.argument.name, state);
+  },
+  AssignmentExpression(node) {
+    if (node.right?.type === 'Identifier') markDynamicNamespaceOpaque(node.right.name, state);
+  },
+  SpreadElement(node) {
+    if (node.argument?.type === 'Identifier') markDynamicNamespaceOpaque(node.argument.name, state);
   },
   TSQualifiedName(node) {
     let left: TSTypeName = node;

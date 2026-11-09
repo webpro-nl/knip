@@ -3,6 +3,7 @@ import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { markDynamicNamespaceOpaque } from './imports.ts';
 import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
@@ -256,6 +257,7 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       const internalImport = s.internal.get(_import.filePath);
       if (internalImport) internalImport.refs.add(name);
     }
+    markDynamicNamespaceOpaque(name, s);
   };
   for (const arg of node.arguments) {
     if (arg.type === 'Identifier') markRefIfNs(arg.name);
