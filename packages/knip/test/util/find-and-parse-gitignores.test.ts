@@ -18,7 +18,7 @@ test('findAndParseGitignores', async () => {
       '.git/!(hooks)',
       '**/node_modules',
       '**/packages/*/dist',
-      '**/a/b/c',
+      'a/b/c',
       '**/.npmrc',
       '**/bin/knip',
       '**/bin/knip-bun',
@@ -89,6 +89,7 @@ test('findAndParseGitignores (with .git file)', async () => {
       '.git/!(hooks)',
       '**/node_modules',
       '**/worktree-exclude-ignored',
+      'data/*',
       '**/worktree-ignored',
       'subdir/**/subdir-ignored',
     ]),
@@ -120,8 +121,8 @@ test('findAndParseGitignores (negated directories)', async () => {
     ignores: new Set([
       '.git/!(hooks)',
       '**/node_modules',
-      '**/generated/*',
-      'generated/keep/**/cache/*',
+      'generated/*',
+      'generated/keep/cache/*',
       '**/.DS_Store',
       '**/.agents',
       '**/.cache',
@@ -131,6 +132,6 @@ test('findAndParseGitignores (negated directories)', async () => {
       '**/bin/knip',
       '**/bin/knip-bun',
     ]),
-    unignores: new Set(['**/generated/keep', 'generated/keep/**/cache/keep']),
+    unignores: new Set(['generated/keep', 'generated/keep/cache/keep']),
   });
 });

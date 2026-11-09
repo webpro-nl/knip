@@ -12,6 +12,7 @@ test('A dir/* gitignore ignores nested files despite an unrelated negation', asy
   const options = await createOptions({ cwd });
   const { issues } = await main(options);
 
-  // generated/other/deep.ts stays ignored; generated/keep/kept.ts is un-ignored and unused
-  assert.deepEqual(Object.keys(issues.files), ['generated/keep/kept.ts']);
+  // generated/other/deep.ts stays ignored; generated/keep/kept.ts is un-ignored and unused;
+  // generated/* is anchored to the root, so src/generated/types.ts is analyzed and unused
+  assert.deepEqual(Object.keys(issues.files).sort(), ['generated/keep/kept.ts', 'src/generated/types.ts']);
 });

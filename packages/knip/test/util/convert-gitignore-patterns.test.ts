@@ -46,13 +46,16 @@ test('expandIgnorePatterns', () => {
 });
 
 test('parseAndConvertGitignorePatterns', async () => {
-  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c'];
+  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c', 'data/*', '!data/keep.json', '*/**/gen/*.ts'];
   const globPatterns = parse(gitignorePatterns.join(EOL));
   assert.deepEqual(globPatterns, [
     { negated: false, pattern: '**/.git' },
     { negated: false, pattern: '**/node_modules' },
-    { negated: false, pattern: '**/a/b/c' },
     { negated: false, pattern: 'a/b/c' },
+    { negated: false, pattern: 'a/b/c' },
+    { negated: false, pattern: 'data/*' },
+    { negated: true, pattern: 'data/keep.json' },
+    { negated: false, pattern: '*/**/gen/*.ts' },
   ]);
 });
 

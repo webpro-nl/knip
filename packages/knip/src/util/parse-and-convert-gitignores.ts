@@ -17,18 +17,19 @@ export const expandIgnorePatterns = (patterns: Iterable<string>, shallow = false
   return result;
 };
 
-export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string) => {
+// A slash at the start or in the middle anchors a pattern to the directory of its .gitignore
+export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string, isAnchored = false) => {
   const negated = pattern[0] === '!';
   if (negated) pattern = pattern.slice(1);
   if (pattern.endsWith('/')) pattern = pattern.slice(0, -1);
-  if (pattern.startsWith('*/**/')) pattern = pattern.slice(5);
+  if (!isAnchored && pattern.startsWith('*/**/')) pattern = pattern.slice(5);
   if (pattern === '*' || pattern === '**') return { negated, pattern };
   if (pattern.startsWith('/')) pattern = pattern.slice(1);
-  else if (!pattern.startsWith('**/')) pattern = `**/${pattern}`;
+  else if (isAnchored ? !pattern.includes('/') : !pattern.startsWith('**/')) pattern = `**/${pattern}`;
   return { negated, pattern };
 };
 
-export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string) => {
+export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string, isAnchored = !ancestor) => {
   const matchFrom = ancestor ? new RegExp(`^(!?/?)(${ancestor})`) : undefined;
   return patterns
     .split(/\r?\n/)
@@ -43,5 +44,5 @@ export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: st
       }
       return [pattern];
     })
-    .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern));
+    .map(pattern => convertGitignoreToPicomatchIgnorePatterns(pattern, isAnchored));
 };
