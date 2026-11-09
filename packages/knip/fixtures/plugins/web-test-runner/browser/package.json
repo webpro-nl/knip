@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/web-test-runner-browser",
+  "private": true,
+  "scripts": {
+    "wtr": "web-test-runner"
+  }
+}

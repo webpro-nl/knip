@@ -196,6 +196,7 @@ export type PluginName =
   | 'vitepress'
   | 'vitest'
   | 'vue'
+  | 'web-test-runner'
   | 'webdriver-io'
   | 'webpack'
   | 'wireit'
@@ -403,6 +404,7 @@ export const pluginNames = [
   'vitepress',
   'vitest',
   'vue',
+  'web-test-runner',
   'webdriver-io',
   'webpack',
   'wireit',

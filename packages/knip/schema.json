@@ -1204,6 +1204,10 @@
           "title": "vue plugin configuration (https://knip.dev/reference/plugins/vue)",
           "$ref": "#/definitions/plugin"
         },
+        "web-test-runner": {
+          "title": "Web Test Runner plugin configuration (https://knip.dev/reference/plugins/web-test-runner)",
+          "$ref": "#/definitions/plugin"
+        },
         "webdriver-io": {
           "title": "webdriver-io plugin configuration (https://knip.dev/reference/plugins/webdriver-io)",
           "$ref": "#/definitions/plugin"

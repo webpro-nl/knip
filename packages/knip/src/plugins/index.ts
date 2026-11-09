@@ -195,6 +195,7 @@ import { default as vitePwaAssetsGenerator } from './vite-pwa-assets-generator/i
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
 import { default as vue } from './vue/index.ts';
+import { default as webTestRunner } from './web-test-runner/index.ts';
 import { default as webdriverIo } from './webdriver-io/index.ts';
 import { default as webpack } from './webpack/index.ts';
 import { default as wireit } from './wireit/index.ts';
@@ -402,6 +403,7 @@ export const Plugins = {
   vitepress,
   vitest,
   vue,
+  'web-test-runner': webTestRunner,
   'webdriver-io': webdriverIo,
   webpack,
   wireit,
