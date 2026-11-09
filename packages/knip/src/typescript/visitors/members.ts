@@ -1,5 +1,5 @@
 import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
-import { OPAQUE } from '../../constants.ts';
+import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import type { ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
@@ -16,6 +16,34 @@ function isNumericKey(value: string | undefined) {
 }
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
+  if (
+    node.object.type === 'CallExpression' &&
+    node.object.callee.type === 'Identifier' &&
+    node.object.callee.name === 'require' &&
+    node.object.arguments.length === 1 &&
+    isStringLiteral(node.object.arguments[0]) &&
+    !s.handledImportExpressions.has(node.object.start)
+  ) {
+    let memberName: string | undefined;
+    if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
+    else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+    if (memberName) {
+      const specifier = getStringValue(node.object.arguments[0])!;
+      const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
+      s.addImport(
+        specifier,
+        memberName,
+        undefined,
+        undefined,
+        node.object.arguments[0].start,
+        IMPORT_FLAGS.NONE,
+        undefined,
+        reqTags
+      );
+    }
+    return;
+  }
+
   if (
     node.object.type === 'MemberExpression' &&
     node.object.object.type === 'MemberExpression' &&

@@ -387,22 +387,13 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
 
   if (left.type !== 'MemberExpression') return;
 
-  if (!left.computed && left.object.type === 'Identifier' && left.object.name === 'exports') {
-    if (s.skipExports) return;
-    const name = left.property.name;
-    if (name) {
-      const fix: Fix = s.options.isFixExports ? [node.start, node.end, FIX_FLAGS.NONE] : undefined;
-      s.addExport(name, SYMBOL_TYPE.UNKNOWN, left.property.start, [], fix, false, EMPTY_TAGS);
-    }
-    return;
-  }
-
   if (
-    left.object.type === 'MemberExpression' &&
-    !left.object.computed &&
-    left.object.object.type === 'Identifier' &&
-    left.object.object.name === 'module' &&
-    left.object.property.name === 'exports'
+    (left.object.type === 'Identifier' && left.object.name === 'exports') ||
+    (left.object.type === 'MemberExpression' &&
+      !left.object.computed &&
+      left.object.object.type === 'Identifier' &&
+      left.object.object.name === 'module' &&
+      left.object.property.name === 'exports')
   ) {
     let exportName: string | undefined;
     if (!left.computed && left.property.type === 'Identifier') {
@@ -429,6 +420,7 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
         if (memberName) {
           const alias = exportName !== memberName ? exportName : undefined;
           s.addImport(specifier, memberName, alias, undefined, right.object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
+          s.handledImportExpressions.add(right.object.start);
           isReExport = true;
         }
       }
