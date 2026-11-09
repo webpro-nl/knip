@@ -13,12 +13,15 @@ test('Find dependencies with the Nuxt plugin without a config file', async () =>
 
   assert(issues.dependencies['package.json']['vue']);
   assert(issues.exports['utils/fn.ts']['unused']);
+  assert('plugins/helpers/unused.js' in issues.files);
+  assert('middleware/helpers/unused.js' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     dependencies: 1,
     exports: 1,
-    processed: 7,
-    total: 7,
+    files: 2,
+    processed: 13,
+    total: 13,
   });
 });

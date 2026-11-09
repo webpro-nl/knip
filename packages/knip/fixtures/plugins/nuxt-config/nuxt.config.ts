@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   dir: {
     plugins: 'my-plugins',
   },
+  plugins: ['my-plugins/custom/deep', { src: '~/my-plugins/custom/client.js', mode: 'client' }],
   components: ['~/components', '~/other-components'],
   imports: {
     dirs: ['custom-utils'],

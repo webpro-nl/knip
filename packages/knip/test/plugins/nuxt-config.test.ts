@@ -17,8 +17,8 @@ test('Find dependencies and literal module type imports with the nuxt plugin (co
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 10,
-    total: 10,
+    processed: 12,
+    total: 12,
   });
 });
 

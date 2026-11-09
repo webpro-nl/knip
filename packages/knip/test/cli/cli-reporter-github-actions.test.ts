@@ -131,9 +131,12 @@ Configuration hints (4)
 
 const nuxtCwd = resolve('fixtures/plugins/nuxt');
 
-test('knip --reporter github-actions (nuxt: unused export, unused dep)', () => {
+test('knip --reporter github-actions (nuxt: unused files, export and dep)', () => {
   const actual = exec('knip --reporter github-actions', { cwd: nuxtCwd }).stdout;
-  const expected = `Unused dependencies (1)
+  const expected = `Unused files (2)
+::error file=middleware/helpers/unused.js,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::middleware/helpers/unused.js
+::error file=plugins/helpers/unused.js,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::plugins/helpers/unused.js
+Unused dependencies (1)
 ::error file=package.json,line=12,endLine=12,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::vue in package.json
 Unused exports (1)
 ::error file=utils/fn.ts,line=3,endLine=3,col=14,endColumn=14,title=✂️ Knip / Unused exports::unused in utils/fn.ts`;

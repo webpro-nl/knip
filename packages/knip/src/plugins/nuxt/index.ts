@@ -5,6 +5,7 @@ import type { Input } from '../../util/input.ts';
 import {
   toAlias,
   toConfig,
+  toDeferResolve,
   toDeferResolveProductionEntry,
   toDependency,
   toEntry,
@@ -33,22 +34,25 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['nuxt.config.{js,cjs,mjs,ts,cts,mts}'];
 
-const entry = ['app.config.ts', '**/*.d.vue.ts'];
+// Nuxt scans these with `nuxt.options.extensions` (all JS/TS variants by default)
+const scriptExt = '{js,mjs,cjs,jsx,ts,mts,cts,tsx}';
+
+const entry = [`app.config.${scriptExt}`, '**/*.d.vue.ts'];
 
 const app = ['app.{vue,jsx,tsx}', 'error.{vue,jsx,tsx}', 'router.options.ts'];
 const layout = (dir = 'layouts') => join(dir, '**/*.{vue,jsx,tsx}');
-const middleware = (dir = 'middleware') => join(dir, '**/*.ts');
+const middleware = (dir = 'middleware') => [join(dir, `*.${scriptExt}`), join(dir, `*/index.${scriptExt}`)];
 const pages = (dir = 'pages') => join(dir, '**/*.{vue,jsx,tsx}');
-const plugins = (dir = 'plugins') => join(dir, '**/*.ts');
+const plugins = (dir = 'plugins') => [join(dir, `*.${scriptExt}`), join(dir, `*/index.${scriptExt}`)];
 const modules = 'modules/**/*.{ts,vue}';
 const server = ['api/**/*.ts', 'middleware/**/*.ts', 'plugins/**/*.ts', 'routes/**/*.ts', 'tasks/**/*.ts'];
 
 const production: string[] = [
   ...app,
   layout(),
-  middleware(),
+  ...middleware(),
   pages(),
-  plugins(),
+  ...plugins(),
   modules,
   ...server.map(id => join('server', id)),
 ];
@@ -101,9 +105,9 @@ const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, confi
   for (const id of entry) inputs.push(toEntry(join(srcDir, id)));
   for (const id of app) inputs.push(toProductionEntry(join(srcDir, id)));
   inputs.push(toProductionEntry(join(srcDir, layout(config.dir?.layouts))));
-  inputs.push(toProductionEntry(join(srcDir, middleware(config.dir?.middleware))));
+  for (const id of middleware(config.dir?.middleware)) inputs.push(toProductionEntry(join(srcDir, id)));
   inputs.push(toProductionEntry(join(srcDir, pages(config.dir?.pages))));
-  inputs.push(toProductionEntry(join(srcDir, plugins(config.dir?.plugins))));
+  for (const id of plugins(config.dir?.plugins)) inputs.push(toProductionEntry(join(srcDir, id)));
   inputs.push(toProductionEntry(join(srcDir, 'components/global/**/*.{vue,jsx,tsx}')));
   for (const id of server) inputs.push(toProductionEntry(join(dir, serverDir, id)));
   inputs.push(toProductionEntry(join(dir, modules)));
@@ -149,6 +153,13 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   for (const id of localConfig.modules ?? []) {
     if (Array.isArray(id) && typeof id[0] === 'string') addModule(id[0]);
     if (typeof id === 'string') addModule(id);
+  }
+
+  // Plugins listed in the config are loaded even outside the scanned top level of `plugins`
+  for (const id of localConfig.plugins ?? []) {
+    const src = typeof id === 'string' ? id : id?.src;
+    if (typeof src === 'string')
+      inputs.push({ ...toDeferResolve(resolveAlias(src, srcDir, cwd), { dir: cwd }), production: true });
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
