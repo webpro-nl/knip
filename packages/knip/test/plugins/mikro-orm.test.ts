@@ -43,3 +43,13 @@ test('Resolve MikroORM configuration factory members in arrays', async () => {
     total: 3,
   });
 });
+
+test('Ignore package.json MikroORM options without configPaths', async () => {
+  const options = await createOptions({
+    cwd: resolve('fixtures/plugins/mikro-orm-package-section'),
+    isProduction: true,
+  });
+  const { issues } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['migrations/Stale.ts']);
+});

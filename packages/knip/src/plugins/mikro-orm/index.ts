@@ -68,7 +68,9 @@ const toFolderEntries = (paths: string[], glob: string, baseDir: string): Input[
   paths.map(path => toProductionEntry(toAbsolute(join(path, glob), baseDir)));
 
 const resolveConfig: ResolveConfig<MikroOrmConfig> = async (config, options) => {
-  if (isMikroOrmPackageJson(config)) {
+  if (options.configFileName === 'package.json') {
+    if (!isMikroOrmPackageJson(config)) return [];
+
     const configPaths = toStrings(config.configPaths);
     return configPaths.map(path => toConfig('mikro-orm', path, { dir: options.cwd }));
   }
