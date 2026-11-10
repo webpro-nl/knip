@@ -48,6 +48,12 @@ if it isn't listed at all. Such a reference is development-only: in [production
 mode][12] the package is still marked as referenced, but an unlisted one is no
 longer reported.
 
+A specifier that is a file path (starting with `./` or `../`, or absolute) is
+resolved as a file instead: Knip adds it as an entry file, or reports it under
+"unresolved imports" if it can't be resolved. So a plugin can pass a value that
+is either a package name or a path, such as an item in Prettier's `plugins`
+option.
+
 ## toProductionDependency
 
 The production `dependency` indicates the entry is a production dependency,
@@ -70,6 +76,11 @@ If this does not lead to a resolution, the specifier will be reported under
 The `deferResolveEntry` input type is similar to `deferResolve`, but it's used
 for entry files only (not dependencies) and unresolved inputs are ignored. It's
 different from `toEntry` as glob patterns are not supported.
+
+A specifier inside `node_modules`, such as `node_modules/pkg/bin.js`, is the
+exception: the tool loads that package rather than a project file, so Knip marks
+the package as referenced, and reports it as an unlisted dependency if it isn't
+listed.
 
 ## toConfig
 
