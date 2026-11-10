@@ -51,8 +51,9 @@ const getInputsDeprecated = (
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, ...settings, ...rules]).map(id => toDeferResolve(id));
-  return [...extendConfigs, ...deferred, ...parsers, ...babelDependencies, ...overrides];
+  const dependencies = compact([...extendsSpecifiers, ...plugins, ...rules]).map(id => toDependency(id));
+  const resolvers = compact(settings).map(id => toDeferResolve(id));
+  return [...extendConfigs, ...dependencies, ...resolvers, ...parsers, ...babelDependencies, ...overrides];
 };
 
 const isParserObject = (value: Record<string, unknown>) =>

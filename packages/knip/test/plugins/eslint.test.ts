@@ -27,22 +27,22 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert(issues.unlisted['.eslintrc.cjs']['eslint-config-airbnb']);
   assert(issues.unlisted['.eslintrc.js']['eslint-config-airbnb']);
   assert(issues.unlisted['.eslintrc.json']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-plugin-import']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-cypress']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-comments']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-plugin']);
+  assert(issues.unlisted['base.eslint.json']['eslint-plugin-import']);
 
-  assert(issues.unresolved['.eslintrc.cjs']['eslint-config-next']);
-  assert(issues.unresolved['.eslintrc.cjs']['eslint-plugin-import']);
   assert(issues.unresolved['.eslintrc.cjs']['eslint-import-resolver-webpack']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-config-next']);
   assert(issues.unresolved['.eslintrc.js']['eslint-import-resolver-exports']);
   assert(issues.unresolved['.eslintrc.js']['eslint-import-resolver-typescript']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-cypress']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-comments']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-plugin']);
-  assert(issues.unresolved['base.eslint.json']['eslint-plugin-import']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 16,
-    unresolved: 10,
+    unlisted: 23,
+    unresolved: 3,
     processed: 4,
     total: 4,
   });

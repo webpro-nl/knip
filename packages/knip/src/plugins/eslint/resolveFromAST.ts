@@ -1,6 +1,6 @@
 import type { Expression, ObjectExpression, Program, SpreadElement } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
-import { type Input, toDeferResolve } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
 import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
@@ -69,5 +69,5 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
 
 export const getInputsFromFlatConfigAST = (program: Program): Input[] => [
   ...getInputsFromSettingsAST(program),
-  toDeferResolve('eslint-import-resolver-typescript', { optional: true }),
+  toDependency('eslint-import-resolver-typescript', { optional: true }),
 ];
