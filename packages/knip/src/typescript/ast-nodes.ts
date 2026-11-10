@@ -523,7 +523,10 @@ const markEnumMemberRefs = (enumMembers: TSEnumMember[], members: ExportMember[]
       if (member) member.hasRefsInFile = true;
       return;
     }
-    if (type === 'MemberExpression' && !node.computed) return visit(node.object);
+    if (type === 'MemberExpression' && !node.computed) {
+      visit(node.object);
+      return;
+    }
     const keys = visitorKeys[type];
     if (!keys) return;
     for (const key of keys) {
