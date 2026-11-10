@@ -13,7 +13,6 @@ test('Find dependencies with the TypeScript plugin', async () => {
 
   assert(issues.unlisted['tsconfig.json']['typescript-eslint-language-service']);
   assert(issues.unlisted['tsconfig.json']['ts-graphql-plugin']);
-  assert(issues.unlisted['tsconfig.json']['tslib']);
   assert(issues.unlisted['tsconfig.content-mapper.json']['@mdx-js/content-mapper']);
   assert(issues.unlisted['tsconfig.content-mapper.json']['remark-math']);
   assert(!issues.unlisted['tsconfig.content-mapper.json']['remark-mdx-frontmatter']);
@@ -25,7 +24,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
-    unlisted: 7,
+    unlisted: 6,
     unresolved: 2,
     processed: 0,
     total: 0,

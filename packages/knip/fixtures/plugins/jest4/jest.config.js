@@ -4,7 +4,7 @@ module.exports = {
       'babel-jest',
       {
         presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-        plugins: [['babel-plugin-react-compiler', { target: '19' }]],
+        plugins: [['babel-plugin-react-compiler', { target: '19' }], '@babel/plugin-transform-runtime'],
       },
     ],
   },

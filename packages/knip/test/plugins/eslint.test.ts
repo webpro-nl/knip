@@ -50,10 +50,13 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
 
 test('Find dependencies with the ESLint plugin (deprecated/1, production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json']['@babel/runtime']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    dependencies: 1,
     processed: 1,
     total: 1,
   });

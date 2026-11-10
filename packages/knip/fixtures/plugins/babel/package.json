@@ -1,13 +1,16 @@
 {
   "name": "@plugins/babel",
   "scripts": {},
+  "dependencies": {
+    "@babel/runtime": "*",
+    "decorator-transforms": "*"
+  },
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "*",
     "@babel/preset-env": "*",
     "@babel/preset-react": "*",
     "@babel/preset-typescript": "*",
     "babel-plugin-macros": "*",
-    "@babel/runtime": "*",
     "babel-plugin-prismjs": "*",
     "underscore": "*"
   },

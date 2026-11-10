@@ -17,3 +17,14 @@ test('Find dependencies with the knex plugin', async () => {
     total: 4,
   });
 });
+
+test('Find dependencies with the knex plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});

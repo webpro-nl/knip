@@ -45,7 +45,7 @@ const getInputsDeprecated = (
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parsers = getParsers(config);
   const babelDependencies = config.parserOptions?.babelOptions
-    ? getDependenciesFromConfig(config.parserOptions.babelOptions)
+    ? getDependenciesFromConfig(config.parserOptions.babelOptions, false)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8

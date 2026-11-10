@@ -24,3 +24,17 @@ test('Find dependencies with the Jest plugin (inline babel-jest presets)', async
     total: 1,
   });
 });
+
+test('Find dependencies with the Jest plugin (inline babel-jest presets, production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json']['@babel/runtime']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    processed: 0,
+    total: 0,
+  });
+});

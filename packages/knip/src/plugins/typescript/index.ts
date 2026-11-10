@@ -61,7 +61,8 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
     ...extend,
     ...references,
     ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd, alsoReferenceOwner: true })),
-    ...[...plugins, ...importHelpers].map(id => toDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
+    ...plugins.map(id => toDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
+    ...importHelpers.map(id => toProductionDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
     ...jsx,
   ]);
 };

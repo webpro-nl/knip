@@ -20,3 +20,17 @@ test('Find dependencies with the nuxt plugin (extends layer sources)', async () 
     total: 3,
   });
 });
+
+test('Find dependencies with the nuxt plugin (extends layer sources, production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json'].nuxt);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    processed: 0,
+    total: 0,
+  });
+});

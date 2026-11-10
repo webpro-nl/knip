@@ -100,7 +100,7 @@ const resolveDependencies = async (
     } else {
       transform.push(transformer[0]);
       if (isBabelJest(transformer)) {
-        transform.push(...getDependenciesFromConfig(transformer[1]));
+        transform.push(...getDependenciesFromConfig(transformer[1], false));
         const { configFile } = transformer[1];
         if (typeof configFile === 'string')
           transform.push(

@@ -185,7 +185,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
     if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
-    else inputs.push(toDependency(source));
+    else inputs.push(isInternal(target) ? toDependency(source) : toProductionDependency(source));
   }
 
   for (const layerConfig of findLayerConfigs(cwd)) {

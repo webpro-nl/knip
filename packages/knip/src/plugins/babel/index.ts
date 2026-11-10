@@ -1,6 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { getPackageNameFromSpecifier } from '../../util/modules.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { api, resolveName } from './helpers.ts';
 import type { BabelConfig, BabelConfigObj } from './types.ts';
@@ -26,16 +27,29 @@ const config = [
 const getName = (value: string | [string, unknown]) =>
   [Array.isArray(value) ? value[0] : value].filter(name => typeof name === 'string');
 
-export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
+const DECORATOR_TRANSFORMS = 'decorator-transforms';
+
+const isRuntimeImportPlugin = (value: unknown) => {
+  if (!Array.isArray(value) || typeof value[0] !== 'string') return false;
+  if (getPackageNameFromSpecifier(resolveName(value[0], 'plugin')) !== DECORATOR_TRANSFORMS) return false;
+  const runtime = value[1]?.runtime;
+  return typeof runtime?.import === 'string';
+};
+
+export const getDependenciesFromConfig = (config: BabelConfigObj, isProduction = true): Input[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
-  const nested = config.env ? Object.values(config.env).flatMap(getDependenciesFromConfig) : [];
-  const overrides = config.overrides ? [config.overrides].flat().flatMap(getDependenciesFromConfig) : [];
+  const toInputs = (config: BabelConfigObj) => getDependenciesFromConfig(config, isProduction);
+  const nested = config.env ? Object.values(config.env).flatMap(toInputs) : [];
+  const overrides = config.overrides ? [config.overrides].flat().flatMap(toInputs) : [];
   return compact([
     ...presets.map(id => toDeferResolve(id)),
     ...plugins.map(id => toDeferResolve(id)),
     ...(plugins.includes('@babel/plugin-transform-runtime')
-      ? [toDependency('@babel/runtime', { optional: true })]
+      ? [toDependency('@babel/runtime', { optional: true, production: isProduction })]
+      : []),
+    ...(config.plugins?.some(isRuntimeImportPlugin)
+      ? [toDependency(DECORATOR_TRANSFORMS, { production: isProduction })]
       : []),
     ...nested,
     ...overrides,

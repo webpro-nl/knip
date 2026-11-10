@@ -8,6 +8,9 @@
     "build-react": "tsc -p tsconfig.jsx-import-source-react.json",
     "build-jsx": "tsc -p tsconfig.jsx-preserve.json"
   },
+  "dependencies": {
+    "tslib": "*"
+  },
   "devDependencies": {
     "ember-content-mapper": "*",
     "remark-gfm": "*",
