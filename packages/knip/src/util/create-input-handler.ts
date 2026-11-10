@@ -1,153 +1,74 @@
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
-import { IGNORED_GLOBAL_BINARIES, IGNORED_RUNTIME_DEPENDENCIES } from '../constants.ts';
+import { IGNORED_GLOBAL_BINARIES } from '../constants.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import type { Issue } from '../types/issues.ts';
 import type { ExternalRef } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
-import {
-  fromBinary,
-  type Input,
-  isBinary,
-  isConfig,
-  isDeferResolve,
-  isDeferResolveEntry,
-  isDependency,
-  toDebugString,
-} from './input.ts';
+import { fromBinary, type Input, isConfig, isDeferResolve, isDeferResolveEntry, toDebugString } from './input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromSpecifier } from './modules.ts';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
 import { _resolveModuleSync, _resolveSync, resolvePackageManifestPath } from './resolve.ts';
 
 export type ExternalRefsFromInputs = Map<string, Set<ExternalRef>>;
 
+const CHAR_HASH = 35;
+const CHAR_AT = 64;
+const CHAR_TILDE = 126;
+
 const isJoinable = (specifier: string) => {
   const char = specifier.charCodeAt(0);
-  return char !== 35 && char !== 126 && char !== 64 && !isAbsolute(specifier); // not # ~ @, not absolute
+  return char !== CHAR_HASH && char !== CHAR_TILDE && char !== CHAR_AT && !isAbsolute(specifier);
 };
 
-const getWorkspaceFor = (input: Input, chief: ConfigurationChief, workspace: Workspace) =>
-  (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
-  (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) ||
-  workspace;
+export const createInputHandler = (
+  deputy: DependencyDeputy,
+  chief: ConfigurationChief,
+  isGitIgnored: (filePath: string) => boolean,
+  addIssue: (issue: Issue) => void,
+  externalRefs: ExternalRefsFromInputs | undefined,
+  options: MainOptions
+) => {
+  const getWorkspaceFor = (input: Input, containingFilePath: string, workspace: Workspace) =>
+    (input.dir && chief.findWorkspaceByFilePath(`${input.dir}/`)) ||
+    chief.findWorkspaceByFilePath(containingFilePath) ||
+    workspace;
 
-const addExternalRef = (map: ExternalRefsFromInputs, containingFilePath: string, ref: ExternalRef) => {
-  if (!map.has(containingFilePath)) map.set(containingFilePath, new Set());
-  // oxlint-disable-next-line @typescript-eslint/no-non-null-assertion
-  map.get(containingFilePath)!.add(ref);
-};
+  const addExternalRef = (containingFilePath: string, specifier: string, identifier?: string) => {
+    if (!externalRefs) return;
+    const ref: ExternalRef = { specifier, identifier };
+    const refs = externalRefs.get(containingFilePath);
+    if (refs) refs.add(ref);
+    else externalRefs.set(containingFilePath, new Set([ref]));
+  };
 
-export const createInputHandler =
-  (
-    deputy: DependencyDeputy,
-    chief: ConfigurationChief,
-    isGitIgnored: (filePath: string) => boolean,
-    addIssue: (issue: Issue) => void,
-    externalRefs: ExternalRefsFromInputs | undefined,
-    options: MainOptions
-  ) =>
-  (input: Input, workspace: Workspace) => {
-    const { specifier, containingFilePath } = input;
+  const isReportable = (input: Input) => !input.optional && (!options.isProduction || input.production);
 
-    if (!containingFilePath) return;
+  const report = (
+    type: 'binaries' | 'unlisted' | 'unresolved',
+    filePath: string,
+    workspace: Workspace,
+    symbol: string
+  ) => addIssue({ type, filePath, workspace: workspace.name, symbol, specifier: symbol, fixes: [] });
 
-    if (isBinary(input)) {
-      const binaryName = fromBinary(input);
-      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
+  const credit = (input: Input, containingFilePath: string, workspace: Workspace, packageName: string) => {
+    const reference = { specifier: input.specifier, isDevOnly: isConfig(input), isTypeOnly: input.isTypeOnly };
+    const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName, reference);
+    if (!input.alsoReferenceOwner) return isHandled;
+    const owner = chief.findWorkspaceByFilePath(containingFilePath);
+    if (!owner || owner === workspace) return isHandled;
+    const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owner, packageName, reference);
+    return isHandled || isOwnerHandled;
+  };
 
-      const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
-      if (dependencies) {
-        if (externalRefs) {
-          for (const dependency of dependencies) {
-            addExternalRef(externalRefs, containingFilePath, { specifier: dependency, identifier: binaryName });
-          }
-        }
-        return;
-      }
+  const resolveWorkspacePath = (specifier: string, containingFilePath: string) => {
+    const filePath = _resolveSync(specifier, dirname(containingFilePath));
+    if (filePath && isInternal(filePath) && !isGitIgnored(filePath)) return filePath;
+  };
 
-      if (input.optional || (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName)))
-        return;
-
-      addIssue({
-        type: 'binaries',
-        filePath: containingFilePath,
-        workspace: inputWorkspace.name,
-        symbol: binaryName,
-        specifier,
-        fixes: [],
-      });
-
-      return;
-    }
-
-    if (IGNORED_RUNTIME_DEPENDENCIES.has(specifier)) return;
-
-    const packageName = getPackageNameFromSpecifier(specifier);
+  const handleFile = (input: Input, containingFilePath: string, workspace: Workspace) => {
+    const { specifier } = input;
     const basePath = input.dir ? join(input.dir, 'file.ts') : containingFilePath;
-
-    if (
-      packageName &&
-      (isDependency(input) ||
-        isDeferResolve(input) ||
-        (isDeferResolveEntry(input) && isInNodeModules(specifier)) ||
-        isConfig(input))
-    ) {
-      // Attempt fast path first for external dependencies (including internal workspaces)
-      const isWorkspace = chief.findWorkspaceByPackageName(packageName, containingFilePath) !== undefined;
-      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
-
-      if (inputWorkspace) {
-        let isHandled = deputy.maybeAddReferencedExternalDependency(inputWorkspace, packageName, {
-          specifier,
-          isDevOnly: isConfig(input),
-          isTypeOnly: input.isTypeOnly,
-        });
-
-        if (input.alsoReferenceOwner && input.containingFilePath) {
-          const owningWorkspace = chief.findWorkspaceByFilePath(input.containingFilePath);
-          if (owningWorkspace && owningWorkspace !== inputWorkspace) {
-            const isOwnerHandled = deputy.maybeAddReferencedExternalDependency(owningWorkspace, packageName, {
-              specifier,
-              isDevOnly: isConfig(input),
-              isTypeOnly: input.isTypeOnly,
-            });
-            isHandled = isHandled || isOwnerHandled;
-          }
-        }
-
-        if (externalRefs && !isWorkspace) {
-          addExternalRef(externalRefs, containingFilePath, { specifier: packageName, identifier: undefined });
-        }
-
-        if (
-          isWorkspace ||
-          isDependency(input) ||
-          (!isHandled && resolvePackageManifestPath(packageName, dirname(basePath)))
-        ) {
-          if (!isHandled) {
-            if (!input.optional && ((options.isProduction && input.production) || !options.isProduction)) {
-              addIssue({
-                type: 'unlisted',
-                filePath: containingFilePath,
-                workspace: inputWorkspace.name,
-                symbol: packageName,
-                specifier: packageName,
-                fixes: [],
-              });
-            }
-            return;
-          }
-
-          // Return resolved path for refs to internal workspaces
-          const internalPath = _resolveSync(specifier, dirname(containingFilePath));
-          if (internalPath && isInternal(internalPath) && !isGitIgnored(internalPath)) return internalPath;
-        }
-
-        if (isHandled) return;
-      }
-    }
-
-    // oxc-resolver does not resolve "file" or "file.ts" without "./" so we best-guess-absolutify
     const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
     const resolvedFilePath =
       _resolveModuleSync(filePath, basePath) ??
@@ -157,41 +78,89 @@ export const createInputHandler =
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
     }
 
-    if (input.optional || (isDeferResolve(input) && deputy.isProduction && !input.production)) return;
+    if (input.optional || (isDeferResolve(input) && options.isProduction && !input.production)) return;
 
     if (resolvedFilePath || !isInternal(filePath)) {
-      const name = resolvedFilePath ? getPackageNameFromFilePath(resolvedFilePath) : packageName;
-      const inputWorkspace = getWorkspaceFor(input, chief, workspace);
-      if (
-        name &&
-        deputy.maybeAddReferencedExternalDependency(inputWorkspace, name, {
-          specifier,
-          isDevOnly: isConfig(input),
-          isTypeOnly: input.isTypeOnly,
-        })
-      ) {
-        return;
-      }
-      addIssue({
-        type: 'unlisted',
-        filePath: containingFilePath,
-        workspace: workspace.name,
-        symbol: name ?? specifier,
-        specifier: name ?? specifier,
-        fixes: [],
-      });
-    } else if (!isGitIgnored(filePath)) {
-      // Let's start out conservatively
-      if (!isDeferResolveEntry(input) && !isConfig(input)) {
-        addIssue({
-          type: 'unresolved',
-          filePath: containingFilePath,
-          workspace: workspace.name,
-          symbol: specifier,
-          fixes: [],
-        });
-      } else {
-        debugLog(workspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
-      }
+      const packageName = resolvedFilePath
+        ? getPackageNameFromFilePath(resolvedFilePath)
+        : getPackageNameFromSpecifier(specifier);
+      const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
+      if (packageName && credit(input, containingFilePath, inputWorkspace, packageName)) return;
+      report('unlisted', containingFilePath, workspace, packageName ?? specifier);
+      return;
+    }
+
+    if (isGitIgnored(filePath)) return;
+    if (isDeferResolveEntry(input) || isConfig(input)) {
+      debugLog(workspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
+    } else {
+      report('unresolved', containingFilePath, workspace, specifier);
     }
   };
+
+  const handleBinary = (input: Input, containingFilePath: string, workspace: Workspace) => {
+    const binaryName = fromBinary(input);
+    const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
+    const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
+    if (dependencies) {
+      for (const dependency of dependencies) {
+        addExternalRef(containingFilePath, dependency, binaryName);
+      }
+      return;
+    }
+    if (input.optional || (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName))) {
+      return;
+    }
+    report('binaries', containingFilePath, inputWorkspace, binaryName);
+  };
+
+  const handleDependency = (input: Input, containingFilePath: string, workspace: Workspace) => {
+    const packageName = getPackageNameFromSpecifier(input.specifier);
+    if (!packageName) return handleFile(input, containingFilePath, workspace);
+    const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
+    if (externalRefs && !chief.findWorkspaceByPackageName(packageName, containingFilePath)) {
+      addExternalRef(containingFilePath, packageName);
+    }
+    if (credit(input, containingFilePath, inputWorkspace, packageName)) {
+      return resolveWorkspacePath(input.specifier, containingFilePath);
+    }
+    if (isReportable(input)) report('unlisted', containingFilePath, inputWorkspace, packageName);
+  };
+
+  const handlePackageOrFile = (input: Input, containingFilePath: string, workspace: Workspace) => {
+    const packageName = getPackageNameFromSpecifier(input.specifier);
+    if (!packageName) return handleFile(input, containingFilePath, workspace);
+    const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
+    const isWorkspace = chief.findWorkspaceByPackageName(packageName, containingFilePath) !== undefined;
+    if (!isWorkspace) addExternalRef(containingFilePath, packageName);
+    if (credit(input, containingFilePath, inputWorkspace, packageName)) {
+      return isWorkspace ? resolveWorkspacePath(input.specifier, containingFilePath) : undefined;
+    }
+    if (isWorkspace || resolvePackageManifestPath(packageName, input.dir ?? dirname(containingFilePath))) {
+      if (isReportable(input)) report('unlisted', containingFilePath, inputWorkspace, packageName);
+      return;
+    }
+    return handleFile(input, containingFilePath, workspace);
+  };
+
+  return (input: Input, workspace: Workspace) => {
+    const { specifier, containingFilePath } = input;
+    if (!containingFilePath) return;
+    switch (input.type) {
+      case 'binary':
+        handleBinary(input, containingFilePath, workspace);
+        return;
+      case 'dependency':
+        return handleDependency(input, containingFilePath, workspace);
+      case 'deferResolve':
+      case 'config':
+        return handlePackageOrFile(input, containingFilePath, workspace);
+      case 'deferResolveEntry':
+        return isInNodeModules(specifier)
+          ? handlePackageOrFile(input, containingFilePath, workspace)
+          : handleFile(input, containingFilePath, workspace);
+      case 'entry':
+        return handleFile(input, containingFilePath, workspace);
+    }
+  };
+};

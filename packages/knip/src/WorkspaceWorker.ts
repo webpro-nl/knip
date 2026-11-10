@@ -33,7 +33,6 @@ import {
   type Input,
   isCatalog,
   isConfig,
-  toConfig,
   toDebugString,
   toEntry,
   toProductionEntry,
@@ -531,7 +530,6 @@ export class WorkspaceWorker {
             inputs.push(toEntry(configFilePath));
             cache.configFile = toEntry(configFilePath);
           }
-          storeConfigFilePath(pluginName, toConfig(pluginName, configFilePath));
 
           if (hasLoadConfigError) {
             this.cache.removeEntry(configFilePath);
