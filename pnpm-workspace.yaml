@@ -12,6 +12,8 @@ trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - undici-types@6.21.0
+overrides:
+  '@napi-rs/wasm-runtime@1.2.4>@emnapi/runtime': 1.11.3
 packageExtensions:
   '@astrojs/mdx@7.0.3':
     dependencies:
