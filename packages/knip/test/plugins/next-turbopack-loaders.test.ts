@@ -50,12 +50,15 @@ for (const isProduction of [false, true]) {
     assert.equal(hasConfigLoadErrors, false);
     assert.deepEqual(
       Object.keys(issues.dependencies['apps/combined/package.json']).sort(),
-      isProduction ? ['@tailwindcss/turbopack', '@workspace/next-config'] : ['@tailwindcss/turbopack']
+      isProduction ? ['@tailwindcss/turbopack', '@workspace/next-config', 'admin-loader'] : ['@tailwindcss/turbopack']
     );
     assert.deepEqual(Object.keys(issues.dependencies['packages/next-config/package.json']), ['@shared/md-loader']);
     if (!isProduction) {
       assert.deepEqual(Object.keys(issues.devDependencies['apps/web/package.json']), ['unused-loader']);
       assert.deepEqual(Object.keys(issues.unlisted['apps/web/next.config.ts']), ['@shared/md-loader']);
+    } else {
+      assert.deepEqual(Object.keys(issues.dependencies['apps/admin/package.json']), ['admin-loader']);
+      assert.deepEqual(Object.keys(issues.dependencies['apps/web/package.json']), ['@tailwindcss/turbopack']);
     }
     assert.deepEqual(Object.keys(issues.files).sort(), [
       'apps/admin/loaders/raw.cjs',
@@ -64,7 +67,7 @@ for (const isProduction of [false, true]) {
     assert.deepEqual(Object.keys(issues.exports['packages/next-config/base.ts']), ['unusedBaseOption']);
     assert.deepEqual(counters, {
       ...baseCounters,
-      dependencies: isProduction ? 3 : 2,
+      dependencies: isProduction ? 6 : 2,
       devDependencies: isProduction ? 0 : 1,
       exports: 1,
       files: 2,

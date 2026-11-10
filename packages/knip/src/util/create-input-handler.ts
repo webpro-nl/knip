@@ -52,7 +52,12 @@ export const createInputHandler = (
   ) => addIssue({ type, filePath, workspace: workspace.name, symbol, specifier: symbol, fixes: [] });
 
   const credit = (input: Input, containingFilePath: string, workspace: Workspace, packageName: string) => {
-    const reference = { specifier: input.specifier, isDevOnly: isConfig(input), isTypeOnly: input.isTypeOnly };
+    const reference = {
+      specifier: input.specifier,
+      isDevOnly: isConfig(input),
+      isTypeOnly: input.isTypeOnly,
+      isDevelopment: !input.production,
+    };
     const isHandled = deputy.maybeAddReferencedExternalDependency(workspace, packageName, reference);
     if (!input.alsoReferenceOwner) return isHandled;
     const owner = chief.findWorkspaceByFilePath(containingFilePath);
@@ -106,14 +111,17 @@ export const createInputHandler = (
   const handleBinary = (input: Input, containingFilePath: string, workspace: Workspace) => {
     const binaryName = fromBinary(input);
     const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
-    const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName);
+    const dependencies = deputy.maybeAddReferencedBinary(inputWorkspace, binaryName, !input.production);
     if (dependencies) {
       for (const dependency of dependencies) {
         addExternalRef(containingFilePath, dependency, binaryName);
       }
       return;
     }
-    if (input.optional || (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName))) {
+    if (
+      !isReportable(input) ||
+      (inputWorkspace.config.ignoreGlobalBinaries && IGNORED_GLOBAL_BINARIES.has(binaryName))
+    ) {
       return;
     }
     report('binaries', containingFilePath, inputWorkspace, binaryName);

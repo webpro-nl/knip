@@ -50,6 +50,7 @@ interface DependencyReferenceOptions {
   isResolved?: boolean;
   isPublishedType?: boolean;
   isCaught?: boolean;
+  isDevelopment?: boolean;
 }
 
 /**
@@ -205,6 +206,10 @@ export class DependencyDeputy {
     this.referencedDependencies.get(workspaceName)?.add(packageName);
   }
 
+  private addReference(workspaceName: string, packageName: string, isDevelopment?: boolean) {
+    if (!this.isProduction || !isDevelopment) this.addReferencedDependency(workspaceName, packageName);
+  }
+
   setHostDependencies(workspaceName: string, hostDependencies: HostDependencies) {
     this.hostDependencies.set(workspaceName, hostDependencies);
   }
@@ -224,7 +229,15 @@ export class DependencyDeputy {
   public maybeAddReferencedExternalDependency(
     workspace: Workspace,
     packageName: string,
-    { specifier, isDevOnly, isTypeOnly, isResolved, isPublishedType, isCaught }: DependencyReferenceOptions
+    {
+      specifier,
+      isDevOnly,
+      isTypeOnly,
+      isResolved,
+      isPublishedType,
+      isCaught,
+      isDevelopment,
+    }: DependencyReferenceOptions
   ): boolean {
     if (isBuiltin(specifier) || specifier.startsWith(PROTOCOL_CLOUDFLARE)) return true;
     if (IGNORED_RUNTIME_DEPENDENCIES.has(packageName)) return true;
@@ -246,10 +259,10 @@ export class DependencyDeputy {
       typesPackageName && workspaceNames.find(name => this.isInDependencies(name, typesPackageName, isDevOrTypeOnly));
 
     if (closestWorkspaceNameForTypes && !this.hasTypesIncluded.get(closestWorkspaceNameForTypes)?.has(packageName))
-      this.addReferencedDependency(closestWorkspaceNameForTypes, typesPackageName);
+      this.addReference(closestWorkspaceNameForTypes, typesPackageName, isDevelopment);
 
     if (closestWorkspaceName) {
-      this.addReferencedDependency(closestWorkspaceName, packageName);
+      this.addReference(closestWorkspaceName, packageName, isDevelopment);
       return true;
     }
     if (closestWorkspaceNameForTypes && isTypeOnly) return true;
@@ -257,7 +270,7 @@ export class DependencyDeputy {
     if (this._manifests.get(workspace.name)?.engines[packageName]) return true;
 
     if (!this.isStrict && this.workspacePkgNames.has(packageName) && this._manifests.get(workspace.name)?.isPrivate) {
-      this.addReferencedDependency(workspace.name, packageName);
+      this.addReference(workspace.name, packageName, isDevelopment);
       return true;
     }
 
@@ -267,18 +280,22 @@ export class DependencyDeputy {
         if (hosts.length === 0) continue;
         const m = this._manifests.get(name);
         if (m && hosts.some(h => m.allDependencies.has(h.name))) {
-          this.addReferencedDependency(name, packageName);
+          this.addReference(name, packageName, isDevelopment);
           return true;
         }
       }
     }
 
-    this.addReferencedDependency(workspace.name, packageName);
+    this.addReference(workspace.name, packageName, isDevelopment);
 
     return false;
   }
 
-  public maybeAddReferencedBinary(workspace: Workspace, binaryName: string): Set<string> | undefined {
+  public maybeAddReferencedBinary(
+    workspace: Workspace,
+    binaryName: string,
+    isDevelopment?: boolean
+  ): Set<string> | undefined {
     if (!this.isReportDependencies) return new Set();
 
     const workspaceNames = this.isStrict ? [workspace.name] : [workspace.name, ...workspace.ancestors.toReversed()];
@@ -288,7 +305,7 @@ export class DependencyDeputy {
       if (binaries?.has(binaryName)) {
         const dependencies = binaries.get(binaryName);
         if (dependencies?.size) {
-          for (const dependency of dependencies) this.addReferencedDependency(name, dependency);
+          for (const dependency of dependencies) this.addReference(name, dependency, isDevelopment);
           return dependencies;
         }
       }
@@ -302,7 +319,7 @@ export class DependencyDeputy {
         const defaultBinaryName = dependency.replace(/^@[^/]+\//, '');
         if (defaultBinaryName === binaryName) {
           optionalDependencies.add(dependency);
-          this.addReferencedDependency(name, dependency);
+          this.addReference(name, dependency, isDevelopment);
         }
       }
     }

@@ -54,11 +54,14 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   assert('installed-pkg.ts' in issues.files);
   assert('test/reporters/summary-reporter.ts' in issues.files);
   assert('test/prisma-environment.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 5);
+  assert(issues.dependencies['package.json']['linked-package']);
+  assert(issues.dependencies['package.json']['shared-state']);
+  assert(issues.dependencies['package.json']['upstream-esm']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 5,
+    dependencies: 3,
     processed: 5,
     total: 5,
   });

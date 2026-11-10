@@ -24,9 +24,10 @@ test('Find dependencies with the GitHub Actions plugin (w/ workspaces, productio
   const { issues, counters } = await main(options);
 
   assert(issues.dependencies['package.json']['hello']);
+  assert(issues.dependencies['packages/app/package.json']['@opentelemetry/auto-instrumentations-node']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 1,
+    dependencies: 2,
   });
 });
