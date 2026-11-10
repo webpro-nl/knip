@@ -19,7 +19,7 @@ import { ConfigurationFiles } from '../session/configuration.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
-import { escapePath } from 'tinyglobby';
+import { escapePath, isDynamicPattern } from 'tinyglobby';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
 import {
@@ -611,6 +611,12 @@ export const build = timerify(async function build({
           input.containingFilePath ??= filePath;
           input.dir ??= dir;
           if (options.isProduction) input.production = true;
+          if (input.type === 'entry' && isDynamicPattern(input.specifier)) {
+            for (const entryPath of _syncGlob({ patterns: input.specifier, cwd: input.dir })) {
+              if (!isGitIgnored(entryPath)) principal.addEntryPath(entryPath, { skipExportsAnalysis: true });
+            }
+            continue;
+          }
           const specifierFilePath = handleInput(input, workspace, filePath);
           if (specifierFilePath) principal.addEntryPath(specifierFilePath, { skipExportsAnalysis: true });
         }

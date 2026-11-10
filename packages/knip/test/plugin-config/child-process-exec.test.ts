@@ -65,8 +65,8 @@ test('Reference binaries and entry files in node:child_process calls', async () 
     ...baseCounters,
     binaries: 23,
     unresolved: 1,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -81,7 +81,7 @@ test('Reference binaries and entry files in node:child_process calls (production
     ...baseCounters,
     binaries: 23,
     unresolved: 1,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });

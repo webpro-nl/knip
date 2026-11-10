@@ -26,6 +26,7 @@ fork(path.join(__dirname, 'scripts', 'task.js'));
 
 // --require/--import hooks and the positional file are entry files
 execSync('node --require ./scripts/hook.js scripts/task.js');
+execSync('node scripts/jobs/*.js');
 
 // a script path as the command is an entry file; a missing one is unresolved
 execSync('./scripts/run.js');
