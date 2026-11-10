@@ -98,13 +98,13 @@
     "formatly": "^0.11.4",
     "get-tsconfig": "4.14.3",
     "jiti": "^2.7.0",
-    "oxc-parser": "^0.156.0",
+    "oxc-parser": "^0.157.0",
     "oxc-resolver": "11.24.2",
     "picomatch": "^4.0.7",
-    "smol-toml": "^1.9.0",
+    "smol-toml": "^1.9.1",
     "strip-json-comments": "5.0.3",
     "tinyglobby": "^0.2.17",
-    "unbash": "^6.0.1",
+    "unbash": "^6.0.4",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
