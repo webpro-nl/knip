@@ -66,7 +66,7 @@ export const createInputHandler = (
     if (filePath && isInternal(filePath) && !isGitIgnored(filePath)) return filePath;
   };
 
-  const handleFile = (input: Input, containingFilePath: string, workspace: Workspace) => {
+  const handleFile = (input: Input, containingFilePath: string, workspace: Workspace, recordedPackageName?: string) => {
     const { specifier } = input;
     const basePath = input.dir ? join(input.dir, 'file.ts') : containingFilePath;
     const filePath = isJoinable(specifier) ? join(input.dir ?? dirname(containingFilePath), specifier) : specifier;
@@ -85,6 +85,9 @@ export const createInputHandler = (
         ? getPackageNameFromFilePath(resolvedFilePath)
         : getPackageNameFromSpecifier(specifier);
       if (packageName) {
+        if (packageName !== recordedPackageName && !chief.findWorkspaceByPackageName(packageName, containingFilePath)) {
+          addExternalRef(containingFilePath, packageName);
+        }
         if (!credit(input, containingFilePath, inputWorkspace, packageName) && isReportable(input)) {
           report('unlisted', containingFilePath, inputWorkspace, packageName);
         }
@@ -142,7 +145,7 @@ export const createInputHandler = (
       if (isReportable(input)) report('unlisted', containingFilePath, inputWorkspace, packageName);
       return;
     }
-    return handleFile(input, containingFilePath, workspace);
+    return handleFile(input, containingFilePath, workspace, packageName);
   };
 
   return (input: Input, workspace: Workspace) => {

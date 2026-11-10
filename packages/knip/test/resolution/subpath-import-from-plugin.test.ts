@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createGraphExplorer } from '../../src/graph-explorer/explorer.ts';
 import { main } from '../../src/index.ts';
+import { run } from '../../src/run.ts';
+import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -47,4 +50,19 @@ test('Allows subpath-imports from plugin (strict)', async () => {
     processed: 3,
     total: 3,
   });
+});
+
+test('Records usage of a package reached through a subpath import (session)', async () => {
+  const options = await createOptions({ cwd, isSession: true });
+  const { session } = await run(options);
+
+  assert(session);
+
+  const explorer = createGraphExplorer(session.getGraph(), session.getEntryPaths());
+  const usage = explorer.getDependencyUsage('dep-pkg').get('dep-pkg');
+
+  assert.deepEqual(
+    usage?.imports.map(node => node.filePath),
+    [join(cwd, 'package.json')]
+  );
 });
