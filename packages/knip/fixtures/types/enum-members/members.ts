@@ -25,3 +25,9 @@ export enum Category {
   Ambient = 'Ambient',
   Playback = 'Playback',
 }
+
+export enum Permission {
+  Read = 1 << 0,
+  Write = 1 << 1,
+  ReadWrite = Read | Write,
+}
