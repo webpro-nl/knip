@@ -19,7 +19,7 @@ import { ConfigurationFiles } from '../session/configuration.ts';
 import { debugLog, debugLogArray } from '../util/debug.ts';
 import { existsSync } from 'node:fs';
 import picomatch from 'picomatch';
-import { escapePath, isDynamicPattern } from 'tinyglobby';
+import { isDynamicPattern } from 'tinyglobby';
 import { tryRealpath } from '../util/fs.ts';
 import { createManifest } from '../util/package-json.ts';
 import {
@@ -34,8 +34,6 @@ import {
   isAlias,
   isCatalog,
   isConfig,
-  isDeferResolve,
-  isDeferResolveEntry,
   isEntry,
   isIgnore,
   isProductionEntry,
@@ -311,6 +309,7 @@ export const build = timerify(async function build({
     const productionPatterns = createPatternMap();
     const productionPatternsSkipExports = createPatternMap();
     const projectFilePatterns = new Set<string>();
+    const developmentFilePaths = new Set<string>();
 
     const addPattern = (map: PatternMap, group: string, pattern: string) => {
       let patterns = map.get(group);
@@ -358,13 +357,8 @@ export const build = timerify(async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
-          if ((isDeferResolveEntry(input) || isDeferResolve(input)) && options.isProduction && !input.production) {
-            if (!input.optional)
-              addPattern(
-                entryPatternsSkipExports,
-                input.group ?? DEFAULT_GROUP,
-                escapePath(relative(dir, resolvedFilePath))
-              );
+          if (options.isProduction && !input.production) {
+            if (!input.optional) developmentFilePaths.add(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
@@ -489,7 +483,9 @@ export const build = timerify(async function build({
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 
-      for (const projectPath of productionPaths(projectPaths)) principal.addProjectPath(projectPath);
+      for (const projectPath of productionPaths(projectPaths)) {
+        if (!developmentFilePaths.has(projectPath)) principal.addProjectPath(projectPath);
+      }
     }
 
     worker.onDispose();

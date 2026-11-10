@@ -39,6 +39,12 @@ Here's what's included in production mode:
 - Only the `start` script (of `package.json#scripts`)
 - Ignore exports with the [`@internal` tag][1]
 
+Files referenced only from development scripts or plugin configuration, such as
+a test setup file or a custom test reporter, are excluded from the analysis. A
+file that is also a production entry stays included. These references do not
+count as dependency usage, so a package in `dependencies` that only test or
+tooling configuration uses is reported as unused.
+
 :::note
 
 The production run does not replace the default run. Depending on your needs you

@@ -49,21 +49,33 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert('coverage/cli-provider.ts' in issues.files);
   assert('shared-state.ts' in issues.files);
   assert('installed-pkg.ts' in issues.files);
-  assert('test/reporters/summary-reporter.ts' in issues.files);
-  assert('test/prisma-environment.ts' in issues.files);
   assert(issues.dependencies['package.json']['linked-package']);
   assert(issues.dependencies['package.json']['shared-state']);
   assert(issues.dependencies['package.json']['upstream-esm']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 5,
+    files: 2,
     dependencies: 3,
-    processed: 5,
-    total: 5,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Find dependencies with the Vitest plugin (strict)', async () => {
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json']['shared-state']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    dependencies: 3,
+    processed: 2,
+    total: 2,
   });
 });
 

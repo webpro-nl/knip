@@ -60,9 +60,9 @@ test('ignore exports (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 3, // TODO: cancel out like regular dev entries
+    files: 2,
     exports: 2,
-    processed: 5,
-    total: 5,
+    processed: 4,
+    total: 4,
   });
 });

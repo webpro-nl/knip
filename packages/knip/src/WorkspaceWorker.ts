@@ -1,4 +1,5 @@
 import picomatch from 'picomatch';
+import { isDynamicPattern } from 'tinyglobby';
 import { _getInputsFromScripts } from './binaries/index.ts';
 import { getScriptCommands } from './binaries/plugins.ts';
 import { CacheConsultant } from './CacheConsultant.ts';
@@ -31,8 +32,8 @@ import { expandIgnorePatterns } from './util/parse-and-convert-gitignores.ts';
 import {
   type ConfigInput,
   type Input,
-  isCatalog,
   isConfig,
+  isEntry,
   toDebugString,
   toEntry,
   toProductionEntry,
@@ -382,11 +383,11 @@ export class WorkspaceWorker {
 
     for (const input of [...inputsFromManifest, ...productionInputsFromManifest]) {
       const inputContainingFilePath = input.containingFilePath ?? containingFilePath;
-      if (isCatalog(input)) {
-        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
-      } else if (isConfig(input)) {
+      if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
-      } else if (!isProduction || input.production) {
+      } else if (isProduction && isEntry(input) && !isDynamicPattern(input.specifier)) {
+        inputs.push({ ...input, type: 'deferResolveEntry', containingFilePath: inputContainingFilePath });
+      } else {
         inputs.push({ ...input, containingFilePath: inputContainingFilePath });
       }
     }
