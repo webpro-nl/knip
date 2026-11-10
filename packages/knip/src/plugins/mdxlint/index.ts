@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MdxlintConfig } from './types.ts';
@@ -14,22 +14,23 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['.mdxlintrc', '.mdxlintrc.{json,js,cjs,mjs,yml,yaml}', 'package.json'];
 
+const isPrefixed = (name: string) => name.startsWith('remark-') || name.startsWith('mdxlint-');
+
+const toPluginName = (plugin: string) => {
+  const slash = plugin.startsWith('@') ? plugin.indexOf('/') + 1 : 0;
+  const name = plugin.slice(slash);
+  return isPrefixed(name) ? plugin : `${plugin.slice(0, slash)}remark-${name}`;
+};
+
 const resolveConfig: ResolveConfig<MdxlintConfig> = config => {
-  const plugins =
-    config.plugins
-      ?.flatMap(plugin => {
-        if (typeof plugin === 'string') return plugin;
-        if (Array.isArray(plugin) && typeof plugin[0] === 'string') return plugin[0];
-        return [];
-      })
-      .map(plugin =>
-        isInternal(plugin)
-          ? plugin
-          : plugin.startsWith('remark-') || plugin.startsWith('mdxlint-')
-            ? plugin
-            : `remark-${plugin}`
-      ) ?? [];
-  return plugins.map(id => toDeferResolve(id));
+  const inputs: Input[] = [];
+  for (const plugin of config.plugins ?? []) {
+    const id = typeof plugin === 'string' ? plugin : Array.isArray(plugin) ? plugin[0] : undefined;
+    if (typeof id !== 'string') continue;
+    if (isInternal(id)) inputs.push(toDeferResolve(id));
+    else inputs.push(toDependency(toPluginName(id)));
+  }
+  return inputs;
 };
 
 const plugin: Plugin = {

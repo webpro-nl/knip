@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { type Input, toConfig, toDeferResolve } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { api, resolveName } from './helpers.ts';
 import type { BabelConfig, BabelConfigObj } from './types.ts';
@@ -35,7 +35,7 @@ export const getDependenciesFromConfig = (config: BabelConfigObj): Input[] => {
     ...presets.map(id => toDeferResolve(id)),
     ...plugins.map(id => toDeferResolve(id)),
     ...(plugins.includes('@babel/plugin-transform-runtime')
-      ? [toDeferResolve('@babel/runtime', { optional: true })]
+      ? [toDependency('@babel/runtime', { optional: true })]
       : []),
     ...nested,
     ...overrides,

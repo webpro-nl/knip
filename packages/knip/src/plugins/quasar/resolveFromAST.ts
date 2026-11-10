@@ -7,7 +7,7 @@ import {
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { type Input, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDependency, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 
 const sourceFilesEntries: [string, string[]][] = [
@@ -60,12 +60,14 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   if (boot?.type === 'ArrayExpression') {
     for (const element of boot.elements ?? []) {
       const id = getStringValue(element) ?? getFirstPropertyValue(element, 'path');
-      if (id) inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/boot', id)));
+      if (!id) continue;
+      if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
+      else inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/boot', id)));
     }
   }
 
   for (const id of getStringValues(findProperty(config, 'css'))) {
-    if (id.startsWith('~')) inputs.push(toDeferResolve(id.slice(1)));
+    if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
     else inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/css', id)));
   }
 

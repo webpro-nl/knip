@@ -1,7 +1,8 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { getPackageNameFromFilePath } from '../../util/modules.ts';
 import { isInNodeModules, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.ts';
@@ -49,7 +50,7 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
   }
 
   return Array.from(copiedPackages)
-    .map(id => toDeferResolve(id))
+    .map(id => toDependency(getPackageNameFromFilePath(id)))
     .concat(
       [
         join(inputDir, dataDir, '**/*.{js,cjs,mjs}'),

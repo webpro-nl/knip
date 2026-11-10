@@ -17,9 +17,11 @@ test('Find dependencies with the semantic-release plugin', async () => {
   assert(issues.unlisted['package.json']['@semantic-release/changelog']);
   assert(issues.unlisted['package.json']['@semantic-release/git']);
 
+  assert(issues.unlisted['release.config.cjs']['semantic-release-config-gitmoji']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 4,
+    unlisted: 5,
     processed: 6,
     total: 6,
   });

@@ -1,5 +1,5 @@
 import type { PluginOptions as Options } from '../../types/config.ts';
-import { type Input, toDeferResolve, toDeferResolveProductionEntry } from '../../util/input.ts';
+import { type Input, toDependency, toDeferResolveProductionEntry } from '../../util/input.ts';
 import { isAbsolute, toAbsolute } from '../../util/path.ts';
 import { findWebpackDependenciesFromConfig } from '../webpack/index.ts';
 import type { ConfigItem, ModuleType, PluginOptions, PresetOptions } from './types.ts';
@@ -75,7 +75,7 @@ const resolveArrayConfig = ([name, config]: [string, unknown], type: ModuleType,
 
   if (isLocalPath(name)) return [toDeferResolveProductionEntry(toAbsolute(name, cwd)), ...sidebar];
 
-  return [toDeferResolve(resolveModuleName(name, type)), ...sidebar];
+  return [toDependency(resolveModuleName(name, type)), ...sidebar];
 };
 
 export const resolveConfigItems = async (items: ConfigItem[], type: ModuleType, options: Options) => {
@@ -88,7 +88,7 @@ export const resolveConfigItems = async (items: ConfigItem[], type: ModuleType, 
 
     if (typeof item === 'string') {
       if (isLocalPath(item)) inputs.add(toDeferResolveProductionEntry(toAbsolute(item, options.cwd)));
-      else inputs.add(toDeferResolve(resolveModuleName(item, type)));
+      else inputs.add(toDependency(resolveModuleName(item, type)));
     } else if (Array.isArray(item)) {
       for (const input of resolveArrayConfig(item, type, options.cwd)) inputs.add(input);
     } else if (typeof item.configureWebpack === 'function') {

@@ -14,9 +14,12 @@ test('Resolve literal extensionless boot entries with the quasar plugin', async 
   assert('src/boot/forgotten.ts' in issues.files);
   assert.deepEqual(Object.keys(issues.files).sort(), ['src/boot/forgotten.ts', 'src/boot/literal.ts']);
 
+  assert(issues.unlisted['quasar.config.ts']['animate.css']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
+    unlisted: 1,
     processed: 9,
     total: 9,
   });

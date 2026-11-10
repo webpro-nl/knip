@@ -15,10 +15,11 @@ test('Find dependencies and literal script entries with the docusaurus plugin', 
 
   assert(issues.unlisted['docusaurus.config.js']['@docusaurus/theme-search-algolia']);
   assert(issues.unlisted['docusaurus.config.js']['@docusaurus/plugin-content-blog']);
+  assert(issues.unlisted['docusaurus.config.js']['docusaurus-plugin-sass']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 2,
+    unlisted: 3,
     files: 1,
     processed: 17,
     total: 17,

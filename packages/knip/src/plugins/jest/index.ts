@@ -82,12 +82,10 @@ const resolveDependencies = async (
   const environments: Input[] = [];
   if (config.testEnvironment === 'node') {
     environments.push(toDependency('jest-environment-node', { optional: true }));
+  } else if (config.testEnvironment === 'jsdom') {
+    environments.push(toDependency('jest-environment-jsdom'));
   } else if (config.testEnvironment) {
-    const environment =
-      config.testEnvironment === 'jsdom'
-        ? 'jest-environment-jsdom'
-        : resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir);
-    environments.push(toDeferResolve(environment));
+    environments.push(toDeferResolve(resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir)));
   }
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);

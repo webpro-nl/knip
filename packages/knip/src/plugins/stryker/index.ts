@@ -1,6 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toConfig, toDeferResolve } from '../../util/input.ts';
+import { toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { StrykerConfig } from './types.ts';
 
@@ -21,7 +21,7 @@ const resolveConfig: ResolveConfig<StrykerConfig> = localConfig => {
     : [];
   const plugins = localConfig.plugins ?? [];
 
-  return [...runners, ...checkers, ...plugins].map(id => toDeferResolve(id));
+  return [...runners, ...checkers].map(id => toDependency(id)).concat(plugins.map(id => toDeferResolve(id)));
 };
 
 const args: Args = {
