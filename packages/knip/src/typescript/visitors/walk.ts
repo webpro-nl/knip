@@ -41,6 +41,7 @@ import {
   handleImportExpression,
   handleImportThen,
   handleVariableDeclarator,
+  markDynamicNamespaceOpaque,
 } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 import { isShadowedIn } from './shadow.ts';
@@ -68,7 +69,13 @@ interface WalkContext {
   internal: ImportMap;
   localImportMap: Map<
     string,
-    { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
+    {
+      importedName: string;
+      filePath: string;
+      isNamespace: boolean;
+      isDynamicImport?: boolean;
+      scope?: [number, number];
+    }
   >;
   localDeclarationTypes: Map<string, SymbolType>;
   importAliases: Map<string, Set<{ id: string; filePath: string }>>;
@@ -617,6 +624,17 @@ const coreVisitorObject: VisitorObject = {
         if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
       }
     }
+  },
+  ReturnStatement(node) {
+    if (node.argument?.type === 'Identifier')
+      markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
+  },
+  AssignmentExpression(node) {
+    if (node.right?.type === 'Identifier') markDynamicNamespaceOpaque(node.right.name, node.right.start, state);
+  },
+  SpreadElement(node) {
+    if (node.argument?.type === 'Identifier')
+      markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
   },
   TSQualifiedName(node) {
     let left: TSTypeName = node;

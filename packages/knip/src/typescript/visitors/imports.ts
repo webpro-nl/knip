@@ -10,7 +10,24 @@ import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
+
+export function markDynamicNamespaceOpaque(name: string, pos: number, s: WalkState) {
+  if (isShadowedIn(s, name, pos)) return;
+  const _import = s.localImportMap.get(name);
+  if (!_import) return;
+  if (!_import.isNamespace) return;
+  if (!_import.isDynamicImport) return;
+  const internalImport = s.internal.get(_import.filePath);
+  if (!internalImport) return;
+  addValue(internalImport.import, OPAQUE, s.filePath);
+}
+
+const getBlockScope = (s: WalkState): [number, number] => {
+  const i = s.scopeDepth - 1;
+  return i < 0 ? [0, s.sourceText.length] : [s.scopeStarts[i], s.scopeEnds[i]];
+};
 
 export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
   if (
@@ -39,7 +56,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   if (importExpr && isStringLiteral(importExpr.source)) {
     const caughtFlag =
       init.type === 'AwaitExpression' && s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
-    handleDynamicImportBinding(node.id, importExpr, init.type === 'AwaitExpression', caughtFlag, s);
+    handleDynamicImportBinding(node.id, importExpr, init.type === 'AwaitExpression', caughtFlag, getBlockScope(s), s);
     return;
   }
 
@@ -151,6 +168,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
               filePath: resolved.resolvedFileName,
               isNamespace: true,
               isDynamicImport: true,
+              scope: getBlockScope(s),
             });
           }
         } else {
@@ -172,11 +190,15 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     const registerAlias = (expr: Expression) => {
       if (expr?.type === 'Identifier') {
         const _import = s.localImportMap.get(expr.name);
+        if (_import?.isDynamicImport && isShadowedIn(s, expr.name, expr.start)) return;
         if (_import) {
           s.addImportAlias(aliasName, expr.name, _import.filePath);
           if (_import.isNamespace) {
             const internalImport = s.internal.get(_import.filePath);
-            if (internalImport) internalImport.refs.add(expr.name);
+            if (internalImport) {
+              if (_import.isDynamicImport) addValue(internalImport.import, OPAQUE, s.filePath);
+              else internalImport.refs.add(expr.name);
+            }
           }
         }
       }
@@ -295,6 +317,7 @@ function handleDynamicImportBinding(
   importExpr: ImportExpression,
   isAwaited: boolean,
   caughtFlag: number,
+  scope: [number, number],
   s: WalkState
 ) {
   s.handledImportExpressions.add(importExpr.start);
@@ -339,6 +362,7 @@ function handleDynamicImportBinding(
           filePath: resolved.resolvedFileName,
           isNamespace: true,
           isDynamicImport: true,
+          scope,
         });
       }
     } else {
@@ -372,7 +396,7 @@ export function handleImportThen(node: CallExpression, s: WalkState) {
   const param = fn.params[0];
   if (param?.type !== 'Identifier' && param?.type !== 'ObjectPattern') return;
   const caughtFlag = s.caughtImportExpressions.has(callee.object.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
-  handleDynamicImportBinding(param, callee.object, true, caughtFlag, s);
+  handleDynamicImportBinding(param, callee.object, true, caughtFlag, [fn.start, fn.end], s);
 }
 
 export function handleImportExpression(node: ImportExpression, s: WalkState) {

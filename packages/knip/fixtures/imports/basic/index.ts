@@ -7,6 +7,8 @@ import type {} from './empty-named-bindings.js';
 
 const fn = (_: any) => {};
 
+const wrap = <T extends object>(module: T): T => module;
+
 const topLevel = await import('./top-level-await-import.js');
 const { top } = await import('./top-level-await-import.js');
 
@@ -17,6 +19,49 @@ const dynamicF = () => import('./dir/import-f.js').then(({ dynamic, named: renam
 const thenMember = () => import('./then-member.js').then(mod => mod.used);
 
 const thenDestructure = () => import('./then-destructure.js').then(({ used }) => used);
+
+const thenNamespaceArg = () => import('./then-namespace-arg.js').then(module => wrap(module));
+
+const thenNamespaceArgMember = () =>
+  import('./then-namespace-arg-member.js').then(module => {
+    module.init();
+    return wrap(module);
+  });
+
+const awaitNamespaceArg = async () => {
+  const module = await import('./await-namespace-arg.js');
+  return wrap(module);
+};
+
+const thenNamespaceReturn = () =>
+  import('./then-namespace-return.js').then(module => {
+    return module;
+  });
+
+let assignedNamespace: object = {};
+const thenNamespaceAssign = () =>
+  import('./then-namespace-assign.js').then(module => {
+    assignedNamespace = module;
+  });
+
+const thenNamespaceSpread = () => import('./then-namespace-spread.js').then(module => ({ ...module }));
+
+const awaitNamespaceAlias = async () => {
+  const module = await import('./await-namespace-alias.js');
+  const alias = module;
+  return alias;
+};
+
+const thenNamespaceScope = () => import('./then-namespace-scope.js').then(ns => ns.used);
+
+function unrelatedNamespaceParam(ns: object) {
+  const copy = ns;
+  assignedNamespace = ns;
+  assignedNamespace = { ...ns };
+  wrap(copy);
+  wrap(ns);
+  return ns;
+}
 
 const dynamicG = import('./import-g.js');
 dynamicG.then(module => module.func());
@@ -139,6 +184,16 @@ export default fn({
   dynamicF,
   thenMember,
   thenDestructure,
+  thenNamespaceArg,
+  thenNamespaceArgMember,
+  awaitNamespaceArg,
+  thenNamespaceReturn,
+  thenNamespaceAssign,
+  thenNamespaceSpread,
+  awaitNamespaceAlias,
+  thenNamespaceScope,
+  unrelatedNamespaceParam,
+  assignedNamespace,
   defaultName1,
   defaultName2,
   defaultName3,
