@@ -54,6 +54,8 @@ export type LocalImport = {
   scope?: [number, number];
 };
 
+export type LocalImportRef = { id: string; import: LocalImport };
+
 interface WalkContext {
   lineStarts: number[];
   skipExports: boolean;
@@ -73,11 +75,11 @@ interface WalkContext {
     jsDocTags?: Set<string>
   ) => void;
   addNsMemberRefs: (internalImport: ImportMaps, namespace: string, member: string | string[]) => void;
-  addImportAlias: (aliasName: string, id: string, filePath: string) => void;
+  addImportAlias: (aliasName: string, id: string, _import: LocalImport) => void;
   internal: ImportMap;
   localImportMap: Map<string, LocalImport>;
   localDeclarationTypes: Map<string, SymbolType>;
-  importAliases: Map<string, Set<{ id: string; filePath: string }>>;
+  importAliases: Map<string, Set<LocalImportRef>>;
   referencedInExport: Map<string, Set<string>>;
   skipBareExprRefs: boolean;
   localRefs: Set<string> | undefined;
@@ -110,7 +112,7 @@ export interface WalkState extends WalkContext {
   functionCaughtTryBlockEnds: number[][];
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
-  nsContainers: Map<string, Map<string, string>>;
+  nsContainers: Map<string, Map<string, LocalImportRef>>;
   accessedNsContainers: Set<string>;
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
@@ -122,7 +124,6 @@ export interface WalkState extends WalkContext {
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
   scopedImports: { name: string; end: number; prev: LocalImport | undefined }[];
-  loopDeclarationStart: number;
   localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
   localInterfaces: Map<string, TSInterfaceDeclaration | null>;
   pendingCallRefs: Array<{
@@ -1011,7 +1012,6 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     scopeEnds: [],
     shadowScopes: new Map(),
     scopedImports: [],
-    loopDeclarationStart: -1,
     localDeclarations: new Map(),
     localInterfaces: new Map(),
     pendingCallRefs: [],
@@ -1073,27 +1073,19 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
   for (const [aliasName, aliasSet] of state.importAliases) {
     if (!state.accessedAliases.has(aliasName)) {
       for (const alias of aliasSet) {
-        const _import = state.localImportMap.get(alias.id);
-        if (_import?.isNamespace) {
-          const internalImport = state.internal.get(_import.filePath);
-          if (internalImport) {
-            addValue(internalImport.import, OPAQUE, filePath);
-          }
+        if (alias.import.isNamespace) {
+          const internalImport = state.internal.get(alias.import.filePath);
+          if (internalImport) addValue(internalImport.import, OPAQUE, filePath);
         }
       }
     }
   }
 
   for (const [containerName, propMap] of state.nsContainers) {
-    for (const [propKey, nsName] of propMap) {
+    for (const [propKey, ref] of propMap) {
       if (!state.accessedNsContainers.has(`${containerName}.${propKey}`)) {
-        const _import = state.localImportMap.get(nsName);
-        if (_import) {
-          const internalImport = state.internal.get(_import.filePath);
-          if (internalImport) {
-            addValue(internalImport.import, OPAQUE, filePath);
-          }
-        }
+        const internalImport = state.internal.get(ref.import.filePath);
+        if (internalImport) addValue(internalImport.import, OPAQUE, filePath);
       }
     }
   }

@@ -6,6 +6,8 @@ import { named as renamed3 } from './named-object-binding.js';
 import type {} from './empty-named-bindings.js';
 import * as shared from './scope-static.js';
 import { fail as rh } from './then-reject-static.js';
+import * as cs from './container-static.js';
+import * as as from './alias-static.js';
 import * as vt from './var-then-static.js';
 import * as ls from './loop-shadow-static.js';
 
@@ -131,6 +133,20 @@ const shadowClass = () =>
     }
   });
 
+const containerStatic = () => cs.used;
+const containerDynamic = () =>
+  import('./container-dynamic.js').then(cs => {
+    const result = { mod: cs };
+    return result;
+  });
+
+const aliasStatic = () => as.used;
+const aliasDynamic = () =>
+  import('./alias-dynamic.js').then(as => {
+    const alias = as;
+    return alias;
+  });
+
 var varThen = import('./var-then.js').then(vt => vt.used);
 const useVarThenStatic = () => vt.after;
 
@@ -161,6 +177,26 @@ const switchShadow = (kind: number) =>
         return m;
     }
     return m.used;
+  });
+
+const containerShadow = () =>
+  import('./container-shadow.js').then(m => {
+    m.used;
+    {
+      const m = {};
+      const box = { m };
+      return box;
+    }
+  });
+
+const spreadShadow = () =>
+  import('./spread-shadow.js').then(m => {
+    m.used;
+    {
+      const m = {};
+      const copy = { ...m };
+      return copy;
+    }
   });
 
 const dynamicG = import('./import-g.js');
@@ -305,12 +341,18 @@ export default fn({
   thenRejectArg,
   shadowDestructured,
   shadowClass,
+  containerStatic,
+  containerDynamic,
+  aliasStatic,
+  aliasDynamic,
   varThen,
   useVarThenStatic,
   loopShadowStatic,
   loopShadowDynamic,
   forInitShadow,
   switchShadow,
+  containerShadow,
+  spreadShadow,
   defaultName1,
   defaultName2,
   defaultName3,

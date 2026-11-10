@@ -202,7 +202,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
         const _import = s.localImportMap.get(expr.name);
         if (_import?.isDynamicImport && isShadowedIn(s, expr.name, expr.start)) return;
         if (_import) {
-          s.addImportAlias(aliasName, expr.name, _import.filePath);
+          s.addImportAlias(aliasName, expr.name, _import);
           if (_import.isNamespace) {
             const internalImport = s.internal.get(_import.filePath);
             if (internalImport) {
@@ -224,8 +224,8 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
       for (const prop of init.properties) {
         if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') {
           const _import = s.localImportMap.get(prop.argument.name);
-          if (_import) {
-            s.addImportAlias(aliasName, prop.argument.name, _import.filePath);
+          if (_import && !(_import.isDynamicImport && isShadowedIn(s, prop.argument.name, prop.argument.start))) {
+            s.addImportAlias(aliasName, prop.argument.name, _import);
             if (_import.isNamespace) {
               const internalImport = s.internal.get(_import.filePath);
               if (internalImport) internalImport.refs.add(prop.argument.name);
@@ -240,7 +240,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
         ) {
           const nsName = prop.value.name;
           const _import = s.localImportMap.get(nsName);
-          if (_import?.isNamespace) {
+          if (_import?.isNamespace && !(_import.isDynamicImport && isShadowedIn(s, nsName, prop.value.start))) {
             const internalImport = s.internal.get(_import.filePath);
             if (internalImport) internalImport.refs.add(nsName);
             let map = s.nsContainers.get(aliasName);
@@ -248,7 +248,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
               map = new Map();
               s.nsContainers.set(aliasName, map);
             }
-            map.set(prop.key.name, nsName);
+            map.set(prop.key.name, { id: nsName, import: _import });
           }
         }
       }
@@ -313,7 +313,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
               else internalImport.refs.add(defaultValue.name);
             }
             if (prop.value.left?.type === 'Identifier') {
-              s.addImportAlias(prop.value.left.name, defaultValue.name, _import.filePath);
+              s.addImportAlias(prop.value.left.name, defaultValue.name, _import);
             }
           }
         }

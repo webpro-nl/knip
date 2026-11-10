@@ -109,11 +109,10 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
         isWholeRead = true;
       }
       for (const alias of aliases) {
-        const internalImport = s.internal.get(alias.filePath);
+        const internalImport = s.internal.get(alias.import.filePath);
         if (!internalImport) continue;
         if (isWholeRead) {
-          const origin = s.localImportMap.get(alias.id);
-          markWholeObjectRead(internalImport, origin?.importedName ?? alias.id);
+          markWholeObjectRead(internalImport, alias.import.importedName);
         } else if (memberName) {
           s.addNsMemberRefs(internalImport, alias.id, memberName);
         }
@@ -212,19 +211,16 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
   ) {
     const containerName = node.object.object.name;
     const propKey = node.object.property.name;
-    const nsName = s.nsContainers.get(containerName)?.get(propKey);
-    if (nsName) {
-      const _import = s.localImportMap.get(nsName);
-      if (_import) {
-        const internalImport = s.internal.get(_import.filePath);
-        if (internalImport) {
-          let memberName: string | undefined;
-          if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
-          else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
-          if (memberName) {
-            s.addNsMemberRefs(internalImport, nsName, memberName);
-            s.accessedNsContainers.add(`${containerName}.${propKey}`);
-          }
+    const ref = s.nsContainers.get(containerName)?.get(propKey);
+    if (ref) {
+      const internalImport = s.internal.get(ref.import.filePath);
+      if (internalImport) {
+        let memberName: string | undefined;
+        if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
+        else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+        if (memberName) {
+          s.addNsMemberRefs(internalImport, ref.id, memberName);
+          s.accessedNsContainers.add(`${containerName}.${propKey}`);
         }
       }
     }
