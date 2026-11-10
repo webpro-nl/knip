@@ -14,19 +14,27 @@ import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
 export function markDynamicNamespaceOpaque(name: string, pos: number, s: WalkState) {
-  if (isShadowedIn(s, name, pos)) return;
   const _import = s.localImportMap.get(name);
-  if (!_import) return;
-  if (!_import.isNamespace) return;
-  if (!_import.isDynamicImport) return;
+  if (!_import?.isDynamicImport || !_import.isNamespace) return;
+  if (isShadowedIn(s, name, pos)) return;
   const internalImport = s.internal.get(_import.filePath);
-  if (!internalImport) return;
-  addValue(internalImport.import, OPAQUE, s.filePath);
+  if (internalImport) addValue(internalImport.import, OPAQUE, s.filePath);
 }
 
-const getBlockScope = (s: WalkState): [number, number] => {
+const getBlockScope = (s: WalkState): [number, number] | undefined => {
   const i = s.scopeDepth - 1;
-  return i < 0 ? [0, s.sourceText.length] : [s.scopeStarts[i], s.scopeEnds[i]];
+  return i < 0 ? undefined : [s.scopeStarts[i], s.scopeEnds[i]];
+};
+
+const setDynamicNamespace = (
+  name: string,
+  filePath: string,
+  scope: [number, number] | undefined,
+  isVar: boolean,
+  s: WalkState
+) => {
+  if (scope && !isVar) s.scopedImports.push({ name, end: scope[1], prev: s.localImportMap.get(name) });
+  s.localImportMap.set(name, { importedName: IMPORT_STAR, filePath, isNamespace: true, isDynamicImport: true, scope });
 };
 
 export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
@@ -43,7 +51,7 @@ export function getPromiseAllElements(expression: Expression): ArrayExpression['
   }
 }
 
-export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
+export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolean, s: WalkState) {
   const init = node.init;
   if (!init) return;
   let importExpr: ImportExpression | null = null;
@@ -56,7 +64,15 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   if (importExpr && isStringLiteral(importExpr.source)) {
     const caughtFlag =
       init.type === 'AwaitExpression' && s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
-    handleDynamicImportBinding(node.id, importExpr, init.type === 'AwaitExpression', caughtFlag, getBlockScope(s), s);
+    handleDynamicImportBinding(
+      node.id,
+      importExpr,
+      init.type === 'AwaitExpression',
+      caughtFlag,
+      getBlockScope(s),
+      isVar,
+      s
+    );
     return;
   }
 
@@ -163,13 +179,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
           );
           const resolved = s.resolveModule(specifier, s.filePath);
           if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
-            s.localImportMap.set(binding.name, {
-              importedName: IMPORT_STAR,
-              filePath: resolved.resolvedFileName,
-              isNamespace: true,
-              isDynamicImport: true,
-              scope: getBlockScope(s),
-            });
+            setDynamicNamespace(binding.name, resolved.resolvedFileName, getBlockScope(s), isVar, s);
           }
         } else {
           s.addImport(
@@ -317,7 +327,8 @@ function handleDynamicImportBinding(
   importExpr: ImportExpression,
   isAwaited: boolean,
   caughtFlag: number,
-  scope: [number, number],
+  scope: [number, number] | undefined,
+  isVar: boolean,
   s: WalkState
 ) {
   s.handledImportExpressions.add(importExpr.start);
@@ -357,13 +368,7 @@ function handleDynamicImportBinding(
       s.addImport(specifier, 'default', id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
       const resolved = s.resolveModule(specifier, s.filePath);
       if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
-        s.localImportMap.set(id.name, {
-          importedName: IMPORT_STAR,
-          filePath: resolved.resolvedFileName,
-          isNamespace: true,
-          isDynamicImport: true,
-          scope,
-        });
+        setDynamicNamespace(id.name, resolved.resolvedFileName, scope, isVar, s);
       }
     } else {
       s.addImport(
@@ -396,7 +401,8 @@ export function handleImportThen(node: CallExpression, s: WalkState) {
   const param = fn.params[0];
   if (param?.type !== 'Identifier' && param?.type !== 'ObjectPattern') return;
   const caughtFlag = s.caughtImportExpressions.has(callee.object.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
-  handleDynamicImportBinding(param, callee.object, true, caughtFlag, [fn.start, fn.end], s);
+  const body = fn.body ?? fn;
+  handleDynamicImportBinding(param, callee.object, true, caughtFlag, [body.start, body.end], false, s);
 }
 
 export function handleImportExpression(node: ImportExpression, s: WalkState) {

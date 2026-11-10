@@ -235,6 +235,17 @@ Ranges come from:
 `_collectBindingNames` handles object and array destructuring, assignment
 patterns, and rest elements.
 
+Dynamic import bindings (`import().then(m => ...)`, `const m = await import()`
+in a block, `Promise.all` destructuring) are local bindings themselves. Their
+`localImportMap` entry records the callback body or enclosing block as `scope`;
+`isShadowedIn` ignores ranges that enclose that scope (the binding's own range
+and its ancestors) so only nested bindings shadow it. `setDynamicNamespace`
+pushes the previous entry on `scopedImports`, and `_restoreScopedImports`
+restores it when the block or function exits, so a static import with the
+same name is visible again after the callback. A top-level binding has no
+scope and is never restored, and neither is a `var` binding, which stays
+visible after its block.
+
 ## Namespace and enum members
 
 `ExportMember.hasRefsInFile` is separate from `Export.hasRefsInFile`. During the

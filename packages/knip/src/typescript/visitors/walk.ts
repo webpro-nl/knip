@@ -46,6 +46,14 @@ import {
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 import { isShadowedIn } from './shadow.ts';
 
+export type LocalImport = {
+  importedName: string;
+  filePath: string;
+  isNamespace: boolean;
+  isDynamicImport?: boolean;
+  scope?: [number, number];
+};
+
 interface WalkContext {
   lineStarts: number[];
   skipExports: boolean;
@@ -67,16 +75,7 @@ interface WalkContext {
   addNsMemberRefs: (internalImport: ImportMaps, namespace: string, member: string | string[]) => void;
   addImportAlias: (aliasName: string, id: string, filePath: string) => void;
   internal: ImportMap;
-  localImportMap: Map<
-    string,
-    {
-      importedName: string;
-      filePath: string;
-      isNamespace: boolean;
-      isDynamicImport?: boolean;
-      scope?: [number, number];
-    }
-  >;
+  localImportMap: Map<string, LocalImport>;
   localDeclarationTypes: Map<string, SymbolType>;
   importAliases: Map<string, Set<{ id: string; filePath: string }>>;
   referencedInExport: Map<string, Set<string>>;
@@ -122,6 +121,7 @@ export interface WalkState extends WalkContext {
   scopeStarts: number[];
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
+  scopedImports: { name: string; end: number; prev: LocalImport | undefined }[];
   localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
   localInterfaces: Map<string, TSInterfaceDeclaration | null>;
   pendingCallRefs: Array<{
@@ -416,6 +416,15 @@ const _addParamShadows = (params: any, body: any) => {
   for (const param of items) _collectBindingNames(param, range);
 };
 
+const _restoreScopedImports = (end: number) => {
+  const stack = state.scopedImports;
+  while (stack.length > 0 && stack[stack.length - 1].end <= end) {
+    const { name, prev } = stack.pop()!;
+    if (prev) state.localImportMap.set(name, prev);
+    else state.localImportMap.delete(name);
+  }
+};
+
 const coreVisitorObject: VisitorObject = {
   BlockStatement(node) {
     state.scopeStarts[state.scopeDepth] = node.start;
@@ -424,6 +433,7 @@ const coreVisitorObject: VisitorObject = {
   },
   'BlockStatement:exit'(node) {
     state.scopeDepth--;
+    _restoreScopedImports(node.end);
     if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end) state.caughtTryBlockEnds.pop();
   },
   TSModuleDeclaration(node) {
@@ -513,8 +523,9 @@ const coreVisitorObject: VisitorObject = {
     state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
   },
-  'ArrowFunctionExpression:exit'() {
+  'ArrowFunctionExpression:exit'(node) {
     state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+    _restoreScopedImports(node.end);
   },
   CatchClause(node) {
     if (node.param?.type === 'Identifier' && node.body) {
@@ -523,6 +534,7 @@ const coreVisitorObject: VisitorObject = {
   },
   VariableDeclaration(node) {
     state.currentVarDeclStart = node.start;
+    for (const decl of node.declarations) handleVariableDeclarator(decl, node.kind === 'var', state);
     if (state.scopeDepth > 0) {
       for (const decl of node.declarations) {
         if (decl.id.type === 'Identifier') {
@@ -555,7 +567,6 @@ const coreVisitorObject: VisitorObject = {
     handleExpressionStatement(node, state);
   },
   VariableDeclarator(node) {
-    handleVariableDeclarator(node, state);
     trackCustomElementRegistry(node, state);
   },
   ImportExpression(node) {
@@ -579,8 +590,8 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   CallExpression(node) {
-    handleImportThen(node, state);
     handleCallExpression(node, state);
+    handleImportThen(node, state);
   },
   NewExpression(node) {
     handleNewExpression(node, state);
@@ -974,6 +985,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     scopeStarts: [],
     scopeEnds: [],
     shadowScopes: new Map(),
+    scopedImports: [],
     localDeclarations: new Map(),
     localInterfaces: new Map(),
     pendingCallRefs: [],

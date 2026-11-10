@@ -4,6 +4,9 @@ import defaultName1, { named as renamed2 } from './default-and-named-binding.js'
 import defaultName2 from './default-identifier.js';
 import { named as renamed3 } from './named-object-binding.js';
 import type {} from './empty-named-bindings.js';
+import * as shared from './scope-static.js';
+import { fail as rh } from './then-reject-static.js';
+import * as vt from './var-then-static.js';
 
 const fn = (_: any) => {};
 
@@ -52,6 +55,28 @@ const awaitNamespaceAlias = async () => {
   return alias;
 };
 
+const awaitVarTry = async () => {
+  try {
+    var v = await import('./await-var-try.js');
+  } catch {
+    return;
+  }
+  return v.used;
+};
+
+const varNestedInit = async () => {
+  try {
+    var first = (() => {
+        const inner = 1;
+        return inner;
+      })(),
+      second = await import('./var-nested-init.js');
+  } catch {
+    return;
+  }
+  return [first, second.used];
+};
+
 const thenNamespaceScope = () => import('./then-namespace-scope.js').then(ns => ns.used);
 
 function unrelatedNamespaceParam(ns: object) {
@@ -62,6 +87,27 @@ function unrelatedNamespaceParam(ns: object) {
   wrap(ns);
   return ns;
 }
+
+const scopeTopLevel = await import('./scope-top-level.js');
+const useScopeTopLevel = () => scopeTopLevel.used;
+function unrelatedTopLevelParam(scopeTopLevel: object) {
+  return scopeTopLevel;
+}
+
+const scopeNested = () =>
+  import('./scope-nested.js').then(module => {
+    const inner = (module: object) => wrap(module);
+    inner({ used: module.used });
+    return module.used;
+  });
+
+const scopeShared = () => import('./scope-shared.js').then(shared => shared.used);
+const useSharedAfter = () => shared.after;
+
+const thenRejectArg = () => import('./then-reject-arg.js').then(rh => rh.used, rh);
+
+var varThen = import('./var-then.js').then(vt => vt.used);
+const useVarThenStatic = () => vt.after;
 
 const dynamicG = import('./import-g.js');
 dynamicG.then(module => module.func());
@@ -191,9 +237,19 @@ export default fn({
   thenNamespaceAssign,
   thenNamespaceSpread,
   awaitNamespaceAlias,
+  awaitVarTry,
+  varNestedInit,
   thenNamespaceScope,
   unrelatedNamespaceParam,
   assignedNamespace,
+  useScopeTopLevel,
+  unrelatedTopLevelParam,
+  scopeNested,
+  scopeShared,
+  useSharedAfter,
+  thenRejectArg,
+  varThen,
+  useVarThenStatic,
   defaultName1,
   defaultName2,
   defaultName3,

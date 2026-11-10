@@ -13,9 +13,9 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 5,
-    processed: 42,
-    total: 42,
+    exports: 15,
+    processed: 52,
+    total: 52,
   });
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
@@ -31,5 +31,15 @@ test('Support various ways to import modules', async () => {
   assert.equal(issues.exports['then-namespace-assign.ts'], undefined);
   assert.equal(issues.exports['then-namespace-spread.ts'], undefined);
   assert.equal(issues.exports['await-namespace-alias.ts'], undefined);
+  assert.deepEqual(Object.keys(issues.exports['await-var-try.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['var-nested-init.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['then-namespace-scope.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['scope-top-level.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['scope-nested.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['scope-static.ts']), ['shared.unused']);
+  assert.deepEqual(Object.keys(issues.exports['scope-shared.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['then-reject-arg.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['then-reject-static.ts']), ['sunused']);
+  assert.deepEqual(Object.keys(issues.exports['var-then.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['var-then-static.ts']), ['vt.sunused']);
 });

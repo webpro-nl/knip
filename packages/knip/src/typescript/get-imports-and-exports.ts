@@ -25,7 +25,7 @@ import {
   type ResolvedModule,
 } from './ast-nodes.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
-import { _walkAST } from './visitors/walk.ts';
+import { _walkAST, type LocalImport } from './visitors/walk.ts';
 
 interface AddInternalImportOptions {
   specifier: string;
@@ -77,16 +77,7 @@ const getImportsAndExports = (
     else importAliases.set(aliasName, new Set([{ id, filePath: importFilePath }]));
   };
 
-  const localImportMap = new Map<
-    string,
-    {
-      importedName: string;
-      filePath: string;
-      isNamespace: boolean;
-      isDynamicImport?: boolean;
-      scope?: [number, number];
-    }
-  >();
+  const localImportMap = new Map<string, LocalImport>();
   let builtinImports: Map<string, Import> | undefined;
   const localDeclarationTypes = new Map<string, SymbolType>();
   const referencedInExport = new Map<string, Set<string>>();
