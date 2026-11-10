@@ -13,9 +13,9 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 15,
-    processed: 52,
-    total: 52,
+    exports: 22,
+    processed: 59,
+    total: 59,
   });
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
@@ -38,8 +38,15 @@ test('Support various ways to import modules', async () => {
   assert.deepEqual(Object.keys(issues.exports['scope-nested.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['scope-static.ts']), ['shared.unused']);
   assert.deepEqual(Object.keys(issues.exports['scope-shared.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['shadow-boundary.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['then-reject-arg.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['then-reject-static.ts']), ['sunused']);
+  assert.deepEqual(Object.keys(issues.exports['shadow-destructured.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['shadow-class.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['var-then.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['var-then-static.ts']), ['vt.sunused']);
+  assert.deepEqual(Object.keys(issues.exports['loop-shadow-static.ts']), ['ls.sunused']);
+  assert.deepEqual(Object.keys(issues.exports['loop-shadow-dynamic.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['for-init-shadow.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['switch-shadow.ts']), ['unused']);
 });

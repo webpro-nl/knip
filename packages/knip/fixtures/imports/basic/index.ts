@@ -7,6 +7,7 @@ import type {} from './empty-named-bindings.js';
 import * as shared from './scope-static.js';
 import { fail as rh } from './then-reject-static.js';
 import * as vt from './var-then-static.js';
+import * as ls from './loop-shadow-static.js';
 
 const fn = (_: any) => {};
 
@@ -104,10 +105,63 @@ const scopeNested = () =>
 const scopeShared = () => import('./scope-shared.js').then(shared => shared.used);
 const useSharedAfter = () => shared.after;
 
+const shadowBoundary = async () => {
+  const q = await import('./shadow-boundary.js');
+  function other(q: object) {}q.used;
+  return other;
+};
+
 const thenRejectArg = () => import('./then-reject-arg.js').then(rh => rh.used, rh);
+
+const shadowDestructured = () =>
+  import('./shadow-destructured.js').then(d => {
+    d.used;
+    {
+      const { d } = { d: {} };
+      return d;
+    }
+  });
+
+const shadowClass = () =>
+  import('./shadow-class.js').then(k => {
+    k.used;
+    {
+      class k {}
+      return k;
+    }
+  });
 
 var varThen = import('./var-then.js').then(vt => vt.used);
 const useVarThenStatic = () => vt.after;
+
+declare const rows: { ls: object; ld: object }[];
+
+function loopShadowStatic() {
+  for (const { ls } of rows) wrap(ls);
+  return ls.after;
+}
+
+const loopShadowDynamic = async () => {
+  const ld = await import('./loop-shadow-dynamic.js');
+  for (const ld of rows) wrap(ld);
+  return ld.used;
+};
+
+const forInitShadow = () =>
+  import('./for-init-shadow.js').then(m => {
+    for (let m = 0; m < 1; m++) wrap(m);
+    return m.used;
+  });
+
+const switchShadow = (kind: number) =>
+  import('./switch-shadow.js').then(m => {
+    switch (kind) {
+      case 1:
+        const m = {};
+        return m;
+    }
+    return m.used;
+  });
 
 const dynamicG = import('./import-g.js');
 dynamicG.then(module => module.func());
@@ -247,9 +301,16 @@ export default fn({
   scopeNested,
   scopeShared,
   useSharedAfter,
+  shadowBoundary,
   thenRejectArg,
+  shadowDestructured,
+  shadowClass,
   varThen,
   useVarThenStatic,
+  loopShadowStatic,
+  loopShadowDynamic,
+  forInitShadow,
+  switchShadow,
   defaultName1,
   defaultName2,
   defaultName3,

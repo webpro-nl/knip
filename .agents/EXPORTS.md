@@ -224,16 +224,18 @@ whether `pos` falls inside a shadow range for `name`.
 
 Ranges come from:
 
-- `_addShadow` for block-scoped variables and nested functions, using the
-  current `scopeDepth` range from `BlockStatement`
+- `_addShadow` for nested functions and classes, and `_collectBindingNames` for
+  block-scoped variable declarators, using the current scope range; scopes are
+  `BlockStatement`, `ForStatement`, `ForInStatement`, `ForOfStatement`,
+  `SwitchStatement` and `StaticBlock`, tracked by `_enterScope` / `_exitScope`
 - `_addParamShadows` for function, arrow, and method parameters, using the
   function body because parameters are visited before its `BlockStatement`
 - `CatchClause` bindings
-- `ForInStatement` and `ForOfStatement` bindings, using the loop body because
-  its `VariableDeclaration` is visited before the body block
 
 `_collectBindingNames` handles object and array destructuring, assignment
-patterns, and rest elements.
+patterns, and rest elements. Ranges are registered when the declaration is
+visited, so a closure that reads a block-level binding declared later in the
+same block is resolved against the outer name; this is a known limitation.
 
 Dynamic import bindings (`import().then(m => ...)`, `const m = await import()`
 in a block, `Promise.all` destructuring) are local bindings themselves. Their
@@ -241,8 +243,8 @@ in a block, `Promise.all` destructuring) are local bindings themselves. Their
 `isShadowedIn` ignores ranges that enclose that scope (the binding's own range
 and its ancestors) so only nested bindings shadow it. `setDynamicNamespace`
 pushes the previous entry on `scopedImports`, and `_restoreScopedImports`
-restores it when the block or function exits, so a static import with the
-same name is visible again after the callback. A top-level binding has no
+restores it when the scope or arrow function exits, so a static import with
+the same name is visible again after the callback. A top-level binding has no
 scope and is never restored, and neither is a `var` binding, which stays
 visible after its block.
 

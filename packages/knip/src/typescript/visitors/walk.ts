@@ -122,6 +122,7 @@ export interface WalkState extends WalkContext {
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
   scopedImports: { name: string; end: number; prev: LocalImport | undefined }[];
+  loopDeclarationStart: number;
   localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
   localInterfaces: Map<string, TSInterfaceDeclaration | null>;
   pendingCallRefs: Array<{
@@ -425,16 +426,36 @@ const _restoreScopedImports = (end: number) => {
   }
 };
 
+const _enterScope = (node: Span) => {
+  state.scopeStarts[state.scopeDepth] = node.start;
+  state.scopeEnds[state.scopeDepth] = node.end;
+  state.scopeDepth++;
+};
+
+const _exitScope = (node: Span) => {
+  state.scopeDepth--;
+  _restoreScopedImports(node.end);
+};
+
 const coreVisitorObject: VisitorObject = {
   BlockStatement(node) {
-    state.scopeStarts[state.scopeDepth] = node.start;
-    state.scopeEnds[state.scopeDepth] = node.end;
-    state.scopeDepth++;
+    _enterScope(node);
   },
   'BlockStatement:exit'(node) {
-    state.scopeDepth--;
-    _restoreScopedImports(node.end);
+    _exitScope(node);
     if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end) state.caughtTryBlockEnds.pop();
+  },
+  ForStatement(node) {
+    _enterScope(node);
+  },
+  'ForStatement:exit'(node) {
+    _exitScope(node);
+  },
+  SwitchStatement(node) {
+    _enterScope(node);
+  },
+  'SwitchStatement:exit'(node) {
+    _exitScope(node);
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
@@ -480,6 +501,7 @@ const coreVisitorObject: VisitorObject = {
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
       state.localDeclarations.set(node.id.name, node);
+      if (state.scopeDepth > 0) _addShadow(node.id.name);
     }
   },
   'ClassDeclaration:exit'() {
@@ -491,11 +513,13 @@ const coreVisitorObject: VisitorObject = {
   'ClassExpression:exit'() {
     state.classNameStack.pop();
   },
-  StaticBlock() {
+  StaticBlock(node) {
     state.staticBlockDepth++;
+    _enterScope(node);
   },
-  'StaticBlock:exit'() {
+  'StaticBlock:exit'(node) {
     state.staticBlockDepth--;
+    _exitScope(node);
   },
   FunctionDeclaration(node) {
     state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
@@ -536,11 +560,10 @@ const coreVisitorObject: VisitorObject = {
     state.currentVarDeclStart = node.start;
     for (const decl of node.declarations) handleVariableDeclarator(decl, node.kind === 'var', state);
     if (state.scopeDepth > 0) {
+      const i = state.scopeDepth - 1;
       for (const decl of node.declarations) {
-        if (decl.id.type === 'Identifier') {
-          state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
-          _addShadow(decl.id.name);
-        }
+        if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+        _collectBindingNames(decl.id, [state.scopeStarts[i], state.scopeEnds[i]]);
       }
     } else {
       for (const decl of node.declarations) {
@@ -603,9 +626,7 @@ const coreVisitorObject: VisitorObject = {
     handleJSXMemberExpression(node, state);
   },
   ForInStatement(node) {
-    if (node.left.type === 'VariableDeclaration' && node.body) {
-      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
-    }
+    _enterScope(node);
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -614,10 +635,11 @@ const coreVisitorObject: VisitorObject = {
       }
     }
   },
+  'ForInStatement:exit'(node) {
+    _exitScope(node);
+  },
   ForOfStatement(node) {
-    if (node.left.type === 'VariableDeclaration' && node.body) {
-      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
-    }
+    _enterScope(node);
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -625,6 +647,9 @@ const coreVisitorObject: VisitorObject = {
         if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
       }
     }
+  },
+  'ForOfStatement:exit'(node) {
+    _exitScope(node);
   },
   ArrayExpression(node) {
     for (const element of node.elements ?? []) {
@@ -986,6 +1011,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     scopeEnds: [],
     shadowScopes: new Map(),
     scopedImports: [],
+    loopDeclarationStart: -1,
     localDeclarations: new Map(),
     localInterfaces: new Map(),
     pendingCallRefs: [],

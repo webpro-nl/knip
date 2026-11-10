@@ -10,12 +10,12 @@ export const isShadowedIn = (s: WalkState, name: string, pos: number): boolean =
       const range = ranges[i];
       if (range[0] < scope[0]) break;
       if (range[0] === scope[0] && range[1] >= scope[1]) continue;
-      if (pos >= range[0] && pos <= range[1]) return true;
+      if (pos >= range[0] && pos < range[1]) return true;
     }
     return false;
   }
   for (const range of ranges) {
-    if (pos >= range[0] && pos <= range[1]) return true;
+    if (pos >= range[0] && pos < range[1]) return true;
   }
   return false;
 };
