@@ -50,9 +50,10 @@ longer reported.
 
 A specifier that is a file path (starting with `./` or `../`, or absolute) is
 resolved as a file instead: Knip adds it as an entry file, or reports it under
-"unresolved imports" if it can't be resolved. So a plugin can pass a value that
-is either a package name or a path, such as an item in Prettier's `plugins`
-option.
+"unresolved imports" if it can't be resolved. For a value that is either a
+package name or a path, such as an item in Prettier's `plugins` option, prefer
+to return [toDeferResolve][6] for a path, with the directory the tool resolves
+it from as `dir`, and `toDependency` for anything else.
 
 ## toProductionDependency
 

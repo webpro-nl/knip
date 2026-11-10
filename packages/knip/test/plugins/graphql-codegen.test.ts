@@ -37,8 +37,8 @@ test('Find dependencies and literal outputs with the graphql-codegen plugin', as
     ...baseCounters,
     unlisted: 16,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 4,
+    total: 4,
   });
 });
 

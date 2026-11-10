@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
-import { toDependency, toIgnore, toProductionEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { toDeferResolve, toDependency, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NitroConfig } from './types.ts';
 
@@ -49,9 +49,9 @@ const resolveConfig: ResolveConfig<NitroConfig> = async localConfig => {
   ];
 
   const deps =
-    localConfig.modules?.reduce<Input[]>((acc, id) => {
-      if (Array.isArray(id) && typeof id[0] === 'string') acc.push(toDependency(id[0]));
-      if (typeof id === 'string') acc.push(toDependency(id));
+    localConfig.modules?.reduce<Input[]>((acc, mod) => {
+      const id = Array.isArray(mod) ? mod[0] : mod;
+      if (typeof id === 'string') acc.push(isInternal(id) ? toDeferResolve(id) : toDependency(id));
       return acc;
     }, []) ?? [];
 

@@ -6,6 +6,10 @@
         [
           "@swc/plugin-styled-components",
           {}
+        ],
+        [
+          "./plugins/swc_plugin_css_variable.wasm",
+          {}
         ]
       ]
     },

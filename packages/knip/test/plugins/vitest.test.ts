@@ -40,8 +40,8 @@ test('Find dependencies with the Vitest plugin', async () => {
     files: 2,
     unlisted: 12,
     unresolved: 2,
-    processed: 19,
-    total: 19,
+    processed: 21,
+    total: 21,
   });
 });
 
@@ -52,13 +52,15 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   assert('coverage/cli-provider.ts' in issues.files);
   assert('shared-state.ts' in issues.files);
   assert('installed-pkg.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 3);
+  assert('test/reporters/summary-reporter.ts' in issues.files);
+  assert('test/prisma-environment.ts' in issues.files);
+  assert.equal(Object.keys(issues.files).length, 5);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 3,
-    processed: 3,
-    total: 3,
+    files: 5,
+    processed: 5,
+    total: 5,
   });
 });
 
@@ -73,7 +75,7 @@ test('Find dependencies with the Vitest plugin (files only)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    processed: 19,
-    total: 19,
+    processed: 21,
+    total: 21,
   });
 });

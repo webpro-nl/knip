@@ -3,9 +3,9 @@ import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../type
 import type { PluginName } from '../../types/PluginNames.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
-import { type Input, toConfig, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDeferResolveEntry, toDependency } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
-import { dirname, join, relative, toAbsolute } from '../../util/path.ts';
+import { dirname, isInternal, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
 import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
@@ -40,7 +40,10 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
         .map(value => substringBefore(value, ':'))
     : [];
 
-  return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
+  return [
+    ...compact([...targetsDefault, ...generators]).map(id => toDependency(id)),
+    ...compact(plugins).map(id => (isInternal(id) ? toDeferResolve(id) : toDependency(id))),
+  ];
 };
 
 const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {

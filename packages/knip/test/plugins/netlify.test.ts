@@ -21,7 +21,7 @@ test('Find dependencies with the Netlify plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 5,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

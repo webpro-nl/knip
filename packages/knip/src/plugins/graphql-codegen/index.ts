@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import {
+  toDeferResolve,
   toDeferResolveEntry,
   toDeferResolveProductionEntry,
   toDependency,
@@ -101,9 +102,11 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .filter((preset): preset is PresetNames => typeof preset === 'string')
     .map(presetName =>
       // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/presets.ts#L8-L11
-      presetName.startsWith('@graphql-codegen/')
-        ? presetName
-        : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
+      isInternal(presetName)
+        ? toDeferResolve(presetName, { dir: options.cwd })
+        : presetName.startsWith('@graphql-codegen/')
+          ? presetName
+          : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
     );
 
   const flatPlugins = generateSet

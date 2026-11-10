@@ -32,7 +32,7 @@ test('Find dependencies with the Commitizen plugin', async () => {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 13,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

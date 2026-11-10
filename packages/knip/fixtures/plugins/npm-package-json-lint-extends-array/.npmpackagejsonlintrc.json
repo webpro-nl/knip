@@ -1,3 +1,7 @@
 {
-  "extends": ["npm-package-json-lint-config-default", "@wordpress/npm-package-json-lint-config"]
+  "extends": [
+    "npm-package-json-lint-config-default",
+    "@wordpress/npm-package-json-lint-config",
+    "./config/npm-package-json-lint.js"
+  ]
 }

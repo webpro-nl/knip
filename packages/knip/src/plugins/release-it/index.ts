@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { ReleaseItConfig } from './types.ts';
 
@@ -26,7 +27,10 @@ const resolveConfig: ResolveConfig<ReleaseItConfig> = (config, options) => {
   }
   const inputs = options.getInputsFromScripts(scripts);
 
-  return [...plugins.map(id => toDependency(id)), ...inputs];
+  return [
+    ...plugins.map(id => (isInternal(id) ? toDeferResolve(id, { dir: options.cwd }) : toDependency(id))),
+    ...inputs,
+  ];
 };
 
 const plugin: Plugin = {

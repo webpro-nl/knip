@@ -9,7 +9,9 @@
     "test:coverage:cli:short": "vitest -r coverage --coverage.provider=custom --coverage.customProviderModule=./cli-provider.ts",
     "test:reporter": "vitest --reporter vitest-sonar-reporter",
     "test:reporter:builtin": "vitest --reporter verbose",
+    "test:reporter:custom": "vitest --root test --reporter ./reporters/summary-reporter.ts",
     "test:env": "vitest --environment jsdom",
+    "test:env:custom": "vitest --environment ./test/prisma-environment.ts",
     "test:typecheck": "vitest --typecheck.checker vue-tsc",
     "test:typecheck:tsc": "vitest --typecheck.checker tsc"
   },

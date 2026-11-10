@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
@@ -45,16 +45,12 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   for (const id of config.plugins ? [config.plugins].flat() : []) {
     if (typeof id === 'string') plugins.push(toPluginSpecifier(id));
   }
-  const formatter = config.formatter ? [config.formatter] : [];
+  for (const id of [...extendsConfigs, ...plugins]) inputs.push(toDependency(id));
   const parserPreset = await config.parserPreset;
-  const parserPresetPaths: string[] = parserPreset
-    ? typeof parserPreset === 'string'
-      ? [parserPreset]
-      : parserPreset.path
-        ? [parserPreset.path ?? parserPreset]
-        : []
-    : [];
-  for (const id of [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths]) inputs.push(toDependency(id));
+  const modules = config.formatter ? [config.formatter] : [];
+  if (typeof parserPreset === 'string') modules.push(parserPreset);
+  for (const id of modules) inputs.push(isInternal(id) ? toDeferResolve(id) : toDependency(id));
+  if (typeof parserPreset === 'object' && parserPreset.path) inputs.push(toDependency(parserPreset.path));
   return inputs;
 };
 

@@ -1,6 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDeferResolve, toDependency, type Input } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PrettierConfig, PrettierOptions } from './types.ts';
 
@@ -29,7 +30,7 @@ const resolveConfig: ResolveConfig<PrettierConfig> = config => {
     if (Array.isArray(options.plugins)) {
       for (const plugin of options.plugins) {
         if (typeof plugin === 'string') {
-          result.add(toDependency(plugin));
+          result.add(isInternal(plugin) ? toDeferResolve(plugin) : toDependency(plugin));
         }
       }
     }

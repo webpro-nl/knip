@@ -3,6 +3,9 @@ package = "netlify-plugin-check-output-for-puppy-references"
   [plugins.inputs]
   breeds = ["pomeranian", "chihuahua", "bulldog"]
 
+[[plugins]]
+package = "/plugins/netlify-plugin-hello-world"
+
 [functions]
   directory = "myfunctions/"
   node_bundler = "esbuild"

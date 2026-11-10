@@ -33,7 +33,7 @@ test('Find dependencies in an npm-package-json-lint extends array', async () => 
     ...baseCounters,
     devDependencies: 1,
     unlisted: 1,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

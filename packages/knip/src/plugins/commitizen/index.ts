@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { CommitizenConfig } from './types.ts';
 
@@ -17,8 +18,9 @@ const packageJsonPath = 'config.commitizen';
 
 const config = ['.czrc', '.cz.json', 'package.json'];
 
-const resolveConfig: ResolveConfig<CommitizenConfig> = config => {
-  return config.path ? [toDependency(config.path)] : [];
+const resolveConfig: ResolveConfig<CommitizenConfig> = (config, options) => {
+  if (!config.path) return [];
+  return [isInternal(config.path) ? toDeferResolve(config.path, { dir: options.cwd }) : toDependency(config.path)];
 };
 
 const plugin: Plugin = {

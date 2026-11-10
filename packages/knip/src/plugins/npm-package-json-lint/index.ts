@@ -1,5 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
+import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
 import type { NpmPkgJsonLintConfig } from './types.ts';
@@ -16,8 +17,12 @@ const packageJsonPath = 'npmpackagejsonlint';
 
 const config = ['package.json', ...toCosmiconfig('npmpackagejsonlint')];
 
-const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = localConfig => {
-  return localConfig?.extends ? [localConfig.extends].flat().map(id => toDependency(id)) : [];
+const resolveConfig: ResolveConfig<NpmPkgJsonLintConfig> = (localConfig, options) => {
+  if (!localConfig?.extends) return [];
+  return [localConfig.extends].flat().map(id => {
+    if (!isInternal(id)) return toDependency(id);
+    return id.startsWith('./') ? toDeferResolve(id, { dir: options.cwd }) : toDeferResolve(id);
+  });
 };
 
 const plugin: Plugin = {
