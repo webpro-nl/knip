@@ -22,6 +22,7 @@ import type { ResolveModule } from './typescript/ast-nodes.ts';
 import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
+import { debugLog } from './util/debug.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
@@ -35,6 +36,15 @@ const copyFileNode = (file: FileNode): FileNode => ({
     externalRefs: new Set(file.imports.externalRefs),
   },
 });
+
+const tryParseFile = (filePath: string, sourceText: string) => {
+  try {
+    return _parseFile(filePath, sourceText);
+  } catch (error) {
+    debugLog('*', `Unable to parse ${filePath} (${error instanceof Error ? error.message : String(error)})`);
+    return undefined;
+  }
+};
 
 export class ProjectPrincipal {
   entryPaths = new Set<string>();
@@ -272,22 +282,19 @@ export class ProjectPrincipal {
           continue;
         }
 
-        try {
-          const result = _parseFile(filePath, sourceText);
-          this.fileManager.sourceTextCache.delete(filePath);
+        const result = tryParseFile(filePath, sourceText);
+        if (!result) continue;
+        this.fileManager.sourceTextCache.delete(filePath);
 
-          if (isProjectPath) {
-            const internalPaths = analyzeFile(filePath, result, sourceText);
-            if (internalPaths) for (const p of internalPaths) enqueue(p);
-          } else {
-            for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-              onSpecifier(specifier, filePath);
-              const resolved = this.resolveSpecifier(specifier, filePath);
-              if (resolved && !isInNodeModules(resolved)) enqueue(resolved);
-            }
+        if (isProjectPath) {
+          const internalPaths = analyzeFile(filePath, result, sourceText);
+          if (internalPaths) for (const p of internalPaths) enqueue(p);
+        } else {
+          for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+            onSpecifier(specifier, filePath);
+            const resolved = this.resolveSpecifier(specifier, filePath);
+            if (resolved && !isInNodeModules(resolved)) enqueue(resolved);
           }
-        } catch {
-          // Parse error — skip this file
         }
       }
     } finally {
@@ -308,15 +315,12 @@ export class ProjectPrincipal {
         const sourceText = typeof loaded === 'string' ? loaded : await loaded;
         if (!sourceText) continue;
 
-        try {
-          const result = _parseFile(filePath, sourceText);
-          for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-            onSpecifier(specifier, filePath);
-            const resolved = this.resolveSpecifier(specifier, filePath);
-            if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
-          }
-        } catch {
-          // Parse error — skip this file
+        const result = tryParseFile(filePath, sourceText);
+        if (!result) continue;
+        for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
+          onSpecifier(specifier, filePath);
+          const resolved = this.resolveSpecifier(specifier, filePath);
+          if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
         }
       }
     } finally {

@@ -45,6 +45,7 @@ import { extractPatternExtensions } from './util/pattern-extensions.ts';
 import { formatCauseMessage } from './util/errors.ts';
 import { logError } from './util/log.ts';
 import { loadConfigForPlugin } from './util/plugin.ts';
+import { hasUnhandledRejection, trackConfigLoad } from './util/unhandled-rejection.ts';
 import type { ConfigurationFiles } from './session/configuration.ts';
 
 type WorkspaceManagerOptions = {
@@ -490,10 +491,13 @@ export class WorkspaceWorker {
             const isLoad =
               typeof plugin.isLoadConfig === 'function' ? plugin.isLoadConfig(resolveOpts, this.dependencies) : true;
             if (isLoad) {
+              const resolveConfig = plugin.resolveConfig;
               try {
-                const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
-                if (localConfig) {
-                  const inputs = await plugin.resolveConfig(localConfig, resolveOpts);
+                const inputs = await trackConfigLoad(configFilePath, this.cache, async () => {
+                  const localConfig = await loadConfigForPlugin(configFilePath, plugin, resolveOpts, pluginName);
+                  return localConfig ? await resolveConfig(localConfig, resolveOpts) : undefined;
+                });
+                if (inputs) {
                   if (plugin.isFilterTransitiveDependencies && !isManifest) {
                     filterTransitiveDependencies(inputs, configFilePath, this.readRawFile);
                   }
@@ -532,7 +536,7 @@ export class WorkspaceWorker {
             cache.configFile = toEntry(configFilePath);
           }
 
-          if (hasLoadConfigError) {
+          if (hasLoadConfigError || hasUnhandledRejection()) {
             this.cache.removeEntry(configFilePath);
           } else if (fd?.meta) {
             fd.meta.data = { ...fd.meta.data, [pluginName]: cache };

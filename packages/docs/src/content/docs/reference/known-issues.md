@@ -47,6 +47,30 @@ eslint: false } }`
   - If this helps, add the file as an `entry` file for static analysis.
 - As a last resort, ignore the workspace: `ignoreWorkspaces: ["packages/lib"]`.
 
+## Unhandled rejections from config files
+
+A configuration file may start asynchronous work that fails without a `catch` or
+`await`. Knip reports the rejection, still prints its results and exits with
+code `2`:
+
+```sh
+$ knip
+ERROR: Unhandled rejection, likely from apps/docs/next.config.mjs (Build failed with 1 error:)
+ERROR: Please fix or visit https://knip.dev/reference/known-issues
+```
+
+The named file is the one Knip was loading or whose work was still running. When
+a dependency shared between config files causes the rejection, another file may
+be named.
+
+Sometimes updating the dependency that causes the rejection might help. For
+example, upgrading `fumadocs-mdx` to v15.2.1 or later resolved the reported
+case.
+
+See [exceptions from config files][4] for more potential workarounds.
+
+Note that `--no-exit-code` does not suppress this error.
+
 ## Path aliases in config files
 
 Loading the configuration file (e.g. `cypress.config.ts`) for one of Knip's
@@ -69,8 +93,8 @@ Potential workarounds:
 - Rewrite the import in the configuration file to a relative import.
 - Inject support with a module like `tsx`: `NODE_OPTIONS="--import tsx" knip`
 - Or `tsconfig-paths`: `NODE_OPTIONS="--import tsconfig-paths/register.js" knip`
-- Use Bun with [knip-bun][4].
-- See [exceptions from config files][5] for more potential workarounds.
+- Use Bun with [knip-bun][5].
+- See [exceptions from config files][4] for more potential workarounds.
 
 ## Nx Daemon
 
@@ -114,6 +138,6 @@ before running with `--cache` again.
 [1]: ../guides/handling-issues.mdx
 [2]: #path-aliases-in-config-files
 [3]: https://dotenvx.com/
-[4]: ./cli.md#knip-bun
-[5]: #exceptions-from-config-files
+[4]: #exceptions-from-config-files
+[5]: ./cli.md#knip-bun
 [6]: https://nx.dev/concepts/nx-daemon#turning-it-off

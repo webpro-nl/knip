@@ -17,12 +17,16 @@ import { perfObserver } from './util/Performance.ts';
 import { createPreprocessor, toReporterOptions } from './util/preprocessor.ts';
 import { runReporters } from './util/reporter.ts';
 import { prettyMilliseconds } from './util/string.ts';
+import { hasUnhandledRejection, listenForUnhandledRejections } from './util/unhandled-rejection.ts';
 import { watchSession } from './session/watch.ts';
 
 export const runCLI = async (args: ParsedCLIArgs) => {
+  let cwd = process.cwd();
+  listenForUnhandledRejections(() => cwd);
   if (perfObserver.isEnabled || perfObserver.isDurationEnabled) perfObserver.startRun();
   try {
     const options = await createOptions({ args });
+    cwd = options.cwd;
 
     if (options.isWatch) {
       await watchSession(options);
@@ -57,7 +61,7 @@ export const runCLI = async (args: ParsedCLIArgs) => {
       perfObserver.reset();
     }
 
-    if (results.hasConfigLoadErrors) {
+    if (results.hasConfigLoadErrors || hasUnhandledRejection()) {
       process.exitCode = 2;
       return;
     }

@@ -7,6 +7,7 @@ import { hasErrorCause } from '../util/errors.ts';
 import { isFile } from '../util/fs.ts';
 import { logError } from '../util/log.ts';
 import { toPosix } from '../util/path.ts';
+import { hasUnhandledRejection } from '../util/unhandled-rejection.ts';
 import { createSession } from './session.ts';
 
 export const watchSession = async (options: MainOptions) => {
@@ -29,7 +30,7 @@ export const watchSession = async (options: MainOptions) => {
     const type = eventType === 'rename' ? (isFile(options.cwd, path) ? 'added' : 'deleted') : 'modified';
     session.handleFileChanges([{ type, filePath: path }]).then(update => {
       if (!update) return;
-      process.exitCode = 0;
+      process.exitCode = hasUnhandledRejection() ? 2 : 0;
       report(update.duration);
     }, onError);
   });

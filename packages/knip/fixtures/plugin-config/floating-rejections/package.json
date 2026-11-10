@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/plugin-config-floating-rejections",
+  "workspaces": ["packages/*"]
+}
