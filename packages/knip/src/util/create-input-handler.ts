@@ -5,7 +5,7 @@ import type { Issue } from '../types/issues.ts';
 import type { ExternalRef } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
-import { fromBinary, type Input, isConfig, isDeferResolve, isDeferResolveEntry, toDebugString } from './input.ts';
+import { fromBinary, type Input, isConfig, isDeferResolveEntry, toDebugString } from './input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromSpecifier } from './modules.ts';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
 import { _resolveModuleSync, _resolveSync, resolvePackageManifestPath } from './resolve.ts';
@@ -78,23 +78,22 @@ export const createInputHandler = (
       return isGitIgnored(resolvedFilePath) ? undefined : resolvedFilePath;
     }
 
-    if (input.optional || (isDeferResolve(input) && options.isProduction && !input.production)) return;
+    const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
 
     if (resolvedFilePath || !isInternal(filePath)) {
       const packageName = resolvedFilePath
         ? getPackageNameFromFilePath(resolvedFilePath)
         : getPackageNameFromSpecifier(specifier);
-      const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
       if (packageName && credit(input, containingFilePath, inputWorkspace, packageName)) return;
-      report('unlisted', containingFilePath, workspace, packageName ?? specifier);
+      if (isReportable(input)) report('unlisted', containingFilePath, inputWorkspace, packageName ?? specifier);
       return;
     }
 
-    if (isGitIgnored(filePath)) return;
+    if (isGitIgnored(filePath) || !isReportable(input)) return;
     if (isDeferResolveEntry(input) || isConfig(input)) {
-      debugLog(workspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
+      debugLog(inputWorkspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
     } else {
-      report('unresolved', containingFilePath, workspace, specifier);
+      report('unresolved', containingFilePath, inputWorkspace, specifier);
     }
   };
 

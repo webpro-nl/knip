@@ -47,3 +47,14 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
     total: 4,
   });
 });
+
+test('Find dependencies with the ESLint plugin (deprecated/1, production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});
