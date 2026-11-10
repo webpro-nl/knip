@@ -11,10 +11,11 @@ test('Allows subpath-imports from plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.equal(Object.keys(issues.unlisted).length, 0);
+  assert(issues.unresolved['package.json']['#missing']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 3,
     total: 3,
   });
@@ -24,10 +25,11 @@ test('Allows subpath-imports from plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert.equal(Object.keys(issues.unlisted).length, 0);
+  assert(issues.unresolved['package.json']['#missing']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 3,
     total: 3,
   });
@@ -37,10 +39,11 @@ test('Allows subpath-imports from plugin (strict)', async () => {
   const options = await createOptions({ cwd, isStrict: true });
   const { issues, counters } = await main(options);
 
-  assert.equal(Object.keys(issues.unlisted).length, 0);
+  assert(issues.unresolved['package.json']['#missing']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    unresolved: 1,
     processed: 3,
     total: 3,
   });

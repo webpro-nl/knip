@@ -8,7 +8,7 @@
     "#dep-pkg": "dep-pkg/feature"
   },
   "scripts": {
-    "start": "node --import=#dep --import=#dep-pkg entry.ts"
+    "start": "node --import=#dep --import=#dep-pkg --import=#missing entry.ts"
   },
   "dependencies": {
     "dep-node-native": "^1.0.0",

@@ -84,12 +84,15 @@ export const createInputHandler = (
       const packageName = resolvedFilePath
         ? getPackageNameFromFilePath(resolvedFilePath)
         : getPackageNameFromSpecifier(specifier);
-      if (packageName && credit(input, containingFilePath, inputWorkspace, packageName)) return;
-      if (isReportable(input)) report('unlisted', containingFilePath, inputWorkspace, packageName ?? specifier);
-      return;
+      if (packageName) {
+        if (!credit(input, containingFilePath, inputWorkspace, packageName) && isReportable(input)) {
+          report('unlisted', containingFilePath, inputWorkspace, packageName);
+        }
+        return;
+      }
     }
 
-    if (isGitIgnored(filePath) || !isReportable(input)) return;
+    if ((isInternal(filePath) && isGitIgnored(filePath)) || !isReportable(input)) return;
     if (isDeferResolveEntry(input) || isConfig(input)) {
       debugLog(inputWorkspace.name, `Unable to resolve ${toDebugString(input, options.cwd)}`);
     } else {
