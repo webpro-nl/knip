@@ -73,8 +73,7 @@ const getInputs = (
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
   const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
   for (const loader of loaders) inputs.push(toDeferResolve(loader));
-  for (const target of aliasTargets)
-    inputs.push({ ...toDeferResolve(target, { dir: configFileDir }), production: true });
+  for (const target of aliasTargets) inputs.push(toDeferResolve(target, { dir: configFileDir, production: true }));
   for (const file of files) inputs.push(toDeferResolveProductionEntry(toAbsolute(file, configFileDir)));
   return inputs;
 };

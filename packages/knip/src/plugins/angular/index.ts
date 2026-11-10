@@ -55,7 +55,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         const opts = { dir: options.cwd };
         if (option === 'polyfills') {
           return isProduction
-            ? { ...toDeferResolve(specifier, opts), production: true }
+            ? toDeferResolve(specifier, { ...opts, production: true })
             : toDeferResolve(specifier, opts);
         }
         return isProduction ? toDeferResolveProductionEntry(specifier, opts) : toDeferResolveEntry(specifier, opts);

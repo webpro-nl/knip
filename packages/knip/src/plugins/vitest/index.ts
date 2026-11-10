@@ -60,7 +60,7 @@ const getCoverageInputs = (provider: string, customProviderModule: string | unde
   builtInCoverageProviders.has(provider)
     ? [toDependency(`@vitest/coverage-${provider}`)]
     : customProviderModule
-      ? [{ ...toDeferResolve(customProviderModule), dir }]
+      ? [toDeferResolve(customProviderModule, { dir })]
       : [];
 
 const isProjectConfig = (project: string | VitestProject): project is VitestProjectConfig =>
@@ -76,7 +76,7 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
     env && env !== 'node' ? (isInternal(env) || isAbsolute(env) ? [toDeferResolve(env)] : [toEnvDependency(env)]) : [];
   const reporters = getExternalReporters(testConfig.reporters).map(specifier =>
     isInternal(specifier) || isAbsolute(specifier)
-      ? { ...toDeferResolve(specifier), dir: vitestRoot }
+      ? toDeferResolve(specifier, { dir: vitestRoot })
       : toDependency(specifier)
   );
 
@@ -87,14 +87,13 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
 
   const setupFiles = [testConfig.setupFiles ?? []]
     .flat()
-    .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
-  const snapshotSerializers = (testConfig.snapshotSerializers ?? []).map(specifier => ({
-    ...toDeferResolve(specifier),
-    dir: vitestRoot,
-  }));
+    .map(specifier => toDeferResolve(specifier, { dir: vitestRoot }));
+  const snapshotSerializers = (testConfig.snapshotSerializers ?? []).map(specifier =>
+    toDeferResolve(specifier, { dir: vitestRoot })
+  );
   const globalSetup = [testConfig.globalSetup ?? []]
     .flat()
-    .map(specifier => ({ ...toDeferResolve(specifier), dir: vitestRoot }));
+    .map(specifier => toDeferResolve(specifier, { dir: vitestRoot }));
 
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {

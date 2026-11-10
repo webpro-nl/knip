@@ -64,7 +64,7 @@ export const scanVarlockFiles = (paths: string[], cwd: string) => {
         } else {
           const packageName = getPackageNameFromModuleSpecifier(descriptor);
           if (packageName) {
-            inputs.push({ ...toDependency(packageName, { containingFilePath: realPath }), production: true });
+            inputs.push(toDependency(packageName, { containingFilePath: realPath, production: true }));
           }
         }
         continue;

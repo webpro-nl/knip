@@ -160,6 +160,18 @@ same path. Project patterns ignore `dir`:
 | `toDependency`, `toBinary`                          | not a path                              | yes         |
 | `toAlias`                                           | `dir`, else the workspace directory     | yes         |
 
+### production
+
+Use the `production` flag for an input that is part of the production code, so
+it's kept in [production mode][12]: a resolved file stays an entry file, and an
+unlisted dependency or unresolved import is still reported. The production
+helpers such as [toProductionDependency][5] set it already. For instance, a
+module the build bundles into the application, resolved as a file or a package:
+
+```ts
+toDeferResolve(specifier, { dir: options.cwd, production: true });
+```
+
 ### optional
 
 Use the `optional` flag to indicate the dependency is optional. Then, a

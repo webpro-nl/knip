@@ -51,6 +51,7 @@ interface IgnoreInput extends Input {
 }
 
 type Options = {
+  production?: boolean;
   optional?: boolean;
   isTypeOnly?: boolean;
   alsoReferenceOwner?: boolean;
@@ -111,10 +112,11 @@ export const toDependency = (specifier: string, options: Options = {}): Input =>
 
 export const isDependency = (input: Input) => input.type === 'dependency';
 
-export const toProductionDependency = (specifier: string): Input => ({
+export const toProductionDependency = (specifier: string, options: Options = {}): Input => ({
   type: 'dependency',
   specifier,
   production: true,
+  ...options,
 });
 
 export const toDeferResolve = (specifier: string, options: Options = {}): Input => ({

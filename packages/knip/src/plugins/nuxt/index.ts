@@ -159,7 +159,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   for (const id of localConfig.plugins ?? []) {
     const src = typeof id === 'string' ? id : id?.src;
     if (typeof src === 'string')
-      inputs.push({ ...toDeferResolve(resolveAlias(src, srcDir, cwd), { dir: cwd }), production: true });
+      inputs.push(toDeferResolve(resolveAlias(src, srcDir, cwd), { dir: cwd, production: true }));
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
