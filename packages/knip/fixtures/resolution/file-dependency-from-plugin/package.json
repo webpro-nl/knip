@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/file-dependency-from-plugin",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "*",
+    "prettier-plugin-local": "file:./vendor/prettier-plugin-local"
+  }
+}

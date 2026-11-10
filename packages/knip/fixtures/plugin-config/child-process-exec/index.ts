@@ -27,6 +27,10 @@ fork(path.join(__dirname, 'scripts', 'task.js'));
 // --require/--import hooks and the positional file are entry files
 execSync('node --require ./scripts/hook.js scripts/task.js');
 
+// a script path as the command is an entry file; a missing one is unresolved
+execSync('./scripts/run.js');
+execSync('./scripts/missing.js');
+
 // options objects and callbacks must never be parsed as inputs
 execSync('lemon', { cwd: '/tmp', encoding: 'utf8' });
 exec('lime', (_error, stdout) => stdout);

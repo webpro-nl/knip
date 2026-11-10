@@ -58,11 +58,15 @@ test('Reference binaries and entry files in node:child_process calls', async () 
 
   assert.equal(Object.keys(binaries).length, 23);
 
+  // a script path as the command is an entry file; a missing one is unresolved
+  assert(issues.unresolved['index.ts']['./scripts/missing.js']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 23,
-    processed: 4,
-    total: 4,
+    unresolved: 1,
+    processed: 5,
+    total: 5,
   });
 });
 
@@ -76,7 +80,8 @@ test('Reference binaries and entry files in node:child_process calls (production
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 23,
-    processed: 4,
-    total: 4,
+    unresolved: 1,
+    processed: 5,
+    total: 5,
   });
 });

@@ -14,6 +14,8 @@ test('Find dependencies and literal module type imports with the nuxt plugin (co
 
   assert.deepEqual(Object.keys(issues.files), ['lib/h/types.ts']);
 
+  // a declared css package that is not installed (@fontsource/roboto) is still credited by name
+
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,

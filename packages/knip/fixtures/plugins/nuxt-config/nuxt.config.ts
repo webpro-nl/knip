@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     plugins: 'my-plugins',
   },
   plugins: ['my-plugins/custom/deep', { src: '~/my-plugins/custom/client.js', mode: 'client' }],
-  css: ['animate.css/animate.min.css'],
+  css: ['animate.css/animate.min.css', '@fontsource/roboto/400.css'],
   components: ['~/components', '~/other-components'],
   imports: {
     dirs: ['custom-utils'],
