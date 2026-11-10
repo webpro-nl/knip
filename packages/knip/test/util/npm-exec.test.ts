@@ -57,6 +57,10 @@ test('npm exec accepts explicit packages and versioned specifiers', () => {
   ]);
   assert.deepEqual(inputs('npm exec -- custom-provider@1'), [toDependency('custom-provider', optional)]);
   assert.deepEqual(inputs('npm exec -- @scope/custom-provider@1'), [toDependency('@scope/custom-provider', optional)]);
+  assert.deepEqual(inputs('npm exec --package=./tools/release-cli -- release-cli'), [
+    toDeferResolve('./tools/release-cli', { ...optional, dir: cwd }),
+    toBinary('release-cli', optional),
+  ]);
 });
 
 test('npm exec preserves explicit module, file and config references', () => {

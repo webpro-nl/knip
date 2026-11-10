@@ -209,6 +209,7 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx main', [toBinary('tsx', opt), toDeferResolveEntry('main', opt)]);
   t('npx tsx ./main.ts build', [toBinary('tsx', opt), ts]);
   t('npx tsx ./main.ts -- build', [toBinary('tsx', opt), ts]);
+  t('npx ./tools/release-cli', [toDeferResolve('./tools/release-cli', { ...opt, dir: cwd })]);
 });
 
 test('getInputsFromScripts (bun)', () => {

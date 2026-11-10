@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { isBinary, toBinary, toDependency } from '../../util/input.ts';
+import { isBinary, toBinary, toDeferResolve, toDependency } from '../../util/input.ts';
 import { extractBinary, isValidBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
 import { argsAfter, expandScript, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
@@ -29,7 +29,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (command === 'exec' || command === 'x') {
     const packages = parsed.package ? [parsed.package].flat() : [];
     const packageInputs = packages.map(specifier =>
-      toDependency(stripVersionFromSpecifier(specifier), { optional: true })
+      isInternal(specifier)
+        ? toDeferResolve(specifier, { optional: true, dir: options.cwd })
+        : toDependency(stripVersionFromSpecifier(specifier), { optional: true })
     );
     const separator = words.findIndex(word => word.value === '--');
     const args = parsed.positionalIndices!.slice(1).map(index => words[index]);

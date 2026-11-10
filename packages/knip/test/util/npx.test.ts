@@ -42,3 +42,10 @@ test('npx no-install preserves package, module, file and sibling references', ()
   assert.deepEqual(inputs('npx custom-build-cli'), [toBinary('custom-build-cli', optional)]);
   assert.deepEqual(inputs('npx --yes custom-build-cli'), [toBinary('custom-build-cli', optional)]);
 });
+
+test('npx resolves a local folder package from the script directory', () => {
+  assert.deepEqual(inputs('npx --package ./tools/release-cli release-cli'), [
+    toBinary('release-cli', optional),
+    toDeferResolve('./tools/release-cli', { ...optional, dir: cwd }),
+  ]);
+});
