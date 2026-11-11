@@ -13,8 +13,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['wrangler.{json,jsonc,toml}'];
 
-const resolveConfig: ResolveConfig<WranglerConfig> = async (config, { cwd }) => {
-  return (config.main ? [config.main] : []).map(id => toDeferResolveProductionEntry(id, { dir: cwd }));
+const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
+  return (config.main ? [config.main] : []).map(id => toDeferResolveProductionEntry(id));
 };
 
 const plugin: Plugin = {
