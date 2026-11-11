@@ -90,7 +90,9 @@ function getDocsForResults(configurationHints, maybeUnconfigured, issueTypes) {
  * @param {{ cwd: string, configFilePath: string | undefined }} options
  */
 export function buildResults(results, options) {
-  const configurationHints = finalizeConfigurationHints(results, options);
+  const configurationHints = finalizeConfigurationHints(results, options).map(hint =>
+    hint.identifier instanceof RegExp ? { ...hint, identifier: hint.identifier.source } : hint
+  );
 
   const maybeUnconfigured = configurationHints.some(hint => UNCONFIGURED_HINT_TYPES.has(hint.type));
 

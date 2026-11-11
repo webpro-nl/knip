@@ -17,6 +17,7 @@ const write = (dir, filePath, content) => {
 // Resolve symlinks (e.g. /var → /private/var on macOS) so paths in results match the fixture
 const cwd = realpathSync(mkdtempSync(join(tmpdir(), 'knip-mcp-')));
 write(cwd, 'package.json', { name: 'fixture' });
+write(cwd, 'knip.json', { ignoreBinaries: ['pm2-.+'] });
 write(cwd, 'node_modules/knip/package.json', { name: 'knip', version: '0.0.1' });
 
 const client = new Client({ name: 'test', version: '0.0.0' });
@@ -61,4 +62,19 @@ test('buildResults accepts a relative cwd', async () => {
     configFilePath: options.configFilePath,
   });
   assert.equal(output.projectKnipVersion, '0.0.1');
+});
+
+test('knip-run declares an output schema', async () => {
+  const { tools } = await client.listTools();
+  const tool = tools.find(tool => tool.name === 'knip-run');
+  assert.equal(tool?.outputSchema?.type, 'object');
+  assert.ok(tool?.outputSchema?.properties?.docs);
+});
+
+test('knip-run returns structured content', async () => {
+  const result = await runKnip({ cwd });
+  const output = /** @type {any} */ (result.structuredContent);
+  assert.deepEqual(JSON.parse(getText(result)), JSON.parse(JSON.stringify(output)));
+  const hint = output.configurationHints.find(hint => hint.type === 'ignoreBinaries');
+  assert.equal(hint?.identifier, 'pm2-.+');
 });
