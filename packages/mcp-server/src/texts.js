@@ -33,6 +33,8 @@ Returns:
 - totalIssues: Total number of issues found (0 = clean)
 - configurationHints: Ordered suggestions to improve configuration (address these first)
 - docs: Doc topics that apply to this result, some with a #section (read them with knip-docs)
+- knipVersion: Version of Knip that ran (bundled with the MCP Server)
+- projectKnipVersion: Version of knip installed in the project, if any (versionHint explains a mismatch)
 - counters: Per-issue-type totals
 - maybeUnconfigured: true when a high unused-file count suggests entry/project may be incomplete (review configurationHints)
 - truncated: true when the sample was capped; read counters for totals, or scope with workspace to see the rest
@@ -80,6 +82,13 @@ export const CONFIG_REVIEW_HINT = `Review the configuration for improvements tha
 - Config files (e.g. vite.config.ts) showing as unused → try enable or disable the plugin explicitly (vite: true)
 - Dependencies matching Node.js builtins: add to ignoreDependencies (e.g. buffer, process)
 - Unresolved imports from path aliases: add paths to Knip config (tsconfig.json semantics)`;
+
+/**
+ * @param {string} version Version of Knip bundled with the MCP Server (used by knip-run)
+ * @param {string} projectVersion Version of knip installed in the project
+ */
+export const getVersionHint = (version, projectVersion) =>
+  `knip-run uses Knip ${version} (bundled with the Knip MCP Server), but this project has knip ${projectVersion} installed (used by its knip CLI and CI). Results and configuration hints can differ between versions, so tell the user and suggest aligning them.`;
 
 export const CLEAN_HINT =
   'No issues and no configuration hints: Knip is happy. Many projects need no knip.json (plugins are auto-detected), so this is a complete, successful result with nothing more to configure.';

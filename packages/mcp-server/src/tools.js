@@ -1,9 +1,16 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
+import {
+  createOptions,
+  createSession,
+  finalizeConfigurationHints,
+  KNIP_CONFIG_LOCATIONS,
+  version as knipVersion,
+} from 'knip/session';
 import { CURATED_RESOURCES, ISSUE_TYPE_DOCS } from './curated-resources.js';
-import { CLEAN_HINT, CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
+import { CLEAN_HINT, CONFIG_REVIEW_HINT, getVersionHint, UNCONFIGURED_HINT } from './texts.js';
 
 export { ERROR_HINT } from './texts.js';
 
@@ -42,6 +49,25 @@ const MAX_ISSUES_PER_TYPE = 50;
 const UNCONFIGURED_HINT_TYPES = new Set(['top-level-unconfigured', 'workspace-unconfigured']);
 
 /**
+ * Version of knip installed in the project, which may differ from the bundled one that runs here
+ * @param {string} cwd
+ * @returns {string | undefined}
+ */
+function getProjectKnipVersion(cwd) {
+  // createRequire needs an absolute path, and the VS Code extension may pass a relative cwd
+  const dirs = createRequire(resolve(cwd, 'package.json')).resolve.paths('knip') ?? [];
+  for (const dir of dirs) {
+    const filePath = join(dir, 'knip', 'package.json');
+    if (!existsSync(filePath)) continue;
+    try {
+      return JSON.parse(readFileSync(filePath, 'utf-8')).version;
+    } catch {
+      return;
+    }
+  }
+}
+
+/**
  * Doc topics (incl. sections) that apply to the configuration hints and issues of a run
  * @param {{ type: string }[]} configurationHints
  * @param {boolean} maybeUnconfigured
@@ -67,6 +93,12 @@ export function buildResults(results, options) {
   const configurationHints = finalizeConfigurationHints(results, options);
 
   const maybeUnconfigured = configurationHints.some(hint => UNCONFIGURED_HINT_TYPES.has(hint.type));
+
+  const projectKnipVersion = getProjectKnipVersion(options.cwd);
+  const versionHint =
+    projectKnipVersion && projectKnipVersion !== knipVersion
+      ? getVersionHint(knipVersion, projectKnipVersion)
+      : undefined;
 
   const configFile = options.configFilePath
     ? { exists: true, filePath: options.configFilePath }
@@ -116,6 +148,9 @@ export function buildResults(results, options) {
 
   return {
     reviewHint,
+    ...(versionHint ? { versionHint } : {}),
+    knipVersion,
+    ...(projectKnipVersion ? { projectKnipVersion } : {}),
     maybeUnconfigured,
     truncated,
     configurationHints,
