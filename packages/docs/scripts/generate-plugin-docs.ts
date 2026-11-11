@@ -139,10 +139,11 @@ for await (const dir of directories) {
         ...generatedBlocks,
       ].join('\n\n') + '\n';
 
-    console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
     await fs.writeFile(path.join(pluginDocsDir, `${pluginName}.md`), output);
   }
 }
+
+console.log(`Wrote ${plugins.length} plugin docs to plugins/`);
 
 // Remove docs of plugins that no longer exist (e.g. after switching branches)
 const pluginDocs = new Set(plugins.map(([, pluginName]) => `${pluginName}.md`));
