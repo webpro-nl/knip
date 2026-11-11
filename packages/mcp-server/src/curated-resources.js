@@ -103,3 +103,26 @@ export const CURATED_RESOURCES = {
     path: 'reference/plugins',
   },
 };
+
+/**
+ * Doc section to read per issue type in a knip-run result (returned as `docs`)
+ * @type {Record<string, string>}
+ */
+export const ISSUE_TYPE_DOCS = {
+  files: 'handling-issues#unused-files',
+  subpaths: 'handling-issues#unused-subpaths',
+  dependencies: 'handling-issues#unused-dependencies',
+  devDependencies: 'handling-issues#unused-dependencies',
+  unlisted: 'handling-issues#unlisted-dependencies',
+  binaries: 'handling-issues#unlisted-binaries',
+  unresolved: 'handling-issues#unresolved-imports',
+  exports: 'handling-issues#unused-exports',
+  nsExports: 'handling-issues#unused-exports',
+  types: 'handling-issues#unused-exports',
+  nsTypes: 'handling-issues#unused-exports',
+  enumMembers: 'handling-issues#enum-members',
+  namespaceMembers: 'handling-issues#namespace-members',
+  catalog: 'features/catalogs#unused-catalog-entries',
+  catalogReferences: 'features/catalogs#unresolved-catalog-references',
+  cycles: 'configuration-reference#cycles',
+};

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { CURATED_RESOURCES } from '../src/curated-resources.js';
+import { ISSUE_TYPES } from 'knip/session';
+import { CURATED_RESOURCES, ISSUE_TYPE_DOCS } from '../src/curated-resources.js';
 import { ERROR_HINT, WORKFLOW } from '../src/texts.js';
 import { getDocs } from '../src/tools.js';
 
@@ -24,6 +25,15 @@ test('every topic referenced in texts resolves', () => {
   const refs = getTopicRefs(WORKFLOW + ERROR_HINT);
   assert.ok(refs.length > 10);
   for (const ref of refs) assert.ok('content' in getDocs(ref), ref);
+});
+
+test('every issue type doc resolves to a section', () => {
+  for (const [type, topic] of Object.entries(ISSUE_TYPE_DOCS)) {
+    assert.ok(ISSUE_TYPES.includes(type), `unknown issue type: ${type}`);
+    const result = getDocs(topic);
+    assert.ok('content' in result, `${type}: ${topic}`);
+    assert.match(result.content, /^#{2,6} /, `${type}: ${topic}`);
+  }
 });
 
 test('getDocs returns a section by anchor', () => {

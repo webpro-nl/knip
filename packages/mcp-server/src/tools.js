@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
-import { CURATED_RESOURCES } from './curated-resources.js';
+import { CURATED_RESOURCES, ISSUE_TYPE_DOCS } from './curated-resources.js';
 import { CLEAN_HINT, CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
 
 export { ERROR_HINT } from './texts.js';
@@ -39,6 +39,26 @@ const getPages = () => {
 const MAX_UNUSED_FILES = 50;
 const MAX_ISSUES_PER_TYPE = 50;
 
+const UNCONFIGURED_HINT_TYPES = new Set(['top-level-unconfigured', 'workspace-unconfigured']);
+
+/**
+ * Doc topics (incl. sections) that apply to the configuration hints and issues of a run
+ * @param {{ type: string }[]} configurationHints
+ * @param {boolean} maybeUnconfigured
+ * @param {string[]} issueTypes
+ */
+function getDocsForResults(configurationHints, maybeUnconfigured, issueTypes) {
+  const docs = new Set();
+  if (maybeUnconfigured) {
+    docs.add('how-knip-works');
+    docs.add('configuring-project-files');
+  }
+  if (configurationHints.some(hint => hint.type === 'workspace-unconfigured')) docs.add('monorepos-and-workspaces');
+  if (configurationHints.some(hint => !UNCONFIGURED_HINT_TYPES.has(hint.type))) docs.add('configuration-hints');
+  for (const type of issueTypes) if (ISSUE_TYPE_DOCS[type]) docs.add(ISSUE_TYPE_DOCS[type]);
+  return [...docs];
+}
+
 /**
  * @param {import('knip/session').Results} results
  * @param {{ cwd: string, configFilePath: string | undefined }} options
@@ -46,9 +66,7 @@ const MAX_ISSUES_PER_TYPE = 50;
 export function buildResults(results, options) {
   const configurationHints = finalizeConfigurationHints(results, options);
 
-  const maybeUnconfigured = configurationHints.some(
-    hint => hint.type === 'top-level-unconfigured' || hint.type === 'workspace-unconfigured'
-  );
+  const maybeUnconfigured = configurationHints.some(hint => UNCONFIGURED_HINT_TYPES.has(hint.type));
 
   const configFile = options.configFilePath
     ? { exists: true, filePath: options.configFilePath }
@@ -70,6 +88,7 @@ export function buildResults(results, options) {
 
   let truncated = false;
 
+  /** @type {string[]} */
   const unusedFiles = Object.keys(results.issues.files);
   const files = unusedFiles.slice(0, MAX_UNUSED_FILES);
   if (unusedFiles.length > files.length) truncated = true;
@@ -93,11 +112,14 @@ export function buildResults(results, options) {
     issues[type] = items.slice(0, MAX_ISSUES_PER_TYPE);
   }
 
+  const issueTypes = [...(unusedFiles.length > 0 ? ['files'] : []), ...Object.keys(issues)];
+
   return {
     reviewHint,
     maybeUnconfigured,
     truncated,
     configurationHints,
+    docs: getDocsForResults(configurationHints, maybeUnconfigured, issueTypes),
     counters,
     totalIssues,
     configFile,

@@ -2,22 +2,20 @@ import { CURATED_RESOURCES } from './curated-resources.js';
 
 export const WORKFLOW = `Workflow:
 
-1. Read essential documentation resources:
-   - how-knip-works (the mental model: entry files, module graph, reachability)
-   - configuring-project-files (must read to configure entry patterns)
-   - plugins-explanation (understand entries added by auto-detected plugins)
-   - handling-issues (comprehensive guide to resolve any reported issue type)
-   - configuration-reference (all knip.json configuration options)
-2. Run analysis (knip-run): returns configurationHints (decode with configuration-hints) and issues keyed by type (decode with issue-types)
+1. Run analysis (knip-run): returns configurationHints, issues keyed by type, and docs (the doc topics that apply to this result)
+2. Read the topics in docs with knip-docs (skip the ones you already read); a topic#section returns only that section
 3. Address the configuration hints by adjusting knip.json
-4. Repeat steps 2-3 until configuration hints are gone and remaining issues are genuine findings
+4. Repeat steps 1-3 until configuration hints are gone and remaining issues are genuine findings
 
 You're done when there are no configuration hints and the issues are genuine (or zero). Many projects need NO knip.json: Knip auto-detects plugins, so configFile exists:false with zero hints is a good, complete result. Don't add configuration just to have it.
 
 Important notes:
 - For prompts like "run knip" or "clean up codebase" or "no more slop": always run workflow to configure Knip first.
+- To decode results, consult: configuration-hints and issue-types
+- For knip.json options, consult: configuration-reference (or one option, e.g. configuration-reference#ignorebinaries)
+- Config files reported as unused, or entry files missing for a tool, consult: plugins-explanation
 - If you hit errors (not lint issues), consult: known-issues
-- Before suggesting fixes/solutions, consult: handling-issues and jsdoc-tsdoc-tags
+- Before suggesting fixes/solutions, read the handling-issues sections in docs, and consult: jsdoc-tsdoc-tags
 - Prefer specific solutions over "ignore"; to focus or mute issue types, consult: rules-and-filters
 - For cleanup, consult: auto-fix
 - To install Knip and start using it from CLI, consult: getting-started and cli
@@ -30,6 +28,7 @@ export const RUN_KNIP_TOOL_DESCRIPTION = `Run Knip and return configuration hint
 Returns:
 - totalIssues: Total number of issues found (0 = clean)
 - configurationHints: Ordered suggestions to improve configuration (address these first)
+- docs: Doc topics that apply to this result, some with a #section (read them with knip-docs)
 - counters: Per-issue-type totals
 - maybeUnconfigured: true when a high unused-file count suggests entry/project may be incomplete (review configurationHints)
 - truncated: true when the sample was capped; read counters for totals, or scope with workspace to see the rest
@@ -52,11 +51,11 @@ ${Object.entries(CURATED_RESOURCES)
   .map(([id, doc]) => `- ${id}: ${doc.description}`)
   .join('\n')}
 
-Full descriptions are registered as MCP resources; any page is also reachable by path (e.g. "guides/troubleshooting"). Use this instead of fetching from https://knip.dev.`;
+Full descriptions are registered as MCP resources; any page is also reachable by path (e.g. "guides/troubleshooting"). Append #section to get only that section (e.g. "handling-issues#unused-dependencies"). Use this instead of fetching from https://knip.dev.`;
 
 // pkg.contributes.languageModelTools[1].inputSchema.properties.topic.description
 export const DOC_TOOL_TOPIC_DESCRIPTION =
-  'Topic key (e.g. "configuring-project-files") for curated resources, or path (e.g. "explanations/plugins") for all available docs';
+  'Topic key (e.g. "configuring-project-files") for curated resources, or path (e.g. "explanations/plugins") for all available docs, optionally with a #section (e.g. "handling-issues#unused-dependencies")';
 
 export const ERROR_HINT = `For unexpected errors (exit code 2) such as "Error loading ...":
 
