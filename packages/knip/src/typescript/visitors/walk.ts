@@ -1039,11 +1039,7 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     let original = state.exports.get(local);
     if (!original) {
       const defaultExport = state.exports.get('default');
-      if (
-        defaultExport &&
-        !defaultExport.jsDocTags.has(ALIAS_TAG) &&
-        (defaultExport.binding === local || state.localToExports.get(local)?.has('default'))
-      ) {
+      if (defaultExport && (defaultExport.binding === local || state.localToExports.get(local)?.has('default'))) {
         name = 'default';
         original = defaultExport;
       }
@@ -1052,13 +1048,18 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     if (symbol === 'default' && state.specifierExportNames.has(local)) continue;
     let group = state.aliasedExports.get(name);
     if (!group) {
-      group = [{ symbol: name, pos: original.pos, line: original.line, col: original.col }];
+      group = original.jsDocTags.has(ALIAS_TAG)
+        ? []
+        : [{ symbol: name, pos: original.pos, line: original.line, col: original.col }];
       state.aliasedExports.set(name, group);
     }
     const { line, col } = getLineAndCol(state.lineStarts, pos);
     group.push({ symbol, pos, line, col });
   }
-  for (const group of state.aliasedExports.values()) group.sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
+  for (const [name, group] of state.aliasedExports) {
+    if (group.length < 2) state.aliasedExports.delete(name);
+    else group.sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
+  }
 
   while (state.pendingCallRefs.length > 0 || state.pendingMemberCallRefs.length > 0) {
     while (state.pendingCallRefs.length > 0) {
