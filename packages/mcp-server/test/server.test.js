@@ -78,3 +78,9 @@ test('knip-run returns structured content', async () => {
   const hint = output.configurationHints.find(hint => hint.type === 'ignoreBinaries');
   assert.equal(hint?.identifier, 'pm2-.+');
 });
+
+test('reads a doc page as resource by path', async () => {
+  const { contents } = await client.readResource({ uri: 'knip://docs/reference/cli' });
+  assert.equal(contents[0].mimeType, 'text/markdown');
+  assert.match(String(contents[0].text), /--production/);
+});

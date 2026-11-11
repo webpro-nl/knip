@@ -110,10 +110,10 @@ class MCP {
       new ResourceTemplate(`${DOCS}/{+path}`, { list: undefined }),
       { description: 'Get Knip documentation page by path', mimeType: 'text/markdown' },
       async (uri, { path }) => {
-        const result = getDocs(path);
-        if ('content' in result) return { content: [{ type: 'text', text: result.content }] };
-        const errorText = `Documentation not found: ${path}`;
-        return { contents: [{ uri, mimeType: 'text/plain', text: errorText }] };
+        const result = getDocs(String(path));
+        if ('content' in result)
+          return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text: result.content }] };
+        return { contents: [{ uri: uri.href, mimeType: 'text/plain', text: result.error }] };
       }
     );
   }
