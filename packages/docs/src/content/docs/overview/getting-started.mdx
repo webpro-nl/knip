@@ -9,7 +9,12 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Knip v6 requires at least Node.js v20.19.0. Or Bun.
 
-Want to try Knip without installation? Visit [the playground][1].
+:::tip
+
+If you're into agentic coding, let your agent configure `knip.json` for you!
+See [coding agents][1] below.
+
+:::
 
 ## Installation
 
@@ -76,12 +81,20 @@ Knip will lint your project and report unused dependencies, exports and files.
 The next step is to learn more about [how Knip works][2] or go straight to [your
 first cleanup][3].
 
-:::tip
+## Coding agents
 
-Try the [Knip Editor Extension][4]! Let your coding agent use the built-in MCP
-Server and create a custom `knip.json` for you.
+Let your coding agent configure Knip using the [Knip MCP Server][4]. Paste this
+into your agent session:
 
-:::
+```text
+Install the Knip MCP Server (@knip/mcp) and use it to configure Knip in this project.
+```
+
+You may need to restart the session to pick up the new MCP server. Paste the
+prompt again and off you go.
+
+Want to use Knip directly in your IDE? The [Knip Editor Extension][5] has the
+same MCP Server built in.
 
 ## Manual
 
@@ -152,10 +165,8 @@ To run Knip without adding it to your project:
   </TabItem>
 </Tabs>
 
-In this scenario `typescript` and `@types/node` are expected to be installed
-already.
-
-[1]: /playground
+[1]: #coding-agents
 [2]: ../explanations/how-knip-works.md
 [3]: ./first-cleanup.mdx
-[4]: ../reference/integrations.md
+[4]: ../reference/integrations.md#mcp-server
+[5]: ../reference/integrations.md
