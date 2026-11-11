@@ -39,7 +39,7 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) 
 
   return [
     ...toInputs([cfg.framework], 'framework'),
-    ...toInputs([cfg.runner], 'runner'),
+    ...toInputs([cfg.runner ?? 'local'], 'runner'),
     ...toInputs(cfg.reporters, 'reporter'),
     ...toInputs(cfg.services, 'service'),
   ];
