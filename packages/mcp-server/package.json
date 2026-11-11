@@ -28,13 +28,26 @@
     "./tools": "./src/tools.js"
   },
   "scripts": {
-    "prepack": "cp -r ../docs/src/content/docs ./src/docs",
-    "release": "release-it -c ../../.release-it.json"
+    "build": "node ../docs/scripts/generate-plugin-docs.ts --pages-only && node scripts/build-docs.js",
+    "prepack": "pnpm run build",
+    "release": "release-it -c ../../.release-it.json",
+    "test": "pnpm run build && node --test test/*.test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
     "knip": "workspace:^",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "github-slugger": "^2.0.0",
+    "mdast-util-definitions": "^6.0.0",
+    "mdast-util-to-string": "^4.0.0",
+    "remark-directive": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

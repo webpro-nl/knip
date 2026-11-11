@@ -13,7 +13,7 @@ import {
   RUN_KNIP_TOOL_DESCRIPTION,
   WORKFLOW,
 } from './texts.js';
-import { getDocs, getErrorMessage, getResults, readContent } from './tools.js';
+import { getDocs, getErrorMessage, getResults } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
@@ -63,7 +63,11 @@ class MCP {
         doc.name,
         uri,
         { description: doc.description, mimeType: 'text/markdown' },
-        async () => ({ contents: [{ uri, mimeType: 'text/markdown', text: readContent(doc.path) }] })
+        async () => {
+          const result = getDocs(id);
+          const text = 'content' in result ? result.content : result.error;
+          return { contents: [{ uri, mimeType: 'text/markdown', text }] };
+        }
       );
     }
 

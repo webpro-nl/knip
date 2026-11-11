@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { createOptions, createSession, finalizeConfigurationHints, KNIP_CONFIG_LOCATIONS } from 'knip/session';
 import { CURATED_RESOURCES } from './curated-resources.js';
 import { CLEAN_HINT, CONFIG_REVIEW_HINT, UNCONFIGURED_HINT } from './texts.js';
-import { transformForAgent } from './transform.js';
 
 export { ERROR_HINT } from './texts.js';
 
@@ -23,8 +22,19 @@ export function getErrorMessage(error) {
   return `${messages.join('\nCaused by: ')}\nCurrent working dir: ${process.cwd()}`;
 }
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const docsDir = join(__dirname, './docs');
+// Built by scripts/build-docs.js (prepack, and the VS Code extension's publish script)
+const DOCS_FILE = join(dirname(fileURLToPath(import.meta.url)), 'docs.json');
+
+/** @type {Record<string, { content: string, sections: Record<string, [number, number]> }> | undefined} */
+let docs;
+
+const getPages = () => {
+  if (!docs) {
+    if (!existsSync(DOCS_FILE)) throw new Error(`Missing ${DOCS_FILE}, run \`pnpm --dir packages/mcp-server build\``);
+    docs = JSON.parse(readFileSync(DOCS_FILE, 'utf-8'));
+  }
+  return docs;
+};
 
 const MAX_UNUSED_FILES = 50;
 const MAX_ISSUES_PER_TYPE = 50;
@@ -107,34 +117,24 @@ export async function getResults(cwd, workspace) {
   return buildResults(session.getResults(), options);
 }
 
-/** @param {string} filePath */
-export function readContent(filePath) {
-  try {
-    const content = readFileSync(join(docsDir, filePath), 'utf-8');
-    return transformForAgent(content, filePath);
-  } catch (error) {
-    return `Error reading ${filePath}: ${error instanceof Error ? error.message : String(error)}`;
-  }
-}
-
 /**
- * @param {string} topic
+ * @param {string} topic Topic id or docs path (e.g. `reference/cli` or `/reference/cli`), optionally with a `#section` anchor
  * @returns {{ content: string } | { error: string }}
  */
 export function getDocs(topic) {
-  const content = findDocPage(topic);
-  if (content) return { content };
-  return { error: `Documentation not found: ${topic}. Available: ${Object.keys(CURATED_RESOURCES).join(', ')}` };
-}
-
-/** @param {string} topic */
-function findDocPage(topic) {
-  if (CURATED_RESOURCES[topic]) return readContent(CURATED_RESOURCES[topic].path);
-
-  for (const ext of ['.md', '.mdx']) {
-    const filePath = join(docsDir, `${topic}${ext}`);
-    if (existsSync(filePath)) return readContent(`${topic}${ext}`);
+  const [id, anchor] = topic.split('#');
+  const pages = getPages();
+  const pageId = CURATED_RESOURCES[id]?.path ?? id.replace(/^\//, '');
+  const page = Object.hasOwn(pages, pageId) ? pages[pageId] : undefined;
+  if (!page) {
+    return { error: `Documentation not found: ${topic}. Available: ${Object.keys(CURATED_RESOURCES).join(', ')}` };
   }
-
-  return null;
+  if (!anchor) return { content: page.content };
+  const section = anchor.toLowerCase();
+  if (Object.hasOwn(page.sections, section)) return { content: page.content.slice(...page.sections[section]) };
+  return {
+    error: `Section not found: ${topic}. Available sections: ${Object.keys(page.sections)
+      .map(a => `#${a}`)
+      .join(', ')}`,
+  };
 }

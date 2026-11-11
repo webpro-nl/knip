@@ -88,7 +88,8 @@ console.log(`Pinning bindings: @oxc-parser@${oxcParserVersion}, @oxc-resolver@${
 cpSync(join(knipNm, 'jiti'), join(nm, 'jiti'), { recursive: true, dereference: true });
 cpSync(join(knipNm, 'oxc-parser'), join(nm, 'oxc-parser'), { recursive: true, dereference: true });
 
-cpSync(join(root, '../mcp-server/src/docs'), join(nm, '@knip/mcp/docs'), { recursive: true });
+execSync('pnpm run build', { cwd: join(root, '../mcp-server'), stdio: 'inherit' });
+cpSync(join(root, '../mcp-server/src/docs.json'), join(nm, '@knip/mcp/docs.json'));
 
 // Remove "type": "module" from package.json so CJS extension.js works
 const pkgPath = join(root, 'package.json');
