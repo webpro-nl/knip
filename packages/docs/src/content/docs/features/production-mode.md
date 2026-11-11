@@ -45,6 +45,9 @@ file that is also a production entry stays included. These references do not
 count as dependency usage, so a package in `dependencies` that only test or
 tooling configuration uses is reported as unused.
 
+Unused subpaths in `package.json` are not reported, since files excluded from
+the analysis, such as tests, may import them.
+
 :::note
 
 The production run does not replace the default run. Depending on your needs you

@@ -45,6 +45,7 @@ export const getIncludedIssueTypes = (options: GetIncludedIssueTypesOptions) => 
     _exclude.push('devDependencies');
     _exclude.push('catalog');
     _exclude.push('catalogReferences');
+    _exclude.push('subpaths');
   } else {
     // Auto-add (or remove) `devDependencies` when `dependencies` are included (or excluded)
     if (_include.includes('dependencies')) _include.push('devDependencies', 'optionalPeerDependencies');

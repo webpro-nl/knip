@@ -45,18 +45,17 @@ test('Report unused subpath imports and their target files', async () => {
   });
 });
 
-test('Report unused subpath imports and their target files (production)', async () => {
+test('Report unused target files of subpath imports, not the subpaths (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
   assert.deepEqual(Object.keys(issues.files).sort(), unusedFiles);
   assert(issues.unlisted['bridge/promoted.js']['unlisted-pkg']);
-  assertUnusedSubpaths(issues);
+  assert.deepEqual(issues.subpaths, {});
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 5,
-    subpaths: 3,
     unlisted: 1,
     processed: 18,
     total: 18,
