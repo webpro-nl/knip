@@ -1,8 +1,8 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toDependency } from '../../util/input.ts';
-import type { Manifest } from '../../util/package-json.ts';
 import { isAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolvePackageManifestPath } from '../../util/resolve.ts';
 import type { WebdriverIOConfig } from './types.ts';
 
 // https://webdriver.io/docs/configuration
@@ -22,30 +22,20 @@ const getNames = (plugins: unknown[] = []) =>
     return typeof name === 'string' && !name.startsWith('file://') && !isAbsolute(name) ? [name] : [];
   });
 
-const getDeclaredDependencies = (manifests: (Manifest | undefined)[]) =>
-  new Set(
-    manifests.flatMap(manifest => [
-      ...Object.keys(manifest?.dependencies ?? {}),
-      ...Object.keys(manifest?.devDependencies ?? {}),
-      ...Object.keys(manifest?.optionalDependencies ?? {}),
-      ...Object.keys(manifest?.peerDependencies ?? {}),
-    ])
-  );
-
-const toPluginDependency = (name: string, type: string, dependencies: Set<string>) => {
+const toPluginDependency = (name: string, type: string, dir: string) => {
   if (name.startsWith('@')) return toDependency(name);
   const scoped = `@wdio/${name.toLowerCase()}-${type}`;
   const community = `wdio-${name.toLowerCase()}-${type}`;
-  return toDependency(!dependencies.has(scoped) && dependencies.has(community) ? community : scoped);
+  const isCommunity = !resolvePackageManifestPath(scoped, dir) && resolvePackageManifestPath(community, dir);
+  return toDependency(isCommunity ? community : scoped);
 };
 
 const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) => {
   const cfg = config?.config;
   if (!cfg) return [];
 
-  const declared = getDeclaredDependencies([options.manifest, options.rootManifest]);
   const toInputs = (plugins: unknown[] | undefined, type: string) =>
-    getNames(plugins).map(name => toPluginDependency(name, type, declared));
+    getNames(plugins).map(name => toPluginDependency(name, type, options.configFileDir));
 
   return [
     ...toInputs([cfg.framework], 'framework'),

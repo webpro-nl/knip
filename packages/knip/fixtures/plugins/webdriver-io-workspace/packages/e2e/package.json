@@ -1,9 +1,0 @@
-{
-  "name": "@plugins/webdriver-io-workspace-e2e",
-  "scripts": {
-    "test": "wdio"
-  },
-  "devDependencies": {
-    "@wdio/cli": "*"
-  }
-}
