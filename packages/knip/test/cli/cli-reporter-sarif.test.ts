@@ -95,6 +95,7 @@ test('knip --reporter sarif', () => {
           physicalLocation: {
             artifactLocation: { uri: 'src/unused.ts' },
           },
+          logicalLocations: [{ name: 'src/unused.ts' }],
         },
       },
       {
@@ -107,6 +108,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 9, startColumn: 27, endColumn: 37 },
           },
+          logicalLocations: [{ name: 'unresolved' }],
         },
       },
       {
@@ -119,6 +121,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 10, startColumn: 27, endColumn: 42 },
           },
+          logicalLocations: [{ name: '@org/unresolved' }],
         },
       },
       {
@@ -131,6 +134,7 @@ test('knip --reporter sarif', () => {
             artifactLocation: { uri: 'src/index.ts' },
             region: { startLine: 8, startColumn: 24, endColumn: 36 },
           },
+          logicalLocations: [{ name: './unresolved' }],
         },
       },
     ]
@@ -155,5 +159,20 @@ test('maps warning rules and results to SARIF warning severity', () => {
       problemSeverity: 'warning',
       resultLevel: 'warning',
     }
+  );
+
+  assert.deepEqual(
+    run.results
+      .filter((result: { ruleId: string }) => result.ruleId === 'knip/exports' || result.ruleId === 'knip/types')
+      .map((result: { ruleId: string; locations: { logicalLocations: unknown[] }[] }) => ({
+        ruleId: result.ruleId,
+        logicalLocation: result.locations[0].logicalLocations[0],
+      })),
+    [
+      { ruleId: 'knip/exports', logicalLocation: { name: 'unused', kind: 'unknown' } },
+      { ruleId: 'knip/exports', logicalLocation: { name: 'unused', kind: 'unknown' } },
+      { ruleId: 'knip/types', logicalLocation: { name: 'UnusedType', kind: 'type' } },
+      { ruleId: 'knip/types', logicalLocation: { name: 'UnusedType', kind: 'type' } },
+    ]
   );
 });
