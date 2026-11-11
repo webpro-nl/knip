@@ -51,7 +51,6 @@ Available topics (use these IDs):
 ${Object.entries(CURATED_RESOURCES)
   .map(([id, doc]) => `- ${id}: ${doc.description}`)
   .join('\n')}
-}
 
 Full descriptions are registered as MCP resources; any page is also reachable by path (e.g. "guides/troubleshooting"). Use this instead of fetching from https://knip.dev.`;
 

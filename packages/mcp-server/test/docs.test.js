@@ -1,10 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { CURATED_RESOURCES } from '../src/curated-resources.js';
+import { ERROR_HINT, WORKFLOW } from '../src/texts.js';
 import { getDocs } from '../src/tools.js';
+
+/** Topic ids named in a text, e.g. "consult: handling-issues and jsdoc-tsdoc-tags" */
+const getTopicRefs = text => {
+  const refs = [];
+  for (const m of text.matchAll(/^\s+- ([a-z-]+) \(/gm)) refs.push(m[1]);
+  for (const m of text.matchAll(/consult: ([a-z-]+(?:#[a-z-]+)?(?:(?:,| and) [a-z-]+(?:#[a-z-]+)?)*)/g)) {
+    refs.push(...m[1].split(/, | and /));
+  }
+  for (const m of text.matchAll(/e\.g\. ([a-z-]+#[a-z-]+)/g)) refs.push(m[1]);
+  for (const m of text.matchAll(/topic "([a-z-]+)"(?: and "([a-z-]+)")?/g)) refs.push(...m.slice(1).filter(Boolean));
+  return refs;
+};
 
 test('every curated resource resolves', () => {
   for (const [id, doc] of Object.entries(CURATED_RESOURCES)) assert.ok('content' in getDocs(id), `${id} (${doc.path})`);
+});
+
+test('every topic referenced in texts resolves', () => {
+  const refs = getTopicRefs(WORKFLOW + ERROR_HINT);
+  assert.ok(refs.length > 10);
+  for (const ref of refs) assert.ok('content' in getDocs(ref), ref);
 });
 
 test('getDocs returns a section by anchor', () => {

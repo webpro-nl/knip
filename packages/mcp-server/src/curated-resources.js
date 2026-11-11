@@ -1,5 +1,21 @@
 /** @type {Record<string, { name: string; description: string; path: string; featured?: boolean }>} */
 export const CURATED_RESOURCES = {
+  'getting-started': {
+    name: 'Getting Started',
+    description: 'New to Knip? Start here for installation and first run',
+    path: 'overview/getting-started',
+  },
+  'first-cleanup': {
+    name: 'Your First Cleanup',
+    description: 'Guided first pass: read the report top-down and fix one unused file, export, and dependency',
+    path: 'overview/first-cleanup',
+  },
+  'how-knip-works': {
+    name: 'How Knip Works',
+    description:
+      'The mental model: entry files, the module graph, reachability, and why findings cascade. Read to reason about any result',
+    path: 'explanations/how-knip-works',
+  },
   configuration: {
     name: 'Configuration',
     description: 'Understand configuration basics, defaults, and file locations',
@@ -51,6 +67,11 @@ export const CURATED_RESOURCES = {
     description: 'Using .vue, .svelte, .astro, .mdx files? Configure compilers to parse them',
     path: 'features/compilers',
   },
+  'auto-fix': {
+    name: 'Auto-fix',
+    description: 'Clean up with --fix: what it removes, related flags, and post-fix steps',
+    path: 'features/auto-fix',
+  },
   'jsdoc-tsdoc-tags': {
     name: 'JSDoc & TSDoc Tags',
     description: 'Keep an export but exclude it from the report with @public/@internal and custom tags',
@@ -60,6 +81,11 @@ export const CURATED_RESOURCES = {
     name: 'Configuration Reference',
     description: 'Complete reference of all config options: entry, project, ignore, plugins, etc.',
     path: 'reference/configuration',
+  },
+  cli: {
+    name: 'CLI Arguments',
+    description: 'All CLI flags, shortcuts, exit codes and environment variables',
+    path: 'reference/cli',
   },
   'plugins-explanation': {
     name: 'Plugins',
