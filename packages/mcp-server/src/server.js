@@ -11,6 +11,7 @@ import {
   DOC_TOOL_TOPIC_DESCRIPTION,
   ERROR_HINT,
   RUN_KNIP_TOOL_DESCRIPTION,
+  SERVER_INSTRUCTIONS,
   WORKFLOW,
 } from './texts.js';
 import { getDocs, getErrorMessage, getResults } from './tools.js';
@@ -22,7 +23,7 @@ const DOCS = 'knip://docs';
 
 class MCP {
   constructor() {
-    this.server = new McpServer({ name: 'Knip', version: pkg.version });
+    this.server = new McpServer({ name: 'Knip', version: pkg.version }, { instructions: SERVER_INSTRUCTIONS });
     this.#registerPrompts();
     this.#registerResources();
     this.#registerTools();

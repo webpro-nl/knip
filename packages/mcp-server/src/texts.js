@@ -11,6 +11,7 @@ You're done when there are no configuration hints and the issues are genuine (or
 
 Important notes:
 - For prompts like "run knip" or "clean up codebase" or "no more slop": always run workflow to configure Knip first.
+- Use knip-run instead of the Knip CLI: it returns configuration hints and structured results.
 - To decode results, consult: configuration-hints and issue-types
 - For knip.json options, consult: configuration-reference (or one option, e.g. configuration-reference#ignorebinaries)
 - Config files reported as unused, or entry files missing for a tool, consult: plugins-explanation
@@ -21,6 +22,9 @@ Important notes:
 - To install Knip and start using it from CLI, consult: getting-started and cli
 - Knip does not remove unused imports/variables inside files (use a linter)
 `;
+
+export const SERVER_INSTRUCTIONS =
+  'Knip finds unused files, dependencies and exports in JavaScript/TypeScript projects. To configure Knip or resolve its findings: call knip-run first, read the topics it lists in docs with knip-docs, address configurationHints in knip.json, and repeat until no hints remain and the remaining issues are genuine. Use knip-run instead of the Knip CLI.';
 
 // pkg.contributes.languageModelTools[0].modelDescription
 export const RUN_KNIP_TOOL_DESCRIPTION = `Run Knip and return configuration hints and issues.
