@@ -7,6 +7,7 @@ import type { Plugin } from '../../knip/src/types/config.ts';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const referenceDocsDir = path.join(rootDir, 'src/content/docs/reference');
+const pluginDocsDir = path.join(referenceDocsDir, 'plugins');
 const compilersDocsPath = path.join(rootDir, 'src/content/docs/features/compilers.md');
 const knipDir = path.join(rootDir, '../../packages/knip');
 const pluginsDir = path.join(knipDir, 'src/plugins');
@@ -139,7 +140,16 @@ for await (const dir of directories) {
       ].join('\n\n') + '\n';
 
     console.log(`Writing ${pluginName} docs to plugins/${pluginName}.md`);
-    await fs.writeFile(path.join(referenceDocsDir, `plugins/${pluginName}.md`), output);
+    await fs.writeFile(path.join(pluginDocsDir, `${pluginName}.md`), output);
+  }
+}
+
+// Remove docs of plugins that no longer exist (e.g. after switching branches)
+const pluginDocs = new Set(plugins.map(([, pluginName]) => `${pluginName}.md`));
+for (const file of await fs.readdir(pluginDocsDir)) {
+  if (file.endsWith('.md') && !pluginDocs.has(file)) {
+    console.log(`Removing plugins/${file}`);
+    await fs.rm(path.join(pluginDocsDir, file));
   }
 }
 
