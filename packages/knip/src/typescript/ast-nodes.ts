@@ -482,7 +482,7 @@ export function extractEnumMembers(
   getJSDocTags: (start: number) => Set<string>
 ): ExportMember[] {
   if (!decl.body?.members) return [];
-  return decl.body.members.map((member: TSEnumMember) => {
+  const members = decl.body.members.map((member: TSEnumMember) => {
     const name =
       member.id.type === 'Identifier'
         ? member.id.name
@@ -509,4 +509,41 @@ export function extractEnumMembers(
       flags: 0,
     };
   });
+  markEnumMemberRefs(decl.body.members, members);
+  return members;
 }
+
+const markEnumMemberRefs = (enumMembers: TSEnumMember[], members: ExportMember[]) => {
+  let byIdentifier: Map<string, ExportMember> | undefined;
+  const visit = (node: any) => {
+    const type = node?.type;
+    if (!type) return;
+    if (type === 'Identifier') {
+      const member = byIdentifier?.get(node.name);
+      if (member) member.hasRefsInFile = true;
+      return;
+    }
+    if (type === 'MemberExpression' && !node.computed) {
+      visit(node.object);
+      return;
+    }
+    const keys = visitorKeys[type];
+    if (!keys) return;
+    for (const key of keys) {
+      const val = node[key];
+      if (!val) continue;
+      if (Array.isArray(val)) {
+        for (const item of val) if (item) visit(item);
+      } else visit(val);
+    }
+  };
+  for (const member of enumMembers) {
+    const initializer = member.initializer;
+    if (!initializer || initializer.type === 'Literal') continue;
+    if (!byIdentifier) {
+      byIdentifier = new Map();
+      for (const m of members) byIdentifier.set(m.identifier, m);
+    }
+    visit(initializer);
+  }
+};
