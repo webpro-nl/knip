@@ -15,6 +15,8 @@ const directories = await fs.opendir(pluginsDir);
 const plugins: Array<[string, string]> = [];
 const compilerPlugins = new Map<string, string[]>();
 const srcBaseUrl = new URL('webpro-nl/knip/blob/main/packages/knip/src/plugins', 'https://github.com');
+// Write only the plugin pages (gitignored), not the plugin list and compilers list (tracked)
+const isPagesOnly = process.argv.includes('--pages-only');
 
 const codeBlock = (value: string, lang = '') => `\`\`\`${lang}\n${value}\n\`\`\``;
 
@@ -169,8 +171,10 @@ const indexBody = [
 
 const indexOutput = `${indexFrontmatter}\n\n${indexBody}\n`;
 
-console.log('Writing plugin list to plugins.md');
-await fs.writeFile(path.join(referenceDocsDir, 'plugins.md'), indexOutput);
+if (!isPagesOnly) {
+  console.log('Writing plugin list to plugins.md');
+  await fs.writeFile(path.join(referenceDocsDir, 'plugins.md'), indexOutput);
+}
 
 const collator = new Intl.Collator('en');
 const compilerEnablers = new Map<string, string[]>();
@@ -198,11 +202,13 @@ const compilersList = tightList(
 );
 const compilersDocs = await fs.readFile(compilersDocsPath, 'utf8');
 
-console.log('Writing compilers list to compilers.md');
-await fs.writeFile(
-  compilersDocsPath,
-  compilersDocs.replace(
-    /(<!-- compilers:start -->\n)[\s\S]*?(\n<!-- compilers:end -->)/,
-    (_, start, end) => `${start}\n${compilersList}\n${end}`
-  )
-);
+if (!isPagesOnly) {
+  console.log('Writing compilers list to compilers.md');
+  await fs.writeFile(
+    compilersDocsPath,
+    compilersDocs.replace(
+      /(<!-- compilers:start -->\n)[\s\S]*?(\n<!-- compilers:end -->)/,
+      (_, start, end) => `${start}\n${compilersList}\n${end}`
+    )
+  );
+}
