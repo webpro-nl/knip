@@ -16,8 +16,11 @@ const write = (dir, filePath, content) => {
 
 // Resolve symlinks (e.g. /var → /private/var on macOS) so paths in results match the fixture
 const cwd = realpathSync(mkdtempSync(join(tmpdir(), 'knip-mcp-')));
-write(cwd, 'package.json', { name: 'fixture' });
+write(cwd, 'package.json', { name: 'fixture', dependencies: { 'left-pad': '*' } });
 write(cwd, 'knip.json', { ignoreBinaries: ['pm2-.+'] });
+write(cwd, 'index.js', "import './used.js';");
+write(cwd, 'used.js', '');
+write(cwd, 'unused.js', '');
 write(cwd, 'node_modules/knip/package.json', { name: 'knip', version: '0.0.1' });
 
 const client = new Client({ name: 'test', version: '0.0.0' });
@@ -62,6 +65,20 @@ test('buildResults accepts a relative cwd', async () => {
     configFilePath: options.configFilePath,
   });
   assert.equal(output.projectKnipVersion, '0.0.1');
+});
+
+test('knip-run lists doc sections for its findings', async () => {
+  const output = JSON.parse(getText(await runKnip({ cwd })));
+  assert.deepEqual(output.files, ['unused.js']);
+  assert.ok(output.docs.includes('handling-issues#unused-files'));
+  assert.ok(output.docs.includes('handling-issues#unused-dependencies'));
+  assert.ok(output.docs.includes('configuration-hints'));
+});
+
+test('knip-docs returns a section', async () => {
+  const result = await client.callTool({ name: 'knip-docs', arguments: { topic: 'handling-issues#unused-files' } });
+  assert.notEqual(result.isError, true);
+  assert.match(getText(result), /^## Unused files\n/);
 });
 
 test('knip-run declares an output schema', async () => {
