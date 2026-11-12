@@ -1,0 +1,4 @@
+{
+  "name": "worker",
+  "main": "./handler.ts"
+}
