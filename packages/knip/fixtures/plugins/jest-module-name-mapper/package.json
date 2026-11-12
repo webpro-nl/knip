@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/jest-module-name-mapper",
+  "devDependencies": {
+    "jest": "*"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^@lib$": "<rootDir>/src/lib"
+    }
+  }
+}
