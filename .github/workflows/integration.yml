@@ -182,6 +182,7 @@ jobs:
 
           - name: query
             repo: TanStack/query
+            ref: 33aba0b5269ff05d634eb13e7fbdcb4e52e7f081 # Last passing commit before explicit exports left unused re-exports in preact-query tests
             commands: |
               pnpm install
               pnpm add -D -w $PKG_URL
