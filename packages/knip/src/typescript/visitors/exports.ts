@@ -11,13 +11,7 @@ import type { Fix } from '../../types/exports.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import { addNsValue, addValue } from '../../util/module-graph.ts';
-import {
-  extractEnumMembers,
-  extractNamespaceMembers,
-  getLineAndCol,
-  getStringValue,
-  isStringLiteral,
-} from '../ast-nodes.ts';
+import { extractEnumMembers, extractNamespaceMembers, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import type { WalkState } from './walk.ts';
 
@@ -189,21 +183,8 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
             s.collectRefsInType(declarator.init, name, hasExplicitFunctionReturnType(declarator.init));
           }
 
-          if (!jsDocTags.has(ALIAS_TAG) && declarator.init?.type === 'Identifier') {
-            const initName = declarator.init.name;
-            const existingExport = s.exports.get(initName);
-            if (existingExport && !existingExport.isReExport) {
-              if (!s.aliasedExports.has(initName)) {
-                s.aliasedExports.set(initName, [
-                  { symbol: initName, pos: existingExport.pos, line: existingExport.line, col: existingExport.col },
-                ]);
-              }
-              const aliased = s.aliasedExports.get(initName);
-              if (aliased) {
-                const { line: l, col: c } = getLineAndCol(s.lineStarts, declarator.id.start);
-                aliased.push({ symbol: name, pos: declarator.id.start, line: l, col: c });
-              }
-            }
+          if (!jsDocTags.has(ALIAS_TAG) && !isReExport && declarator.init?.type === 'Identifier') {
+            s.exportAliases.push({ local: declarator.init.name, symbol: name, pos: declarator.id.start });
           }
         }
       }
@@ -335,21 +316,8 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
       }
     }
 
-    const jsDocTags = s.getJSDocTags(node.start);
-    if (!jsDocTags.has(ALIAS_TAG) && !s.specifierExportNames.has(decl.name)) {
-      const existingExport = s.exports.get(decl.name);
-      if (existingExport) {
-        if (!s.aliasedExports.has(decl.name)) {
-          s.aliasedExports.set(decl.name, [
-            { symbol: decl.name, pos: existingExport.pos, line: existingExport.line, col: existingExport.col },
-          ]);
-        }
-        const aliased = s.aliasedExports.get(decl.name);
-        if (aliased) {
-          const { line: defLine, col: defCol } = getLineAndCol(s.lineStarts, decl.start);
-          aliased.push({ symbol: 'default', pos: decl.start, line: defLine, col: defCol });
-        }
-      }
+    if (!_import && !s.getJSDocTags(node.start).has(ALIAS_TAG)) {
+      s.exportAliases.push({ local: decl.name, symbol: 'default', pos: decl.start });
     }
   }
 
