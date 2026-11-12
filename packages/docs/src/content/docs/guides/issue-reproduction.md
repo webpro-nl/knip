@@ -29,7 +29,8 @@ reproduce and demonstrate the issue. Having this as a basis has many benefits:
 - Files serve as a fixture to the project
 
 Share the files themselves, ready to review, copy or clone. A script that
-generates them only adds steps on both ends.
+generates them only adds steps on both ends. Do not "inline" file sources in the
+issue description, adding extra steps to reproduce.
 
 Providing this with an issue description will help us help you and improve the
 chances the issue can be looked into efficiently and in a timely manner.
@@ -49,7 +50,7 @@ Before opening an issue, please make sure you:
 - have searched [existing issues][1]
 - have checked the list of [known issues][2]
 
-Please file only a single issue at a time, so each of them can be labeled and
+Please file only a single issue at a time, so each of them can be reviewed and
 tracked separately.
 
 There is no need to open an issue if you're going to submit a pull request to

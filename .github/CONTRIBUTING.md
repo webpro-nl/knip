@@ -46,11 +46,11 @@ Pull requests are welcome!
 
 Please consider this before opening a pull request:
 
-- Open an issue before starting the work if for any reason you're not 100% sure
-  about it. We can optimize both your and our time if we discuss ideas and
-  choose a direction upfront.
-- One issue or feature per pull request. Unrelated changes are harder to review
-  and keep track of.
+- Not 100% sure about a change? Open an issue first so we can agree on a
+  direction and save us both time. Otherwise, skip the issue and keep the
+  discussion in the pull request.
+- One issue or feature per pull request: unrelated changes are harder to review
+  and track.
 - Pull requests may not align with the general philosophy, or may not be
   affordable to maintain, and therefore rejected.
 - Using AI tools? Read the [AI contribution policy][6].

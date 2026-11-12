@@ -26,25 +26,47 @@ performance, less maintenance and easier refactorings.
 - Follow [@webpro.nl on Bluesky][13] for updates
 - [Sponsor Knip!][14]
 
+## Getting started
+
+Install Knip and run it to lint your project:
+
+```shell
+npm init @knip/config
+npm run knip
+```
+
+See [Getting Started][15] for more package managers and installation options.
+
+## Coding agents
+
+Let your coding agent configure Knip using the [Knip MCP Server][16]:
+
+```text
+Install the Knip MCP Server (@knip/mcp) and use it to configure Knip in this
+project.
+```
+
+You may need to restart your agent session after installing the server.
+
 ## Contributors
 
-Special thanks to [the wonderful people who have contributed to Knip][15]!
+Special thanks to [the wonderful people who have contributed to Knip][17]!
 
 ## Knip
 
-/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][16] 🇳🇱
+/'knɪp/ means "(to) cut" and is [pronounced with a hard "K"][18] 🇳🇱
 
 ## License
 
-Knip is free and open-source software licensed under the [ISC License][17].
+Knip is free and open-source software licensed under the [ISC License][19].
 
 Parts of Knip have been inspired by and/or partially copy code from the
 following projects:
 
-- [@npmcli/package-json][18] ([ISC][19])
-- [@pnpm/deps.graph-sequencer][20] ([MIT][21])
-- [file-entry-cache][22] ([MIT][23])
-- [json-parse-even-better-errors][24] ([MIT][25])
+- [@npmcli/package-json][20] ([ISC][21])
+- [@pnpm/deps.graph-sequencer][22] ([MIT][23])
+- [file-entry-cache][24] ([MIT][25])
+- [json-parse-even-better-errors][26] ([MIT][27])
 
 [1]: https://www.npmx.dev/package/knip
 [2]: https://img.shields.io/npm/v/knip?color=f56e0f
@@ -60,14 +82,16 @@ following projects:
 [12]: https://github.com/webpro-nl/knip/blob/main/.github/CONTRIBUTING.md
 [13]: https://bsky.app/profile/webpro.nl
 [14]: https://knip.dev/sponsors
-[15]: https://knip.dev/#created-by-awesome-contributors
-[16]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
-[17]: ./LICENSE
-[18]: https://github.com/npm/package-json
-[19]: https://github.com/npm/package-json/blob/main/LICENSE
-[20]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
-[21]: https://github.com/pnpm/pnpm/blob/main/LICENSE
-[22]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
-[23]: https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
-[24]: https://github.com/npm/json-parse-even-better-errors
-[25]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md
+[15]: https://knip.dev/overview/getting-started
+[16]: https://knip.dev/reference/integrations#mcp-server
+[17]: https://knip.dev/#created-by-awesome-contributors
+[18]: https://www.youtube.com/watch?v=PE7h7KvQoUI&t=9s
+[19]: ./LICENSE
+[20]: https://github.com/npm/package-json
+[21]: https://github.com/npm/package-json/blob/main/LICENSE
+[22]: https://github.com/pnpm/pnpm/tree/main/deps/graph-sequencer
+[23]: https://github.com/pnpm/pnpm/blob/main/LICENSE
+[24]: https://github.com/jaredwray/cacheable/tree/main/packages/file-entry-cache
+[25]: https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
+[26]: https://github.com/npm/json-parse-even-better-errors
+[27]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md
