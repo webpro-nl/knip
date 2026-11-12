@@ -1,5 +1,4 @@
-import type { ParsedArgs } from '../../util/parse-args.ts';
-import { argsFrom } from '../../binaries/util.ts';
+import { spawningArgs } from '../../binaries/util.ts';
 import type { Plugin } from '../../types/config.ts';
 
 // https://www.npmx.dev/package/dotenv
@@ -8,7 +7,10 @@ const title = 'dotenv';
 
 const args = {
   binaries: ['dotenv', 'dotenv-cli'],
-  fromArgs: (parsed: ParsedArgs, args: string[]) => (parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? [])),
+  args: (args: string[]) => (args[0] === 'run' ? args.slice(1) : args),
+  boolean: ['debug', 'fast', 'override'],
+  alias: { quiet: ['q'] },
+  fromArgs: spawningArgs,
 };
 
 const plugin: Plugin = {

@@ -129,6 +129,10 @@ test('getInputsFromScripts (dotenv)', () => {
   t(`dotenv -- concurrently 'echo "next dev"' "prisma generate"`, [toBinary('dotenv'), toBinary('concurrently'), toBinary('echo'), toBinary('prisma')]);
   t('dotenv-cli -e .env -- program', [toBinary('dotenv-cli'), toBinary('program')]);
   t('dotenv-cli -e .env -- tsx ./main.ts', [toBinary('dotenv-cli'), toBinary('tsx'), ts]);
+  t('dotenv run -- tsx ./main.ts', [toBinary('dotenv'), toBinary('tsx'), ts]);
+  t('dotenv run tsx ./main.ts', [toBinary('dotenv'), toBinary('tsx'), ts]);
+  t('dotenv run -q --file .env.local,.env tsx ./main.ts', [toBinary('dotenv'), toBinary('tsx'), ts]);
+  t('dotenv run -f .env --override --debug -- program', [toBinary('dotenv'), toBinary('program')]);
 });
 
 test('getInputsFromScripts (cross-env/env vars)', () => {
