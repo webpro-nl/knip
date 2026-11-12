@@ -7,6 +7,7 @@ import type { Plugin } from '../../types/config.ts';
 const title = 'dotenv';
 
 const args = {
+  binaries: ['dotenv', 'dotenv-cli'],
   fromArgs: (parsed: ParsedArgs, args: string[]) => (parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? [])),
 };
 
