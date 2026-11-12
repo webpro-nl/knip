@@ -18,7 +18,7 @@ test('Ignore duplicate exports with @alias (JSDoc)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 5,
-    duplicates: 12,
+    duplicates: 11,
     processed: 23,
     total: 23,
   });
@@ -62,8 +62,7 @@ test('Report an alias or a default export before the named export', async () => 
   assert(issues.duplicates['named-alias-before.ts']?.['sendAlias|send']);
   assert(issues.duplicates['named-default-before.ts']?.['default|load']);
   assert(issues.duplicates['named-specifier-alias-before.ts']?.['saveAlias|save']);
-  assert(issues.duplicates['named-original-tagged.ts']?.['stampAlias|stampAliasAfter']);
-  assert(!issues.duplicates['named-original-tagged.ts']?.['stamp|stampAlias|stampAliasAfter']);
+  assert(!issues.duplicates['named-original-tagged.ts'], 'an @alias tag on the named export prevents the duplicate');
   assert(
     !issues.duplicates['named-original-tagged-before.ts'],
     'an @alias tag on the named export prevents the duplicate'
