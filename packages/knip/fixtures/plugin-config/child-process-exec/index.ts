@@ -54,6 +54,10 @@ execSync(`${bin} phantomserve`);
 const config = 'lingui.config.ts';
 spawnSync('lingui', ['extract', '--config', config]);
 
+// a later argument must not take the place of a dynamic Bun script path
+const dynamicPath = path.join(__dirname, 'scripts', 'task.js');
+spawnSync('bun', [dynamicPath, 'src']);
+
 // not referenced: dynamic command, and a non-child_process `.exec`
 const dynamic = 'kiwi';
 execSync(dynamic);

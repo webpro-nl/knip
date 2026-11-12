@@ -51,6 +51,7 @@ test('Reference binaries and entry files in node:child_process calls', async () 
 
   // a plugin binary with a dynamic --config value is still referenced
   assert(binaries.lingui);
+  assert(!binaries.src);
 
   // dynamic command and a non-child_process `.exec` are not referenced
   assert(!binaries.kiwi);

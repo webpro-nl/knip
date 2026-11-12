@@ -107,10 +107,10 @@ export const getSafeScriptFromArgs = (executable: any, argsArray: any): string |
   const parts = [value];
   if (argsArray?.type === 'ArrayExpression') {
     for (const element of argsArray.elements) {
-      if (element && isStringLiteral(element)) {
-        const arg = getStringValue(element);
-        if (arg && SAFE_SCRIPT_ARG.test(arg)) parts.push(arg);
-      }
+      if (!element || !isStringLiteral(element)) break;
+      const arg = getStringValue(element);
+      if (!arg || !SAFE_SCRIPT_ARG.test(arg)) break;
+      parts.push(arg);
     }
   }
   return parts.join(' ');
