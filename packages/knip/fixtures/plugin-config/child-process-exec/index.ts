@@ -54,6 +54,18 @@ execSync(`${bin} phantomserve`);
 const config = 'lingui.config.ts';
 spawnSync('lingui', ['extract', '--config', config]);
 
+// a literal after a dynamic arg must not take its position
+const entry = path.join(import.meta.dirname, 'scripts', 'run.js');
+spawnSync('bun', [entry, 'phantomtarget']);
+
+// nor may a literal after an arg with unsafe characters
+spawn('bunx', ['--package', 'kiwano@^1', 'phantomrange']);
+
+// a file after a spread, a dynamic flag value or an unsafe arg is still an entry file
+spawn('node', [...process.execArgv, 'scripts/after-spread.js']);
+spawn('node', ['--env-file', target, 'scripts/after-value.js']);
+spawn('node', ['--title', 'my app', 'scripts/after-unsafe.js']);
+
 // not referenced: dynamic command, and a non-child_process `.exec`
 const dynamic = 'kiwi';
 execSync(dynamic);

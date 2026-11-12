@@ -52,6 +52,17 @@ test('Reference binaries and entry files in node:child_process calls', async () 
   // a plugin binary with a dynamic --config value is still referenced
   assert(binaries.lingui);
 
+  // a literal after a dynamic arg is not referenced as a binary
+  assert(!binaries.phantomtarget);
+
+  // nor is a literal after an arg with unsafe characters
+  assert(!issues.unlisted['index.ts']?.phantomrange);
+
+  // a file after a spread, a dynamic flag value or an unsafe arg is still an entry file
+  assert(!('scripts/after-spread.js' in issues.files));
+  assert(!('scripts/after-value.js' in issues.files));
+  assert(!('scripts/after-unsafe.js' in issues.files));
+
   // dynamic command and a non-child_process `.exec` are not referenced
   assert(!binaries.kiwi);
   assert(!binaries.banana);
@@ -65,8 +76,8 @@ test('Reference binaries and entry files in node:child_process calls', async () 
     ...baseCounters,
     binaries: 23,
     unresolved: 1,
-    processed: 6,
-    total: 6,
+    processed: 9,
+    total: 9,
   });
 });
 
@@ -81,7 +92,7 @@ test('Reference binaries and entry files in node:child_process calls (production
     ...baseCounters,
     binaries: 23,
     unresolved: 1,
-    processed: 6,
-    total: 6,
+    processed: 9,
+    total: 9,
   });
 });
