@@ -1,3 +1,4 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toEntryPath } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -17,12 +18,17 @@ const resolveConfig: ResolveConfig<WranglerConfig> = async config => {
   return (config.main ? [config.main] : []).map(id => toEntryPath(id, { production: true }));
 };
 
+const args: Args = {
+  config: true,
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  args,
 };
 
 export default plugin;
