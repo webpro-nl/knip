@@ -734,7 +734,28 @@ const coreVisitorObject: VisitorObject = {
     const src = node.source;
     if (isStringLiteral(src)) {
       const specifier = getStringValue(src)!;
-      state.addImport(specifier, undefined, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      const members: string[] = [];
+      let qualifier = node.qualifier;
+      while (qualifier && qualifier.type === 'TSQualifiedName') {
+        members.unshift(qualifier.right.name);
+        qualifier = qualifier.left;
+      }
+      state.addImport(specifier, qualifier?.name, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      if (qualifier) {
+        const module = state.resolveModule(specifier, state.filePath);
+        const internalImport = module && state.internal.get(module.resolvedFileName);
+        if (internalImport) {
+          if (members.length > 0) {
+            let path = '';
+            for (const member of members) {
+              path = path ? `${path}.${member}` : member;
+              state.addNsMemberRefs(internalImport, qualifier.name, path);
+            }
+          } else {
+            internalImport.refs.add(qualifier.name);
+          }
+        }
+      }
     }
   },
 
