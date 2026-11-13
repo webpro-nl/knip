@@ -1,5 +1,8 @@
 {
   "name": "@plugins/cypress2",
+  "scripts": {
+    "test:smoke": "cypress run --config-file config/smoke.config.js"
+  },
   "devDependencies": {
     "cypress": "*",
     "mocha-junit-reporter": "*",
