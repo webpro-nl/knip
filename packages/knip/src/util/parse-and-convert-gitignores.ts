@@ -30,14 +30,16 @@ export const convertGitignoreToPicomatchIgnorePatterns = (pattern: string, isAnc
 };
 
 export const parseAndConvertGitignorePatterns = (patterns: string, ancestor?: string, isAnchored = !ancestor) => {
-  const matchFrom = ancestor ? new RegExp(`^(!?/?)(${ancestor})`) : undefined;
   return patterns
     .split(/\r?\n/)
     .filter(line => line.trim() && !line.startsWith('#'))
     .flatMap(line => {
       const pattern = line.replace(/^\\(?=#)/, '').trim();
-      if (ancestor && matchFrom) {
-        if (pattern.match(matchFrom)) return [pattern.replace(matchFrom, '$1')];
+      if (ancestor) {
+        const negation = pattern.startsWith('!') ? 1 : 0;
+        const offset = pattern[negation] === '/' ? negation + 1 : negation;
+        if (pattern.startsWith(ancestor, offset))
+          return [pattern.slice(0, offset) + pattern.slice(offset + ancestor.length)];
         if (pattern.startsWith('/**/')) return [pattern.slice(1)];
         if (pattern.startsWith('!/**/')) return [`!${pattern.slice(2)}`];
         if (pattern.startsWith('/') || pattern.startsWith('!/')) return [];

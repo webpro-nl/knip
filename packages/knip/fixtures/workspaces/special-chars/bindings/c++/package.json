@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/workspaces-special-chars__cpp",
+  "main": "./index.ts"
+}
