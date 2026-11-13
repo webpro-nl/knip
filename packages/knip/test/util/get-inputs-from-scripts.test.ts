@@ -516,6 +516,19 @@ test('getInputsFromScripts (double-dash)', () => {
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
 });
 
+test('getInputsFromScripts (command flags)', () => {
+  t('doppler run --command="node server.ts"', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
+  t("doppler run -c prod --command 'tsx watch src/index.ts'", [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
+  t("infisical run --env=dev --command 'tsx src/seed.ts && node server.ts'", [
+    toBinary('infisical'),
+    toBinary('tsx'),
+    toEntryPath('src/seed.ts', opt),
+    toBinary('node'),
+    toEntryPath('server.ts', opt),
+  ]);
+  t('infisical run -c "node server.ts"', [toBinary('infisical'), toBinary('node'), toEntryPath('server.ts', opt)]);
+});
+
 test('getInputsFromScripts (advanced bash syntax)', () => {
   t('if test "$NODE_ENV" = "production" ; then make install ; fi ', [toBinary('make')]);
   t('if test -f a; then make a; elif test -f b; then node ./script.js; fi', [toBinary('make'), toBinary('node'), js]);

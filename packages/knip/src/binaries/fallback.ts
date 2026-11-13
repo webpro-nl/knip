@@ -13,6 +13,12 @@ export const spawningBinaries = ['cross-env'];
 // Binaries that have a new script behind the double-dash/end-of-command
 const endOfCommandBinaries = ['doppler', 'dotenvx', 'env-cmd', 'infisical', 'op'];
 
+// Binaries that have a new script in a flag value
+const commandFlagBinaries = new Map([
+  ['doppler', ['command']],
+  ['infisical', ['command', 'c']],
+]);
+
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
 
@@ -24,7 +30,12 @@ export const isWrapper = (binary: string) =>
 
 export const resolve: BinaryResolver = (binary, words, options) => {
   const { fromArgs } = options;
-  const parsed = parseArgs(words, { boolean: ['quiet', 'verbose'], '--': endOfCommandBinaries.includes(binary) });
+  const commandFlags = commandFlagBinaries.get(binary) ?? [];
+  const parsed = parseArgs(words, {
+    boolean: ['quiet', 'verbose'],
+    string: commandFlags,
+    '--': endOfCommandBinaries.includes(binary),
+  });
   const bin =
     binary.startsWith('.') || (binary.includes('/') && !isAbsolute(binary))
       ? toEntry(binary)
@@ -34,5 +45,6 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const pos = positionals.has(binary) ? [toModule(parsed._[0])] : [];
   const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--')) : [];
   const commands = positionalBinaries.has(binary) ? parsed._.flatMap(cmd => fromArgs([cmd])) : [];
-  return compact([bin, ...pos, ...newCommand, ...commands]);
+  const flagCommands = commandFlags.flatMap(flag => (parsed[flag] ? fromArgs([parsed[flag]]) : []));
+  return compact([bin, ...pos, ...newCommand, ...commands, ...flagCommands]);
 };
