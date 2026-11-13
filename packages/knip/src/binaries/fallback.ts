@@ -11,7 +11,7 @@ import { argsAfter, toCommandBinary } from './util.ts';
 export const spawningBinaries = ['cross-env'];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['dotenvx', 'env-cmd', 'op'];
+const endOfCommandBinaries = ['doppler', 'dotenvx', 'env-cmd', 'infisical', 'op'];
 
 // Binaries with entry at first positional arg
 const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);

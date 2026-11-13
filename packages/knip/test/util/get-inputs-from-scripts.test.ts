@@ -511,6 +511,9 @@ test('getInputsFromScripts (double-dash)', () => {
   t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('op run --env-file=.env -- node server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('op run --env-file=.env -- node --import=mocks.ts server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt), toModule('mocks.ts')]);
+  t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
+  t('doppler run -c prod --project app -- tsx watch src/index.ts', [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
+  t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
 });
 
 test('getInputsFromScripts (advanced bash syntax)', () => {
