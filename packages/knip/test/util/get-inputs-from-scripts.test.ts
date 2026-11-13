@@ -341,6 +341,10 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
+  t('pnpm tsx ./main.ts', [toBinary('tsx'), ts]);
+  t('pnpm --silent node ./script.js', [toBinary('node'), js]);
+  t('pnpm node ./script.js -- --import tsx', [toBinary('node'), js]);
+  t('pnpm vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);

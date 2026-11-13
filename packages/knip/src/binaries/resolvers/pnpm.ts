@@ -1,7 +1,5 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toBinary } from '../../util/input.ts';
-import { isValidBinary } from '../../util/modules.ts';
 import { argsAfter, expandScript } from '../util.ts';
 import { resolveDlx } from './pnpx.ts';
 
@@ -147,5 +145,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (isScript) return expandScript(name, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
   if (commands.includes(command)) return childInputs;
 
-  return command && isValidBinary(command) ? [toBinary(command)] : [];
+  if (!command) return [];
+  const rest = words.slice(parsed.positionalIndices![0]);
+  return fromArgs([rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ')]);
 };
