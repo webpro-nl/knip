@@ -70,6 +70,17 @@ test('parseAndConvertGitignorePatterns (ancestor)', async () => {
   ]);
 });
 
+test('parseAndConvertGitignorePatterns (ancestor with regex characters)', async () => {
+  assert.deepEqual(parse(['bindings/c++/gen', '/bindings/c++/out'].join(EOL), 'bindings/c++/'), [
+    { negated: false, pattern: '**/gen' },
+    { negated: false, pattern: 'out' },
+  ]);
+  assert.deepEqual(parse(['apps/(web)/gen', '!apps/(web)/gen/keep.ts'].join(EOL), 'apps/(web)/'), [
+    { negated: false, pattern: '**/gen' },
+    { negated: true, pattern: '**/gen/keep.ts' },
+  ]);
+});
+
 test('parseAndConvertGitignorePatterns (hashes)', async () => {
   const gitignorePatterns = ['#comment', 'ends-with-hash#', String.raw`\#starts-with-hash`];
   const globPatterns = parse(gitignorePatterns.join(EOL));
