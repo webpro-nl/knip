@@ -62,6 +62,8 @@ export const dd = 1;
 `,
     'exports.js': `const identifier = 1;
 const identifier2 = 2;
+const identifier3 = 3;
+const identifier4 = 4;
 
 module.exports = { identifier };
 `,
