@@ -11,11 +11,16 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const entry = ['plopfile.{cjs,mjs,js,ts}'];
 
+const args = {
+  config: ['plopfile'],
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   entry,
+  args,
 };
 
 export default plugin;
