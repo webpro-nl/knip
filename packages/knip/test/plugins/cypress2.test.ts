@@ -13,7 +13,7 @@ test('Find dependencies with the Cypress plugin (2)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 8,
+    total: 8,
   });
 });
