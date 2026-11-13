@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/namespace-as-value",
+  "main": "index.ts"
+}
