@@ -166,6 +166,19 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
                     ? prop.key.value
                     : undefined;
               s.addImport(specifier, importedName, undefined, undefined, prop.key?.start ?? prop.start, caughtFlag);
+            } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
+              s.addImport(
+                specifier,
+                IMPORT_STAR,
+                prop.argument.name,
+                undefined,
+                prop.start,
+                IMPORT_FLAGS.DYNAMIC | caughtFlag
+              );
+              const resolved = s.resolveModule(specifier, s.filePath);
+              if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+                setDynamicNamespace(prop.argument.name, resolved.resolvedFileName, getBlockScope(s), isVar, s);
+              }
             }
           }
         } else if (binding?.type === 'Identifier') {
@@ -361,6 +374,10 @@ function handleDynamicImportBinding(
           prop.start,
           IMPORT_FLAGS.DYNAMIC | caughtFlag
         );
+        const resolved = s.resolveModule(specifier, s.filePath);
+        if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+          setDynamicNamespace(prop.argument.name, resolved.resolvedFileName, scope, isVar, s);
+        }
       }
     }
   } else if (id.type === 'Identifier') {
