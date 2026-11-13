@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/eslint11",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "*",
+    "@babel/plugin-proposal-decorators": "*",
+    "@babel/preset-env": "*",
+    "eslint": "*"
+  }
+}

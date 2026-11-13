@@ -1,9 +1,10 @@
 import type { Expression, ObjectExpression, Program, SpreadElement } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import { type Input, toModule, toDependency } from '../../util/input.ts';
-import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
+import { findProperty, getPropertyKey, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
+import { getDependenciesFromConfig } from '../babel/index.ts';
 import { type ImportSettingKind, importSettingKinds, toParser } from './helpers.ts';
 
 const isParserObjectExpression = (node: ObjectExpression) => {
@@ -51,6 +52,13 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
           const kind = key && importSettingKinds.get(key);
           if (kind) addResolvers(kind, prop.value);
         }
+      }
+
+      const babelOptions = findProperty(node, 'babelOptions');
+      if (babelOptions?.type === 'ObjectExpression') {
+        const plugins = [...getStringValues(findProperty(babelOptions, 'plugins'))];
+        const presets = [...getStringValues(findProperty(babelOptions, 'presets'))];
+        for (const input of getDependenciesFromConfig({ plugins, presets }, false)) inputs.push(input);
       }
 
       const parser = findProperty(findProperty(node, 'parserOptions'), 'parser');
