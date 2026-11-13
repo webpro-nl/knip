@@ -16,7 +16,7 @@ test('Find literal entry files with the wrangler plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });
