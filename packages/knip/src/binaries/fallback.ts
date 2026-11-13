@@ -8,7 +8,9 @@ import { argsAfter, toCommandBinary } from './util.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
-export const spawningBinaries = ['cross-env'];
+export const shellSpawningBinaries = ['cross-env-shell'];
+
+export const spawningBinaries = ['cross-env', ...shellSpawningBinaries];
 
 // Binaries that have a new script behind the double-dash/end-of-command
 const endOfCommandBinaries = ['doppler', 'dotenvx', 'env-cmd', 'infisical', 'op'];
