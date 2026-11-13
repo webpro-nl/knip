@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/ember-template-lint",
+  "scripts": {
+    "lint:hbs": "ember-template-lint .",
+    "lint:hbs:strict": "ember-template-lint . --config-path config/template-lint.strict.mjs"
+  },
+  "devDependencies": {
+    "ember-template-lint": "*",
+    "ember-template-lint-plugin-prettier": "*",
+    "ember-template-lint-plugin-tailwindcss": "*"
+  }
+}

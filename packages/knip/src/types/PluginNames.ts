@@ -35,6 +35,7 @@ export type PluginName =
   | 'electron-vite'
   | 'eleventy'
   | 'ember'
+  | 'ember-template-lint'
   | 'esbuild'
   | 'eslint'
   | 'evalite'
@@ -246,6 +247,7 @@ export const pluginNames = [
   'electron-vite',
   'eleventy',
   'ember',
+  'ember-template-lint',
   'esbuild',
   'eslint',
   'evalite',
