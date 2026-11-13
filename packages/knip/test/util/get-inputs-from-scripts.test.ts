@@ -470,6 +470,11 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --transpile-only ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --prefer-ts-exts ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --esm ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --files --pretty ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --skip-project --type-check ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
