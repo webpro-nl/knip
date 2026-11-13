@@ -70,3 +70,30 @@ test('Find dependencies with the SvelteKit plugin (config in vite.config takes p
     total: 4,
   });
 });
+
+test('Find dependencies with the SvelteKit plugin (config in withPwa from @vite-pwa/sveltekit)', async () => {
+  const cwd5 = resolve('fixtures/plugins/sveltekit-vite-pwa');
+  const options = await createOptions({ cwd: cwd5, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert('legacy/helper.ts' in issues.files);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    processed: 4,
+    total: 4,
+  });
+});
+
+test('Find dependencies with the SvelteKit plugin (svelte.config.js next to SvelteKitPWA from @vite-pwa/sveltekit v1)', async () => {
+  const cwd6 = resolve('fixtures/plugins/sveltekit-vite-pwa-v1');
+  const options = await createOptions({ cwd: cwd6, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 3,
+    total: 3,
+  });
+});

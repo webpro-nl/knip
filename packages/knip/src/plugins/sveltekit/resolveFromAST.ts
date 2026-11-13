@@ -21,6 +21,8 @@ const production = [
   'src/instrumentation.server.{js,ts}',
 ];
 
+const findKitOptions = (program: Program) => findCallArg(program, 'sveltekit') ?? findCallArg(program, 'withPwa');
+
 /**
  * SvelteKit ignores `svelte.config.js` when options are passed to `sveltekit()`, so prefer the Vite config.
  * @see https://github.com/sveltejs/kit/blob/8fe845d036850e506f437cae0fb034c87d1e5b83/packages/kit/src/exports/vite/index.js#L149-L172
@@ -28,13 +30,13 @@ const production = [
 const isConfigInViteConfig = (dir: string, readFile: (filePath: string) => string): boolean => {
   for (const filePath of _syncGlob({ cwd: dir, patterns: viteConfig })) {
     const text = readFile(filePath);
-    if (text && findCallArg(_parseFile(filePath, text).program, 'sveltekit')) return true;
+    if (text && findKitOptions(_parseFile(filePath, text).program)) return true;
   }
   return false;
 };
 
 const getLibFromViteConfig = (program: Program): string => {
-  const call = findCallArg(program, 'sveltekit');
+  const call = findKitOptions(program);
   const files = call ? findProperty(call, 'files') : undefined;
   return (files && getFirstPropertyValue(files, 'lib')) ?? 'src/lib';
 };
@@ -52,7 +54,8 @@ const toInputs = (lib: string) => [
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   if (options.configFileName.startsWith('vite.config')) {
-    if (!hasImportSpecifier(program, '@sveltejs/kit/vite', 'sveltekit')) return [];
+    const isKit = hasImportSpecifier(program, '@sveltejs/kit/vite', 'sveltekit');
+    if (!isKit && !hasImportSpecifier(program, '@vite-pwa/sveltekit', 'withPwa')) return [];
     return toInputs(getLibFromViteConfig(program));
   }
   if (isConfigInViteConfig(options.configFileDir, options.readFile)) return [];
