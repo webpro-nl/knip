@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/storybook6",
+  "devDependencies": {
+    "@storybook/nextjs-vite": "*",
+    "@vitejs/plugin-react": "*"
+  }
+}
