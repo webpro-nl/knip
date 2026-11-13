@@ -137,6 +137,7 @@ export type PluginName =
   | 'rollup'
   | 'rsbuild'
   | 'rslib'
+  | 'rslint'
   | 'rspack'
   | 'rstest'
   | 'sanity'
@@ -346,6 +347,7 @@ export const pluginNames = [
   'rollup',
   'rsbuild',
   'rslib',
+  'rslint',
   'rspack',
   'rstest',
   'sanity',

@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/rslint",
+  "scripts": {
+    "lint": "rslint",
+    "lint:strict": "rslint --config config/strict.mjs"
+  },
+  "devDependencies": {
+    "@rslint/core": "*",
+    "eslint-plugin-jsdoc": "*",
+    "eslint-plugin-regexp": "*"
+  }
+}

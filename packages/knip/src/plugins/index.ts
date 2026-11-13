@@ -136,6 +136,7 @@ import { default as rolldown } from './rolldown/index.ts';
 import { default as rollup } from './rollup/index.ts';
 import { default as rsbuild } from './rsbuild/index.ts';
 import { default as rslib } from './rslib/index.ts';
+import { default as rslint } from './rslint/index.ts';
 import { default as rspack } from './rspack/index.ts';
 import { default as rstest } from './rstest/index.ts';
 import { default as sanity } from './sanity/index.ts';
@@ -345,6 +346,7 @@ export const Plugins = {
   rollup,
   rsbuild,
   rslib,
+  rslint,
   rspack,
   rstest,
   sanity,

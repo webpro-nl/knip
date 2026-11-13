@@ -968,6 +968,10 @@
           "title": "rslib plugin configuration (https://knip.dev/reference/plugins/rslib)",
           "$ref": "#/definitions/plugin"
         },
+        "rslint": {
+          "title": "rslint plugin configuration (https://knip.dev/reference/plugins/rslint)",
+          "$ref": "#/definitions/plugin"
+        },
         "rspack": {
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
