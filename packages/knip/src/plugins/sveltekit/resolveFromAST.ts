@@ -2,10 +2,10 @@ import type { Program } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import {
   collectFirstPropertyValue,
-  findImportedCallArg,
-  findImportedCalls,
+  findCallArg,
   findProperty,
   getFirstPropertyValue,
+  hasImportSpecifier,
 } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { _syncGlob } from '../../util/glob.ts';
@@ -21,7 +21,7 @@ const production = [
   'src/instrumentation.server.{js,ts}',
 ];
 
-const kitPlugins = ['@sveltejs/kit/vite', '@vite-pwa/sveltekit'];
+const findKitOptions = (program: Program) => findCallArg(program, 'sveltekit') ?? findCallArg(program, 'withPwa');
 
 /**
  * SvelteKit ignores `svelte.config.js` when options are passed to `sveltekit()`, so prefer the Vite config.
@@ -30,13 +30,13 @@ const kitPlugins = ['@sveltejs/kit/vite', '@vite-pwa/sveltekit'];
 const isConfigInViteConfig = (dir: string, readFile: (filePath: string) => string): boolean => {
   for (const filePath of _syncGlob({ cwd: dir, patterns: viteConfig })) {
     const text = readFile(filePath);
-    if (text && findImportedCallArg(_parseFile(filePath, text).program, kitPlugins)) return true;
+    if (text && findKitOptions(_parseFile(filePath, text).program)) return true;
   }
   return false;
 };
 
 const getLibFromViteConfig = (program: Program): string => {
-  const call = findImportedCallArg(program, kitPlugins);
+  const call = findKitOptions(program);
   const files = call ? findProperty(call, 'files') : undefined;
   return (files && getFirstPropertyValue(files, 'lib')) ?? 'src/lib';
 };
@@ -54,7 +54,8 @@ const toInputs = (lib: string) => [
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   if (options.configFileName.startsWith('vite.config')) {
-    if (findImportedCalls(program, kitPlugins).length === 0) return [];
+    const isKit = hasImportSpecifier(program, '@sveltejs/kit/vite', 'sveltekit');
+    if (!isKit && !hasImportSpecifier(program, '@vite-pwa/sveltekit', 'withPwa')) return [];
     return toInputs(getLibFromViteConfig(program));
   }
   if (isConfigInViteConfig(options.configFileDir, options.readFile)) return [];
