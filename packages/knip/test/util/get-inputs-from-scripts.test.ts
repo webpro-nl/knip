@@ -160,6 +160,15 @@ test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r esm ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('esm')]);
 });
 
+test('getInputsFromScripts (cross-env-shell)', () => {
+  t('cross-env-shell NODE_ENV=test node ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell MESSAGE="two words" "node ./script.js && tsx ./main.ts"', [toBinary('cross-env-shell'), toBinary('node'), js, toBinary('tsx'), ts]);
+  t('cross-env-shell NODE_OPTIONS="--require pkg" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+  t('cross-env-shell "NODE_ENV=production" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t("cross-env-shell 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+});
+
 test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);

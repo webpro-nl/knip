@@ -8,11 +8,19 @@ import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { collectCommands, getCommandWords } from '../util/scripts.ts';
-import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
+import {
+  isWrapper as isFallbackWrapper,
+  resolve as fallbackResolve,
+  shellSpawningBinaries,
+  spawningBinaries,
+} from './fallback.ts';
 import { spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
+
+const isEnvAssignment = /^\w+=/;
+const quotedEnvAssignment = /^(["'])(\w+=)/;
 
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
@@ -54,7 +62,16 @@ export const getWrappedCommand = (binary: string, words: Word[], cwd = process.c
   const fromArgs = pluginArgs?.fromArgs;
   if (!pluginArgs || typeof fromArgs !== 'function') return;
   const args = toArgs(pluginArgs, words);
-  return toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
+  const command = toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
+  if (!shellSpawningBinaries.includes(binary)) return command;
+  const script: ScriptArg[] = [];
+  let isCommand = false;
+  for (const arg of command) {
+    const value = typeof arg === 'string' ? arg : arg.value;
+    if (!isEnvAssignment.test(value)) isCommand = true;
+    script.push(isCommand ? value : typeof arg === 'string' ? arg : arg.text.replace(quotedEnvAssignment, '$2$1'));
+  }
+  return script;
 };
 
 export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()) => {
