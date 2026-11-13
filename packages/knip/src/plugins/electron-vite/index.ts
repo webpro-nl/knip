@@ -36,7 +36,8 @@ const resolveConfig: ResolveConfig<ElectronViteConfig> = async (localConfig, opt
     if (typeof section === 'function') section = await section(buildEnv);
 
     const ids: string[] = [];
-    for (const input of [section?.build?.rollupOptions?.input, section?.build?.lib?.entry]) {
+    const rolldownOptions = section?.build?.rolldownOptions ?? section?.build?.rollupOptions;
+    for (const input of [rolldownOptions?.input, section?.build?.lib?.entry]) {
       if (typeof input === 'string') ids.push(input);
       else if (input) ids.push(...Object.values(input as Record<string, string>));
     }
