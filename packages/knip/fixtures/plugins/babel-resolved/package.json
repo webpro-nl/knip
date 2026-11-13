@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/babel-resolved",
+  "devDependencies": {
+    "@babel/plugin-transform-class-properties": "*",
+    "@embroider/compat": "*"
+  }
+}

@@ -2,6 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { getPackageNameFromSpecifier } from '../../util/modules.ts';
+import { isInNodeModules } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { api, resolveName } from './helpers.ts';
 import type { BabelConfig, BabelConfigObj } from './types.ts';
@@ -36,6 +37,8 @@ const isRuntimeImportPlugin = (value: unknown) => {
   return typeof runtime?.import === 'string';
 };
 
+const toPluginModule = (id: string) => toModule(id, isInNodeModules(id) ? { optional: true } : undefined);
+
 export const getDependenciesFromConfig = (config: BabelConfigObj, isProduction = true): Input[] => {
   const presets = config.presets?.flatMap(getName).map(name => resolveName(name, 'preset')) ?? [];
   const plugins = config.plugins?.flatMap(getName).map(name => resolveName(name, 'plugin')) ?? [];
@@ -43,8 +46,8 @@ export const getDependenciesFromConfig = (config: BabelConfigObj, isProduction =
   const nested = config.env ? Object.values(config.env).flatMap(toInputs) : [];
   const overrides = config.overrides ? [config.overrides].flat().flatMap(toInputs) : [];
   return compact([
-    ...presets.map(id => toModule(id)),
-    ...plugins.map(id => toModule(id)),
+    ...presets.map(toPluginModule),
+    ...plugins.map(toPluginModule),
     ...(plugins.includes('@babel/plugin-transform-runtime')
       ? [toDependency('@babel/runtime', { optional: true, production: isProduction })]
       : []),
