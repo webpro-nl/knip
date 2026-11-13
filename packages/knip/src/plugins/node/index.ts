@@ -55,7 +55,7 @@ const resolve: Resolve = options => {
   return entries;
 };
 
-const args = {
+export const args = {
   positional: true,
   nodeImportArgs: true,
   resolve: ['test-reporter'],
@@ -64,18 +64,27 @@ const args = {
     'enable-source-maps',
     'experimental-detect-module',
     'experimental-json-modules',
+    'experimental-require-module',
+    'experimental-sqlite',
     'experimental-strip-types',
+    'experimental-test-coverage',
+    'experimental-test-module-mocks',
     'experimental-transform-types',
     'experimental-vm-modules',
+    'experimental-wasm-modules',
     'expose-gc',
     'harmony',
     'inspect-brk',
     'inspect-wait',
     'inspect',
     'openssl-legacy-provider',
+    'preserve-symlinks',
     'test-only',
     'test',
+    'trace-deprecation',
+    'trace-warnings',
     'warnings',
+    'watch-preserve-output',
     'watch',
   ],
   args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),

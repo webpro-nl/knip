@@ -89,6 +89,15 @@ test('getInputsFromScripts (node -r)', () => {
   t('node --enable-source-maps --expose-gc node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node --experimental-detect-module --experimental-json-modules node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node --openssl-legacy-provider node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --require ./require.js --trace-warnings ./script.js', [toBinary('node'), js, req]);
+  t('node --trace-deprecation ./script.js', [toBinary('node'), js]);
+  t('node --watch --watch-preserve-output ./script.js', [toBinary('node'), js]);
+  t('node --preserve-symlinks ./script.js', [toBinary('node'), js]);
+  t('node --experimental-require-module ./script.js', [toBinary('node'), js]);
+  t('node --experimental-sqlite ./script.js', [toBinary('node'), js]);
+  t('node --experimental-wasm-modules ./script.js', [toBinary('node'), js]);
+  t('node --experimental-test-coverage ./script.js', [toBinary('node'), js]);
+  t('node --experimental-test-module-mocks ./script.js', [toBinary('node'), js]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toModule('ts-node/register')]);
   t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toModule('dotenv-flow/config')]);
 });
@@ -96,6 +105,8 @@ test('getInputsFromScripts (node -r)', () => {
 test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --test ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --tsconfig tsconfig.build.json --inspect ./main.ts', [toBinary('tsx'), ts]);
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);
   t('tsx ./main.ts build', [toBinary('tsx'), ts]);
