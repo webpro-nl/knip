@@ -18,6 +18,7 @@ dependencies or plugins in parentheses:
 
 - `.astro` (Astro)
 - `.css` (Tailwind)
+- `.gjs` + `.gts` (Ember)
 - `.less` (`less`)
 - `.marko` (Marko)
 - `.md` (unplugin-vue-markdown)

@@ -1,0 +1,21 @@
+{
+  "name": "orchard-app",
+  "devDependencies": {
+    "ember-cli": "*",
+    "ember-source": "^7.4.0",
+    "ember-cli-htmlbars": "*",
+    "ember-source-channel-url": "*",
+    "@ember/test-helpers": "*",
+    "ember-modifier": "*",
+    "ember-page-title": "*",
+    "@glimmer/tracking": "*",
+    "@embroider/macros": "*"
+  },
+  "dependencies": {
+    "ember-truth-helpers": "*"
+  },
+  "exports": {
+    "./tests/*": "./tests/*",
+    "./*": "./app/*"
+  }
+}

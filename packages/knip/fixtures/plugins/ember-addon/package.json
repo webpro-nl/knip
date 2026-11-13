@@ -1,0 +1,27 @@
+{
+  "name": "@plugins/ember-addon",
+  "keywords": ["ember-addon"],
+  "exports": {
+    ".": "./dist/index.js",
+    "./basket": "./dist/basket.js"
+  },
+  "scripts": {
+    "build": "rollup --config"
+  },
+  "dependencies": {
+    "@embroider/addon-shim": "*"
+  },
+  "devDependencies": {
+    "@embroider/addon-dev": "*",
+    "qunit": "*",
+    "rollup": "*"
+  },
+  "peerDependencies": {
+    "ember-source": "^7.4.0"
+  },
+  "ember-addon": {
+    "version": 2,
+    "type": "addon",
+    "main": "addon-main.cjs"
+  }
+}

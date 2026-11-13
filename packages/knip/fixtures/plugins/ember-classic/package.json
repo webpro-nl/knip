@@ -1,0 +1,18 @@
+{
+  "name": "orchard-classic",
+  "devDependencies": {
+    "@embroider/macros": "*",
+    "ember-auto-import": "*",
+    "ember-cli": "*",
+    "ember-data": "~5.3.0",
+    "ember-fetch": "*",
+    "ember-source": "~5.12.0",
+    "glob": "*",
+    "webpack": "*"
+  },
+  "ember-addon": {
+    "paths": [
+      "lib/fruit-utils"
+    ]
+  }
+}

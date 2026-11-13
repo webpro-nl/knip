@@ -1,0 +1,5 @@
+{
+  "ember": {
+    "entry": ["app/app.js"]
+  }
+}
