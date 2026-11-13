@@ -78,20 +78,17 @@ export const toCatalog = (specifier: string, catalogName: string): CatalogInput 
 
 export const isCatalog = (input: Input): input is CatalogInput => input.type === 'catalog';
 
-export const toEntry = (specifier: string): Input => ({ type: 'entry', specifier });
+export const toEntry = (specifier: string, options: Options = {}): Input => ({
+  type: 'entry',
+  specifier,
+  ...options,
+});
 
 export const isEntry = (input: Input) => input.type === 'entry' && !input.production;
 
 export const toProject = (specifier: string): Input => ({ type: 'project', specifier });
 
 export const isProject = (input: Input) => input.type === 'project';
-
-export const toProductionEntry = (specifier: string, options: Options = {}): Input => ({
-  type: 'entry',
-  specifier,
-  production: true,
-  ...options,
-});
 
 export const isProductionEntry = (input: Input) => input.type === 'entry' && input.production === true;
 
@@ -112,14 +109,7 @@ export const toDependency = (specifier: string, options: Options = {}): Input =>
 
 export const isDependency = (input: Input) => input.type === 'dependency';
 
-export const toProductionDependency = (specifier: string, options: Options = {}): Input => ({
-  type: 'dependency',
-  specifier,
-  production: true,
-  ...options,
-});
-
-export const toDeferResolve = (specifier: string, options: Options = {}): Input => ({
+export const toModule = (specifier: string, options: Options = {}): Input => ({
   type: 'deferResolve',
   specifier,
   ...options,
@@ -127,14 +117,7 @@ export const toDeferResolve = (specifier: string, options: Options = {}): Input 
 
 export const isDeferResolve = (input: Input) => input.type === 'deferResolve';
 
-export const toDeferResolveProductionEntry = (specifier: string, options: Options = {}): Input => ({
-  type: 'deferResolveEntry',
-  specifier,
-  production: true,
-  ...options,
-});
-
-export const toDeferResolveEntry = (specifier: string, options: Options = {}): Input => ({
+export const toEntryPath = (specifier: string, options: Options = {}): Input => ({
   type: 'deferResolveEntry',
   specifier,
   ...options,

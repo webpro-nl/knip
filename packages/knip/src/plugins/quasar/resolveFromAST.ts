@@ -7,7 +7,7 @@ import {
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { type Input, toDependency, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDependency, toEntryPath, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 
 const sourceFilesEntries: [string, string[]][] = [
@@ -51,10 +51,10 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   const sourceFiles = findProperty(config, 'sourceFiles');
   for (const [key, defaults] of sourceFilesEntries) {
     const override = getFirstPropertyValue(sourceFiles, key);
-    if (override) inputs.push(toDeferResolveProductionEntry(join(configFileDir, override)));
-    else for (const id of defaults) inputs.push(toProductionEntry(join(configFileDir, id)));
+    if (override) inputs.push(toEntryPath(join(configFileDir, override), { production: true }));
+    else for (const id of defaults) inputs.push(toEntry(join(configFileDir, id), { production: true }));
   }
-  for (const id of staticEntries) inputs.push(toProductionEntry(join(configFileDir, id)));
+  for (const id of staticEntries) inputs.push(toEntry(join(configFileDir, id), { production: true }));
 
   const boot = findProperty(config, 'boot');
   if (boot?.type === 'ArrayExpression') {
@@ -62,13 +62,13 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
       const id = getStringValue(element) ?? getFirstPropertyValue(element, 'path');
       if (!id) continue;
       if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
-      else inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/boot', id)));
+      else inputs.push(toEntryPath(join(configFileDir, 'src/boot', id), { production: true }));
     }
   }
 
   for (const id of getStringValues(findProperty(config, 'css'))) {
     if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
-    else inputs.push(toDeferResolveProductionEntry(join(configFileDir, 'src/css', id)));
+    else inputs.push(toEntryPath(join(configFileDir, 'src/css', id), { production: true }));
   }
 
   return inputs;

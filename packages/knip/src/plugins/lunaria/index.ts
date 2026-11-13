@@ -1,7 +1,7 @@
 import { toAbsolute } from '../../util/path.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { LunariaConfig } from './types.ts';
 
@@ -23,8 +23,8 @@ const resolveConfig: ResolveConfig<LunariaConfig> = async (localConfig, options)
   const baseDir = options.configFileDir;
 
   return [
-    ...files.map(id => toProductionEntry(toAbsolute(id, baseDir))),
-    ...[...renderer, ...customCss, ...favicon].map(id => toDeferResolveProductionEntry(toAbsolute(id, baseDir))),
+    ...files.map(id => toEntry(toAbsolute(id, baseDir), { production: true })),
+    ...[...renderer, ...customCss, ...favicon].map(id => toEntryPath(toAbsolute(id, baseDir), { production: true })),
   ];
 };
 

@@ -1,6 +1,6 @@
 import type { Expression, ObjectExpression, Program, SpreadElement } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
-import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toDependency } from '../../util/input.ts';
 import { findProperty, getPropertyKey } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isInternal } from '../../util/path.ts';
@@ -21,7 +21,7 @@ const getInputsFromSettingsAST = (program: Program): Input[] => {
   const addResolver = (kind: ImportSettingKind, resolver: string | undefined) => {
     if (!resolver || resolver === 'node' || isInternal(resolver)) return;
     const dep = kind === 'resolver' ? `eslint-import-resolver-${resolver}` : resolver;
-    inputs.push(toDeferResolve(dep, { optional: true }));
+    inputs.push(toModule(dep, { optional: true }));
   };
 
   const addParser = (name: string | undefined) => {

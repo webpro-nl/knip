@@ -38,9 +38,9 @@ import {
   isIgnore,
   isProductionEntry,
   isProject,
-  toDeferResolveEntry,
+  toEntryPath,
   toDependency,
-  toProductionEntry,
+  toEntry,
 } from '../util/input.ts';
 import { isAmbientDeclarationFile } from '../typescript/ast-nodes.ts';
 import { resolveImportGlobs } from '../typescript/glob-imports.ts';
@@ -136,7 +136,7 @@ export const build = timerify(async function build({
     const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
     const isLocal = isInternal(specifier);
     const input = isLocal
-      ? toDeferResolveEntry(specifier, { containingFilePath })
+      ? toEntryPath(specifier, { containingFilePath })
       : toDependency(specifier, { containingFilePath, optional: true });
     // The negated production entry pattern only applies to its own workspace, so a local
     // preprocessor must be registered in the workspace holding it, not always in the root
@@ -221,7 +221,7 @@ export const build = timerify(async function build({
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
       for (const id of definitionPaths)
-        inputs.add(toProductionEntry(tryRealpath(id), { containingFilePath: tsConfigFilePath }));
+        inputs.add(toEntry(tryRealpath(id), { production: true, containingFilePath: tsConfigFilePath }));
     }
 
     const sharedGlobOptions = { cwd: options.cwd, dir, gitignore: options.gitignore };
@@ -238,7 +238,7 @@ export const build = timerify(async function build({
     const entrySpecifiersFromManifest = getEntrySpecifiersFromManifest(manifest, config.isIncludeSubpathExports);
     const label = 'entry paths from package.json';
     for (const filePath of await toSourceFilePaths(entrySpecifiersFromManifest, dir, extensionGlobStr, label)) {
-      if (!isGitIgnored(filePath)) inputs.add(toProductionEntry(filePath));
+      if (!isGitIgnored(filePath)) inputs.add(toEntry(filePath, { production: true }));
     }
 
     if (getPublishedTypeDependencies && !manifest.private && !manifest.publishConfig?.directory) {

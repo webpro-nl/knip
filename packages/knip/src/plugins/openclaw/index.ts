@@ -1,7 +1,7 @@
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
-import { type Input, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { type Input, toEntryPath, toEntry } from '../../util/input.ts';
 import type { OpenClawManifest } from './types.ts';
 
 const title = 'OpenClaw';
@@ -16,14 +16,14 @@ const isLoadConfig: IsLoadConfig = ({ configFileName }) => configFileName === 'p
 
 const toEntries = (value: unknown, dir: string): Input[] =>
   (Array.isArray(value) ? value : [value]).flatMap(entry =>
-    typeof entry === 'string' ? [toDeferResolveProductionEntry(entry, { dir })] : []
+    typeof entry === 'string' ? [toEntryPath(entry, { production: true, dir })] : []
   );
 
 const toHookEntries = (value: unknown): Input[] =>
   (Array.isArray(value) ? value : [value]).flatMap(entry => {
     if (typeof entry !== 'string') return [];
     const dir = entry.trim().replace(/\/+$/, '');
-    return dir ? [toProductionEntry(`${dir}/{handler,index}.{ts,js}`)] : [];
+    return dir ? [toEntry(`${dir}/{handler,index}.{ts,js}`, { production: true })] : [];
   });
 
 const resolveConfig: ResolveConfig<OpenClawManifest> = (localConfig, options) => {
@@ -48,7 +48,7 @@ const resolveConfig: ResolveConfig<OpenClawManifest> = (localConfig, options) =>
     ...toEntries(localConfig.channel?.persistedAuthState?.specifier, options.cwd),
     ...toHookEntries(localConfig.hooks),
     ...(localConfig.build?.staticAssets ?? []).flatMap(asset =>
-      typeof asset.source === 'string' ? [toProductionEntry(asset.source)] : []
+      typeof asset.source === 'string' ? [toEntry(asset.source, { production: true })] : []
     ),
     ...assetScriptInputs,
   ];
@@ -59,7 +59,7 @@ const resolveFromAST: ResolveFromAST = (_, options) => {
   const sourceText = options.readFile(options.configFilePath).replace(/^\uFEFF/, '');
   const { program } = _parseFile(`${options.configFilePath}.ts`, `(${sourceText}\n)`);
   return Array.from(collectPropertyValues(program, 'providerCatalogEntry'), entry =>
-    toDeferResolveProductionEntry(entry, { dir: options.cwd })
+    toEntryPath(entry, { production: true, dir: options.cwd })
   );
 };
 

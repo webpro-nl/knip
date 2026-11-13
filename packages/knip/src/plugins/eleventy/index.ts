@@ -1,7 +1,7 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import { getPackageNameFromFilePath } from '../../util/modules.ts';
 import { isInNodeModules, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -57,7 +57,7 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
         join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
         join(inputDir, '**/*.11tydata.{js,cjs,mjs}'),
         ...copiedEntries,
-      ].map(id => toProductionEntry(id))
+      ].map(id => toEntry(id, { production: true }))
     );
 };
 

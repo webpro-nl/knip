@@ -1,5 +1,5 @@
 import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
-import { toEntry, toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import type { RegisterVisitors } from '../../types/config.ts';
 import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
 
@@ -43,13 +43,13 @@ const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
 };
 
 const resolve: Resolve = options => {
-  const entries = entry.map(id => toProductionEntry(id));
+  const entries = entry.map(id => toEntry(id, { production: true }));
 
   if (
     hasNodeTest(options.manifest.scripts, options.cwd, options.getScriptCommands) ||
     hasNodeTest(options.rootManifest?.scripts, options.rootCwd, options.getScriptCommands)
   ) {
-    entries.push(...patterns.map(toEntry));
+    entries.push(...patterns.map(id => toEntry(id)));
   }
 
   return entries;

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MdxlintConfig } from './types.ts';
@@ -27,7 +27,7 @@ const resolveConfig: ResolveConfig<MdxlintConfig> = config => {
   for (const plugin of config.plugins ?? []) {
     const id = typeof plugin === 'string' ? plugin : Array.isArray(plugin) ? plugin[0] : undefined;
     if (typeof id !== 'string') continue;
-    if (isInternal(id)) inputs.push(toDeferResolve(id));
+    if (isInternal(id)) inputs.push(toModule(id));
     else inputs.push(toDependency(toPluginName(id)));
   }
   return inputs;

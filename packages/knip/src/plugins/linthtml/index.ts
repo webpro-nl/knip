@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { toModule } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
 import type { LintHTMLConfig } from './types.ts';
@@ -19,7 +19,7 @@ const config = ['package.json', ...toCosmiconfig('linthtml')];
 const resolveConfig: ResolveConfig<LintHTMLConfig> = config => {
   const extensions = config.extends ?? [];
   const plugins = config.plugins ?? [];
-  return [extensions, plugins].flat().map(id => toDeferResolve(id));
+  return [extensions, plugins].flat().map(id => toModule(id));
 };
 
 const plugin: Plugin = {

@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { toDeferResolveProductionEntry, toDependency } from '../../util/input.ts';
+import { toEntryPath, toDependency } from '../../util/input.ts';
 import { _load } from '../../util/loader.ts';
 import { get } from '../../util/object.ts';
 import { isInternal, join, toAbsolute } from '../../util/path.ts';
@@ -35,11 +35,11 @@ const resolveFileVariable = async (value: unknown, dir: string): Promise<unknown
 const handlerToEntry = (handler: string, dir: string) => {
   const dot = handler.lastIndexOf('.');
   const file = handler.slice(0, dot);
-  return toDeferResolveProductionEntry(file, { dir });
+  return toEntryPath(file, { production: true, dir });
 };
 
 const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toDeferResolveProductionEntry(toAbsolute(plugin, dir)) : toDependency(plugin);
+  isInternal(plugin) ? toEntryPath(toAbsolute(plugin, dir), { production: true }) : toDependency(plugin);
 
 const getFunctionEntries = async (functions: unknown, dir: string, cwd: string) => {
   const entries = [];
@@ -57,7 +57,7 @@ const getFunctionEntries = async (functions: unknown, dir: string, cwd: string) 
 
 const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
   esbuild && typeof esbuild === 'object'
-    ? arrayify(esbuild.inject).map(id => toDeferResolveProductionEntry(join(dir, id)))
+    ? arrayify(esbuild.inject).map(id => toEntryPath(join(dir, id), { production: true }))
     : [];
 
 export const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {

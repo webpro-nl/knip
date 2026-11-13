@@ -2,7 +2,7 @@ import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
@@ -47,7 +47,7 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
   if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
 
   const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(id =>
-    toProductionDependency(id, { dir: options.cwd, alsoReferenceOwner: true })
+    toDependency(id, { production: true, dir: options.cwd, alsoReferenceOwner: true })
   );
 
   const types = compilerOptions.types ?? [];
@@ -60,9 +60,9 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
     ...contentMappers,
     ...extend,
     ...references,
-    ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd, alsoReferenceOwner: true })),
+    ...types.map(id => toModule(id, { isTypeOnly: true, dir: options.cwd, alsoReferenceOwner: true })),
     ...plugins.map(id => toDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
-    ...importHelpers.map(id => toProductionDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
+    ...importHelpers.map(id => toDependency(id, { production: true, dir: options.cwd, alsoReferenceOwner: true })),
     ...jsx,
   ]);
 };

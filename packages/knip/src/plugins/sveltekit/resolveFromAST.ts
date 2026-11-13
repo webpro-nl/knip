@@ -9,7 +9,7 @@ import {
 } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { _syncGlob } from '../../util/glob.ts';
-import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { toAlias, toIgnore, toEntry } from '../../util/input.ts';
 import { config as viteConfig } from '../vite/index.ts';
 
 const production = [
@@ -42,7 +42,7 @@ const getLibFromViteConfig = (program: Program): string => {
 const getLibFromSvelteConfig = (program: Program): string => collectFirstPropertyValue(program, 'lib') ?? 'src/lib';
 
 const toInputs = (lib: string) => [
-  ...production.map(pattern => toProductionEntry(pattern)),
+  ...production.map(pattern => toEntry(pattern, { production: true })),
   toAlias('$lib', [`./${lib}`]),
   toAlias('$lib/*', [`./${lib}/*`]),
   toIgnore('\\$app/.+', 'unresolved'),

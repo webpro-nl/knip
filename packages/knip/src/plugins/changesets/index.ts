@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { toModule, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -24,7 +24,7 @@ const resolveConfig: ResolveConfig<ChangesetsConfig> = config => {
       : typeof config.changelog === 'string'
         ? [config.changelog]
         : []
-  ).map(id => (isInternal(id) ? toDeferResolve(id) : toDependency(id)));
+  ).map(id => (isInternal(id) ? toModule(id) : toDependency(id)));
 
   if (config.$schema?.includes('node_modules/')) {
     const packageName = getPackageNameFromFilePath(config.$schema);

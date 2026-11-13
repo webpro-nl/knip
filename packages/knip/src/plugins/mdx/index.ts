@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toDeferResolveProductionEntry, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toEntryPath, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MdxConfig } from './types.ts';
@@ -29,8 +29,8 @@ const bundledPlugins = ['remark-mdx-frontmatter'];
 
 export const toProviderInput = (provider: string, dir: string): Input =>
   isInternal(provider) || provider.startsWith('#')
-    ? toDeferResolveProductionEntry(provider)
-    : toDeferResolve(provider, { dir, production: true });
+    ? toEntryPath(provider, { production: true })
+    : toModule(provider, { dir, production: true });
 
 export const resolveContentMapperOptions = (options: Record<string, unknown>, dir: string) => {
   const inputs = takeDependencies(options.remarkPlugins).filter(input => !bundledPlugins.includes(input.specifier));

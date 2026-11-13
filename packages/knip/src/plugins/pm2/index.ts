@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolveEntry } from '../../util/input.ts';
+import { type Input, toEntryPath } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PM2Application, PM2Config } from './types.ts';
@@ -13,8 +13,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['pm2.config.{json,js,cjs,mjs}', 'ecosystem.config.{json,js,cjs,mjs}'];
 
 const addApplicationEntry = (application: PM2Application, entries: Input[], cwd: string) => {
-  if (application.script && isInternal(application.script))
-    entries.push(toDeferResolveEntry(application.script, { dir: cwd }));
+  if (application.script && isInternal(application.script)) entries.push(toEntryPath(application.script, { dir: cwd }));
 };
 
 const resolveConfig: ResolveConfig<PM2Config> = (config, { cwd }) => {

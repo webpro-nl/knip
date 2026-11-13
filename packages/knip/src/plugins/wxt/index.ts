@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { WxtConfig } from './types.ts';
 
@@ -20,7 +20,7 @@ const resolveConfig: ResolveConfig<WxtConfig> = async localConfig => {
   const inputs: Input[] = [];
 
   for (const pattern of production) {
-    inputs.push(toProductionEntry(pattern));
+    inputs.push(toEntry(pattern, { production: true }));
   }
 
   for (const id of localConfig?.modules ?? []) {

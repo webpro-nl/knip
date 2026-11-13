@@ -1,6 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toProductionEntry } from '../../util/input.ts';
+import { type Input, toConfig, toEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type {
@@ -61,11 +61,11 @@ const toEntityEntry = (specifier: string, extensions: string, baseDir: string): 
   const hasPattern = entitySpecialRegex.test(specifier);
   const hasExtension = entityFileExtensionRegex.test(specifier);
   const pattern = hasPattern || hasExtension ? specifier : join(specifier, `**/*.{${extensions}}`);
-  return toProductionEntry(toAbsolute(pattern, baseDir));
+  return toEntry(toAbsolute(pattern, baseDir), { production: true });
 };
 
 const toFolderEntries = (paths: string[], glob: string, baseDir: string): Input[] =>
-  paths.map(path => toProductionEntry(toAbsolute(join(path, glob), baseDir)));
+  paths.map(path => toEntry(toAbsolute(join(path, glob), baseDir), { production: true }));
 
 const resolveConfig: ResolveConfig<MikroOrmConfig> = async (config, options) => {
   if (options.configFileName === 'package.json') {

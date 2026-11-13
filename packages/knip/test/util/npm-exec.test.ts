@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
-import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toDependency } from '../../src/util/input.ts';
+import { toBinary, toConfig, toModule, toEntryPath, toDependency } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -58,7 +58,7 @@ test('npm exec accepts explicit packages and versioned specifiers', () => {
   assert.deepEqual(inputs('npm exec -- custom-provider@1'), [toDependency('custom-provider', optional)]);
   assert.deepEqual(inputs('npm exec -- @scope/custom-provider@1'), [toDependency('@scope/custom-provider', optional)]);
   assert.deepEqual(inputs('npm exec --package=./tools/release-cli -- release-cli'), [
-    toDeferResolve('./tools/release-cli', { ...optional, dir: cwd }),
+    toModule('./tools/release-cli', { ...optional, dir: cwd }),
     toBinary('release-cli', optional),
   ]);
 });
@@ -66,8 +66,8 @@ test('npm exec accepts explicit packages and versioned specifiers', () => {
 test('npm exec preserves explicit module, file and config references', () => {
   assert.deepEqual(inputs('npm exec -- node --import import-hook ./script.js'), [
     toBinary('node', optional),
-    toDeferResolveEntry('./script.js', optional),
-    toDeferResolve('import-hook'),
+    toEntryPath('./script.js', optional),
+    toModule('import-hook'),
   ]);
   assert.deepEqual(inputs('npm exec -- vitest -c vitest.unit.config.ts'), [
     toBinary('vitest', optional),
@@ -75,19 +75,19 @@ test('npm exec preserves explicit module, file and config references', () => {
   ]);
   assert.deepEqual(inputs('npm exec -- tsx@4 ./main.ts'), [
     toDependency('tsx', optional),
-    toDeferResolveEntry('./main.ts', optional),
+    toEntryPath('./main.ts', optional),
   ]);
   assert.deepEqual(inputs('npm exec -- node ./script.js -- --import import-hook'), [
     toBinary('node', optional),
-    toDeferResolveEntry('./script.js', optional),
+    toEntryPath('./script.js', optional),
   ]);
 });
 
 test('npm exec call without requested packages executes a project script', () => {
   assert.deepEqual(inputs('npm exec --call "node --import import-hook ./script.js"'), [
     toBinary('node'),
-    toDeferResolveEntry('./script.js', optional),
-    toDeferResolve('import-hook'),
+    toEntryPath('./script.js', optional),
+    toModule('import-hook'),
   ]);
   assert.deepEqual(inputs('npm exec -c "custom-build-cli && another-build-cli"'), [
     toBinary('custom-build-cli'),
@@ -99,7 +99,7 @@ test('npm exec uses the last call without dropping sibling commands', () => {
   assert.deepEqual(inputs('npm exec --call first-build-cli --call last-build-cli'), [toBinary('last-build-cli')]);
   assert.deepEqual(inputs('node ./script.js && npm exec --call first-build-cli -c last-build-cli'), [
     toBinary('node'),
-    toDeferResolveEntry('./script.js', optional),
+    toEntryPath('./script.js', optional),
     toBinary('last-build-cli'),
   ]);
 });

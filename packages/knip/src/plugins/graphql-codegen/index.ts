@@ -1,11 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import {
-  toDeferResolve,
-  toDeferResolveEntry,
-  toDeferResolveProductionEntry,
-  toDependency,
-  toProductionEntry,
-} from '../../util/input.ts';
+import { toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
 import { isInternal, join, normalize } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -72,11 +66,13 @@ const getOutputInput = (output: string, outputConfig: ConfiguredOutput | Configu
     const subfolder = normalize(folder)
       .split('/')
       .filter(segment => segment !== '' && segment !== '.' && segment !== '..');
-    return toProductionEntry(join(dir, output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`));
+    return toEntry(join(dir, output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`), {
+      production: true,
+    });
   }
   return output.endsWith('/')
-    ? toProductionEntry(join(dir, `${output}**`))
-    : toDeferResolveProductionEntry(output, { dir });
+    ? toEntry(join(dir, `${output}**`), { production: true })
+    : toEntryPath(output, { production: true, dir });
 };
 
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = (
@@ -103,7 +99,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .map(presetName =>
       // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/presets.ts#L8-L11
       isInternal(presetName)
-        ? toDeferResolve(presetName, { dir: options.cwd })
+        ? toModule(presetName, { dir: options.cwd })
         : presetName.startsWith('@graphql-codegen/')
           ? presetName
           : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
@@ -122,7 +118,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     })
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
-      if (isInternal(plugin)) return [toDeferResolveEntry(plugin, { dir: options.cwd })];
+      if (isInternal(plugin)) return [toEntryPath(plugin, { dir: options.cwd })];
       return [toDependency(getPluginPackageName(plugin))];
     });
 

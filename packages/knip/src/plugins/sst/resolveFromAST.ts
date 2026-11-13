@@ -2,7 +2,7 @@ import { Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues, getImportMap } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
-import { toDeferResolveProductionEntry } from '../../util/input.ts';
+import { toEntryPath } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
 
@@ -47,5 +47,5 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
     visitor.visit(program);
   } catch {}
 
-  return Array.from(entries).map(specifier => toDeferResolveProductionEntry(specifier));
+  return Array.from(entries).map(specifier => toEntryPath(specifier, { production: true }));
 };

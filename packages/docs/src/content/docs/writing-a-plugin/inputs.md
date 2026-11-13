@@ -1,34 +1,55 @@
 ---
 title: Inputs
-description: Reference for Knip plugin input functions like toEntry, toDependency, toDeferResolve, toConfig, toBinary and toAlias, plus their options.
+description: Reference for Knip plugin input functions like toEntry, toEntryPath, toModule, toDependency and toConfig, plus their options.
 ---
 
-You may have noticed functions like `toDeferResolve` and `toEntry`. They're a
-way for plugins to tell what they've found and how Knip should handle those. The
-more precise a plugin can be, the better it is for results and performance.
-Here's an overview of all input type functions:
+Input helpers tell Knip what a plugin found and how to handle it. Choose a
+helper based on the value the tool accepts:
 
 - [toEntry][1]
-- [toProductionEntry][2]
+- [toEntryPath][2]
 - [toProject][3]
 - [toDependency][4]
-- [toProductionDependency][5]
-- [toDeferResolve][6]
-- [toDeferResolveEntry][7]
-- [toConfig][8]
-- [toBinary][9]
-- [toAlias][10]
-- [Options][11]
+- [toModule][5]
+- [toConfig][6]
+- [toBinary][7]
+- [toAlias][8]
+- [Options][9]
 
 ## toEntry
 
-An `entry` input is just like an `entry` in the configuration. It should either
-be an absolute or relative path, and glob patterns are allowed.
+Use `toEntry` for absolute or relative entry paths and glob patterns, including
+negations, just like `entry` in the configuration. Relative patterns use `dir`,
+defaulting to the workspace directory. A pattern that matches no files is
+ignored.
 
-## toProductionEntry
+Set `production: true` for application entry patterns:
 
-A production `entry` input is just like an `production` in the configuration. It
-should either be an absolute or relative path, and it can have glob patterns.
+```ts
+toEntry('src/routes/**/*.tsx', { production: true });
+```
+
+## toEntryPath
+
+Use `toEntryPath` to resolve one entry path without interpreting glob syntax.
+Extensionless paths, directory indexes and aliases can be resolved. Relative
+paths use `dir`, defaulting to the config file's directory. Missing local files
+are ignored.
+
+```ts
+toEntryPath('src/[variant]/bootstrap', { dir: options.cwd, production: true });
+```
+
+Resolution tries a local path before the original specifier. For example, with
+both a declared `input` dependency and an `input.js` file,
+`toEntryPath('input')` chooses the file. Use [toModule][5] when the package
+should take precedence.
+
+This helper can also reference dependencies: a resolved package target, a scoped
+package name or a path inside `node_modules` can credit a package or produce an
+unlisted dependency issue. Ignoring missing local files does not suppress
+unlisted dependency issues; use `optional: true` when those should be suppressed
+too.
 
 ## toProject
 
@@ -38,50 +59,46 @@ are allowed.
 
 ## toDependency
 
-The `dependency` indicates the entry is a dependency, belonging in either the
-`"dependencies"` or `"devDependencies"` section of `package.json`. Use it for
-package names referenced from configuration, such as a plugin or transformer a
-tool loads at build time.
+Use `toDependency` for known package references, such as a plugin or transformer
+a tool loads at build time. Knip marks the package as referenced and reports it
+as unlisted if it isn't declared, without requiring it to be installed.
 
-Knip marks the package as referenced, and reports it as an unlisted dependency
-if it isn't listed at all. Such a reference is development-only: in [production
-mode][12] the package is still marked as referenced, but an unlisted one is no
-longer reported.
+References are development-only by default: in [production mode][10] they
+neither count as dependency usage nor produce unlisted issues. Set
+`production: true` for runtime dependencies:
 
-A specifier that is a file path (starting with `./` or `../`, or absolute) is
-resolved as a file instead: Knip adds it as an entry file, or reports it under
-"unresolved imports" if it can't be resolved. For a value that is either a
-package name or a path, such as an item in Prettier's `plugins` option, prefer
-to return [toDeferResolve][6] for a path, with the directory the tool resolves
-it from as `dir`, and `toDependency` for anything else.
+```ts
+toDependency('react', { production: true });
+```
 
-## toProductionDependency
+A file path starting with `./` or `../`, or an absolute local path, is resolved
+as a file instead. Knip adds it as an entry file or reports an unresolved
+import. For a value that may be a package or local module, use [toModule][5].
 
-The production `dependency` indicates the entry is a production dependency,
-expected to be listed in `"dependencies"`. Unlike [toDependency][4] it's also
-reported as unlisted in production mode.
+## toModule
 
-## toDeferResolve
+Use `toModule` for a specifier that may refer to a package or a local module.
+Relative file resolution uses `dir`, defaulting to the config file's directory.
+Glob patterns are not supported.
 
-The `deferResolve` input type is used to defer the resolution of a specifier.
-This could be resolved to a dependency or an entry file. For instance, the
-specifier `"input"` could be resolved to `"input.js"`, `"input.tsx"`,
-`"input/index.js"` or the `"input"` package name. Local files are added as entry
-files, package names are external dependencies.
+A recognized package takes precedence over a same-named local file. A declared
+external package can satisfy the reference even when it isn't installed. An
+installed but undeclared package is reported as unlisted. Otherwise Knip tries
+file resolution, including extensions and aliases, and adds a resolved local
+file as an entry.
 
-If this does not lead to a resolution, the specifier will be reported under
-"unresolved imports".
+```ts
+toModule('input', { dir: options.cwd });
+```
 
-## toDeferResolveEntry
+This can reference the `input` package or resolve a file such as `input.js`,
+`input.tsx` or `input/index.js`. Missing local files are reported as unresolved
+imports. Use [toEntryPath][2] for file-first resolution with missing-file
+tolerance.
 
-The `deferResolveEntry` input type is similar to `deferResolve`, but it's used
-for entry files only (not dependencies) and unresolved inputs are ignored. It's
-different from `toEntry` as glob patterns are not supported.
-
-A specifier inside `node_modules`, such as `node_modules/pkg/bin.js`, is the
-exception: the tool loads that package rather than a project file, so Knip marks
-the package as referenced, and reports it as an unlisted dependency if it isn't
-listed.
+Both helpers can produce entry files or dependency references.
+`toModule(value, { optional: true })` still uses package-first resolution, so it
+is not a substitute for `toEntryPath(value)`.
 
 ## toConfig
 
@@ -112,8 +129,9 @@ added to `compilerOptions.paths` so the syntax is identical.
 
 ## Options
 
-When creating inputs from specifiers, an extra `options` object as the second
-argument can be provided.
+The entry, module, dependency and binary helpers accept an `options` object as
+their second argument. `toConfig` and `toAlias` accept it as their third
+argument. `toProject` accepts no options.
 
 ### dir
 
@@ -127,7 +145,7 @@ Use it when a tool resolves values from its working directory rather than from
 its config file:
 
 ```ts
-toDeferResolve(specifier, { dir: options.cwd });
+toModule(specifier, { dir: options.cwd });
 ```
 
 And to assign inputs to another workspace. For instance, GitHub Action workflows
@@ -164,30 +182,36 @@ plugin returns with the same base (`dir`, else the workspace directory): a
 negation from another base does not reach them, even when it resolves to the
 same path. Project patterns ignore `dir`:
 
-| Input type                                          | Relative to                             | Reads `dir` |
-| --------------------------------------------------- | --------------------------------------- | ----------- |
-| `toEntry`, `toProductionEntry`                      | `dir`, else the workspace directory     | base only   |
-| `toProject`                                         | the workspace directory                 | no          |
-| `toDeferResolve`, `toDeferResolveEntry`, `toConfig` | `dir`, else the config file's directory | yes         |
-| `toDependency`, `toBinary`                          | not a path                              | yes         |
-| `toAlias`                                           | `dir`, else the workspace directory     | yes         |
+| Input helper                          | Relative to                             | Reads `dir` |
+| ------------------------------------- | --------------------------------------- | ----------- |
+| `toEntry`                             | `dir`, else the workspace directory     | base only   |
+| `toProject`                           | the workspace directory                 | no          |
+| `toModule`, `toEntryPath`, `toConfig` | `dir`, else the config file's directory | yes         |
+| `toDependency`, `toBinary`            | not a path                              | yes         |
+| `toAlias`                             | `dir`, else the workspace directory     | yes         |
 
 ### production
 
-Use the `production` flag for an input that is part of the production code, so
-it's kept in [production mode][12]: a resolved file stays an entry file, and an
-unlisted dependency or unresolved import is still reported. The production
-helpers such as [toProductionDependency][5] set it already. For instance, a
-module the build bundles into the application, resolved as a file or a package:
+Use `production: true` for inputs that belong to production code. In [production
+mode][10], their files remain entries, their dependency references count as
+usage, and applicable unlisted or unresolved issues are still reported. This
+does not change the helper's reporting policy: `toEntryPath` still ignores
+missing local files.
 
 ```ts
-toDeferResolve(specifier, { dir: options.cwd, production: true });
+toModule(specifier, { dir: options.cwd, production: true });
 ```
+
+Inputs without this flag are development-only. In production mode they do not
+count as dependency usage or produce missing-reference issues. Their resolved
+local files can still identify development files to exclude.
 
 ### optional
 
-Use the `optional` flag to indicate the dependency is optional. Then, a
-dependency won't be flagged as unlisted if it isn't.
+Use `optional: true` to suppress unlisted dependency, unresolved import and
+missing binary issues for that input. Existing targets are still resolved and
+referenced where applicable. Optional development inputs do not add their
+resolved files to production exclusions.
 
 ### isTypeOnly
 
@@ -216,27 +240,26 @@ consume named exports from entry files, causing false positives.
 
 The `allowIncludeExports` option allows the exports of entry files to be
 reported as unused when using `--include-entry-exports`. Use it with
-[toProductionEntry][2] for entry patterns or `toDeferResolveProductionEntry` for
-literal file paths.
+[toEntry][1] for patterns, [toEntryPath][2] for individual paths, or
+[toModule][5] when the specifier resolves to a local file.
 
 Example:
 
 ```ts
-toProductionEntry('./entry.ts', { allowIncludeExports: true });
-toDeferResolveProductionEntry('./src/[variant]/entry.ts', {
+toEntry('./entry.ts', { production: true, allowIncludeExports: true });
+toEntryPath('./src/[variant]/entry.ts', {
+  production: true,
   allowIncludeExports: true,
 });
 ```
 
 [1]: #toentry
-[2]: #toproductionentry
+[2]: #toentrypath
 [3]: #toproject
 [4]: #todependency
-[5]: #toproductiondependency
-[6]: #todeferresolve
-[7]: #todeferresolveentry
-[8]: #toconfig
-[9]: #tobinary
-[10]: #toalias
-[11]: #options
-[12]: ../features/production-mode.md
+[5]: #tomodule
+[6]: #toconfig
+[7]: #tobinary
+[8]: #toalias
+[9]: #options
+[10]: ../features/production-mode.md

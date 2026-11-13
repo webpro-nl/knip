@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency, toProductionEntry } from '../../util/input.ts';
+import { toModule, toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { GatsbyActions, GatsbyConfig, GatsbyNode } from './types.ts';
 
@@ -26,11 +26,11 @@ const production = [
 const resolveConfig: ResolveConfig<GatsbyConfig | GatsbyNode> = async (localConfig, options) => {
   const { configFileName } = options;
 
-  const entries = production.map(id => toProductionEntry(id));
+  const entries = production.map(id => toEntry(id, { production: true }));
 
   if (configFileName.includes('gatsby-config')) {
     const plugins = (localConfig as GatsbyConfig).plugins ?? [];
-    return [...entries, ...plugins.map(plugin => toDeferResolve(typeof plugin === 'string' ? plugin : plugin.resolve))];
+    return [...entries, ...plugins.map(plugin => toModule(typeof plugin === 'string' ? plugin : plugin.resolve))];
   }
 
   if (configFileName.includes('gatsby-node')) {

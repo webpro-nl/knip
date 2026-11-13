@@ -2,17 +2,7 @@ import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig
 import { isDirectory } from '../../util/fs.ts';
 import { _syncGlob } from '../../util/glob.ts';
 import type { Input } from '../../util/input.ts';
-import {
-  toAlias,
-  toConfig,
-  toDeferResolve,
-  toDeferResolveProductionEntry,
-  toDependency,
-  toEntry,
-  toIgnore,
-  toProductionDependency,
-  toProductionEntry,
-} from '../../util/input.ts';
+import { toAlias, toConfig, toModule, toEntryPath, toDependency, toEntry, toIgnore } from '../../util/input.ts';
 import { loadTSConfig } from '../../util/load-tsconfig.ts';
 import { isInternal, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -103,16 +93,16 @@ const toLayerSources = (extend: NuxtConfig['extends']) => {
 
 const addAppEntries = (inputs: Input[], srcDir: string, serverDir: string, config: NuxtConfig, dir: string) => {
   for (const id of entry) inputs.push(toEntry(join(srcDir, id)));
-  for (const id of app) inputs.push(toProductionEntry(join(srcDir, id)));
-  inputs.push(toProductionEntry(join(srcDir, layout(config.dir?.layouts))));
-  for (const id of middleware(config.dir?.middleware)) inputs.push(toProductionEntry(join(srcDir, id)));
-  inputs.push(toProductionEntry(join(srcDir, pages(config.dir?.pages))));
-  for (const id of plugins(config.dir?.plugins)) inputs.push(toProductionEntry(join(srcDir, id)));
-  inputs.push(toProductionEntry(join(srcDir, 'components/global/**/*.{vue,jsx,tsx}')));
-  for (const id of server) inputs.push(toProductionEntry(join(dir, serverDir, id)));
-  inputs.push(toProductionEntry(join(dir, modules)));
+  for (const id of app) inputs.push(toEntry(join(srcDir, id), { production: true }));
+  inputs.push(toEntry(join(srcDir, layout(config.dir?.layouts)), { production: true }));
+  for (const id of middleware(config.dir?.middleware)) inputs.push(toEntry(join(srcDir, id), { production: true }));
+  inputs.push(toEntry(join(srcDir, pages(config.dir?.pages)), { production: true }));
+  for (const id of plugins(config.dir?.plugins)) inputs.push(toEntry(join(srcDir, id), { production: true }));
+  inputs.push(toEntry(join(srcDir, 'components/global/**/*.{vue,jsx,tsx}'), { production: true }));
+  for (const id of server) inputs.push(toEntry(join(dir, serverDir, id), { production: true }));
+  inputs.push(toEntry(join(dir, modules), { production: true }));
   if (config.css)
-    for (const id of config.css) inputs.push(toDeferResolveProductionEntry(resolveAlias(id, srcDir, dir)));
+    for (const id of config.css) inputs.push(toEntryPath(resolveAlias(id, srcDir, dir), { production: true }));
 };
 
 const findLayerConfigs = (cwd: string): string[] => _syncGlob({ cwd, patterns: [`layers/*/${config.at(0)}`] });
@@ -147,7 +137,11 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   const addModule = (id: string) => {
     const specifier = resolveAlias(id, srcDir, cwd);
-    inputs.push(isInternal(specifier) ? toDeferResolveProductionEntry(specifier) : toProductionDependency(specifier));
+    inputs.push(
+      isInternal(specifier)
+        ? toEntryPath(specifier, { production: true })
+        : toDependency(specifier, { production: true })
+    );
   };
 
   for (const id of localConfig.modules ?? []) {
@@ -158,8 +152,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
   // Plugins listed in the config are loaded even outside the scanned top level of `plugins`
   for (const id of localConfig.plugins ?? []) {
     const src = typeof id === 'string' ? id : id?.src;
-    if (typeof src === 'string')
-      inputs.push(toDeferResolve(resolveAlias(src, srcDir, cwd), { dir: cwd, production: true }));
+    if (typeof src === 'string') inputs.push(toModule(resolveAlias(src, srcDir, cwd), { dir: cwd, production: true }));
   }
 
   addAppEntries(inputs, srcDir, serverDir, localConfig, cwd);
@@ -185,7 +178,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
     const resolved = isInternal(target) ? toAbsolute(target, cwd) : target;
     const configs = _syncGlob({ cwd: resolved, patterns: config });
     if (configs.length > 0) for (const cfg of configs) inputs.push(toConfig('nuxt', cfg));
-    else inputs.push(isInternal(target) ? toDependency(source) : toProductionDependency(source));
+    else inputs.push(isInternal(target) ? toDependency(source) : toDependency(source, { production: true }));
   }
 
   for (const layerConfig of findLayerConfigs(cwd)) {
@@ -196,7 +189,7 @@ const resolveConfig: ResolveConfig<NuxtConfig> = async (localConfig, options) =>
 
   for (const file of _syncGlob({ cwd, patterns: ['.nuxt/module/*.d.ts'] })) {
     const result = readAndParseFile(file);
-    for (const p of collectLocalImportPaths(file, result)) inputs.push(toDeferResolveProductionEntry(p));
+    for (const p of collectLocalImportPaths(file, result)) inputs.push(toEntryPath(p, { production: true }));
   }
 
   // In case typescript isn't listed

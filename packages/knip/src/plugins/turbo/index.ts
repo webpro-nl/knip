@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import type { Args } from '../../types/args.ts';
-import { toDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://turborepo.com/docs/guides/generating-code
@@ -23,7 +23,7 @@ const args: Args = {
   string: ['config'],
   resolveInputs: (parsed, { cwd }) =>
     (parsed._[0] === 'gen' || parsed._[0] === 'generate') && typeof parsed.config === 'string'
-      ? [toDeferResolveEntry(parsed.config, { dir: cwd })]
+      ? [toEntryPath(parsed.config, { dir: cwd })]
       : [],
 };
 

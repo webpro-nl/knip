@@ -1,6 +1,6 @@
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { TsupConfig } from './types.ts';
 
@@ -28,13 +28,15 @@ const resolveConfig: ResolveConfig<TsupConfig> = async config => {
       if (Array.isArray(config.entry)) return config.entry;
       return Object.values(config.entry);
     })
-    .map(id => toProductionEntry(id, { allowIncludeExports: true }));
+    .map(id => toEntry(id, { production: true, allowIncludeExports: true }));
 
   return entryPatterns;
 };
 
 const resolveFromAST: ResolveFromAST = program =>
-  Array.from(collectPropertyValues(program, 'entry'), id => toProductionEntry(id, { allowIncludeExports: true }));
+  Array.from(collectPropertyValues(program, 'entry'), id =>
+    toEntry(id, { production: true, allowIncludeExports: true })
+  );
 
 const args = {
   config: true,

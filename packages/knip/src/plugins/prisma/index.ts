@@ -2,7 +2,7 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { type Input, toDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { type Input, toEntryPath, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
@@ -28,7 +28,7 @@ const config: string[] = [
 
 const resolveSchema = (path: string, cwd: string) => {
   if (!isDirectory(cwd, path)) {
-    return toDeferResolveEntry(path, { dir: cwd });
+    return toEntryPath(path, { dir: cwd });
   }
   // Multi-file schema directory
   return toEntry(join(path, '**/*.prisma'));

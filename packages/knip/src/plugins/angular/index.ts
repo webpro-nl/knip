@@ -1,13 +1,5 @@
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
-import {
-  type Input,
-  toConfig,
-  toDeferResolve,
-  toDeferResolveEntry,
-  toDeferResolveProductionEntry,
-  toDependency,
-  toEntry,
-} from '../../util/input.ts';
+import { type Input, toConfig, toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createComponentStyleUrlsVisitor } from '../_component-style-urls/component-style-urls-visitor.ts';
 import * as karma from '../karma/helpers.ts';
@@ -52,13 +44,8 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
         entriesByOptionByConfig.get(PRODUCTION_CONFIG_NAME) ?? new Map();
       const isBuildTarget = targetName === BUILD_TARGET_NAME;
       const toInput = (option: string, specifier: string, isProduction: boolean): Input => {
-        const opts = { dir: options.cwd };
-        if (option === 'polyfills') {
-          return isProduction
-            ? toDeferResolve(specifier, { ...opts, production: true })
-            : toDeferResolve(specifier, opts);
-        }
-        return isProduction ? toDeferResolveProductionEntry(specifier, opts) : toDeferResolveEntry(specifier, opts);
+        const opts = { dir: options.cwd, production: isProduction };
+        return option === 'polyfills' ? toModule(specifier, opts) : toEntryPath(specifier, opts);
       };
       for (const [configName, entriesByOption] of entriesByOptionByConfig) {
         for (const [option, entries] of entriesByOption) {

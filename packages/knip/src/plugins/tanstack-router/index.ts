@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { TanStackRouterConfig } from './types.ts';
@@ -33,7 +33,10 @@ const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, o
   const generatedRouteTree = localConfig.generatedRouteTree ?? './src/routeTree.gen.ts';
   const routeTreePath = toAbsolute(generatedRouteTree, configFileDir);
 
-  return [toDeferResolveProductionEntry(routeTreePath), ...routerEntries.map(id => toProductionEntry(id))];
+  return [
+    toEntryPath(routeTreePath, { production: true }),
+    ...routerEntries.map(id => toEntry(id, { production: true })),
+  ];
 };
 
 const plugin: Plugin = {

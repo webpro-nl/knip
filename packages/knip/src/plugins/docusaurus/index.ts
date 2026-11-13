@@ -1,13 +1,5 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
-import {
-  type Input,
-  toAlias,
-  toConfig,
-  toDeferResolveProductionEntry,
-  toDependency,
-  toIgnore,
-  toProductionEntry,
-} from '../../util/input.ts';
+import { type Input, toAlias, toConfig, toEntryPath, toDependency, toIgnore, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { CORE_CLIENT_API, resolveConfigItems } from './helpers.ts';
@@ -33,7 +25,7 @@ const resolveStaticAssets = (items: DocusaurusConfig['scripts'] | DocusaurusConf
   for (const item of items ?? []) {
     const value = typeof item === 'string' ? item : (item.src ?? item.href);
     if (typeof value === 'string' && !value.includes('://'))
-      entries.push(toDeferResolveProductionEntry(join(cwd, 'static', value)));
+      entries.push(toEntryPath(join(cwd, 'static', value), { production: true }));
   }
   return entries;
 };
@@ -61,7 +53,7 @@ const resolveConfig: ResolveConfig<DocusaurusConfig> = async (config, options) =
     toIgnore('@generated/.*', 'dependencies'),
     // https://docusaurus.io/blog/releases/3.8
     ...(config.future?.experimental_faster ? [toDependency('@docusaurus/faster')] : []),
-    ...production.map(id => toProductionEntry(id)),
+    ...production.map(id => toEntry(id, { production: true })),
     ...themes,
     ...plugins,
     ...presets,

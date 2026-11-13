@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntryPath, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -65,9 +65,9 @@ const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
-  inputs.push(...files.map(id => toDeferResolveEntry(id, { dir: options.cwd })));
-  inputs.push(...require.map(id => toDeferResolve(id, { dir: options.cwd })));
-  if (isExternalReporter(localConfig.reporter)) inputs.push(toDeferResolve(localConfig.reporter, { dir: options.cwd }));
+  inputs.push(...files.map(id => toEntryPath(id, { dir: options.cwd })));
+  inputs.push(...require.map(id => toModule(id, { dir: options.cwd })));
+  if (isExternalReporter(localConfig.reporter)) inputs.push(toModule(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
 
@@ -126,7 +126,7 @@ const args = {
       else inputs.push(toEntry(value));
     }
     for (const value of [parsed.ignore ?? []].flat()) inputs.push(toEntry(`!${String(value)}`));
-    if (isExternalReporter(parsed.reporter)) inputs.push(toDeferResolve(parsed.reporter));
+    if (isExternalReporter(parsed.reporter)) inputs.push(toModule(parsed.reporter));
     return inputs;
   },
 };

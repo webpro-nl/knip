@@ -1,6 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
@@ -36,7 +36,7 @@ const resolveConfig: ResolveConfig<SemanticReleaseConfig> = (config, options) =>
     else inputs.push(toDependency(id));
   }
   const plugins = (config?.plugins ?? []).map(plugin => (Array.isArray(plugin) ? plugin[0] : plugin));
-  for (const id of plugins.filter(plugin => !excludePackages.includes(plugin))) inputs.push(toDeferResolve(id));
+  for (const id of plugins.filter(plugin => !excludePackages.includes(plugin))) inputs.push(toModule(id));
   return inputs;
 };
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
 import { main } from '../../src/index.ts';
-import { toBinary, toDependency, toProductionEntry } from '../../src/util/input.ts';
+import { toBinary, toDependency, toEntry } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
@@ -42,18 +42,18 @@ test('Parse tsdown CLI arguments', () => {
   for (const mode of ['inline', 'hidden']) {
     assert.deepEqual(_getInputsFromScripts(`tsdown --sourcemap ${mode} src/library.ts`, options), [
       toBinary('tsdown'),
-      toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+      toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
     ]);
   }
   assert.deepEqual(_getInputsFromScripts('tsdown --sourcemap src/library.ts', options), [
     toBinary('tsdown'),
-    toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+    toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
   ]);
 
   assert.deepEqual(_getInputsFromScripts('tsdown --watch src', options), [toBinary('tsdown')]);
   assert.deepEqual(_getInputsFromScripts('tsdown src/library.ts --watch', options), [
     toBinary('tsdown'),
-    toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+    toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
   ]);
 
   for (const subcommand of ['create', 'migrate']) {
@@ -63,28 +63,28 @@ test('Parse tsdown CLI arguments', () => {
   for (const flag of ['--failOnWarn', '--deps.skipNodeModulesBundle', '--silent']) {
     assert.deepEqual(_getInputsFromScripts(`tsdown ${flag} src/library.ts`, options), [
       toBinary('tsdown'),
-      toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+      toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
     ]);
   }
 
   for (const flag of ['--entry', '--entry.library']) {
     assert.deepEqual(_getInputsFromScripts(`tsdown ${flag} src/library.ts`, options), [
       toBinary('tsdown'),
-      toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+      toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
     ]);
   }
 
   for (const flag of ['--deps.never-bundle', '--deps.neverBundle', '--external']) {
     assert.deepEqual(_getInputsFromScripts(`tsdown ${flag} react src/library.ts`, options), [
       toBinary('tsdown'),
-      toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+      toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
       toDependency('react', { optional: true }),
     ]);
   }
 
   assert.deepEqual(_getInputsFromScripts('tsdown --publint --attw src/library.ts', options), [
     toBinary('tsdown'),
-    toProductionEntry('src/library.ts', { allowIncludeExports: true }),
+    toEntry('src/library.ts', { production: true, allowIncludeExports: true }),
     toDependency('publint', { optional: true }),
     toDependency('@arethetypeswrong/core', { optional: true }),
   ]);

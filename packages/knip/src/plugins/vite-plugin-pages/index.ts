@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveFromAST } from '../../types/config.ts';
-import { toIgnore, toProductionEntry } from '../../util/input.ts';
+import { toIgnore, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getVitePluginDirs } from '../vite/helpers.ts';
@@ -21,7 +21,7 @@ const production = [`${defaultDir}/**/*.{${extensions}}`];
 
 const resolveFromAST: ResolveFromAST = (program, options) => {
   const dirs = getVitePluginDirs(program, enablers, 'dirs') ?? [defaultDir];
-  return dirs.map(dir => toProductionEntry(join(options.configFileDir, `${dir}/**/*.{${extensions}}`)));
+  return dirs.map(dir => toEntry(join(options.configFileDir, `${dir}/**/*.{${extensions}}`), { production: true }));
 };
 
 const resolve: Resolve = () =>

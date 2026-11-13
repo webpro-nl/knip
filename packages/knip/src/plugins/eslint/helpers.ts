@@ -1,7 +1,7 @@
 import type { PluginOptions } from '../../types/config.ts';
 import type { Manifest } from '../../util/package-json.ts';
 import { compact } from '../../util/array.ts';
-import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type ConfigInput, type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { substringBefore } from '../../util/string.ts';
@@ -27,7 +27,7 @@ export const getInputs = (
 
   dependencies.push('eslint-import-resolver-typescript');
 
-  return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
+  return compact(dependencies).map(id => toModule(id, { optional: true }));
 };
 
 const getInputsDeprecated = (
@@ -52,14 +52,14 @@ const getInputsDeprecated = (
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
   const dependencies = compact([...extendsSpecifiers, ...plugins, ...rules]).map(id => toDependency(id));
-  const resolvers = compact(settings).map(id => toDeferResolve(id));
+  const resolvers = compact(settings).map(id => toModule(id));
   return [...extendConfigs, ...dependencies, ...resolvers, ...parsers, ...babelDependencies, ...overrides];
 };
 
 const isParserObject = (value: Record<string, unknown>) =>
   typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
 
-export const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+export const toParser = (name: string) => toModule(name, name === 'espree' ? { optional: true } : {});
 
 const getParsers = ({ parser, parserOptions }: BaseConfig) => {
   const inputs: Input[] = [];
@@ -150,7 +150,7 @@ const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'
 };
 
 export const getInputsFromSettings = (settings?: Settings) =>
-  compact(getDependenciesFromSettings(settings)).map(id => toDeferResolve(id, { optional: true }));
+  compact(getDependenciesFromSettings(settings)).map(id => toModule(id, { optional: true }));
 
 const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
 const builtinFormattersUntilV8 = new Set([
@@ -176,7 +176,7 @@ export const resolveFormatters = (formatters: string | string[], manifest: Manif
   for (const rawFormatter of [formatters].flat()) {
     const formatter = rawFormatter.replace(/\\/g, '/');
     if (!formatter.startsWith('@') && formatter.includes('/')) {
-      inputs.add(toDeferResolve(isInternal(formatter) ? formatter : `./${formatter}`));
+      inputs.add(toModule(isInternal(formatter) ? formatter : `./${formatter}`));
     } else {
       const isBuiltin = builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter));
       inputs.add(toDependency(normalizeFormatterName(formatter), isBuiltin ? { optional: true } : {}));

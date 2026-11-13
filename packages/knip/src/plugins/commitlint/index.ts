@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
@@ -49,7 +49,7 @@ const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   const parserPreset = await config.parserPreset;
   const modules = config.formatter ? [config.formatter] : [];
   if (typeof parserPreset === 'string') modules.push(parserPreset);
-  for (const id of modules) inputs.push(isInternal(id) ? toDeferResolve(id) : toDependency(id));
+  for (const id of modules) inputs.push(isInternal(id) ? toModule(id) : toDependency(id));
   if (typeof parserPreset === 'object' && parserPreset.path) inputs.push(toDependency(parserPreset.path));
   return inputs;
 };

@@ -1,6 +1,6 @@
 import MDX from '../../compilers/mdx.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency, toEntry } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getBabelInputs } from '../vite/helpers.ts';
@@ -74,7 +74,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
 
   return [
     ...patterns.map(id => toEntry(id)),
-    ...addons.map(id => toDeferResolve(id)),
+    ...addons.map(id => toModule(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
     ...coverageDeps,

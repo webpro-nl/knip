@@ -5,14 +5,7 @@ import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../.
 import { filterTransitiveDependencies } from '../../util/filter-transitive-dependencies.ts';
 import { findFileWithExtensions } from '../../util/fs.ts';
 import { _dirGlob, _glob } from '../../util/glob.ts';
-import {
-  type Input,
-  toConfig,
-  toDeferResolve,
-  toDeferResolveProductionEntry,
-  toDependency,
-  toEntry,
-} from '../../util/input.ts';
+import { type Input, toConfig, toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -60,7 +53,7 @@ const getCoverageInputs = (provider: string, customProviderModule: string | unde
   builtInCoverageProviders.has(provider)
     ? [toDependency(`@vitest/coverage-${provider}`)]
     : customProviderModule
-      ? [toDeferResolve(customProviderModule, { dir })]
+      ? [toModule(customProviderModule, { dir })]
       : [];
 
 const isProjectConfig = (project: string | VitestProject): project is VitestProjectConfig =>
@@ -73,11 +66,9 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
 
   const env = testConfig.environment;
   const environments =
-    env && env !== 'node' ? (isInternal(env) || isAbsolute(env) ? [toDeferResolve(env)] : [toEnvDependency(env)]) : [];
+    env && env !== 'node' ? (isInternal(env) || isAbsolute(env) ? [toModule(env)] : [toEnvDependency(env)]) : [];
   const reporters = getExternalReporters(testConfig.reporters).map(specifier =>
-    isInternal(specifier) || isAbsolute(specifier)
-      ? toDeferResolve(specifier, { dir: vitestRoot })
-      : toDependency(specifier)
+    isInternal(specifier) || isAbsolute(specifier) ? toModule(specifier, { dir: vitestRoot }) : toDependency(specifier)
   );
 
   const hasCoverage = testConfig.coverage && (testConfig.coverage.enabled !== false || testConfig.coverage.provider);
@@ -85,15 +76,11 @@ const findConfigDependencies = (localConfig: ViteConfig, options: PluginOptions,
     ? getCoverageInputs(testConfig.coverage?.provider ?? 'v8', testConfig.coverage?.customProviderModule, vitestRoot)
     : [];
 
-  const setupFiles = [testConfig.setupFiles ?? []]
-    .flat()
-    .map(specifier => toDeferResolve(specifier, { dir: vitestRoot }));
+  const setupFiles = [testConfig.setupFiles ?? []].flat().map(specifier => toModule(specifier, { dir: vitestRoot }));
   const snapshotSerializers = (testConfig.snapshotSerializers ?? []).map(specifier =>
-    toDeferResolve(specifier, { dir: vitestRoot })
+    toModule(specifier, { dir: vitestRoot })
   );
-  const globalSetup = [testConfig.globalSetup ?? []]
-    .flat()
-    .map(specifier => toDeferResolve(specifier, { dir: vitestRoot }));
+  const globalSetup = [testConfig.globalSetup ?? []].flat().map(specifier => toModule(specifier, { dir: vitestRoot }));
 
   const workspaceDependencies: Input[] = [];
   if (testConfig.workspace !== undefined) {
@@ -271,7 +258,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
       typeof _input === 'string' ? [_input] : Array.isArray(_input) ? _input : Object.values(_input).flat();
     for (const specifier of inputSpecifiers) {
       const resolved = toAbsolute(specifier, viteRoot);
-      inputs.add(toDeferResolveProductionEntry(resolved));
+      inputs.add(toEntryPath(resolved, { production: true }));
       if (resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved, viteRoot, publicDir)) inputs.add(input);
       }
@@ -280,7 +267,9 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const _entry = cfg.build?.lib?.entry ?? [];
     const entries =
       typeof _entry === 'string' ? [_entry] : Array.isArray(_entry) ? _entry : Object.values(_entry).flat();
-    const deps = entries.map(specifier => toAbsolute(specifier, viteRoot)).map(id => toDeferResolveProductionEntry(id));
+    const deps = entries
+      .map(specifier => toAbsolute(specifier, viteRoot))
+      .map(id => toEntryPath(id, { production: true }));
     for (const dependency of deps) inputs.add(dependency);
   }
 
@@ -307,11 +296,11 @@ const args: Args = {
     }
     if (parsed['reporter']) {
       for (const reporter of getExternalReporters([parsed['reporter']].flat())) {
-        inputs.push(isInternal(reporter) ? toDeferResolve(reporter, { dir: root }) : toDependency(reporter));
+        inputs.push(isInternal(reporter) ? toModule(reporter, { dir: root }) : toDependency(reporter));
       }
     }
     const env = parsed['environment'];
-    if (env && env !== 'node') inputs.push(isInternal(env) ? toDeferResolve(env, { dir: root }) : toEnvDependency(env));
+    if (env && env !== 'node') inputs.push(isInternal(env) ? toModule(env, { dir: root }) : toEnvDependency(env));
     if (typeof parsed['typecheck'] === 'object' && parsed['typecheck'].checker) {
       inputs.push(toDependency(parsed['typecheck'].checker === 'tsc' ? 'typescript' : parsed['typecheck'].checker));
     }

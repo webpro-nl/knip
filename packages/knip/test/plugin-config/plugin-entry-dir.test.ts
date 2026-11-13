@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
 import { main } from '../../src/index.ts';
-import { type Input, toDeferResolveProductionEntry, toEntry, toProductionEntry } from '../../src/util/input.ts';
+import { type Input, toEntryPath, toEntry } from '../../src/util/input.ts';
 import { join } from '../../src/util/path.ts';
 import { WorkspaceWorker } from '../../src/WorkspaceWorker.ts';
 import baseCounters from '../helpers/baseCounters.ts';
@@ -30,7 +30,8 @@ const run = async (
 for (const isProduction of [false, true]) {
   test(`Include exports from resolved plugin entries when opted in (isProduction: ${isProduction})`, async t => {
     const inputs = [
-      toDeferResolveProductionEntry('keep.ts', {
+      toEntryPath('keep.ts', {
+        production: true,
         dir: cwd,
         containingFilePath: join(app, 'package.json'),
         allowIncludeExports: true,
@@ -44,10 +45,7 @@ for (const isProduction of [false, true]) {
 
   test(`Skip exports from resolved plugin entries by default (isProduction: ${isProduction})`, async t => {
     const inputs = [
-      toDeferResolveProductionEntry('keep.ts', {
-        dir: cwd,
-        containingFilePath: join(app, 'package.json'),
-      }),
+      toEntryPath('keep.ts', { production: true, dir: cwd, containingFilePath: join(app, 'package.json') }),
     ];
     const { counters } = await run(t, inputs, { isProduction, isIncludeEntryExports: true });
 
@@ -64,7 +62,7 @@ const spellings = {
 
 for (const [spelling, patterns] of Object.entries(spellings)) {
   test(`Resolve plugin entry patterns from dir (${spelling})`, async t => {
-    const inputs = patterns.map(pattern => ({ ...toEntry(pattern), dir: app }));
+    const inputs = patterns.map(pattern => toEntry(pattern, { dir: app }));
     const { issues, counters } = await run(t, inputs);
 
     assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
@@ -72,7 +70,7 @@ for (const [spelling, patterns] of Object.entries(spellings)) {
   });
 
   test(`Resolve plugin production entry patterns from dir (${spelling})`, async t => {
-    const inputs = patterns.map(pattern => toProductionEntry(pattern, { dir: app }));
+    const inputs = patterns.map(pattern => toEntry(pattern, { production: true, dir: app }));
     const { issues, counters } = await run(t, inputs, { isProduction: true });
 
     assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);

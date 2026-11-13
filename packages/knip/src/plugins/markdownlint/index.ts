@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getArgumentValues } from './helpers.ts';
@@ -45,10 +45,10 @@ const resolveConfig: ResolveConfig<MarkdownlintConfig> = (config, options) => {
     .filter(script => script.includes('markdownlint ') || script.includes('markdownlint-cli2 '))
     .flatMap(script => getArgumentValues(script, / (--rules|-r)[ =]([^ ]+)/g));
   return [
-    ...dependencies.filter(id => !isBundled(id)).map(id => (isInternal(id) ? toDeferResolve(id) : toDependency(id))),
+    ...dependencies.filter(id => !isBundled(id)).map(id => (isInternal(id) ? toModule(id) : toDependency(id))),
     ...uses
       .filter(id => !isBundled(id))
-      .map(id => (isInternal(id) ? toDeferResolve(id, { dir: options.cwd }) : toDependency(id))),
+      .map(id => (isInternal(id) ? toModule(id, { dir: options.cwd }) : toDependency(id))),
   ];
 };
 

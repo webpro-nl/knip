@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { toModule } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NycConfig } from './types.ts';
 
@@ -16,7 +16,7 @@ const config = ['.nycrc', '.nycrc.{json,yml,yaml}', 'nyc.config.{js,cjs,mjs}', '
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
   const requires = config?.require ?? [];
-  return [extend, requires].flat().map(id => toDeferResolve(id));
+  return [extend, requires].flat().map(id => toModule(id));
 };
 
 const plugin: Plugin = {

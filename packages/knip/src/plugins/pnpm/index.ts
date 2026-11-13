@@ -21,7 +21,7 @@ const entry: string[] = ['.pnpmfile.{cjs,mjs}'];
 const config: string[] = ['package.json', 'pnpm-workspace.yaml'];
 
 const resolveConfig: ResolveConfig<PnpmConfig> = config => {
-  const inputs: Input[] = entry.map(toEntry);
+  const inputs: Input[] = entry.map(id => toEntry(id));
 
   const packageExtensions = config?.pnpm?.packageExtensions || config?.packageExtensions;
 

@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toBinary, toDeferResolve, toDependency } from '../../util/input.ts';
+import { toBinary, toModule, toDependency } from '../../util/input.ts';
 import { stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
 import { argsFrom, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
@@ -10,7 +10,7 @@ const noInstallFlags = new Set(['--no', '--no-install', '--yes=false', '--no-yes
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs, cwd } = options;
   const toPackage = (id: string, opts?: { optional: boolean }) =>
-    isInternal(id) ? toDeferResolve(id, { ...opts, dir: cwd }) : toDependency(id, opts);
+    isInternal(id) ? toModule(id, { ...opts, dir: cwd }) : toDependency(id, opts);
   const args = {
     isStorePositions: true,
     boolean: npmBooleanFlags,

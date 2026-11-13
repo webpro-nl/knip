@@ -1,7 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://rollupjs.org/guide/en/#configuration-files
@@ -24,7 +24,7 @@ const args: Args = {
 };
 
 const resolveFromAST: ResolveFromAST = program =>
-  Array.from(collectPropertyValues(program, 'input'), id => toProductionEntry(id));
+  Array.from(collectPropertyValues(program, 'input'), id => toEntry(id, { production: true }));
 
 const plugin: Plugin = {
   title,

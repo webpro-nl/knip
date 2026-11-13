@@ -3,7 +3,7 @@ import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../type
 import type { PluginName } from '../../types/PluginNames.ts';
 import { compact } from '../../util/array.ts';
 import { isFile, loadJSON } from '../../util/fs.ts';
-import { type Input, toConfig, toDeferResolve, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toEntryPath, toDependency } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
 import { dirname, isInternal, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -42,7 +42,7 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
 
   return [
     ...compact([...targetsDefault, ...generators]).map(id => toDependency(id)),
-    ...compact(plugins).map(id => (isInternal(id) ? toDeferResolve(id) : toDependency(id))),
+    ...compact(plugins).map(id => (isInternal(id) ? toModule(id) : toDependency(id))),
   ];
 };
 
@@ -149,7 +149,7 @@ const resolve: Resolve = async options => {
         if (!entry || typeof entry !== 'object') continue;
         for (const id of [entry.implementation || entry.factory, entry.batchImplementation]) {
           if (typeof id === 'string' && id.length > 0) {
-            inputs.push(toDeferResolveEntry(substringBefore(id, '#'), { dir: dirname(filePath) }));
+            inputs.push(toEntryPath(substringBefore(id, '#'), { dir: dirname(filePath) }));
           }
         }
       }

@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { RelayConfig } from './types.ts';
@@ -23,10 +23,10 @@ const resolveConfig: ResolveConfig<RelayConfig> = async config => {
     const artifactDirectory = project.artifactDirectory;
 
     if (artifactDirectory == null) {
-      return toProductionEntry('**/__generated__/*');
+      return toEntry('**/__generated__/*', { production: true });
     }
 
-    return toProductionEntry(join(artifactDirectory, '**'));
+    return toEntry(join(artifactDirectory, '**'), { production: true });
   });
 };
 

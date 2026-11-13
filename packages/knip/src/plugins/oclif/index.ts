@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency, toProductionEntry } from '../../util/input.ts';
+import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { OclifConfig } from './types.ts';
 
@@ -17,7 +17,7 @@ const production = ['{,src/}commands/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}'];
 
 const resolveConfig: ResolveConfig<OclifConfig> = async config => {
   if (!config) return [];
-  const inputs: Input[] = production.map(id => toProductionEntry(id));
+  const inputs: Input[] = production.map(id => toEntry(id, { production: true }));
   for (const id of [...(config.plugins ?? []), ...(config.devPlugins ?? [])]) inputs.push(toDependency(id));
   return inputs;
 };

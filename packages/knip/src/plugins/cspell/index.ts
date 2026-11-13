@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { toModule } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { CSpellConfig } from './types.ts';
 
@@ -28,7 +28,7 @@ const config = [
 ];
 
 const resolveConfig: ResolveConfig<CSpellConfig> = config => {
-  return [config?.import ?? []].flat().map(id => toDeferResolve(id));
+  return [config?.import ?? []].flat().map(id => toModule(id));
 };
 
 const plugin: Plugin = {

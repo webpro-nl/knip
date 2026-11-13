@@ -1,4 +1,4 @@
-import { type Input, toDeferResolveEntry, toDependency } from '../../util/input.ts';
+import { type Input, toEntryPath, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import type { Config, ConfigOptions } from './types.ts';
 
@@ -21,7 +21,7 @@ export const inputsFromPlugins = (
   return plugins
     .map(plugin => {
       if (typeof plugin !== 'string') return;
-      return isInternal(plugin) ? toDeferResolveEntry(plugin) : toDependency(plugin);
+      return isInternal(plugin) ? toEntryPath(plugin) : toDependency(plugin);
     })
     .filter((input): input is Input => !!input);
 };

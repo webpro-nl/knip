@@ -11,7 +11,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../
 import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toConfig, toDeferResolve, toDeferResolveProductionEntry, toProductionEntry } from '../../util/input.ts';
+import { toConfig, toModule, toEntryPath, toEntry } from '../../util/input.ts';
 import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NextConfigModule } from './types.ts';
@@ -71,10 +71,10 @@ const getInputs = (
 ) => {
   const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
-  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
-  for (const loader of loaders) inputs.push(toDeferResolve(loader));
-  for (const target of aliasTargets) inputs.push(toDeferResolve(target, { dir: configFileDir, production: true }));
-  for (const file of files) inputs.push(toDeferResolveProductionEntry(toAbsolute(file, configFileDir)));
+  const inputs = patterns.map(id => toEntry(join(configFileDir, id), { production: true }));
+  for (const loader of loaders) inputs.push(toModule(loader));
+  for (const target of aliasTargets) inputs.push(toModule(target, { dir: configFileDir, production: true }));
+  for (const file of files) inputs.push(toEntryPath(toAbsolute(file, configFileDir), { production: true }));
   return inputs;
 };
 

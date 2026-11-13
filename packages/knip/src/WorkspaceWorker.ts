@@ -29,15 +29,7 @@ import type { MainOptions } from './util/create-options.ts';
 import { debugLog, debugLogArray, debugLogObject } from './util/debug.ts';
 import { _glob, hasNoProductionSuffix, hasProductionSuffix, negate } from './util/glob.ts';
 import { expandIgnorePatterns } from './util/parse-and-convert-gitignores.ts';
-import {
-  type ConfigInput,
-  type Input,
-  isConfig,
-  isEntry,
-  toDebugString,
-  toEntry,
-  toProductionEntry,
-} from './util/input.ts';
+import { type ConfigInput, type Input, isConfig, isEntry, toDebugString, toEntry } from './util/input.ts';
 import { filterTransitiveDependencies } from './util/filter-transitive-dependencies.ts';
 import { timerify } from './util/Performance.ts';
 import { basename, dirname, extname, join, relative, toRelative } from './util/path.ts';
@@ -430,8 +422,8 @@ export class WorkspaceWorker {
       };
 
       if (config.entry) {
-        const toInput = isProduction && plugin.production && plugin.production.length > 0 ? toProductionEntry : toEntry;
-        for (const id of config.entry) inputs.push(toInput(id));
+        const entryOptions = isProduction && plugin.production?.length ? { production: true } : undefined;
+        for (const id of config.entry) inputs.push(toEntry(id, entryOptions));
       } else if (
         (!plugin.resolveConfig && !plugin.resolveFromAST) ||
         (!configFilePaths.some(path => basename(path) !== 'package.json') &&
@@ -439,7 +431,7 @@ export class WorkspaceWorker {
             this.configFilesMap.get(wsName)?.get(pluginName)?.size === 0))
       ) {
         if (plugin.entry) for (const id of plugin.entry) inputs.push(toEntry(id));
-        if (plugin.production) for (const id of plugin.production) inputs.push(toProductionEntry(id));
+        if (plugin.production) for (const id of plugin.production) inputs.push(toEntry(id, { production: true }));
       }
 
       if (typeof plugin.setup === 'function') await plugin.setup();

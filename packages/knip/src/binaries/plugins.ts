@@ -4,7 +4,7 @@ import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
 import type { BinaryResolver, GetScriptCommands, ScriptArg, ScriptCommand } from '../types/config.ts';
 import { compact } from '../util/array.ts';
-import { type Input, toBinary, toConfig, toDeferResolve, toDeferResolveEntry, toEntry } from '../util/input.ts';
+import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { collectCommands, getCommandWords } from '../util/scripts.ts';
@@ -96,7 +96,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
       if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
-      else positionals.push(toDeferResolveEntry(id, { optional: true }));
+      else positionals.push(toEntryPath(id, { optional: true }));
     }
   }
 
@@ -126,8 +126,8 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   return [
     toCommandBinary(binary, options, inputOpts),
     ...positionals,
-    ...resolved.map(id => toDeferResolve(id)),
-    ...resolvedImports.map(id => toDeferResolve(id)),
+    ...resolved.map(id => toModule(id)),
+    ...resolvedImports.map(id => toModule(id)),
     ...resolvedFromArgs,
     ...configFilePaths,
     ...inputs,

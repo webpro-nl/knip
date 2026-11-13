@@ -2,7 +2,7 @@ import { escapePath } from 'tinyglobby';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { findImportedCalls, findProperty } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toEntry } from '../../util/input.ts';
 import { join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getViteRoot } from '../vite/helpers.ts';
@@ -26,10 +26,10 @@ const production = [`${defaultDir}/**/*.{${defaultExtensions.join(',')}}`];
 const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
   if (config.entry) return [];
   const root = getViteRoot(program, cwd);
-  const toEntry = (dir: string, pattern: string) =>
-    toProductionEntry(join(cwd, escapePath(relative(cwd, dir)), pattern));
+  const toRouteEntry = (dir: string, pattern: string) =>
+    toEntry(join(cwd, escapePath(relative(cwd, dir)), pattern), { production: true });
   const calls = findImportedCalls(program, 'filesystem-routing/vite');
-  if (calls.length === 0) return production.map(pattern => toEntry(root, pattern));
+  if (calls.length === 0) return production.map(pattern => toRouteEntry(root, pattern));
 
   const inputs: Input[] = [];
   for (const call of calls) {
@@ -48,7 +48,7 @@ const resolveFromAST: ResolveFromAST = (program, { config, cwd }) => {
     if (useDefaults) for (const extension of defaultExtensions) extensions.add(extension);
     if (extensions.size === 0) continue;
     const suffix = extensions.size === 1 ? [...extensions][0] : `{${[...extensions].join(',')}}`;
-    inputs.push(toEntry(toAbsolute(dir, root), `**/*.${suffix}`));
+    inputs.push(toRouteEntry(toAbsolute(dir, root), `**/*.${suffix}`));
   }
   return inputs;
 };

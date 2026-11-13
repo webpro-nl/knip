@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
-import { toBinary, toDeferResolve, toDeferResolveEntry, toDependency } from '../../src/util/input.ts';
+import { toBinary, toModule, toEntryPath, toDependency } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -35,8 +35,8 @@ test('npx no-install preserves package, module, file and sibling references', ()
   assert.deepEqual(inputs('npx --no-install custom-provider@1'), [toDependency('custom-provider')]);
   assert.deepEqual(inputs('npx --no-install node --import import-hook ./script.js && custom-build-cli'), [
     toBinary('node'),
-    toDeferResolveEntry('./script.js', optional),
-    toDeferResolve('import-hook'),
+    toEntryPath('./script.js', optional),
+    toModule('import-hook'),
     toBinary('custom-build-cli', optional),
   ]);
   assert.deepEqual(inputs('npx custom-build-cli'), [toBinary('custom-build-cli', optional)]);
@@ -46,6 +46,6 @@ test('npx no-install preserves package, module, file and sibling references', ()
 test('npx resolves a local folder package from the script directory', () => {
   assert.deepEqual(inputs('npx --package ./tools/release-cli release-cli'), [
     toBinary('release-cli', optional),
-    toDeferResolve('./tools/release-cli', { ...optional, dir: cwd }),
+    toModule('./tools/release-cli', { ...optional, dir: cwd }),
   ]);
 });

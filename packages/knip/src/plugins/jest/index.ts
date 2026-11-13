@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
 import { _glob } from '../../util/glob.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency, toEntry } from '../../util/input.ts';
 import { extname, isInternal, join, normalize, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
@@ -85,7 +85,7 @@ const resolveDependencies = async (
   } else if (config.testEnvironment === 'jsdom') {
     environments.push(toDependency('jest-environment-jsdom'));
   } else if (config.testEnvironment) {
-    environments.push(toDeferResolve(resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir)));
+    environments.push(toModule(resolveWithPrefix('jest-environment-', config.testEnvironment, rootDir)));
   }
   const resolvers = config.resolver ? [config.resolver] : [];
   const reporters = getReportersDependencies(config, options);
@@ -146,7 +146,7 @@ const resolveDependencies = async (
     ...testSequencer,
     ...globalSetup,
     ...globalTeardown,
-  ].map(id => (typeof id === 'string' ? toDeferResolve(id) : id));
+  ].map(id => (typeof id === 'string' ? toModule(id) : id));
 };
 
 const resolveConfig: ResolveConfig<JestConfig> = async (localConfig, options) => {

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createCompiler } from './compiler.ts';
@@ -43,16 +43,16 @@ const tagDefFields = [
 
 const resolveConfig: ResolveConfig<MarkoTagDef> = (localConfig, options) => {
   const { configFileName, configFileDir } = options;
-  const inputs: Input[] = production.map(pattern => toProductionEntry(pattern));
+  const inputs: Input[] = production.map(pattern => toEntry(pattern, { production: true }));
   if (!localConfig) return inputs;
 
   if (configFileName === 'marko.json') {
-    return tagProduction.map(pattern => toProductionEntry(join(configFileDir, pattern)));
+    return tagProduction.map(pattern => toEntry(join(configFileDir, pattern), { production: true }));
   }
 
   for (const field of tagDefFields) {
     for (const id of [localConfig[field]].flat()) {
-      if (typeof id === 'string') inputs.push(toDeferResolve(id));
+      if (typeof id === 'string') inputs.push(toModule(id));
     }
   }
   return inputs;

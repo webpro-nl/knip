@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import type { Input } from '../../util/input.ts';
-import { toDeferResolve, toDeferResolveProductionEntry, toDependency } from '../../util/input.ts';
+import { toModule, toEntryPath, toDependency } from '../../util/input.ts';
 import { isDirectory, isFile, tryRealpath } from '../../util/fs.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
@@ -56,10 +56,10 @@ export const scanVarlockFiles = (paths: string[], cwd: string) => {
       if (name === 'plugin') {
         if (isLocalPath(descriptor)) {
           inputs.push(
-            toDeferResolveProductionEntry(
-              descriptor.startsWith('~/') ? resolvePath(descriptor, dirname(realPath)) : descriptor,
-              { containingFilePath: realPath }
-            )
+            toEntryPath(descriptor.startsWith('~/') ? resolvePath(descriptor, dirname(realPath)) : descriptor, {
+              production: true,
+              containingFilePath: realPath,
+            })
           );
         } else {
           const packageName = getPackageNameFromModuleSpecifier(descriptor);
@@ -74,7 +74,7 @@ export const scanVarlockFiles = (paths: string[], cwd: string) => {
       const importPath = resolvePath(descriptor, dirname(realPath));
       if (isFile(importPath) || isDirectory(importPath)) queue.push(...expandLoadPath(importPath));
       else if (allowMissing !== true && allowMissing !== null && enabled !== null) {
-        inputs.push(toDeferResolve(descriptor, { containingFilePath: realPath }));
+        inputs.push(toModule(descriptor, { containingFilePath: realPath }));
       }
     }
   }

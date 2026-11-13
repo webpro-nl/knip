@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { toModule, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { CucumberConfig, Format } from './types.ts';
 
@@ -43,7 +43,7 @@ const resolveProfile = (config?: CucumberConfig) => {
   const formatters = (config?.format ? config.format : [])
     .map(toFormatterName)
     .filter(name => !builtinFormatters.has(name))
-    .map(id => toDeferResolve(id));
+    .map(id => toModule(id));
   return [...imports, ...requires, ...formatters];
 };
 

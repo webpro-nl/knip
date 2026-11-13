@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MetroConfig } from './types.ts';
@@ -37,13 +37,13 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
   const pattern = `src/**/*.{${platformEntryPatterns.join(',')}}.{${sourceExts.join(',')}}`;
 
   if (!config.projectRoot) {
-    i.add(toProductionEntry(pattern));
+    i.add(toEntry(pattern, { production: true }));
   } else {
     const entryFilePattern = 'index.{js,jsx,ts,tsx}';
     const entryFilePath = join(config.projectRoot, entryFilePattern);
     const entryFilePaths = join(config.projectRoot, pattern);
-    i.add(toProductionEntry(entryFilePath));
-    i.add(toProductionEntry(entryFilePaths));
+    i.add(toEntry(entryFilePath, { production: true }));
+    i.add(toEntry(entryFilePaths, { production: true }));
   }
 
   if (transformerPath) inputs.push(transformerPath);
@@ -53,7 +53,7 @@ const resolveConfig: ResolveConfig<MetroConfig> = async config => {
 
   return Array.from(i).concat(
     Array.from(inputs, id =>
-      toDeferResolve(id, {
+      toModule(id, {
         optional: id === DEFAULT_TRANSFORMER_PACKAGE || id === DEFAULT_MINIFIER_PACKAGE,
       })
     )

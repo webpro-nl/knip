@@ -87,7 +87,7 @@ configuration object.
 Here's the full source code of the `nyc` plugin:
 
 ```ts
-import { toDeferResolve } from '../../util/input.js';
+import { toModule } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NycConfig } from './types.js';
 import type {
@@ -113,7 +113,7 @@ const config = [
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
   const requires = config?.require ?? [];
-  return [extend, requires].flat().map(id => toDeferResolve(id));
+  return [extend, requires].flat().map(id => toModule(id));
 };
 
 const plugin: Plugin = {
@@ -287,7 +287,9 @@ const getComponentPaths = (program: Program) => {
 
 const resolveFromAST: ResolveFromAST = (program: Program) => {
   const componentPaths = getComponentPaths(program);
-  return [...production, ...componentPaths].map(id => toProductionEntry(id));
+  return [...production, ...componentPaths].map(id =>
+    toEntry(id, { production: true })
+  );
 };
 
 const plugin: Plugin = {
@@ -314,10 +316,9 @@ const resolve: Resolve = async options => {
 
 ## Inputs
 
-You may have noticed functions like `toDeferResolve` and `toEntry`. They're a
-way for plugins to tell what they've found and how Knip should handle those. The
-more precision a plugin can provide here, the better results and performance
-will be.
+Functions like `toModule`, `toEntryPath` and `toEntry` tell Knip what a plugin
+found and how to handle it. Choose the helper that matches the tool's input to
+preserve resolution behavior and avoid unnecessary work.
 
 Find all the details over at [Writing A Plugin → Inputs][5].
 

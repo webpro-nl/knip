@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import { toDeferResolveProductionEntry, toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry, toDependency } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency, load } from '../../util/plugin.ts';
 import vite from '../vite/index.ts';
@@ -46,9 +46,9 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
     // routes.* is only used as input to the bundler build system
     toEntry(join(appDir, `routes.${entryExtsGlob}`)),
     // routes and entries are part of the actual build
-    toProductionEntry(join(appDir, `root.${entryExtsGlob}`)),
-    toProductionEntry(join(appDir, `entry.{client,server}.${entryExtsGlob}`)),
-    ...routes.map(id => toDeferResolveProductionEntry(id)),
+    toEntry(join(appDir, `root.${entryExtsGlob}`), { production: true }),
+    toEntry(join(appDir, `entry.{client,server}.${entryExtsGlob}`), { production: true }),
+    ...routes.map(id => toEntryPath(id, { production: true })),
   ];
 
   const serverEntries = await _glob({
@@ -61,8 +61,8 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   // default entry.server.tsx automatically which depends on these.
   // See: https://github.com/remix-run/react-router/blob/react-router@8.5.1/packages/react-router-dev/config/defaults/entry.server.node.tsx
   if (serverEntries.length === 0) {
-    resolved.push(toProductionDependency('@react-router/node'));
-    resolved.push(toProductionDependency('isbot'));
+    resolved.push(toDependency('@react-router/node', { production: true }));
+    resolved.push(toDependency('isbot', { production: true }));
   }
 
   return resolved;

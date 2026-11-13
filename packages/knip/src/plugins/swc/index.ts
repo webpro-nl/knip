@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { SWCConfig } from './types.ts';
@@ -23,9 +23,7 @@ const resolveConfig: ResolveConfig<SWCConfig | SWCConfig[]> = async (config, opt
     for (const [id] of item?.jsc?.experimental?.plugins ?? []) dependencies.push(id);
     if (item?.jsc?.externalHelpers) dependencies.push('@swc/helpers');
   }
-  return compact(dependencies).map(id =>
-    isInternal(id) ? toDeferResolve(id, { dir: options.cwd }) : toDependency(id)
-  );
+  return compact(dependencies).map(id => (isInternal(id) ? toModule(id, { dir: options.cwd }) : toDependency(id)));
 };
 
 const plugin: Plugin = {

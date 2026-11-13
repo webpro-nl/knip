@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -35,8 +35,8 @@ const resolveConfig: ResolveConfig<JasmineConfig> = (localConfig, options) => {
   const inputs: Input[] = [];
   for (const id of [...specFiles, ...helpers]) inputs.push(toEntry(id));
   // `requires` and `loader` are resolved from the working directory, not from the config file, and may be a package name
-  for (const id of requires) inputs.push(toDeferResolve(id, { dir: options.cwd }));
-  if (localConfig.loader) inputs.push(toDeferResolve(localConfig.loader, { dir: options.cwd }));
+  for (const id of requires) inputs.push(toModule(id, { dir: options.cwd }));
+  if (localConfig.loader) inputs.push(toModule(localConfig.loader, { dir: options.cwd }));
   return inputs;
 };
 

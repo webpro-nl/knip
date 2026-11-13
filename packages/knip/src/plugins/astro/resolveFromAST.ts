@@ -10,7 +10,7 @@ import {
   resolveObjectArg,
 } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
-import { toConfig, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { toConfig, toDependency, toEntry } from '../../util/input.ts';
 import { getAliasInputs } from '../vitest/helpers.ts';
 
 export const entry = ['src/content/config.ts', 'src/content.config.ts'];
@@ -71,7 +71,7 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
   const setSrcDir = (entry: string) => entry.replace(/^src\//, `${srcDir}/`);
   const inputs = [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
-    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
+    ...production.map(setSrcDir).map(path => toEntry(path, { production: true })),
     ...getAliasInputs(getViteAliases(program), options.cwd),
   ];
 

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve } from '../../util/input.ts';
+import { type Input, toConfig, toModule } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
 import type { StyleLintConfig } from './types.ts';
@@ -19,11 +19,11 @@ const resolveConfig: ResolveConfig<StyleLintConfig> = async (config, options) =>
   const inputs: Input[] = [];
   const extend = Array.isArray(config.extends) ? config.extends : config.extends ? [config.extends] : [];
   for (const id of extend) {
-    if (typeof id === 'string') inputs.push(toDeferResolve(id), toConfig('stylelint', id));
+    if (typeof id === 'string') inputs.push(toModule(id), toConfig('stylelint', id));
     else for (const x of await resolveConfig(id, options)) inputs.push(x);
   }
-  for (const plugin of config.plugins ?? []) if (typeof plugin === 'string') inputs.push(toDeferResolve(plugin));
-  if (typeof config.customSyntax === 'string') inputs.push(toDeferResolve(config.customSyntax));
+  for (const plugin of config.plugins ?? []) if (typeof plugin === 'string') inputs.push(toModule(plugin));
+  if (typeof config.customSyntax === 'string') inputs.push(toModule(config.customSyntax));
   for (const override of config.overrides ?? []) {
     for (const input of await resolveConfig(override, options)) inputs.push(input);
   }

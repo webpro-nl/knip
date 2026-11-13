@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
-import { type Input, toEntry, toProductionDependency } from '../../util/input.ts';
+import { type Input, toEntry, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { clientToPackages } from './helpers.ts';
 import type { KnexConfig } from './types.ts';
@@ -19,7 +19,7 @@ const processKnexConfig = (config: KnexConfig): Input[] => {
   const inputs: Input[] = [];
   if (config.client) {
     const packages = clientToPackages(config.client);
-    inputs.push(...packages.map(pkg => toProductionDependency(pkg, { optional: true })));
+    inputs.push(...packages.map(pkg => toDependency(pkg, { production: true, optional: true })));
   }
   if (config.migrations?.directory) {
     const dirs = Array.isArray(config.migrations.directory)

@@ -1,7 +1,7 @@
 import type { Command } from 'unbash';
 import { Plugins, pluginArgsMap } from '../plugins.ts';
 import type { BinaryResolverOptions, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
-import { type Input, toDeferResolve } from '../util/input.ts';
+import { type Input, toModule } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin, isRelativeNodeModulesBin } from '../util/modules.ts';
 import { getCommandWords } from '../util/scripts.ts';
 import { resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
@@ -16,7 +16,7 @@ export const getInputsFromNodeOptions = (prefix: Command['prefix']): Input[] => 
   for (const item of prefix) {
     if (item.type !== 'Assignment' || item.name !== 'NODE_OPTIONS' || item.value.type !== 'Word') continue;
     const args = parseNodeArgs(item.value.value.split(' '));
-    if (args.require) for (const id of [args.require].flat()) inputs.push(toDeferResolve(id));
+    if (args.require) for (const id of [args.require].flat()) inputs.push(toModule(id));
   }
   return inputs;
 };

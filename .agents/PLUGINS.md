@@ -18,14 +18,16 @@ Read the writing-a-plugin docs first:
 - Use the existing plugin lifecycle. Do not add core machinery solely to carry
   one plugin's state.
 - Return specifiers as the tool reads them and name the tool's base with an
-  absolute `dir`. `toDeferResolve`, `toDeferResolveEntry` and `toConfig` resolve
-  from it (default: the config file's directory); `toDependency` and `toBinary`
-  use it to select the workspace; `toAlias` uses it as the base of its targets.
-  `toEntry` and `toProductionEntry` resolve from it as well (default: the
-  workspace directory) and stay with the workspace that returned them; a negated
-  entry pattern reaches only the plugin's entry patterns with the same base
-  (`dir`, else the workspace directory). `toProject` is workspace-relative and
-  ignores `dir`.
+  absolute `dir`. `toModule`, `toEntryPath` and `toConfig` resolve from it
+  (default: the config file's directory); `toDependency` and `toBinary` use it
+  to select the workspace; `toAlias` uses it as the base of its targets.
+  `toEntry` resolves patterns from it (default: the workspace directory) and
+  stays with the workspace that returned them; a negated entry pattern reaches
+  only the plugin's entry patterns with the same base (`dir`, else the workspace
+  directory). `toProject` is workspace-relative and ignores `dir`.
+- Use `toModule` for package-first resolution and `toEntryPath` for file-first
+  resolution that ignores missing local files. Both can credit dependencies. Set
+  `production: true` for production inputs.
 - Enable a plugin on the tool's package with `hasDependency`. File or manifest
   checks in `isEnabled` add I/O per workspace; reserve them for tools without a
   package, such as package managers, mise, Task or CI configs.

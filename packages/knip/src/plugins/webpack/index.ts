@@ -2,14 +2,7 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
-import {
-  type Input,
-  toAlias,
-  toDeferResolve,
-  toDeferResolveEntry,
-  toDeferResolveProductionEntry,
-  toDependency,
-} from '../../util/input.ts';
+import { type Input, toAlias, toModule, toEntryPath, toDependency } from '../../util/input.ts';
 import { extname, isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
@@ -126,7 +119,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       const entries = [];
 
       for (const loader of opts.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
-        inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
+        inputs.add(toModule(loader.replace(/\?.*/, '')));
       }
 
       for (const plugin of opts?.plugins ?? []) {
@@ -135,7 +128,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           if (providePluginInstance.definitions) {
             for (const values of Object.values(providePluginInstance.definitions)) {
               const specifier = typeof values === 'string' ? values : values[0];
-              inputs.add(toDeferResolve(specifier));
+              inputs.add(toModule(specifier));
             }
           }
         }
@@ -159,12 +152,9 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       for (const entry of entries) {
         if (isInternal(entry) || entry.startsWith('#')) {
           const dir = opts.context ? opts.context : cwd;
-          const input = isProduction
-            ? toDeferResolveProductionEntry(entry, { dir })
-            : toDeferResolveEntry(entry, { dir });
-          inputs.add(input);
+          inputs.add(toEntryPath(entry, { production: isProduction, dir }));
         } else {
-          inputs.add(toDeferResolve(entry));
+          inputs.add(toModule(entry));
         }
       }
 

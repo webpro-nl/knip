@@ -2,7 +2,7 @@ import { join } from '../../util/path.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://mastra.ai/reference/project-structure
@@ -49,7 +49,7 @@ const args: Args = {
     if (!discoveryCommands.has(parsed._[0])) return [];
     const inputs = [];
     if (parsed.dir) {
-      for (const pattern of getProductionPatterns(parsed.dir)) inputs.push(toProductionEntry(pattern));
+      for (const pattern of getProductionPatterns(parsed.dir)) inputs.push(toEntry(pattern, { production: true }));
     }
     if (parsed.tools) {
       // `--tools` takes a comma-separated list of tool files, globs or directories; Mastra bundles each match
@@ -58,7 +58,7 @@ const args: Args = {
         const specifier = tool.trim();
         if (!specifier) continue;
         const pattern = isDirectory(join(cwd, specifier)) ? `${specifier}/index.${extensions}` : specifier;
-        inputs.push(toProductionEntry(pattern));
+        inputs.push(toEntry(pattern, { production: true }));
       }
     }
     return inputs;

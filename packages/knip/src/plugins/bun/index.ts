@@ -1,6 +1,6 @@
 import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
-import { type Input, toDeferResolve, toEntry, toIgnore } from '../../util/input.ts';
+import { type Input, toModule, toEntry, toIgnore } from '../../util/input.ts';
 import parseArgs from '../../util/parse-args.ts';
 import type { BunfigConfig } from './types.ts';
 
@@ -32,7 +32,7 @@ const config = ['bunfig.toml'];
 
 const resolveConfig: ResolveConfig<BunfigConfig> = localConfig => {
   const preload = localConfig.test?.preload ?? [];
-  return preload.map(specifier => toDeferResolve(specifier));
+  return preload.map(specifier => toModule(specifier));
 };
 
 // Bun reads only `./`, `../` and `/` arguments as paths; any other argument filters test files by path
@@ -65,7 +65,7 @@ const resolve: Resolve = options => {
     if (!parsed) continue;
     const targets = parsed._.slice(1);
     for (const pattern of targets.length === 0 ? patterns : targets.flatMap(toPatterns)) inputs.push(toEntry(pattern));
-    for (const specifier of [parsed.preload ?? []].flat()) inputs.push(toDeferResolve(specifier));
+    for (const specifier of [parsed.preload ?? []].flat()) inputs.push(toModule(specifier));
   }
   return inputs;
 };

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency, toProductionEntry } from '../../util/input.ts';
+import { toModule, toDependency, toEntry } from '../../util/input.ts';
 import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { extractFunctionsConfigProperty } from './helpers.ts';
@@ -23,7 +23,7 @@ const production = [`${NETLIFY_FUNCTIONS_DIR}/**/*.{${NETLIFY_FUNCTIONS_EXTS}}`]
 
 const toPluginInput = (id: string) => {
   const specifier = id.startsWith('/') ? `.${id}` : id;
-  return isInternal(specifier) ? toDeferResolve(specifier) : toDependency(id);
+  return isInternal(specifier) ? toModule(specifier) : toDependency(id);
 };
 
 const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
@@ -32,7 +32,7 @@ const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
     join(localConfig.functions?.directory ?? NETLIFY_FUNCTIONS_DIR, `**/*.{${NETLIFY_FUNCTIONS_EXTS}}`),
   ]
     .filter(file => !file.startsWith('!'))
-    .map(id => toProductionEntry(id))
+    .map(id => toEntry(id, { production: true }))
     .concat([
       ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(toPluginInput),
       ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(id =>

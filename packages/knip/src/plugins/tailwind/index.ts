@@ -1,6 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
-import { toDeferResolveProductionEntry } from '../../util/input.ts';
+import { toEntryPath } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 
@@ -34,7 +34,7 @@ const args: Args = {
   binaries: ['tailwindcss'],
   string: ['input'],
   alias: { input: ['i'] },
-  resolveInputs: (parsed, { cwd }) => (parsed.input ? [toDeferResolveProductionEntry(parsed.input, { dir: cwd })] : []),
+  resolveInputs: (parsed, { cwd }) => (parsed.input ? [toEntryPath(parsed.input, { production: true, dir: cwd })] : []),
 };
 
 const plugin: Plugin = {

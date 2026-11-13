@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toDeferResolveEntry } from '../../util/input.ts';
+import { toEntryPath } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
 import { toCommandBinary } from '../util.ts';
@@ -45,7 +45,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (runners.has(command)) {
     if (!script || manifest.scriptNames.has(script)) return [binary];
     const resolved = _resolveSync(isAbsolute(script) ? script : join(cwd, script), cwd);
-    return resolved ? [binary, toDeferResolveEntry(resolved, { optional: true })] : [binary];
+    return resolved ? [binary, toEntryPath(resolved, { optional: true })] : [binary];
   }
 
   if (command && (commands.has(command) || manifest.scriptNames.has(command))) return [binary];

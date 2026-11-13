@@ -1,7 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { toModule } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { AwsCdkConfig } from './types.ts';
@@ -21,7 +21,7 @@ const config = ['cdk.json'];
 const resolveConfig: ResolveConfig<AwsCdkConfig> = (localConfig, options) => {
   const scripts = [localConfig.build, localConfig.app].filter((script): script is string => typeof script === 'string');
   const inputs = options.getInputsFromScripts(scripts, { optionalBinaries: true, cwd: options.configFileDir });
-  for (const id of localConfig.plugin ?? []) inputs.push(toDeferResolve(id));
+  for (const id of localConfig.plugin ?? []) inputs.push(toModule(id));
   return inputs;
 };
 

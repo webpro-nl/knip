@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isFile } from '../../util/fs.ts';
 import type { Input } from '../../util/input.ts';
-import { toDeferResolveEntry, toDependency, toEntry } from '../../util/input.ts';
+import { toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import type { YarnConfig } from './types.ts';
 
 // https://yarnpkg.com
@@ -21,17 +21,17 @@ const config = ['.yarnrc.yml'];
 const entry = ['yarn.config.cjs'];
 
 const resolveConfig: ResolveConfig<YarnConfig> = (config, { cwd }) => {
-  const inputs: Input[] = entry.map(toEntry);
+  const inputs: Input[] = entry.map(id => toEntry(id));
 
   if (Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
-      if (typeof plugin === 'string') inputs.push(toDeferResolveEntry(plugin, { dir: cwd }));
-      else if (typeof plugin.path === 'string') inputs.push(toDeferResolveEntry(plugin.path, { dir: cwd }));
+      if (typeof plugin === 'string') inputs.push(toEntryPath(plugin, { dir: cwd }));
+      else if (typeof plugin.path === 'string') inputs.push(toEntryPath(plugin.path, { dir: cwd }));
     }
   }
 
   if (config.yarnPath) {
-    inputs.push(toDeferResolveEntry(config.yarnPath, { dir: cwd }));
+    inputs.push(toEntryPath(config.yarnPath, { dir: cwd }));
   }
 
   if (config.packageExtensions) {

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import expo from '../expo/index.ts';
@@ -27,11 +27,11 @@ const resolveConfig: ResolveConfig<ExpoConfig> = async (localConfig, options) =>
     const [name, pluginOptions] = plugin;
     const root = pluginOptions?.root;
     if (name === 'expo-router' && typeof root === 'string') {
-      return [toProductionEntry(join(root, '**/*.{js,jsx,ts,tsx}'))];
+      return [toEntry(join(root, '**/*.{js,jsx,ts,tsx}'), { production: true })];
     }
   }
 
-  return production.map(id => toProductionEntry(id));
+  return production.map(id => toEntry(id, { production: true }));
 };
 
 const plugin: Plugin = {

@@ -1,4 +1,4 @@
-import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toDependency } from '../../util/input.ts';
 import type { Manifest } from '../../util/package-json.ts';
 import { isInternal } from '../../util/path.ts';
 
@@ -44,5 +44,5 @@ export const resolveLoadPluginStylePluginName = (prefix: string, identifier: str
 
   const candidate = pickCandidate(prefix, identifier, manifest);
 
-  return isInternal(candidate) ? toDeferResolve(candidate) : toDependency(candidate);
+  return isInternal(candidate) ? toModule(candidate) : toDependency(candidate);
 };

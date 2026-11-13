@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
-import { toDeferResolve, toDependency, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { toModule, toDependency, toIgnore, toEntry } from '../../util/input.ts';
 import { isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NitroConfig } from './types.ts';
@@ -38,20 +38,20 @@ const resolveConfig: ResolveConfig<NitroConfig> = async localConfig => {
   const srcDir = localConfig.srcDir ?? '.';
 
   const patterns = [
-    toProductionEntry('.nitro/types/*.d.ts'),
+    toEntry('.nitro/types/*.d.ts', { production: true }),
     ...[
       typeof localConfig.serverEntry === 'string' ? localConfig.serverEntry : 'server.{js,mjs,ts}',
       join(typeof localConfig.apiDir === 'string' ? localConfig.apiDir : 'api', '**/*.ts'),
       join(typeof localConfig.routesDir === 'string' ? localConfig.routesDir : 'routes', '**/*.ts'),
       'middleware/**/*.ts',
       'plugins/**/*.ts',
-    ].map(pattern => toProductionEntry(join(srcDir, pattern))),
+    ].map(pattern => toEntry(join(srcDir, pattern), { production: true })),
   ];
 
   const deps =
     localConfig.modules?.reduce<Input[]>((acc, mod) => {
       const id = Array.isArray(mod) ? mod[0] : mod;
-      if (typeof id === 'string') acc.push(isInternal(id) ? toDeferResolve(id) : toDependency(id));
+      if (typeof id === 'string') acc.push(isInternal(id) ? toModule(id) : toDependency(id));
       return acc;
     }, []) ?? [];
 

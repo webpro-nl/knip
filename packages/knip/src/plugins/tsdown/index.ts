@@ -1,7 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toDependency, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { Entry, Options, TsdownConfig } from './types.ts';
 
@@ -47,7 +47,7 @@ const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
   const entryPatterns = [config]
     .flat()
     .flatMap(config => normalizeEntry(config.entry))
-    .map(id => toProductionEntry(id, { allowIncludeExports: true }));
+    .map(id => toEntry(id, { production: true, allowIncludeExports: true }));
 
   const externalDependencies = [config]
     .flat()
@@ -58,7 +58,9 @@ const resolveConfig: ResolveConfig<TsdownConfig> = async config => {
 };
 
 const resolveFromAST: ResolveFromAST = program => [
-  ...Array.from(collectPropertyValues(program, 'entry'), id => toProductionEntry(id, { allowIncludeExports: true })),
+  ...Array.from(collectPropertyValues(program, 'entry'), id =>
+    toEntry(id, { production: true, allowIncludeExports: true })
+  ),
   ...Array.from(collectPropertyValues(program, 'neverBundle'), id => toDependency(id, { optional: true })),
 ];
 
@@ -95,7 +97,9 @@ const args: Args = {
     'write',
   ],
   resolveInputs: parsed => [
-    ...[...parsed._, ...normalizeEntry(parsed.entry)].map(id => toProductionEntry(id, { allowIncludeExports: true })),
+    ...[...parsed._, ...normalizeEntry(parsed.entry)].map(id =>
+      toEntry(id, { production: true, allowIncludeExports: true })
+    ),
     ...[parsed.deps?.neverBundle, parsed.deps?.['never-bundle'], parsed.external]
       .flat()
       .filter(id => typeof id === 'string')

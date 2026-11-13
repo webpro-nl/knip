@@ -1,7 +1,7 @@
 import parseArgs from '../util/parse-args.ts';
 import type { BinaryResolver } from '../types/config.ts';
 import { compact } from '../util/array.ts';
-import { toDeferResolve, toEntry } from '../util/input.ts';
+import { toModule, toEntry } from '../util/input.ts';
 import { isValidBinary } from '../util/modules.ts';
 import { isAbsolute } from '../util/path.ts';
 import { argsAfter, toCommandBinary } from './util.ts';
@@ -31,7 +31,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
       : isValidBinary(binary)
         ? toCommandBinary(binary, options)
         : undefined;
-  const pos = positionals.has(binary) ? [toDeferResolve(parsed._[0])] : [];
+  const pos = positionals.has(binary) ? [toModule(parsed._[0])] : [];
   const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--')) : [];
   const commands = positionalBinaries.has(binary) ? parsed._.flatMap(cmd => fromArgs([cmd])) : [];
   return compact([bin, ...pos, ...newCommand, ...commands]);
