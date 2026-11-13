@@ -492,6 +492,18 @@ test('getInputsFromScripts (c8)', () => {
   t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
 });
 
+test('getInputsFromScripts (nyc)', () => {
+  t('nyc program', [toBinary('nyc'), toBinary('program')], forwardedArgs);
+  t('nyc node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc npm test', [toBinary('nyc')]);
+  t('nyc report --reporter=text-lcov', [toBinary('nyc')]);
+  t('nyc check-coverage --lines 95 --per-file', [toBinary('nyc')]);
+  t("nyc --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('nyc'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
+  t('nyc --all -s node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc --require ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -i ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (nodemon)', () => {
   t('nodemon --require dotenv/config ./script.js --watch ./script.js', [toBinary('nodemon'), toModule('dotenv/config')]);
   t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [toBinary('nodemon'), toBinary('ts-node'), toBinary('pino-pretty')]);
