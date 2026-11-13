@@ -461,6 +461,10 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup --config', [toBinary('rollup')]);
   t('rollup --config --watch', [toBinary('rollup')]);
   t('rollup --config rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
+  t('rollup -c', [toBinary('rollup')]);
+  t('rollup -c -w', [toBinary('rollup')]);
+  t('rollup -cw', [toBinary('rollup')]);
+  t('rollup -c rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
