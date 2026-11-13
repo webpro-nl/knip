@@ -11,7 +11,7 @@ import { argsAfter, toCommandBinary } from './util.ts';
 export const spawningBinaries = ['cross-env'];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['doppler', 'dotenvx', 'env-cmd', 'infisical', 'op'];
+const endOfCommandBinaries = ['doppler', 'dotenvx', 'infisical', 'op'];
 
 // Binaries that have a new script in a flag value
 const commandFlagBinaries = new Map([
