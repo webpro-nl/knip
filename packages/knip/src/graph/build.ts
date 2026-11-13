@@ -131,6 +131,7 @@ export const build = timerify(async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
+  const developmentFilePaths = new Set<string>();
   const preprocessorInputs = new Map<string, Input[]>();
   for (const specifier of options.preprocessorInputs) {
     const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
@@ -309,7 +310,6 @@ export const build = timerify(async function build({
     const productionPatterns = createPatternMap();
     const productionPatternsSkipExports = createPatternMap();
     const projectFilePatterns = new Set<string>();
-    const developmentFilePaths = new Set<string>();
 
     const addPattern = (map: PatternMap, group: string, pattern: string) => {
       let patterns = map.get(group);
@@ -483,9 +483,7 @@ export const build = timerify(async function build({
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 
-      for (const projectPath of productionPaths(projectPaths)) {
-        if (!developmentFilePaths.has(projectPath)) principal.addProjectPath(projectPath);
-      }
+      for (const projectPath of productionPaths(projectPaths)) principal.addProjectPath(projectPath);
     }
 
     worker.onDispose();
@@ -674,6 +672,7 @@ export const build = timerify(async function build({
   );
 
   for (const filePath of principal.getUnreferencedFiles()) {
+    if (developmentFilePaths.has(filePath)) continue;
     if (IS_DTS.test(filePath)) {
       const loaded = principal.fileManager.loadSourceText(filePath);
       const sourceText = typeof loaded === 'string' ? loaded : await loaded;
