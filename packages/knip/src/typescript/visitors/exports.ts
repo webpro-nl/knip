@@ -415,7 +415,7 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
       if (allShorthand) {
         for (const prop of props) {
           if (prop.type === 'Property' && prop.key.type === 'Identifier') {
-            const fix: Fix = s.options.isFixExports ? [prop.start, prop.end, FIX_FLAGS.NONE] : undefined;
+            const fix: Fix = s.options.isFixExports ? [prop.start, prop.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
             s.addExport(prop.key.name, SYMBOL_TYPE.UNKNOWN, prop.key.start, [], fix, false, EMPTY_TAGS);
           }
         }

@@ -109,8 +109,10 @@ export const dd = 1;
     await readFile(join(cwd, 'exports.js'), 'utf8'),
     `const identifier = 1;
 const identifier2 = 2;
+const identifier3 = 3;
+const identifier4 = 4;
 
-module.exports = { identifier,  };
+module.exports = {  identifier,   };
 `
   );
 
