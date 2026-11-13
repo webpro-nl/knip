@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/ts-node2",
+  "devDependencies": {
+    "ts-node": "*",
+    "ts-patch": "*",
+    "typescript": "*"
+  }
+}

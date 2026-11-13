@@ -1,0 +1,10 @@
+{
+  "extends": "./config/tsconfig.base.json",
+  "ts-node": {
+    "swc": true,
+    "compilerOptions": {
+      "sourceMap": true
+    },
+    "require": ["tsconfig-paths/register", "./setup/register.ts"]
+  }
+}
