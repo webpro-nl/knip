@@ -26,12 +26,19 @@ test('Find dependencies with the Prettier plugin', async () => {
   });
 });
 
-test('Find dependencies with the Prettier plugin (--config arg)', async () => {
+test('Find dependencies with the Prettier plugin (--config and --plugin args)', async () => {
   const cwd = resolve('fixtures/plugins/prettier-args');
   const options = await createOptions({ cwd });
-  const { issues } = await main(options);
+  const { issues, counters } = await main(options);
 
   assert(issues.unlisted['my-prettier-settings.js']['my-custom-prettier-plugin']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 1,
+    processed: 2,
+    total: 2,
+  });
 });
 
 test('Find dependencies with the Prettier plugin (--config arg with -c check flag)', async () => {

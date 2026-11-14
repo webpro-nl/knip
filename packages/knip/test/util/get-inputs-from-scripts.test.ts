@@ -585,6 +585,12 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('prettier --config --write', [toBinary('prettier')]);
 });
 
+test('getInputsFromScripts (plugins → resolve)', () => {
+  t('prettier --check . --plugin prettier-plugin-svelte', [toBinary('prettier'), toModule('prettier-plugin-svelte')]);
+  t('prettier --plugin=prettier-plugin-astro --plugin=./prettier-plugin.js', [toBinary('prettier'), toModule('prettier-plugin-astro'), toModule('./prettier-plugin.js')]);
+  t('prettier --plugin --write', [toBinary('prettier')]);
+});
+
 test('getInputsFromScripts (plugins → fromArgs)', () => {
   t('glob --cmd', [toBinary('glob')]);
   t('glob -c', [toBinary('glob')]);
