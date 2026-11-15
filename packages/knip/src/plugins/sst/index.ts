@@ -1,4 +1,5 @@
-import { spawningArgs } from '../../binaries/util.ts';
+import { argsFrom } from '../../binaries/util.ts';
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveFromAST } from './resolveFromAST.ts';
@@ -18,10 +19,13 @@ const config = ['sst.config.ts'];
 
 const wrappers = new Set(['bind', 'dev', 'env', 'shell']);
 
-const args = {
-  args: (args: string[]) => (wrappers.has(args[0]) ? args.slice(1).flatMap(arg => arg.split(' ')) : []),
+const args: Args = {
   boolean: ['print-logs', 'script'],
-  fromArgs: spawningArgs,
+  fromArgs: (parsed, args) => {
+    if (!wrappers.has(parsed._[0])) return [];
+    const command = parsed._[1] ? argsFrom(args, parsed._[1]) : (parsed['--'] ?? []);
+    return command.length === 1 ? command[0].split(' ') : command;
+  },
 };
 
 const plugin: Plugin = {
