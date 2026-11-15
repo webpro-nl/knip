@@ -17,11 +17,14 @@ test('Find dependencies with the Netlify plugin', async () => {
   assert(issues.unlisted['netlify.toml']['package-3']);
   assert(issues.unlisted['netlify.toml']['package-4']);
 
+  assert.deepEqual(Object.keys(issues.files), ['myedgefunctions/tracker/old.ts']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     devDependencies: 1,
     unlisted: 5,
-    processed: 1,
-    total: 1,
+    processed: 5,
+    total: 5,
   });
 });

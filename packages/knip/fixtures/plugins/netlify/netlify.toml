@@ -1,3 +1,6 @@
+[build]
+  edge_functions = "myedgefunctions/"
+
 [[plugins]]
 package = "netlify-plugin-check-output-for-puppy-references"
   [plugins.inputs]
