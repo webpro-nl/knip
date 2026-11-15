@@ -1188,6 +1188,10 @@
           "title": "vite plugin configuration (https://knip.dev/reference/plugins/vite)",
           "$ref": "#/definitions/plugin"
         },
+        "vite-node": {
+          "title": "vite-node plugin configuration (https://knip.dev/reference/plugins/vite-node)",
+          "$ref": "#/definitions/plugin"
+        },
         "vite-plugin-pages": {
           "title": "vite-plugin-pages plugin configuration (https://knip.dev/reference/plugins/vite-plugin-pages)",
           "$ref": "#/definitions/plugin"

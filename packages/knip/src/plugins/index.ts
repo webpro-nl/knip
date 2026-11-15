@@ -191,6 +191,7 @@ import { default as vercel } from './vercel/index.ts';
 import { default as vercelOg } from './vercel-og/index.ts';
 import { default as vike } from './vike/index.ts';
 import { default as vite } from './vite/index.ts';
+import { default as viteNode } from './vite-node/index.ts';
 import { default as vitePluginPages } from './vite-plugin-pages/index.ts';
 import { default as vitePluginPwa } from './vite-plugin-pwa/index.ts';
 import { default as vitePluginVueLayoutsNext } from './vite-plugin-vue-layouts-next/index.ts';
@@ -403,6 +404,7 @@ export const Plugins = {
   'vercel-og': vercelOg,
   vike,
   vite,
+  'vite-node': viteNode,
   'vite-plugin-pages': vitePluginPages,
   'vite-plugin-pwa': vitePluginPwa,
   'vite-plugin-vue-layouts-next': vitePluginVueLayoutsNext,

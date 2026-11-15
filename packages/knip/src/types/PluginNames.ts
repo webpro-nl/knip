@@ -192,6 +192,7 @@ export type PluginName =
   | 'vercel-og'
   | 'vike'
   | 'vite'
+  | 'vite-node'
   | 'vite-plugin-pages'
   | 'vite-plugin-pwa'
   | 'vite-plugin-vue-layouts-next'
@@ -404,6 +405,7 @@ export const pluginNames = [
   'vercel-og',
   'vike',
   'vite',
+  'vite-node',
   'vite-plugin-pages',
   'vite-plugin-pwa',
   'vite-plugin-vue-layouts-next',
