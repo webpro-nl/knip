@@ -506,6 +506,18 @@ test('getInputsFromScripts (concurrently)', () => {
   t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
 });
 
+test('getInputsFromScripts (start-server-and-test)', () => {
+  t('start-server-and-test start http://localhost:3000 test', [toBinary('start-server-and-test')], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' 3000 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("start-test --expect 404 start :3000 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js], lifecycle);
+  t("server-test start 3000 'tsx ./main.ts' http-get://localhost:3001 test", [toBinary('server-test'), toBinary('tsx'), ts], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' '3000|3001' 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("server-test '8000|9000' test", [toBinary('server-test')], lifecycle);
+  t("server-test '8000|9000'", [toBinary('server-test')]);
+  t("start-test '3000|3001' 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js]);
+  t("start-test 'node ./script.js' '3000|3001'", [toBinary('start-test'), toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);

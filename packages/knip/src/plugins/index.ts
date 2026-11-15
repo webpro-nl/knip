@@ -150,6 +150,7 @@ import { default as sizeLimit } from './size-limit/index.ts';
 import { default as solidjsVitePlugin } from './solidjs-vite-plugin/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
+import { default as startServerAndTest } from './start-server-and-test/index.ts';
 import { default as stencil } from './stencil/index.ts';
 import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
@@ -362,6 +363,7 @@ export const Plugins = {
   'solidjs-vite-plugin': solidjsVitePlugin,
   sst,
   starlight,
+  'start-server-and-test': startServerAndTest,
   stencil,
   storybook,
   stryker,
