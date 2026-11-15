@@ -20,7 +20,7 @@ const commandFlagBinaries = new Map([
 ]);
 
 // Binaries with entry at first positional arg
-const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
+const positionals = new Set(['babel-node', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
 
 // Binaries where each positional arg is a separate script
 const positionalBinaries = new Set(['concurrently']);
