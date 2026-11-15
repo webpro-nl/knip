@@ -1,3 +1,4 @@
+import { removeExport } from 'knip/session';
 import { DeleteFile, TextEdit } from 'vscode-languageserver/node';
 
 /**
@@ -16,11 +17,19 @@ export const createRemoveExportEdit = (document, uri, issue) => {
   try {
     if (!document || !issue.fixes?.length) return null;
 
-    const edits = issue.fixes.map(([start, end]) => {
-      return TextEdit.del({ start: document.positionAt(start), end: document.positionAt(end) });
-    });
+    const source = document.getText();
+    let text = source;
+    for (const [start, end, flags] of issue.fixes.toSorted((a, b) => b[0] - a[0])) {
+      text = removeExport({ text, start, end, flags });
+    }
 
-    return { changes: { [uri]: edits } };
+    let start = 0;
+    while (start < text.length && text[start] === source[start]) start++;
+    let end = 0;
+    while (end < text.length - start && text.at(-1 - end) === source.at(-1 - end)) end++;
+
+    const range = { start: document.positionAt(start), end: document.positionAt(source.length - end) };
+    return { changes: { [uri]: [TextEdit.replace(range, text.slice(start, text.length - end))] } };
   } catch (_error) {
     return null;
   }

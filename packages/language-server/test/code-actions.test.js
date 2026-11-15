@@ -1,7 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { createRemoveDependencyEdit } from '../src/code-actions.js';
+import { createRemoveDependencyEdit, createRemoveExportEdit } from '../src/code-actions.js';
+
+test('removes an export with the same edit as --fix', () => {
+  const removeExport = (text, symbol, flags) => {
+    const document = TextDocument.create('file:///project/fruits.ts', 'typescript', 1, text);
+    const start = text.indexOf(symbol);
+    const edit = createRemoveExportEdit(document, document.uri, { fixes: [[start, start + symbol.length, flags]] });
+    return TextDocument.applyEdits(document, edit.changes[document.uri]);
+  };
+  assert.equal(removeExport('export { apple, pear };\n', 'apple', 3), 'export {  pear };\n');
+  assert.equal(removeExport("export { apple } from './basket.ts';\n", 'apple', 3), ';\n');
+  assert.equal(
+    removeExport('enum Fruit {\n  Apple,\n  Pear,\n  Plum,\n}\n', 'Pear', 5),
+    'enum Fruit {\n  Apple,\n  Plum,\n}\n'
+  );
+});
 
 const uri = 'file:///project/package.json';
 
