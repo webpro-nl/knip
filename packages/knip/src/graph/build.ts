@@ -147,6 +147,8 @@ export const build = timerify(async function build({
     else preprocessorInputs.set(name, [input]);
   }
 
+  const developmentFilePaths = new Set<string>();
+
   for (const workspace of workspaces) {
     const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
@@ -309,7 +311,6 @@ export const build = timerify(async function build({
     const productionPatterns = createPatternMap();
     const productionPatternsSkipExports = createPatternMap();
     const projectFilePatterns = new Set<string>();
-    const developmentFilePaths = new Set<string>();
 
     const addPattern = (map: PatternMap, group: string, pattern: string) => {
       let patterns = map.get(group);
@@ -484,7 +485,7 @@ export const build = timerify(async function build({
       }
 
       for (const projectPath of productionPaths(projectPaths)) {
-        if (!developmentFilePaths.has(projectPath)) principal.addProjectPath(projectPath);
+        principal.addProjectPath(projectPath);
       }
     }
 
@@ -674,6 +675,7 @@ export const build = timerify(async function build({
   );
 
   for (const filePath of principal.getUnreferencedFiles()) {
+    if (developmentFilePaths.has(filePath)) continue;
     if (IS_DTS.test(filePath)) {
       const loaded = principal.fileManager.loadSourceText(filePath);
       const sourceText = typeof loaded === 'string' ? loaded : await loaded;
