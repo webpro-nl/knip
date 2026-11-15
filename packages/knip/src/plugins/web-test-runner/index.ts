@@ -2,13 +2,15 @@ import type { Program } from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
-import { type Input, toEntry } from '../../util/input.ts';
+import { type Input, toDependency, toEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://modern-web.dev/docs/test-runner/cli-and-configuration/
 // https://github.com/modernweb-dev/web/blob/ed64db24393a49fadf078829b0b34d3ffcaca7e1/packages/test-runner/src/config/readFileConfig.ts
 // https://github.com/modernweb-dev/web/blob/ed64db24393a49fadf078829b0b34d3ffcaca7e1/packages/config-loader/src/index.js
+// https://github.com/modernweb-dev/web/blob/ed64db24393a49fadf078829b0b34d3ffcaca7e1/packages/test-runner/src/config/loadLauncher.ts
+// https://github.com/modernweb-dev/web/blob/ed64db24393a49fadf078829b0b34d3ffcaca7e1/packages/test-runner/src/config/parseConfig.ts
 
 const title = 'Web Test Runner';
 
@@ -87,8 +89,15 @@ const args: Args = {
     'update-snapshots',
     'watch',
   ],
-  resolveInputs: (parsed, { cwd }) =>
-    toFileEntries([...parsed._, ...(parsed['--'] ?? []), ...[parsed.files ?? []].flat()].map(String), cwd),
+  resolveInputs: (parsed, { cwd }) => {
+    const inputs = toFileEntries(
+      [...parsed._, ...(parsed['--'] ?? []), ...[parsed.files ?? []].flat()].map(String),
+      cwd
+    );
+    const launcher = parsed.puppeteer ? 'puppeteer' : parsed.playwright ? 'playwright' : undefined;
+    if (launcher) inputs.push(toDependency(`@web/test-runner-${launcher}`));
+    return inputs;
+  },
 };
 
 const plugin: Plugin = {
