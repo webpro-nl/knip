@@ -1,5 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
+import { toConfig, toDependency } from '../../util/input.ts';
 import { isAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolvePackageManifestPath } from '../../util/resolve.ts';
@@ -7,6 +8,7 @@ import type { WebdriverIOConfig } from './types.ts';
 
 // https://webdriver.io/docs/configuration
 // https://github.com/webdriverio/webdriverio/blob/v10.1.1/packages/wdio-utils/src/initializePlugin.ts#L15-L46
+// https://github.com/webdriverio/webdriverio/blob/v10.1.1/packages/wdio-cli/src/run.ts#L11-L64
 
 const title = 'WebdriverIO';
 
@@ -45,12 +47,25 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) 
   ];
 };
 
+const commands = new Set(['config', 'install', 'repl', 'session']);
+
+const args: Args = {
+  binaries: ['wdio'],
+  boolean: ['cpuProf', 'headless', 'heapProf'],
+  resolveInputs: parsed => {
+    const [command, path] = parsed._;
+    const configPath = command === 'run' ? path : command;
+    return configPath && !commands.has(configPath) ? [toConfig('webdriver-io', configPath)] : [];
+  },
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  args,
 };
 
 export default plugin;
