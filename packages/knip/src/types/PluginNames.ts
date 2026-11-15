@@ -46,6 +46,7 @@ export type PluginName =
   | 'expressive-code'
   | 'fast'
   | 'filesystem-routing'
+  | 'firebase'
   | 'flue'
   | 'fumadocs'
   | 'gatsby'
@@ -258,6 +259,7 @@ export const pluginNames = [
   'expressive-code',
   'fast',
   'filesystem-routing',
+  'firebase',
   'flue',
   'fumadocs',
   'gatsby',
