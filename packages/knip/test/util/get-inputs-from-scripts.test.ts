@@ -516,6 +516,17 @@ test('getInputsFromScripts (double-dash)', () => {
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
 });
 
+test('getInputsFromScripts (sst)', () => {
+  t('sst deploy --stage production', [toBinary('sst')]);
+  t('sst shell', [toBinary('sst')]);
+  t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
+  t('sst shell --stage dev -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst dev next dev', [toBinary('sst'), toBinary('next')]);
+  t('sst bind vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst env vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst bind "tsx ./main.ts"', [toBinary('sst'), toBinary('tsx'), ts]);
+});
+
 test('getInputsFromScripts (command flags)', () => {
   t('doppler run --command="node server.ts"', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t("doppler run -c prod --command 'tsx watch src/index.ts'", [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
