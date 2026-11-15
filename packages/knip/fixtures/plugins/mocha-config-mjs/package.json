@@ -5,6 +5,8 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "mocha-junit-reporter": "*"
+    "mocha-junit-reporter": "*",
+    "ts-node": "*",
+    "tsx": "*"
   }
 }
