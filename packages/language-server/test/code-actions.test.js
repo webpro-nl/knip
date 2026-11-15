@@ -53,3 +53,21 @@ for (const [label, eol] of [
     assert.deepEqual(JSON.parse(result).devDependencies, {});
   });
 }
+
+test('removes dependency with escaped quotes in its value', () => {
+  const text = '{\n  "dependencies": {\n    "lodash": "file:./vendor/pkg-\\"quoted\\""\n  }\n}\n';
+  assert.deepEqual(JSON.parse(remove(text, 'lodash')).dependencies, {});
+});
+
+for (const [label, text] of [
+  ['inline section', '{\n  "dependencies": { "lodash": "*", "chalk": "*" }\n}\n'],
+  ['single-line manifest', '{"dependencies":{"lodash":"*"}}\n'],
+  ['two dependencies on a line', '{\n  "dependencies": {\n    "lodash": "*", "chalk": "*"\n  }\n}\n'],
+  ['closing brace on the line', '{\n  "dependencies": {\n    "lodash": "*" }\n}\n'],
+]) {
+  test(`skips dependency not on its own line (${label})`, () => {
+    const document = TextDocument.create(uri, 'json', 1, text);
+    const line = text.split('\n').findIndex(l => l.includes('"lodash"')) + 1;
+    assert.equal(createRemoveDependencyEdit(document, uri, { type: 'dependencies', symbol: 'lodash', line }), null);
+  });
+}
