@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/nodemon-config-flag",
+  "scripts": {
+    "dev": "nodemon --config config/dev.json",
+    "debug": "nodemon --exec 'node src/debug.js'",
+    "inspect": "nodemon --config config/inspect.json --exec 'node src/debug.js'"
+  },
+  "devDependencies": {
+    "nodemon": "*"
+  }
+}

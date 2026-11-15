@@ -1,0 +1,3 @@
+{
+  "exec": "node scripts/overridden.js"
+}

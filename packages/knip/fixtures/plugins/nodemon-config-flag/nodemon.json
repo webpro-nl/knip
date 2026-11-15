@@ -1,0 +1,3 @@
+{
+  "exec": "node scripts/stale.js"
+}
