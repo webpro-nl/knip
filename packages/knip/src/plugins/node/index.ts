@@ -1,5 +1,6 @@
 import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
-import { toEntry } from '../../util/input.ts';
+import { type Input, toEntry, toModule } from '../../util/input.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { RegisterVisitors } from '../../types/config.ts';
 import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
 
@@ -38,6 +39,8 @@ const hasNodeTest = (
 
 const entry = ['server.js'];
 
+const builtInReporters = new Set(['spec', 'tap', 'dot', 'junit', 'lcov']);
+
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createFsPromisesGlobVisitor(ctx));
 };
@@ -58,7 +61,7 @@ const resolve: Resolve = options => {
 const args = {
   positional: true,
   nodeImportArgs: true,
-  resolve: ['test-reporter'],
+  string: ['test-reporter'],
   boolean: [
     'deprecation',
     'enable-source-maps',
@@ -78,7 +81,11 @@ const args = {
     'warnings',
     'watch',
   ],
-  args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
+  resolveInputs: (parsed: ParsedArgs) => {
+    const inputs: Input[] = [];
+    for (const id of [parsed['test-reporter'] ?? []].flat()) if (!builtInReporters.has(id)) inputs.push(toModule(id));
+    return inputs;
+  },
 };
 
 const plugin: Plugin = {

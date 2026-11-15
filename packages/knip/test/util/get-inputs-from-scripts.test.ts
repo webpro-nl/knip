@@ -70,6 +70,8 @@ test('getInputsFromScripts (node)', () => {
 test('getInputsFromScripts (node --test)', () => {
   t('node --test --test-reporter=reporter', [toBinary('node'), toModule('reporter')]);
   t('node --test --test-reporter=spec', [toBinary('node')]);
+  t('node --test --test-reporter spec', [toBinary('node')]);
+  t('node --test-reporter dot --test-reporter ./reporter.js --test', [toBinary('node'), toModule('./reporter.js')]);
 });
 
 test('getInputsFromScripts (node -r)', () => {
