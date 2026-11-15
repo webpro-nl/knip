@@ -27,7 +27,7 @@ export default $config({
         },
       },
     });
-    api.route('$default', 'route.handler');
+    api.route('$default', 'fallback.handler');
 
     return {
       api: api.url,
