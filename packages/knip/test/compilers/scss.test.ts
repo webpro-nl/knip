@@ -18,7 +18,7 @@ test('Built-in compiler for SCSS', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    processed: 19,
-    total: 19,
+    processed: 21,
+    total: 21,
   });
 });

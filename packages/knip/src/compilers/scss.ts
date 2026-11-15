@@ -7,7 +7,9 @@ import { hasUrlScheme } from '../util/url.ts';
 const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
 const dependencyMatcher =
-  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]|url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/g;
+  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|forward)\s+(['"][^'"]+['"])|@import\s+((?:['"][^'"]+['"]\s*,\s*)*['"][^'"]+['"])|url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/g;
+
+const specifierMatcher = /['"](pkg:)?([^'"]+)['"]/g;
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);
@@ -35,17 +37,21 @@ export const compiler: CompilerSync = text => {
       if (spec) out.push(`import _$${i++} from '${spec}';`);
       continue;
     }
-    let spec = match[2];
-    if (!spec || spec.startsWith('//') || hasUrlScheme(spec)) continue;
-    let isBare = Boolean(match[1]) || isScopedPackage(spec);
-    if (isTildePackage(spec)) {
-      spec = spec.slice(1);
-      isBare = true;
-    }
-    if (isBare) {
-      out.push(`import _$${i++} from '${spec}';`);
-    } else {
-      for (const s of candidates(spec)) out.push(`import _$${i++} from '${s}';`);
+    const specifiers = match[1] ?? match[2];
+    if (!specifiers) continue;
+    for (const specifier of specifiers.matchAll(specifierMatcher)) {
+      let spec = specifier[2];
+      if (spec.startsWith('//') || hasUrlScheme(spec)) continue;
+      let isBare = Boolean(specifier[1]) || isScopedPackage(spec);
+      if (isTildePackage(spec)) {
+        spec = spec.slice(1);
+        isBare = true;
+      }
+      if (isBare) {
+        out.push(`import _$${i++} from '${spec}';`);
+      } else {
+        for (const s of candidates(spec)) out.push(`import _$${i++} from '${s}';`);
+      }
     }
   }
   return out.join('\n');
