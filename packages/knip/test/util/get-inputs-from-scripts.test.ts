@@ -164,6 +164,8 @@ test('getInputsFromScripts (env)', () => {
   t('env -v node ./script.js', [toBinary('env'), toBinary('node'), js]);
   t('env $(cat .env | xargs) node ./script.js', [toBinary('env'), toBinary('node'), js, toBinary('cat'), toBinary('xargs')]);
   t('env -C dir node ./script.js', [toBinary('env')]);
+  t('env -iC dir node ./script.js', [toBinary('env')]);
+  t('env NODE_ENV=test node -C development ./script.js', [toBinary('env'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (cross-env/node)', () => {
