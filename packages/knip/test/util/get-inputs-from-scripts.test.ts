@@ -161,6 +161,7 @@ test('getInputsFromScripts (env)', () => {
   t('env -i PATH=/usr/bin:/bin node ./script.js', [toBinary('env'), toBinary('node'), js]);
   t("env -i PATH=$PATH NODE_OPTIONS='--require pkg' program", [toBinary('env'), toBinary('program'), toModule('pkg')]);
   t('env -i node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -v node ./script.js', [toBinary('env'), toBinary('node'), js]);
   t('env $(cat .env | xargs) node ./script.js', [toBinary('env'), toBinary('node'), js, toBinary('cat'), toBinary('xargs')]);
   t('env -C dir node ./script.js', [toBinary('env')]);
 });

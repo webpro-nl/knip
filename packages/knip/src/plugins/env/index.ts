@@ -10,9 +10,9 @@ const title = 'env';
 const isAssignmentOrSubstitution = (arg: string) => /^(\w+=|\$\()/.test(arg);
 
 const args: Args = {
-  boolean: ['ignore-environment'],
+  boolean: ['debug', 'ignore-environment'],
   string: ['chdir'],
-  alias: { chdir: ['C'], 'ignore-environment': ['i'] },
+  alias: { chdir: ['C'], debug: ['v'], 'ignore-environment': ['i'] },
   fromArgs: (parsed, args) => {
     if (parsed.chdir) return [];
     const command = spawningArgs(parsed, args);
