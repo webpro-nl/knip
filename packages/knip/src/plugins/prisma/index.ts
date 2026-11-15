@@ -45,6 +45,7 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
     // Prisma config file
     inputs.push(...options.getInputsFromScripts(config.migrations.seed));
   }
+  for (const input of inputs) input.dir ??= options.cwd;
 
   // Entry/Schema
   if (config.schema) {
