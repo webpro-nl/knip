@@ -516,6 +516,13 @@ test('getInputsFromScripts (double-dash)', () => {
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
 });
 
+test('getInputsFromScripts (graphql-codegen)', () => {
+  const config = toConfig('graphql-codegen', 'codegen.ts');
+  t('graphql-codegen --config codegen.ts', [toBinary('graphql-codegen'), config]);
+  t('graphql-codegen -r dotenv/config --config codegen.ts', [toBinary('graphql-codegen'), toModule('dotenv/config'), config]);
+  t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [toBinary('graphql-codegen'), toModule('dotenv/config'), toModule('tsconfig-paths/register')]);
+});
+
 test('getInputsFromScripts (command flags)', () => {
   t('doppler run --command="node server.ts"', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t("doppler run -c prod --command 'tsx watch src/index.ts'", [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);

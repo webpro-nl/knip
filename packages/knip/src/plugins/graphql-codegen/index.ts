@@ -34,6 +34,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const args = {
   config: true,
+  resolve: ['require'],
+  alias: { require: ['r'] },
 };
 
 const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
