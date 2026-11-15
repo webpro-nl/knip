@@ -407,6 +407,11 @@ test('getInputsFromScripts (pnpm exec child options)', () => {
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
+  t('pnpx tsx ./main.ts', [toDependency('tsx', opt), ts]);
+  t('pnpx prisma generate --schema=./prisma/schema.prisma', [toDependency('prisma', opt), toEntryPath('./prisma/schema.prisma', { dir: cwd })]);
+  t('pnpm dlx --package tsx tsx ./main.ts', [toDependency('tsx', opt), toDependency('tsx', opt), ts]);
+  t('pnpm -C sub dlx tsx ./main.ts', [toDependency('tsx', opt)]);
+  t('pnpm dlx dotenv-cli -e .env -- pnpm dlx prisma migrate deploy', [toDependency('dotenv-cli', opt), toDependency('prisma', opt)]);
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);

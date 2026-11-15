@@ -13,14 +13,17 @@ const toDependencyInputs = (packageSpecifier: string) => {
 
 export const resolveDlx = (words: Word[], options: BinaryResolverOptions) => {
   const parsed = parseArgs(words, {
+    isStorePositions: true,
     boolean: ['silent'],
-    alias: { package: 'p', 'shell-mode': 'c' },
+    alias: { package: 'p', 'shell-mode': 'c', dir: 'C' },
   });
   const packageSpecifier = parsed._[0];
   const packages = parsed.package && !parsed.yes ? [parsed.package].flat() : [];
   const command = parsed['shell-mode'] ? options.fromArgs([parsed['shell-mode']]) : [];
   const dependencyInputs = packageSpecifier ? toDependencyInputs(packageSpecifier) : [];
-  return [...dependencyInputs, ...packages.flatMap(toDependencyInputs), ...command];
+  const forwarded =
+    packageSpecifier && !parsed.dir ? options.fromArgs(words.slice(parsed.positionalIndices![0])).slice(1) : [];
+  return [...dependencyInputs, ...packages.flatMap(toDependencyInputs), ...command, ...forwarded];
 };
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
