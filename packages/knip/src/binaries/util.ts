@@ -50,8 +50,8 @@ export const toScript = (args: ScriptArg[]): string => {
   const parts: string[] = [];
   for (const arg of args) {
     if (typeof arg === 'string') {
-      if (arg !== '--') parts.push(arg);
-    } else if (arg.value !== '--') parts.push(arg.text);
+      if (arg !== '--' || parts.length > 0) parts.push(arg);
+    } else if (arg.value !== '--' || parts.length > 0) parts.push(arg.text);
   }
   return parts.join(' ');
 };

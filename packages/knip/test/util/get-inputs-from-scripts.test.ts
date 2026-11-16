@@ -513,6 +513,11 @@ test('getInputsFromScripts (double-dash)', () => {
   t('env-cmd -e production --silent node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -x --no-override --fallback node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -e test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
+  t('env-cmd -f .env --use-shell -- "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
   t('op run --env-file=.env -- node server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('op run --env-file=.env -- node --import=mocks.ts server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt), toModule('mocks.ts')]);
   t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
