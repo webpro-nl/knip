@@ -114,10 +114,11 @@ export const resolve: BinaryResolver = (binary, words, options) => {
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
   const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {
+    if (!pluginName) return [];
     if (typeof value === 'string')
-      return parsed[value] && pluginName ? [toConfig(pluginName, parsed[value], inputOpts)] : [];
+      return compact([parsed[value]].flat()).map(arg => toConfig(pluginName, arg, inputOpts));
     const [id, fn] = value;
-    return parsed[id] && pluginName ? [toConfig(pluginName, fn(parsed[id]), inputOpts)] : [];
+    return compact([parsed[id]].flat()).map(arg => toConfig(pluginName, fn(arg), inputOpts));
   };
   const configFilePaths = config.flatMap(mapToConfigPattern);
 
