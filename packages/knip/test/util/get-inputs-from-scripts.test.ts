@@ -408,6 +408,10 @@ test('getInputsFromScripts (pnpm exec child options)', () => {
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
   t('pnpx tsx ./main.ts', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts --dir output', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts -C output', [toDependency('tsx', opt), ts]);
+  t('pnpx node ./script.js -- --import unused-dep', [toDependency('node', opt), js]);
+  t('pnpx --package=pnpm pnpm exec tsx ./main.ts', [toDependency('pnpm', opt), toDependency('pnpm', opt), toBinary('tsx'), ts]);
   t('pnpx prisma generate --schema=./prisma/schema.prisma', [toDependency('prisma', opt), toEntryPath('./prisma/schema.prisma', { dir: cwd })]);
   t('pnpm dlx --package tsx tsx ./main.ts', [toDependency('tsx', opt), toDependency('tsx', opt), ts]);
   t('pnpm -C sub dlx tsx ./main.ts', [toDependency('tsx', opt)]);
