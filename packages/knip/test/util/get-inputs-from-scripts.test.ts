@@ -162,6 +162,7 @@ test('getInputsFromScripts (cross-env/node)', () => {
 
 test('getInputsFromScripts (cross-env-shell)', () => {
   t('cross-env-shell NODE_ENV=test node ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep', [toBinary('cross-env-shell'), toBinary('node'), js]);
   t('cross-env-shell "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
   t('cross-env-shell MESSAGE="two words" "node ./script.js && tsx ./main.ts"', [toBinary('cross-env-shell'), toBinary('node'), js, toBinary('tsx'), ts]);
   t('cross-env-shell NODE_OPTIONS="--require pkg" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
