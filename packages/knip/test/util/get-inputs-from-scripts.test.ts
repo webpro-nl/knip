@@ -89,6 +89,15 @@ test('getInputsFromScripts (node -r)', () => {
   t('node --enable-source-maps --expose-gc node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node --experimental-detect-module --experimental-json-modules node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
   t('node --openssl-legacy-provider node_modules/.bin/exec', [toBinary('node'), toBinary('exec')]);
+  t('node --require ./require.js --trace-warnings ./script.js', [toBinary('node'), js, req]);
+  t('node --trace-deprecation ./script.js', [toBinary('node'), js]);
+  t('node --watch --watch-preserve-output ./script.js', [toBinary('node'), js]);
+  t('node --preserve-symlinks ./script.js', [toBinary('node'), js]);
+  t('node --experimental-require-module ./script.js', [toBinary('node'), js]);
+  t('node --experimental-sqlite ./script.js', [toBinary('node'), js]);
+  t('node --experimental-wasm-modules ./script.js', [toBinary('node'), js]);
+  t('node --experimental-test-coverage ./script.js', [toBinary('node'), js]);
+  t('node --experimental-test-module-mocks ./script.js', [toBinary('node'), js]);
   t('node -r ts-node/register node_modules/.bin/jest', [toBinary('node'), toBinary('jest'), toModule('ts-node/register')]);
   t('node -r dotenv-flow/config ./node_modules/.bin/sanity-test codegen', [toBinary('node'), toBinary('sanity-test'), toModule('dotenv-flow/config')]);
 });
@@ -96,6 +105,8 @@ test('getInputsFromScripts (node -r)', () => {
 test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --test ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --tsconfig tsconfig.build.json --inspect ./main.ts', [toBinary('tsx'), ts]);
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);
   t('tsx ./main.ts build', [toBinary('tsx'), ts]);
@@ -470,6 +481,11 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node -T ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --transpile-only ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --prefer-ts-exts ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --esm ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --files --pretty ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node --skip-project --type-check ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
@@ -495,6 +511,7 @@ test('getInputsFromScripts (c8)', () => {
 test('getInputsFromScripts (nodemon)', () => {
   t('nodemon --require dotenv/config ./script.js --watch ./script.js', [toBinary('nodemon'), toModule('dotenv/config')]);
   t("nodemon --exec 'ts-node --esm' ./main.ts | pino-pretty", [toBinary('nodemon'), toBinary('ts-node'), toBinary('pino-pretty')]);
+  t("nodemon -e ts -x 'node ./script.js'", [toBinary('nodemon'), toBinary('node'), js]);
   t('nodemon ./script.js', [toBinary('nodemon')]);
 });
 
@@ -586,6 +603,12 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('cypress run -C cypress.ci.config.ts --config baseUrl=http://localhost:3000', [toBinary('cypress'), toConfig('cypress', 'cypress.ci.config.ts')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
+});
+
+test('getInputsFromScripts (plugins → resolve)', () => {
+  t('prettier --check . --plugin prettier-plugin-svelte', [toBinary('prettier'), toModule('prettier-plugin-svelte')]);
+  t('prettier --plugin=prettier-plugin-astro --plugin=./prettier-plugin.js', [toBinary('prettier'), toModule('prettier-plugin-astro'), toModule('./prettier-plugin.js')]);
+  t('prettier --plugin --write', [toBinary('prettier')]);
 });
 
 test('getInputsFromScripts (plugins → fromArgs)', () => {
