@@ -71,6 +71,7 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'lunaria'
+  | 'maestro'
   | 'markdownlint'
   | 'marko'
   | 'mastra'
@@ -283,6 +284,7 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'lunaria',
+  'maestro',
   'markdownlint',
   'marko',
   'mastra',

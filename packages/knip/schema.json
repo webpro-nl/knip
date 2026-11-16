@@ -184,7 +184,14 @@
     },
     "preprocessor": {
       "title": "Preprocess the results before providing them to the reporter(s)",
-      "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/list" }]
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/list"
+        }
+      ]
     },
     "preprocessorOptions": {
       "title": "Extra options to pass to the preprocessor",
@@ -712,6 +719,10 @@
           "title": "lunaria plugin configuration (https://knip.dev/reference/plugins/lunaria)",
           "$ref": "#/definitions/plugin"
         },
+        "maestro": {
+          "title": "maestro plugin configuration (https://knip.dev/reference/plugins/maestro)",
+          "$ref": "#/definitions/plugin"
+        },
         "markdownlint": {
           "title": "markdownlint plugin configuration (https://knip.dev/reference/plugins/markdownlint)",
           "$ref": "#/definitions/plugin"
@@ -736,12 +747,12 @@
           "title": "mdxlint plugin configuration (https://knip.dev/reference/plugins/mdxlint)",
           "$ref": "#/definitions/plugin"
         },
-        "mikro-orm": {
-          "title": "mikro-orm plugin configuration (https://knip.dev/reference/plugins/mikro-orm)",
-          "$ref": "#/definitions/plugin"
-        },
         "metro": {
           "title": "metro plugin configuration (https://knip.dev/reference/plugins/metro)",
+          "$ref": "#/definitions/plugin"
+        },
+        "mikro-orm": {
+          "title": "mikro-orm plugin configuration (https://knip.dev/reference/plugins/mikro-orm)",
           "$ref": "#/definitions/plugin"
         },
         "mise": {

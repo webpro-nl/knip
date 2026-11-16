@@ -70,6 +70,7 @@ import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as lunaria } from './lunaria/index.ts';
+import { default as maestro } from './maestro/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as marko } from './marko/index.ts';
 import { default as mastra } from './mastra/index.ts';
@@ -282,6 +283,7 @@ export const Plugins = {
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   lunaria,
+  maestro,
   markdownlint,
   marko,
   mastra,

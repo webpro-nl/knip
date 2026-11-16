@@ -26,3 +26,9 @@ test('Should load JSON5 files', async () => {
   assert.equal(config.plugins.length, 2);
   assert.equal(config.enabled, true);
 });
+
+test('Should load multi-document YAML files', async () => {
+  const cwd = resolve('fixtures/load-yaml-multi');
+  const config = await load(join(cwd, 'flow.yaml'));
+  assert.deepEqual(config, [{ appId: 'com.example' }, ['launchApp', { runScript: 'script.js' }]]);
+});
