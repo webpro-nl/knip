@@ -65,6 +65,8 @@ test('getInputsFromScripts (node)', () => {
   t('node --watch ./script.js', [toBinary('node'), js]);
   t('node script', [toBinary('node'), toEntryPath('script', opt)]);
   t('node ./script.js build', [toBinary('node'), js]);
+  t('node -- ./script.js', [toBinary('node'), js]);
+  t('node -e "console.log(1)" -- ./script.js', [toBinary('node')]);
 });
 
 test('getInputsFromScripts (node --test)', () => {
@@ -74,7 +76,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toModule('script.js')]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config')]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toEntryPath('node', opt), toModule('dotenv/config')]);
   t('node -r package/script', [toBinary('node'), toModule('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toEntryPath('script', opt), toModule('pkg1'), toModule('pkg2')]);
@@ -532,6 +534,7 @@ test('getInputsFromScripts (double-dash)', () => {
   t('doppler run -c prod --project app -- tsx watch src/index.ts', [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
   t('dotenvx run -- node ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 

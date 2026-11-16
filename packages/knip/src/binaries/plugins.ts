@@ -91,8 +91,9 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  if (pluginArgs.positional && parsed._[0]) {
-    const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
+  const isEval = parsed.e || parsed.eval || parsed.p || parsed.print;
+  const id = parsed._[0] ?? (isEval ? undefined : parsed['--']?.[0]); // let's start out safe, but sometimes we'll want more
+  if (pluginArgs.positional && id) {
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
       if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
