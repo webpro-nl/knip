@@ -13,7 +13,7 @@ export default defineConfig({
   },
   renderer: {
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         input: { index: 'src/renderer/main.ts' },
       },
     },
