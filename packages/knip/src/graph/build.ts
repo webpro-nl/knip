@@ -131,7 +131,6 @@ export const build = timerify(async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
-  const developmentFilePaths = new Set<string>();
   const preprocessorInputs = new Map<string, Input[]>();
   for (const specifier of options.preprocessorInputs) {
     const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
@@ -358,7 +357,7 @@ export const build = timerify(async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (options.isProduction && !input.production) {
-            if (!input.optional) developmentFilePaths.add(resolvedFilePath);
+            if (!input.optional) collector.addReferencedFile(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
@@ -672,7 +671,6 @@ export const build = timerify(async function build({
   );
 
   for (const filePath of principal.getUnreferencedFiles()) {
-    if (developmentFilePaths.has(filePath)) continue;
     if (IS_DTS.test(filePath)) {
       const loaded = principal.fileManager.loadSourceText(filePath);
       const sourceText = typeof loaded === 'string' ? loaded : await loaded;
