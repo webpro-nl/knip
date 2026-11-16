@@ -4,7 +4,7 @@ import { stylePreprocessorImports } from '../../compilers/style-preprocessors.ts
 const propsDeclMatcher = /(?:^|[\s;])(?:interface|type)\s+Props\b/;
 
 const scriptSrcMatcher =
-  /<!--[\s\S]*?-->|\{\s*(?:\/\*[\s\S]*?\*\/|`[^`]*`|'[^']*'|"[^"]*")|<script\s+src\s*=\s*(["'])(\.{1,2}\/[^"']+)\1\s*>|<script(?=[\s/>])(?:[^>"']|"[^"]*"|'[^']*')*(?<!\/)>[\s\S]*?<\/script>/g;
+  /<!--[\s\S]*?-->|\{\s*(?:\/\*[\s\S]*?\*\/|`[^`]*`|'[^']*'|"[^"]*")|<script\s+src\s*=\s*(["'])(\.{1,2}\/[^"']+)\1\s*>|<script(?=[\s/>])(?:[^>"']|"[^"]*"|'[^']*')*(?<!\/)>[\s\S]*?<\/script>|<template(?=[\s>])[\s\S]*?<\/template>|<([\w.:-]+)(?=\s)(?:[^>"']|"[^"]*"|'[^']*')*?\sis:raw(?=[\s/>])(?:[^>"']|"[^"]*"|'[^']*')*(?<!\/)>[\s\S]*?<\/\3>/g;
 
 const compiler = (text: string, path: string) => {
   let out = '';

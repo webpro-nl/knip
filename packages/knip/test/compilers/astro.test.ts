@@ -39,3 +39,14 @@ const html = '<script src="../scripts/string.ts"></script>';
     `const html = '<script src="../scripts/string.ts"></script>';\n// <script src="../scripts/line-comment.ts"></script>\nconst tag = '<script src="../scripts/in-string.ts">'; /* <script src="../scripts/in-comment.ts"> */`
   );
 });
+
+test('Script src is not an import in template elements or elements with is:raw', () => {
+  const source = `<template><script src="../scripts/template.ts"></script></template>
+<pre is:raw><script src="../scripts/raw.ts"></script></pre>
+<Fragment class="code" is:raw>
+  <script src="../scripts/raw-fragment.ts"></script>
+</Fragment>
+<script src="../scripts/local.ts"></script>`;
+
+  assert.equal(compiler(source, 'Page.astro'), "import '../scripts/local.ts';");
+});
