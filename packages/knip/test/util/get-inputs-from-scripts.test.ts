@@ -348,6 +348,8 @@ test('getInputsFromScripts (pnpm)', () => {
   const tools = { dir: join(cwd, 'tools') };
   t('pnpm --dir=tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
   t('pnpm -C tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm node ./script.js --dir output', [toBinary('node'), js]);
+  t('pnpm --dir tools node ./script.js --dir output', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);

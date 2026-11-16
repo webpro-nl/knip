@@ -148,10 +148,12 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (commands.includes(command)) return childInputs;
 
   if (!command) return [];
-  const rest = words.slice(parsed.positionalIndices![0]);
+  const commandIndex = parsed.positionalIndices![0];
+  const rest = words.slice(commandIndex);
   const script = rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
-  if (!parsed.dir) return fromArgs([script]);
-  const dir = toAbsolute(parsed.dir, options.cwd);
+  const pnpmOptions = parseArgs(words.slice(0, commandIndex), parseOptions);
+  if (!pnpmOptions.dir) return fromArgs([script]);
+  const dir = toAbsolute(pnpmOptions.dir, options.cwd);
   const inputs = fromArgs([script], { cwd: dir });
   for (const input of inputs) input.dir ??= dir;
   return inputs;
