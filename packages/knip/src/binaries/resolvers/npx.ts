@@ -33,7 +33,10 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const specifiers = dependency ? [dependency] : [];
 
   const forwarded = packageSpecifier ? fromArgs(argsFrom(words, packageSpecifier)) : [];
-  if (forwarded[0] && forwarded[0].specifier === extractBinary(packageSpecifier)) forwarded.shift();
+  const [first] = forwarded;
+  const isOuterCommand =
+    first && first.specifier === extractBinary(packageSpecifier) && (!first.dir || first.dir === cwd);
+  if (isOuterCommand) forwarded.shift();
 
   return [...specifiers, ...packages.map(id => toPackage(id, { optional: true })), ...command, ...forwarded];
 };
