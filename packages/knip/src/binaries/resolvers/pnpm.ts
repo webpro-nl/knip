@@ -1,4 +1,4 @@
-import parseArgs from '../../util/parse-args.ts';
+import parseArgs, { type ParsedArgs } from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { argsAfter, expandScript } from '../util.ts';
@@ -106,6 +106,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   };
   const parsed = parseArgs(words, parseOptions);
   const [command] = parsed._;
+  const [commandIndex, scriptIndex] = parsed.positionalIndices!;
 
   if (command === 'dlx') {
     const wordsForDlx = words.filter(word => word.value !== 'dlx');
@@ -118,23 +119,29 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const { manifest, fromArgs } = options;
 
-  if (command === 'exec') {
-    const commandIndex = parsed.positionalIndices![0];
-    if (commandIndex > 0) {
-      const execOptions = parseArgs(words.slice(0, commandIndex), parseOptions);
-      if (execOptions.filter && !execOptions.recursive) return [];
-    }
-    const index = commandIndex + 1;
-    const rest = words.slice(words[index]?.value === '--' ? index + 1 : index);
-    return fromArgs([rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ')]);
-  }
+  const forward = (index: number, pnpmOptions: ParsedArgs) => {
+    const rest = words.slice(index);
+    const script = rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
+    if (!pnpmOptions.dir) return fromArgs([script]);
+    const dir = toAbsolute(pnpmOptions.dir, options.cwd);
+    const inputs = fromArgs([script], { cwd: dir });
+    for (const input of inputs) input.dir ??= dir;
+    return inputs;
+  };
 
-  if (parsed.filter && !parsed.recursive) return [];
+  const isRun = command === 'run' || command === 'run-script';
+  const pnpmOptions = parseArgs(words.slice(0, isRun ? scriptIndex : commandIndex), parseOptions);
+  if (pnpmOptions.filter && !pnpmOptions.recursive) return [];
+
+  if (command === 'exec') {
+    const index = commandIndex + 1;
+    return forward(words[index]?.value === '--' ? index + 1 : index, pnpmOptions);
+  }
 
   const childInputs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
 
-  if (command === 'run' || command === 'run-script') {
+  if (isRun) {
     const script = parsed._[1];
     if (script && manifest.scriptNames.has(script)) {
       return expandScript(script, argsAfter(words, script), manifest.scripts, options) ?? childInputs;
@@ -147,14 +154,5 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (isScript) return expandScript(name, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
   if (commands.includes(command)) return childInputs;
 
-  if (!command) return [];
-  const commandIndex = parsed.positionalIndices![0];
-  const rest = words.slice(commandIndex);
-  const script = rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
-  const pnpmOptions = parseArgs(words.slice(0, commandIndex), parseOptions);
-  if (!pnpmOptions.dir) return fromArgs([script]);
-  const dir = toAbsolute(pnpmOptions.dir, options.cwd);
-  const inputs = fromArgs([script], { cwd: dir });
-  for (const input of inputs) input.dir ??= dir;
-  return inputs;
+  return command ? forward(commandIndex, pnpmOptions) : [];
 };
