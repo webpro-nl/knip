@@ -106,7 +106,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   };
   const parsed = parseArgs(words, parseOptions);
   const [command] = parsed._;
-  const [commandIndex] = parsed.positionalIndices!;
+  const [commandIndex, scriptIndex] = parsed.positionalIndices!;
 
   if (command === 'dlx') {
     const wordsForDlx = words.filter(word => word.value !== 'dlx');
@@ -129,24 +129,16 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
     return inputs;
   };
 
-  const pnpmOptions = parseArgs(words.slice(0, commandIndex), parseOptions);
-  const isFiltered = pnpmOptions.filter && !pnpmOptions.recursive;
+  const isRun = command === 'run' || command === 'run-script';
+  const name = testAliases.has(command) ? 'test' : command;
+  const optionsEnd = isRun ? scriptIndex : name === 'test' || !commands.includes(command) ? commandIndex : words.length;
+  const pnpmOptions = parseArgs(words.slice(0, optionsEnd), parseOptions);
+  if (pnpmOptions.filter && !pnpmOptions.recursive) return [];
 
   if (command === 'exec') {
-    if (isFiltered) return [];
     const index = commandIndex + 1;
     return forward(words[index]?.value === '--' ? index + 1 : index, pnpmOptions);
   }
-
-  const isRun = command === 'run' || command === 'run-script';
-  const name = testAliases.has(command) ? 'test' : command;
-  const isScript = manifest.scriptNames.has(name);
-
-  if (command && !isRun && !isScript && !commands.includes(command)) {
-    return isFiltered ? [] : forward(commandIndex, pnpmOptions);
-  }
-
-  if (parsed.filter && !parsed.recursive) return [];
 
   const childInputs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
@@ -159,6 +151,10 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
     return childInputs;
   }
 
-  if (isScript) return expandScript(name, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
-  return commands.includes(command) ? childInputs : [];
+  if (manifest.scriptNames.has(name)) {
+    return expandScript(name, argsAfter(words, command), manifest.scripts, options) ?? childInputs;
+  }
+  if (commands.includes(command)) return childInputs;
+
+  return command ? forward(commandIndex, pnpmOptions) : [];
 };
