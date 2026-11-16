@@ -14,6 +14,8 @@ import { spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
+const evalFlags = ['e', 'eval', 'p', 'print'];
+
 const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
@@ -91,8 +93,9 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  const isEval = parsed.e || parsed.eval || parsed.p || parsed.print;
-  const id = parsed._[0] ?? (isEval ? undefined : parsed['--']?.[0]); // let's start out safe, but sometimes we'll want more
+  const isEval = evalFlags.some(flag => parsed[flag] !== undefined && parsed[flag] !== false);
+  const script = isEval ? undefined : parsed['--']?.[0];
+  const id = parsed._[0] ?? (script?.startsWith('-') ? undefined : script); // let's start out safe, but sometimes we'll want more
   if (pluginArgs.positional && id) {
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
