@@ -90,11 +90,18 @@ export const parseJSONC = async (filePath: string, contents: string) => {
 };
 
 export const parseYAML = (contents: string) => {
+  const { parse: parseYAMLContents }: typeof import('yaml') = require('yaml');
+  return parseYAMLContents(contents, { logLevel: 'error' });
+};
+
+export const loadYAMLDocuments = async (filePath: string) => {
   const { parseAllDocuments }: typeof import('yaml') = require('yaml');
-  const documents = parseAllDocuments(contents, { logLevel: 'error' });
-  for (const document of documents) if (document.errors.length > 0) throw document.errors[0];
-  if (documents.length > 1) return documents.map(document => document.toJS());
-  return documents[0]?.toJS() ?? null;
+  const documents: unknown[] = [];
+  for (const document of parseAllDocuments(await loadFile(filePath), { logLevel: 'error' })) {
+    if (document.errors.length > 0) throw new LoaderError(`Error loading ${filePath}`, { cause: document.errors[0] });
+    documents.push(document.toJS());
+  }
+  return documents;
 };
 
 export const tryRealpath = (filePath: string) => {

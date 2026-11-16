@@ -12,11 +12,12 @@ test('Find scripts run by flows with the Maestro plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert('.maestro/scripts/unused.js' in issues.files);
+  assert('shared/unused.js' in issues.files);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 7,
-    total: 7,
+    files: 2,
+    processed: 11,
+    total: 11,
   });
 });

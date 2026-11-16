@@ -24,3 +24,8 @@ onFlowComplete:
     commands:
       - evalScript: ${output.paid = true}
       - runScript: scripts/pay.js
+- runFlow:
+    file: ../shared/logout.yaml
+- retry:
+    maxRetries: 1
+    file: ../shared/flaky.yaml

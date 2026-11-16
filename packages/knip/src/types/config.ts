@@ -238,6 +238,7 @@ export interface Plugin {
   isLoadConfig?: IsLoadConfig;
   /** Fall back to `resolveFromAST` when the config file fails to load, instead of reporting an error */
   isLoadConfigOptional?: boolean;
+  isLoadYAMLDocuments?: boolean;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   /**
