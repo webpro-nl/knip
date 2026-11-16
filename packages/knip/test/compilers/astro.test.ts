@@ -46,7 +46,12 @@ test('Script src is not an import in template elements or elements with is:raw',
 <Fragment class="code" is:raw>
   <script src="../scripts/raw-fragment.ts"></script>
 </Fragment>
+<pre is:raw=""><script src="../scripts/raw-value.ts"></script></pre>
+<div data-directive="is:raw"><script src="../scripts/attribute-value.ts"></script></div>
 <script src="../scripts/local.ts"></script>`;
 
-  assert.equal(compiler(source, 'Page.astro'), "import '../scripts/local.ts';");
+  assert.equal(
+    compiler(source, 'Page.astro'),
+    "import '../scripts/attribute-value.ts';\nimport '../scripts/local.ts';"
+  );
 });
