@@ -1,5 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toEntry } from '../../util/input.ts';
+import { type Input, toConfig, toEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { type ConfigFile, configFiles, inputsFromFrameworks, inputsFromPlugins, loadConfig } from './helpers.ts';
@@ -44,12 +45,17 @@ const resolveConfig: ResolveConfig<ConfigFile> = async (localConfig, options) =>
   return Array.from(inputs);
 };
 
+const args: Args = {
+  resolveInputs: parsed => (parsed._[0] === 'start' && parsed._[1] ? [toConfig('karma', parsed._[1])] : []),
+};
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   resolveConfig,
+  args,
 };
 
 export default plugin;
