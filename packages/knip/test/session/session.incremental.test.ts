@@ -212,3 +212,31 @@ test('subpath references from scripts in modified files are refreshed', async t 
   assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']), ['#setup']);
   assert.deepEqual(Object.keys(session.getIssues().issues.files), ['setup-default.ts']);
 });
+
+test('subpath references from import globs survive edits to other files', async t => {
+  const cwd = await setup(t);
+  await writeFile(
+    join(cwd, 'package.json'),
+    '{"name":"incremental","devDependencies":{"vite":"*"},"imports":{"#widgets/*":"./widgets/*"},"knip":{"entry":["index.ts"],"project":["**/*.ts"]}}'
+  );
+  await mkdir(join(cwd, 'widgets'));
+  await writeFile(
+    join(cwd, 'index.ts'),
+    "import 'vite';\nimport { value } from './value.ts';\nconsole.log(value, import.meta.glob('#widgets/*.ts'));\n"
+  );
+  await writeFile(join(cwd, 'value.ts'), 'export const value = 1;\n');
+  await writeFile(join(cwd, 'widgets/button.ts'), 'export {};\n');
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(session.getIssues().issues.subpaths, {});
+  assert.deepEqual(session.getIssues().issues.files, {});
+
+  await writeFile(join(cwd, 'value.ts'), 'export const value = 1;\nexport const spare = 2;\n');
+  await session.handleFileChanges([{ type: 'modified', filePath: 'value.ts' }]);
+  assert.deepEqual(session.getIssues().issues.subpaths, {});
+  assert.deepEqual(session.getIssues().issues.files, {});
+  await assertFresh(session, cwd);
+
+  await writeFile(join(cwd, 'index.ts'), "import 'vite';\nimport { value } from './value.ts';\nconsole.log(value);\n");
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']), ['#widgets/*']);
+});

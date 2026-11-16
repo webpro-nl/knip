@@ -88,18 +88,20 @@ function compileRootDirs(scopedRootDirs: ScopedRootDirs | undefined): ScopedRoot
   return scoped;
 }
 
-export type ResolveGlobPattern = (pattern: string, dir: string) => string[];
+export type ResolveGlobPattern = (pattern: string, containingFile: string) => string[];
 
-export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): ResolveGlobPattern {
-  const mappings = compilePathMappings(scopedPaths);
-  return (pattern, dir) => {
-    if (!mappings) return [pattern];
+export function createGlobAliasResolver(
+  scopedPaths: ScopedPaths | undefined,
+  findWorkspacePackageTarget?: WorkspacePackageTargetHandler
+): ResolveGlobPattern {
+  const mappings = compilePathMappings(scopedPaths) ?? [];
+  return (pattern, containingFile) => {
     const isNegated = pattern[0] === '!';
     const specifier = isNegated ? pattern.slice(1) : pattern;
     let best: PathMapping | undefined;
     for (const mapping of mappings) {
       const { prefix, wildcard, scope } = mapping;
-      if (dir !== scope && !dir.startsWith(`${scope}/`)) continue;
+      if (!containingFile.startsWith(`${scope}/`)) continue;
       const matches = wildcard
         ? specifier.startsWith(prefix)
         : specifier === prefix || specifier.startsWith(`${prefix}/`);
@@ -111,9 +113,15 @@ export function createGlobAliasResolver(scopedPaths: ScopedPaths | undefined): R
       )
         best = mapping;
     }
-    if (!best) return [pattern];
-    const captured = specifier.slice(best.prefix.length);
     const resolved: string[] = [];
+    if (!best) {
+      const target = specifier[0] === '#' && findWorkspacePackageTarget?.(specifier, containingFile);
+      if (!target) return [pattern];
+      for (const targetPath of getPackageTargetPaths(target.target, target.dir, target.patternMatch, false))
+        resolved.push(isNegated ? `!${targetPath}` : targetPath);
+      return resolved;
+    }
+    const captured = specifier.slice(best.prefix.length);
     for (const value of best.values) {
       const starIdx = value.indexOf('*');
       const mapped = toPosix(

@@ -167,7 +167,7 @@ export class ProjectPrincipal {
       this.findWorkspacePackageTarget,
       this.tsConfigFile
     );
-    this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
+    this.resolveGlobPattern = createGlobAliasResolver(scopedPaths, this.findWorkspacePackageTarget);
   }
 
   hasAcceptedExtension(filePath: string) {

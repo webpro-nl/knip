@@ -135,7 +135,7 @@ export const getPackageMapTarget = (map: Exports, key: string) => {
     }
   }
   if (!hasSubpaths) return key === '.' ? { target: map, subpath: '.' } : undefined;
-  if (Object.hasOwn(map, key)) return { target: map[key], subpath: key };
+  if (Object.hasOwn(map, key) && !key.includes('*')) return { target: map[key], subpath: key };
 
   let best:
     | { target: Exports; subpath: string; patternMatch: string; prefixLength: number; subpathLength: number }

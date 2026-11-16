@@ -101,6 +101,10 @@ export const build = timerify(async function build({
     subpathReferences.addInput(input, owner);
     return resolveInput(input, workspace);
   };
+  const resolveGlobPattern = (pattern: string, containingFilePath: string) => {
+    if (pattern[0] === '#') subpathReferences.addInput(toEntry(pattern, { containingFilePath }), containingFilePath);
+    return principal.resolveGlobPattern(pattern, containingFilePath);
+  };
   const getPublishedTypeDependencies = options.isReportDependencies
     ? createPublishedTypeDependencyAnalyzer()
     : undefined;
@@ -620,11 +624,11 @@ export const build = timerify(async function build({
 
       if (file.importGlobs.length > 0) {
         const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
-        const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
+        const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, resolveGlobPattern, workspace.dir);
         for (const importedFilePath of analyzed) {
           if (!isGitIgnored(importedFilePath)) principal.addProgramPath(importedFilePath);
         }
-        const entries = resolveImportGlobs(entryImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
+        const entries = resolveImportGlobs(entryImportGlobs, filePath, resolveGlobPattern, workspace.dir);
         for (const importedFilePath of entries) {
           if (!isGitIgnored(importedFilePath)) principal.addEntryPath(importedFilePath, { skipExportsAnalysis: true });
         }

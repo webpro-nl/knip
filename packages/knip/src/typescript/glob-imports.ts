@@ -4,10 +4,10 @@ import { _syncGlob } from '../util/glob.ts';
 import { dirname, isAbsolute, join, toAbsolute, toRelative } from '../util/path.ts';
 import type { ResolveGlobPattern } from './resolve-module-names.ts';
 
-function resolveBaseDir(base: string, dir: string, resolveGlobPattern: ResolveGlobPattern) {
-  if (base.startsWith('.')) return join(dir, base);
+function resolveBaseDir(base: string, containingFile: string, resolveGlobPattern: ResolveGlobPattern) {
+  if (base.startsWith('.')) return join(dirname(containingFile), base);
   if (isAbsolute(base)) return base;
-  for (const resolved of resolveGlobPattern(base, dir)) {
+  for (const resolved of resolveGlobPattern(base, containingFile)) {
     if (resolved !== base && existsSync(resolved)) return resolved;
   }
   return undefined;
@@ -28,7 +28,7 @@ export function resolveImportGlobs(
         filePaths.push(filePath);
       }
     } else if (base !== undefined) {
-      const cwd = resolveBaseDir(base, dir, resolveGlobPattern);
+      const cwd = resolveBaseDir(base, containingFile, resolveGlobPattern);
       if (!cwd) continue;
       for (const filePath of _syncGlob({ patterns, cwd })) {
         if (!filter || filter.test(`./${toRelative(filePath, cwd)}`)) filePaths.push(filePath);
@@ -42,7 +42,7 @@ export function resolveImportGlobs(
           const rooted = join(workspaceRoot, specifier);
           resolved.push(isNegated ? `!${rooted}` : rooted);
         } else {
-          for (const p of resolveGlobPattern(pattern, dir)) resolved.push(p);
+          for (const p of resolveGlobPattern(pattern, containingFile)) resolved.push(p);
         }
       }
       if (resolved.length === 0) continue;
