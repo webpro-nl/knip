@@ -42,7 +42,7 @@ const resolveConfig: ResolveConfig<ElectronBuilderConfig | ConfigFactory> = asyn
     packageKey: 'build',
     configFilename: 'electron-builder',
     projectDir: options.cwd,
-    packageMetadata: null,
+    packageMetadata: { value: Promise.resolve(options.manifest) },
   };
   const localConfig = typeof config === 'function' ? await config(request) : config;
   if (!isObject(localConfig)) return [];
