@@ -32,7 +32,21 @@ const hooks = [
   'beforeBuild',
 ];
 
-const resolveConfig: ResolveConfig<Record<string, unknown>> = (localConfig, options) => {
+type ElectronBuilderConfig = Record<string, unknown>;
+
+type ConfigFactory = (request: Record<string, unknown>) => ElectronBuilderConfig | Promise<ElectronBuilderConfig>;
+
+const resolveConfig: ResolveConfig<ElectronBuilderConfig | ConfigFactory> = async (config, options) => {
+  // electron-builder calls a config factory with its read config request and awaits the result
+  const request = {
+    packageKey: 'build',
+    configFilename: 'electron-builder',
+    projectDir: options.cwd,
+    packageMetadata: null,
+  };
+  const localConfig = typeof config === 'function' ? await config(request) : config;
+  if (!isObject(localConfig)) return [];
+
   const ids: unknown[] = [];
   for (const hook of hooks) ids.push(localConfig[hook]);
   for (const target of [localConfig.mac, localConfig.mas, localConfig.masDev]) {
