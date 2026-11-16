@@ -52,6 +52,7 @@ const commands = new Set(['config', 'install', 'repl', 'session']);
 const args: Args = {
   binaries: ['wdio'],
   boolean: ['cpuProf', 'headless', 'heapProf'],
+  alias: { cpuProf: ['cpu-prof'], heapProf: ['heap-prof'] },
   resolveInputs: parsed => {
     const [command, path] = parsed._;
     const configPath = command === 'run' ? path : command;
