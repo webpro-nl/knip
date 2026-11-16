@@ -11,15 +11,42 @@ const title = 'env-cmd';
 
 const environmentFlags = new Set(['-e', '--environments']);
 
-const isEnvironmentName = (args: string[], index: number) => {
-  for (let i = index - 1; i >= 0; i--) if (args[i].startsWith('-')) return environmentFlags.has(args[i]);
-  return false;
+const valueFlags = new Set(['-f', '--file', '-r', '--rc-file']);
+
+const booleanFlags = new Set([
+  '-x',
+  '--expand-envs',
+  '--fallback',
+  '--no-override',
+  '--recursive',
+  '--silent',
+  '--use-shell',
+  '--verbose',
+]);
+
+const isFlag = (arg: string) => {
+  const index = arg.indexOf('=');
+  const name = index === -1 ? arg : arg.slice(0, index);
+  return environmentFlags.has(name) || valueFlags.has(name) || booleanFlags.has(name);
 };
 
-const getCommand = (parsed: ParsedArgs, args: string[]) =>
-  parsed['--']?.length && isEnvironmentName(args, args.indexOf(parsed._[0]))
-    ? parsed['--']
-    : spawningArgs(parsed, args);
+const getCommandIndex = (args: string[]) => {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--') return i + 1;
+    if (environmentFlags.has(arg)) while (i + 1 < args.length && !args[i + 1].startsWith('-')) i++;
+    else if (valueFlags.has(arg)) i++;
+    else if (!isFlag(arg)) return arg.startsWith('-') ? -1 : i;
+  }
+  return -1;
+};
+
+const getCommand = (parsed: ParsedArgs, args: string[]) => {
+  const index = getCommandIndex(args);
+  return index === -1 || index === args.length || args[index].startsWith('-')
+    ? spawningArgs(parsed, args)
+    : args.slice(index);
+};
 
 const args: Args = {
   boolean: ['expand-envs', 'fallback', 'recursive', 'silent', 'use-shell'],

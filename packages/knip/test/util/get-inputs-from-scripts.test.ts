@@ -514,6 +514,9 @@ test('getInputsFromScripts (double-dash)', () => {
   t('env-cmd -x --no-override --fallback node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -e test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -e test node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --silent node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test node ./script.js --port 3000', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
