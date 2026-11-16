@@ -517,12 +517,18 @@ test('getInputsFromScripts (double-dash)', () => {
 });
 
 test('getInputsFromScripts (sst)', () => {
+  const config = toConfig('sst', 'infra/sst.config.ts', { dir: cwd });
   t('sst deploy --stage production', [toBinary('sst')]);
+  t('sst --config infra/sst.config.ts dev', [toBinary('sst'), config]);
+  t('sst deploy --config infra/sst.config.ts --stage production', [toBinary('sst'), config]);
+  t('sst shell -- vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts')]);
+  t('sst shell vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts')]);
+  t('sst --config infra/sst.config.ts shell vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts'), config]);
   t('sst shell', [toBinary('sst')]);
   t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
   t('sst shell --stage dev -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
   t('sst shell -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
-  t('sst --config infra/sst.config.ts shell tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst --config infra/sst.config.ts shell tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts, config]);
   t('sst --stage dev shell -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
   t('sst dev next dev', [toBinary('sst'), toBinary('next')]);
   t('sst bind vitest run', [toBinary('sst'), toBinary('vitest')]);
