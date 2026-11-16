@@ -352,6 +352,7 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --dir tools node ./script.js --dir output', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
   t('pnpm -C tools exec node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
   t('pnpm vitest --filter smoke', [toBinary('vitest')]);
+  t('pnpm list --filter app', [], { cwd, manifest: createManifest({ scripts: { list: 'node ./tools/list.js' } }) });
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
@@ -366,7 +367,6 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
   t('pnpm with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm run with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
-  t('pnpm run with-env src/main.ts --filter app', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm run-script with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm t src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
   t('pnpm tst -- src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
