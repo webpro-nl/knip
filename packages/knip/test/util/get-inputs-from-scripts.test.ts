@@ -620,6 +620,7 @@ test('getInputsFromScripts (plugins → resolve)', () => {
 
 test('getInputsFromScripts (plugins → fromArgs)', () => {
   t('glob --cmd', [toBinary('glob')]);
+  t('glob -- "-*.js"', [toBinary('glob'), toEntry('-*.js')]);
   t('glob -c', [toBinary('glob')]);
   t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
   t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
