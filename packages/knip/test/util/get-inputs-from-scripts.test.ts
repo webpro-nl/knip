@@ -483,6 +483,7 @@ test('getInputsFromScripts (c8)', () => {
   t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node ./script.js -- --import unused-dep', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t('c8 report', [toBinary('c8')]);
@@ -495,6 +496,9 @@ test('getInputsFromScripts (c8)', () => {
 test('getInputsFromScripts (nyc)', () => {
   t('nyc program', [toBinary('nyc'), toBinary('program')], forwardedArgs);
   t('nyc node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -- node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node --import tsx ./script.js', [toBinary('nyc'), toBinary('node'), js, toModule('tsx')]);
   t('nyc npm test', [toBinary('nyc')]);
   t('nyc report --reporter=text-lcov', [toBinary('nyc')]);
   t('nyc check-coverage --lines 95 --per-file', [toBinary('nyc')]);
