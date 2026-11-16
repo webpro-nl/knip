@@ -1,5 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { argsAfter, expandScript } from '../util.ts';
 import { resolveDlx } from './pnpx.ts';
 
@@ -98,8 +99,9 @@ const testAliases = new Set(['t', 'tst']);
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const parseOptions = {
     isStorePositions: true,
+    string: ['dir'],
     boolean: ['aggregate-output', 'if-present', 'parallel', 'recursive', 'reverse', 'shell-mode', 'silent', 'stream'],
-    alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F' },
+    alias: { recursive: 'r', silent: 's', 'shell-mode': 'c', filter: 'F', dir: 'C' },
     '--': true,
   };
   const parsed = parseArgs(words, parseOptions);
@@ -147,5 +149,10 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   if (!command) return [];
   const rest = words.slice(parsed.positionalIndices![0]);
-  return fromArgs([rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ')]);
+  const script = rest.length === 1 ? rest[0].value : rest.map(word => word.text).join(' ');
+  if (!parsed.dir) return fromArgs([script]);
+  const dir = toAbsolute(parsed.dir, options.cwd);
+  const inputs = fromArgs([script], { cwd: dir });
+  for (const input of inputs) input.dir ??= dir;
+  return inputs;
 };

@@ -345,6 +345,9 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent node ./script.js', [toBinary('node'), js]);
   t('pnpm node ./script.js -- --import tsx', [toBinary('node'), js]);
   t('pnpm vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
+  const tools = { dir: join(cwd, 'tools') };
+  t('pnpm --dir=tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm -C tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
