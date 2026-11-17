@@ -617,6 +617,8 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('webpack --config a.js --config b.js --merge', [toBinary('webpack'), toConfig('webpack', 'a.js'), toConfig('webpack', 'b.js'), toDependency('webpack-cli')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
+  t('wdio run --cpu-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
+  t('wdio run --heap-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
 });
 
 test('getInputsFromScripts (plugins → resolve)', () => {
