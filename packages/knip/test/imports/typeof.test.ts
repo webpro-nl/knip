@@ -13,12 +13,15 @@ test('Support typeof imports', async () => {
 
   assert(issues.exports['fruits.ts']['cherry']);
   assert(issues.namespaceMembers['fruits.ts']['Citrus.Lime']);
+  assert(issues.namespaceMembers['vegetables.ts']['Roots.Beet']);
+  assert(issues.enumMembers['vegetables.ts']['Color.Red']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     exports: 1,
-    namespaceMembers: 1,
-    processed: 2,
-    total: 2,
+    enumMembers: 1,
+    namespaceMembers: 2,
+    processed: 3,
+    total: 3,
   });
 });
