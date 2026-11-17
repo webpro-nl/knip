@@ -304,7 +304,7 @@ export class ProjectPrincipal {
     this.resolvedFiles = visited;
   }
 
-  async getUsedResolvedFiles(onSpecifier: (specifier: string, filePath: string) => void) {
+  async getUsedResolvedFiles(onSpecifier: (specifier: string, filePath: string, isImport: boolean) => void) {
     this.resolvedFiles.clear();
     const visited = new Set([...this.entryPaths, ...this.programPaths]);
     this.onPathAdded = p => visited.add(p);
@@ -317,8 +317,9 @@ export class ProjectPrincipal {
 
         const result = tryParseFile(filePath, sourceText);
         if (!result) continue;
+        const isProjectPath = this.projectPaths.has(filePath);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-          onSpecifier(specifier, filePath);
+          onSpecifier(specifier, filePath, isProjectPath);
           const resolved = this.resolveSpecifier(specifier, filePath);
           if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
         }
@@ -333,7 +334,7 @@ export class ProjectPrincipal {
     return usedFiles;
   }
 
-  private resolveSpecifier(specifier: string, containingFile: string): string | undefined {
+  resolveSpecifier(specifier: string, containingFile: string): string | undefined {
     return this.resolveModule(specifier, containingFile)?.resolvedFileName;
   }
 

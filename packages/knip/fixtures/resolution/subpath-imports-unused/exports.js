@@ -1,6 +1,7 @@
 export * from '#used';
 export * from '#conditional';
 export * from '#patterns/a';
+export * from '#conditional-patterns/fruit';
 export * from './bridge/promoted.js';
 export * from './bridge/index.js';
 export * from '#query?raw';

@@ -125,6 +125,27 @@ test('subpath references released by edits and deletions refresh unused subpaths
   assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']).sort(), ['#unused', '#used']);
 });
 
+test('files matched by a subpath import pattern keep their unused exports after topology changes', async t => {
+  const cwd = await setup(t);
+  await writeFile(
+    join(cwd, 'package.json'),
+    '{"name":"incremental","imports":{"#/*":"./*"},"knip":{"entry":["index.ts"],"project":["*.ts"]}}'
+  );
+  await writeFile(join(cwd, 'index.ts'), "import { used } from '#/used.ts'; console.log(used);\n");
+  await writeFile(join(cwd, 'used.ts'), 'export const used = 1;\nexport const spare = 2;\n');
+  await writeFile(join(cwd, 'other.ts'), 'export const other = 3;\nexport const extra = 4;\n');
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports['used.ts']), ['spare']);
+
+  await writeFile(
+    join(cwd, 'index.ts'),
+    "import { used } from '#/used.ts'; import { other } from '#/other.ts'; console.log(used, other);\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports).sort(), ['other.ts', 'used.ts']);
+  await assertFresh(session, cwd);
+});
+
 test('subpath targets stay entry files while a script references them', async t => {
   const cwd = await setup(t);
   await writeFile(
