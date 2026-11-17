@@ -25,7 +25,7 @@ test('Resolve run.tasks and staged scripts from the vite-plus config', async () 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 7,
+    total: 7,
   });
 });
