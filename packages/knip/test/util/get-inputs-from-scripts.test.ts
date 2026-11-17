@@ -180,6 +180,17 @@ test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r esm ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('esm')]);
 });
 
+test('getInputsFromScripts (cross-env-shell)', () => {
+  t('cross-env-shell NODE_ENV=test node ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell NODE_ENV=test node -- ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell MESSAGE="two words" "node ./script.js && tsx ./main.ts"', [toBinary('cross-env-shell'), toBinary('node'), js, toBinary('tsx'), ts]);
+  t('cross-env-shell NODE_OPTIONS="--require pkg" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+  t('cross-env-shell "NODE_ENV=production" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t("cross-env-shell 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+});
+
 test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);
@@ -578,6 +589,20 @@ test('getInputsFromScripts (concurrently)', () => {
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
+  t('env-cmd -f .env.local node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env.local node -- ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e production --silent node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -x --no-override --fallback node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test,production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --silent node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --environments test,production --silent node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -- node ./script.js --port 3000', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -f .env --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
+  t('env-cmd -f .env --use-shell -- "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
   t('op run --env-file=.env -- node server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('op run --env-file=.env -- node --import=mocks.ts server.ts', [toBinary('op'), toBinary('node'), toEntryPath('server.ts', opt), toModule('mocks.ts')]);
   t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
@@ -612,6 +637,23 @@ test('getInputsFromScripts (graphql-codegen)', () => {
   t('graphql-codegen --config codegen.ts', [toBinary('graphql-codegen'), config]);
   t('graphql-codegen -r dotenv/config --config codegen.ts', [toBinary('graphql-codegen'), toModule('dotenv/config'), config]);
   t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [toBinary('graphql-codegen'), toModule('dotenv/config'), toModule('tsconfig-paths/register')]);
+});
+
+test('getInputsFromScripts (env-cmd environment operands)', () => {
+  t('env-cmd -e test node ./script.js', [toBinary('env-cmd')]);
+  t('env-cmd --silent -e test node ./script.js -- node ./main.ts', [toBinary('env-cmd'), toBinary('node'), ts]);
+});
+
+test('getInputsFromScripts (env-cmd variadic environments)', () => {
+  t('env-cmd -e -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e "" production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --environments test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -e production staging -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --silent -e test node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('echo')]);
+  t('env-cmd --environments=test node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -etest node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --verbose node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
 });
 
 test('getInputsFromScripts (command flags)', () => {
