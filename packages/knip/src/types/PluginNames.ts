@@ -37,6 +37,7 @@ export type PluginName =
   | 'eleventy'
   | 'ember'
   | 'ember-template-lint'
+  | 'env-cmd'
   | 'esbuild'
   | 'eslint'
   | 'evalite'
@@ -250,6 +251,7 @@ export const pluginNames = [
   'eleventy',
   'ember',
   'ember-template-lint',
+  'env-cmd',
   'esbuild',
   'eslint',
   'evalite',
