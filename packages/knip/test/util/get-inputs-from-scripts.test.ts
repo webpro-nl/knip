@@ -564,6 +564,8 @@ test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run -- tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- glob -- "*.js"', [toBinary('dotenvx'), toBinary('glob'), toEntry('*.js')]);
   t('cross-env A=1 tsx -- ./main.ts', [toBinary('cross-env'), toBinary('tsx'), ts]);
+  t('dotenvx run -- pnpm tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- yarn exec -- tsx ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
   t(`cdk --app 'tsx --tsconfig "./config files/tsconfig.json" -- ./main.ts'`, [toBinary('cdk'), toBinary('tsx'), ts]);
   t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);

@@ -13,6 +13,7 @@ import type { PackageJson } from './package-json.ts';
 
 export interface GetInputsFromScriptsOptions extends BaseOptions {
   isForwardedArgs?: boolean;
+  hasForwardedSeparator?: boolean;
   optionalBinaries?: boolean;
   containingFilePath: string;
   expandedScripts?: Set<string>;

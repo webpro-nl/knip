@@ -7,7 +7,11 @@ import { relative } from '../util/path.ts';
 import { substringBefore, truncate } from '../util/string.ts';
 import { isScriptExpansion } from '../util/scripts.ts';
 import { getDependenciesFromCommand } from './command.ts';
-import { toForwardedScript } from './plugins.ts';
+import { toScript } from './util.ts';
+
+// A `--` forwarded as an argument of its own, which the child command's own separator may be
+const hasSeparator = (args: ScriptArg[]) =>
+  args.some((arg, index) => index > 0 && (typeof arg === 'string' ? arg : arg.value) === '--');
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
@@ -17,15 +21,16 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (args.length === 0) return [];
     const first = typeof args[0] === 'string' ? args[0] : args[0].value;
     if (!isValidBinary(substringBefore(first, ' '))) return [];
-    return getDependenciesFromScript(toForwardedScript(args), {
+    return getDependenciesFromScript(toScript(args), {
       ...options,
       isForwardedArgs: false,
       ...opts,
+      hasForwardedSeparator: hasSeparator(args),
     });
   };
 
   const fromWords = (args: ScriptArg[], opts: GetInputsFromScriptsOptions): Input[] =>
-    getDependenciesFromScript(toForwardedScript(args), opts);
+    getDependenciesFromScript(toScript(args), { ...opts, hasForwardedSeparator: hasSeparator(args) });
 
   const definedFunctions = new Set<string>();
   const collectFunctionNames = (statements: readonly Statement[]): void => {

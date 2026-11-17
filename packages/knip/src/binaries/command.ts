@@ -53,7 +53,9 @@ export const getDependenciesFromCommand = (
 
   if (binary in KnownResolvers) {
     const resolver = KnownResolvers[binary as KnownResolver];
-    return [...resolver(binary, words, options), ...fromNodeOptions];
+    // Package managers and runners have their own grammar, so a forwarded one still gets the command without separators
+    const resolverWords = options.hasForwardedSeparator ? words.filter(word => word.value !== '--') : words;
+    return [...resolver(binary, resolverWords, options), ...fromNodeOptions];
   }
 
   if (pluginArgsMap.has(binary)) {
