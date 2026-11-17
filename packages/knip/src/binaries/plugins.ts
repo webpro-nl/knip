@@ -1,4 +1,4 @@
-import { parse as parseScript, type Word } from 'unbash';
+import { forEachChild, parse as parseScript, type SyntaxNode, type Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
@@ -7,19 +7,23 @@ import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { collectCommands, getCommandWords } from '../util/scripts.ts';
+import { collectCommands, getCommandWords, isScriptExpansion } from '../util/scripts.ts';
 import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
+import KnownResolvers from './resolvers/index.ts';
 import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
 const spawningPluginArgs: Args = { fromArgs: spawningArgs };
 
-const toArgs = (pluginArgs: Args, words: Word[]) => {
-  const values: string[] = [];
-  for (const word of words) values.push(word.value);
-  return typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
-};
+const toArgValues = (pluginArgs: Args, values: string[]) =>
+  typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
+
+const toArgs = (pluginArgs: Args, words: Word[]) =>
+  toArgValues(
+    pluginArgs,
+    words.map(word => word.value)
+  );
 
 const parse = (pluginArgs: Args, args: string[]) => {
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
@@ -43,6 +47,64 @@ const parse = (pluginArgs: Args, args: string[]) => {
   });
 };
 
+const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
+
+// Whether a forwarded `--` stays in the child's script: a wrapper decides about its own separators when its command
+// is forwarded in turn, and a command with a plugin keeps the one after its operands, where the rest belongs to the
+// script. Anything else is dropped, as forwarding always did, so options and operands of the child still parse.
+const isCommandWrapper = (binary: string) =>
+  isFallbackWrapper(binary) || typeof pluginArgsMap.get(binary)?.[1].fromArgs === 'function';
+
+const toKeptSeparators = (script: string, offsets: Set<number>) => {
+  const kept = new Set<number>();
+  const visit = (node: SyntaxNode) => {
+    if (node.type === 'Command' && node.name) {
+      const binary = extractBinary(node.name.value);
+      const pluginArgs = binary in KnownResolvers ? undefined : pluginArgsMap.get(binary)?.[1];
+      const values: string[] = [];
+      for (const word of getCommandWords(node)) {
+        const isForwarded = word.value === '--' && offsets.has(word.pos);
+        const isKept =
+          isForwarded &&
+          (isCommandWrapper(binary) ||
+            (!!pluginArgs && parse(pluginArgs, toArgValues(pluginArgs, values))._.length > 0));
+        if (isKept) kept.add(word.pos);
+        if (!isForwarded || isKept) values.push(word.value);
+      }
+    }
+    // A script with its own decoded source (escaped backticks) has positions that don't index this text
+    if (!isScriptExpansion(node)) forEachChild(node, visit);
+    else if (node.script && node.script.source === undefined) visit(node.script);
+  };
+  visit(parseScript(script));
+  return kept;
+};
+
+export const toForwardedScript = (args: ScriptArg[]): string => {
+  const parts: string[] = [];
+  const separators: number[] = [];
+  for (const arg of args) {
+    const value = valueOf(arg);
+    if (value === '--' && parts.length === 0) continue;
+    if (value === '--') separators.push(parts.length);
+    parts.push(typeof arg === 'string' ? arg : arg.text);
+  }
+  const script = parts.join(' ');
+  if (separators.length === 0) return script;
+  const starts: number[] = [];
+  let offset = 0;
+  for (const part of parts) {
+    starts.push(offset);
+    offset += part.length + 1;
+  }
+  let kept = new Set<number>();
+  try {
+    kept = toKeptSeparators(script, new Set(separators.map(index => starts[index])));
+  } catch {}
+  const dropped = new Set(separators.filter(index => !kept.has(starts[index])));
+  return parts.filter((_, index) => !dropped.has(index)).join(' ');
+};
+
 export const getWrappedCommand = (binary: string, words: Word[], cwd = process.cwd()): ScriptArg[] | undefined => {
   const pluginArgs =
     pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningPluginArgs : undefined);
@@ -63,7 +125,7 @@ export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()
         const binary = extractBinary(text);
         const words = getCommandWords(node);
         const command = getWrappedCommand(binary, words, cwd);
-        if (command?.length) out.push(...getScriptCommands(toScript(command), cwd));
+        if (command?.length) out.push(...getScriptCommands(toForwardedScript(command), cwd));
         else out.push({ binary, args: words.map(word => word.value) });
       }
     }
@@ -73,24 +135,11 @@ export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()
   return out;
 };
 
-// A forwarded child keeps its `--` after its operands, where the rest belongs to the script. Before them it only ends
-// the child's options, so it's dropped there as forwarding did before, and the operands still reach `parsed._`
-const dropLeadingSeparators = (pluginArgs: Args, words: Word[]) => {
-  let separator = words.findIndex(word => word.value === '--');
-  while (separator !== -1 && parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length === 0) {
-    words = [...words.slice(0, separator), ...words.slice(separator + 1)];
-    separator = words.findIndex(word => word.value === '--');
-  }
-  return words;
-};
-
-export const resolve: BinaryResolver = (binary, commandWords, options) => {
+export const resolve: BinaryResolver = (binary, words, options) => {
   const { cwd, fromArgs, containingFilePath, manifest } = options;
   const [pluginName, pluginArgs] = pluginArgsMap.get(binary) ?? [];
 
-  if (!pluginArgs) return fallbackResolve(binary, commandWords, options);
-
-  const words = options.hasForwardedSeparator ? dropLeadingSeparators(pluginArgs, commandWords) : commandWords;
+  if (!pluginArgs) return fallbackResolve(binary, words, options);
 
   const inputOpts = {};
   if (cwd && dirname(containingFilePath) !== cwd) Object.assign(inputOpts, { dir: cwd });

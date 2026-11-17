@@ -571,6 +571,8 @@ test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t("'dotenvx' 'run' '--' 'tsx' '--' './main.ts'", [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- tsx --"" ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t(`cdk --app 'npx -c "tsx -- ./main.ts"'`, [toBinary('cdk'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts "$(node --eval=0 -- ./script.js)"', [toBinary('dotenvx'), toBinary('tsx'), ts, toBinary('node'), toBinary('node')]);
   t(`cdk --app 'tsx -- ./main.ts && echo done'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('echo')]);
   t(`cdk --app 'tsx -- ./main.ts "$(node -- ./script.js)"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('node'), js]);
   t(`cdk --app 'tsx -- ./main.ts "\`tsx -- ./script.js \\$HOME\`"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('tsx'), js]);
