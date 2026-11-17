@@ -542,7 +542,13 @@ test('getInputsFromScripts (double-dash)', () => {
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
   t('dotenvx run -- node ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
   t('dotenvx run -- node -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
-  t('dotenvx run -- node -r ./require.js -- ./script.js', [toBinary('dotenvx'), toBinary('node'), req, js]);
+  t('dotenvx run -- node -r ./require.js -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js, req]);
+  t('dotenvx run -- node -- ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node --max-old-space-size=1536 -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- ts-node --files -- ./main.ts', [toBinary('dotenvx'), toBinary('ts-node'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- glob -- "*.js"', [toBinary('dotenvx'), toBinary('glob'), toEntry('*.js')]);
+  t('cross-env A=1 tsx -- ./main.ts', [toBinary('cross-env'), toBinary('tsx'), ts]);
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 
