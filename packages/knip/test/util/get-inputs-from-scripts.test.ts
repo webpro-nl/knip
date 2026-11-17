@@ -351,8 +351,8 @@ test('getInputsFromScripts (vp)', () => {
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
   t('pnpm exec -- custom-build-cli', [toBinary('custom-build-cli')]);
-  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli')]);
-  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli', { dir: join(cwd, 'exec') })]);
+  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli', { dir: join(cwd, 'exec') })]);
   t('pnpm exec custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
   t('pnpm exec -- custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
   t('pnpm exec node --import tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
@@ -361,6 +361,18 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
+  t('pnpm tsx ./main.ts', [toBinary('tsx'), ts]);
+  t('pnpm --silent node ./script.js', [toBinary('node'), js]);
+  t('pnpm node ./script.js -- --import tsx', [toBinary('node'), js]);
+  t('pnpm vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
+  const tools = { dir: join(cwd, 'tools') };
+  t('pnpm --dir=tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm -C tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm node ./script.js --dir output', [toBinary('node'), js]);
+  t('pnpm --dir tools node ./script.js --dir output', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm -C tools exec node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm vitest --filter smoke', [toBinary('vitest')]);
+  t('pnpm list --filter app', [], { cwd, manifest: createManifest({ scripts: { list: 'node ./tools/list.js' } }) });
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
@@ -375,6 +387,9 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
   t('pnpm with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm run with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm run with-env src/main.ts --filter app', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm with-env src/main.ts --filter app', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm run --filter app with-env src/main.ts', [], withEnv);
   t('pnpm run-script with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm t src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
   t('pnpm tst -- src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
@@ -629,6 +644,8 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('webpack --config a.js --config b.js --merge', [toBinary('webpack'), toConfig('webpack', 'a.js'), toConfig('webpack', 'b.js'), toDependency('webpack-cli')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
+  t('wdio run --cpu-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
+  t('wdio run --heap-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
 });
 
 test('getInputsFromScripts (plugins → resolve)', () => {
