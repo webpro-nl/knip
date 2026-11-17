@@ -6,6 +6,7 @@ import {
   type Program,
   type Span,
   type TSInterfaceDeclaration,
+  type TSImportTypeQualifier,
   type TSPropertySignature,
   type TSTypeName,
   type TryStatement,
@@ -382,6 +383,28 @@ const _addLocalRef = (name: string, pos: number) => {
   else state.localRefs!.add(name);
 };
 
+const _splitQualifiedName = (node: TSTypeName | TSImportTypeQualifier) => {
+  const members: string[] = [];
+  let root = node;
+  while (root.type === 'TSQualifiedName') {
+    if (root.right.type === 'Identifier') members.unshift(root.right.name);
+    root = root.left;
+  }
+  return { root, members };
+};
+
+const _addQualifiedRefs = (internalImport: ImportMaps, rootName: string, members: string[]) => {
+  if (members.length === 0) {
+    internalImport.refs.add(rootName);
+    return;
+  }
+  let path = '';
+  for (const member of members) {
+    path = path ? `${path}.${member}` : member;
+    state.addNsMemberRefs(internalImport, rootName, path);
+  }
+};
+
 const _addShadowRange = (name: string, range: [number, number]) => {
   const ranges = state.shadowScopes.get(name);
   if (ranges) ranges.push(range);
@@ -675,32 +698,17 @@ const coreVisitorObject: VisitorObject = {
       markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
   },
   TSQualifiedName(node) {
-    let left: TSTypeName = node;
-    const parts: string[] = [];
-    while (left.type === 'TSQualifiedName') {
-      if (left.right.type === 'Identifier') parts.unshift(left.right.name);
-      left = left.left;
-    }
-    if (left.type === 'Identifier' && !isShadowed(left.name, left.start)) {
-      const rootName = left.name;
+    const { root, members } = _splitQualifiedName(node);
+    if (root.type === 'Identifier' && !isShadowed(root.name, root.start)) {
+      const rootName = root.name;
       const _import = state.localImportMap.get(rootName);
       if (_import) {
         const internalImport = state.internal.get(_import.filePath);
-        if (internalImport) {
-          if (parts.length > 0) {
-            let path = '';
-            for (const part of parts) {
-              path = path ? `${path}.${part}` : part;
-              state.addNsMemberRefs(internalImport, rootName, path);
-            }
-          } else {
-            internalImport.refs.add(rootName);
-          }
-        }
-      } else if (parts.length > 0) {
+        if (internalImport) _addQualifiedRefs(internalImport, rootName, members);
+      } else if (members.length > 0) {
         let path = '';
-        for (const part of parts) {
-          path = path ? `${path}.${part}` : part;
+        for (const member of members) {
+          path = path ? `${path}.${member}` : member;
           state.memberRefsInFile.push(rootName, path);
         }
       }
@@ -734,7 +742,14 @@ const coreVisitorObject: VisitorObject = {
     const src = node.source;
     if (isStringLiteral(src)) {
       const specifier = getStringValue(src)!;
-      state.addImport(specifier, undefined, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      const qualifier = node.qualifier ? _splitQualifiedName(node.qualifier) : undefined;
+      const rootName = qualifier?.root.type === 'Identifier' ? qualifier.root.name : undefined;
+      state.addImport(specifier, rootName, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      if (qualifier && rootName) {
+        const module = state.resolveModule(specifier, state.filePath);
+        const internalImport = module && state.internal.get(module.resolvedFileName);
+        if (internalImport) _addQualifiedRefs(internalImport, rootName, qualifier.members);
+      }
     }
   },
 
