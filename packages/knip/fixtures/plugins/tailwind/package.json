@@ -1,11 +1,13 @@
 {
   "name": "@plugins/tailwind",
   "scripts": {
-    "css": "tailwindcss"
+    "css": "tailwindcss",
+    "css:email": "tailwindcss -c config/tailwind.email.js"
   },
   "devDependencies": {
     "tailwindcss": "*",
     "@tailwindcss/typography": "*",
+    "@tailwindcss/container-queries": "*",
     "@tailwindcss/forms": "*",
     "@acmecorp/tailwind-base": "*"
   }

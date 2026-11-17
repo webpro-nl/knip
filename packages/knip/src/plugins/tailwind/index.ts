@@ -32,6 +32,7 @@ const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency 
 // https://tailwindcss.com/docs/installation/tailwind-cli
 const args: Args = {
   binaries: ['tailwindcss'],
+  config: true,
   string: ['input'],
   alias: { input: ['i'] },
   resolveInputs: (parsed, { cwd }) => (parsed.input ? [toEntryPath(parsed.input, { production: true, dir: cwd })] : []),
