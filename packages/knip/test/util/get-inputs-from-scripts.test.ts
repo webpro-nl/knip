@@ -552,6 +552,8 @@ test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
   t(`cdk --app 'tsx --tsconfig "./config files/tsconfig.json" -- ./main.ts'`, [toBinary('cdk'), toBinary('tsx'), ts]);
   t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t(`cdk --app 'tsx -- ./main.ts && echo done'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('echo')]);
+  t(`cdk --app 'tsx -- ./main.ts "$(node -- ./script.js)"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('node'), js]);
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 

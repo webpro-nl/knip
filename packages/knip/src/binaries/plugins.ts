@@ -1,4 +1,4 @@
-import { parse as parseScript, type Word } from 'unbash';
+import { type Command, forEachChild, parse as parseScript, type SyntaxNode, type Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
@@ -7,7 +7,7 @@ import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { collectCommands, getCommandWords } from '../util/scripts.ts';
+import { collectCommands, getCommandWords, isScriptExpansion } from '../util/scripts.ts';
 import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
 import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 
@@ -47,23 +47,33 @@ const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
 
 // A forwarded child keeps its `--` after its operands, where the rest belongs to the script. Before them it only ends
 // the child's options, so it's dropped as before and the child's plugin still finds its operands in `parsed._`
-const dropLeadingSeparator = (script: string): string | undefined => {
-  const { commands } = parseScript(script);
-  const command = commands.length === 1 ? commands[0].command : undefined;
-  if (command?.type !== 'Command' || !command.name) return;
-  const pluginArgs = pluginArgsMap.get(extractBinary(command.name.value))?.[1];
-  if (!pluginArgs) return;
-  const words = getCommandWords(command);
-  const separator = words.findIndex(word => word.value === '--');
-  if (separator === -1 || parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length > 0) return;
-  return script.slice(0, words[separator].pos) + script.slice(words[separator].end).trimStart();
+const dropLeadingSeparators = (script: string): string | undefined => {
+  const separators: Word[] = [];
+  const visit = (node: SyntaxNode) => {
+    const pluginArgs = node.type === 'Command' && node.name && pluginArgsMap.get(extractBinary(node.name.value))?.[1];
+    if (pluginArgs) {
+      const words = getCommandWords(node as Command);
+      const separator = words.findIndex(word => word.value === '--');
+      if (separator !== -1 && parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length === 0)
+        separators.push(words[separator]);
+    }
+    if (isScriptExpansion(node)) {
+      if (node.script) visit(node.script);
+    } else forEachChild(node, visit);
+  };
+  visit(parseScript(script));
+  if (separators.length === 0) return;
+  let out = script;
+  for (const { pos, end } of separators.sort((a, b) => b.pos - a.pos))
+    out = out.slice(0, pos) + out.slice(end).replace(/^ +/, '');
+  return out;
 };
 
 export const toForwardedScript = (args: ScriptArg[]): string => {
   let script = toScript(args);
   if (!args.some((arg, index) => index > 0 && valueOf(arg) === '--')) return script;
   try {
-    for (let next = dropLeadingSeparator(script); next !== undefined; next = dropLeadingSeparator(script))
+    for (let next = dropLeadingSeparators(script); next !== undefined; next = dropLeadingSeparators(script))
       script = next;
   } catch {}
   return script;
