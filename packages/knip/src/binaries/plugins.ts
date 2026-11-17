@@ -55,15 +55,20 @@ const toRawIndex = (raw: string, decoded: string, index: number) => {
   return r;
 };
 
+const isSeparatorText = (text: string) => {
+  const command = parseScript(text).commands[0]?.command;
+  return command?.type === 'Command' && command.name?.value === '--' && command.args.length === 0;
+};
+
 const dropLeadingSeparators = (script: string): string | undefined => {
-  const separators: number[] = [];
+  const separators: [number, number][] = [];
   const visit = (node: SyntaxNode, source: string, toText: (pos: number) => number) => {
     const pluginArgs = node.type === 'Command' && node.name && pluginArgsMap.get(extractBinary(node.name.value))?.[1];
     if (pluginArgs) {
       const words = getCommandWords(node as Command);
       const separator = words.findIndex(word => word.value === '--');
       if (separator !== -1 && parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length === 0)
-        separators.push(toText(words[separator].pos));
+        separators.push([toText(words[separator].pos), toText(words[separator].end - 1) + 1]);
     }
     if (!isScriptExpansion(node)) forEachChild(node, child => visit(child, source, toText));
     else if (node.script?.source === undefined) {
@@ -75,10 +80,11 @@ const dropLeadingSeparators = (script: string): string | undefined => {
     }
   };
   visit(parseScript(script), script, pos => pos);
-  const valid = separators.filter(pos => script.slice(pos, pos + 2) === '--');
+  const valid = separators.filter(([pos, end]) => isSeparatorText(script.slice(pos, end)));
   if (valid.length === 0) return;
   let out = script;
-  for (const pos of valid.sort((a, b) => b - a)) out = out.slice(0, pos) + out.slice(pos + 2).replace(/^ +/, '');
+  for (const [pos, end] of valid.sort((a, b) => b[0] - a[0]))
+    out = out.slice(0, pos) + out.slice(end).replace(/^ +/, '');
   return out;
 };
 
