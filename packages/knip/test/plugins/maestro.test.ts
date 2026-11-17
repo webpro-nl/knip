@@ -21,3 +21,14 @@ test('Find scripts run by flows with the Maestro plugin', async () => {
     total: 11,
   });
 });
+
+test('Enable the Maestro plugin with flows only in subdirectories', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/maestro-nested') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});

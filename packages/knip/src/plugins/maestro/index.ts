@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { hasFileWithExtension } from '../../util/fs.ts';
+import { isDirectory } from '../../util/fs.ts';
 import { type Input, toConfig, toEntryPath } from '../../util/input.ts';
 import type { Command, File, MaestroConfig } from './types.ts';
 
@@ -9,9 +9,9 @@ import type { Command, File, MaestroConfig } from './types.ts';
 
 const title = 'Maestro';
 
-const enablers = 'This plugin is enabled when a `.yaml` or `.yml` file is found in the `.maestro` folder.';
+const enablers = 'This plugin is enabled when a `.maestro` folder is found.';
 
-const isEnabled: IsPluginEnabled = ({ cwd }) => hasFileWithExtension(cwd, '.maestro', ['.yaml', '.yml']);
+const isEnabled: IsPluginEnabled = ({ cwd }) => isDirectory(cwd, '.maestro');
 
 const config = ['.maestro/**/*.{yaml,yml}'];
 
