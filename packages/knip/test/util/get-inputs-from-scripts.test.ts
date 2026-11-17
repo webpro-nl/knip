@@ -534,6 +534,7 @@ test('getInputsFromScripts (c8)', () => {
   t('c8 node -- ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 node -r ./require.js -- ./script.js', [toBinary('c8'), toBinary('node'), js, req]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node ./script.js -- --import unused-dep', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t('c8 report', [toBinary('c8')]);
@@ -541,6 +542,22 @@ test('getInputsFromScripts (c8)', () => {
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toModule('@org/rep')]);
   t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
+});
+
+test('getInputsFromScripts (nyc)', () => {
+  t('nyc program', [toBinary('nyc'), toBinary('program')], forwardedArgs);
+  t('nyc node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node -- ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -- node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node --import tsx ./script.js', [toBinary('nyc'), toBinary('node'), js, toModule('tsx')]);
+  t('nyc npm test', [toBinary('nyc')]);
+  t('nyc report --reporter=text-lcov', [toBinary('nyc')]);
+  t('nyc check-coverage --lines 95 --per-file', [toBinary('nyc')]);
+  t("nyc --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('nyc'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
+  t('nyc --all -s node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc --require ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -i ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (nodemon)', () => {
