@@ -47,25 +47,38 @@ const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
 
 // A forwarded child keeps its `--` after its operands, where the rest belongs to the script. Before them it only ends
 // the child's options, so it's dropped as before and the child's plugin still finds its operands in `parsed._`
+// Escaped backticks give a script its own decoded source, which is the raw text without some backslashes
+const toRawIndex = (raw: string, decoded: string, index: number) => {
+  let r = 0;
+  for (let d = 0; d < index; r++) if (raw[r] === decoded[d]) d++;
+  while (r < raw.length && raw[r] !== decoded[index]) r++;
+  return r;
+};
+
 const dropLeadingSeparators = (script: string): string | undefined => {
-  const separators: Word[] = [];
-  const visit = (node: SyntaxNode) => {
+  const separators: number[] = [];
+  const visit = (node: SyntaxNode, source: string, toText: (pos: number) => number) => {
     const pluginArgs = node.type === 'Command' && node.name && pluginArgsMap.get(extractBinary(node.name.value))?.[1];
     if (pluginArgs) {
       const words = getCommandWords(node as Command);
       const separator = words.findIndex(word => word.value === '--');
       if (separator !== -1 && parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length === 0)
-        separators.push(words[separator]);
+        separators.push(toText(words[separator].pos));
     }
-    if (isScriptExpansion(node)) {
-      if (node.script) visit(node.script);
-    } else forEachChild(node, visit);
+    if (!isScriptExpansion(node)) forEachChild(node, child => visit(child, source, toText));
+    else if (node.script?.source === undefined) {
+      if (node.script) visit(node.script, source, toText);
+    } else {
+      const decoded = node.script.source;
+      const raw = source.slice(node.pos + 1, node.end - 1);
+      visit(node.script, decoded, pos => toText(node.pos + 1 + toRawIndex(raw, decoded, pos)));
+    }
   };
-  visit(parseScript(script));
-  if (separators.length === 0) return;
+  visit(parseScript(script), script, pos => pos);
+  const valid = separators.filter(pos => script.slice(pos, pos + 2) === '--');
+  if (valid.length === 0) return;
   let out = script;
-  for (const { pos, end } of separators.sort((a, b) => b.pos - a.pos))
-    out = out.slice(0, pos) + out.slice(end).replace(/^ +/, '');
+  for (const pos of valid.sort((a, b) => b - a)) out = out.slice(0, pos) + out.slice(pos + 2).replace(/^ +/, '');
   return out;
 };
 
