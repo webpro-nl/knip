@@ -13,11 +13,13 @@ test('Treat namespace in default-exported object or return statement as used', a
 
   assert(issues.exports['nuts.ts']['nuts.almond']);
   assert(issues.exports['nuts.ts']['nuts.walnut']);
+  assert(issues.exports['seeds.ts']['seeds.pumpkin']);
+  assert(issues.exports['seeds.ts']['seeds.sesame']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
-    processed: 7,
-    total: 7,
+    exports: 4,
+    processed: 8,
+    total: 8,
   });
 });

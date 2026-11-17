@@ -41,7 +41,7 @@ import {
   handleImportExpression,
   handleImportThen,
   handleVariableDeclarator,
-  markDynamicNamespaceOpaque,
+  markNamespaceRef,
 } from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
 import { isShadowedIn } from './shadow.ts';
@@ -382,15 +382,6 @@ const _addLocalRef = (name: string, pos: number) => {
   else state.localRefs!.add(name);
 };
 
-const _markNamespaceRef = (name: string, pos: number) => {
-  const _import = state.localImportMap.get(name);
-  if (!_import?.isNamespace || isShadowed(name, pos)) return;
-  const internalImport = state.internal.get(_import.filePath);
-  if (!internalImport) return;
-  if (_import.isDynamicImport) addValue(internalImport.import, OPAQUE, state.filePath);
-  else internalImport.refs.add(name);
-};
-
 const _addShadowRange = (name: string, range: [number, number]) => {
   const ranges = state.shadowScopes.get(name);
   if (ranges) ranges.push(range);
@@ -596,7 +587,7 @@ const coreVisitorObject: VisitorObject = {
     if (node.declaration.type === 'ObjectExpression') {
       for (const prop of node.declaration.properties) {
         const value = prop.type === 'Property' ? prop.value : prop.argument;
-        if (value.type === 'Identifier') _markNamespaceRef(value.name, value.start);
+        if (value.type === 'Identifier') markNamespaceRef(value.name, value.start, state, true);
       }
     }
   },
@@ -679,14 +670,13 @@ const coreVisitorObject: VisitorObject = {
     }
   },
   ReturnStatement(node) {
-    if (node.argument?.type === 'Identifier') _markNamespaceRef(node.argument.name, node.argument.start);
+    if (node.argument?.type === 'Identifier') markNamespaceRef(node.argument.name, node.argument.start, state, true);
   },
   AssignmentExpression(node) {
-    if (node.right?.type === 'Identifier') markDynamicNamespaceOpaque(node.right.name, node.right.start, state);
+    if (node.right?.type === 'Identifier') markNamespaceRef(node.right.name, node.right.start, state);
   },
   SpreadElement(node) {
-    if (node.argument?.type === 'Identifier')
-      markDynamicNamespaceOpaque(node.argument.name, node.argument.start, state);
+    if (node.argument?.type === 'Identifier') markNamespaceRef(node.argument.name, node.argument.start, state);
   },
   TSQualifiedName(node) {
     let left: TSTypeName = node;
