@@ -11,12 +11,18 @@ test('Resolve import.meta.glob patterns with subpath imports as entry files', as
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files).sort(), ['widgets/secret.ts', 'workers/video.worklet.ts']);
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'icons/legacy.ts',
+    'widgets/secret.ts',
+    'workers/video.worklet.ts',
+  ]);
+  assert(issues.exports['raw/template.ts'].template);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    processed: 6,
-    total: 6,
+    files: 3,
+    exports: 1,
+    processed: 9,
+    total: 9,
   });
 });

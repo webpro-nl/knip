@@ -240,3 +240,29 @@ test('subpath references from import globs survive edits to other files', async 
   await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
   assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']), ['#widgets/*']);
 });
+
+test('subpath references from import globs follow the file that holds them', async t => {
+  const cwd = await setup(t);
+  await writeFile(
+    join(cwd, 'package.json'),
+    '{"name":"incremental","devDependencies":{"vite":"*"},"imports":{"#widgets/*":"./widgets/*.ts"},"knip":{"entry":["index.ts"],"project":["**/*.ts"]}}'
+  );
+  await mkdir(join(cwd, 'widgets'));
+  await writeFile(join(cwd, 'index.ts'), "import 'vite';\nimport './loader.ts';\n");
+  await writeFile(join(cwd, 'loader.ts'), "import.meta.glob('#widgets/button');\n");
+  await writeFile(join(cwd, 'widgets/button.ts'), 'export {};\n');
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(session.getIssues().issues.subpaths, {});
+  assert.deepEqual(session.getIssues().issues.files, {});
+
+  await writeFile(join(cwd, 'index.ts'), "import 'vite';\n");
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert('loader.ts' in session.getIssues().issues.files);
+  assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']), ['#widgets/*']);
+
+  await writeFile(join(cwd, 'index.ts'), "import 'vite';\nimport './loader.ts';\n");
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert.deepEqual(session.getIssues().issues.subpaths, {});
+  assert.deepEqual(session.getIssues().issues.files, {});
+  await assertFresh(session, cwd);
+});

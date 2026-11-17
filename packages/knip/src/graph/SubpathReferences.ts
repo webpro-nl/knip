@@ -11,6 +11,7 @@ import { extname, join } from '../util/path.ts';
 import type { WorkspacePackageTargetHandler } from '../util/to-source-path.ts';
 
 type InputReference = [specifier: string, containingFilePath: string];
+type PatternReference = [name: string, subpath: string];
 
 interface SubpathReferencesOptions {
   chief: ConfigurationChief;
@@ -29,6 +30,7 @@ export class SubpathReferences {
   private extensions: string[] = [];
   private isActive = false;
   private inputs = new Map<string, InputReference[]>();
+  private patterns = new Map<string, PatternReference[]>();
   private seen = new Set<string>();
   private referenced = new Map<string, Set<string>>();
 
@@ -56,6 +58,16 @@ export class SubpathReferences {
     if (this.isActive) this.add(specifier, filePath);
   }
 
+  addPattern(pattern: string, containingFilePath: string) {
+    const specifier = pattern[0] === '!' ? pattern.slice(1) : pattern;
+    if (specifier[0] !== '#') return;
+    const target = this.findWorkspacePackageTarget(specifier, containingFilePath);
+    if (!target) return;
+    const references = this.patterns.get(containingFilePath);
+    if (references) references.push([target.name, target.subpath]);
+    else this.patterns.set(containingFilePath, [[target.name, target.subpath]]);
+  }
+
   add(specifier: string, containingFilePath: string) {
     const workspace = this.chief.findWorkspaceByFilePath(containingFilePath);
     const id = `${workspace?.name ?? ''}\0${specifier}`;
@@ -63,9 +75,7 @@ export class SubpathReferences {
     this.seen.add(id);
     const target = this.findWorkspacePackageTarget(sanitizeSpecifier(specifier), containingFilePath);
     if (!target) return;
-    const subpaths = this.referenced.get(target.name);
-    if (subpaths) subpaths.add(target.subpath);
-    else this.referenced.set(target.name, new Set([target.subpath]));
+    this.addReference(target.name, target.subpath);
     for (const targetPath of getPackageTargetPaths(target.target, target.dir, target.patternMatch, true)) {
       const filePath =
         this.principal.toSourceFilePath(targetPath, this.extensions) ?? (isFile(targetPath) ? targetPath : undefined);
@@ -73,8 +83,15 @@ export class SubpathReferences {
     }
   }
 
+  private addReference(name: string, subpath: string) {
+    const subpaths = this.referenced.get(name);
+    if (subpaths) subpaths.add(subpath);
+    else this.referenced.set(name, new Set([subpath]));
+  }
+
   release(owner: string) {
     this.inputs.delete(owner);
+    this.patterns.delete(owner);
   }
 
   reset() {
@@ -89,6 +106,10 @@ export class SubpathReferences {
   }
 
   getIssues() {
+    for (const [filePath, references] of this.patterns) {
+      if (!this.principal.resolvedFiles.has(filePath)) continue;
+      for (const [name, subpath] of references) this.addReference(name, subpath);
+    }
     const issues: Issue[] = [];
     for (const { name, manifestPath, manifestStr, config } of this.workspaces) {
       const manifest = this.chief.getManifestForWorkspace(name);

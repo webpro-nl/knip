@@ -2,7 +2,9 @@
   "name": "@fixtures/import-meta-glob-subpath-imports",
   "imports": {
     "#workers/*": "./workers/*.ts",
-    "#widgets/*": "./widgets/*"
+    "#widgets/*": "./widgets/*",
+    "#raw/*": "./raw/*",
+    "#icons/*": "./icons/*"
   },
   "devDependencies": {
     "vite": "*"

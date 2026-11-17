@@ -102,7 +102,7 @@ export const build = timerify(async function build({
     return resolveInput(input, workspace);
   };
   const resolveGlobPattern = (pattern: string, containingFilePath: string) => {
-    if (pattern[0] === '#') subpathReferences.addInput(toEntry(pattern, { containingFilePath }), containingFilePath);
+    subpathReferences.addPattern(pattern, containingFilePath);
     return principal.resolveGlobPattern(pattern, containingFilePath);
   };
   const getPublishedTypeDependencies = options.isReportDependencies
