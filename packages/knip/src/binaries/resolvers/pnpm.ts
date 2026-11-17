@@ -109,8 +109,8 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const [commandIndex, scriptIndex] = parsed.positionalIndices!;
 
   if (command === 'dlx') {
-    const wordsForDlx = words.filter(word => word.value !== 'dlx');
-    return resolveDlx(wordsForDlx, options);
+    const index = parsed.positionalIndices![0];
+    return resolveDlx([...words.slice(0, index), ...words.slice(index + 1)], options);
   }
 
   if (recursiveCommands.includes(command)) {
