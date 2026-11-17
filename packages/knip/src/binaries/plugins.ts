@@ -93,7 +93,8 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  const isEval = evalFlags.some(flag => parsed[flag] !== undefined && parsed[flag] !== false);
+  const isEval =
+    pluginArgs.nodeImportArgs && evalFlags.some(flag => parsed[flag] !== undefined && parsed[flag] !== false);
   const script = isEval ? undefined : parsed['--']?.[0];
   const id = parsed._[0] ?? (script?.startsWith('-') && !isGlobLike(script) ? undefined : script); // let's start out safe, but sometimes we'll want more
   if (pluginArgs.positional && id) {
