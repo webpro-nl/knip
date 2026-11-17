@@ -513,10 +513,11 @@ test('getInputsFromScripts (double-dash)', () => {
   t('env-cmd -e production --silent node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -x --no-override --fallback node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -e test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
-  t('env-cmd -e test node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test,production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -e test production --silent node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
-  t('env-cmd -e test node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
-  t('env-cmd -e test node ./script.js --port 3000', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --environments test,production --silent node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -- node ./script.js --port 3000', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env -- node ./script.js -- --import unused-dep', [toBinary('env-cmd'), toBinary('node'), js]);
   t('env-cmd -f .env --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
@@ -526,6 +527,23 @@ test('getInputsFromScripts (double-dash)', () => {
   t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('doppler run -c prod --project app -- tsx watch src/index.ts', [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
+});
+
+test('getInputsFromScripts (env-cmd environment operands)', () => {
+  t('env-cmd -e test node ./script.js', [toBinary('env-cmd')]);
+  t('env-cmd --silent -e test node ./script.js -- node ./main.ts', [toBinary('env-cmd'), toBinary('node'), ts]);
+});
+
+test('getInputsFromScripts (env-cmd variadic environments)', () => {
+  t('env-cmd -e -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e "" production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --environments test production -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test -e production staging -- node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd --silent -e test node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('echo')]);
+  t('env-cmd --environments=test node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -etest node ./script.js -- echo other', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --verbose node ./script.js', [toBinary('env-cmd'), toBinary('node'), js]);
+  t('env-cmd -e test production --use-shell "node ./script.js && tsx ./main.ts"', [toBinary('env-cmd'), toBinary('node'), js, toBinary('tsx'), ts]);
 });
 
 test('getInputsFromScripts (command flags)', () => {
