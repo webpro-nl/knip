@@ -27,7 +27,7 @@ const args: Args = {
   },
   fromArgs: (parsed, argv) => {
     const command = spawningArgs(parsed, argv);
-    return parsed['use-shell'] ? command.flatMap(arg => arg.split(' ')) : command;
+    return parsed['use-shell'] ? command.join(' ') : command;
   },
 };
 
