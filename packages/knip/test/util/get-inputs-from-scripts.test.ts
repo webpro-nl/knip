@@ -180,6 +180,17 @@ test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r esm ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('esm')]);
 });
 
+test('getInputsFromScripts (cross-env-shell)', () => {
+  t('cross-env-shell NODE_ENV=test node ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell NODE_ENV=test node -- ./script.js', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t('cross-env-shell MESSAGE="two words" "node ./script.js && tsx ./main.ts"', [toBinary('cross-env-shell'), toBinary('node'), js, toBinary('tsx'), ts]);
+  t('cross-env-shell NODE_OPTIONS="--require pkg" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+  t('cross-env-shell "NODE_ENV=production" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
+  t("cross-env-shell 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+});
+
 test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);
@@ -442,6 +453,15 @@ test('getInputsFromScripts (pnpm exec child options)', () => {
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
+  t('pnpx tsx ./main.ts', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts --dir output', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts -C output', [toDependency('tsx', opt), ts]);
+  t('pnpx node ./script.js -- --import unused-dep', [toDependency('node', opt), js]);
+  t('pnpx --package=pnpm pnpm exec tsx ./main.ts', [toDependency('pnpm', opt), toDependency('pnpm', opt), toBinary('tsx'), ts]);
+  t('pnpx prisma generate --schema=./prisma/schema.prisma', [toDependency('prisma', opt), toEntryPath('./prisma/schema.prisma', { dir: cwd })]);
+  t('pnpm dlx --package tsx tsx ./main.ts', [toDependency('tsx', opt), toDependency('tsx', opt), ts]);
+  t('pnpm -C sub dlx tsx ./main.ts', [toDependency('tsx', opt)]);
+  t('pnpm dlx dotenv-cli -e .env -- pnpm dlx prisma migrate deploy', [toDependency('dotenv-cli', opt), toDependency('prisma', opt)]);
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
@@ -522,7 +542,10 @@ test('getInputsFromScripts ("positionals")', () => {
 test('getInputsFromScripts (c8)', () => {
   t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -- ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -r ./require.js -- ./script.js', [toBinary('c8'), toBinary('node'), js, req]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node ./script.js -- --import unused-dep', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t('c8 report', [toBinary('c8')]);
@@ -530,6 +553,22 @@ test('getInputsFromScripts (c8)', () => {
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toModule('@org/rep')]);
   t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
+});
+
+test('getInputsFromScripts (nyc)', () => {
+  t('nyc program', [toBinary('nyc'), toBinary('program')], forwardedArgs);
+  t('nyc node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node -- ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -- node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node --import tsx ./script.js', [toBinary('nyc'), toBinary('node'), js, toModule('tsx')]);
+  t('nyc npm test', [toBinary('nyc')]);
+  t('nyc report --reporter=text-lcov', [toBinary('nyc')]);
+  t('nyc check-coverage --lines 95 --per-file', [toBinary('nyc')]);
+  t("nyc --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('nyc'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
+  t('nyc --all -s node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc --require ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -i ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (nodemon)', () => {
@@ -653,6 +692,7 @@ test('getInputsFromScripts (redirects and shell command wrappers)', () => {
   t('node >output.log ./script.js', [toBinary('node'), js]);
   t('>output.log NODE_OPTIONS="--require pkg-a" node ./script.js', [toBinary('node'), js, toModule('pkg-a')]);
   t('cross-env >output.log NODE_ENV=test node ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
+  t('cross-env MODE=test node -- ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
   t('time -p ! { node ./script.js; } >output.log', [toBinary('node'), js]);
   t('time', []);
   t('!', []);
