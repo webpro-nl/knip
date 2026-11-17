@@ -153,6 +153,8 @@ type PluginSetup = () => Promise<void> | void;
 
 export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
 
+export type ParseConfig = (source: string) => unknown | Promise<unknown>;
+
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
 export type Resolve = (options: PluginOptions) => Promise<Input[]> | Input[];
@@ -238,7 +240,7 @@ export interface Plugin {
   isLoadConfig?: IsLoadConfig;
   /** Fall back to `resolveFromAST` when the config file fails to load, instead of reporting an error */
   isLoadConfigOptional?: boolean;
-  isLoadYAMLDocuments?: boolean;
+  parseConfig?: ParseConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   /**

@@ -1,4 +1,4 @@
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, ParseConfig, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { type Input, toConfig, toEntryPath } from '../../util/input.ts';
 import type { Command, File, MaestroConfig } from './types.ts';
@@ -14,6 +14,14 @@ const enablers = 'This plugin is enabled when a `.maestro` folder is found.';
 const isEnabled: IsPluginEnabled = ({ cwd }) => isDirectory(cwd, '.maestro');
 
 const config = ['.maestro/**/*.{yaml,yml}'];
+
+const parseConfig: ParseConfig = async source => {
+  const { parseAllDocuments } = await import('yaml');
+  return parseAllDocuments(source, { logLevel: 'error' }).map(document => {
+    if (document.errors.length > 0) throw document.errors[0];
+    return document.toJS();
+  });
+};
 
 const getFile = (value: File | undefined) => (typeof value === 'string' ? value : value?.file);
 
@@ -49,7 +57,7 @@ const plugin: Plugin = {
   enablers,
   isEnabled,
   config,
-  isLoadYAMLDocuments: true,
+  parseConfig,
   resolveConfig,
 };
 

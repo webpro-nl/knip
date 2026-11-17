@@ -94,16 +94,6 @@ export const parseYAML = (contents: string) => {
   return parseYAMLContents(contents, { logLevel: 'error' });
 };
 
-export const loadYAMLDocuments = async (filePath: string) => {
-  const { parseAllDocuments }: typeof import('yaml') = require('yaml');
-  const documents: unknown[] = [];
-  for (const document of parseAllDocuments(await loadFile(filePath), { logLevel: 'error' })) {
-    if (document.errors.length > 0) throw new LoaderError(`Error loading ${filePath}`, { cause: document.errors[0] });
-    documents.push(document.toJS());
-  }
-  return documents;
-};
-
 export const tryRealpath = (filePath: string) => {
   try {
     return toPosix(realpathSync.native(filePath));

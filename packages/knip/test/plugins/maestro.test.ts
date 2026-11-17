@@ -1,11 +1,23 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
+import maestro from '../../src/plugins/maestro/index.ts';
+import { loadFile } from '../../src/util/fs.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/maestro');
+
+test('Decode Maestro YAML documents', async () => {
+  assert.deepEqual(await maestro.parseConfig!(await loadFile(resolve('fixtures/load-yaml-multi/flow.yaml'))), [
+    { appId: 'com.example' },
+    ['launchApp', { runScript: 'script.js' }],
+  ]);
+  assert.deepEqual(await maestro.parseConfig!(await loadFile(resolve('fixtures/load-yaml-multi/config.yaml'))), [
+    { flows: ['*'] },
+  ]);
+});
 
 test('Find scripts run by flows with the Maestro plugin', async () => {
   const options = await createOptions({ cwd });

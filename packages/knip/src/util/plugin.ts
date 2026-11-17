@@ -2,7 +2,7 @@ export { _load as load } from './loader.ts';
 
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.ts';
 import { arrayify } from './array.ts';
-import { loadYAMLDocuments } from './fs.ts';
+import { loadFile } from './fs.ts';
 import { _load as load } from './loader.ts';
 import { get } from './object.ts';
 import { basename } from './path.ts';
@@ -54,5 +54,5 @@ export const loadConfigForPlugin = async (
       : get(manifest, packageJsonPath ?? pluginName);
   }
 
-  return plugin.isLoadYAMLDocuments ? await loadYAMLDocuments(configFilePath) : await load(configFilePath);
+  return plugin.parseConfig ? await plugin.parseConfig(await loadFile(configFilePath)) : await load(configFilePath);
 };

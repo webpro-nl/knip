@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { loadYAMLDocuments } from '../../src/util/fs.ts';
 import { _load as load } from '../../src/util/loader.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -31,13 +30,4 @@ test('Should load JSON5 files', async () => {
 test('Should not load multi-document YAML files by default', async () => {
   const cwd = resolve('fixtures/load-yaml-multi');
   await assert.rejects(load(join(cwd, 'flow.yaml')));
-});
-
-test('Should load all YAML documents', async () => {
-  const cwd = resolve('fixtures/load-yaml-multi');
-  assert.deepEqual(await loadYAMLDocuments(join(cwd, 'flow.yaml')), [
-    { appId: 'com.example' },
-    ['launchApp', { runScript: 'script.js' }],
-  ]);
-  assert.deepEqual(await loadYAMLDocuments(join(cwd, 'config.yaml')), [{ flows: ['*'] }]);
 });
