@@ -1,9 +1,11 @@
 {
   "name": "@plugins/prettier-args",
   "devDependencies": {
-    "prettier": "*"
+    "prettier": "*",
+    "prettier-plugin-astro": "*"
   },
   "scripts": {
-    "format": "prettier --write --config=my-prettier-settings.js ."
+    "format": "prettier --write --config=my-prettier-settings.js .",
+    "format:astro": "prettier --write . --plugin=prettier-plugin-astro --plugin=./plugins/prettier-plugin-custom.js"
   }
 }

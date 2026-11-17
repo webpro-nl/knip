@@ -38,6 +38,8 @@ export const createRemoveDependencyEdit = (document, uri, issue) => {
 
     const lineIndex = issue.line - 1;
     const range = { start: { line: lineIndex, character: 0 }, end: { line: lineIndex + 1, character: 0 } };
+    const line = document.getText(range).trim();
+    if (!line.startsWith(`"${issue.symbol}"`) || !/^"[^"]*"\s*:\s*"(?:[^"\\]|\\.)*"\s*,?$/.test(line)) return null;
     const edits = [TextEdit.del(range)];
 
     if (lineIndex > 0 && !document.getText(range).trimEnd().endsWith(',')) {
