@@ -21,10 +21,12 @@ const manifest = (eol = '\n') =>
     '',
   ].join(eol);
 
+const issue = { type: 'dependencies', filePath: '/project/package.json', workspace: '.', symbol: '', fixes: [] };
+
 const remove = (text, symbol) => {
   const document = TextDocument.create(uri, 'json', 1, text);
   const line = text.split(/\r?\n/).findIndex(l => l.includes(`"${symbol}"`)) + 1;
-  const edit = createRemoveDependencyEdit(document, uri, { type: 'dependencies', symbol, line });
+  const edit = createRemoveDependencyEdit(document, uri, { ...issue, symbol, line });
   return TextDocument.applyEdits(document, edit.changes[uri]);
 };
 
@@ -68,6 +70,6 @@ for (const [label, text] of [
   test(`skips dependency not on its own line (${label})`, () => {
     const document = TextDocument.create(uri, 'json', 1, text);
     const line = text.split('\n').findIndex(l => l.includes('"lodash"')) + 1;
-    assert.equal(createRemoveDependencyEdit(document, uri, { type: 'dependencies', symbol: 'lodash', line }), null);
+    assert.equal(createRemoveDependencyEdit(document, uri, { ...issue, symbol: 'lodash', line }), null);
   });
 }
