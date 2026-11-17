@@ -531,6 +531,8 @@ test('getInputsFromScripts ("positionals")', () => {
 test('getInputsFromScripts (c8)', () => {
   t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -- ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -r ./require.js -- ./script.js', [toBinary('c8'), toBinary('node'), js, req]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
@@ -631,6 +633,7 @@ test('getInputsFromScripts (redirects and shell command wrappers)', () => {
   t('node >output.log ./script.js', [toBinary('node'), js]);
   t('>output.log NODE_OPTIONS="--require pkg-a" node ./script.js', [toBinary('node'), js, toModule('pkg-a')]);
   t('cross-env >output.log NODE_ENV=test node ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
+  t('cross-env MODE=test node -- ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
   t('time -p ! { node ./script.js; } >output.log', [toBinary('node'), js]);
   t('time', []);
   t('!', []);
