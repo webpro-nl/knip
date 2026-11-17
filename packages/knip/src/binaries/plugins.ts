@@ -8,13 +8,37 @@ import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { collectCommands, getCommandWords, isScriptExpansion } from '../util/scripts.ts';
-import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
+import {
+  isWrapper as isFallbackWrapper,
+  resolve as fallbackResolve,
+  shellSpawningBinaries,
+  spawningBinaries,
+} from './fallback.ts';
 import KnownResolvers from './resolvers/index.ts';
 import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
+
+const isEnvAssignment = /^\w+=/;
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
 const spawningPluginArgs: Args = { fromArgs: spawningArgs };
+
+const toShellAssignment = (assignment: string) => {
+  const index = assignment.indexOf('=');
+  return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
+};
+
+const shellSpawningPluginArgs: Args = {
+  fromArgs: (_, args) => {
+    const command: string[] = [];
+    let isAssignment = true;
+    for (const arg of args) {
+      isAssignment &&= isEnvAssignment.test(arg);
+      command.push(isAssignment ? toShellAssignment(arg) : arg);
+    }
+    return command.join(' ');
+  },
+};
 
 const toArgValues = (pluginArgs: Args, values: string[]) =>
   typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
@@ -105,13 +129,21 @@ export const toForwardedScript = (args: ScriptArg[]): string => {
   return parts.filter((_, index) => !dropped.has(index)).join(' ');
 };
 
+const toCommandArgs = (command: string[] | string, words: Word[]): ScriptArg[] =>
+  typeof command === 'string' ? (command ? [command] : []) : toWordArgs(command, words);
+
 export const getWrappedCommand = (binary: string, words: Word[], cwd = process.cwd()): ScriptArg[] | undefined => {
   const pluginArgs =
-    pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningPluginArgs : undefined);
+    pluginArgsMap.get(binary)?.[1] ??
+    (shellSpawningBinaries.includes(binary)
+      ? shellSpawningPluginArgs
+      : spawningBinaries.includes(binary)
+        ? spawningPluginArgs
+        : undefined);
   const fromArgs = pluginArgs?.fromArgs;
   if (!pluginArgs || typeof fromArgs !== 'function') return;
   const args = toArgs(pluginArgs, words);
-  return toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
+  return toCommandArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
 };
 
 export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()) => {
@@ -164,7 +196,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
 
   const resolvedFromArgs =
     typeof pluginArgs.fromArgs === 'function'
-      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args, { cwd }), words))
+      ? fromArgs(toCommandArgs(pluginArgs.fromArgs(parsed, args, { cwd }), words))
       : Array.isArray(pluginArgs.fromArgs)
         ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
         : [];

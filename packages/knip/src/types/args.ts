@@ -79,7 +79,7 @@ export type Args = {
 
   /**
    * Parse return value as script.
-   * Can be a function that returns an array of string,
+   * Can be a function that returns an array of string (or a string to parse as shell script text),
    * or an array of strings and those values will be parsed as scripts (recursion)
    *
    * @example fromArgs: ["exec"] and `nodemon --exec "node index.js"` to also parse `node index.js`
@@ -87,9 +87,12 @@ export type Args = {
    * @example fromArgs: (parsed: ParsedArgs, args: string[]) => argsFrom(args, parsed._[0]);
    *           and `dotenv KEY=value -- program index.js` to also parse script starting from first positional: `program index.js`
    *
+   * @example fromArgs: (parsed: ParsedArgs, args: string[]) => args.join(' ');
+   *           and `cross-env-shell "node a.js && node b.js"` to parse both commands
+   *
    * @default undefined
    */
-  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[], options: { cwd: string }) => string[]);
+  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[], options: { cwd: string }) => string[] | string);
 
   /**
    * Return inputs from parsed arguments
