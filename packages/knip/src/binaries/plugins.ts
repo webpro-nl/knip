@@ -15,13 +15,10 @@ export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fr
 
 const spawningPluginArgs: Args = { fromArgs: spawningArgs };
 
-const toArgValues = (pluginArgs: Args, values: string[]) =>
-  typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
-
 const toArgs = (pluginArgs: Args, words: Word[]) => {
   const values: string[] = [];
   for (const word of words) values.push(word.value);
-  return toArgValues(pluginArgs, values);
+  return typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
 };
 
 const parse = (pluginArgs: Args, args: string[]) => {
@@ -49,23 +46,28 @@ const parse = (pluginArgs: Args, args: string[]) => {
 const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
 
 // A forwarded child keeps its `--` after its operands, where the rest belongs to the script. Before them it only ends
-// the child's options, so it's dropped as before and an entry read from the first positional still reaches `parsed._`
-const isAssignment = (value: string) => /^[A-Za-z_][A-Za-z0-9_]*=/.test(value);
-
-const toForwardedArgs = (args: ScriptArg[]): ScriptArg[] => {
-  let offset = args.length > 0 && valueOf(args[0]) === '--' ? 1 : 0;
-  while (offset < args.length && isAssignment(valueOf(args[offset]))) offset++;
-  if (args.length <= offset) return args;
-  const pluginArgs = pluginArgsMap.get(extractBinary(valueOf(args[offset])))?.[1];
-  if (!pluginArgs?.positional) return args;
-  const separator = args.findIndex((arg, index) => index > offset && valueOf(arg) === '--');
-  if (separator === -1) return args;
-  const options = toArgValues(pluginArgs, args.slice(offset + 1, separator).map(valueOf));
-  if (parse(pluginArgs, options)._.length > 0) return args;
-  return [...args.slice(0, separator), ...args.slice(separator + 1)];
+// the child's options, so it's dropped as before and the child's plugin still finds its operands in `parsed._`
+const dropLeadingSeparator = (script: string): string | undefined => {
+  const { commands } = parseScript(script);
+  const command = commands.length === 1 ? commands[0].command : undefined;
+  if (command?.type !== 'Command' || !command.name) return;
+  const pluginArgs = pluginArgsMap.get(extractBinary(command.name.value))?.[1];
+  if (!pluginArgs) return;
+  const words = getCommandWords(command);
+  const separator = words.findIndex(word => word.value === '--');
+  if (separator === -1 || parse(pluginArgs, toArgs(pluginArgs, words.slice(0, separator)))._.length > 0) return;
+  return script.slice(0, words[separator].pos) + script.slice(words[separator].end).trimStart();
 };
 
-export const toForwardedScript = (args: ScriptArg[]) => toScript(toForwardedArgs(args));
+export const toForwardedScript = (args: ScriptArg[]): string => {
+  let script = toScript(args);
+  if (!args.some((arg, index) => index > 0 && valueOf(arg) === '--')) return script;
+  try {
+    for (let next = dropLeadingSeparator(script); next !== undefined; next = dropLeadingSeparator(script))
+      script = next;
+  } catch {}
+  return script;
+};
 
 export const getWrappedCommand = (binary: string, words: Word[], cwd = process.cwd()): ScriptArg[] | undefined => {
   const pluginArgs =
