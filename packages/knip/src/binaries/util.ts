@@ -46,15 +46,10 @@ export const npmBooleanAliases = {
 
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 
-export const toScript = (args: ScriptArg[]): string => {
-  const parts: string[] = [];
-  for (const arg of args) {
-    if (typeof arg === 'string') {
-      if (arg !== '--') parts.push(arg);
-    } else if (arg.value !== '--') parts.push(arg.text);
-  }
-  return parts.join(' ');
-};
+export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+
+const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
+export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
 export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) =>
   args.slice(args.findIndex(arg => valueOf(arg) === from));

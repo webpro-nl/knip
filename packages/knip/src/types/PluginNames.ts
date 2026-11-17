@@ -31,12 +31,14 @@ export type PluginName =
   | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
+  | 'electron-builder'
   | 'electron-forge'
   | 'electron-vite'
   | 'eleventy'
   | 'ember'
   | 'ember-template-lint'
   | 'env'
+  | 'env-cmd'
   | 'esbuild'
   | 'eslint'
   | 'evalite'
@@ -244,12 +246,14 @@ export const pluginNames = [
   'docusaurus',
   'dotenv',
   'drizzle',
+  'electron-builder',
   'electron-forge',
   'electron-vite',
   'eleventy',
   'ember',
   'ember-template-lint',
   'env',
+  'env-cmd',
   'esbuild',
   'eslint',
   'evalite',

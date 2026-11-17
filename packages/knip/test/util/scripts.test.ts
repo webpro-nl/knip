@@ -42,6 +42,16 @@ test('getScriptCommands traverses elif branches', () => {
 
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('cross-env-shell MESSAGE="two words" "node --test && bun test"'), [
+    { binary: 'node', args: ['--test'] },
+    { binary: 'bun', args: ['test'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell TZ=UTC node ./script.js "title=hello world"'), [
+    { binary: 'node', args: ['./script.js', 'title=hello', 'world'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep'), [
+    { binary: 'node', args: ['./script.js', '--', '--import', 'unused-dep'] },
+  ]);
   assert.deepEqual(getScriptCommands('retry -n 3 -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);

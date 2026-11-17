@@ -4,14 +4,16 @@ import { compact } from '../util/array.ts';
 import { toModule, toEntry } from '../util/input.ts';
 import { isValidBinary } from '../util/modules.ts';
 import { isAbsolute } from '../util/path.ts';
-import { argsAfter, toCommandBinary } from './util.ts';
+import { argsFrom, toCommandBinary } from './util.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
-export const spawningBinaries = ['cross-env'];
+export const shellSpawningBinaries = ['cross-env-shell'];
+
+export const spawningBinaries = ['cross-env', ...shellSpawningBinaries];
 
 // Binaries that have a new script behind the double-dash/end-of-command
-const endOfCommandBinaries = ['doppler', 'dotenvx', 'env-cmd', 'infisical', 'op'];
+const endOfCommandBinaries = ['doppler', 'dotenvx', 'infisical', 'op'];
 
 // Binaries that have a new script in a flag value
 const commandFlagBinaries = new Map([
@@ -43,7 +45,7 @@ export const resolve: BinaryResolver = (binary, words, options) => {
         ? toCommandBinary(binary, options)
         : undefined;
   const pos = positionals.has(binary) ? [toModule(parsed._[0])] : [];
-  const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--')) : [];
+  const newCommand = parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsFrom(words, '--').slice(1)) : [];
   const commands = positionalBinaries.has(binary) ? parsed._.flatMap(cmd => fromArgs([cmd])) : [];
   const flagCommands = commandFlags.flatMap(flag => (parsed[flag] ? fromArgs([parsed[flag]]) : []));
   return compact([bin, ...pos, ...newCommand, ...commands, ...flagCommands]);

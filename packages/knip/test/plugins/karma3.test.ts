@@ -16,9 +16,8 @@ test('Find dependencies with the Karma plugin (plugin dependencies)', async () =
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    devDependencies: 1,
     unlisted: 2,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });

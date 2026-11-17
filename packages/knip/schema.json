@@ -556,6 +556,10 @@
           "title": "Drizzle plugin configuration (https://knip.dev/reference/plugins/drizzle)",
           "$ref": "#/definitions/plugin"
         },
+        "electron-builder": {
+          "title": "electron-builder plugin configuration (https://knip.dev/reference/plugins/electron-builder)",
+          "$ref": "#/definitions/plugin"
+        },
         "electron-forge": {
           "title": "Electron Forge plugin configuration (https://knip.dev/reference/plugins/electron-forge)",
           "$ref": "#/definitions/plugin"
@@ -578,6 +582,10 @@
         },
         "env": {
           "title": "env plugin configuration (https://knip.dev/reference/plugins/env)",
+          "$ref": "#/definitions/plugin"
+        },
+        "env-cmd": {
+          "title": "env-cmd plugin configuration (https://knip.dev/reference/plugins/env-cmd)",
           "$ref": "#/definitions/plugin"
         },
         "esbuild": {
