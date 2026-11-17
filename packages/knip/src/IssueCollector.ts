@@ -33,6 +33,7 @@ export class IssueCollector {
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
+  private developmentFilePaths = new Set<string>();
   private configurationHintCandidates: ConfigurationHints = new Map();
   private configurationHints: ConfigurationHint[] = [];
   private tagHints = new Set<TagHint>();
@@ -62,6 +63,10 @@ export class IssueCollector {
 
   setSelectedWorkspaces(selectedWorkspaces: Set<string> | undefined) {
     this.selectedWorkspaces = selectedWorkspaces;
+  }
+
+  addDevelopmentFilePath(filePath: string) {
+    this.developmentFilePaths.add(filePath);
   }
 
   private collectIgnorePatterns(
@@ -146,6 +151,7 @@ export class IssueCollector {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
+      if (this.developmentFilePaths.has(filePath)) continue;
       const symbol = relative(this.cwd, filePath);
       if (this.isMatch(symbol)) {
         this.markUsedPatterns(symbol, this.unusedIgnorePatterns);

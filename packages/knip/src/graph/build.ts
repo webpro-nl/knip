@@ -147,8 +147,6 @@ export const build = timerify(async function build({
     else preprocessorInputs.set(name, [input]);
   }
 
-  const developmentFilePaths = new Set<string>();
-
   for (const workspace of workspaces) {
     const { name, dir, ancestors, config: baseConfig, manifestPath: filePath } = workspace;
 
@@ -359,7 +357,7 @@ export const build = timerify(async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (options.isProduction && !input.production) {
-            if (!input.optional) developmentFilePaths.add(resolvedFilePath);
+            if (!input.optional) collector.addDevelopmentFilePath(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
@@ -675,7 +673,6 @@ export const build = timerify(async function build({
   );
 
   for (const filePath of principal.getUnreferencedFiles()) {
-    if (developmentFilePaths.has(filePath)) continue;
     if (IS_DTS.test(filePath)) {
       const loaded = principal.fileManager.loadSourceText(filePath);
       const sourceText = typeof loaded === 'string' ? loaded : await loaded;
