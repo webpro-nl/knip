@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/typedoc-args",
+  "scripts": {
+    "docs": "typedoc --options docs/typedoc-options.cjs"
+  },
+  "devDependencies": {
+    "typedoc": "*",
+    "typedoc-plugin-missing-exports": "*"
+  }
+}

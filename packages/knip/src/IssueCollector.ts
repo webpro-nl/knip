@@ -177,7 +177,7 @@ export class IssueCollector {
     if (this.rules[issue.type] === 'off') return;
     issue.severity = this.rules[issue.type];
     const issues = this.issues[issue.type];
-    issues[key] = issues[key] ?? {};
+    issues[key] = issues[key] ?? Object.create(null);
     const symbol = issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
     if (!issues[key][symbol]) {
       issues[key][symbol] = issue;
