@@ -1,10 +1,12 @@
 {
   "name": "@plugins/webdriver-io",
   "scripts": {
-    "test": "wdio"
+    "test": "wdio",
+    "test:e2e": "wdio run --headless ./config/wdio.e2e.ts"
   },
   "dependencies": {
     "@wdio/cli": "*",
+    "@wdio/jasmine-framework": "*",
     "@wdio/mocha-framework": "*",
     "@wdio/concise-reporter": "*",
     "@wdio/browser-runner": "*",

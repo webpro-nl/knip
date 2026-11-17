@@ -9,11 +9,19 @@ const cwd = resolve('fixtures/imports/typeof');
 
 test('Support typeof imports', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert(issues.exports['fruits.ts']['cherry']);
+  assert(issues.namespaceMembers['fruits.ts']['Citrus.Lime']);
+  assert(issues.namespaceMembers['vegetables.ts']['Roots.Beet']);
+  assert(issues.enumMembers['vegetables.ts']['Color.Red']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    exports: 1,
+    enumMembers: 1,
+    namespaceMembers: 2,
+    processed: 3,
+    total: 3,
   });
 });

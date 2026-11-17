@@ -12,6 +12,8 @@ test('Find referenced optional peerDependencies', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.optionalPeerDependencies['package.json']['pg']);
+  assert.equal(issues.optionalPeerDependencies['package.json']['pg'].line, 8);
+  assert.equal(issues.optionalPeerDependencies['package.json']['pg'].col, 6);
 
   assert.deepEqual(counters, {
     ...baseCounters,
