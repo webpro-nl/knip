@@ -7,7 +7,7 @@ import { relative } from '../util/path.ts';
 import { substringBefore, truncate } from '../util/string.ts';
 import { isScriptExpansion } from '../util/scripts.ts';
 import { getDependenciesFromCommand } from './command.ts';
-import { toScript } from './util.ts';
+import { toForwardedScript } from './plugins.ts';
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
@@ -17,7 +17,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
     if (args.length === 0) return [];
     const first = typeof args[0] === 'string' ? args[0] : args[0].value;
     if (!isValidBinary(substringBefore(first, ' '))) return [];
-    return getDependenciesFromScript(toScript(args), {
+    return getDependenciesFromScript(toForwardedScript(args), {
       ...options,
       isForwardedArgs: false,
       ...opts,
@@ -25,7 +25,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   };
 
   const fromWords = (args: ScriptArg[], opts: GetInputsFromScriptsOptions): Input[] =>
-    getDependenciesFromScript(toScript(args), opts);
+    getDependenciesFromScript(toForwardedScript(args), opts);
 
   const definedFunctions = new Set<string>();
   const collectFunctionNames = (statements: readonly Statement[]): void => {
