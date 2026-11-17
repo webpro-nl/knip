@@ -46,6 +46,11 @@ export const npmBooleanAliases = {
 
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 
+export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+
+const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
+export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
+
 export const toScript = (args: ScriptArg[]): string => {
   const parts: string[] = [];
   for (const arg of args) {

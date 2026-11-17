@@ -9,14 +9,7 @@ import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { collectCommands, getCommandWords } from '../util/scripts.ts';
 import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
-import { spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
-
-const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
-const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
-
-const evalFlags = ['e', 'eval', 'p', 'print'];
-
-const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toScript, toWordArgs } from './util.ts';
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
@@ -93,12 +86,8 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  const isEval =
-    pluginArgs.nodeImportArgs &&
-    evalFlags.some(flag => parsed[flag] !== undefined && typeof parsed[flag] !== 'boolean');
-  const script = isEval ? undefined : parsed['--']?.[0];
-  const id = parsed._[0] ?? (script?.startsWith('-') && !isGlobLike(script) ? undefined : script); // let's start out safe, but sometimes we'll want more
-  if (pluginArgs.positional && id) {
+  if (pluginArgs.positional && parsed._[0]) {
+    const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
     if (isGlobLike(id)) positionals.push(toEntry(id));
     else {
       if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));

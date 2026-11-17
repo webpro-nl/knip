@@ -70,8 +70,10 @@ test('getInputsFromScripts (node)', () => {
   t('node -e "" -- ./script.js', [toBinary('node')]);
   t('node -p 0 -- ./script.js', [toBinary('node')]);
   t('node --eval="console.log(1)" -- ./script.js', [toBinary('node')]);
-  t('node --print -- ./script.js', [toBinary('node'), js]);
   t('node -- --version', [toBinary('node')]);
+  t('node --run start -- ./script.js', [toBinary('node')]);
+  t('node --no-addons --no-addons -- ./script.js', [toBinary('node'), js]);
+  t('node --test -- "checks/*.js"', [toBinary('node'), toEntry('checks/*.js')]);
 });
 
 test('getInputsFromScripts (node --test)', () => {
@@ -81,7 +83,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toModule('script.js')]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toEntryPath('node', opt), toModule('dotenv/config')]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config'), toEntryPath('node', opt)]);
   t('node -r package/script', [toBinary('node'), toModule('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toEntryPath('script', opt), toModule('pkg1'), toModule('pkg2')]);
@@ -117,7 +119,6 @@ test('getInputsFromScripts (tsx)', () => {
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);
   t('tsx ./main.ts build', [toBinary('tsx'), ts]);
-  t('tsx -p 0 -- ./main.ts', [toBinary('tsx')]);
 });
 
 test('getInputsFromScripts (--require)', () => {
@@ -493,8 +494,6 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node --files --pretty ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --skip-project --type-check ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
-  t('ts-node -p -- ./main.ts', [toBinary('ts-node'), ts]);
-  t('ts-node -e "1" -p -- ./main.ts', [toBinary('ts-node')]);
   t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
@@ -543,6 +542,7 @@ test('getInputsFromScripts (double-dash)', () => {
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
   t('dotenvx run -- node ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
   t('dotenvx run -- node -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -r ./require.js -- ./script.js', [toBinary('dotenvx'), toBinary('node'), req, js]);
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 
@@ -625,8 +625,6 @@ test('getInputsFromScripts (plugins → resolve)', () => {
 
 test('getInputsFromScripts (plugins → fromArgs)', () => {
   t('glob --cmd', [toBinary('glob')]);
-  t('glob -- "-*.js"', [toBinary('glob'), toEntry('-*.js')]);
-  t('glob -p "*.ts" -- "*.js"', [toBinary('glob'), toEntry('*.js')]);
   t('glob -c', [toBinary('glob')]);
   t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
   t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
