@@ -14,7 +14,7 @@ test('Find dependencies with the Trigger.dev plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 4,
+    processed: 5,
     total: 5,
   });
 });
