@@ -262,6 +262,10 @@ function promiseTail() {
 
 (await import('./prop-access.js')).propAccess;
 
+(await import('./prop-access-members.js')).Members.used;
+
+const computedMember = async (key: 'first' | 'second') => (await import('./prop-access-members.js')).Computed[key];
+
 const {
   default: defaultName3,
   identifier13: renamedIdentifier,
