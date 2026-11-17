@@ -65,6 +65,15 @@ test('getInputsFromScripts (node)', () => {
   t('node --watch ./script.js', [toBinary('node'), js]);
   t('node script', [toBinary('node'), toEntryPath('script', opt)]);
   t('node ./script.js build', [toBinary('node'), js]);
+  t('node -- ./script.js', [toBinary('node'), js]);
+  t('node -e "console.log(1)" -- ./script.js', [toBinary('node')]);
+  t('node -e "" -- ./script.js', [toBinary('node')]);
+  t('node -p 0 -- ./script.js', [toBinary('node')]);
+  t('node --eval="console.log(1)" -- ./script.js', [toBinary('node')]);
+  t('node -- --version', [toBinary('node')]);
+  t('node --run start -- ./script.js', [toBinary('node')]);
+  t('node --no-addons --no-addons -- ./script.js', [toBinary('node'), js]);
+  t('node --test -- "checks/*.js"', [toBinary('node'), toEntry('checks/*.js')]);
 });
 
 test('getInputsFromScripts (node --test)', () => {
@@ -74,7 +83,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toModule('script.js')]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config')]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config'), toEntryPath('node', opt)]);
   t('node -r package/script', [toBinary('node'), toModule('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toEntryPath('script', opt), toModule('pkg1'), toModule('pkg2')]);
@@ -546,6 +555,28 @@ test('getInputsFromScripts (double-dash)', () => {
   t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('doppler run -c prod --project app -- tsx watch src/index.ts', [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
+  t('dotenvx run -- node ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -r ./require.js -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js, req]);
+  t('dotenvx run -- node -- ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node --max-old-space-size=1536 -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- ts-node --files -- ./main.ts', [toBinary('dotenvx'), toBinary('ts-node'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- glob -- "*.js"', [toBinary('dotenvx'), toBinary('glob'), toEntry('*.js')]);
+  t('cross-env A=1 tsx -- ./main.ts', [toBinary('cross-env'), toBinary('tsx'), ts]);
+  t('dotenvx run -- pnpm tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- yarn exec -- tsx ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
+  t(`cdk --app 'tsx --tsconfig "./config files/tsconfig.json" -- ./main.ts'`, [toBinary('cdk'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t("'dotenvx' 'run' '--' 'tsx' '--' './main.ts'", [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx --"" ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t(`cdk --app 'npx -c "tsx -- ./main.ts"'`, [toBinary('cdk'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts "$(node --eval=0 -- ./script.js)"', [toBinary('dotenvx'), toBinary('tsx'), ts, toBinary('node'), toBinary('node')]);
+  t(`cdk --app 'tsx -- ./main.ts && echo done'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('echo')]);
+  t(`cdk --app 'tsx -- ./main.ts "$(node -- ./script.js)"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t(`cdk --app 'tsx -- ./main.ts "\`tsx -- ./script.js \\$HOME\`"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('tsx'), js]);
+  t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (command flags)', () => {
