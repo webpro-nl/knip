@@ -13,12 +13,14 @@ import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
-export function markDynamicNamespaceOpaque(name: string, pos: number, s: WalkState) {
+export function markNamespaceRef(name: string, pos: number, s: WalkState, isStaticIncluded = false) {
   const _import = s.localImportMap.get(name);
-  if (!_import?.isDynamicImport || !_import.isNamespace) return;
+  if (!_import?.isNamespace || !(_import.isDynamicImport || isStaticIncluded)) return;
   if (isShadowedIn(s, name, pos)) return;
   const internalImport = s.internal.get(_import.filePath);
-  if (internalImport) addValue(internalImport.import, OPAQUE, s.filePath);
+  if (!internalImport) return;
+  if (_import.isDynamicImport) addValue(internalImport.import, OPAQUE, s.filePath);
+  else internalImport.refs.add(name);
 }
 
 const getBlockScope = (s: WalkState): [number, number] | undefined => {
