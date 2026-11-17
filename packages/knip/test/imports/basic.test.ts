@@ -13,9 +13,9 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 26,
-    processed: 65,
-    total: 65,
+    exports: 32,
+    processed: 72,
+    total: 72,
   });
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
@@ -55,4 +55,11 @@ test('Support various ways to import modules', async () => {
   assert.deepEqual(Object.keys(issues.exports['switch-shadow.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['container-shadow.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['spread-shadow.ts']), ['unused']);
+  assert.equal(issues.exports['rest-spread.ts'], undefined);
+  assert.deepEqual(Object.keys(issues.exports['rest-member.ts']), ['rest.unused']);
+  assert.deepEqual(Object.keys(issues.exports['rest-unused.ts']), ['rest.unused']);
+  assert.deepEqual(Object.keys(issues.exports['rest-param.ts']), ['paramRest.unused']);
+  assert.deepEqual(Object.keys(issues.exports['rest-var.ts']), ['varRest.unused']);
+  assert.deepEqual(Object.keys(issues.exports['rest-block.ts']), ['blockRest.unused']);
+  assert.deepEqual(Object.keys(issues.exports['rest-promise-all.ts']), ['rest.unused']);
 });

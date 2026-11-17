@@ -65,6 +65,15 @@ test('getInputsFromScripts (node)', () => {
   t('node --watch ./script.js', [toBinary('node'), js]);
   t('node script', [toBinary('node'), toEntryPath('script', opt)]);
   t('node ./script.js build', [toBinary('node'), js]);
+  t('node -- ./script.js', [toBinary('node'), js]);
+  t('node -e "console.log(1)" -- ./script.js', [toBinary('node')]);
+  t('node -e "" -- ./script.js', [toBinary('node')]);
+  t('node -p 0 -- ./script.js', [toBinary('node')]);
+  t('node --eval="console.log(1)" -- ./script.js', [toBinary('node')]);
+  t('node -- --version', [toBinary('node')]);
+  t('node --run start -- ./script.js', [toBinary('node')]);
+  t('node --no-addons --no-addons -- ./script.js', [toBinary('node'), js]);
+  t('node --test -- "checks/*.js"', [toBinary('node'), toEntry('checks/*.js')]);
 });
 
 test('getInputsFromScripts (node --test)', () => {
@@ -74,7 +83,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toModule('script.js')]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config')]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config'), toEntryPath('node', opt)]);
   t('node -r package/script', [toBinary('node'), toModule('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toEntryPath('script', opt), toModule('pkg1'), toModule('pkg2')]);
@@ -344,8 +353,8 @@ test('getInputsFromScripts (vp)', () => {
 test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec program', [toBinary('program')]);
   t('pnpm exec -- custom-build-cli', [toBinary('custom-build-cli')]);
-  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli')]);
-  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli')]);
+  t('pnpm --dir exec exec custom-build-cli', [toBinary('custom-build-cli', { dir: join(cwd, 'exec') })]);
+  t('pnpm --dir exec exec -- custom-build-cli', [toBinary('custom-build-cli', { dir: join(cwd, 'exec') })]);
   t('pnpm exec custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
   t('pnpm exec -- custom-build-cli -- node script.js', [toBinary('custom-build-cli')]);
   t('pnpm exec node --import tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
@@ -354,6 +363,18 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm exec -- vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
   t('pnpm run program', []);
   t('pnpm program', [toBinary('program')]);
+  t('pnpm tsx ./main.ts', [toBinary('tsx'), ts]);
+  t('pnpm --silent node ./script.js', [toBinary('node'), js]);
+  t('pnpm node ./script.js -- --import tsx', [toBinary('node'), js]);
+  t('pnpm vitest -c vitest.unit.config.mts', [toBinary('vitest'), toConfig('vitest', 'vitest.unit.config.mts')]);
+  const tools = { dir: join(cwd, 'tools') };
+  t('pnpm --dir=tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm -C tools node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm node ./script.js --dir output', [toBinary('node'), js]);
+  t('pnpm --dir tools node ./script.js --dir output', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm -C tools exec node ./script.js', [toBinary('node', tools), toEntryPath('./script.js', { ...opt, ...tools })]);
+  t('pnpm vitest --filter smoke', [toBinary('vitest')]);
+  t('pnpm list --filter app', [], { cwd, manifest: createManifest({ scripts: { list: 'node ./tools/list.js' } }) });
   t('pnpm run program', [], pkgScripts);
   t('pnpm program', [], pkgScripts);
   t('pnpm dlx pkg', [toDependency('pkg', opt)]);
@@ -368,6 +389,9 @@ test('getInputsFromScripts (pnpm)', () => {
   t('pnpm --silent run program script.js', [], pkgScripts);
   t('pnpm with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm run with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm run with-env src/main.ts --filter app', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm with-env src/main.ts --filter app', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
+  t('pnpm run --filter app with-env src/main.ts', [], withEnv);
   t('pnpm run-script with-env src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], withEnv);
   t('pnpm t src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
   t('pnpm tst -- src/main.ts', [toBinary('node'), toEntryPath('src/main.ts', opt), toModule('tsx')], lifecycle);
@@ -420,6 +444,15 @@ test('getInputsFromScripts (pnpm exec child options)', () => {
 
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
+  t('pnpx tsx ./main.ts', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts --dir output', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx ./main.ts -C output', [toDependency('tsx', opt), ts]);
+  t('pnpx node ./script.js -- --import unused-dep', [toDependency('node', opt), js]);
+  t('pnpx --package=pnpm pnpm exec tsx ./main.ts', [toDependency('pnpm', opt), toDependency('pnpm', opt), toBinary('tsx'), ts]);
+  t('pnpx prisma generate --schema=./prisma/schema.prisma', [toDependency('prisma', opt), toEntryPath('./prisma/schema.prisma', { dir: cwd })]);
+  t('pnpm dlx --package tsx tsx ./main.ts', [toDependency('tsx', opt), toDependency('tsx', opt), ts]);
+  t('pnpm -C sub dlx tsx ./main.ts', [toDependency('tsx', opt)]);
+  t('pnpm dlx dotenv-cli -e .env -- pnpm dlx prisma migrate deploy', [toDependency('dotenv-cli', opt), toDependency('prisma', opt)]);
   const inputs = [toDependency('cowsay', opt), toDependency('lolcatjs', opt), toBinary('echo'), toBinary('cowsay'), toBinary('lolcatjs')];
   t('pnpx --package cowsay --package lolcatjs -c \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
   t('pnpm --package cowsay --package lolcatjs -c dlx \'echo "hi pnpm" | cowsay | lolcatjs\'', inputs);
@@ -500,7 +533,10 @@ test('getInputsFromScripts ("positionals")', () => {
 test('getInputsFromScripts (c8)', () => {
   t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -- ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node -r ./require.js -- ./script.js', [toBinary('c8'), toBinary('node'), js, req]);
   t('c8 -- node ./script.js', [toBinary('c8'), toBinary('node'), js]);
+  t('c8 node ./script.js -- --import unused-dep', [toBinary('c8'), toBinary('node'), js]);
   t('c8 npm test', [toBinary('c8')]);
   t('c8 check-coverage --lines 95 --per-file npm test', [toBinary('c8')]);
   t('c8 report', [toBinary('c8')]);
@@ -508,6 +544,22 @@ test('getInputsFromScripts (c8)', () => {
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toModule('@org/rep')]);
   t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
+});
+
+test('getInputsFromScripts (nyc)', () => {
+  t('nyc program', [toBinary('nyc'), toBinary('program')], forwardedArgs);
+  t('nyc node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node -- ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -- node ./script.js -- --import unused-dep', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc node --import tsx ./script.js', [toBinary('nyc'), toBinary('node'), js, toModule('tsx')]);
+  t('nyc npm test', [toBinary('nyc')]);
+  t('nyc report --reporter=text-lcov', [toBinary('nyc')]);
+  t('nyc check-coverage --lines 95 --per-file', [toBinary('nyc')]);
+  t("nyc --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('nyc'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
+  t('nyc --all -s node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc --require ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc -i ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (nodemon)', () => {
@@ -533,6 +585,28 @@ test('getInputsFromScripts (double-dash)', () => {
   t('doppler run -- node server.ts', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t('doppler run -c prod --project app -- tsx watch src/index.ts', [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('infisical run --env=dev -- tsx src/seed.ts', [toBinary('infisical'), toBinary('tsx'), toEntryPath('src/seed.ts', opt)]);
+  t('dotenvx run -- node ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node -r ./require.js -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js, req]);
+  t('dotenvx run -- node -- ./script.js -- --import unused-dep', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- node --max-old-space-size=1536 -- ./script.js', [toBinary('dotenvx'), toBinary('node'), js]);
+  t('dotenvx run -- ts-node --files -- ./main.ts', [toBinary('dotenvx'), toBinary('ts-node'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- glob -- "*.js"', [toBinary('dotenvx'), toBinary('glob'), toEntry('*.js')]);
+  t('cross-env A=1 tsx -- ./main.ts', [toBinary('cross-env'), toBinary('tsx'), ts]);
+  t('dotenvx run -- pnpm tsx -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- yarn exec -- tsx ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
+  t(`cdk --app 'tsx --tsconfig "./config files/tsconfig.json" -- ./main.ts'`, [toBinary('cdk'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t("'dotenvx' 'run' '--' 'tsx' '--' './main.ts'", [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx --"" ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t(`cdk --app 'npx -c "tsx -- ./main.ts"'`, [toBinary('cdk'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx -- ./main.ts "$(node --eval=0 -- ./script.js)"', [toBinary('dotenvx'), toBinary('tsx'), ts, toBinary('node'), toBinary('node')]);
+  t(`cdk --app 'tsx -- ./main.ts && echo done'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('echo')]);
+  t(`cdk --app 'tsx -- ./main.ts "$(node -- ./script.js)"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t(`cdk --app 'tsx -- ./main.ts "\`tsx -- ./script.js \\$HOME\`"'`, [toBinary('cdk'), toBinary('tsx'), ts, toBinary('tsx'), js]);
+  t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (command flags)', () => {
@@ -578,6 +652,7 @@ test('getInputsFromScripts (redirects and shell command wrappers)', () => {
   t('node >output.log ./script.js', [toBinary('node'), js]);
   t('>output.log NODE_OPTIONS="--require pkg-a" node ./script.js', [toBinary('node'), js, toModule('pkg-a')]);
   t('cross-env >output.log NODE_ENV=test node ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
+  t('cross-env MODE=test node -- ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
   t('time -p ! { node ./script.js; } >output.log', [toBinary('node'), js]);
   t('time', []);
   t('!', []);
@@ -604,6 +679,8 @@ test('getInputsFromScripts (plugins → config)', () => {
   t('webpack --config a.js --config b.js --merge', [toBinary('webpack'), toConfig('webpack', 'a.js'), toConfig('webpack', 'b.js'), toDependency('webpack-cli')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
+  t('wdio run --cpu-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
+  t('wdio run --heap-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);
 });
 
 test('getInputsFromScripts (plugins → resolve)', () => {
