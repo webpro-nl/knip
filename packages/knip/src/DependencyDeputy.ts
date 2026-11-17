@@ -393,7 +393,8 @@ export class DependencyDeputy {
       const isNotReferencedDependency = (dependency: string): boolean => !isReferencedDependency(dependency);
 
       for (const symbol of this.getProductionDependencies(workspace).filter(isNotReferencedDependency)) {
-        const position = peeker.getLocation('dependencies', symbol);
+        const position =
+          peeker.getPropertyLocation('dependencies', symbol) ?? peeker.getPropertyLocation('peerDependencies', symbol);
         dependencyIssues.push({ type: 'dependencies', workspace, filePath, symbol, fixes: [], ...position });
       }
 
@@ -401,13 +402,13 @@ export class DependencyDeputy {
 
       for (const symbol of this.getDevDependencies(workspace)) {
         if (!manifest.dependencies.includes(symbol) && !isNotReferencedDependency(symbol)) continue;
-        const position = peeker.getLocation('devDependencies', symbol);
+        const position = peeker.getPropertyLocation('devDependencies', symbol);
         devDependencyIssues.push({ type: 'devDependencies', filePath, workspace, symbol, fixes: [], ...position });
       }
       for (const symbol of this.getOptionalPeerDependencies(workspace)) {
         if (!referencedDependencies?.has(symbol)) continue;
         if (manifest.dependencies.includes(symbol) || manifest.devDependencies.includes(symbol)) continue;
-        const pos = peeker.getLocation('optionalPeerDependencies', symbol);
+        const pos = peeker.getPropertyLocation('peerDependencies', symbol);
         optionalPeerDependencyIssues.push({
           type: 'optionalPeerDependencies',
           filePath,

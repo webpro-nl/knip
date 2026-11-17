@@ -24,6 +24,10 @@ const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createRequireContextVisitor(ctx));
 };
 
+const args = {
+  config: true,
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -31,6 +35,7 @@ const plugin: Plugin = {
   config,
   resolveConfig,
   registerVisitors,
+  args,
 };
 
 export default plugin;
