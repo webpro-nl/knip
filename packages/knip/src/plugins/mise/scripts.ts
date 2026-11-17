@@ -1,9 +1,8 @@
 import { type Command, forEachChild, parse, type Script, type SyntaxNode } from 'unbash';
 import { getDependenciesFromCommand, getInputsFromNodeOptions } from '../../binaries/command.ts';
 import { spawningBinaries } from '../../binaries/fallback.ts';
-import { isWrapper } from '../../binaries/plugins.ts';
+import { isWrapper, toForwardedScript } from '../../binaries/plugins.ts';
 import { isPackageManager } from '../../binaries/resolvers/index.ts';
-import { toScript } from '../../binaries/util.ts';
 import { SCRIPT_INTERPOLATION } from '../../constants.ts';
 import type { FromArgs, GetInputsFromScriptsOptions, GetInputsFromScriptsPartial } from '../../types/config.ts';
 import { type Input, isBinary } from '../../util/input.ts';
@@ -64,7 +63,7 @@ export const getInputsFromMiseScript = (script: string, options: Options, hasLoc
           inputs.push(...getInputsFromMiseScript(script, options, isLocal));
           return [];
         };
-        const fromArgs: FromArgs = args => fromScript(toScript(args));
+        const fromArgs: FromArgs = args => fromScript(toForwardedScript(args));
         commandInputs = getDependenciesFromCommand(marked, { ...options, fromArgs });
         if (spawningBinaries.includes(binary)) commandInputs.push(...getInputsFromNodeOptions(marked.prefix));
       } else {

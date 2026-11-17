@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { renameSync, writeFileSync } from 'node:fs';
 import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
@@ -60,15 +60,20 @@ test('CLI watch reloads JSON and imported plugin configuration', async t => {
     while (!predicate(getLastReport()) && Date.now() < deadline && !closed) await setTimeout(10);
     assert.ok(predicate(getLastReport()), `Expected CLI watch update\nstdout:\n${stdout}\nstderr:\n${stderr}`);
   };
+  const replaceFile = (fileName: string, contents: string) => {
+    const tmpPath = `${cwd}-${fileName}`;
+    writeFileSync(tmpPath, contents);
+    renameSync(tmpPath, join(cwd, fileName));
+  };
 
   await waitForReport(report => report.includes('originalUnused') && report.includes('Unused files'));
   writeFileSync(join(cwd, 'value.ts'), 'export const value = 1;\nexport const changedUnused = 2;\n');
   await waitForReport(report => report.includes('changedUnused') && report.includes('missing-command'));
 
-  writeFileSync(join(cwd, 'knip.json'), '{"entry":["index.ts"],"project":["*.ts"],"ignore":["value.ts"]}');
+  replaceFile('knip.json', '{"entry":["index.ts"],"project":["*.ts"],"ignore":["value.ts"]}');
   await waitForReport(report => !report.includes('changedUnused') && report.includes('Unused files'));
 
-  writeFileSync(join(cwd, 'settings.ts'), "export const include = ['unused.ts'];\n");
+  replaceFile('settings.ts', "export const include = ['unused.ts'];\n");
   await waitForReport(report => !report.includes('Unused files'));
   assert.equal(stderr, '');
 });

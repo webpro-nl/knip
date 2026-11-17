@@ -13,6 +13,7 @@ test('Optional peerDependencies in strict mode should not be reported as unused 
   assert(!issues.dependencies['package.json']?.['pg']);
   assert(!issues.dependencies['package.json']?.['@types/pg']);
   assert(issues.dependencies['package.json']['required-peer']);
+  assert.equal(issues.dependencies['package.json']['required-peer'].line, 6);
 
   assert.deepEqual(counters, {
     ...baseCounters,

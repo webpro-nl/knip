@@ -13,8 +13,8 @@ test('Find dependencies with the knex plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 8,
+    total: 8,
   });
 });
 
