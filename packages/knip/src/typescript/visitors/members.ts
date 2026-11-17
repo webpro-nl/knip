@@ -1,4 +1,4 @@
-import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
+import type { ImportExpression, MemberExpression, JSXMemberExpression } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import type { ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
@@ -16,6 +16,45 @@ function isNumericKey(value: string | undefined) {
   return value != null && Number.isFinite(Number(value)) && String(Number(value)) === value;
 }
 
+function getMemberName(node: MemberExpression) {
+  if (!node.computed) return node.property.type === 'Identifier' ? node.property.name : undefined;
+  return getStringValue(node.property);
+}
+
+function getAwaitedImport(node: MemberExpression): ImportExpression | undefined {
+  let object = node.object;
+  while (object.type === 'MemberExpression') object = object.object;
+  if (object.type === 'ParenthesizedExpression') object = object.expression;
+  if (object.type === 'AwaitExpression' && object.argument.type === 'ImportExpression') return object.argument;
+}
+
+function handleAwaitedImportMember(node: MemberExpression, importExpr: ImportExpression, s: WalkState) {
+  const specifier = getStringValue(importExpr.source);
+  if (!specifier || s.handledImportExpressions.has(importExpr.start)) return;
+  chainNames.length = 0;
+  let member: MemberExpression['object'] = node;
+  while (member.type === 'MemberExpression') {
+    chainNames.push(getMemberName(member) ?? '');
+    member = member.object;
+  }
+  const last = chainNames.length - 1;
+  const memberName = chainNames[last];
+  if (!memberName) return;
+  s.handledImportExpressions.add(importExpr.start);
+  const caughtFlag = s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+  s.addImport(specifier, memberName, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+  if (last === 0) return;
+  const resolved = s.resolveModule(specifier, s.filePath);
+  const internalImport = resolved && s.internal.get(resolved.resolvedFileName);
+  if (!internalImport) return;
+  if (!chainNames[last - 1]) markWholeObjectRead(internalImport, memberName);
+  let path = memberName;
+  for (let i = last - 1; i >= 0 && chainNames[i]; i--) {
+    path = `${path}.${chainNames[i]}`;
+    internalImport.refs.add(path);
+  }
+}
+
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
   if (
     node.object.type === 'CallExpression' &&
@@ -25,9 +64,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     isStringLiteral(node.object.arguments[0]) &&
     !s.handledImportExpressions.has(node.object.start)
   ) {
-    let memberName: string | undefined;
-    if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
-    else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+    const memberName = getMemberName(node);
     if (memberName) {
       const specifier = getStringValue(node.object.arguments[0])!;
       const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
@@ -44,6 +81,9 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     }
     return;
   }
+
+  const importExpr = getAwaitedImport(node);
+  if (importExpr) return handleAwaitedImportMember(node, importExpr, s);
 
   if (
     node.object.type === 'MemberExpression' &&
@@ -215,9 +255,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     if (ref) {
       const internalImport = s.internal.get(ref.import.filePath);
       if (internalImport) {
-        let memberName: string | undefined;
-        if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
-        else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+        const memberName = getMemberName(node);
         if (memberName) {
           s.addNsMemberRefs(internalImport, ref.id, memberName);
           s.accessedNsContainers.add(`${containerName}.${propKey}`);

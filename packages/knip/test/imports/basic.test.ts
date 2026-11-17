@@ -13,10 +13,15 @@ test('Support various ways to import modules', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 26,
-    processed: 65,
-    total: 65,
+    exports: 28,
+    enumMembers: 1,
+    processed: 66,
+    total: 66,
   });
+
+  assert.deepEqual(Object.keys(issues.exports['prop-access.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.exports['default-prop-access.ts']), ['unused']);
+  assert.deepEqual(Object.keys(issues.enumMembers['prop-access-members.ts']), ['Members.unused']);
 
   assert.deepEqual(Object.keys(issues.exports['promise-all-top-level.ts']), ['unused']);
   assert.deepEqual(Object.keys(issues.exports['promise-all-scoped.ts']), ['unused']);
