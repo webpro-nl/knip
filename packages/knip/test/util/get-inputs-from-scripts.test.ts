@@ -69,6 +69,8 @@ test('getInputsFromScripts (node)', () => {
   t('node -e "console.log(1)" -- ./script.js', [toBinary('node')]);
   t('node -e "" -- ./script.js', [toBinary('node')]);
   t('node -p 0 -- ./script.js', [toBinary('node')]);
+  t('node --eval="console.log(1)" -- ./script.js', [toBinary('node')]);
+  t('node --print -- ./script.js', [toBinary('node'), js]);
   t('node -- --version', [toBinary('node')]);
 });
 
