@@ -1,5 +1,9 @@
 {
   "name": "@plugins/knex",
+  "scripts": {
+    "migrate:analytics": "knex migrate:latest --knexfile analytics/knexfile.analytics.js",
+    "seed:reporting": "knex seed:run --cwd reporting --knexfile knexfile.js"
+  },
   "dependencies": {
     "knex": "*",
     "pg": "*"

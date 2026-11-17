@@ -257,7 +257,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const inputSpecifiers =
       typeof _input === 'string' ? [_input] : Array.isArray(_input) ? _input : Object.values(_input).flat();
     for (const specifier of inputSpecifiers) {
-      const resolved = toAbsolute(specifier, viteRoot);
+      const resolved = toAbsolute(toPosix(specifier), viteRoot);
       inputs.add(toEntryPath(resolved, { production: true }));
       if (resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved, viteRoot, publicDir)) inputs.add(input);

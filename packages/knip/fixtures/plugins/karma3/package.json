@@ -1,7 +1,10 @@
 {
   "name": "@plugins/karma3",
-  "scripts": {},
+  "scripts": {
+    "test:ci": "karma start config/karma.ci.conf.js --single-run"
+  },
   "devDependencies": {
-    "karma": "*"
+    "karma": "*",
+    "karma-firefox-launcher": "*"
   }
 }

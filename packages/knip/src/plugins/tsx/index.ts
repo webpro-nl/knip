@@ -2,6 +2,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import type { PackageJson } from '../../types/package-json.ts';
 import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { args as nodeArgs } from '../node/index.ts';
 
 // https://tsx.is
 
@@ -36,6 +37,7 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 const args = {
   positional: true,
   nodeImportArgs: true,
+  boolean: nodeArgs.boolean,
   args: (args: string[]) => args.filter(arg => arg !== 'watch'),
 };
 

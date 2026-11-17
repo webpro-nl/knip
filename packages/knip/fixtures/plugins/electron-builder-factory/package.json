@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/electron-builder-factory",
+  "main": "src/main.js",
+  "scripts": {
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "*",
+    "electron-builder": "*"
+  }
+}
