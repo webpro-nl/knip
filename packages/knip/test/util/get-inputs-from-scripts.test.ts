@@ -76,6 +76,23 @@ test('getInputsFromScripts (node)', () => {
   t('node --test -- "checks/*.js"', [toBinary('node'), toEntry('checks/*.js')]);
 });
 
+test('getInputsFromScripts (node options end at the script)', () => {
+  t('node ./script.js -r spec', [toBinary('node'), js]);
+  t('node ./script.js --import unused-dep', [toBinary('node'), js]);
+  t('node ./script.js -- --import unused-dep', [toBinary('node'), js]);
+  t('node --trace-uncaught ./script.js', [toBinary('node'), js]);
+  t('node --max-old-space-size=1536 -- ./script.js', [toBinary('node'), js]);
+  t('node --title app ./script.js', [toBinary('node'), js]);
+  t('node --env-file .env ./script.js', [toBinary('node'), js]);
+  t('node --conditions development ./script.js', [toBinary('node'), js]);
+  t('node -C development -r ./require.js ./script.js', [toBinary('node'), js, req]);
+  t('node -p 0 ./script.js', [toBinary('node')]);
+  t('node -e "require(1)" ./script.js', [toBinary('node')]);
+  t('node --run build ./script.js', [toBinary('node')]);
+  t('node inspect ./script.js', [toBinary('node'), js]);
+  t('node --test ./a.test.js ./b.test.js', [toBinary('node'), toEntryPath('./a.test.js', opt), toEntryPath('./b.test.js', opt)]);
+});
+
 test('getInputsFromScripts (node --test)', () => {
   t('node --test --test-reporter=reporter', [toBinary('node'), toModule('reporter')]);
   t('node --test --test-reporter=spec', [toBinary('node')]);
@@ -83,7 +100,7 @@ test('getInputsFromScripts (node --test)', () => {
 
 test('getInputsFromScripts (node -r)', () => {
   t('node -r script.js', [toBinary('node'), toModule('script.js')]);
-  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toModule('dotenv/config'), toEntryPath('node', opt)]);
+  t('node -r dotenv/config -- node ./script.js', [toBinary('node'), toEntryPath('node', opt), toModule('dotenv/config')]);
   t('node -r package/script', [toBinary('node'), toModule('package/script')]);
   t('node -r ./require.js ./script.js', [toBinary('node'), js, req]);
   t('node --require=pkg1 --require pkg2 script', [toBinary('node'), toEntryPath('script', opt), toModule('pkg1'), toModule('pkg2')]);
@@ -119,6 +136,12 @@ test('getInputsFromScripts (tsx)', () => {
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);
   t('tsx ./main.ts build', [toBinary('tsx'), ts]);
+  t('tsx ./main.ts -r spec', [toBinary('tsx'), ts]);
+  t('tsx -- ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --tsconfig tsconfig.build.json -r ./require.js ./main.ts', [toBinary('tsx'), ts, req]);
+  t('tsx ./main.ts watch', [toBinary('tsx'), ts]);
+  t('tsx watch --include ./src ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx -e "console.log(1)" ./main.ts', [toBinary('tsx')]);
 });
 
 test('getInputsFromScripts (--require)', () => {
@@ -528,6 +551,10 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node --esm ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --files --pretty ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node --skip-project --type-check ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node ./main.ts --require pkg/register', [toBinary('ts-node'), ts]);
+  t('ts-node -- ./main.ts', [toBinary('ts-node'), ts]);
+  t('ts-node -P tsconfig.json -r pkg/register ./main.ts', [toBinary('ts-node'), ts, toModule('pkg/register')]);
+  t('ts-node -e "console.log(1)" ./main.ts', [toBinary('ts-node')]);
   t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);

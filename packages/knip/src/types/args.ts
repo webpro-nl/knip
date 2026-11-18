@@ -13,11 +13,13 @@ export type Args = {
   binaries?: string[];
 
   /**
-   * Add first positional argument as entry point(s)
+   * Add first positional argument as entry point(s), or a function that returns the positional arguments to add
+   *
+   * @example positional: parsed => (parsed.eval === undefined ? parsed._.slice(0, 1) : [])
    *
    * @default undefined
    */
-  positional?: boolean;
+  positional?: boolean | ((parsed: ParsedArgs) => string[]);
 
   /**
    * Mark arguments as string
@@ -27,11 +29,18 @@ export type Args = {
   string?: string[];
 
   /**
-   * Mark arguments as boolean
+   * Mark arguments as boolean, or `true` to treat every argument not marked as string as boolean (e.g. Node.js)
    *
    * @default undefined
    */
-  boolean?: string[];
+  boolean?: string[] | true;
+
+  /**
+   * Stop parsing options at the first positional argument, the rest belongs to it (e.g. `node [options] script.js`)
+   *
+   * @default undefined
+   */
+  stopEarly?: boolean;
 
   /**
    * Define aliases (e.g. `{ require: ["r"] }`)

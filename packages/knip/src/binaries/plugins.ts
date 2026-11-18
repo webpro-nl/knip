@@ -61,13 +61,14 @@ const parse = (pluginArgs: Args, args: string[]) => {
 
   return parseArgs(args, {
     string,
-    boolean: ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
+    boolean: pluginArgs.boolean === true ? true : ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
     alias: {
       ...(pluginArgs.nodeImportArgs ? nodeLoadersArgs : {}),
       ...(pluginArgs.config === true ? { config: ['c'] } : {}),
       ...pluginArgs.alias,
     },
     '--': true,
+    stopEarly: pluginArgs.stopEarly,
   });
 };
 
@@ -180,13 +181,16 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  if (pluginArgs.positional && parsed._[0]) {
-    const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
+  const ids =
+    typeof pluginArgs.positional === 'function'
+      ? pluginArgs.positional(parsed)
+      : pluginArgs.positional && parsed._[0]
+        ? [parsed._[0]]
+        : [];
+  for (const id of ids) {
     if (isGlobLike(id)) positionals.push(toEntry(id));
-    else {
-      if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
-      else positionals.push(toEntryPath(id, { optional: true }));
-    }
+    else if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
+    else positionals.push(toEntryPath(id, { optional: true }));
   }
 
   const mapToParsedKey = (id: string) => parsed[id];
