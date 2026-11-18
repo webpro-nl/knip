@@ -26,3 +26,8 @@ test('Should load JSON5 files', async () => {
   assert.equal(config.plugins.length, 2);
   assert.equal(config.enabled, true);
 });
+
+test('Should not load multi-document YAML files by default', async () => {
+  const cwd = resolve('fixtures/load-yaml-multi');
+  await assert.rejects(load(join(cwd, 'flow.yaml')));
+});

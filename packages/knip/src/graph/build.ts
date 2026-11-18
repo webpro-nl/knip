@@ -309,7 +309,6 @@ export const build = timerify(async function build({
     const productionPatterns = createPatternMap();
     const productionPatternsSkipExports = createPatternMap();
     const projectFilePatterns = new Set<string>();
-    const developmentFilePaths = new Set<string>();
 
     const addPattern = (map: PatternMap, group: string, pattern: string) => {
       let patterns = map.get(group);
@@ -358,7 +357,7 @@ export const build = timerify(async function build({
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
           if (options.isProduction && !input.production) {
-            if (!input.optional) developmentFilePaths.add(resolvedFilePath);
+            if (!input.optional) collector.addReferencedFile(resolvedFilePath);
           } else {
             principal.addEntryPath(resolvedFilePath, { skipExportsAnalysis: input.skipExportsAnalysis ?? true });
           }
@@ -483,9 +482,7 @@ export const build = timerify(async function build({
         for (const hint of hints) collector.addConfigurationHint(hint);
       }
 
-      for (const projectPath of productionPaths(projectPaths)) {
-        if (!developmentFilePaths.has(projectPath)) principal.addProjectPath(projectPath);
-      }
+      for (const projectPath of productionPaths(projectPaths)) principal.addProjectPath(projectPath);
     }
 
     worker.onDispose();

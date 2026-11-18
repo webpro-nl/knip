@@ -60,7 +60,7 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
     files: 2,
     dependencies: 3,
     processed: 2,
-    total: 2,
+    total: 9,
   });
 });
 
@@ -75,7 +75,7 @@ test('Find dependencies with the Vitest plugin (strict)', async () => {
     files: 2,
     dependencies: 3,
     processed: 2,
-    total: 2,
+    total: 9,
   });
 });
 

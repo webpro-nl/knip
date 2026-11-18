@@ -51,11 +51,15 @@ export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require',
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
-export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) =>
-  args.slice(args.findIndex(arg => valueOf(arg) === from));
+export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) => {
+  const index = args.findIndex(arg => valueOf(arg) === from);
+  return index === -1 ? [] : args.slice(index);
+};
 
-export const spawningArgs = (parsed: ParsedArgs, args: string[]) =>
-  parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? []);
+export const spawningArgs = (parsed: ParsedArgs, args: string[]) => {
+  const index = parsed.positionalIndices?.[0];
+  return index === undefined ? (parsed['--'] ?? []) : args.slice(index);
+};
 
 export const argsAfter = <T extends string | Word>(args: readonly T[], token: string) => {
   const index = args.findIndex(arg => valueOf(arg) === token);

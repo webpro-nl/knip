@@ -453,7 +453,7 @@ export class WorkspaceWorker {
         }
 
         let parsed: ReturnType<typeof _parseFile> | undefined;
-        if (!isManifest) {
+        if (!isManifest && (!plugin.parseConfig || plugin.resolveFromAST)) {
           if (parsedConfigCache.has(configFilePath)) {
             parsed = parsedConfigCache.get(configFilePath);
           } else {
@@ -475,7 +475,7 @@ export class WorkspaceWorker {
         let hasLoadConfigError = false;
 
         if (plugin.resolveConfig) {
-          if (parsed && isExternalReExportsOnly(parsed)) {
+          if (!plugin.parseConfig && parsed && isExternalReExportsOnly(parsed)) {
             cache.resolveConfig = [];
           }
 

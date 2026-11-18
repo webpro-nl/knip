@@ -1,6 +1,6 @@
 import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
-import { isGlobLike, nodeLoadersArgs } from '../../binaries/util.ts';
-import { type Input, toEntry, toEntryPath, toModule } from '../../util/input.ts';
+import type { Args } from '../../types/args.ts';
+import { type Input, toEntry, toModule } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { RegisterVisitors } from '../../types/config.ts';
 import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
@@ -59,54 +59,106 @@ const resolve: Resolve = options => {
   return entries;
 };
 
-export const args = {
-  positional: true,
-  nodeImportArgs: true,
-  string: ['test-reporter'],
-  boolean: [
-    'deprecation',
-    'enable-source-maps',
-    'experimental-detect-module',
-    'experimental-json-modules',
-    'experimental-require-module',
-    'experimental-sqlite',
-    'experimental-strip-types',
-    'experimental-test-coverage',
-    'experimental-test-module-mocks',
-    'experimental-transform-types',
-    'experimental-vm-modules',
-    'experimental-wasm-modules',
-    'expose-gc',
-    'harmony',
-    'inspect-brk',
-    'inspect-wait',
-    'inspect',
-    'openssl-legacy-provider',
-    'preserve-symlinks',
-    'test-only',
-    'test',
-    'trace-deprecation',
-    'trace-warnings',
-    'warnings',
-    'watch-preserve-output',
-    'watch',
-  ],
-  resolveInputs: (parsed: ParsedArgs) => {
-    const inputs: Input[] = [];
-    for (const id of [parsed['test-reporter'] ?? []].flat()) if (!builtInReporters.has(id)) inputs.push(toModule(id));
-    const script = parsed['--']?.[0];
-    if (parsed._.length > 0 || !script || script.startsWith('-')) return inputs;
-    const isOff = (key: string) => [parsed[key]].flat().every(value => value === false);
-    const isDeclared = (key: string) => key === '_' || key === '--' || isOff(key) || declaredOptions.has(key);
-    if (!Object.keys(parsed).every(isDeclared)) return inputs;
-    inputs.push(isGlobLike(script) ? toEntry(script) : toEntryPath(script, { optional: true }));
-    return inputs;
-  },
+const toScripts = (parsed: ParsedArgs) => {
+  if (parsed.eval !== undefined || parsed.print !== undefined || parsed.run !== undefined) return [];
+  const scripts = parsed.test ? parsed._ : parsed._.slice(parsed._[0] === 'inspect' ? 1 : 0).slice(0, 1);
+  return scripts.filter(script => !String(script).startsWith('-'));
 };
 
-// Node runs the first argument after `--` as the script, but an undeclared option before it (`--run`, `-e`) may
-// select another mode, so the argument is only an entry when every option is one of these
-const declaredOptions = new Set([...Object.entries(nodeLoadersArgs).flat(2), ...args.string, ...args.boolean]);
+// https://nodejs.org/api/cli.html (options that take a value, from `getCLIOptionsInfo()` in Node.js v24)
+export const args = {
+  positional: toScripts,
+  nodeImportArgs: true,
+  string: [
+    'allow-fs-read',
+    'allow-fs-write',
+    'build-snapshot-config',
+    'conditions',
+    'cpu-prof-dir',
+    'cpu-prof-interval',
+    'cpu-prof-name',
+    'debug-port',
+    'diagnostic-dir',
+    'disable-proto',
+    'disable-warning',
+    'dns-result-order',
+    'env-file',
+    'env-file-if-exists',
+    'eval',
+    'experimental-config-file',
+    'experimental-default-config-file',
+    'experimental-package-map',
+    'experimental-sea-config',
+    'experimental-test-isolation',
+    'experimental-test-tag-filter',
+    'heap-prof-dir',
+    'heap-prof-interval',
+    'heap-prof-name',
+    'heapsnapshot-near-heap-limit',
+    'heapsnapshot-signal',
+    'icu-data-dir',
+    'input-type',
+    'inspect-port',
+    'inspect-publish-uid',
+    'localstorage-file',
+    'max-http-header-size',
+    'max-old-space-size-percentage',
+    'network-family-autoselection-attempt-timeout',
+    'openssl-config',
+    'print',
+    'redirect-warnings',
+    'report-dir',
+    'report-directory',
+    'report-filename',
+    'report-signal',
+    'run',
+    'secure-heap',
+    'secure-heap-min',
+    'security-revert',
+    'security-reverts',
+    'snapshot-blob',
+    'stack-trace-limit',
+    'test-concurrency',
+    'test-coverage-branches',
+    'test-coverage-exclude',
+    'test-coverage-functions',
+    'test-coverage-include',
+    'test-coverage-lines',
+    'test-global-setup',
+    'test-isolation',
+    'test-name-pattern',
+    'test-random-seed',
+    'test-reporter',
+    'test-reporter-destination',
+    'test-rerun-failures',
+    'test-shard',
+    'test-skip-pattern',
+    'test-timeout',
+    'title',
+    'tls-cipher-list',
+    'tls-keylog',
+    'trace-event-categories',
+    'trace-event-file-pattern',
+    'trace-require-module',
+    'unhandled-rejections',
+    'use-largepages',
+    'v8-pool-size',
+    'watch-kill-signal',
+    'watch-path',
+  ],
+  alias: { conditions: ['C'], eval: ['e'], print: ['p'] },
+  boolean: true,
+  stopEarly: true,
+  resolveInputs: (parsed: ParsedArgs) => {
+    const reporters = parsed['test-reporter'];
+    if (!reporters) return [];
+    const inputs: Input[] = [];
+    for (const reporter of Array.isArray(reporters) ? reporters : [reporters]) {
+      if (typeof reporter === 'string' && reporter && !builtInReporters.has(reporter)) inputs.push(toModule(reporter));
+    }
+    return inputs;
+  },
+} satisfies Args;
 
 const plugin: Plugin = {
   title,

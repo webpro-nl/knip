@@ -1,0 +1,5 @@
+{
+  "includePlugins": ["@capacitor/app"],
+  "android": { "includePlugins": [] },
+  "ios": { "includePlugins": ["@capacitor/browser"] }
+}
