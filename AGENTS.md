@@ -45,14 +45,16 @@ JavaScript and TypeScript projects.
   the graph when imported.
 - Use `--performance` or `--performance-fn [name]` to profile (→ [timerify][3])
 - If creating, modifying, or reviewing a plugin, read [PLUGINS.md][4] first.
+- For script discovery, command forwarding, or argument parsing, read
+  [SCRIPT-PARSING.md][5].
 - If modifying core module graph, AST traversal, or CLI sequence, read
-  [MODULE-GRAPH.md][5] first.
+  [MODULE-GRAPH.md][6] first.
 - For issues re. exported identifiers (following refs, shadowing,
-  `ignoreExportsUsedInFile`), see [EXPORTS.md][6].
-- Before any significant performance tuning, consult [PERFORMANCE.md][7].
-- When modifying or reviewing built-in compilers, read [COMPILERS.md][8].
+  `ignoreExportsUsedInFile`), see [EXPORTS.md][7].
+- Before any significant performance tuning, consult [PERFORMANCE.md][8].
+- When modifying or reviewing built-in compilers, read [COMPILERS.md][9].
 - For test/fixture structure, conventions, and where a new test goes, see
-  [TESTS.md][9].
+  [TESTS.md][10].
 
 ## Issues and Pull Requests
 
@@ -65,14 +67,14 @@ JavaScript and TypeScript projects.
   actually write. A correct fix for a contrived case is still code to maintain.
 - Find repositories/CodeSandbox/StackBlitz source files and local fixtures to
   actually reproduce the issue at hand.
-- To fetch a stackblitz.com reproduction: `pnpx stackblitz-zip
-https://stackblitz.com/edit/{name} {filename}.zip`
+- To fetch a stackblitz.com reproduction:
+  `pnpx stackblitz-zip https://stackblitz.com/edit/{name} {filename}.zip`
 - For a fix, revert the source change and confirm the new test fails for the
   reported reason.
 - For a new plugin or a change in how a tool finds files, verify against the
   tool's source, not only its docs, and run Knip on the tool's examples or
   starters when available.
-- Follow the [AI contribution policy][10]: before opening an issue or PR, make
+- Follow the [AI contribution policy][11]: before opening an issue or PR, make
   sure the person you work for understands and stands behind it. Keep
   descriptions concise.
 - Breaking changes, such as dropping a Node.js version (#1853), wait for the
@@ -86,14 +88,14 @@ https://stackblitz.com/edit/{name} {filename}.zip`
 Important: debug, don't guess.
 
 Run the CLI directly using `node` or `bun`. This document shows `knip` in
-commands for consistency. Replace it with `node (path/to/)src/cli.ts` or `bun
-(path/to/)src/cli.ts` and keep using what works.
+commands for consistency. Replace it with `node (path/to/)src/cli.ts` or
+`bun (path/to/)src/cli.ts` and keep using what works.
 
 - Run `knip` directly in a fixture or temp directory (over creating test scripts
   that import the `main` function).
 - Knip requires `package.json` in root dir.
-- Enable [debug & helpers][11] with `--debug` (not `DEBUG=`). Warning: noisy.
-- Use [trace][12] to debug
+- Enable [debug & helpers][12] with `--debug` (not `DEBUG=`). Warning: noisy.
+- Use [trace][13] to debug
   - exported identifiers (`knip --trace-export [name] --trace-file [file]`)
   - external dependencies (`knip --trace-dependency [name] --workspace [dir]`)
 
@@ -137,7 +139,7 @@ pnpm test
 Before pushing, run `pnpm qa` in `packages/knip` (lint, build, dogfood, all
 tests), also for fixture-only changes: fixtures are shared across tests.
 
-See [TESTS.md][9] for test and fixture conventions and placements.
+See [TESTS.md][10] for test and fixture conventions and placements.
 
 ## Build
 
@@ -157,11 +159,12 @@ CI also type-checks against TypeScript 5.0.4 (`ci-legacy-5.0.4.yml`), which
 [2]: ./packages/docs/src/content/docs/guides/configuring-project-files.md
 [3]: ./packages/knip/src/util/Performance.ts
 [4]: ./.agents/PLUGINS.md
-[5]: ./.agents/MODULE-GRAPH.md
-[6]: ./.agents/EXPORTS.md
-[7]: ./.agents/PERFORMANCE.md
-[8]: ./.agents/COMPILERS.md
-[9]: ./.agents/TESTS.md
-[10]: ./AI_POLICY.md
-[11]: ./packages/knip/src/util/debug.ts
-[12]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
+[5]: ./.agents/SCRIPT-PARSING.md
+[6]: ./.agents/MODULE-GRAPH.md
+[7]: ./.agents/EXPORTS.md
+[8]: ./.agents/PERFORMANCE.md
+[9]: ./.agents/COMPILERS.md
+[10]: ./.agents/TESTS.md
+[11]: ./AI_POLICY.md
+[12]: ./packages/knip/src/util/debug.ts
+[13]: ./packages/docs/src/content/docs/guides/troubleshooting.md#trace
