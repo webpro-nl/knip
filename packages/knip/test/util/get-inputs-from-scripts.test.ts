@@ -665,10 +665,15 @@ test('getInputsFromScripts (double-dash)', () => {
 });
 
 test('getInputsFromScripts (graphql-codegen)', () => {
+  const binary = toBinary('graphql-codegen');
   const config = toConfig('graphql-codegen', 'codegen.ts');
-  t('graphql-codegen --config codegen.ts', [toBinary('graphql-codegen'), config]);
-  t('graphql-codegen -r dotenv/config --config codegen.ts', [toBinary('graphql-codegen'), toModule('dotenv/config'), config]);
-  t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [toBinary('graphql-codegen'), toModule('dotenv/config'), toModule('tsconfig-paths/register')]);
+  const dotenv = toModule('dotenv/config');
+  const tsconfigPaths = toModule('tsconfig-paths/register');
+  t('graphql-codegen --config codegen.ts', [binary, config]);
+  t('graphql-codegen -r dotenv/config --config codegen.ts', [binary, dotenv, config]);
+  t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [binary, dotenv, tsconfigPaths]);
+  t('graphql-codegen --require dotenv/config tsconfig-paths/register -c codegen.ts', [binary, dotenv, tsconfigPaths, config]);
+  t('graphql-codegen -r=dotenv/config tsconfig-paths/register -- --require unused-dep', [binary, dotenv, tsconfigPaths]);
 });
 
 test('getInputsFromScripts (env-cmd environments)', () => {
