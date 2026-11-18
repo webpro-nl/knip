@@ -1,3 +1,6 @@
 {
-  "name": "@fixtures/tsconfig-cli-paths"
+  "name": "@fixtures/tsconfig-cli-paths",
+  "dependencies": {
+    "@app/used": "*"
+  }
 }
