@@ -110,7 +110,7 @@ const args = {
     ui: ['u'],
     watch: ['w'],
   },
-  string: ['config', 'extension', 'fgrep', 'file', 'grep', 'ignore', 'package', 'reporter', 'spec', 'ui'],
+  string: ['extension', 'file', 'ignore', 'reporter', 'spec'],
   config: ['config'],
   resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) => {
     const extensions = [parsed.extension ?? []]

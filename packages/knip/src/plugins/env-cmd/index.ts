@@ -11,7 +11,6 @@ const title = 'env-cmd';
 const valueOptions = new Set(['-f', '--file', '-r', '--rc-file']);
 
 const args: Args = {
-  string: ['environments', 'file', 'rc-file'],
   boolean: ['expand-envs', 'fallback', 'recursive', 'silent', 'use-shell', 'verbose'],
   alias: { environments: ['e'], file: ['f'], 'rc-file': ['r'], 'expand-envs': ['x'] },
   args: argv => {
