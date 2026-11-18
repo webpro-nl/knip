@@ -1,4 +1,4 @@
-import { forEachChild, parse as parseScript, type SyntaxNode, type Word } from 'unbash';
+import { parse as parseScript, type Word } from 'unbash';
 import parseArgs from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
@@ -7,14 +7,13 @@ import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { collectCommands, getCommandWords, isScriptExpansion } from '../util/scripts.ts';
+import { collectCommands, getCommandWords } from '../util/scripts.ts';
 import {
   isWrapper as isFallbackWrapper,
   resolve as fallbackResolve,
   shellSpawningBinaries,
   spawningBinaries,
 } from './fallback.ts';
-import KnownResolvers from './resolvers/index.ts';
 import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
 
 const isEnvAssignment = /^\w+=/;
@@ -74,60 +73,13 @@ const parse = (pluginArgs: Args, args: string[]) => {
 
 const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
 
-// Whether a forwarded `--` stays in the child's script: a wrapper decides about its own separators when its command
-// is forwarded in turn, and a command with a plugin keeps the one after its operands, where the rest belongs to the
-// script. Anything else is dropped, as forwarding always did, so options and operands of the child still parse.
-const isCommandWrapper = (binary: string) =>
-  isFallbackWrapper(binary) || typeof pluginArgsMap.get(binary)?.[1].fromArgs === 'function';
-
-const toKeptSeparators = (script: string, offsets: Set<number>) => {
-  const kept = new Set<number>();
-  const visit = (node: SyntaxNode) => {
-    if (node.type === 'Command' && node.name) {
-      const binary = extractBinary(node.name.value);
-      const pluginArgs = binary in KnownResolvers ? undefined : pluginArgsMap.get(binary)?.[1];
-      const values: string[] = [];
-      for (const word of getCommandWords(node)) {
-        const isForwarded = word.value === '--' && offsets.has(word.pos);
-        const isKept =
-          isForwarded &&
-          (isCommandWrapper(binary) ||
-            (!!pluginArgs && parse(pluginArgs, toArgValues(pluginArgs, values))._.length > 0));
-        if (isKept) kept.add(word.pos);
-        if (!isForwarded || isKept) values.push(word.value);
-      }
-    }
-    // A script with its own decoded source (escaped backticks) has positions that don't index this text
-    if (!isScriptExpansion(node)) forEachChild(node, visit);
-    else if (node.script && node.script.source === undefined) visit(node.script);
-  };
-  visit(parseScript(script));
-  return kept;
-};
-
 export const toForwardedScript = (args: ScriptArg[]): string => {
   const parts: string[] = [];
-  const separators: number[] = [];
   for (const arg of args) {
-    const value = valueOf(arg);
-    if (value === '--' && parts.length === 0) continue;
-    if (value === '--') separators.push(parts.length);
+    if (parts.length === 0 && valueOf(arg) === '--') continue;
     parts.push(typeof arg === 'string' ? arg : arg.text);
   }
-  const script = parts.join(' ');
-  if (separators.length === 0) return script;
-  const starts: number[] = [];
-  let offset = 0;
-  for (const part of parts) {
-    starts.push(offset);
-    offset += part.length + 1;
-  }
-  let kept = new Set<number>();
-  try {
-    kept = toKeptSeparators(script, new Set(separators.map(index => starts[index])));
-  } catch {}
-  const dropped = new Set(separators.filter(index => !kept.has(starts[index])));
-  return parts.filter((_, index) => !dropped.has(index)).join(' ');
+  return parts.join(' ');
 };
 
 const toCommandArgs = (command: string[] | string, words: Word[]): ScriptArg[] =>
@@ -181,11 +133,12 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
+  const operand = parsed._[0] ?? parsed['--']?.[0];
   const ids =
     typeof pluginArgs.positional === 'function'
       ? pluginArgs.positional(parsed)
-      : pluginArgs.positional && parsed._[0]
-        ? [parsed._[0]]
+      : pluginArgs.positional && operand
+        ? [operand]
         : [];
   for (const id of ids) {
     if (isGlobLike(id)) positionals.push(toEntry(id));

@@ -613,6 +613,15 @@ test('getInputsFromScripts (concurrently)', () => {
   t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
 });
 
+test('getInputsFromScripts (forwarded commands keep their own separator)', () => {
+  t('mocha test/a.js -- test/b.js', [toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
+  t('dotenvx run -- mocha test/a.js -- test/b.js', [toBinary('dotenvx'), toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
+  t('cross-env A=1 mocha test/a.js -- test/b.js', [toBinary('cross-env'), toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
+  t('c8 node -p 0 -- ./script.js', [toBinary('c8'), toBinary('node')]);
+  t('cross-env A=1 node -e "require(1)" -- ./script.js', [toBinary('cross-env'), toBinary('node')]);
+  t('yarn exec -- tsx ./main.ts', [toBinary('tsx'), ts]);
+});
+
 test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run --convention=nextjs -- tsx watch src/index.ts', [toBinary('dotenvx'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
   t('env-cmd --no-overrides -- tsx watch src/index.ts', [toBinary('env-cmd'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);
@@ -648,7 +657,7 @@ test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run -- yarn exec -- tsx ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
   t(`cdk --app 'tsx --tsconfig "./config files/tsconfig.json" -- ./main.ts'`, [toBinary('cdk'), toBinary('tsx'), ts]);
-  t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
+  t('dotenvx run -- tsx watch -- -- ./main.ts', [toBinary('dotenvx'), toBinary('tsx')]);
   t("'dotenvx' 'run' '--' 'tsx' '--' './main.ts'", [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- tsx --"" ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t(`cdk --app 'npx -c "tsx -- ./main.ts"'`, [toBinary('cdk'), toBinary('tsx'), ts]);
