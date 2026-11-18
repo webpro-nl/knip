@@ -254,9 +254,10 @@ export class WorkspaceWorker {
   getProductionProjectFilePatterns() {
     const project = this.config.project;
     if (project.length === 0) return this.getProductionEntryFilePatterns();
-    const _project = this.config.project.map(pattern => {
-      if (!(pattern.endsWith('!') || pattern.startsWith('!'))) return negate(pattern);
-      return pattern;
+    // A plain pattern that is also listed as `pattern!` is dropped, as `pattern!` applies in default mode too
+    const _project = project.flatMap(pattern => {
+      if (pattern.endsWith('!') || pattern.startsWith('!')) return [pattern];
+      return project.includes(`${pattern}!`) ? [] : [negate(pattern)];
     });
     const negatedEntryFiles = this.getNegatedDevelopmentEntryFiles();
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
