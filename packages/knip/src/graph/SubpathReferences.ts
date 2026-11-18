@@ -56,9 +56,9 @@ export class SubpathReferences {
     if (this.isActive) this.add(specifier, filePath);
   }
 
-  add(specifier: string, containingFilePath: string, isImport = false) {
+  add(specifier: string, containingFilePath: string, importedFilePath?: string) {
     const workspace = this.chief.findWorkspaceByFilePath(containingFilePath);
-    const id = `${workspace?.name ?? ''}\0${specifier}${isImport ? '\0import' : ''}`;
+    const id = `${workspace?.name ?? ''}\0${specifier}\0${importedFilePath ?? ''}`;
     if (this.seen.has(id)) return;
     this.seen.add(id);
     const target = this.findWorkspacePackageTarget(sanitizeSpecifier(specifier), containingFilePath);
@@ -66,14 +66,11 @@ export class SubpathReferences {
     const subpaths = this.referenced.get(target.name);
     if (subpaths) subpaths.add(target.subpath);
     else this.referenced.set(target.name, new Set([target.subpath]));
-    const importedFilePath =
-      isImport && target.patternMatch !== undefined
-        ? this.principal.resolveSpecifier(specifier, containingFilePath)
-        : undefined;
+    const skipFilePath = target.patternMatch === undefined ? undefined : importedFilePath;
     for (const targetPath of getPackageTargetPaths(target.target, target.dir, target.patternMatch, true)) {
       const filePath =
         this.principal.toSourceFilePath(targetPath, this.extensions) ?? (isFile(targetPath) ? targetPath : undefined);
-      if (filePath && filePath !== importedFilePath && !this.isGitIgnored(filePath))
+      if (filePath && filePath !== skipFilePath && !this.isGitIgnored(filePath))
         this.principal.claimEntryPath(filePath);
     }
   }
