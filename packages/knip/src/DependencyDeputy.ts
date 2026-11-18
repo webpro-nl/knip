@@ -70,6 +70,10 @@ export class DependencyDeputy {
   hostDependencies: Map<string, HostDependencies>;
   installedBinaries: Map<string, InstalledBinaries>;
   hasTypesIncluded: Map<string, Set<string>>;
+  topLevelIgnores: { ignoreDependencies: (string | RegExp)[]; unusedIgnoreDependencies: Set<string | RegExp> } = {
+    ignoreDependencies: [],
+    unusedIgnoreDependencies: new Set(),
+  };
 
   constructor({ isProduction, isStrict, isReportDependencies }: MainOptions) {
     this.isProduction = isProduction;
@@ -167,6 +171,14 @@ export class DependencyDeputy {
 
   getWorkspaceManifest(workspaceName: string) {
     return this._manifests.get(workspaceName);
+  }
+
+  public setTopLevelIgnoreDependencies(items: IgnoreItem[]) {
+    const ignores = toIgnoreMap(items, id => filterIsProduction(id, this.isProduction));
+    this.topLevelIgnores = {
+      ignoreDependencies: [...ignores.keys()],
+      unusedIgnoreDependencies: new Set(ignores.keys()),
+    };
   }
 
   public setWorkspacePkgNames(pkgNames: Iterable<string>) {
@@ -447,14 +459,12 @@ export class DependencyDeputy {
               counters[type]--;
               manifest.unusedIgnoreDependencies.delete(ignoreItem);
             } else if (issue.workspace !== ROOT_WORKSPACE_NAME) {
-              const manifest = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME);
-              if (manifest) {
-                const ignoreItem = findMatch(manifest.ignoreDependencies, packageName);
-                if (ignoreItem) {
-                  delete issueSet[issueKey];
-                  counters[type]--;
-                  manifest.unusedIgnoreDependencies.delete(ignoreItem);
-                }
+              const rootIgnores = this.getWorkspaceManifest(ROOT_WORKSPACE_NAME) ?? this.topLevelIgnores;
+              const ignoreItem = findMatch(rootIgnores.ignoreDependencies, packageName);
+              if (ignoreItem) {
+                delete issueSet[issueKey];
+                counters[type]--;
+                rootIgnores.unusedIgnoreDependencies.delete(ignoreItem);
               }
             }
           }
@@ -546,6 +556,10 @@ export class DependencyDeputy {
       for (const identifier of manifest.unusedIgnoreUnresolved) {
         configurationHints.push(toHint('ignoreUnresolved', identifier));
       }
+    }
+
+    for (const identifier of this.topLevelIgnores.unusedIgnoreDependencies) {
+      configurationHints.push({ workspaceName: ROOT_WORKSPACE_NAME, identifier, type: 'ignoreDependencies' });
     }
 
     return configurationHints;

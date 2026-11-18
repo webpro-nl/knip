@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/workspaces-ignored-root-b",
+  "version": "*",
+  "dependencies": {
+    "@org/b": "*",
+    "valibot": "*"
+  }
+}

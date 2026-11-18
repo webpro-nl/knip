@@ -1,0 +1,4 @@
+{
+  "ignoreWorkspaces": ["."],
+  "ignoreDependencies": ["@org/.+", "unused-ignore"]
+}
