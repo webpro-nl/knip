@@ -122,6 +122,8 @@ export const build = timerify(async function build({
     });
   }
 
+  if (!deputy.getWorkspaceManifest(ROOT_WORKSPACE_NAME)) deputy.setRootIgnores(chief.getIgnores(ROOT_WORKSPACE_NAME));
+
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
 
   collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: id, id })));
