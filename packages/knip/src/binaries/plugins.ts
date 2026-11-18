@@ -67,6 +67,7 @@ const parse = (pluginArgs: Args, args: string[]) => {
       ...pluginArgs.alias,
     },
     '--': true,
+    isStorePositions: true,
     stopEarly: pluginArgs.stopEarly,
   });
 };

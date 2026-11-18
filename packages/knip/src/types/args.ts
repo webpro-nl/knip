@@ -93,7 +93,7 @@ export type Args = {
    *
    * @example fromArgs: ["exec"] and `nodemon --exec "node index.js"` to also parse `node index.js`
    *
-   * @example fromArgs: (parsed: ParsedArgs, args: string[]) => argsFrom(args, parsed._[0]);
+   * @example fromArgs: spawningArgs
    *           and `dotenv KEY=value -- program index.js` to also parse script starting from first positional: `program index.js`
    *
    * @example fromArgs: (parsed: ParsedArgs, args: string[]) => args.join(' ');

@@ -580,6 +580,7 @@ test('getInputsFromScripts (c8)', () => {
   t("c8 --reporter=lcov --reporter text mocha 'test/**/*.spec.js'", [toBinary('c8'), toBinary('mocha'), toEntry('test/**/*.spec.js')]);
   t('c8 --reporter=lcov --reporter text node --test --test-reporter=@org/rep', [toBinary('c8'), toBinary('node'), toModule('@org/rep')]);
   t('c8 --100 node --test', [toBinary('c8'), toBinary('node')]);
+  t('c8 --reporter node node ./script.js', [toBinary('c8'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (nyc)', () => {
@@ -596,6 +597,7 @@ test('getInputsFromScripts (nyc)', () => {
   t('nyc --all -s node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
   t('nyc --require ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
   t('nyc -i ./require.js node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
+  t('nyc --exclude node node ./script.js', [toBinary('nyc'), toBinary('node'), js]);
 });
 
 test('getInputsFromScripts (nodemon)', () => {
