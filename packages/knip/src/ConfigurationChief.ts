@@ -433,10 +433,6 @@ export class ConfigurationChief {
     return workspaces[key] ?? {};
   }
 
-  public getTopLevelIgnoreDependencies() {
-    return toIgnoreItems(this.rawConfig?.ignoreDependencies);
-  }
-
   public getIgnores(workspaceName: string) {
     const workspaceConfig = this.getWorkspaceConfig(workspaceName);
     const configKey = this.getConfigKey(workspaceName);

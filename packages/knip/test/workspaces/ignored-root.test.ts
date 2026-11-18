@@ -7,12 +7,14 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/workspaces/ignored-root');
 
-test('Apply top-level ignoreDependencies to workspaces when root workspace is ignored', async () => {
+test('Apply top-level ignores to workspaces when root workspace is ignored', async () => {
   const options = await createOptions({ cwd });
   const { counters, configurationHints } = await main(options);
 
   assert.deepEqual(configurationHints, [
-    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignore' },
+    { type: 'ignoreDependencies', workspaceName: '.', identifier: 'unused-ignore-dependency' },
+    { type: 'ignoreBinaries', workspaceName: '.', identifier: 'unused-ignore-binary' },
+    { type: 'ignoreUnresolved', workspaceName: '.', identifier: 'unused-ignore-unresolved' },
   ]);
 
   assert.deepEqual(counters, {
