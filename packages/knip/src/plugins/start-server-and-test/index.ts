@@ -8,16 +8,8 @@ const title = 'start-server-and-test';
 
 const args: Args = {
   binaries: ['server-test', 'start-server-and-test', 'start-test'],
-  string: ['expect'],
-  fromArgs: parsed => {
-    const commands: string[] = [];
-    for (const arg of parsed._) {
-      if (typeof arg !== 'string' || !arg.includes(' ')) continue;
-      if (commands.length > 0) commands.push('&&');
-      commands.push(...arg.split(' '));
-    }
-    return commands;
-  },
+  fromArgs: parsed =>
+    [...parsed._, ...(parsed['--'] ?? [])].filter(arg => typeof arg === 'string' && arg.includes(' ')).join('\n'),
 };
 
 const plugin: Plugin = {

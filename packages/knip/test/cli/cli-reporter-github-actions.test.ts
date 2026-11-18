@@ -26,11 +26,11 @@ test('knip --reporter github-actions (rules: unused export, unused dep, unresolv
   const expected = `Unused files (1)
 ::warning file=unused.ts,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused files::unused.ts
 Unused dependencies (1)
-::warning file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused dependencies::unused in package.json
+::warning file=package.json,line=5,endLine=5,col=6,endColumn=6,title=✂️ Knip / Unused dependencies::unused in package.json
 Unused devDependencies (1)
-::warning file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Unused devDependencies::@dev/unused in package.json
+::warning file=package.json,line=9,endLine=9,col=6,endColumn=6,title=✂️ Knip / Unused devDependencies::@dev/unused in package.json
 Referenced optional peerDependencies (1)
-::warning file=package.json,line=1,endLine=1,col=1,endColumn=1,title=✂️ Knip / Referenced optional peerDependencies::optional-peer-dep in package.json
+::warning file=package.json,line=12,endLine=12,col=6,endColumn=6,title=✂️ Knip / Referenced optional peerDependencies::optional-peer-dep in package.json
 Unlisted dependencies (1)
 ::warning file=index.ts,line=5,endLine=5,col=8,endColumn=8,title=✂️ Knip / Unlisted dependencies::unlisted in index.ts
 Unlisted binaries (1)
