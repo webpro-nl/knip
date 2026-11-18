@@ -631,7 +631,7 @@ export class WorkspaceWorker {
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) continue;
       const id = pattern.replace(/!$/, '');
-      if (includedPaths.has(join(dir, id))) {
+      if ((hasNoProductionSuffix(pattern) && patterns.includes(`${pattern}!`)) || includedPaths.has(join(dir, id))) {
         hints.push(hint(`${type}-redundant`, pattern));
       } else if (!hasMatch(picomatch(id))) {
         hints.push(hint(`${type}-empty`, pattern));

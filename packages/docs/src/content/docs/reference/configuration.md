@@ -41,8 +41,8 @@ See [dynamic configuration][1] about dynamic and typed configuration files.
 
 ### `entry`
 
-Array of glob patterns to find entry files. Prefix with `!` for negation.
-Example:
+Array of glob patterns to find entry files. Prefix with `!` for negation. Suffix
+with `!` to also use a pattern in production mode. Example:
 
 ```json title="knip.json"
 {
@@ -54,7 +54,8 @@ Also see [configuration][2] and [entry files][3].
 
 ### `project`
 
-Array of glob patterns to find project files. Example:
+Array of glob patterns to find project files. Suffix with `!` to also use a
+pattern in production mode. Example:
 
 ```json title="knip.json"
 {
@@ -497,7 +498,8 @@ entry files when reporting unused exports:
 If enabled, Knip will report unused exports in entry source files. But not in
 entry and configuration files as configured by plugins, such as `next.config.js`
 or `src/routes/+page.svelte`. Entry files discovered only through `package.json`
-scripts are also excluded; add them to `entry` to include their exports.
+scripts are also excluded; add them to `entry` to include their exports, with
+`!` for production files.
 
 This will also enable reporting unused members of exported enums and namespaces.
 
