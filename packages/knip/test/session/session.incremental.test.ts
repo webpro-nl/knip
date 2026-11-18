@@ -146,6 +146,63 @@ test('files matched by a subpath import pattern keep their unused exports after 
   await assertFresh(session, cwd);
 });
 
+test('files matched by a subpath import pattern keep their unused exports while the importing file is unchanged', async t => {
+  const cwd = await setup(t);
+  await writeFile(
+    join(cwd, 'package.json'),
+    '{"name":"incremental","imports":{"#/*":"./*"},"knip":{"entry":["index.ts"],"project":["*.ts"]}}'
+  );
+  await writeFile(join(cwd, 'consumer.ts'), "import { used } from '#/used.ts';\nexport const consumer = used;\n");
+  await writeFile(join(cwd, 'used.ts'), 'export const used = 1;\nexport const spare = 2;\n');
+  await writeFile(join(cwd, 'other.ts'), 'export const other = 3;\n');
+  await writeFile(join(cwd, 'index.ts'), "import { consumer } from './consumer.ts';\nconsole.log(consumer);\n");
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports), ['used.ts']);
+
+  await writeFile(
+    join(cwd, 'index.ts'),
+    "import { consumer } from './consumer.ts';\nimport { other } from './other.ts';\nconsole.log(consumer, other);\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports), ['used.ts']);
+  await assertFresh(session, cwd);
+});
+
+test('workspace package subpath targets stay entry files after unrelated topology changes', async t => {
+  const cwd = await setup(t);
+  await writeFile(
+    join(cwd, 'package.json'),
+    '{"name":"root","private":true,"workspaces":["packages/*"],"knip":{"workspaces":{"packages/app":{"entry":["index.ts"]},"packages/lib":{"includeSubpathExports":true}}}}'
+  );
+  await mkdir(join(cwd, 'packages/app'), { recursive: true });
+  await mkdir(join(cwd, 'packages/lib'), { recursive: true });
+  await writeFile(join(cwd, 'packages/lib/package.json'), '{"name":"@scope/lib","exports":{"./*":"./*.ts"}}');
+  await writeFile(join(cwd, 'packages/lib/shared.ts'), 'export const shared = 1;\nexport const spare = 2;\n');
+  await writeFile(
+    join(cwd, 'packages/app/package.json'),
+    '{"name":"@scope/app","dependencies":{"@scope/lib":"workspace:*"}}'
+  );
+  await writeFile(
+    join(cwd, 'packages/app/consumer.ts'),
+    "import { shared } from '@scope/lib/shared';\nexport const consumer = shared;\n"
+  );
+  await writeFile(join(cwd, 'packages/app/other.ts'), 'export const other = 1;\n');
+  await writeFile(
+    join(cwd, 'packages/app/index.ts'),
+    "import { consumer } from './consumer.ts';\nconsole.log(consumer);\n"
+  );
+  const session = await createSession(await createOptions({ cwd, isSession: true }));
+  assert.deepEqual(session.getIssues().issues.exports, {});
+
+  await writeFile(
+    join(cwd, 'packages/app/index.ts'),
+    "import { consumer } from './consumer.ts';\nimport { other } from './other.ts';\nconsole.log(consumer, other);\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'packages/app/index.ts' }]);
+  assert.deepEqual(session.getIssues().issues.exports, {});
+  await assertFresh(session, cwd);
+});
+
 test('subpath targets stay entry files while a script references them', async t => {
   const cwd = await setup(t);
   await writeFile(
