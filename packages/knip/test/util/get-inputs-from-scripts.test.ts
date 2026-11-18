@@ -480,6 +480,8 @@ test('getInputsFromScripts (pnpm exec child options)', () => {
 test('getInputsFromScripts (pnpx/pnpm dlx)', () => {
   t('pnpx pkg', [toDependency('pkg', opt)]);
   t('pnpx tsx ./main.ts', [toDependency('tsx', opt), ts]);
+  t('pnpx tsx@catalog: ./main.ts', [toDependency('tsx', opt), toCatalog('tsx', 'default'), ts]);
+  t('pnpm dlx @biomejs/biome check .', [toDependency('@biomejs/biome', opt)]);
   t('pnpx tsx ./main.ts --dir output', [toDependency('tsx', opt), ts]);
   t('pnpx tsx ./main.ts -C output', [toDependency('tsx', opt), ts]);
   t('pnpx node ./script.js -- --import unused-dep', [toDependency('node', opt), js]);
