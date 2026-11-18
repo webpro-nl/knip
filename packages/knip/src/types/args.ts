@@ -13,11 +13,13 @@ export type Args = {
   binaries?: string[];
 
   /**
-   * Add first positional argument as entry point(s)
+   * Add first positional argument as entry point(s), or a function that returns the positional arguments to add
+   *
+   * @example positional: parsed => (parsed.eval === undefined ? parsed._.slice(0, 1) : [])
    *
    * @default undefined
    */
-  positional?: boolean;
+  positional?: boolean | ((parsed: ParsedArgs) => string[]);
 
   /**
    * Mark arguments as string
@@ -27,11 +29,18 @@ export type Args = {
   string?: string[];
 
   /**
-   * Mark arguments as boolean
+   * Mark arguments as boolean, or `true` to treat every argument not marked as string as boolean (e.g. Node.js)
    *
    * @default undefined
    */
-  boolean?: string[];
+  boolean?: string[] | true;
+
+  /**
+   * Stop parsing options at the first positional argument, the rest belongs to it (e.g. `node [options] script.js`)
+   *
+   * @default undefined
+   */
+  stopEarly?: boolean;
 
   /**
    * Define aliases (e.g. `{ require: ["r"] }`)
@@ -79,17 +88,20 @@ export type Args = {
 
   /**
    * Parse return value as script.
-   * Can be a function that returns an array of string,
+   * Can be a function that returns an array of string (or a string to parse as shell script text),
    * or an array of strings and those values will be parsed as scripts (recursion)
    *
    * @example fromArgs: ["exec"] and `nodemon --exec "node index.js"` to also parse `node index.js`
    *
-   * @example fromArgs: (parsed: ParsedArgs, args: string[]) => argsFrom(args, parsed._[0]);
+   * @example fromArgs: spawningArgs
    *           and `dotenv KEY=value -- program index.js` to also parse script starting from first positional: `program index.js`
+   *
+   * @example fromArgs: (parsed: ParsedArgs, args: string[]) => args.join(' ');
+   *           and `cross-env-shell "node a.js && node b.js"` to parse both commands
    *
    * @default undefined
    */
-  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[], options: { cwd: string }) => string[]);
+  fromArgs?: string[] | ((parsed: ParsedArgs, args: string[], options: { cwd: string }) => string[] | string);
 
   /**
    * Return inputs from parsed arguments

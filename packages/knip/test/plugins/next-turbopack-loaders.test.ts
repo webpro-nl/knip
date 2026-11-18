@@ -20,7 +20,7 @@ for (const isProduction of [false, true]) {
       devDependencies: isProduction ? 0 : 1,
       files: 2,
       processed: isProduction ? 9 : 11,
-      total: isProduction ? 9 : 11,
+      total: isProduction ? 10 : 11,
     });
   });
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { cpSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -69,17 +69,15 @@ const startServer = (cwd, t) => {
 test('source updates refresh descriptors and notify clients with unchanged empty diagnostics', async t => {
   const cwd = realpathSync(mkdtempSync(path.join(tmpdir(), 'knip-ls-graph-update-')));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
-  writeFileSync(path.join(cwd, 'package.json'), '{"name":"graph-update","type":"module"}');
-  writeFileSync(path.join(cwd, 'knip.json'), '{"entry":["index.js"],"project":["*.js"]}');
-  writeFileSync(path.join(cwd, 'index.js'), "import { used } from './value.js'; console.log(used);");
-  writeFileSync(path.join(cwd, 'value.js'), 'export const used = 1;');
+  cpSync(new URL('../../knip/fixtures/namespaces/namespace-enumerated', import.meta.url), cwd, { recursive: true });
   const server = startServer(cwd, t);
   await server.initialize();
-  const uri = pathToFileURL(path.join(cwd, 'value.js')).href;
+  const filePath = path.join(cwd, 'colors.ts');
+  const uri = pathToFileURL(filePath).href;
   const initial = await server.request(REQUEST_FILE_NODE, { uri });
   const before = await server.request(REQUEST_RESULTS);
   for (const issues of Object.values(before.issues)) assert.deepEqual(issues, {});
-  writeFileSync(path.join(cwd, 'value.js'), '\nexport const used = 1;');
+  writeFileSync(filePath, `\n${readFileSync(filePath, 'utf8')}`);
   server.send({ method: 'workspace/didChangeWatchedFiles', params: { changes: [{ uri, type: 2 }] } });
   await server.wait(message => message.method === NOTIFICATION_MODULE_GRAPH_BUILT);
   const updated = await server.request(REQUEST_FILE_NODE, { uri });
@@ -90,20 +88,16 @@ test('source updates refresh descriptors and notify clients with unchanged empty
 test('older local Knip sessions keep the existing manifest reload fallback without exiting the server', async t => {
   const cwd = realpathSync(mkdtempSync(path.join(tmpdir(), 'knip-ls-legacy-')));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
-  cpSync(
-    new URL('../../vscode-knip/test/fixtures/version-bump/knip', import.meta.url),
-    path.join(cwd, 'node_modules/knip'),
-    {
-      recursive: true,
-    }
-  );
-  writeFileSync(path.join(cwd, 'package.json'), '{"name":"legacy","type":"module"}');
-  writeFileSync(path.join(cwd, 'index.js'), '');
+  cpSync(new URL('../../vscode-knip/test/fixtures/version-bump', import.meta.url), cwd, { recursive: true });
+  mkdirSync(path.join(cwd, 'node_modules'));
+  renameSync(path.join(cwd, 'knip'), path.join(cwd, 'node_modules/knip'));
   const server = startServer(cwd, t);
   await server.initialize();
   const before = await server.request(REQUEST_RESULTS);
   assert.ok(before.issues.exports['index.js']['knip-version-1.0.0']);
-  writeFileSync(path.join(cwd, 'package.json'), '{"name":"legacy","type":"module","description":"updated"}');
+  const manifestPath = path.join(cwd, 'package.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  writeFileSync(manifestPath, JSON.stringify({ ...manifest, description: 'updated' }));
   server.send({
     method: 'workspace/didChangeWatchedFiles',
     params: { changes: [{ uri: pathToFileURL(path.join(cwd, 'package.json')).href, type: 2 }] },

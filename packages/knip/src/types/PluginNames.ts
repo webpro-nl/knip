@@ -31,11 +31,13 @@ export type PluginName =
   | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
+  | 'electron-builder'
   | 'electron-forge'
   | 'electron-vite'
   | 'eleventy'
   | 'ember'
   | 'ember-template-lint'
+  | 'env-cmd'
   | 'esbuild'
   | 'eslint'
   | 'evalite'
@@ -71,6 +73,7 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'lunaria'
+  | 'maestro'
   | 'markdownlint'
   | 'marko'
   | 'mastra'
@@ -243,11 +246,13 @@ export const pluginNames = [
   'docusaurus',
   'dotenv',
   'drizzle',
+  'electron-builder',
   'electron-forge',
   'electron-vite',
   'eleventy',
   'ember',
   'ember-template-lint',
+  'env-cmd',
   'esbuild',
   'eslint',
   'evalite',
@@ -283,6 +288,7 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'lunaria',
+  'maestro',
   'markdownlint',
   'marko',
   'mastra',

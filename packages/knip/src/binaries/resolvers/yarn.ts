@@ -94,7 +94,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const opts = dir ? { cwd: dir } : {};
   if (command === 'exec') {
-    const rest = argsFrom(words, binary);
+    const rest = binary === undefined ? argsFrom(words, '--').slice(1) : argsFrom(words, binary);
     return rest.length === 1 ? fromArgs([rest[0].value], opts) : fromArgs(rest, opts);
   }
   return fromArgs(argsFrom(words, command), opts);

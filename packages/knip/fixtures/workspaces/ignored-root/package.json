@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-ignored-root",
+  "version": "*",
+  "workspaces": ["packages/*"]
+}

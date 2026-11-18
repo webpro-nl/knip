@@ -44,7 +44,6 @@ const commands = new Set(['init', 'examples', 'help', 'version']);
 
 const args = {
   boolean: ['color', 'fail-fast', 'list-not-applicable', 'no-color'],
-  string: ['config', 'reporter', 'require'],
   config: ['config'],
   resolve: ['require', 'reporter'],
   resolveInputs: (parsed: ParsedArgs) => {

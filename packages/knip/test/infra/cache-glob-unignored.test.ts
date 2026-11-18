@@ -17,7 +17,6 @@ test('Cached globs pick up files in a directory that is no longer gitignored', (
   try {
     const command = `knip --no-progress --files --cache --cache-location ${cacheLocation}`;
 
-    writeFileSync(gitignore, 'generated\n');
     const cold = exec(command, { cwd: fixtureCopy });
     assert.equal(cold.stdout, '');
     assert.equal(cold.status, 0);

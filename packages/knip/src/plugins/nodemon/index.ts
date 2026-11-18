@@ -5,7 +5,6 @@ const title = 'nodemon';
 const args = {
   positional: false,
   nodeImportArgs: true,
-  string: ['exec'],
   alias: { exec: ['x'] },
   fromArgs: ['exec'],
 };
