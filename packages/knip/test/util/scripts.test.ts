@@ -57,6 +57,34 @@ test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);
 });
 
+test('getScriptCommands unwraps the commands dependency discovery follows', () => {
+  assert.deepEqual(getScriptCommands('dotenvx run -- node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(
+    getScriptCommands('dotenvx run --quiet -- c8 node --test-reporter spec --test test/unit/**/*.test.js'),
+    [{ binary: 'node', args: ['--test-reporter', 'spec', '--test', 'test/unit/**/*.test.js'] }]
+  );
+  assert.deepEqual(getScriptCommands('op run --env-file=.env -- bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('doppler run --command="node index.js"'), [
+    { binary: 'node', args: ['index.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("infisical run --command 'tsx ./scripts/generate-api.ts'"), [
+    { binary: 'tsx', args: ['./scripts/generate-api.ts'] },
+  ]);
+  assert.deepEqual(getScriptCommands('concurrently "tsc -w" "node --watch -r dotenv/config ./build/src/start.js"'), [
+    { binary: 'tsc', args: ['-w'] },
+    { binary: 'node', args: ['--watch', '-r', 'dotenv/config', './build/src/start.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("nodemon --exec 'npm test' --watch src --watch specs"), [
+    { binary: 'npm', args: ['test'] },
+  ]);
+  assert.deepEqual(
+    getScriptCommands(
+      'glob -c "node --import tsx --import global-jsdom/register --test --no-warnings" "./src/**/__tests__/**/*.[jt]s"'
+    ),
+    [{ binary: 'node', args: ['--import', 'tsx', '--import', 'global-jsdom/register', '--test', '--no-warnings'] }]
+  );
+});
+
 test('getScriptCommands skips options of spawning binaries', () => {
   assert.deepEqual(getScriptCommands('c8 --reporter=lcov --reporter text node --test'), [
     { binary: 'node', args: ['--test'] },
