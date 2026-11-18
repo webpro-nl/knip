@@ -1,0 +1,31 @@
+appId: com.example.app
+onFlowStart:
+  - runScript: scripts/setup.js
+onFlowComplete:
+  - runScript:
+      file: scripts/teardown.js
+---
+- launchApp
+- runScript: scripts/seed.js
+- runFlow: auth/login.yaml
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - repeat:
+          times: 2
+          commands:
+            - runScript:
+                file: scripts/add-to-cart.js
+                env:
+                  SKU: abc
+- retry:
+    maxRetries: 2
+    commands:
+      - evalScript: ${output.paid = true}
+      - runScript: scripts/pay.js
+- runFlow:
+    file: ../shared/logout.yaml
+- retry:
+    maxRetries: 1
+    file: ../shared/flaky.yaml

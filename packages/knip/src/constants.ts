@@ -129,6 +129,7 @@ export const IGNORED_GLOBAL_BINARIES = new Set([
   'logname',
   'ls',
   'lsof',
+  'maestro',
   'md5sum',
   'mkdir',
   'mkfifo',
