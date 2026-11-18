@@ -18,7 +18,8 @@ const production = ['{,src/}commands/**/*.{js,mjs,cjs,jsx,ts,tsx,mts,cts}'];
 const resolveConfig: ResolveConfig<OclifConfig> = async config => {
   if (!config) return [];
   const inputs: Input[] = production.map(id => toEntry(id, { production: true }));
-  for (const id of [...(config.plugins ?? []), ...(config.devPlugins ?? [])]) inputs.push(toDependency(id));
+  for (const id of config.plugins ?? []) inputs.push(toDependency(id, { production: true }));
+  for (const id of config.devPlugins ?? []) inputs.push(toDependency(id));
   return inputs;
 };
 

@@ -44,7 +44,9 @@ const resolveConfig: ResolveConfig<CapacitorConfig> = async (config, { configFil
     }
   }
 
-  return [...plugins, ...platforms.map(platform => `@capacitor/${platform}`)].map(id => toDependency(id));
+  return [...plugins, ...platforms.map(platform => `@capacitor/${platform}`)].map(id =>
+    toDependency(id, { production: true })
+  );
 };
 
 const plugin: Plugin = {
