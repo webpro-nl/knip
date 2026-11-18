@@ -1,6 +1,12 @@
 {
   "name": "@plugins/capacitor-spm",
+  "dependencies": {
+    "@capacitor/app": "*",
+    "@capacitor/browser": "*",
+    "lodash": "*"
+  },
   "devDependencies": {
-    "@capacitor/cli": "*"
+    "@capacitor/cli": "*",
+    "@capacitor/keyboard": "*"
   }
 }
