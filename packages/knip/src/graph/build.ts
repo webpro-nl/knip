@@ -568,7 +568,8 @@ export const build = timerify(async function build({
       }
 
       if (file.imports.subpathImports) {
-        for (const specifier of file.imports.subpathImports) subpathReferences.add(specifier, filePath);
+        for (const [specifier, importedFilePath] of file.imports.subpathImports)
+          subpathReferences.add(specifier, filePath, importedFilePath);
       }
 
       const wsDependencies = deputy.getDependencies(workspace.name);

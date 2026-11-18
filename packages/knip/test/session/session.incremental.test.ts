@@ -115,6 +115,51 @@ test('subpath references released by edits and deletions refresh unused subpaths
   assert.deepEqual(Object.keys(session.getIssues().issues.subpaths['package.json']).sort(), ['#unused', '#used']);
 });
 
+test('files matched by a subpath import pattern keep their unused exports after topology changes', async t => {
+  const cwd = await setup(t, 'session-subpath-patterns');
+  const options = await createOptions({ cwd, isSession: true });
+  const session = await createSession(options);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports['used.ts']), ['spare']);
+
+  await writeFile(
+    join(cwd, 'consumer.ts'),
+    "import { used } from '#/used.ts';\nimport { other } from '#/other.ts';\nexport const consumer = [used, other];\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'consumer.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports).sort(), ['other.ts', 'used.ts']);
+  await assertFresh(session, options);
+});
+
+test('files matched by a subpath import pattern keep their unused exports while the importing file is unchanged', async t => {
+  const cwd = await setup(t, 'session-subpath-patterns');
+  const options = await createOptions({ cwd, isSession: true });
+  const session = await createSession(options);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports), ['used.ts']);
+
+  await writeFile(
+    join(cwd, 'index.ts'),
+    "import { consumer } from './consumer.ts';\nimport { other, extra } from './other.ts';\nconsole.log(consumer, other, extra);\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'index.ts' }]);
+  assert.deepEqual(Object.keys(session.getIssues().issues.exports), ['used.ts']);
+  await assertFresh(session, options);
+});
+
+test('workspace package subpath targets stay entry files after unrelated topology changes', async t => {
+  const cwd = await setup(t, 'session-subpath-workspaces');
+  const options = await createOptions({ cwd, isSession: true });
+  const session = await createSession(options);
+  assert.deepEqual(session.getIssues().issues.exports, {});
+
+  await writeFile(
+    join(cwd, 'packages/app/index.ts'),
+    "import { consumer } from './consumer.ts';\nimport { other } from './other.ts';\nconsole.log(consumer, other);\n"
+  );
+  await session.handleFileChanges([{ type: 'modified', filePath: 'packages/app/index.ts' }]);
+  assert.deepEqual(session.getIssues().issues.exports, {});
+  await assertFresh(session, options);
+});
+
 test('subpath targets stay entry files while a script references them', async t => {
   const cwd = await setup(t, 'session-subpaths');
   const options = await createOptions({ cwd, isSession: true, args: { config: 'knip.script.json' } });
