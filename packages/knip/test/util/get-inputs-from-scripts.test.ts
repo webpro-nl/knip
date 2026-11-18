@@ -212,6 +212,9 @@ test('getInputsFromScripts (cross-env-shell)', () => {
   t('cross-env-shell NODE_OPTIONS="--require pkg" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
   t('cross-env-shell "NODE_ENV=production" "node ./script.js"', [toBinary('cross-env-shell'), toBinary('node'), js]);
   t("cross-env-shell 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('cross-env-shell'), toBinary('node'), js, toModule('pkg')]);
+  t('cross-env-shell NODE_OPTIONS="-r esm" ANALYZE=true next build', [toBinary('cross-env-shell'), toBinary('next'), toModule('esm')]);
+  t('cross-env "NODE_ENV=production" node ./script.js', [toBinary('cross-env'), toBinary('node'), js]);
+  t("cross-env 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('cross-env'), toBinary('node'), js, toModule('pkg')]);
 });
 
 test('getInputsFromScripts (nx)', () => {
@@ -673,6 +676,8 @@ test('getInputsFromScripts (double-dash)', () => {
 test('getInputsFromScripts (env-cmd environment operands)', () => {
   t('env-cmd -e test node ./script.js', [toBinary('env-cmd')]);
   t('env-cmd --silent -e test node ./script.js -- node ./main.ts', [toBinary('env-cmd'), toBinary('node'), ts]);
+  t('env-cmd --silent nyc -e .ts node ./script.js', [toBinary('env-cmd'), toBinary('nyc'), toBinary('node'), js]);
+  t('env-cmd -f .env node -e "require(1)" ./script.js', [toBinary('env-cmd'), toBinary('node')]);
 });
 
 test('getInputsFromScripts (env-cmd variadic environments)', () => {

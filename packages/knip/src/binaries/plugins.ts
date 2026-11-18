@@ -9,35 +9,31 @@ import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
 import { collectCommands, getCommandWords } from '../util/scripts.ts';
 import {
+  getEnvAssignmentCount,
   isWrapper as isFallbackWrapper,
   resolve as fallbackResolve,
   shellSpawningBinaries,
   spawningBinaries,
 } from './fallback.ts';
-import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
-
-const isEnvAssignment = /^\w+=/;
+import { isGlobLike, nodeLoadersArgs, toCommandBinary, toWordArgs } from './util.ts';
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
-
-const spawningPluginArgs: Args = { fromArgs: spawningArgs };
 
 const toShellAssignment = (assignment: string) => {
   const index = assignment.indexOf('=');
   return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
 };
 
-const shellSpawningPluginArgs: Args = {
-  fromArgs: (_, args) => {
-    const command: string[] = [];
-    let isAssignment = true;
-    for (const arg of args) {
-      isAssignment &&= isEnvAssignment.test(arg);
-      command.push(isAssignment ? toShellAssignment(arg) : arg);
-    }
-    return command.join(' ');
-  },
+const toCrossEnvCommand = (args: string[]) => {
+  const command = args.slice();
+  const count = getEnvAssignmentCount(args);
+  for (let index = 0; index < count; index++) command[index] = toShellAssignment(args[index]);
+  return command;
 };
+
+const spawningPluginArgs: Args = { fromArgs: (_, args) => toCrossEnvCommand(args) };
+
+const shellSpawningPluginArgs: Args = { fromArgs: (_, args) => toCrossEnvCommand(args).join(' ') };
 
 const toArgValues = (pluginArgs: Args, values: string[]) =>
   typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;

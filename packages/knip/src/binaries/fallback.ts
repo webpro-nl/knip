@@ -12,6 +12,14 @@ export const shellSpawningBinaries = ['cross-env-shell'];
 
 export const spawningBinaries = ['cross-env', ...shellSpawningBinaries];
 
+const isEnvAssignment = /^\w+=/;
+
+export const getEnvAssignmentCount = (values: string[]) => {
+  let count = 0;
+  while (count < values.length && isEnvAssignment.test(values[count])) count++;
+  return count;
+};
+
 // Binaries that have a new script behind the double-dash/end-of-command
 const endOfCommandBinaries = ['doppler', 'dotenvx', 'infisical', 'op'];
 
