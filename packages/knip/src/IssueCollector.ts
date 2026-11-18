@@ -142,6 +142,10 @@ export class IssueCollector {
     this.counters.total += processed + unused;
   }
 
+  addReferencedFile(filePath: string) {
+    this.referencedFiles.add(filePath);
+  }
+
   addFilesIssues(filePaths: string[]) {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;

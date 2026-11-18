@@ -110,7 +110,7 @@ const args = {
     ui: ['u'],
     watch: ['w'],
   },
-  string: ['config', 'extension', 'fgrep', 'file', 'grep', 'ignore', 'package', 'reporter', 'spec', 'ui'],
+  string: ['extension', 'file', 'ignore', 'reporter', 'spec'],
   config: ['config'],
   resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) => {
     const extensions = [parsed.extension ?? []]
@@ -120,7 +120,8 @@ const args = {
     const list = extensions.length > 0 ? extensions : defaultExtensions;
     const suffix = list.length === 1 ? `*.${list[0]}` : `*.{${list.join(',')}}`;
     const inputs: Input[] = [];
-    for (const value of [...parsed._, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
+    const operands = [...parsed._, ...(parsed['--'] ?? []).filter(value => !value.startsWith('-'))];
+    for (const value of [...operands, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
       if (isDirectory(cwd, value))
         inputs.push(toEntry(`${value.replace(/\/$/, '')}/${parsed.recursive ? '**/' : ''}${suffix}`));
       else inputs.push(toEntry(value));

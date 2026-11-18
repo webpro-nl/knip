@@ -30,7 +30,7 @@ const resolveConfig: ResolveConfig<TsdConfig> = async localConfig => {
 
 const args = {
   alias: { files: ['f'], typings: ['t'] },
-  string: ['files', 'typings'],
+  string: ['files'],
   resolveInputs: (parsed: ParsedArgs) => {
     const inputs: Input[] = [];
     for (const id of [parsed.files ?? []].flat()) inputs.push(toEntry(String(id)));
