@@ -79,6 +79,7 @@ test('getInputsFromScripts (node)', () => {
 test('getInputsFromScripts (node options end at the script)', () => {
   t('node ./script.js -r spec', [toBinary('node'), js]);
   t('node ./script.js --import unused-dep', [toBinary('node'), js]);
+  t('node ./script.js --test-reporter ./reporter.js', [toBinary('node'), js]);
   t('node ./script.js -- --import unused-dep', [toBinary('node'), js]);
   t('node --trace-uncaught ./script.js', [toBinary('node'), js]);
   t('node --max-old-space-size=1536 -- ./script.js', [toBinary('node'), js]);
@@ -96,6 +97,11 @@ test('getInputsFromScripts (node options end at the script)', () => {
 test('getInputsFromScripts (node --test)', () => {
   t('node --test --test-reporter=reporter', [toBinary('node'), toModule('reporter')]);
   t('node --test --test-reporter=spec', [toBinary('node')]);
+  t('node --test --test-reporter spec', [toBinary('node')]);
+  t('node --test --test-reporter=tap-spec', [toBinary('node'), toModule('tap-spec')]);
+  t('node --test-reporter dot --test-reporter ./reporter.js --test', [toBinary('node'), toModule('./reporter.js')]);
+  t('node --test --test-reporter spec -- ./script.js', [toBinary('node'), js]);
+  t('node --test-reporter ./reporter.js -- ./script.js', [toBinary('node'), js, toModule('./reporter.js')]);
 });
 
 test('getInputsFromScripts (node -r)', () => {
@@ -132,6 +138,7 @@ test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
   t('tsx --test ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --test --test-reporter spec -- ./main.ts', [toBinary('tsx'), ts]);
   t('tsx --tsconfig tsconfig.build.json --inspect ./main.ts', [toBinary('tsx'), ts]);
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);

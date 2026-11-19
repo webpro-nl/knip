@@ -1,6 +1,6 @@
 import type { GetScriptCommands, IsPluginEnabled, Plugin, Resolve } from '../../types/config.ts';
 import type { Args } from '../../types/args.ts';
-import { toEntry } from '../../util/input.ts';
+import { type Input, toEntry, toModule } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { RegisterVisitors } from '../../types/config.ts';
 import { createFsPromisesGlobVisitor } from './visitors/fsPromisesGlob.ts';
@@ -40,6 +40,8 @@ const hasNodeTest = (
 
 const entry = ['server.js'];
 
+const builtInReporters = new Set(['spec', 'tap', 'dot', 'junit', 'lcov']);
+
 const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createFsPromisesGlobVisitor(ctx));
 };
@@ -67,7 +69,6 @@ const toScripts = (parsed: ParsedArgs) => {
 export const args = {
   positional: toScripts,
   nodeImportArgs: true,
-  resolve: ['test-reporter'],
   string: [
     'allow-fs-read',
     'allow-fs-write',
@@ -127,6 +128,7 @@ export const args = {
     'test-isolation',
     'test-name-pattern',
     'test-random-seed',
+    'test-reporter',
     'test-reporter-destination',
     'test-rerun-failures',
     'test-shard',
@@ -147,7 +149,15 @@ export const args = {
   alias: { conditions: ['C'], eval: ['e'], print: ['p'] },
   boolean: true,
   stopEarly: true,
-  args: (args: string[]) => args.filter(arg => !/--test-reporter[= ](spec|tap|dot|junit|lcov)/.test(arg)),
+  resolveInputs: (parsed: ParsedArgs) => {
+    const reporters = parsed['test-reporter'];
+    if (!reporters) return [];
+    const inputs: Input[] = [];
+    for (const reporter of Array.isArray(reporters) ? reporters : [reporters]) {
+      if (typeof reporter === 'string' && reporter && !builtInReporters.has(reporter)) inputs.push(toModule(reporter));
+    }
+    return inputs;
+  },
 } satisfies Args;
 
 const plugin: Plugin = {

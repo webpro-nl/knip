@@ -38,7 +38,7 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 const args = {
   ...nodeArgs,
   string: [...nodeArgs.string, 'exclude', 'ignore', 'include', 'tsconfig'],
-  args: (args: string[]) => nodeArgs.args(args[0] === 'watch' ? args.slice(1) : args),
+  args: (args: string[]) => (args[0] === 'watch' ? args.slice(1) : args),
 } satisfies Args;
 
 const plugin: Plugin = {
