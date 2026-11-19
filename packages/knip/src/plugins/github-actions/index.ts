@@ -36,6 +36,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
   const inputs = new Set<Input>();
 
   const jobs = findByKeyDeep<Job>(config, 'steps');
+  const workflowWorkingDir = config?.defaults?.run?.['working-directory'];
 
   for (const steps of jobs) {
     if (!Array.isArray(steps.steps)) continue;
@@ -43,8 +44,9 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
     const path = action?.with?.path;
+    const jobWorkingDir = steps.defaults?.run?.['working-directory'] ?? workflowWorkingDir;
     for (const step of steps.steps) {
-      const workingDir = step['working-directory'];
+      const workingDir = step['working-directory'] ?? jobWorkingDir;
       const dir = join(rootCwd, path && workingDir ? relative(path, workingDir) : workingDir ? workingDir : '.');
       if (step.run) {
         const manifest = getManifest(dir) ?? options.manifest;
