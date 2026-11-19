@@ -9,8 +9,10 @@ import { _resolveSync } from '../../util/resolve.ts';
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   const entries = new Set<string>();
 
+  const addHandler = (specifier: string) => entries.add(specifier.substring(0, specifier.lastIndexOf('.')));
+
   const addHandlers = (values: Set<string>) => {
-    for (const specifier of values) entries.add(specifier.substring(0, specifier.lastIndexOf('.')));
+    for (const specifier of values) addHandler(specifier);
   };
 
   try {
@@ -40,7 +42,7 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
         }
         if (propName === 'route' && node.arguments?.length >= 2) {
           const handlerArg = node.arguments[1];
-          if (handlerArg?.type === 'Literal' && typeof handlerArg.value === 'string') entries.add(handlerArg.value);
+          if (handlerArg?.type === 'Literal' && typeof handlerArg.value === 'string') addHandler(handlerArg.value);
         }
       },
     });
