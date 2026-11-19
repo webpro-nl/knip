@@ -12,10 +12,12 @@
     "@docusaurus/plugin-sitemap": "*",
     "@docusaurus/preset-classic": "*",
     "@docusaurus/theme-mermaid": "*",
+    "@easyops-cn/docusaurus-search-local": "*",
     "@mdx-js/react": "*",
     "@my-company/docusaurus-plugin": "*",
     "@my-company/docusaurus-plugin-awesome": "*",
     "@my-company/docusaurus-plugin-cool": "*",
+    "docusaurus-lunr-search": "*",
     "docusaurus-plugin-awesome": "*"
   },
   "devDependencies": {

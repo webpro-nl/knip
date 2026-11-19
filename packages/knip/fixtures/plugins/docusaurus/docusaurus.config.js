@@ -8,7 +8,11 @@ export default {
   future: {
     experimental_faster: true,
   },
-  themes: ['@docusaurus/theme-mermaid', '@docusaurus/theme-search-algolia'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    '@docusaurus/theme-search-algolia',
+    ['@easyops-cn/docusaurus-search-local', { hashed: true }],
+  ],
   markdown: {
     mermaid: true,
   },
@@ -26,6 +30,7 @@ export default {
     ['sitemap', { changefreq: 'weekly' }],
     'awesome',
     'sass',
+    'docusaurus-lunr-search',
     '@my-company',
     '@my-company/awesome',
     '@my-company/cool/web',
