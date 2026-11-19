@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/vite-plus-vite-disabled",
+  "devDependencies": {
+    "vite-plus": "*"
+  }
+}

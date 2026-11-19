@@ -10,6 +10,7 @@ import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveExtendedConfig } from '../oxlint/index.ts';
+import { getTaskInputs } from '../vite-plus/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getExternalReporters, toEnvDependency } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
@@ -159,6 +160,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
   inputs.add(toEntry(join(options.cwd, 'src/vite-env.d.ts')));
 
   const configs = await getConfigs(localConfig);
+
+  if (options.enabledPlugins.includes('vite-plus')) {
+    for (const input of getTaskInputs(configs, options)) inputs.add(input);
+  }
 
   const patterns = new Set<string>();
   for (const cfg of configs) {
