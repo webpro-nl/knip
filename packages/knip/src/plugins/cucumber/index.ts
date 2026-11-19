@@ -4,6 +4,7 @@ import { hasDependency } from '../../util/plugin.ts';
 import type { CucumberConfig, Format } from './types.ts';
 
 // https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md
+// https://github.com/cucumber/cucumber-js/blob/main/docs/transpiling.md
 
 const title = 'Cucumber';
 
@@ -40,11 +41,12 @@ const toFormatterName = (format: Format) => {
 const resolveProfile = (config?: CucumberConfig) => {
   const imports = (config?.import ? config.import : entry).map(id => toEntry(id));
   const requires = (config?.require ? config.require : []).map(id => toEntry(id));
+  const modules = (config?.requireModule ? config.requireModule : []).map(id => toModule(id));
   const formatters = (config?.format ? config.format : [])
     .map(toFormatterName)
     .filter(name => !builtinFormatters.has(name))
     .map(id => toModule(id));
-  return [...imports, ...requires, ...formatters];
+  return [...imports, ...requires, ...modules, ...formatters];
 };
 
 const resolveConfig: ResolveConfig<CucumberConfig | Record<string, CucumberConfig> | string> = (config, options) => {
