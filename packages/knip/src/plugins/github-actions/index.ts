@@ -30,7 +30,7 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
 
 const ACTION_PATH_VAR = /\$\{\{\s*github\.action_path\s*\}\}|\$\{GITHUB_ACTION_PATH\}|\$GITHUB_ACTION_PATH/g;
 
-const resolveConfig: ResolveConfig = async (config, options) => {
+export const resolveConfig: ResolveConfig = async (config, options) => {
   const { rootCwd, getInputsFromScripts, isProduction, getManifest, configFileDir } = options;
 
   const inputs = new Set<Input>();
