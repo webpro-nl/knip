@@ -239,21 +239,27 @@ export class WorkspaceWorker {
     return [patterns, negateWorkspaces, ignoredWorkspaces.map(negate)].flat();
   }
 
+  private getNegatedDevelopmentEntryFiles() {
+    const { entry } = this.config;
+    return entry.filter(pattern => hasNoProductionSuffix(pattern) && !entry.includes(`${pattern}!`)).map(negate);
+  }
+
   getProductionEntryFilePatterns() {
     const entry = this.config.entry.filter(hasProductionSuffix);
     if (entry.length === 0) return [];
-    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
+    const negatedEntryFiles = this.getNegatedDevelopmentEntryFiles();
     return [entry, negatedEntryFiles, this.negatedWorkspacePatterns].flat();
   }
 
   getProductionProjectFilePatterns() {
     const project = this.config.project;
     if (project.length === 0) return this.getProductionEntryFilePatterns();
-    const _project = this.config.project.map(pattern => {
-      if (!(pattern.endsWith('!') || pattern.startsWith('!'))) return negate(pattern);
-      return pattern;
+    // A plain pattern that is also listed as `pattern!` is dropped, as `pattern!` applies in default mode too
+    const _project = project.flatMap(pattern => {
+      if (pattern.endsWith('!') || pattern.startsWith('!')) return [pattern];
+      return project.includes(`${pattern}!`) ? [] : [negate(pattern)];
     });
-    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
+    const negatedEntryFiles = this.getNegatedDevelopmentEntryFiles();
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
