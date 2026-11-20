@@ -6,7 +6,7 @@ export type { Results } from '../run.ts';
 export type { Issue, Issues, IssueType, Rules } from '../types/issues.ts';
 export type { PackageJson } from '../types/package-json.ts';
 export { createOptions, type MainOptions } from '../util/create-options.ts';
-export { removeExport } from '../util/remove-export.ts';
+export { keepModuleMarker, removeExport } from '../util/remove-export.ts';
 export { buildFileDescriptor, type FileDescriptorOptions } from './file-descriptor.ts';
 export { buildPackageJsonDescriptor, type PackageJsonFile } from './package-json-descriptor.ts';
 export { createSession, type Session } from './session.ts';

@@ -11,10 +11,20 @@ test('removes an export with the same edit as --fix', () => {
     return TextDocument.applyEdits(document, edit.changes[document.uri]);
   };
   assert.equal(removeExport('export { apple, pear };\n', 'apple', 3), 'export {  pear };\n');
-  assert.equal(removeExport("export { apple } from './basket.ts';\n", 'apple', 3), ';\n');
+  assert.equal(removeExport("export { apple } from './basket.ts';\n", 'apple', 3), ';\n\nexport {};\n');
   assert.equal(
     removeExport('enum Fruit {\n  Apple,\n  Pear,\n  Plum,\n}\n', 'Pear', 5),
     'enum Fruit {\n  Apple,\n  Plum,\n}\n'
+  );
+});
+
+test('keeps the file a module when the quick fix removes its last export', () => {
+  const text = 'export const FASTIFY_HELMET_CONFIG = {\n  xXssProtection: true,\n} as const;\n';
+  const document = TextDocument.create('file:///project/fastify-helmet.config.ts', 'typescript', 1, text);
+  const edit = createRemoveExportEdit(document, document.uri, { fixes: [[0, 7, 0]] });
+  assert.equal(
+    TextDocument.applyEdits(document, edit.changes[document.uri]),
+    'const FASTIFY_HELMET_CONFIG = {\n  xXssProtection: true,\n} as const;\n\nexport {};\n'
   );
 });
 

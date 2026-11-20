@@ -1,4 +1,4 @@
-import { removeExport } from 'knip/session';
+import { keepModuleMarker, removeExport } from 'knip/session';
 import { DeleteFile, TextEdit } from 'vscode-languageserver/node';
 
 /**
@@ -22,6 +22,7 @@ export const createRemoveExportEdit = (document, uri, issue) => {
     for (const [start, end, flags] of issue.fixes.toSorted((a, b) => b[0] - a[0])) {
       text = removeExport({ text, start, end, flags });
     }
+    text = keepModuleMarker(source, text);
 
     let start = 0;
     while (start < text.length && text[start] === source[start]) start++;
