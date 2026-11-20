@@ -28,6 +28,6 @@ test('Find dependencies with the Angular plugin (production)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     processed: 5,
-    total: 5,
+    total: 10,
   });
 });

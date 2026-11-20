@@ -3,13 +3,15 @@
   "type": "module",
   "scripts": {
     "test": "yarn --cwd browser wtr --node-resolve --files checks.js",
-    "test:custom": "wtr --config config/runner.cjs --node-resolve custom-checks.js",
-    "test:after": "wtr -- spec/after-terminator.js"
+    "test:custom": "wtr --config config/runner.cjs --node-resolve --puppeteer custom-checks.js",
+    "test:after": "wtr --playwright -- spec/after-terminator.js"
   },
   "devDependencies": {
     "@esm-bundle/chai": "*",
     "@web/dev-server-esbuild": "*",
     "@web/dev-server-rollup": "*",
-    "@web/test-runner": "*"
+    "@web/test-runner": "*",
+    "@web/test-runner-playwright": "*",
+    "@web/test-runner-puppeteer": "*"
   }
 }

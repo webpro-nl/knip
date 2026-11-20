@@ -1,0 +1,22 @@
+name: lint
+
+on: push
+
+defaults:
+  run:
+    working-directory: packages/app
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: node scripts/lint.js
+  format:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/app/scripts
+    steps:
+      - uses: actions/checkout@v6
+      - run: node format.js

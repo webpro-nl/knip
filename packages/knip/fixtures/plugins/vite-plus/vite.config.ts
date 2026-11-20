@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite-plus';
+import { sharedTasks } from './tooling/tasks.ts';
 
 export default defineConfig({
   run: {
@@ -6,6 +7,8 @@ export default defineConfig({
       sprite: {
         command: 'node scripts/build-sprite.ts',
       },
+      fonts: 'node scripts/subset-fonts.ts',
+      ...sharedTasks,
     },
   },
   staged: {

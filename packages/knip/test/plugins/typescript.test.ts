@@ -11,6 +11,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
+  assert(issues.devDependencies['package.json']['@types/chai']);
   assert(issues.unlisted['tsconfig.json']['typescript-eslint-language-service']);
   assert(issues.unlisted['tsconfig.json']['ts-graphql-plugin']);
   assert(issues.unlisted['tsconfig.content-mapper.json']['@mdx-js/content-mapper']);
@@ -24,6 +25,7 @@ test('Find dependencies with the TypeScript plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
+    devDependencies: 1,
     unlisted: 6,
     unresolved: 2,
     processed: 0,

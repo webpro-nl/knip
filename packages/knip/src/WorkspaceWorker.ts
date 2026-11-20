@@ -239,21 +239,27 @@ export class WorkspaceWorker {
     return [patterns, negateWorkspaces, ignoredWorkspaces.map(negate)].flat();
   }
 
+  private getNegatedDevelopmentEntryFiles() {
+    const { entry } = this.config;
+    return entry.filter(pattern => hasNoProductionSuffix(pattern) && !entry.includes(`${pattern}!`)).map(negate);
+  }
+
   getProductionEntryFilePatterns() {
     const entry = this.config.entry.filter(hasProductionSuffix);
     if (entry.length === 0) return [];
-    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
+    const negatedEntryFiles = this.getNegatedDevelopmentEntryFiles();
     return [entry, negatedEntryFiles, this.negatedWorkspacePatterns].flat();
   }
 
   getProductionProjectFilePatterns() {
     const project = this.config.project;
     if (project.length === 0) return this.getProductionEntryFilePatterns();
-    const _project = this.config.project.map(pattern => {
-      if (!(pattern.endsWith('!') || pattern.startsWith('!'))) return negate(pattern);
-      return pattern;
+    // A plain pattern that is also listed as `pattern!` is dropped, as `pattern!` applies in default mode too
+    const _project = project.flatMap(pattern => {
+      if (pattern.endsWith('!') || pattern.startsWith('!')) return [pattern];
+      return project.includes(`${pattern}!`) ? [] : [negate(pattern)];
     });
-    const negatedEntryFiles = this.config.entry.filter(hasNoProductionSuffix).map(negate);
+    const negatedEntryFiles = this.getNegatedDevelopmentEntryFiles();
     const negatedPluginConfigPatterns = this.getPluginConfigPatterns().map(negate);
     const negatedPluginProjectFilePatterns = this.getPluginProjectFilePatterns().map(negate);
 
@@ -453,7 +459,7 @@ export class WorkspaceWorker {
         }
 
         let parsed: ReturnType<typeof _parseFile> | undefined;
-        if (!isManifest) {
+        if (!isManifest && (!plugin.parseConfig || plugin.resolveFromAST)) {
           if (parsedConfigCache.has(configFilePath)) {
             parsed = parsedConfigCache.get(configFilePath);
           } else {
@@ -475,7 +481,7 @@ export class WorkspaceWorker {
         let hasLoadConfigError = false;
 
         if (plugin.resolveConfig) {
-          if (parsed && isExternalReExportsOnly(parsed)) {
+          if (!plugin.parseConfig && parsed && isExternalReExportsOnly(parsed)) {
             cache.resolveConfig = [];
           }
 
@@ -631,7 +637,7 @@ export class WorkspaceWorker {
     for (const pattern of patterns) {
       if (pattern.startsWith('!')) continue;
       const id = pattern.replace(/!$/, '');
-      if (includedPaths.has(join(dir, id))) {
+      if ((hasNoProductionSuffix(pattern) && patterns.includes(`${pattern}!`)) || includedPaths.has(join(dir, id))) {
         hints.push(hint(`${type}-redundant`, pattern));
       } else if (!hasMatch(picomatch(id))) {
         hints.push(hint(`${type}-empty`, pattern));

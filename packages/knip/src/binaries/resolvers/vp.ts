@@ -6,7 +6,7 @@ import { toCommandBinary } from '../util.ts';
 
 const parseOptions = {
   isStorePositions: true,
-  string: ['filter', 'resume-from'],
+  string: ['filter'],
   boolean: [
     'fail-if-no-match',
     'parallel',

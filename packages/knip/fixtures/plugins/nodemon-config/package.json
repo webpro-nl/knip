@@ -4,9 +4,6 @@
     "dev": "nodemon",
     "dev:mock": "nodemon --config config/mock.json"
   },
-  "nodemonConfig": {
-    "exec": "node scripts/legacy.js"
-  },
   "devDependencies": {
     "nodemon": "*",
     "tsx": "*"

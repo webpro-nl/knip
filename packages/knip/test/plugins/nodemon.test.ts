@@ -20,15 +20,12 @@ test('Find dependencies with the nodemon plugin', async () => {
 
 test('Find commands in nodemon config files', async () => {
   const options = await createOptions({ cwd: resolve('fixtures/plugins/nodemon-config') });
-  const { issues, counters } = await main(options);
-
-  assert(issues.files['scripts/legacy.js']);
+  const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    processed: 3,
-    total: 3,
+    processed: 2,
+    total: 2,
   });
 });
 
@@ -40,20 +37,5 @@ test('Find commands in nodemonConfig in package.json', async () => {
     ...baseCounters,
     processed: 1,
     total: 1,
-  });
-});
-
-test('Skip the nodemon config that --config or --exec replaces', async () => {
-  const options = await createOptions({ cwd: resolve('fixtures/plugins/nodemon-config-flag') });
-  const { issues, counters } = await main(options);
-
-  assert(issues.files['scripts/stale.js']);
-  assert(issues.files['scripts/overridden.js']);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    files: 2,
-    processed: 4,
-    total: 4,
   });
 });

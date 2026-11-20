@@ -1,0 +1,5 @@
+{
+  "entry": ["unused.ts"],
+  "project": ["unused.ts", "used.ts"],
+  "jest": false
+}

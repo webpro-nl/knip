@@ -1,7 +1,8 @@
 {
   "name": "@plugins/wrangler",
   "scripts": {
-    "dev": "wrangler dev"
+    "dev": "wrangler dev",
+    "dev:workers": "wrangler dev -c ./app/wrangler.jsonc -c ./api/wrangler.jsonc"
   },
   "dependencies": {
     "wrangler": "^3.37.0"

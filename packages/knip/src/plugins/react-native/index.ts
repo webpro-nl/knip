@@ -30,7 +30,7 @@ const resolveConfig: ResolveConfig<ReactNativeConfig> = async config => {
 
   if (config.platforms) {
     for (const platform of Object.values(config.platforms)) {
-      if (platform.npmPackageName) inputs.push(toDependency(platform.npmPackageName));
+      if (platform.npmPackageName) inputs.push(toDependency(platform.npmPackageName, { production: true }));
     }
   }
 

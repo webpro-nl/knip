@@ -2,7 +2,8 @@
   "name": "@plugins/rspack",
   "scripts": {
     "dev": "rspack serve",
-    "build": "rspack build"
+    "build": "rspack build",
+    "build:server": "rspack build -c config/server.js"
   },
   "devDependencies": {
     "@swc/plugin-emotion": "*",

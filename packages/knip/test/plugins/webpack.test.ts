@@ -29,3 +29,10 @@ test('Find dependencies with the Webpack plugin', async () => {
     total: 17,
   });
 });
+
+test('Find dependencies with the Webpack plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues } = await main(options);
+
+  assert.deepEqual(issues.dependencies, {});
+});

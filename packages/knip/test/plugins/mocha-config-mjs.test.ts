@@ -14,10 +14,12 @@ test('Find dependencies with the Mocha plugin (.mocharc.mjs)', async () => {
   assert(!('specs/example.test.js' in issues.files));
   assert('unrelated.js' in issues.files);
   assert(!issues.devDependencies['package.json']?.['mocha-junit-reporter']);
+  assert(issues.devDependencies['package.json']['ts-node']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
+    devDependencies: 1,
     processed: 3,
     total: 3,
   });

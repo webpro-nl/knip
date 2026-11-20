@@ -4,3 +4,4 @@ reporter: spec
 require:
   - ts-node/register
   - hooks.ts
+loader: ./loader.mjs
