@@ -9,6 +9,11 @@ interface FixerOptions {
 
 const importAttributesMatcher = /^(?:\s*with|[^\S\r\n\u2028\u2029]*assert)\s*\{[^}]*\}/;
 
+const MODULE_MARKER = /^[ \t]*(import|export)\b/m;
+
+export const keepModuleMarker = (source: string, text: string) =>
+  MODULE_MARKER.test(source) && !MODULE_MARKER.test(text) ? `${text.trimEnd()}\n\nexport {};\n` : text;
+
 const getOpeningBracketIndex = (text: string) => {
   let bracketOpenIndex = -1;
   let j = text.length - 1;

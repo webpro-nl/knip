@@ -36,7 +36,8 @@ Also see [type definitions][1] and [examples in existing plugins][2].
 - [positional][10]
 - [resolve][11]
 - [resolveInputs][12]
-- [string][13]
+- [stopEarly][13]
+- [string][14]
 
 ## alias
 
@@ -82,7 +83,8 @@ Default: plugin name, e.g. for the ESLint plugin the value is `["eslint"]`
 ## boolean
 
 Mark arguments as boolean. By default, arguments are expected to have string
-values.
+values. Set to `true` to have only [string][14] arguments take a value, like
+Node.js does.
 
 ## config
 
@@ -115,7 +117,9 @@ will be handled by `resolveConfig` of the (typescript) plugin.
 ## fromArgs
 
 Parse return value as a new script. Can be a an array of strings, or function
-that returns an array of strings and those values will be parsed separately.
+that returns an array of strings and those values will be parsed separately. A
+function can also return a string to have it parsed as shell script text, for
+tools that run the command in a shell (e.g. `env-cmd --use-shell`).
 
 Example:
 
@@ -153,7 +157,8 @@ Example:
 
 ## positional
 
-Set to `true` to use the first positional argument as an entry point.
+Set to `true` to use the first positional argument as an entry point, or use a
+function that returns the positional arguments to use as entry points.
 
 Example:
 
@@ -192,6 +197,12 @@ Return inputs from parsed arguments
 }
 ```
 
+## stopEarly
+
+Set to `true` to stop parsing options at the first positional argument, like
+Node.js does with `node [options] script.js [arguments]`. The arguments after it
+belong to the script.
+
 ## string
 
 Mark arguments as string. This is the default, but number-looking arguments are
@@ -209,4 +220,5 @@ returned as numbers.
 [10]: #positional
 [11]: #resolve
 [12]: #resolveinputs
-[13]: #string
+[13]: #stopearly
+[14]: #string

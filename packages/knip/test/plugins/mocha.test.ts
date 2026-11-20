@@ -14,7 +14,7 @@ test('Find dependencies with the Mocha plugin', async () => {
   assert(!issues.devDependencies['package.json']?.['mocha-multi-reporters']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

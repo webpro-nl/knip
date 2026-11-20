@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/session-subpath-patterns",
+  "imports": {
+    "#/*": "./*"
+  }
+}

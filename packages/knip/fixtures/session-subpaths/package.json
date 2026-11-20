@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/session-subpaths",
+  "devDependencies": {
+    "jest": "*"
+  },
+  "imports": {
+    "#used": "./used.ts",
+    "#unused": "./unused.ts",
+    "#setup": {
+      "node": "./setup-node.ts",
+      "default": "./setup-default.ts"
+    }
+  }
+}

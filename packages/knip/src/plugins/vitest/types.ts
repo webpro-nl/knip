@@ -1,4 +1,5 @@
 import type { OxlintConfig } from '../oxlint/types.ts';
+import type { VitePlusConfig } from '../vite-plus/types.ts';
 
 interface Alias {
   find: string | RegExp;
@@ -32,7 +33,7 @@ interface VitestConfig {
   };
 }
 
-export interface ViteConfig extends VitestConfig {
+export interface ViteConfig extends VitestConfig, VitePlusConfig {
   lint?: OxlintConfig;
   extends?: string | true;
   root?: string;

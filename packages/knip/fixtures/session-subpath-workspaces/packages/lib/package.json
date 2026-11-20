@@ -1,0 +1,6 @@
+{
+  "name": "@scope/lib",
+  "exports": {
+    "./*": "./*.ts"
+  }
+}

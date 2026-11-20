@@ -30,11 +30,13 @@ import { default as dependencyCruiser } from './dependency-cruiser/index.ts';
 import { default as docusaurus } from './docusaurus/index.ts';
 import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
+import { default as electronBuilder } from './electron-builder/index.ts';
 import { default as electronForge } from './electron-forge/index.ts';
 import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as ember } from './ember/index.ts';
 import { default as emberTemplateLint } from './ember-template-lint/index.ts';
+import { default as envCmd } from './env-cmd/index.ts';
 import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
 import { default as evalite } from './evalite/index.ts';
@@ -70,6 +72,7 @@ import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as lunaria } from './lunaria/index.ts';
+import { default as maestro } from './maestro/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as marko } from './marko/index.ts';
 import { default as mastra } from './mastra/index.ts';
@@ -150,6 +153,7 @@ import { default as sizeLimit } from './size-limit/index.ts';
 import { default as solidjsVitePlugin } from './solidjs-vite-plugin/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
+import { default as startServerAndTest } from './start-server-and-test/index.ts';
 import { default as stencil } from './stencil/index.ts';
 import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
@@ -168,6 +172,7 @@ import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
 import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
+import { default as triggerDev } from './trigger-dev/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
@@ -242,11 +247,13 @@ export const Plugins = {
   docusaurus,
   dotenv,
   drizzle,
+  'electron-builder': electronBuilder,
   'electron-forge': electronForge,
   'electron-vite': electronVite,
   eleventy,
   ember,
   'ember-template-lint': emberTemplateLint,
+  'env-cmd': envCmd,
   esbuild,
   eslint,
   evalite,
@@ -282,6 +289,7 @@ export const Plugins = {
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   lunaria,
+  maestro,
   markdownlint,
   marko,
   mastra,
@@ -362,6 +370,7 @@ export const Plugins = {
   'solidjs-vite-plugin': solidjsVitePlugin,
   sst,
   starlight,
+  'start-server-and-test': startServerAndTest,
   stencil,
   storybook,
   stryker,
@@ -380,6 +389,7 @@ export const Plugins = {
   temporal,
   textlint,
   travis,
+  'trigger-dev': triggerDev,
   'ts-node': tsNode,
   tsd,
   tsdown,

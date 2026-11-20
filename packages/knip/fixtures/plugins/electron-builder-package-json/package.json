@@ -1,0 +1,17 @@
+{
+  "name": "@plugins/electron-builder-package-json",
+  "main": "src/main.js",
+  "scripts": {
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "*",
+    "electron-builder": "*",
+    "electron-builder-notarize": "*"
+  },
+  "build": {
+    "appId": "com.example.notes",
+    "afterSign": "electron-builder-notarize",
+    "afterPack": "./build/strip-locales.js"
+  }
+}
