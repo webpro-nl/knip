@@ -1043,6 +1043,10 @@
           "title": "starlight plugin configuration (https://knip.dev/reference/plugins/starlight)",
           "$ref": "#/definitions/plugin"
         },
+        "start-server-and-test": {
+          "title": "start-server-and-test plugin configuration (https://knip.dev/reference/plugins/start-server-and-test)",
+          "$ref": "#/definitions/plugin"
+        },
         "stencil": {
           "title": "stencil plugin configuration (https://knip.dev/reference/plugins/stencil)",
           "$ref": "#/definitions/plugin"

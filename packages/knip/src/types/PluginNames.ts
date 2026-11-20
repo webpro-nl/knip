@@ -154,6 +154,7 @@ export type PluginName =
   | 'solidjs-vite-plugin'
   | 'sst'
   | 'starlight'
+  | 'start-server-and-test'
   | 'stencil'
   | 'storybook'
   | 'stryker'
@@ -369,6 +370,7 @@ export const pluginNames = [
   'solidjs-vite-plugin',
   'sst',
   'starlight',
+  'start-server-and-test',
   'stencil',
   'storybook',
   'stryker',

@@ -627,6 +627,25 @@ test('getInputsFromScripts (concurrently)', () => {
   t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
 });
 
+test('getInputsFromScripts (start-server-and-test)', () => {
+  t('start-server-and-test start http://localhost:3000 test', [toBinary('start-server-and-test')], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' 3000 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("start-test --expect 404 start :3000 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js], lifecycle);
+  t("server-test start 3000 'tsx ./main.ts' http-get://localhost:3001 test", [toBinary('server-test'), toBinary('tsx'), ts], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' '3000|3001' 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("server-test '8000|9000' test", [toBinary('server-test')], lifecycle);
+  t("server-test '8000|9000'", [toBinary('server-test')]);
+  t("start-test '3000|3001' 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js]);
+  t("start-test 'node ./script.js' '3000|3001'", [toBinary('start-test'), toBinary('node'), js]);
+  t("start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'", [
+    toBinary('start-server-and-test'),
+    toBinary('vitest'),
+    toConfig('vitest', 'vitest.config.evals.ts'),
+  ]);
+  t(`start-test -- 'tsx "./server files/main.ts"' 3000 'node -- ./script.js'`, [toBinary('start-test'), toBinary('tsx'), toEntryPath('./server files/main.ts', opt), toBinary('node'), js]);
+  t("server-test 'tsx ./main.ts # start the dev server' 3000 'node ./script.js'", [toBinary('server-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (forwarded commands keep their own separator)', () => {
   t('mocha test/a.js -- test/b.js', [toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
   t('dotenvx run -- mocha test/a.js -- test/b.js', [toBinary('dotenvx'), toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
