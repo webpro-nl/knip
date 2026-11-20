@@ -1,7 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://trigger.dev/docs/config/config-file
@@ -22,28 +21,17 @@ const extensions = '{ts,tsx,mts,cts,js,jsx,mjs,cjs}';
 // Without `dirs`, every directory named `trigger` holds tasks
 const defaultDir = '**/trigger';
 
-const defaultIgnorePatterns = ['**/*.{test,spec}.{ts,mts,cts,js,mjs,cjs}'];
-
-const getProductionPatterns = (dirs: Iterable<string>, ignorePatterns: Iterable<string>) => [
+const getProductionPatterns = (dirs: Iterable<string>) => [
   ...Array.from(dirs, dir => `${dir}/**/*.${extensions}`),
-  ...Array.from(ignorePatterns, pattern => `!${pattern}`),
+  '!**/*.{test,spec}.{ts,mts,cts,js,mjs,cjs}',
 ];
 
-const production = getProductionPatterns([defaultDir], defaultIgnorePatterns);
+const production = getProductionPatterns([defaultDir]);
 
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
-  const triggerDirectories = collectPropertyValues(program, 'triggerDirectories');
-  const dirs = triggerDirectories.size > 0 ? triggerDirectories : collectPropertyValues(program, 'dirs');
-  const ignorePatterns = collectPropertyValues(program, 'ignorePatterns');
-  const patterns = getProductionPatterns(
-    dirs.size > 0 ? dirs : [defaultDir],
-    ignorePatterns.size > 0 ? ignorePatterns : defaultIgnorePatterns
-  );
-  return patterns.map(pattern =>
-    toEntry(pattern.startsWith('!') ? `!${join(configFileDir, pattern.slice(1))}` : join(configFileDir, pattern), {
-      production: true,
-    })
-  );
+  const dirs = collectPropertyValues(program, 'dirs');
+  const patterns = dirs.size > 0 ? getProductionPatterns(dirs) : production;
+  return patterns.map(pattern => toEntry(pattern, { dir: configFileDir, production: true }));
 };
 
 const plugin: Plugin = {
