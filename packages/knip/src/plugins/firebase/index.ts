@@ -6,10 +6,10 @@ import type { Plugin } from '../../types/config.ts';
 const title = 'Firebase';
 
 const args: Args = {
-  binaries: ['firebase'],
+  binaries: ['firebase', 'firebase-tools'],
   boolean: ['debug', 'interactive', 'json', 'non-interactive', 'ui'],
   alias: { interactive: ['i'], json: ['j'] },
-  fromArgs: parsed => (parsed._[0] === 'emulators:exec' && parsed._[1] ? parsed._[1].split(' ') : []),
+  fromArgs: parsed => (parsed._[0] === 'emulators:exec' && parsed._[1] ? parsed._[1] : []),
 };
 
 const plugin: Plugin = {
