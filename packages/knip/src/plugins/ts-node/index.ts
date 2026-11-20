@@ -1,13 +1,12 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
-import { type Input, toDependency, toModule } from '../../util/input.ts';
+import { type Input, toModule } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://typestrong.org/ts-node/docs/options
 // https://github.com/TypeStrong/ts-node/blob/v10.9.2/src/configuration.ts#L235-L272
-// https://github.com/TypeStrong/ts-node/blob/v10.9.2/src/transpilers/swc.ts#L34-L46
 
 const title = 'ts-node';
 
@@ -24,11 +23,6 @@ export const resolveTsNodeConfig = (options: NonNullable<TsConfigJson['ts-node']
 
   const transpiler = Array.isArray(options.transpiler) ? options.transpiler[0] : options.transpiler;
   if (transpiler) inputs.push(toModule(transpiler));
-
-  if (options.swc) {
-    inputs.push(toDependency('@swc/core', { optional: true }));
-    inputs.push(toDependency('@swc/wasm', { optional: true }));
-  }
 
   return inputs;
 };

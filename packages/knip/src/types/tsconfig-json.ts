@@ -14,7 +14,6 @@ export interface TsConfigJson {
   'ts-node'?: {
     compiler?: string;
     transpiler?: string | [string, object];
-    swc?: boolean;
     require?: string[];
   };
 }

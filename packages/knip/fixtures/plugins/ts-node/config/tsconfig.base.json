@@ -3,6 +3,6 @@
     "strict": true
   },
   "ts-node": {
-    "require": ["./hooks.ts"]
+    "require": ["tsconfig-paths/register", "../setup/register.ts", "./hooks.ts"]
   }
 }
