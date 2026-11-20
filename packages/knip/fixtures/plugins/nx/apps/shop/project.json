@@ -1,0 +1,48 @@
+{
+  "sourceRoot": "apps/shop/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "options": {
+        "browser": "apps/shop/src/app.ts",
+        "server": "apps/shop/src/app.server.ts",
+        "polyfills": ["apps/shop/src/polyfills.ts"],
+        "scripts": [{ "input": "apps/shop/src/analytics.js", "bundleName": "analytics" }],
+        "ssr": {
+          "entry": "{projectRoot}/src/server.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/shop/src/environments/environment.ts",
+              "with": "apps/shop/src/environments/environment.prod.ts"
+            }
+          ]
+        },
+        "development": {
+          "fileReplacements": [
+            {
+              "replace": "apps/shop/src/environments/environment.ts",
+              "with": "apps/shop/src/environments/environment.development.ts"
+            }
+          ]
+        }
+      }
+    },
+    "build-esbuild": {
+      "executor": "@nx/angular:browser-esbuild",
+      "options": {
+        "main": "apps/shop/src/app-esbuild.ts"
+      }
+    },
+    "build-webpack": {
+      "executor": "@nrwl/angular:webpack-browser",
+      "options": {
+        "main": "apps/shop/src/app-webpack.ts"
+      }
+    }
+  }
+}

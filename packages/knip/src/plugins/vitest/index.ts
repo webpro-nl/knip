@@ -10,6 +10,7 @@ import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { basename, isAbsolute, isInternal, join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveExtendedConfig } from '../oxlint/index.ts';
+import { getTaskInputs } from '../vite-plus/index.ts';
 import { getHtmlScriptEntries, getIndexHtmlEntries } from '../vite/helpers.ts';
 import { getAliasInputs, getExternalReporters, toEnvDependency } from './helpers.ts';
 import { createVitestMockVisitor } from './visitors/mock.ts';
@@ -160,6 +161,10 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
 
   const configs = await getConfigs(localConfig);
 
+  if (options.enabledPlugins.includes('vite-plus')) {
+    for (const input of getTaskInputs(configs, options)) inputs.add(input);
+  }
+
   const patterns = new Set<string>();
   for (const cfg of configs) {
     for (const project of cfg.test?.projects ?? []) {
@@ -257,7 +262,7 @@ export const resolveConfig: ResolveConfig<ViteConfigOrFn | VitestWorkspaceConfig
     const inputSpecifiers =
       typeof _input === 'string' ? [_input] : Array.isArray(_input) ? _input : Object.values(_input).flat();
     for (const specifier of inputSpecifiers) {
-      const resolved = toAbsolute(specifier, viteRoot);
+      const resolved = toAbsolute(toPosix(specifier), viteRoot);
       inputs.add(toEntryPath(resolved, { production: true }));
       if (resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved, viteRoot, publicDir)) inputs.add(input);

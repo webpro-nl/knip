@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/session-configuration",
+  "devDependencies": {
+    "vite": "*",
+    "webpack": "*"
+  }
+}

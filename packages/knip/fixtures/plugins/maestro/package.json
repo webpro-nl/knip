@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/maestro",
+  "scripts": {
+    "e2e": "maestro test .maestro"
+  }
+}

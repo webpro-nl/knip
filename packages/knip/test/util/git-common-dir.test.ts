@@ -1,34 +1,34 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { findAndParseGitignores, getGitIgnoredHandler } from '../../src/util/glob-core.ts';
-import { join, relative, toPosix } from '../../src/util/path.ts';
+import { join, relative } from '../../src/util/path.ts';
+import { copyFixture } from '../helpers/copy-fixture.ts';
+import { resolve } from '../helpers/resolve.ts';
 
 for (const gitdir of ['directory', 'relative', 'absolute']) {
   for (const commondir of ['none', 'relative', 'absolute']) {
     test(`info/exclude (gitdir: ${gitdir}, commondir: ${commondir})`, async t => {
-      const root = toPosix(await fs.mkdtemp(join(toPosix(tmpdir()), 'knip-git-common-dir-')));
+      const root = await copyFixture('fixtures/glob-worktree/common-dir', 'knip-git-common-dir-');
       t.after(() => fs.rm(root, { recursive: true, force: true }));
       const cwd = join(root, 'checkout');
-      const gitDir = gitdir === 'directory' ? join(cwd, '.git') : join(root, 'metadata/worktrees/linked');
+      const gitDir = gitdir === 'directory' ? join(cwd, '.git') : join(root, 'mock-git-dir');
       const commonDir = commondir === 'none' ? gitDir : join(root, 'metadata');
-      await fs.mkdir(cwd, { recursive: true });
-      await fs.mkdir(gitDir, { recursive: true });
-      await fs.mkdir(join(commonDir, 'info'), { recursive: true });
-      if (gitdir !== 'directory') {
-        await fs.writeFile(join(cwd, '.git'), `gitdir: ${gitdir === 'absolute' ? gitDir : relative(cwd, gitDir)}\n`);
+      if (gitdir === 'directory') {
+        await fs.cp(join(root, 'mock-git-dir'), gitDir, { recursive: true });
+        await fs.copyFile(join(cwd, 'commondir'), join(gitDir, 'commondir'));
+      } else if (gitdir === 'relative') {
+        await fs.copyFile(resolve('fixtures/glob-worktree/root/dot-git'), join(cwd, '.git'));
+      } else {
+        await fs.writeFile(join(cwd, '.git'), `gitdir: ${gitDir}\n`);
       }
-      if (commondir !== 'none') {
-        await fs.writeFile(
-          join(gitDir, 'commondir'),
-          `${commondir === 'absolute' ? commonDir : relative(gitDir, commonDir)}\n`
-        );
-        await fs.mkdir(join(gitDir, 'info'), { recursive: true });
-        await fs.writeFile(join(gitDir, 'info/exclude'), '/local-only.ts\n');
+      if (commondir === 'none') {
+        await fs.rm(join(gitDir, 'commondir'));
+        await fs.copyFile(join(root, 'metadata/info/exclude'), join(gitDir, 'info/exclude'));
+      } else if (commondir === 'absolute') {
+        await fs.writeFile(join(gitDir, 'commondir'), `${commonDir}\n`);
       }
       const excludePath = join(commonDir, 'info/exclude');
-      await fs.writeFile(excludePath, '/.local-backups/\ndata/*\n');
       const parsed = await findAndParseGitignores(cwd);
       assert.deepEqual(parsed.gitignoreFiles, [relative(cwd, excludePath)]);
       const isIgnored = await getGitIgnoredHandler({ cwd, gitignore: true });

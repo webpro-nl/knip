@@ -1,0 +1,4 @@
+appId: com.example.app
+---
+- runScript: seed-user.js
+- launchApp

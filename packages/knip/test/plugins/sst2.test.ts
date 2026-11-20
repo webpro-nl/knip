@@ -16,7 +16,7 @@ test('Find dependencies with the sst plugin (2)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 6,
-    total: 6,
+    processed: 9,
+    total: 9,
   });
 });

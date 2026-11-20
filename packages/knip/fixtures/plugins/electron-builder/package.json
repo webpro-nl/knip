@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/electron-builder",
+  "main": "src/main.js",
+  "scripts": {
+    "dist": "electron-builder -c config/electron-builder.yml --config.extraMetadata.main=src/main.js"
+  },
+  "devDependencies": {
+    "@electron/notarize": "*",
+    "electron": "*",
+    "electron-builder": "*"
+  }
+}

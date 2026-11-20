@@ -9,6 +9,8 @@ export default $config({
     };
   },
   async run() {
+    await import('./infra/api');
+
     const api = new sst.aws.ApiGatewayV2('MyApi', {
       domain: {
         name: 'api.ion.sst.sh',
