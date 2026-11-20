@@ -42,23 +42,7 @@ const resolveFromAST: ResolveFromAST = program =>
 
 const args: Args = {
   config: true,
-  args: args => args.filter((arg, index) => args[index - 1] !== '--watch' || arg.startsWith('-')),
-  boolean: [
-    'cjsInterop',
-    'clean',
-    'dts-only',
-    'dts-resolve',
-    'inject-style',
-    'keep-names',
-    'legacy-output',
-    'metafile',
-    'minify-identifiers',
-    'minify-syntax',
-    'minify-whitespace',
-    'replaceNodeEnv',
-    'shims',
-    'silent',
-  ],
+  boolean: ['clean'],
   resolveInputs: parsed => parsed._.map(id => toEntry(id, { production: true, allowIncludeExports: true })),
 };
 

@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
+    "types": ["*"],
     "importHelpers": true,
     "paths": {
       "@": ["../trailing"],

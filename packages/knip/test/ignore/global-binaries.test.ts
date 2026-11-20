@@ -10,7 +10,33 @@ const cwd = resolve('fixtures/ignore/global-binaries');
 test('Report global binaries while preserving installed providers, optional inputs and explicit ignores', async () => {
   const { issues, counters, configurationHints } = await main(await createOptions({ cwd }));
 
-  assert.deepEqual(Object.keys(issues.binaries['package.json'] ?? {}).sort(), ['docker', 'node']);
-  assert.deepEqual(counters, { ...baseCounters, binaries: 2 });
+  assert.deepEqual(Object.keys(issues.binaries['package.json'] ?? {}).sort(), [
+    'awk',
+    'custom-build-cli',
+    'ditto',
+    'docker',
+    'dscl',
+    'explorer.exe',
+    'fc-list',
+    'mkfifo',
+    'node',
+    'plutil',
+    'system_profiler',
+    'wmic',
+    'wsl.exe',
+    'wslpath',
+    'xclip',
+  ]);
+  assert.deepEqual(counters, { ...baseCounters, binaries: 15 });
   assert.deepEqual(configurationHints, [{ type: 'ignoreBinaries', workspaceName: '.', identifier: 'unused-ignore' }]);
+});
+
+test('Ignore system commands by default while retaining unknown binaries and installed providers', async () => {
+  const { issues, counters, configurationHints } = await main(
+    await createOptions({ cwd, args: { config: 'knip-default.json' } })
+  );
+
+  assert.deepEqual(Object.keys(issues.binaries['package.json'] ?? {}), ['custom-build-cli']);
+  assert.deepEqual(counters, { ...baseCounters, binaries: 1 });
+  assert.deepEqual(configurationHints, []);
 });

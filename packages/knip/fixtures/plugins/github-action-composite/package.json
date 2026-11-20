@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/github-action-composite",
+  "dependencies": {
+    "@actions/core": "*"
+  }
+}

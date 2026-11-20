@@ -111,7 +111,6 @@ const resolveConfig: ResolveConfig<MikroOrmConfig> = async (config, options) => 
 const args: Args = {
   binaries: ['mikro-orm'],
   config: true,
-  string: ['contextName'],
 };
 
 const plugin: Plugin = {

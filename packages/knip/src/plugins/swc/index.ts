@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { compact } from '../../util/array.ts';
-import { toModule, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { SWCConfig } from './types.ts';
@@ -18,12 +18,15 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config: string[] = ['.swcrc'];
 
 const resolveConfig: ResolveConfig<SWCConfig | SWCConfig[]> = async (config, options) => {
-  const dependencies: string[] = [];
+  const plugins: string[] = [];
+  const inputs: Input[] = [];
   for (const item of [config].flat()) {
-    for (const [id] of item?.jsc?.experimental?.plugins ?? []) dependencies.push(id);
-    if (item?.jsc?.externalHelpers) dependencies.push('@swc/helpers');
+    for (const [id] of item?.jsc?.experimental?.plugins ?? []) plugins.push(id);
+    if (item?.jsc?.externalHelpers) inputs.push(toDependency('@swc/helpers', { production: true }));
   }
-  return compact(dependencies).map(id => (isInternal(id) ? toModule(id, { dir: options.cwd }) : toDependency(id)));
+  for (const id of compact(plugins))
+    inputs.push(isInternal(id) ? toModule(id, { dir: options.cwd }) : toDependency(id));
+  return inputs;
 };
 
 const plugin: Plugin = {

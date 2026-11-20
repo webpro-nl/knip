@@ -20,3 +20,20 @@ test('Find dependencies with the React Native plugin and a TypeScript config', a
     total: 1,
   });
 });
+
+test('Find dependencies with the React Native plugin and a TypeScript config (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.dependencies['package.json']).sort(), [
+    'react-native',
+    'react-native-vector-icons',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+    processed: 0,
+    total: 0,
+  });
+});

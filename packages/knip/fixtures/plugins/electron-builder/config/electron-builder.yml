@@ -1,0 +1,6 @@
+appId: com.example.notes
+afterSign: scripts/notarize.js
+beforeBuild: ./scripts/rebuild-native.cjs
+win:
+  signtoolOptions:
+    sign: ./scripts/sign-windows.js

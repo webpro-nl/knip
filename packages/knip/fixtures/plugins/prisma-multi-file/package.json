@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/prisma-multi-file",
+  "devDependencies": {
+    "prisma": "*"
+  }
+}

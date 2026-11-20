@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
 import { main } from '../../src/index.ts';
-import { toBinary, toEntry } from '../../src/util/input.ts';
+import { toBinary, toConfig, toEntry } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import baseCounters from '../helpers/baseCounters.ts';
@@ -34,6 +34,11 @@ test('Parse tsup CLI arguments', () => {
   };
   const entry = toEntry('entry-8.ts', { production: true, allowIncludeExports: true });
 
-  assert.deepEqual(_getInputsFromScripts('tsup --watch src entry-8.ts', options), [toBinary('tsup'), entry]);
-  assert.deepEqual(_getInputsFromScripts('tsup entry-8.ts --watch', options), [toBinary('tsup'), entry]);
+  assert.deepEqual(_getInputsFromScripts('tsup --clean entry-8.ts', options), [toBinary('tsup'), entry]);
+  assert.deepEqual(_getInputsFromScripts('tsup --keep-names entry-8.ts', options), [toBinary('tsup')]);
+  assert.deepEqual(_getInputsFromScripts('tsup --config custom.ts entry-8.ts', options), [
+    toBinary('tsup'),
+    toConfig('tsup', 'custom.ts'),
+    entry,
+  ]);
 });

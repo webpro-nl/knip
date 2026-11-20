@@ -1,5 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
+import { toConfig, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 import mdxCompiler from './compiler-mdx.ts';
@@ -38,6 +39,12 @@ const resolve: Resolve = options => {
   return inputs;
 };
 
+const args: Args = {
+  string: ['config', 'root'],
+  resolveInputs: (parsed, { cwd }) =>
+    parsed.config && !parsed.root ? [toConfig('astro', parsed.config, { dir: cwd })] : [],
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -48,6 +55,7 @@ const plugin: Plugin = {
   registerCompilers,
   resolveFromAST,
   resolve,
+  args,
 };
 
 export default plugin;
