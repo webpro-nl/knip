@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, readdir, readFile, rm } from 'node:fs/promises';
 import test from 'node:test';
 import { deserialize } from 'node:v8';
 import { join } from '../../src/util/path.ts';
@@ -8,22 +8,22 @@ import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 
 for (const [value, message] of [
-  ['"Missing environment"', 'Missing environment'],
+  ['string', 'Missing environment'],
   ['undefined', 'undefined'],
   ['null', 'null'],
-  ['new Error("Missing environment")', 'Missing environment'],
+  ['error', 'Missing environment'],
 ]) {
   for (const isAsync of [false, true]) {
-    const functionSource = `${isAsync ? 'async ' : ''}() => { throw ${value}; }`;
+    const env = { KNIP_TEST_THROW: value, KNIP_TEST_ASYNC: String(isAsync) };
+    const configSource = resolve('fixtures/plugin-config/resolve-config-error/throw.cjs');
 
     test(`Optional config failure retains AST entries (${value}, async: ${isAsync})`, async () => {
       const cwd = await copyFixture('fixtures/plugins/next-page-extensions');
       try {
         const configPath = join(cwd, 'next.config.js');
-        const config = await readFile(configPath, 'utf8');
-        await writeFile(configPath, `${config}\nmodule.exports = ${functionSource};\n`);
+        await copyFile(configSource, configPath);
 
-        const result = exec('knip --no-progress --reporter json --include files', { cwd });
+        const result = exec('knip --no-progress --reporter json --include files', { cwd, env });
         assert.equal(result.stderr, '');
         assert.equal(result.status, 1);
         assert.deepEqual(JSON.parse(result.stdout), {
@@ -37,9 +37,9 @@ for (const [value, message] of [
     test(`Required config failure reports its cause (${value}, async: ${isAsync})`, async () => {
       const cwd = await copyFixture('fixtures/plugin-config/resolve-config-error');
       try {
-        await writeFile(join(cwd, 'vite.config.ts'), `export default ${functionSource};\n`);
+        await copyFile(configSource, join(cwd, 'vite.config.ts'));
 
-        const result = exec('knip --no-progress --no-exit-code', { cwd });
+        const result = exec('knip --no-progress --no-exit-code', { cwd, env });
         assert.equal(result.status, 2);
         assert.equal(
           result.stderr,

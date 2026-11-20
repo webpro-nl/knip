@@ -2,6 +2,7 @@ type EntryInput = string | string[] | Record<string, string>;
 
 interface ViteBuildConfig {
   build?: {
+    rolldownOptions?: { input?: EntryInput };
     rollupOptions?: { input?: EntryInput };
     lib?: { entry?: EntryInput };
   };

@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/workspaces-ignored-root-b",
+  "version": "*",
+  "scripts": {
+    "build": "used-binary"
+  },
+  "dependencies": {
+    "@org/b": "*",
+    "valibot": "*"
+  }
+}

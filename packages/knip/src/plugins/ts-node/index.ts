@@ -1,20 +1,39 @@
+import type { Args } from '../../types/args.ts';
 import type { Plugin } from '../../types/config.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 
 // https://typestrong.org/ts-node/docs/options
 
 const title = 'ts-node';
 
 const args = {
-  positional: true,
+  binaries: ['ts-node', 'ts-node-cwd', 'ts-node-esm', 'ts-node-script', 'ts-node-transpile-only'],
+  positional: (parsed: ParsedArgs) => (parsed.eval === undefined ? parsed._.slice(0, 1) : []),
   nodeImportArgs: true,
-  boolean: ['transpileOnly', 'compilerHost', 'ignoreDiagnostics', 'swc', 'preferTsExts'],
+  string: [
+    'compiler',
+    'compilerOptions',
+    'cwd',
+    'dir',
+    'eval',
+    'experimentalSpecifierResolution',
+    'ignore',
+    'ignoreDiagnostics',
+    'project',
+    'scopeDir',
+    'transpiler',
+  ],
   alias: {
-    transpileOnly: ['T', 'transpile-only'],
-    compilerHost: ['H', 'compiler-host'],
-    ignoreDiagnostics: ['D'],
-    preferTsExts: ['prefer-ts-exts'],
+    compiler: ['C'],
+    compilerOptions: ['O', 'compiler-options'],
+    eval: ['e'],
+    ignore: ['I'],
+    ignoreDiagnostics: ['D', 'ignore-diagnostics'],
+    project: ['P'],
   },
-};
+  boolean: true,
+  stopEarly: true,
+} satisfies Args;
 
 const plugin: Plugin = {
   title,

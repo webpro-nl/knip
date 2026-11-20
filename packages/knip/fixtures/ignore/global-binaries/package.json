@@ -1,7 +1,8 @@
 {
   "name": "@fixtures/global-binaries",
   "scripts": {
-    "build": "git status && docker build . && aws && node -v && npx on-demand-cli"
+    "build": "git status && docker build . && aws && node -v && npx on-demand-cli",
+    "system": "awk && ditto && dscl && explorer.exe && fc-list && mkfifo && plutil && system_profiler && wmic && wsl.exe && wslpath && xclip && custom-build-cli"
   },
   "devDependencies": {
     "cloud-cli": "*"

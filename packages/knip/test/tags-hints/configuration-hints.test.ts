@@ -45,6 +45,23 @@ test('Provide configuration hints for patterns covered by plugins and project re
   });
 });
 
+test('Provide configuration hints for plain patterns that repeat a production pattern', async () => {
+  const cwd = resolve('fixtures/tags-hints/configuration-hints-production-duplicate');
+  const options = await createOptions({ cwd });
+  const { counters, configurationHints } = await main(options);
+
+  assert.deepEqual(configurationHints, [
+    { type: 'entry-redundant', identifier: 'main.ts', workspaceName: '.' },
+    { type: 'project-redundant', identifier: '*.ts', workspaceName: '.' },
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
+  });
+});
+
 test('No hints when user overrides plugin entry config', async () => {
   const cwd = resolve('fixtures/tags-hints/configuration-hints-plugin-override');
   const options = await createOptions({ cwd });

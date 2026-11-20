@@ -2,6 +2,7 @@
   "name": "@plugins/cucumber2",
   "devDependencies": {
     "@cucumber/cucumber": "*",
-    "@cucumber/pretty-formatter": "*"
+    "@cucumber/pretty-formatter": "*",
+    "tsx": "*"
   }
 }

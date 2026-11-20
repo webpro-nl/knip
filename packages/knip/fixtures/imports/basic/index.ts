@@ -199,6 +199,50 @@ const spreadShadow = () =>
     }
   });
 
+const restSpread = async () => {
+  const { one, ...rest } = await import('./rest-spread.js');
+  return { one, ...rest };
+};
+
+const restMember = async () => {
+  const { named, ...rest } = await import('./rest-member.js');
+  return [named, rest.used];
+};
+
+const restUnused = async () => {
+  const { named, ...rest } = await import('./rest-unused.js');
+  return named;
+};
+
+const { ...paramRest } = await import('./rest-param.js');
+const useParamRest = () => paramRest.used;
+function unrelatedRestParam(paramRest: object) {
+  return { ...paramRest };
+}
+
+const restVar = async () => {
+  try {
+    var { ...varRest } = await import('./rest-var.js');
+  } catch {
+    return;
+  }
+  return varRest.used;
+};
+
+const restBlock = async () => {
+  {
+    const { ...blockRest } = await import('./rest-block.js');
+    blockRest.used;
+  }
+  const blockRest = {};
+  return { ...blockRest };
+};
+
+const restPromiseAll = async () => {
+  const [{ named, ...rest }] = await Promise.all([import('./rest-promise-all.js')]);
+  return [named, rest.used];
+};
+
 const dynamicG = import('./import-g.js');
 dynamicG.then(module => module.func());
 
@@ -353,6 +397,14 @@ export default fn({
   switchShadow,
   containerShadow,
   spreadShadow,
+  restSpread,
+  restMember,
+  restUnused,
+  useParamRest,
+  unrelatedRestParam,
+  restVar,
+  restBlock,
+  restPromiseAll,
   defaultName1,
   defaultName2,
   defaultName3,

@@ -15,7 +15,7 @@ test('Cached config file shared by multiple plugins keeps the inputs of each plu
   const run = async () => main(await createOptions({ cwd, args: { cache: true, 'cache-location': cacheLocation } }));
 
   try {
-    const counters = { ...baseCounters, processed: 2, total: 2 };
+    const counters = { ...baseCounters, processed: 3, total: 3 };
     assert.deepEqual((await run()).counters, counters);
     assert.deepEqual((await run()).counters, counters);
   } finally {

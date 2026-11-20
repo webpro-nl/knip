@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, realpath, rename, symlink, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { cp, mkdir, readFile, rename, symlink } from 'node:fs/promises';
 import test from 'node:test';
 import { join } from '../../src/util/path.ts';
 import { substringBefore } from '../../src/util/string.ts';
@@ -8,17 +7,6 @@ import { copyFixture } from '../helpers/copy-fixture.ts';
 import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 import { tsc } from '../helpers/tsc.ts';
-
-const tsconfig = JSON.stringify({
-  compilerOptions: {
-    target: 'ES2022',
-    module: 'esnext',
-    moduleResolution: 'bundler',
-    noEmit: true,
-    allowImportingTsExtensions: true,
-  },
-  include: ['**/*.ts'],
-});
 
 const fixtures = [
   'namespaces/barrel-namespace-chain',
@@ -45,7 +33,7 @@ const fixtures = [
 for (const name of fixtures) {
   test(`tsc clean before and after knip --fix: ${name}`, async () => {
     const cwd = await copyFixture(`fixtures/${name}`);
-    await writeFile(join(cwd, 'tsconfig.json'), tsconfig);
+    await cp(resolve('fixtures/e2e-lib-consumer/tsconfig.json'), join(cwd, 'tsconfig.json'));
 
     const baseline = tsc(cwd);
     assert.equal(baseline.status, 0, `baseline tsc failed:\n${baseline.stdout}${baseline.stderr}`);
@@ -104,16 +92,12 @@ const libFixtureRemovals: Record<string, RegExp[]> = {
 for (const name of libFixtures) {
   const pkgName = `@fixtures/${name}`;
   test(`consume built dist after knip --fix: ${name}`, async () => {
-    const tmp = await realpath(await mkdtemp(join(tmpdir(), 'knip-e2e-pkg-')));
+    const tmp = await copyFixture('fixtures/e2e-lib-consumer', 'knip-e2e-pkg-');
     const pkgDir = join(tmp, 'pkg');
-    await mkdir(pkgDir, { recursive: true });
     await cp(resolve(`fixtures/${name}`), pkgDir, { recursive: true });
     await rename(join(pkgDir, '_index.ts'), join(tmp, '_index.ts'));
     await mkdir(join(tmp, 'node_modules', substringBefore(pkgName, '/')), { recursive: true });
     await symlink(pkgDir, join(tmp, 'node_modules', pkgName), 'dir');
-
-    await writeFile(join(tmp, 'package.json'), '{ "name": "e2e-lib-consumer", "type": "module" }\n');
-    await writeFile(join(tmp, 'tsconfig.json'), tsconfig);
 
     const buildBaseline = tsc(pkgDir);
     assert.equal(buildBaseline.status, 0, `baseline build failed:\n${buildBaseline.stdout}${buildBaseline.stderr}`);

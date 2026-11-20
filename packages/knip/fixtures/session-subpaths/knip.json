@@ -1,0 +1,4 @@
+{
+  "entry": ["index.ts", "other.ts"],
+  "project": ["index.ts", "other.ts", "used.ts", "unused.ts", "setup-*.ts"]
+}
