@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/cypress2');
 
-test('Find dependencies with the Cypress plugin (2)', async () => {
+test('Read a Cypress config from the Cypress directory', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 

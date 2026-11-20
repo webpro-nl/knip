@@ -1,7 +1,7 @@
 {
   "name": "@plugins/cypress2",
   "scripts": {
-    "test:smoke": "cypress run --config-file config/smoke.config.js"
+    "test:smoke": "cypress run --config-file cypress/cypress.config.js"
   },
   "devDependencies": {
     "cypress": "*",
