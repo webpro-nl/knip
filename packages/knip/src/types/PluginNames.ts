@@ -173,6 +173,7 @@ export type PluginName =
   | 'temporal'
   | 'textlint'
   | 'travis'
+  | 'trigger-dev'
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
@@ -389,6 +390,7 @@ export const pluginNames = [
   'temporal',
   'textlint',
   'travis',
+  'trigger-dev',
   'ts-node',
   'tsd',
   'tsdown',

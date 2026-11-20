@@ -172,6 +172,7 @@ import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
 import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
+import { default as triggerDev } from './trigger-dev/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
@@ -388,6 +389,7 @@ export const Plugins = {
   temporal,
   textlint,
   travis,
+  'trigger-dev': triggerDev,
   'ts-node': tsNode,
   tsd,
   tsdown,
