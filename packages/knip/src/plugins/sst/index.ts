@@ -24,7 +24,7 @@ const args: Args = {
   fromArgs: (parsed, args) => {
     if (!wrappers.has(parsed._[0])) return [];
     const command = parsed._[1] ? argsFrom(args, parsed._[1]) : (parsed['--'] ?? []);
-    return command.length === 1 ? command[0].split(' ') : command;
+    return parsed._[0] === 'bind' || parsed._[0] === 'env' ? command.join(' ') : command;
   },
 };
 
