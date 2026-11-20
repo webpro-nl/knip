@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/session-incremental",
+  "devDependencies": {
+    "vite": "*"
+  },
+  "scripts": {
+    "check": "missing-command"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["vitest/globals"],
+    "types": ["*", "vitest/globals"],
     "jsx": "react",
     "jsxImportSource": "hastscript/svg"
   }

@@ -1,4 +1,5 @@
 {
   "spec": ["**/*.test.ts"],
-  "require": ["ts-node/register", "hooks.ts"]
+  "require": ["ts-node/register", "hooks.ts"],
+  "import": "tsx/esm"
 }

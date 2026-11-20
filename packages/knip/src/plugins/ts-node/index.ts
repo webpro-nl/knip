@@ -1,4 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { Plugin } from '../../types/config.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 
 // https://typestrong.org/ts-node/docs/options
 
@@ -6,45 +8,32 @@ const title = 'ts-node';
 
 const args = {
   binaries: ['ts-node', 'ts-node-cwd', 'ts-node-esm', 'ts-node-script', 'ts-node-transpile-only'],
-  positional: true,
+  positional: (parsed: ParsedArgs) => (parsed.eval === undefined ? parsed._.slice(0, 1) : []),
   nodeImportArgs: true,
-  string: ['ignoreDiagnostics'],
-  boolean: [
-    'compilerHost',
-    'cwdMode',
-    'emit',
-    'esm',
-    'files',
-    'interactive',
-    'logError',
-    'preferTsExts',
-    'pretty',
-    'print',
-    'scope',
-    'scriptMode',
-    'showConfig',
-    'skipIgnore',
-    'skipProject',
-    'swc',
-    'transpileOnly',
-    'typeCheck',
+  string: [
+    'compiler',
+    'compilerOptions',
+    'cwd',
+    'dir',
+    'eval',
+    'experimentalSpecifierResolution',
+    'ignore',
+    'ignoreDiagnostics',
+    'project',
+    'scopeDir',
+    'transpiler',
   ],
   alias: {
-    transpileOnly: ['T', 'transpile-only'],
-    compilerHost: ['H', 'compiler-host'],
+    compiler: ['C'],
+    compilerOptions: ['O', 'compiler-options'],
+    eval: ['e'],
+    ignore: ['I'],
     ignoreDiagnostics: ['D', 'ignore-diagnostics'],
-    preferTsExts: ['prefer-ts-exts'],
-    cwdMode: ['cwd-mode'],
-    interactive: ['i'],
-    logError: ['log-error'],
-    print: ['p'],
-    scriptMode: ['s', 'script-mode'],
-    showConfig: ['show-config'],
-    skipIgnore: ['skip-ignore'],
-    skipProject: ['skip-project'],
-    typeCheck: ['type-check'],
+    project: ['P'],
   },
-};
+  boolean: true,
+  stopEarly: true,
+} satisfies Args;
 
 const plugin: Plugin = {
   title,

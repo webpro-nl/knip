@@ -8,6 +8,7 @@ import { get } from '../../util/object.ts';
 import { dirname, isInternal, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
+import { getBuilderEntries } from '../angular/helpers.ts';
 import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
 const title = 'Nx';
@@ -17,6 +18,13 @@ const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json', 'package.json'];
+
+const angularBuilderPackages = new Set([
+  '@angular-devkit/build-angular',
+  '@angular/build',
+  '@nrwl/angular',
+  '@nx/angular',
+]);
 
 const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
   const targetsDefault = localConfig.targetDefaults
@@ -125,7 +133,14 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     return configs;
   });
 
-  return compact([...executors, ...inputs, ...configInputs]).map(id =>
+  const angularBuilderInputs: Input[] = [];
+  for (const [targetName, target] of Object.entries(config.targets ?? {})) {
+    if (target.executor && angularBuilderPackages.has(substringBefore(target.executor, ':'))) {
+      angularBuilderInputs.push(...getBuilderEntries(targetName, target, options.rootCwd, expand));
+    }
+  }
+
+  return compact([...executors, ...inputs, ...configInputs, ...angularBuilderInputs]).map(id =>
     typeof id === 'string' ? toDependency(id) : id
   );
 };

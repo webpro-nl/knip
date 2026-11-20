@@ -13,7 +13,8 @@
     "@types/mocha": "*",
     "mocha": "*",
     "mocha-multi-reporters": "*",
-    "ts-node": "*"
+    "ts-node": "*",
+    "tsx": "*"
   },
   "scripts": {
     "test:integration": "mocha --recursive integration",

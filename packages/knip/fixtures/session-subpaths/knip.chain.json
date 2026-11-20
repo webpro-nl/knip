@@ -1,0 +1,5 @@
+{
+  "entry": ["chain.ts"],
+  "project": ["chain.ts", "last.ts", "used.ts"],
+  "jest": false
+}
