@@ -9,22 +9,9 @@ import type { Plugin } from '../../types/config.ts';
 const title = 'env-cmd';
 
 const args: Args = {
+  boolean: true,
   string: ['environments', 'file', 'rc-file'],
-  boolean: ['expand-envs', 'fallback', 'recursive', 'silent', 'use-shell', 'verbose'],
-  alias: { environments: ['e'], file: ['f'], 'rc-file': ['r'], 'expand-envs': ['x'] },
-  args: argv => {
-    const rest = [];
-    for (let i = 0; i < argv.length; i++) {
-      const arg = argv[i];
-      if (arg === '--') return [...rest, ...argv.slice(i)];
-      if (arg === '-e' || arg === '--environments') {
-        while (i + 1 < argv.length && !argv[i + 1].startsWith('-')) i++;
-      } else if (!arg.startsWith('-e')) {
-        rest.push(arg);
-      }
-    }
-    return rest;
-  },
+  alias: { environments: ['e'], file: ['f'], 'rc-file': ['r'] },
   fromArgs: (parsed, argv) => {
     const command = spawningArgs(parsed, argv);
     return parsed['use-shell'] ? command.join(' ') : command;

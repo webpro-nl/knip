@@ -74,6 +74,7 @@ export type PluginName =
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'lunaria'
+  | 'maestro'
   | 'markdownlint'
   | 'marko'
   | 'mastra'
@@ -154,6 +155,7 @@ export type PluginName =
   | 'solidjs-vite-plugin'
   | 'sst'
   | 'starlight'
+  | 'start-server-and-test'
   | 'stencil'
   | 'storybook'
   | 'stryker'
@@ -172,6 +174,7 @@ export type PluginName =
   | 'temporal'
   | 'textlint'
   | 'travis'
+  | 'trigger-dev'
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
@@ -289,6 +292,7 @@ export const pluginNames = [
   'lockfile-lint',
   'lost-pixel',
   'lunaria',
+  'maestro',
   'markdownlint',
   'marko',
   'mastra',
@@ -369,6 +373,7 @@ export const pluginNames = [
   'solidjs-vite-plugin',
   'sst',
   'starlight',
+  'start-server-and-test',
   'stencil',
   'storybook',
   'stryker',
@@ -387,6 +392,7 @@ export const pluginNames = [
   'temporal',
   'textlint',
   'travis',
+  'trigger-dev',
   'ts-node',
   'tsd',
   'tsdown',

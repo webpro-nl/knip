@@ -20,3 +20,23 @@ test('Find dependencies with the React Native plugin', async () => {
     total: 1,
   });
 });
+
+test('Find dependencies with the React Native plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.dependencies['package.json']).sort(), [
+    '@react-native-community/cli',
+    '@react-native-community/cli-platform-android',
+    '@react-native-community/cli-platform-ios',
+    'react-native',
+    'react-native-vector-icons',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 5,
+    processed: 0,
+    total: 0,
+  });
+});

@@ -27,6 +27,7 @@ module.exports = () => {
                 ],
                 'babel-plugin-macros',
                 'babel-plugin-styled-components',
+                '@babel/plugin-transform-runtime',
               ],
             },
           },

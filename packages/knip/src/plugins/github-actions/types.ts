@@ -12,6 +12,7 @@ type Steps = Step[];
 
 export type Job = {
   steps: Steps;
+  defaults?: { run?: { 'working-directory'?: string } };
 };
 
 export type Runs = {

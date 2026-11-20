@@ -5,6 +5,7 @@ import type { Issue } from '../types/issues.ts';
 import type { ExternalRef } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
+import { isFile } from './fs.ts';
 import { fromBinary, type Input, isConfig, isDeferResolveEntry, toDebugString } from './input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromSpecifier } from './modules.ts';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
@@ -142,7 +143,9 @@ export const createInputHandler = (
 
   const handlePackageOrFile = (input: Input, containingFilePath: string, workspace: Workspace) => {
     const packageName = getPackageNameFromSpecifier(input.specifier);
-    if (!packageName) return handleFile(input, containingFilePath, workspace);
+    if (!packageName || (isConfig(input) && isFile(input.dir ?? dirname(containingFilePath), input.specifier))) {
+      return handleFile(input, containingFilePath, workspace);
+    }
     const inputWorkspace = getWorkspaceFor(input, containingFilePath, workspace);
     const isWorkspace = chief.findWorkspaceByPackageName(packageName, containingFilePath) !== undefined;
     if (!isWorkspace) addExternalRef(containingFilePath, packageName);

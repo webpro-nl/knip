@@ -15,22 +15,17 @@ import { deserialize } from 'node:v8';
 import { main } from '../../src/index.ts';
 import { join, toPosix } from '../../src/util/path.ts';
 import { createOptions } from '../helpers/create-options.ts';
+import { copyFixture } from '../helpers/copy-fixture.ts';
 
 test('Warm cache runs leave an unchanged cache untouched and store pristine analysis nodes', async t => {
-  const cwd = toPosix(realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-stable-'))));
+  const cwd = await copyFixture('fixtures/resolution/tsconfig-cli-paths');
   const cacheLocation = toPosix(realpathSync(mkdtempSync(join(tmpdir(), 'knip-cache-stable-data-'))));
   t.after(() => {
     rmSync(cwd, { recursive: true, force: true });
     rmSync(cacheLocation, { recursive: true, force: true });
   });
-  const write = (file: string, contents: string) => writeFileSync(join(cwd, file), contents);
-  write('package.json', '{"name":"cache-stable","dependencies":{"@value":"*"}}');
-  write('knip.json', '{"entry":["index.ts"],"project":["*.ts"],"paths":{"@value":["./value.ts"]}}');
-  write('index.ts', "import { value } from '@value'; console.log(value);");
-  write('value.ts', 'export const value = 1; export const unused = 2;');
-
   const run = async (cache = true) =>
-    main(await createOptions({ cwd, args: { cache, 'cache-location': cacheLocation } }));
+    main(await createOptions({ cwd, args: { cache, 'cache-location': cacheLocation, tsConfig: 'tsconfig.app.json' } }));
   const cacheFile = () => join(cacheLocation, readdirSync(cacheLocation).find(name => name.startsWith('root-')) ?? '');
 
   await run();
@@ -43,8 +38,8 @@ test('Warm cache runs leave an unchanged cache untouched and store pristine anal
     assert.equal(statSync(cacheFile()).mtimeMs, 1000);
   }
 
-  write('value.ts', 'export const value = 1; export const replaced = 2;');
-  assert.deepEqual(Object.keys((await run()).issues.exports['value.ts']), ['replaced']);
+  writeFileSync(join(cwd, 'src/used.ts'), "export const used = () => 'used'; export const replaced = 2;");
+  assert.deepEqual(Object.keys((await run()).issues.exports['src/used.ts']), ['replaced']);
   const records = deserialize(readFileSync(cacheFile()));
   assert.ok(records instanceof Map);
   assert.equal(records.size, 2);

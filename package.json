@@ -32,12 +32,12 @@
     "@release-it/bumper": "^8.0.1",
     "installed-check": "^11.0.0",
     "mdxlint": "^1.0.0",
-    "mdxlint-preset-webpro": "^1.3.0",
-    "oxfmt": "^0.77.0",
-    "oxlint": "^1.92.0",
+    "mdxlint-preset-webpro": "^1.3.1",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
     "release-it": "^21.1.2",
     "remark-cli": "12.0.1",
-    "remark-preset-webpro": "^2.2.1"
+    "remark-preset-webpro": "^2.2.2"
   },
   "prettier": {
     "arrowParens": "avoid",
