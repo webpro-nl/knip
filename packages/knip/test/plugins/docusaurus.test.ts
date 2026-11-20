@@ -25,3 +25,22 @@ test('Find dependencies and literal script entries with the docusaurus plugin', 
     total: 17,
   });
 });
+
+test('Find dependencies with the docusaurus plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(!issues.dependencies['package.json']['@docusaurus/theme-mermaid']);
+  assert(!issues.dependencies['package.json']['@docusaurus/preset-classic']);
+  assert(issues.dependencies['package.json']['@docusaurus/plugin-sitemap']);
+  assert.deepEqual(Object.keys(issues.unlisted['docusaurus.config.js']), ['@docusaurus/theme-search-algolia']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 7,
+    unlisted: 1,
+    files: 1,
+    processed: 14,
+    total: 14,
+  });
+});

@@ -2,12 +2,12 @@ import { type Command, forEachChild, parse, type Script, type Statement, type Sy
 import type { FromArgs, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
 import type { Input } from '../util/input.ts';
-import { extractBinary, isValidBinary } from '../util/modules.ts';
+import { extractBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
-import { substringBefore, truncate } from '../util/string.ts';
+import { truncate } from '../util/string.ts';
 import { isScriptExpansion } from '../util/scripts.ts';
 import { getDependenciesFromCommand } from './command.ts';
-import { toScript } from './util.ts';
+import { toForwardedScript } from './plugins.ts';
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
@@ -15,9 +15,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   // Helper for recursive calls; Word args re-serialize from their raw text, string args are script fragments
   const fromArgs: FromArgs = (args, opts): Input[] => {
     if (args.length === 0) return [];
-    const first = typeof args[0] === 'string' ? args[0] : args[0].value;
-    if (!isValidBinary(substringBefore(first, ' '))) return [];
-    return getDependenciesFromScript(toScript(args), {
+    return getDependenciesFromScript(toForwardedScript(args), {
       ...options,
       isForwardedArgs: false,
       ...opts,
@@ -25,7 +23,7 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   };
 
   const fromWords = (args: ScriptArg[], opts: GetInputsFromScriptsOptions): Input[] =>
-    getDependenciesFromScript(toScript(args), opts);
+    getDependenciesFromScript(toForwardedScript(args), opts);
 
   const definedFunctions = new Set<string>();
   const collectFunctionNames = (statements: readonly Statement[]): void => {

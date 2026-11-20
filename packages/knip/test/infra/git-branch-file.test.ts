@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, rmSync } from 'node:fs';
 import test from 'node:test';
 import { main } from '../../src/index.ts';
 import { createOptions } from '../helpers/create-options.ts';
@@ -10,7 +10,7 @@ const gitLogsDir = resolve('fixtures/infra/git-branch-file/.git/logs/refs/heads/
 
 test('Ignore files in .git directory (branch names ending in .ts)', async () => {
   mkdirSync(gitLogsDir, { recursive: true });
-  writeFileSync(resolve('fixtures/infra/git-branch-file/.git/logs/refs/heads/don/feature.ts'), '');
+  copyFileSync(resolve('fixtures/infra/git-branch-file/index.ts'), `${gitLogsDir}/feature.ts`);
 
   try {
     const options = await createOptions({ cwd });

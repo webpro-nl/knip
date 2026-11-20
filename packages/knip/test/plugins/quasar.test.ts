@@ -24,3 +24,19 @@ test('Resolve literal extensionless boot entries with the quasar plugin', async 
     total: 9,
   });
 });
+
+test('Resolve literal extensionless boot entries with the quasar plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['src/boot/forgotten.ts', 'src/boot/literal.ts']);
+  assert.deepEqual(Object.keys(issues.unlisted['quasar.config.ts']), ['animate.css']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    unlisted: 1,
+    processed: 8,
+    total: 8,
+  });
+});

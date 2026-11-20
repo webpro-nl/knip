@@ -1,0 +1,9 @@
+{
+  "name": "mcp-server-fixture",
+  "dependencies": {
+    "left-pad": "*"
+  },
+  "knip": {
+    "ignoreBinaries": ["pm2-.+"]
+  }
+}

@@ -1,6 +1,8 @@
 import Component from './component';
 import Docs from './readme.md';
 import Styles from './styles.css';
+export { Layout as default } from './layout';
+export { metadata } from './metadata';
 
 # Header
 
@@ -16,9 +18,12 @@ Multiple inline codes: `import x from 'x'` and `import y from 'y'` on same line.
 
 Nested backticks won't happen but edge case: `import Default from "double-quotes"`.
 
+A re-export in inline code is skipped too: `export { inline } from 'inline-export'`.
+
 ```js
 import { fenced } from 'fenced-module';
 import * as ns from 'namespace-module';
+export { fenced as default } from 'fenced-export';
 
 const x = 1;
 ```

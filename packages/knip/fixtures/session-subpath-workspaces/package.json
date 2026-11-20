@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/session-subpath-workspaces",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
