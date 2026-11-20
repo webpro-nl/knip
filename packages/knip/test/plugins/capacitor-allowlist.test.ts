@@ -18,3 +18,15 @@ test('Respect platform-specific Capacitor plugin allowlists', async () => {
     dependencies: 2,
   });
 });
+
+test('Respect platform-specific Capacitor plugin allowlists (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.dependencies['package.json']).sort(), ['@capacitor/app', '@capacitor/keyboard']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+  });
+});

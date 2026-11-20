@@ -79,6 +79,7 @@ test('getInputsFromScripts (node)', () => {
 test('getInputsFromScripts (node options end at the script)', () => {
   t('node ./script.js -r spec', [toBinary('node'), js]);
   t('node ./script.js --import unused-dep', [toBinary('node'), js]);
+  t('node ./script.js --test-reporter ./reporter.js', [toBinary('node'), js]);
   t('node ./script.js -- --import unused-dep', [toBinary('node'), js]);
   t('node --trace-uncaught ./script.js', [toBinary('node'), js]);
   t('node --max-old-space-size=1536 -- ./script.js', [toBinary('node'), js]);
@@ -96,6 +97,11 @@ test('getInputsFromScripts (node options end at the script)', () => {
 test('getInputsFromScripts (node --test)', () => {
   t('node --test --test-reporter=reporter', [toBinary('node'), toModule('reporter')]);
   t('node --test --test-reporter=spec', [toBinary('node')]);
+  t('node --test --test-reporter spec', [toBinary('node')]);
+  t('node --test --test-reporter=tap-spec', [toBinary('node'), toModule('tap-spec')]);
+  t('node --test-reporter dot --test-reporter ./reporter.js --test', [toBinary('node'), toModule('./reporter.js')]);
+  t('node --test --test-reporter spec -- ./script.js', [toBinary('node'), js]);
+  t('node --test-reporter ./reporter.js -- ./script.js', [toBinary('node'), js, toModule('./reporter.js')]);
 });
 
 test('getInputsFromScripts (node -r)', () => {
@@ -132,6 +138,7 @@ test('getInputsFromScripts (tsx)', () => {
   t('tsx ./main.ts', [toBinary('tsx'), ts]);
   t('tsx watch ./main.ts', [toBinary('tsx'), ts]);
   t('tsx --test ./main.ts', [toBinary('tsx'), ts]);
+  t('tsx --test --test-reporter spec -- ./main.ts', [toBinary('tsx'), ts]);
   t('tsx --tsconfig tsconfig.build.json --inspect ./main.ts', [toBinary('tsx'), ts]);
   t('node --loader tsx ./main.ts', [toBinary('node'), ts, toModule('tsx')]);
   t('tsx main', [toBinary('tsx'), toEntryPath('main', opt)]);
@@ -544,6 +551,10 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup --config', [toBinary('rollup')]);
   t('rollup --config --watch', [toBinary('rollup')]);
   t('rollup --config rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
+  t('rollup -c', [toBinary('rollup')]);
+  t('rollup -c -w', [toBinary('rollup')]);
+  t('rollup -cw', [toBinary('rollup')]);
+  t('rollup -c rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
 test('getInputsFromScripts ("positionals")', () => {
@@ -620,6 +631,25 @@ test('getInputsFromScripts (concurrently)', () => {
   t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
 });
 
+test('getInputsFromScripts (start-server-and-test)', () => {
+  t('start-server-and-test start http://localhost:3000 test', [toBinary('start-server-and-test')], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' 3000 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("start-test --expect 404 start :3000 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js], lifecycle);
+  t("server-test start 3000 'tsx ./main.ts' http-get://localhost:3001 test", [toBinary('server-test'), toBinary('tsx'), ts], lifecycle);
+  t("start-server-and-test 'tsx ./main.ts' '3000|3001' 'node ./script.js'", [toBinary('start-server-and-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+  t("server-test '8000|9000' test", [toBinary('server-test')], lifecycle);
+  t("server-test '8000|9000'", [toBinary('server-test')]);
+  t("start-test '3000|3001' 'node ./script.js'", [toBinary('start-test'), toBinary('node'), js]);
+  t("start-test 'node ./script.js' '3000|3001'", [toBinary('start-test'), toBinary('node'), js]);
+  t("start-server-and-test --expect 404 eval:server http://localhost:8976 'vitest run --testTimeout=60000 --config vitest.config.evals.ts'", [
+    toBinary('start-server-and-test'),
+    toBinary('vitest'),
+    toConfig('vitest', 'vitest.config.evals.ts'),
+  ]);
+  t(`start-test -- 'tsx "./server files/main.ts"' 3000 'node -- ./script.js'`, [toBinary('start-test'), toBinary('tsx'), toEntryPath('./server files/main.ts', opt), toBinary('node'), js]);
+  t("server-test 'tsx ./main.ts # start the dev server' 3000 'node ./script.js'", [toBinary('server-test'), toBinary('tsx'), ts, toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (forwarded commands keep their own separator)', () => {
   t('mocha test/a.js -- test/b.js', [toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
   t('dotenvx run -- mocha test/a.js -- test/b.js', [toBinary('dotenvx'), toBinary('mocha'), toEntry('test/a.js'), toEntry('test/b.js')]);
@@ -672,8 +702,6 @@ test('getInputsFromScripts (graphql-codegen)', () => {
   t('graphql-codegen --config codegen.ts', [binary, config]);
   t('graphql-codegen -r dotenv/config --config codegen.ts', [binary, dotenv, config]);
   t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [binary, dotenv, tsconfigPaths]);
-  t('graphql-codegen --require dotenv/config tsconfig-paths/register -c codegen.ts', [binary, dotenv, tsconfigPaths, config]);
-  t('graphql-codegen -r=dotenv/config tsconfig-paths/register -- --require unused-dep', [binary, dotenv, tsconfigPaths]);
 });
 
 test('getInputsFromScripts (env-cmd environments)', () => {
@@ -750,12 +778,36 @@ test('getInputsFromScripts (plugins → double-dash)', () => {
   t('nx exec -- vitest --config vitest.int.config.ts', [toBinary('nx'), toBinary('vitest'), toConfig('vitest', 'vitest.int.config.ts')]);
 });
 
+test('getInputsFromScripts (typedoc themes)', () => {
+  t('typedoc --theme default', [toBinary('typedoc')]);
+  t('typedoc --theme typedoc-github-theme', [toBinary('typedoc'), toModule('typedoc-github-theme')]);
+});
+
+test('getInputsFromScripts (cucumber)', () => {
+  t('cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require "test/integration/**/*.ts"', [
+    toBinary('cucumber-js'),
+    toModule('ts-node/register'),
+    toModule('tsconfig-paths/register'),
+    toEntry('test/integration/**/*.ts'),
+  ]);
+  t('cucumber-js --require-module=ts-node/register -r src/test.ts', [toBinary('cucumber-js'), toModule('ts-node/register'), toEntry('src/test.ts')]);
+  t('cucumber-js --config config/cucumber.json', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+  t('cucumber-js --config=config/cucumber.json', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+  t('cucumber-js -c config/cucumber.json -p default', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+});
+
 test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsc -p a.json -p b.json', [toBinary('tsc'), toConfig('typescript', 'a.json'), toConfig('typescript', 'b.json')]);
+  t('tsc -b tsconfig.build.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.build.json', { dir: cwd })]);
+  t('tsc --build -f src test', [toBinary('tsc'), toConfig('typescript', 'src/tsconfig.json', { dir: cwd }), toConfig('typescript', 'test/tsconfig.json', { dir: cwd })]);
+  t('tsc -b -v packages', [toBinary('tsc'), toConfig('typescript', 'packages/tsconfig.json', { dir: cwd })]);
+  t('tsc -b', [toBinary('tsc')]);
   t('tsup -c tsup.server.json', [toBinary('tsup'), toConfig('tsup', 'tsup.server.json')]);
+  t('astro build --root site --config config/site.mjs', [toBinary('astro')]);
   t('prettier --write --config=my-prettier-settings.js', [toBinary('prettier'), toConfig('prettier', 'my-prettier-settings.js')]);
   t('webpack --config a.js --config b.js --merge', [toBinary('webpack'), toConfig('webpack', 'a.js'), toConfig('webpack', 'b.js'), toDependency('webpack-cli')]);
+  t('cypress run -C cypress.ci.config.ts --config baseUrl=http://localhost:3000', [toBinary('cypress'), toConfig('cypress', 'cypress.ci.config.ts')]);
   t('lingui extract --config', [toBinary('lingui')]);
   t('prettier --config --write', [toBinary('prettier')]);
   t('wdio run --cpu-prof ./config/wdio.e2e.ts', [toBinary('wdio'), toConfig('webdriver-io', './config/wdio.e2e.ts')]);

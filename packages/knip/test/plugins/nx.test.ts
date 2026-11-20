@@ -38,7 +38,22 @@ test('Find dependencies with the Nx plugin', async () => {
     binaries: 6,
     devDependencies: 7,
     unlisted: 7,
-    processed: 8,
-    total: 8,
+    processed: 18,
+    total: 18,
+  });
+});
+
+test('Find dependencies with the Nx plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert('libs/b/build.mts' in issues.files);
+  assert('libs/b/generate.mjs' in issues.files);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 9,
+    total: 14,
   });
 });

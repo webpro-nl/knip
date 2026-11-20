@@ -1,4 +1,3 @@
-import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
@@ -33,21 +32,10 @@ const enablers = [/^@graphql-codegen\//, 'graphql-config'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const args: Args = {
+const args = {
   config: true,
   resolve: ['require'],
   alias: { require: ['r'] },
-  args: argv => {
-    const expanded: string[] = [];
-    let isRequire = false;
-    for (const [index, arg] of argv.entries()) {
-      if (arg === '--') return expanded.concat(argv.slice(index));
-      const isOption = arg.startsWith('-');
-      if (isOption) isRequire = /^(?:--require|--?r)(?:=|$)/.test(arg);
-      expanded.push(isRequire && !isOption ? `--require=${arg}` : arg);
-    }
-    return expanded;
-  },
 };
 
 const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');

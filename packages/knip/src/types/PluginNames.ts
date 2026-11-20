@@ -154,6 +154,7 @@ export type PluginName =
   | 'solidjs-vite-plugin'
   | 'sst'
   | 'starlight'
+  | 'start-server-and-test'
   | 'stencil'
   | 'storybook'
   | 'stryker'
@@ -172,6 +173,7 @@ export type PluginName =
   | 'temporal'
   | 'textlint'
   | 'travis'
+  | 'trigger-dev'
   | 'ts-node'
   | 'tsd'
   | 'tsdown'
@@ -369,6 +371,7 @@ export const pluginNames = [
   'solidjs-vite-plugin',
   'sst',
   'starlight',
+  'start-server-and-test',
   'stencil',
   'storybook',
   'stryker',
@@ -387,6 +390,7 @@ export const pluginNames = [
   'temporal',
   'textlint',
   'travis',
+  'trigger-dev',
   'ts-node',
   'tsd',
   'tsdown',

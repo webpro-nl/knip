@@ -38,6 +38,11 @@ const resolveConfig: ResolveConfig<CypressConfig> = async (localConfig, options)
   ];
 };
 
+const args = {
+  config: ['config-file'],
+  alias: { 'config-file': ['C'] },
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -45,6 +50,7 @@ const plugin: Plugin = {
   config,
   entry,
   resolveConfig,
+  args,
 };
 
 export default plugin;

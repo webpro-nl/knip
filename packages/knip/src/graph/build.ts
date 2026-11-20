@@ -122,6 +122,8 @@ export const build = timerify(async function build({
     });
   }
 
+  if (!deputy.getWorkspaceManifest(ROOT_WORKSPACE_NAME)) deputy.setRootIgnores(chief.getIgnores(ROOT_WORKSPACE_NAME));
+
   deputy.setWorkspacePkgNames(chief.availableWorkspacePkgNames);
 
   collector.addIgnorePatterns(chief.config.ignore.map(id => ({ pattern: id, id })));
@@ -566,7 +568,8 @@ export const build = timerify(async function build({
       }
 
       if (file.imports.subpathImports) {
-        for (const specifier of file.imports.subpathImports) subpathReferences.add(specifier, filePath);
+        for (const [specifier, importedFilePath] of file.imports.subpathImports)
+          subpathReferences.add(specifier, filePath, importedFilePath);
       }
 
       const wsDependencies = deputy.getDependencies(workspace.name);

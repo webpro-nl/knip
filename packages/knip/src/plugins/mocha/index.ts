@@ -55,6 +55,8 @@ const builtInReporters = new Set([
   'github-actions',
 ]);
 
+const nodeOptionModule = /^(?:import|require|loader|experimental-loader)=(.+)$/;
+
 const isExternalReporter = (reporter: unknown): reporter is string =>
   typeof reporter === 'string' && !builtInReporters.has(reporter);
 
@@ -62,11 +64,16 @@ const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
+  const nodeOptions = localConfig['node-option'] ? [localConfig['node-option']].flat() : undefined;
+  const preload = nodeOptions
+    ? nodeOptions.flatMap(option => option.match(nodeOptionModule)?.[1] ?? [])
+    : [localConfig.import ?? [], localConfig.loader ?? []].flat();
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
   inputs.push(...files.map(id => toEntryPath(id, { dir: options.cwd })));
   inputs.push(...require.map(id => toModule(id, { dir: options.cwd })));
+  inputs.push(...preload.map(id => toModule(id, { dir: options.cwd })));
   if (isExternalReporter(localConfig.reporter)) inputs.push(toModule(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
