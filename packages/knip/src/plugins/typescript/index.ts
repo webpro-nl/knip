@@ -3,6 +3,7 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
 import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
@@ -67,11 +68,16 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
   ]);
 };
 
+const toConfigPath = (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'));
+
 export const args = {
   binaries: ['tsc', 'tsgo'],
   string: ['project'],
-  alias: { project: ['p'] },
-  config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
+  boolean: ['build', 'clean', 'dry', 'force', 'stopBuildOnErrors'],
+  alias: { project: ['p'], build: ['b'], verbose: ['v'], dry: ['d'], force: ['f'], watch: ['w'] },
+  config: [['project', toConfigPath]] satisfies ConfigArg,
+  resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) =>
+    parsed.build ? parsed._.map(String).map(p => toConfig('typescript', toConfigPath(p), { dir: cwd })) : [],
 };
 
 const note = `[What's up with that configurable tsconfig.json location?](/reference/faq#whats-up-with-that-configurable-tsconfigjson-location)`;
