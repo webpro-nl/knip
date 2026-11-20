@@ -51,7 +51,7 @@ export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options)
     toDependency(id, { production: true, dir: options.cwd, alsoReferenceOwner: true })
   );
 
-  const types = compilerOptions.types ?? [];
+  const types = compilerOptions.types?.filter(id => id !== '*') ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
