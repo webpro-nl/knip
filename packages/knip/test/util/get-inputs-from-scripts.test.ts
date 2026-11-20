@@ -764,6 +764,11 @@ test('getInputsFromScripts (plugins → double-dash)', () => {
   t('nx exec -- vitest --config vitest.int.config.ts', [toBinary('nx'), toBinary('vitest'), toConfig('vitest', 'vitest.int.config.ts')]);
 });
 
+test('getInputsFromScripts (typedoc themes)', () => {
+  t('typedoc --theme default', [toBinary('typedoc')]);
+  t('typedoc --theme typedoc-github-theme', [toBinary('typedoc'), toModule('typedoc-github-theme')]);
+});
+
 test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsc -p a.json -p b.json', [toBinary('tsc'), toConfig('typescript', 'a.json'), toConfig('typescript', 'b.json')]);
