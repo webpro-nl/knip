@@ -1,0 +1,4 @@
+appId: com.example.app
+---
+- runScript: token.js
+- inputText: ${output.token}

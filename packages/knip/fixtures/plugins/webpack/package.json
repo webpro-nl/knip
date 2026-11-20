@@ -7,11 +7,16 @@
     "build": "webpack",
     "dev": "webpack serve"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@babel/runtime": "*",
+    "core-js": "*",
+    "jquery": "*"
+  },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "*",
     "@babel/plugin-proposal-object-rest-spread": "*",
     "@babel/plugin-transform-react-jsx": "*",
+    "@babel/plugin-transform-runtime": "*",
     "@babel/preset-env": "*",
     "@babel/preset-typescript": "*",
     "babel-loader": "*",
@@ -25,7 +30,6 @@
     "esbuild-loader": "*",
     "file-loader": "*",
     "html-minimizer-webpack-plugin": "*",
-    "jquery": "*",
     "less-loader": "*",
     "lodash": "*",
     "mini-css-extract-plugin": "*",

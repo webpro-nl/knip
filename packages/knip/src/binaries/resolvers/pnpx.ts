@@ -2,7 +2,7 @@ import type { Word } from 'unbash';
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.ts';
 import { getCatalogReference } from '../../util/catalog.ts';
-import { isBinary, toCatalog, toDependency } from '../../util/input.ts';
+import { toCatalog, toDependency } from '../../util/input.ts';
 import { extractBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 
 const toDependencyInputs = (packageSpecifier: string) => {
@@ -25,9 +25,9 @@ export const resolveDlx = (words: Word[], options: BinaryResolverOptions) => {
   const packages = flags.package && !flags.yes ? [flags.package].flat() : [];
   const command = flags['shell-mode'] ? options.fromArgs([flags['shell-mode']]) : [];
   const dependencyInputs = packageSpecifier ? toDependencyInputs(packageSpecifier) : [];
-  const forwarded = packageSpecifier && !flags.dir ? options.fromArgs(words.slice(commandIndex)) : [];
-  const [first] = forwarded;
-  const isOuterCommand = first && isBinary(first) && first.specifier === extractBinary(packageSpecifier);
+  const executable = packageSpecifier ? extractBinary(String(packageSpecifier)) : '';
+  const forwarded = executable && !flags.dir ? options.fromArgs([executable, ...words.slice(commandIndex + 1)]) : [];
+  const isOuterCommand = forwarded[0]?.specifier === executable;
   return [
     ...dependencyInputs,
     ...packages.flatMap(toDependencyInputs),

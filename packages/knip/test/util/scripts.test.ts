@@ -42,9 +42,47 @@ test('getScriptCommands traverses elif branches', () => {
 
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('cross-env-shell MESSAGE="two words" "node --test && bun test"'), [
+    { binary: 'node', args: ['--test'] },
+    { binary: 'bun', args: ['test'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell TZ=UTC node ./script.js "title=hello world"'), [
+    { binary: 'node', args: ['./script.js', 'title=hello', 'world'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep'), [
+    { binary: 'node', args: ['./script.js', '--', '--import', 'unused-dep'] },
+  ]);
   assert.deepEqual(getScriptCommands('retry -n 3 -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);
+});
+
+test('getScriptCommands unwraps the commands dependency discovery follows', () => {
+  assert.deepEqual(getScriptCommands('dotenvx run -- node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(
+    getScriptCommands('dotenvx run --quiet -- c8 node --test-reporter spec --test test/unit/**/*.test.js'),
+    [{ binary: 'node', args: ['--test-reporter', 'spec', '--test', 'test/unit/**/*.test.js'] }]
+  );
+  assert.deepEqual(getScriptCommands('op run --env-file=.env -- bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('doppler run --command="node index.js"'), [
+    { binary: 'node', args: ['index.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("infisical run --command 'tsx ./scripts/generate-api.ts'"), [
+    { binary: 'tsx', args: ['./scripts/generate-api.ts'] },
+  ]);
+  assert.deepEqual(getScriptCommands('concurrently "tsc -w" "node --watch -r dotenv/config ./build/src/start.js"'), [
+    { binary: 'tsc', args: ['-w'] },
+    { binary: 'node', args: ['--watch', '-r', 'dotenv/config', './build/src/start.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("nodemon --exec 'npm test' --watch src --watch specs"), [
+    { binary: 'npm', args: ['test'] },
+  ]);
+  assert.deepEqual(
+    getScriptCommands(
+      'glob -c "node --import tsx --import global-jsdom/register --test --no-warnings" "./src/**/__tests__/**/*.[jt]s"'
+    ),
+    [{ binary: 'node', args: ['--import', 'tsx', '--import', 'global-jsdom/register', '--test', '--no-warnings'] }]
+  );
 });
 
 test('getScriptCommands skips options of spawning binaries', () => {

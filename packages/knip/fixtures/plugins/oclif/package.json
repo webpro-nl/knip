@@ -4,6 +4,14 @@
     "start": "oclif"
   },
   "dependencies": {
+    "@oclif/plugin-help": "*",
     "oclif": "*"
+  },
+  "devDependencies": {
+    "@oclif/plugin-warn-if-update-available": "*"
+  },
+  "oclif": {
+    "plugins": ["@oclif/plugin-help"],
+    "devPlugins": ["@oclif/plugin-warn-if-update-available"]
   }
 }

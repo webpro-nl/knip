@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/trigger-dev-default-dirs",
+  "dependencies": {
+    "@trigger.dev/sdk": "*"
+  }
+}

@@ -61,7 +61,7 @@ const getImportsAndExports = (
   const programFiles = new Set<string>();
   const entryFiles = new Set<string>();
   const imports: Imports = new Set();
-  let subpathImports: Set<string> | undefined;
+  let subpathImports: Map<string, string | undefined> | undefined;
   const exports = new Map<string, Export>();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const specifierExportNames = new Set<string>();
@@ -175,7 +175,10 @@ const getImportsAndExports = (
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
 
     const subpathImport = getSubpathImport(specifier);
-    if (subpathImport) (subpathImports ??= new Set()).add(subpathImport);
+    if (subpathImport) {
+      subpathImports ??= new Map();
+      if (!subpathImports.get(subpathImport)) subpathImports.set(subpathImport, module?.resolvedFileName);
+    }
 
     if (
       modifiers & IMPORT_FLAGS.AUGMENT &&

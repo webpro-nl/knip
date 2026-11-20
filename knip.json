@@ -13,7 +13,7 @@
       "entry": ["{plugins,scripts}/*.ts"]
     },
     "packages/mcp-server": {
-      "project": ["**!", "!scripts/**!"]
+      "project": ["**!", "!scripts/**!", "!test/fixtures"]
     },
     "packages/vscode-knip": {
       "entry": ["src/index.js!", "scripts/*.js", "test/*.mjs"],

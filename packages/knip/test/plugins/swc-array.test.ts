@@ -16,3 +16,15 @@ test('Find dependencies in SWC config arrays', async () => {
     total: 0,
   });
 });
+
+test('Find dependencies in SWC config arrays (production)', async () => {
+  const cwd = resolve('fixtures/plugins/swc-array');
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});

@@ -12,7 +12,6 @@ test('Recompile async sources after changes and failures, skipping unchanged raw
   const callsPath = join(cwd, 'selection.foo.calls');
 
   try {
-    await writeFile(join(cwd, 'unused.ts'), 'export const unused = true;\n');
     const options = await createOptions({ cwd, isSession: true });
     const session = await createSession(options);
 

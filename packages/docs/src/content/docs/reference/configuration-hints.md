@@ -166,8 +166,8 @@ Refine knip.json → project pattern (no matches)
 
 ## Redundant patterns
 
-A glob/pattern is redundant, because it's already covered by defaults or added
-by an enabled plugin.
+A glob/pattern is redundant, because it's already covered by defaults, added by
+an enabled plugin, or listed again with the production suffix (`pattern!`).
 
 ```
 Remove redundant pattern from knip.json → entry

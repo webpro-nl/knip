@@ -10,11 +10,10 @@ test('Retain added, deleted, and modified files when a compiler interrupts a ses
   const cwd = await copyFixture('fixtures/session-compilers-overlap');
   const filePath = join(cwd, 'selection.foo');
   const addedPath = join(cwd, 'added.ts');
-  const deletedPath = join(cwd, 'deleted.ts');
+  const deletedPath = join(cwd, 'cherry.ts');
   const modifiedPath = join(cwd, 'apple.ts');
 
   try {
-    await writeFile(deletedPath, 'export const deleted = true;\n');
     const options = await createOptions({ cwd, isSession: true });
     options.parsedConfig.compilers = {
       foo: async (text: string) => {
@@ -24,7 +23,7 @@ test('Retain added, deleted, and modified files when a compiler interrupts a ses
       },
     };
     const session = await createSession(options);
-    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['banana.ts', 'cherry.ts', 'deleted.ts']);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['banana.ts', 'cherry.ts']);
 
     await writeFile(filePath, 'invalid\n');
     await writeFile(addedPath, 'export const added = true;\n');
@@ -41,7 +40,7 @@ test('Retain added, deleted, and modified files when a compiler interrupts a ses
 
     await writeFile(filePath, 'apple\n');
     await session.handleFileChanges([{ type: 'modified', filePath }]);
-    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts', 'cherry.ts']);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts']);
 
     await writeFile(filePath, 'invalid\n');
     await writeFile(modifiedPath, "export const fruit = 'apple';\nexport const unused = true;\n");
@@ -56,7 +55,7 @@ test('Retain added, deleted, and modified files when a compiler interrupts a ses
     await writeFile(filePath, 'apple\n');
     await session.handleFileChanges([{ type: 'modified', filePath }]);
     assert.deepEqual(Object.keys(session.getIssues().issues.exports['apple.ts']), ['unused']);
-    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts', 'cherry.ts']);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts']);
 
     await writeFile(filePath, 'invalid\n');
     await rm(addedPath);
@@ -78,7 +77,7 @@ test('Retain added, deleted, and modified files when a compiler interrupts a ses
       { type: 'added', filePath: addedPath },
       { type: 'deleted', filePath: deletedPath },
     ]);
-    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts', 'cherry.ts']);
+    assert.deepEqual(Object.keys(session.getIssues().issues.files).sort(), ['added.ts', 'banana.ts']);
     assert.equal(await session.handleFileChanges([{ type: 'modified', filePath }]), undefined);
   } finally {
     await rm(cwd, { recursive: true, force: true });

@@ -15,7 +15,7 @@ test('Find dependencies with the Drizzle plugin', async () => {
     ...baseCounters,
     devDependencies: 0,
     unlisted: 0,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

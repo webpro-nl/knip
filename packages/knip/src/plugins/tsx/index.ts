@@ -1,3 +1,4 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { PackageJson } from '../../types/package-json.ts';
 import { toEntry } from '../../util/input.ts';
@@ -35,11 +36,10 @@ const resolveConfig: ResolveConfig<PackageJson> = localConfig => {
 };
 
 const args = {
-  positional: true,
-  nodeImportArgs: true,
-  boolean: nodeArgs.boolean,
-  args: (args: string[]) => args.filter(arg => arg !== 'watch'),
-};
+  ...nodeArgs,
+  string: [...nodeArgs.string, 'exclude', 'ignore', 'include', 'tsconfig'],
+  args: (args: string[]) => (args[0] === 'watch' ? args.slice(1) : args),
+} satisfies Args;
 
 const plugin: Plugin = {
   title,

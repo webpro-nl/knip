@@ -1,5 +1,5 @@
-import { forEachChild, parse as parseScript, type SyntaxNode, type Word } from 'unbash';
-import parseArgs from '../util/parse-args.ts';
+import { parse as parseScript, type Word } from 'unbash';
+import parseArgs, { type ParsedArgs } from '../util/parse-args.ts';
 import { pluginArgsMap } from '../plugins.ts';
 import type { Args } from '../types/args.ts';
 import type { BinaryResolver, GetScriptCommands, ScriptArg, ScriptCommand } from '../types/config.ts';
@@ -7,14 +7,34 @@ import { compact } from '../util/array.ts';
 import { type Input, toBinary, toConfig, toModule, toEntryPath, toEntry } from '../util/input.ts';
 import { extractBinary, isInNodeModulesBin } from '../util/modules.ts';
 import { dirname } from '../util/path.ts';
-import { collectCommands, getCommandWords, isScriptExpansion } from '../util/scripts.ts';
-import { isWrapper as isFallbackWrapper, resolve as fallbackResolve, spawningBinaries } from './fallback.ts';
-import KnownResolvers from './resolvers/index.ts';
-import { isGlobLike, nodeLoadersArgs, spawningArgs, toCommandBinary, toWordArgs } from './util.ts';
+import { collectCommands, getCommandWords } from '../util/scripts.ts';
+import {
+  getEnvAssignmentCount,
+  getWrappedScripts,
+  isWrapper as isFallbackWrapper,
+  resolve as fallbackResolve,
+  shellSpawningBinaries,
+  spawningBinaries,
+} from './fallback.ts';
+import { isGlobLike, nodeLoadersArgs, toCommandBinary, toWordArgs } from './util.ts';
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
 
-const spawningPluginArgs: Args = { fromArgs: spawningArgs };
+const toShellAssignment = (assignment: string) => {
+  const index = assignment.indexOf('=');
+  return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
+};
+
+const toCrossEnvCommand = (args: string[]) => {
+  const command = args.slice();
+  const count = getEnvAssignmentCount(args);
+  for (let index = 0; index < count; index++) command[index] = toShellAssignment(args[index]);
+  return command;
+};
+
+const spawningPluginArgs: Args = { fromArgs: (_, args) => toCrossEnvCommand(args) };
+
+const shellSpawningPluginArgs: Args = { fromArgs: (_, args) => toCrossEnvCommand(args).join(' ') };
 
 const toArgValues = (pluginArgs: Args, values: string[]) =>
   typeof pluginArgs.args === 'function' ? pluginArgs.args(values) : values;
@@ -37,81 +57,61 @@ const parse = (pluginArgs: Args, args: string[]) => {
 
   return parseArgs(args, {
     string,
-    boolean: ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
+    boolean: pluginArgs.boolean === true ? true : ['quiet', 'verbose', 'watch', ...(pluginArgs.boolean ?? [])],
     alias: {
       ...(pluginArgs.nodeImportArgs ? nodeLoadersArgs : {}),
       ...(pluginArgs.config === true ? { config: ['c'] } : {}),
       ...pluginArgs.alias,
     },
     '--': true,
+    isStorePositions: true,
+    stopEarly: pluginArgs.stopEarly,
   });
 };
 
 const valueOf = (arg: ScriptArg) => (typeof arg === 'string' ? arg : arg.value);
 
-// Whether a forwarded `--` stays in the child's script: a wrapper decides about its own separators when its command
-// is forwarded in turn, and a command with a plugin keeps the one after its operands, where the rest belongs to the
-// script. Anything else is dropped, as forwarding always did, so options and operands of the child still parse.
-const isCommandWrapper = (binary: string) =>
-  isFallbackWrapper(binary) || typeof pluginArgsMap.get(binary)?.[1].fromArgs === 'function';
-
-const toKeptSeparators = (script: string, offsets: Set<number>) => {
-  const kept = new Set<number>();
-  const visit = (node: SyntaxNode) => {
-    if (node.type === 'Command' && node.name) {
-      const binary = extractBinary(node.name.value);
-      const pluginArgs = binary in KnownResolvers ? undefined : pluginArgsMap.get(binary)?.[1];
-      const values: string[] = [];
-      for (const word of getCommandWords(node)) {
-        const isForwarded = word.value === '--' && offsets.has(word.pos);
-        const isKept =
-          isForwarded &&
-          (isCommandWrapper(binary) ||
-            (!!pluginArgs && parse(pluginArgs, toArgValues(pluginArgs, values))._.length > 0));
-        if (isKept) kept.add(word.pos);
-        if (!isForwarded || isKept) values.push(word.value);
-      }
-    }
-    // A script with its own decoded source (escaped backticks) has positions that don't index this text
-    if (!isScriptExpansion(node)) forEachChild(node, visit);
-    else if (node.script && node.script.source === undefined) visit(node.script);
-  };
-  visit(parseScript(script));
-  return kept;
-};
-
 export const toForwardedScript = (args: ScriptArg[]): string => {
   const parts: string[] = [];
-  const separators: number[] = [];
   for (const arg of args) {
-    const value = valueOf(arg);
-    if (value === '--' && parts.length === 0) continue;
-    if (value === '--') separators.push(parts.length);
+    if (parts.length === 0 && valueOf(arg) === '--') continue;
     parts.push(typeof arg === 'string' ? arg : arg.text);
   }
-  const script = parts.join(' ');
-  if (separators.length === 0) return script;
-  const starts: number[] = [];
-  let offset = 0;
-  for (const part of parts) {
-    starts.push(offset);
-    offset += part.length + 1;
-  }
-  let kept = new Set<number>();
-  try {
-    kept = toKeptSeparators(script, new Set(separators.map(index => starts[index])));
-  } catch {}
-  const dropped = new Set(separators.filter(index => !kept.has(starts[index])));
-  return parts.filter((_, index) => !dropped.has(index)).join(' ');
+  return parts.join(' ');
+};
+
+const toCommandArgs = (command: string[] | string, words: Word[]): ScriptArg[] =>
+  typeof command === 'string' ? (command ? [command] : []) : toWordArgs(command, words);
+
+const toWrappedCommand = (
+  pluginArgs: Args,
+  parsed: ParsedArgs,
+  args: string[],
+  words: Word[],
+  cwd: string
+): ScriptArg[] => {
+  const { fromArgs } = pluginArgs;
+  if (typeof fromArgs === 'function') return toCommandArgs(fromArgs(parsed, args, { cwd }), words);
+  if (Array.isArray(fromArgs)) return fromArgs.flatMap(key => parsed[key]).filter(Boolean);
+  return [];
 };
 
 export const getWrappedCommand = (binary: string, words: Word[], cwd = process.cwd()): ScriptArg[] | undefined => {
   const pluginArgs =
-    pluginArgsMap.get(binary)?.[1] ?? (spawningBinaries.includes(binary) ? spawningPluginArgs : undefined);
-  const fromArgs = pluginArgs?.fromArgs;
-  if (!pluginArgs || typeof fromArgs !== 'function') return;
+    pluginArgsMap.get(binary)?.[1] ??
+    (shellSpawningBinaries.includes(binary)
+      ? shellSpawningPluginArgs
+      : spawningBinaries.includes(binary)
+        ? spawningPluginArgs
+        : undefined);
+  if (!pluginArgs?.fromArgs) return;
   const args = toArgs(pluginArgs, words);
-  return toWordArgs(fromArgs(parse(pluginArgs, args), args, { cwd }), words);
+  return toWrappedCommand(pluginArgs, parse(pluginArgs, args), args, words, cwd);
+};
+
+const getWrappedCommands = (binary: string, words: Word[], cwd: string) => {
+  const command = getWrappedCommand(binary, words, cwd);
+  return command ? [command] : getWrappedScripts(binary, words);
 };
 
 export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()) => {
@@ -124,9 +124,9 @@ export const getScriptCommands: GetScriptCommands = (script, cwd = process.cwd()
         if (!text) continue;
         const binary = extractBinary(text);
         const words = getCommandWords(node);
-        const command = getWrappedCommand(binary, words, cwd);
-        if (command?.length) out.push(...getScriptCommands(toForwardedScript(command), cwd));
-        else out.push({ binary, args: words.map(word => word.value) });
+        const commands = getWrappedCommands(binary, words, cwd).filter(command => command.length > 0);
+        if (commands.length === 0) out.push({ binary, args: words.map(word => word.value) });
+        for (const command of commands) out.push(...getScriptCommands(toForwardedScript(command), cwd));
       }
     }
   } catch {
@@ -148,13 +148,17 @@ export const resolve: BinaryResolver = (binary, words, options) => {
   const parsed = parse(pluginArgs, args);
 
   const positionals = [];
-  if (pluginArgs.positional && parsed._[0]) {
-    const id = parsed._[0]; // let's start out safe, but sometimes we'll want more
+  const operand = parsed._[0] ?? parsed['--']?.[0];
+  const ids =
+    typeof pluginArgs.positional === 'function'
+      ? pluginArgs.positional(parsed)
+      : pluginArgs.positional && operand
+        ? [operand]
+        : [];
+  for (const id of ids) {
     if (isGlobLike(id)) positionals.push(toEntry(id));
-    else {
-      if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
-      else positionals.push(toEntryPath(id, { optional: true }));
-    }
+    else if (isInNodeModulesBin(id)) positionals.push(toBinary(extractBinary(id)));
+    else positionals.push(toEntryPath(id, { optional: true }));
   }
 
   const mapToParsedKey = (id: string) => parsed[id];
@@ -162,12 +166,8 @@ export const resolve: BinaryResolver = (binary, words, options) => {
 
   const resolvedImports = pluginArgs.nodeImportArgs && parsed.import ? [parsed.import].flat() : [];
 
-  const resolvedFromArgs =
-    typeof pluginArgs.fromArgs === 'function'
-      ? fromArgs(toWordArgs(pluginArgs.fromArgs(parsed, args, { cwd }), words))
-      : Array.isArray(pluginArgs.fromArgs)
-        ? fromArgs(pluginArgs.fromArgs.flatMap(mapToParsedKey).filter(Boolean))
-        : [];
+  const wrappedCommand = toWrappedCommand(pluginArgs, parsed, args, words, cwd);
+  const resolvedFromArgs = wrappedCommand.length > 0 ? fromArgs(wrappedCommand) : [];
 
   const config = pluginArgs.config === true ? ['config'] : pluginArgs.config || [];
   const mapToConfigPattern = (value: string | [string, (value: string) => string]) => {

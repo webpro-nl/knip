@@ -129,21 +129,10 @@ See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 
 ## Script parsing
 
-Don't walk and parse `manifest.scripts` manually. Use `Plugin.args` and find
-what core script parser handles. See [Argument Parsing][3] and other plugins
-like prisma, vitest, webpack.
-
-Handle the CLI arguments that change what the tool loads, such as a config file,
-a source directory or extra entry files: `args.config` for config files,
-`args.resolveInputs` for the rest (see react-email). Check that an option means
-the same thing in every command. Declare the tool's boolean flags in
-`args.boolean`: an undeclared option takes the next token as its value and can
-swallow a positional entry.
-
-Pass a command from a tool's config (Playwright's `webServer.command`) with its
-cwd to `options.getInputsFromScripts`, not to a plugin-specific parser or
-allowlist. Wrappers such as c8 re-parse trailing commands through other plugins'
-`args`, so after an `args` change also run `get-inputs-from-scripts.test.ts`.
+Read [SCRIPT-PARSING.md][4] before changing or reviewing `Plugin.args` or
+command discovery. It covers evidence from real scripts, parsing ownership,
+shell text versus argv, and verification. The [Argument Parsing reference][3]
+describes the available options.
 
 ## Compilers (`registerCompilers`)
 
@@ -152,7 +141,7 @@ registers their extension: it makes `**/*.<ext>` project files (unreferenced →
 unused) and extracts imports so refs are followed. Built-ins (`src/compilers/`:
 mdx/scss/less/ stylus) auto-enable on a known dependency; plugins gate on
 `hasDependency`. Regex extractors, not parsers. The same scope and tradeoffs
-apply when adding new compilers; read [COMPILERS.md][4] first.
+apply when adding new compilers; read [COMPILERS.md][5] first.
 
 ## Visitors (`registerVisitors`)
 
@@ -172,10 +161,11 @@ into graph facts.
 
 ## Fixtures
 
-See [TESTS.md][5] for fixture conventions, including plugin fixtures.
+See [TESTS.md][6] for fixture conventions, including plugin fixtures.
 
 [1]: ../packages/docs/src/content/docs/writing-a-plugin/index.md
 [2]: ../packages/docs/src/content/docs/writing-a-plugin/inputs.md
 [3]: ../packages/docs/src/content/docs/writing-a-plugin/argument-parsing.md
-[4]: ./COMPILERS.md
-[5]: ./TESTS.md#plugin-fixtures
+[4]: ./SCRIPT-PARSING.md
+[5]: ./COMPILERS.md
+[6]: ./TESTS.md#plugin-fixtures

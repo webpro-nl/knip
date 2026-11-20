@@ -5,6 +5,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "build:docs": "astro --config config/docs.config.mjs build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check"

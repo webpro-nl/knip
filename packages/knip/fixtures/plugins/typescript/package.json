@@ -12,6 +12,7 @@
     "tslib": "*"
   },
   "devDependencies": {
+    "@types/chai": "*",
     "ember-content-mapper": "*",
     "remark-gfm": "*",
     "@tsconfig/node16": "*",

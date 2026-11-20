@@ -17,3 +17,14 @@ test('Find dependencies with the oclif plugin', async () => {
     total: 0,
   });
 });
+
+test('Find dependencies with the oclif plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});

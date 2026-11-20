@@ -17,7 +17,7 @@ test('Support compiler functions in config', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    processed: 11,
-    total: 11,
+    processed: 13,
+    total: 13,
   });
 });

@@ -1,0 +1,11 @@
+name: composite
+
+runs:
+  using: composite
+  steps:
+    - run: node ${GITHUB_ACTION_PATH}/src/entrypoints/run.js
+      shell: bash
+    - run: node ${{ github.action_path }}/scripts/post.js
+      shell: bash
+    - run: node ${{ github.action_path }}/dist/index.js
+      shell: bash
