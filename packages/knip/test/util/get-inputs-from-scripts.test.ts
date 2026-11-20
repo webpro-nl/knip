@@ -773,6 +773,19 @@ test('getInputsFromScripts (typedoc themes)', () => {
   t('typedoc --theme typedoc-github-theme', [toBinary('typedoc'), toModule('typedoc-github-theme')]);
 });
 
+test('getInputsFromScripts (cucumber)', () => {
+  t('cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require "test/integration/**/*.ts"', [
+    toBinary('cucumber-js'),
+    toModule('ts-node/register'),
+    toModule('tsconfig-paths/register'),
+    toEntry('test/integration/**/*.ts'),
+  ]);
+  t('cucumber-js --require-module=ts-node/register -r src/test.ts', [toBinary('cucumber-js'), toModule('ts-node/register'), toEntry('src/test.ts')]);
+  t('cucumber-js --config config/cucumber.json', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+  t('cucumber-js --config=config/cucumber.json', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+  t('cucumber-js -c config/cucumber.json -p default', [toBinary('cucumber-js'), toConfig('cucumber', 'config/cucumber.json')]);
+});
+
 test('getInputsFromScripts (plugins → config)', () => {
   t('tsc -p tsconfig.app.json', [toBinary('tsc'), toConfig('typescript', 'tsconfig.app.json')]);
   t('tsc -p a.json -p b.json', [toBinary('tsc'), toConfig('typescript', 'a.json'), toConfig('typescript', 'b.json')]);
