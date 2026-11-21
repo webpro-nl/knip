@@ -22,7 +22,7 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) =>
 
 const args: Args = {
   boolean: true,
-  positional: parsed => parsed._,
+  resolveInputs: parsed => parsed._.map(id => toEntry(id, { production: true })),
 };
 
 const plugin: Plugin = {
