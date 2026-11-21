@@ -1,3 +1,4 @@
+import { keepModuleMarker, removeExport } from 'knip/session';
 import { DeleteFile, TextEdit } from 'vscode-languageserver/node';
 
 /**
@@ -16,11 +17,20 @@ export const createRemoveExportEdit = (document, uri, issue) => {
   try {
     if (!document || !issue.fixes?.length) return null;
 
-    const edits = issue.fixes.map(([start, end]) => {
-      return TextEdit.del({ start: document.positionAt(start), end: document.positionAt(end) });
-    });
+    const source = document.getText();
+    let text = source;
+    for (const [start, end, flags] of issue.fixes.toSorted((a, b) => b[0] - a[0])) {
+      text = removeExport({ text, start, end, flags });
+    }
+    text = keepModuleMarker(source, text);
 
-    return { changes: { [uri]: edits } };
+    let start = 0;
+    while (start < text.length && text[start] === source[start]) start++;
+    let end = 0;
+    while (end < text.length - start && text.at(-1 - end) === source.at(-1 - end)) end++;
+
+    const range = { start: document.positionAt(start), end: document.positionAt(source.length - end) };
+    return { changes: { [uri]: [TextEdit.replace(range, text.slice(start, text.length - end))] } };
   } catch (_error) {
     return null;
   }
@@ -38,6 +48,8 @@ export const createRemoveDependencyEdit = (document, uri, issue) => {
 
     const lineIndex = issue.line - 1;
     const range = { start: { line: lineIndex, character: 0 }, end: { line: lineIndex + 1, character: 0 } };
+    const line = document.getText(range).trim();
+    if (!line.startsWith(`"${issue.symbol}"`) || !/^"[^"]*"\s*:\s*"(?:[^"\\]|\\.)*"\s*,?$/.test(line)) return null;
     const edits = [TextEdit.del(range)];
 
     if (lineIndex > 0 && !document.getText(range).trimEnd().endsWith(',')) {

@@ -17,3 +17,14 @@ test('Find dependencies with the swc plugin', async () => {
     total: 0,
   });
 });
+
+test('Find dependencies with the swc plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});

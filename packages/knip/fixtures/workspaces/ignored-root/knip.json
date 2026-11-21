@@ -1,0 +1,6 @@
+{
+  "ignoreWorkspaces": ["."],
+  "ignoreDependencies": ["@org/.+", "unused-ignore-dependency"],
+  "ignoreBinaries": ["used-binary", "unused-ignore-binary"],
+  "ignoreUnresolved": ["./missing.js", "unused-ignore-unresolved"]
+}

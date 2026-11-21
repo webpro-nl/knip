@@ -23,6 +23,7 @@ import { SourceFileManager } from './typescript/SourceFileManager.ts';
 import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLog } from './util/debug.ts';
+import { getSubpathImport } from './util/modules.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
@@ -304,7 +305,9 @@ export class ProjectPrincipal {
     this.resolvedFiles = visited;
   }
 
-  async getUsedResolvedFiles(onSpecifier: (specifier: string, filePath: string) => void) {
+  async getUsedResolvedFiles(
+    onSpecifier: (specifier: string, filePath: string, importedFilePath: string | undefined) => void
+  ) {
     this.resolvedFiles.clear();
     const visited = new Set([...this.entryPaths, ...this.programPaths]);
     this.onPathAdded = p => visited.add(p);
@@ -317,9 +320,10 @@ export class ProjectPrincipal {
 
         const result = tryParseFile(filePath, sourceText);
         if (!result) continue;
+        const isProjectPath = this.projectPaths.has(filePath);
         for (const specifier of extractSpecifiers(result, sourceText, filePath)) {
-          onSpecifier(specifier, filePath);
           const resolved = this.resolveSpecifier(specifier, filePath);
+          onSpecifier(specifier, filePath, isProjectPath && getSubpathImport(specifier) ? resolved : undefined);
           if (resolved && !isInNodeModules(resolved)) visited.add(resolved);
         }
       }

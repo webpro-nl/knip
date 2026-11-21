@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/cucumber-args",
+  "scripts": {
+    "test": "cucumber-js --require-module ts-node/register --require 'features/**/*.ts'",
+    "test:config": "cucumber-js -c config/cucumber.json -p default",
+    "test:hooks": "cucumber-js -r hooks"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "*",
+    "ts-node": "*"
+  }
+}

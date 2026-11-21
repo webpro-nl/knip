@@ -1,0 +1,9 @@
+{
+  "extends": "./config/tsconfig.base.json",
+  "ts-node": {
+    "swc": true,
+    "compilerOptions": {
+      "sourceMap": true
+    }
+  }
+}

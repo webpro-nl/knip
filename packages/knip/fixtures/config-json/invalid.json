@@ -1,0 +1,5 @@
+{
+  "ignoreGlobalBinaries": "yes",
+  "workspaces": { "app": { "paths": { "@app": [42] } } },
+  "typo": true
+}

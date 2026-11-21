@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/github-actions-working-directory');
 
-test('Glob a script entry pattern from the working directory of a step', async () => {
+test('Resolve scripts from the working directory of a step, job or workflow', async () => {
   const { issues, counters } = await main(await createOptions({ cwd }));
 
   assert.deepEqual(Object.keys(issues.files), ['specs/app.spec.js']);
@@ -15,7 +15,7 @@ test('Glob a script entry pattern from the working directory of a step', async (
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 2,
-    total: 2,
+    processed: 4,
+    total: 4,
   });
 });

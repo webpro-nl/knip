@@ -48,7 +48,7 @@ const resolveConfig: ResolveConfig<NetlifyConfig> = async localConfig => {
     .concat([
       ...(localConfig?.plugins?.map(plugin => plugin.package) ?? []).map(toPluginInput),
       ...extractFunctionsConfigProperty(localConfig.functions || {}, 'external_node_modules').map(id =>
-        toDependency(id)
+        toDependency(id, { production: true })
       ),
     ]);
 };

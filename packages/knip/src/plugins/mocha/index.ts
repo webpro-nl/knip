@@ -55,6 +55,8 @@ const builtInReporters = new Set([
   'github-actions',
 ]);
 
+const nodeOptionModule = /^(?:import|require|loader|experimental-loader)=(.+)$/;
+
 const isExternalReporter = (reporter: unknown): reporter is string =>
   typeof reporter === 'string' && !builtInReporters.has(reporter);
 
@@ -62,11 +64,16 @@ const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
+  const nodeOptions = localConfig['node-option'] ? [localConfig['node-option']].flat() : undefined;
+  const preload = nodeOptions
+    ? nodeOptions.flatMap(option => option.match(nodeOptionModule)?.[1] ?? [])
+    : [localConfig.import ?? [], localConfig.loader ?? []].flat();
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
   inputs.push(...files.map(id => toEntryPath(id, { dir: options.cwd })));
   inputs.push(...require.map(id => toModule(id, { dir: options.cwd })));
+  inputs.push(...preload.map(id => toModule(id, { dir: options.cwd })));
   if (isExternalReporter(localConfig.reporter)) inputs.push(toModule(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
@@ -110,7 +117,7 @@ const args = {
     ui: ['u'],
     watch: ['w'],
   },
-  string: ['config', 'extension', 'fgrep', 'file', 'grep', 'ignore', 'package', 'reporter', 'spec', 'ui'],
+  string: ['extension', 'file', 'ignore', 'reporter', 'spec'],
   config: ['config'],
   resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) => {
     const extensions = [parsed.extension ?? []]
@@ -120,7 +127,8 @@ const args = {
     const list = extensions.length > 0 ? extensions : defaultExtensions;
     const suffix = list.length === 1 ? `*.${list[0]}` : `*.{${list.join(',')}}`;
     const inputs: Input[] = [];
-    for (const value of [...parsed._, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
+    const operands = [...parsed._, ...(parsed['--'] ?? []).filter(value => !value.startsWith('-'))];
+    for (const value of [...operands, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
       if (isDirectory(cwd, value))
         inputs.push(toEntry(`${value.replace(/\/$/, '')}/${parsed.recursive ? '**/' : ''}${suffix}`));
       else inputs.push(toEntry(value));

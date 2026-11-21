@@ -1,0 +1,5 @@
+{
+  "entry": ["index.ts", "run.ts"],
+  "project": ["index.ts", "run.ts", "used.ts"],
+  "jest": false
+}
