@@ -1,0 +1,7 @@
+{
+  "ts-node": {
+    "compiler": "ts-patch/compiler",
+    "transpiler": ["ts-node/transpilers/swc", {}],
+    "transpileOnly": true
+  }
+}
