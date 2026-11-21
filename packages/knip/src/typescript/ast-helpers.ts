@@ -1,4 +1,4 @@
-import type { CallExpression, ParseResult, Program } from 'oxc-parser';
+import type { CallExpression, Node, ParseResult, Program } from 'oxc-parser';
 import { Visitor } from 'oxc-parser';
 import stripJsonComments from 'strip-json-comments';
 import { extname, isInternal } from '../util/path.ts';
@@ -87,26 +87,39 @@ export const getFirstPropertyValue = (node: any, propertyName: string) =>
 export const collectFirstPropertyValue = (program: Program, propertyName: string) =>
   firstValue(collectPropertyValues(program, propertyName));
 
-const unwrapParens = (node: any): any =>
-  node?.type === 'ParenthesizedExpression' ? unwrapParens(node.expression) : node;
+export function unwrapExpression(node: Node): Node;
+export function unwrapExpression(node: Node | null | undefined): Node | null | undefined;
+export function unwrapExpression(node: Node | null | undefined): Node | null | undefined {
+  while (
+    node &&
+    (node.type === 'ParenthesizedExpression' ||
+      node.type === 'TSAsExpression' ||
+      node.type === 'TSSatisfiesExpression' ||
+      node.type === 'TSNonNullExpression' ||
+      node.type === 'TSTypeAssertion')
+  ) {
+    node = node.expression;
+  }
+  return node;
+}
 
 /**
  * Resolve a `defineConfig`-style argument to its ObjectExpression. Handles:
  * object form `defineConfig({...})`, implicit-return arrow `defineConfig(() => ({...}))`,
  * and `defineConfig(() => { return {...}; })` (single inline return). Unwraps
- * `ParenthesizedExpression` at every step.
+ * parentheses and TypeScript assertions at every step.
  */
 export const resolveObjectArg = (arg: any): any | undefined => {
-  const node = unwrapParens(arg);
+  const node = unwrapExpression(arg);
   if (!node) return;
   if (node.type === 'ObjectExpression') return node;
   if (node.type !== 'ArrowFunctionExpression' && node.type !== 'FunctionExpression') return;
-  const body = unwrapParens(node.body);
+  const body = unwrapExpression(node.body);
   if (body?.type === 'ObjectExpression') return body;
   if (body?.type !== 'BlockStatement') return;
   for (const stmt of body.body ?? []) {
     if (stmt.type === 'ReturnStatement') {
-      const ret = unwrapParens(stmt.argument);
+      const ret = unwrapExpression(stmt.argument);
       if (ret?.type === 'ObjectExpression') return ret;
     }
   }

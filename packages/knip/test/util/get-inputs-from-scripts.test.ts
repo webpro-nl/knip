@@ -204,6 +204,23 @@ test('getInputsFromScripts (cross-env/env vars)', () => {
   t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toModule('pkg-b'), toModule('pkg-a')]);
 });
 
+test('getInputsFromScripts (env)', () => {
+  t("env 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('env'), toBinary('node'), js, toModule('pkg')]);
+  t('env NODE_ENV=production program', [toBinary('env'), toBinary('program')]);
+  t('env GREETING="hello world" node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env GREETING="it\'s fine" node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env NODE_ENV=test node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -u NO_COLOR node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -i PATH=/usr/bin:/bin node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t("env -i PATH=$PATH NODE_OPTIONS='--require pkg' program", [toBinary('env'), toBinary('program'), toModule('pkg')]);
+  t('env -i node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -v node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env $(cat .env | xargs) node ./script.js', [toBinary('env'), toBinary('node'), js, toBinary('cat'), toBinary('xargs')]);
+  t('env -C dir node ./script.js', [toBinary('env')]);
+  t('env -iC dir node ./script.js', [toBinary('env')]);
+  t('env NODE_ENV=test node -C development ./script.js', [toBinary('env'), toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r pkg/config ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('pkg/config')]);
   t('cross-env NODE_ENV=production node -r node_modules/pkg/cfg ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('node_modules/pkg/cfg')]);
@@ -227,7 +244,7 @@ test('getInputsFromScripts (cross-env-shell)', () => {
 test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);
-  t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toModule('./main.ts')]);
+  t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toEntry('./main.ts', { production: true })]);
 });
 
 test('getInputsFromScripts (npm)', () => {
@@ -280,6 +297,7 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx ./main.ts build', [toBinary('tsx', opt), ts]);
   t('npx tsx ./main.ts -- build', [toBinary('tsx', opt), ts]);
   t('npx ./tools/release-cli', [toModule('./tools/release-cli', { ...opt, dir: cwd })]);
+  t('npx --package=pnpm pnpm exec tsx ./main.ts', [toBinary('pnpm', opt), toDependency('pnpm', opt), toBinary('tsx'), ts]);
 });
 
 test('getInputsFromScripts (bun)', () => {
@@ -581,6 +599,9 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);
+  t('esbuild --bundle ./main.ts ./worker.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true }), toEntry('./worker.ts', { production: true })]);
+  t('esbuild --minify --external:react ./main.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true })]);
+  t('esbuild --bundle "app/javascript/*.*" --outdir=dist', [toBinary('esbuild'), toEntry('app/javascript/*.*', { production: true })]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toModule('script.js')]);
@@ -729,6 +750,28 @@ test('getInputsFromScripts (env-cmd environments)', () => {
   t('env-cmd -e mocha nyc mocha', [toBinary('env-cmd'), toBinary('nyc'), toBinary('mocha')]);
   t('env-cmd -e "traQ,firefox" ts-node --transpile-only ./scripts/watch.ts', [toBinary('env-cmd'), toBinary('ts-node'), toEntryPath('./scripts/watch.ts', opt)]);
   t('env-cmd -e version -- run-s update:*', [toBinary('env-cmd'), toBinary('run-s')]);
+});
+
+test('getInputsFromScripts (sst)', () => {
+  t('sst deploy --stage production', [toBinary('sst')]);
+  t('sst shell', [toBinary('sst')]);
+  t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
+  t('sst shell "./scripts/my task.sh"', [toBinary('sst'), toEntry('./scripts/my task.sh')]);
+  t('sst shell --stage dev -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst shell --stage node node ./script.js', [toBinary('sst'), toBinary('node'), js]);
+  t('sst shell -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
+  t('sst --config infra/sst.config.ts shell tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst --stage dev shell -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst dev next dev', [toBinary('sst'), toBinary('next')]);
+  t('sst dev -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
+});
+
+test('getInputsFromScripts (sst bind and env)', () => {
+  t('sst bind vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst env vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst bind "tsx ./main.ts"', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst bind --script "node --import tsx" ./main.ts', [toBinary('sst'), toBinary('node'), ts, toModule('tsx')]);
+  t(`sst env 'node "./scripts/my task.js"' input`, [toBinary('sst'), toBinary('node'), toEntryPath('./scripts/my task.js', opt)]);
 });
 
 test('getInputsFromScripts (command flags)', () => {

@@ -587,6 +587,10 @@
           "title": "ember-template-lint plugin configuration (https://knip.dev/reference/plugins/ember-template-lint)",
           "$ref": "#/definitions/plugin"
         },
+        "env": {
+          "title": "env plugin configuration (https://knip.dev/reference/plugins/env)",
+          "$ref": "#/definitions/plugin"
+        },
         "env-cmd": {
           "title": "env-cmd plugin configuration (https://knip.dev/reference/plugins/env-cmd)",
           "$ref": "#/definitions/plugin"

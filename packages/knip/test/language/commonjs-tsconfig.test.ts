@@ -18,15 +18,16 @@ test('Support CommonJS-style imports and exports (w tsconfig.json)', async () =>
   assert(issues.exports['dir/module1.ts']['unused']);
   assert(issues.exports['dir/module2.ts']['unused']);
   assert(issues.exports['dir/module3.js']['unused']);
+  assert.deepEqual(Object.keys(issues.exports['dir/wrapped.ts']), ['unused']);
 
   assert(issues.unlisted['dir/script1.js']['string-literal']);
   assert(issues.unlisted['dir/script1.js']['another-unlisted']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 6,
+    exports: 7,
     unlisted: 2,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
 });
