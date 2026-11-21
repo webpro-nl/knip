@@ -32,12 +32,14 @@ test('Find dependencies with the docusaurus plugin (production)', async () => {
 
   assert(!issues.dependencies['package.json']['@docusaurus/theme-mermaid']);
   assert(!issues.dependencies['package.json']['@docusaurus/preset-classic']);
+  assert(!issues.dependencies['package.json']['@easyops-cn/docusaurus-search-local']);
   assert(issues.dependencies['package.json']['@docusaurus/plugin-sitemap']);
+  assert(issues.dependencies['package.json']['docusaurus-lunr-search']);
   assert.deepEqual(Object.keys(issues.unlisted['docusaurus.config.js']), ['@docusaurus/theme-search-algolia']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    dependencies: 7,
+    dependencies: 8,
     unlisted: 1,
     files: 1,
     processed: 14,
