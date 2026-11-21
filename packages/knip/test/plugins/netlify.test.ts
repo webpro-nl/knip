@@ -25,3 +25,22 @@ test('Find dependencies with the Netlify plugin', async () => {
     total: 1,
   });
 });
+
+test('Find dependencies with the Netlify plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.unlisted['netlify.toml']).sort(), [
+    'package-1',
+    'package-2',
+    'package-3',
+    'package-4',
+  ]);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    unlisted: 4,
+    processed: 0,
+    total: 1,
+  });
+});

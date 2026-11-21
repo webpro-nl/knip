@@ -6,7 +6,7 @@ const common = require('./webpack.common.js');
 module.exports = env =>
   merge(common(), {
     mode: 'production',
-    entry: './src/entry.js',
+    entry: ['core-js/stable', './src/entry.js'],
     module: {
       rules: [],
     },

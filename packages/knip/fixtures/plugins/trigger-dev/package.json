@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/trigger-dev",
+  "scripts": {
+    "dev": "trigger dev",
+    "deploy": "trigger deploy"
+  },
+  "dependencies": {
+    "@trigger.dev/sdk": "*"
+  },
+  "devDependencies": {
+    "trigger.dev": "*"
+  }
+}

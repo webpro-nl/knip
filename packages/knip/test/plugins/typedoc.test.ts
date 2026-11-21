@@ -30,3 +30,15 @@ test('Find dependencies and literal entry files with the typedoc plugin', async 
     total: 3,
   });
 });
+
+test('Find dependencies with the typedoc plugin (--options arg)', async () => {
+  const cwd = resolve('fixtures/plugins/typedoc-args');
+  const options = await createOptions({ cwd });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});

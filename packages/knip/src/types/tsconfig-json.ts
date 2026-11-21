@@ -11,4 +11,9 @@ export interface TsConfigJson {
     options?: Record<string, unknown>;
   }[];
   references?: Array<{ path: string }>;
+  'ts-node'?: {
+    compiler?: string;
+    transpiler?: string | [string, object];
+    require?: string[];
+  };
 }

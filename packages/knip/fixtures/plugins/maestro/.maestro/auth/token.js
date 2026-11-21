@@ -1,0 +1,1 @@
+output.token = 'secret';

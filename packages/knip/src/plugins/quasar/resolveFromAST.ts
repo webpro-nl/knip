@@ -61,13 +61,13 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
     for (const element of boot.elements ?? []) {
       const id = getStringValue(element) ?? getFirstPropertyValue(element, 'path');
       if (!id) continue;
-      if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
+      if (id.startsWith('~')) inputs.push(toDependency(id.slice(1), { production: true }));
       else inputs.push(toEntryPath(join(configFileDir, 'src/boot', id), { production: true }));
     }
   }
 
   for (const id of getStringValues(findProperty(config, 'css'))) {
-    if (id.startsWith('~')) inputs.push(toDependency(id.slice(1)));
+    if (id.startsWith('~')) inputs.push(toDependency(id.slice(1), { production: true }));
     else inputs.push(toEntryPath(join(configFileDir, 'src/css', id), { production: true }));
   }
 

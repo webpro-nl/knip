@@ -1,0 +1,4 @@
+appId: com.example.app
+---
+- runScript:
+    file: reset.js

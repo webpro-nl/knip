@@ -16,6 +16,10 @@
     "#patterns/*": "./patterns/*.js",
     "#patterns/private/*": null,
     "#unused-patterns/*": "./unused-patterns/*.js",
+    "#conditional-patterns/*": {
+      "node": "./conditional-patterns/*-node.js",
+      "default": "./conditional-patterns/*-default.js"
+    },
     "#query": "./query.js",
     "#via-bridge": {
       "node": "./via-bridge-node.js",

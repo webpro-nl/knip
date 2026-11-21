@@ -1,0 +1,6 @@
+{
+  "name": "@scope/app",
+  "dependencies": {
+    "@scope/lib": "workspace:*"
+  }
+}

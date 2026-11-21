@@ -1,4 +1,4 @@
-import { argsFrom } from '../../binaries/util.ts';
+import { argsFromPositional } from '../../binaries/util.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { toConfig } from '../../util/input.ts';
@@ -27,8 +27,8 @@ const args: Args = {
   ...options,
   fromArgs: (parsed, args) => {
     if (!wrappers.has(parsed._[0])) return [];
-    const command = parsed._[1] ? argsFrom(args, parsed._[1]) : (parsed['--'] ?? []);
-    return command.length === 1 ? command[0].split(' ') : command;
+    const command = argsFromPositional(parsed, args, 1);
+    return parsed._[0] === 'bind' || parsed._[0] === 'env' ? command.join(' ') : command;
   },
   resolveInputs: (parsed, { args, cwd }) => {
     const command = wrappers.has(parsed._[0]) && parsed._[1] ? argsFrom(args, parsed._[1]) : [];

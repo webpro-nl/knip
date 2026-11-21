@@ -29,10 +29,10 @@ const args: Args = {
   binaries: ['cdk'],
   string: ['app'],
   alias: { app: ['a'] },
-  // a lone word or an existing directory is a cloud assembly or a file to run; return words so a quoted command is re-parsed
+  // a lone word or an existing directory is a cloud assembly or a file to run
   fromArgs: (parsed, _, { cwd }) =>
     typeof parsed.app === 'string' && parsed.app.includes(' ') && !isDirectory(toAbsolute(parsed.app, cwd))
-      ? parsed.app.split(' ')
+      ? parsed.app
       : [],
 };
 

@@ -14,9 +14,10 @@ const dependencies = [
 ];
 
 const mdxImportMatcher = /^import[^'"]+['"][^'"]+['"]/gm;
+const mdxReExportMatcher = /^export\s*\{([^}]*)\}\s*from\s*(['"][^'"]+['"])/gm;
 
 const compiler = (text: string) => {
-  if (!text.includes('import')) return '';
+  if (!text.includes('import') && !text.includes('export')) return '';
   const imports: string[] = [];
   const source = text
     .replace(frontmatterMatcher, '')
@@ -25,6 +26,11 @@ const compiler = (text: string) => {
   let match: RegExpExecArray | null;
   mdxImportMatcher.lastIndex = 0;
   while ((match = mdxImportMatcher.exec(source))) imports.push(match[0]);
+  mdxReExportMatcher.lastIndex = 0;
+  while ((match = mdxReExportMatcher.exec(source))) {
+    const names = match[1].replace(/\s+as\s+[\w$]+/g, '').replace(/\bdefault\b/, 'default as _');
+    imports.push(`import {${names}} from ${match[2]}`);
+  }
   return imports.join('\n');
 };
 

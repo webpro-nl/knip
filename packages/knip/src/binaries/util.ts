@@ -46,21 +46,22 @@ export const npmBooleanAliases = {
 
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 
-export const toScript = (args: ScriptArg[]): string => {
-  const parts: string[] = [];
-  for (const arg of args) {
-    if (typeof arg === 'string') {
-      if (arg !== '--') parts.push(arg);
-    } else if (arg.value !== '--') parts.push(arg.text);
-  }
-  return parts.join(' ');
+export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+
+const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
+export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
+
+export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) => {
+  const index = args.findIndex(arg => valueOf(arg) === from);
+  return index === -1 ? [] : args.slice(index);
 };
 
-export const argsFrom = <T extends string | Word>(args: readonly T[], from: string) =>
-  args.slice(args.findIndex(arg => valueOf(arg) === from));
+export const argsFromPositional = (parsed: ParsedArgs, args: string[], position: number) => {
+  const index = parsed.positionalIndices?.[position];
+  return index === undefined ? (parsed['--'] ?? []) : args.slice(index);
+};
 
-export const spawningArgs = (parsed: ParsedArgs, args: string[]) =>
-  parsed._[0] ? argsFrom(args, parsed._[0]) : (parsed['--'] ?? []);
+export const spawningArgs = (parsed: ParsedArgs, args: string[]) => argsFromPositional(parsed, args, 0);
 
 export const argsAfter = <T extends string | Word>(args: readonly T[], token: string) => {
   const index = args.findIndex(arg => valueOf(arg) === token);

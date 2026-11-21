@@ -22,6 +22,9 @@ To tell Knip what is production code, add an exclamation mark behind each
 }
 ```
 
+The default mode uses these patterns too, no need to list them again without
+`!`.
+
 Depending on file structure and enabled plugins, you might not need to modify
 your configuration at all.
 

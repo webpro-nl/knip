@@ -7,9 +7,13 @@ import { convertGitignoreToPicomatchIgnorePatterns, expandIgnorePatterns } from 
 export function parseCodeowners(content: string) {
   const matchers = content
     .split(/\r?\n/)
+    .map(line => line.trim())
     .filter(line => line && !line.startsWith('#'))
     .map(rule => {
-      const [path, ...owners] = rule.split(/\s+/);
+      const [path, ...tokens] = rule.split(/\s+/);
+      // An inline comment (`*.js @owner # comment`) ends the list of owners
+      const comment = tokens.findIndex(token => token.startsWith('#'));
+      const owners = comment === -1 ? tokens : tokens.slice(0, comment);
       const { pattern } = convertGitignoreToPicomatchIgnorePatterns(path);
       // CODEOWNERS `dir/*` is shallow: it owns direct files only, not nested subdirectories
       return { owners, match: picomatch(expandIgnorePatterns([pattern], true)) };
