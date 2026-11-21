@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/ts-node",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "@swc/core": "*",
+    "ts-node": "*",
+    "tsconfig-paths": "*",
+    "typescript": "*"
+  }
+}
