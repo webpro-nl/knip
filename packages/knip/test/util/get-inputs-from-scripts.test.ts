@@ -204,6 +204,23 @@ test('getInputsFromScripts (cross-env/env vars)', () => {
   t("NODE_OPTIONS='--require pkg-a' cross-env NODE_OPTIONS='--require pkg-b' program", [toBinary('cross-env'), toBinary('program'), toModule('pkg-b'), toModule('pkg-a')]);
 });
 
+test('getInputsFromScripts (env)', () => {
+  t("env 'NODE_OPTIONS=--require pkg' node ./script.js", [toBinary('env'), toBinary('node'), js, toModule('pkg')]);
+  t('env NODE_ENV=production program', [toBinary('env'), toBinary('program')]);
+  t('env GREETING="hello world" node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env GREETING="it\'s fine" node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env NODE_ENV=test node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -u NO_COLOR node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -i PATH=/usr/bin:/bin node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t("env -i PATH=$PATH NODE_OPTIONS='--require pkg' program", [toBinary('env'), toBinary('program'), toModule('pkg')]);
+  t('env -i node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env -v node ./script.js', [toBinary('env'), toBinary('node'), js]);
+  t('env $(cat .env | xargs) node ./script.js', [toBinary('env'), toBinary('node'), js, toBinary('cat'), toBinary('xargs')]);
+  t('env -C dir node ./script.js', [toBinary('env')]);
+  t('env -iC dir node ./script.js', [toBinary('env')]);
+  t('env NODE_ENV=test node -C development ./script.js', [toBinary('env'), toBinary('node'), js]);
+});
+
 test('getInputsFromScripts (cross-env/node)', () => {
   t('cross-env NODE_ENV=production node -r pkg/config ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('pkg/config')]);
   t('cross-env NODE_ENV=production node -r node_modules/pkg/cfg ./script.js', [toBinary('cross-env'), toBinary('node'), js, toModule('node_modules/pkg/cfg')]);
