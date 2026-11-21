@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/nodemon-package-json",
+  "scripts": {
+    "dev": "nodemon"
+  },
+  "nodemonConfig": {
+    "exec": "node src/server.js"
+  },
+  "devDependencies": {
+    "nodemon": "*"
+  }
+}
