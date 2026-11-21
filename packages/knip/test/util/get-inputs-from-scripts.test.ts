@@ -557,6 +557,13 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup -c rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
+test('getInputsFromScripts (tsup)', () => {
+  const entry = toEntry('entry-8.ts', { production: true, allowIncludeExports: true });
+  t('tsup --clean entry-8.ts', [toBinary('tsup'), entry]);
+  t('tsup --keep-names entry-8.ts', [toBinary('tsup')]);
+  t('tsup --config custom.ts entry-8.ts', [toBinary('tsup'), toConfig('tsup', 'custom.ts'), entry]);
+});
+
 test('getInputsFromScripts ("positionals")', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toModule('./script.js')]);
   t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toModule('./script.js')]);

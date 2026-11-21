@@ -1,3 +1,4 @@
+import type { Args } from '../../types/args.ts';
 import type { IsLoadConfig, IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
 import { toEntry } from '../../util/input.ts';
@@ -6,6 +7,7 @@ import type { TsupConfig } from './types.ts';
 
 // https://paka.dev/npm/tsup/api
 // https://github.com/egoist/tsup/blob/dev/src/load.ts
+// https://github.com/egoist/tsup/blob/198479b814f5981032dc0b7cd52c4b9e4b699ac3/src/cli-main.ts
 
 const title = 'tsup';
 
@@ -38,8 +40,10 @@ const resolveFromAST: ResolveFromAST = program =>
     toEntry(id, { production: true, allowIncludeExports: true })
   );
 
-const args = {
+const args: Args = {
   config: true,
+  boolean: ['clean'],
+  resolveInputs: parsed => parsed._.map(id => toEntry(id, { production: true, allowIncludeExports: true })),
 };
 
 const plugin: Plugin = {
