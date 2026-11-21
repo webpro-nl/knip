@@ -584,11 +584,11 @@ test('getInputsFromScripts ("positionals")', () => {
   t('esbuild --bundle ./main.ts ./worker.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true }), toEntry('./worker.ts', { production: true })]);
   t('esbuild --minify --external:react ./main.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true })]);
   t('esbuild --bundle "app/javascript/*.*" --outdir=dist', [toBinary('esbuild'), toEntry('app/javascript/*.*', { production: true })]);
-  t('vite-node --watch ./main.ts', [toBinary('vite-node'), toEntryPath('./main.ts')]);
-  t('vite-node -w ./main.ts', [toBinary('vite-node'), toEntryPath('./main.ts')]);
-  t('vite-node --inspect ./main.ts', [toBinary('vite-node'), toEntryPath('./main.ts')]);
-  t('vite-node --script ./main.ts', [toBinary('vite-node'), toEntryPath('./main.ts')]);
-  t('vite-node ./main.ts build', [toBinary('vite-node'), toEntryPath('./main.ts')]);
+  t('vite-node --watch ./main.ts', [toBinary('vite-node'), ts]);
+  t('vite-node -w ./main.ts', [toBinary('vite-node'), ts]);
+  t('vite-node --inspect ./main.ts', [toBinary('vite-node'), ts]);
+  t('vite-node --script ./main.ts', [toBinary('vite-node'), ts]);
+  t('vite-node ./main.ts build', [toBinary('vite-node'), ts]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toModule('script.js')]);
