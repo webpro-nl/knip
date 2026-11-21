@@ -1,6 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { toConfig, toDependency } from '../../util/input.ts';
+import type { Manifest } from '../../util/package-json.ts';
 import { isAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolvePackageManifestPath } from '../../util/resolve.ts';
@@ -24,10 +25,12 @@ const getNames = (plugins: unknown[] = []) =>
     return typeof name === 'string' && !name.startsWith('file://') && !isAbsolute(name) ? [name] : [];
   });
 
-const toPluginDependency = (name: string, type: string, dir: string) => {
+const toPluginDependency = (name: string, type: string, dir: string, manifest: Manifest) => {
   if (name.startsWith('@')) return toDependency(name);
   const scoped = `@wdio/${name.toLowerCase()}-${type}`;
   const community = `wdio-${name.toLowerCase()}-${type}`;
+  if (manifest.allDependencies.has(scoped)) return toDependency(scoped);
+  if (manifest.allDependencies.has(community)) return toDependency(community);
   const isCommunity = !resolvePackageManifestPath(scoped, dir) && resolvePackageManifestPath(community, dir);
   return toDependency(isCommunity ? community : scoped);
 };
@@ -37,7 +40,7 @@ const resolveConfig: ResolveConfig<WebdriverIOConfig> = async (config, options) 
   if (!cfg) return [];
 
   const toInputs = (plugins: unknown[] | undefined, type: string) =>
-    getNames(plugins).map(name => toPluginDependency(name, type, options.configFileDir));
+    getNames(plugins).map(name => toPluginDependency(name, type, options.configFileDir, options.manifest));
 
   return [
     ...toInputs([cfg.framework], 'framework'),
