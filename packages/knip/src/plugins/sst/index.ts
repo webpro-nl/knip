@@ -31,8 +31,8 @@ const args: Args = {
     return parsed._[0] === 'bind' || parsed._[0] === 'env' ? command.join(' ') : command;
   },
   resolveInputs: (parsed, { args, cwd }) => {
-    const command = wrappers.has(parsed._[0]) && parsed._[1] ? argsFrom(args, parsed._[1]) : [];
-    const { config } = command.length > 0 ? parseArgs(args.slice(0, -command.length), options) : parsed;
+    const index = wrappers.has(parsed._[0]) ? parsed.positionalIndices?.[1] : undefined;
+    const { config } = index === undefined ? parsed : parseArgs(args.slice(0, index), options);
     return config ? [toConfig('sst', config, { dir: cwd })] : [];
   },
 };
