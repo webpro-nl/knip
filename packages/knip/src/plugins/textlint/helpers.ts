@@ -23,17 +23,9 @@ const createFullPackageName = (prefix: string, name: string) => {
 const hasPrefix = (prefix: string, name: string) =>
   (name.charAt(0) === '@' ? name.slice(name.indexOf('/') + 1) : name).startsWith(prefix);
 
-const isDeclared = (manifest: Manifest, name: string) =>
-  Boolean(
-    manifest.dependencies?.[name] ??
-    manifest.devDependencies?.[name] ??
-    manifest.optionalDependencies?.[name] ??
-    manifest.peerDependencies?.[name]
-  );
-
 const toPackageDependency = (prefix: string, name: string, candidates: string[], manifest: Manifest) =>
   toDependency(
-    candidates.find(candidate => isDeclared(manifest, candidate)) ??
+    candidates.find(candidate => manifest.allDependencies.has(candidate)) ??
       (hasPrefix(prefix, name) ? name : createFullPackageName(prefix, name))
   );
 

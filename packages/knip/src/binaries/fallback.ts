@@ -5,15 +5,13 @@ import { compact } from '../util/array.ts';
 import { toModule, toEntry } from '../util/input.ts';
 import { isValidBinary } from '../util/modules.ts';
 import { isAbsolute } from '../util/path.ts';
-import { argsFrom, toCommandBinary } from './util.ts';
+import { argsFrom, isEnvAssignment, toCommandBinary } from './util.ts';
 
 // Generic fallbacks for basic handling of binaries that don't have a plugin nor a custom resolver
 
 export const shellSpawningBinaries = ['cross-env-shell'];
 
 export const spawningBinaries = ['cross-env', ...shellSpawningBinaries];
-
-const isEnvAssignment = /^\w+=/;
 
 export const getEnvAssignmentCount = (values: string[]) => {
   let count = 0;
@@ -31,7 +29,7 @@ const commandFlagBinaries = new Map([
 ]);
 
 // Binaries with entry at first positional arg
-const positionals = new Set(['babel-node', 'esbuild', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
+const positionals = new Set(['babel-node', 'execa', 'jiti', 'oxnode', 'vite-node', 'zx']);
 
 // Binaries where each positional arg is a separate script
 const positionalBinaries = new Set(['concurrently']);

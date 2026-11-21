@@ -9,6 +9,10 @@ export const toCommandBinary = (
   inputOptions: { dir?: string } = {}
 ) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
+export const removeOuterCommand = (inputs: Input[], executable: string) => {
+  if (inputs[0]?.specifier === executable) inputs.shift();
+};
+
 export const npmBooleanFlags = [
   'color',
   'd',
@@ -47,6 +51,13 @@ export const npmBooleanAliases = {
 const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.value);
 
 export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
+
+export const isEnvAssignment = /^\w+=/;
+
+export const toShellAssignment = (assignment: string) => {
+  const index = assignment.indexOf('=');
+  return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
+};
 
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);

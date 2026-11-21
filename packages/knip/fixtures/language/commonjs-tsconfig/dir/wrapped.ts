@@ -1,0 +1,15 @@
+export const destructuredBare = 1;
+export const destructuredAs = 1;
+export const destructuredSatisfies = 1;
+export const destructuredParenthesized = 1;
+export const destructuredNonNull = 1;
+export const destructuredAssertion = 1;
+export const destructuredNested = 1;
+export const memberBare = 1;
+export const memberAs = 1;
+export const memberSatisfies = 1;
+export const memberParenthesized = 1;
+export const memberNonNull = 1;
+export const memberAssertion = 1;
+export const memberNested = 1;
+export const unused = 1;

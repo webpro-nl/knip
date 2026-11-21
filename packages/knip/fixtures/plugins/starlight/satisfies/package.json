@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/starlight-satisfies",
+  "type": "module",
+  "dependencies": {
+    "@astrojs/starlight": "*",
+    "astro": "*"
+  }
+}
