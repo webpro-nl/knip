@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/git-hooks",
+  "devDependencies": {
+    "git-hooks": "*",
+    "lint-staged": "*",
+    "prettier": "*"
+  }
+}

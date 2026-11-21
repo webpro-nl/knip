@@ -1,0 +1,4 @@
+#!/bin/sh
+npx lint-staged
+pnpm eslint .
+git diff --cached --name-only
