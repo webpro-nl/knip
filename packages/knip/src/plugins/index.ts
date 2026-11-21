@@ -36,6 +36,7 @@ import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
 import { default as ember } from './ember/index.ts';
 import { default as emberTemplateLint } from './ember-template-lint/index.ts';
+import { default as env } from './env/index.ts';
 import { default as envCmd } from './env-cmd/index.ts';
 import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
@@ -256,6 +257,7 @@ export const Plugins = {
   eleventy,
   ember,
   'ember-template-lint': emberTemplateLint,
+  env,
   'env-cmd': envCmd,
   esbuild,
   eslint,

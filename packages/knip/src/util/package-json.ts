@@ -325,19 +325,27 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson, isIncludeS
 
 export type Manifest = PackageJson & {
   scriptNames: Set<string>;
+  allDependencies: Set<string>;
   getMajor: (name: string) => number | undefined;
 };
 
-export const createManifest = (raw: PackageJson): Manifest =>
-  Object.assign(raw, {
+export const createManifest = (raw: PackageJson): Manifest => {
+  const allDependencies = new Set<string>();
+  for (const name in raw.dependencies) allDependencies.add(name);
+  for (const name in raw.devDependencies) allDependencies.add(name);
+  for (const name in raw.peerDependencies) allDependencies.add(name);
+  for (const name in raw.optionalDependencies) allDependencies.add(name);
+  return Object.assign(raw, {
     ...raw,
     scriptNames: new Set(Object.keys(raw.scripts ?? {})),
+    allDependencies,
     getMajor(name: string) {
       const range = raw.dependencies?.[name] ?? raw.devDependencies?.[name];
       const match = range?.match(/\d+/)?.[0];
       return match ? Number.parseInt(match, 10) : undefined;
     },
   });
+};
 
 export const getManifestImportDependencies = (manifest: PackageJson) => {
   const dependencies = new Set<string>();

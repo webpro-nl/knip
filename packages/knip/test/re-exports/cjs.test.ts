@@ -14,13 +14,15 @@ test('Ignore re-exports from entry files (CommonJS', async () => {
   assert(issues.exports['3-my-module.js']['somethingReExported']);
   assert(issues.exports['3-my-module.js']['somethingElse']);
   assert(issues.exports['3-my-module.js']['somethingComputed']);
+  assert(issues.exports['3-my-module.js']['somethingParenthesized']);
   assert(issues.exports['4-re-export-member.js']['somethingReExported']);
   assert(issues.exports['4-re-export-member.js']['somethingElse']);
   assert(issues.exports['4-re-export-member.js']['somethingComputed']);
+  assert(issues.exports['4-re-export-member.js']['somethingParenthesized']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 6,
+    exports: 8,
     processed: 4,
     total: 4,
   });

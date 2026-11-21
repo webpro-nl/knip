@@ -21,3 +21,6 @@ env._.path = "node_modules/.bin"
 
 [tasks.nested]
 run = 'find . -exec c8 pnpm exec -- missing-local-cli {} \;'
+
+[tasks.env-inline]
+run = 'env PATH="/usr/bin:/bin" inline-override'

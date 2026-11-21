@@ -11,6 +11,7 @@ import type { Fix } from '../../types/exports.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import { addNsValue, addValue } from '../../util/module-graph.ts';
+import { unwrapExpression } from '../ast-helpers.ts';
 import { extractEnumMembers, extractNamespaceMembers, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import type { WalkState } from './walk.ts';
@@ -373,22 +374,24 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
     if (exportName) {
       const right = expr.right;
       let isReExport = false;
+      const object = right.type === 'MemberExpression' ? unwrapExpression(right.object) : undefined;
       if (
         right.type === 'MemberExpression' &&
-        right.object.type === 'CallExpression' &&
-        right.object.callee.type === 'Identifier' &&
-        right.object.callee.name === 'require' &&
-        right.object.arguments.length === 1 &&
-        isStringLiteral(right.object.arguments[0])
+        object &&
+        object.type === 'CallExpression' &&
+        object.callee.type === 'Identifier' &&
+        object.callee.name === 'require' &&
+        object.arguments.length === 1 &&
+        isStringLiteral(object.arguments[0])
       ) {
-        const specifier = getStringValue(right.object.arguments[0])!;
+        const specifier = getStringValue(object.arguments[0])!;
         let memberName: string | undefined;
         if (!right.computed && right.property.type === 'Identifier') memberName = right.property.name;
         else if (right.computed && isStringLiteral(right.property)) memberName = getStringValue(right.property);
         if (memberName) {
           const alias = exportName !== memberName ? exportName : undefined;
-          s.addImport(specifier, memberName, alias, undefined, right.object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
-          s.handledImportExpressions.add(right.object.start);
+          s.addImport(specifier, memberName, alias, undefined, object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
+          s.handledImportExpressions.add(object.start);
           isReExport = true;
         }
       }

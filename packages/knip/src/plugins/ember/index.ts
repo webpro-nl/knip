@@ -115,19 +115,12 @@ const resolve: Resolve = async ({ cwd, manifest }) => {
       );
     }
   }
-  const isDeclared = (name: string) =>
-    Boolean(
-      manifest.dependencies?.[name] ||
-      manifest.devDependencies?.[name] ||
-      manifest.peerDependencies?.[name] ||
-      manifest.optionalDependencies?.[name]
-    );
   const checked = new Set<string>();
   const provided = new Set<string>();
   for (const dependencies of [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies]) {
     for (const name in dependencies) {
       if (name === 'ember-auto-import') inputs.push(toDependency('webpack', { production: true, optional: true }));
-      if (name === 'ember-fetch' && !isDeclared('fetch')) provided.add('fetch');
+      if (name === 'ember-fetch' && !manifest.allDependencies.has('fetch')) provided.add('fetch');
       const path = resolvePackageManifestPath(name, cwd);
       if (!path) continue;
       const pkg: EmberPackage = await loadJSON(path);
@@ -138,7 +131,7 @@ const resolve: Resolve = async ({ cwd, manifest }) => {
       }
       const dir = dirname(path);
       for (const dependency in pkg.dependencies) {
-        if (checked.has(dependency) || isDeclared(dependency)) continue;
+        if (checked.has(dependency) || manifest.allDependencies.has(dependency)) continue;
         checked.add(dependency);
         const nestedPath = resolvePackageManifestPath(dependency, dir);
         if (nestedPath && isAddon(await loadJSON(nestedPath))) provided.add(dependency);
@@ -149,12 +142,12 @@ const resolve: Resolve = async ({ cwd, manifest }) => {
           ...getModuleNames(join(dir, 'dist/packages')),
           ...getModuleNames(join(dir, 'dist/dependencies')),
         ]) {
-          if (!isDeclared(module)) provided.add(module);
+          if (!manifest.allDependencies.has(module)) provided.add(module);
         }
       }
       for (const specifier in renamedModules) {
         const packageName = getPackageNameFromSpecifier(specifier);
-        if (packageName && !isDeclared(packageName)) provided.add(packageName);
+        if (packageName && !manifest.allDependencies.has(packageName)) provided.add(packageName);
       }
     }
   }

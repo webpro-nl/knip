@@ -5,6 +5,7 @@ import rsbuild from '../../src/plugins/rsbuild/index.ts';
 import type { RsbuildConfig } from '../../src/plugins/rsbuild/types.ts';
 import type { PluginOptions } from '../../src/types/config.ts';
 import { isAlias } from '../../src/util/input.ts';
+import { createManifest } from '../../src/util/package-json.ts';
 import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -14,8 +15,8 @@ const cwd = resolve('fixtures/plugins/rsbuild');
 const pluginOptions: PluginOptions = {
   cwd,
   rootCwd: cwd,
-  manifest: {},
-  rootManifest: {},
+  manifest: createManifest({}),
+  rootManifest: createManifest({}),
   manifestScriptNames: new Set(),
   config: { config: null, entry: null, project: null },
   configFileDir: cwd,

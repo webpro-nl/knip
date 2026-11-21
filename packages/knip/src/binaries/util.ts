@@ -9,6 +9,10 @@ export const toCommandBinary = (
   inputOptions: { dir?: string } = {}
 ) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
+export const removeOuterCommand = (inputs: Input[], executable: string) => {
+  if (inputs[0]?.specifier === executable) inputs.shift();
+};
+
 export const npmBooleanFlags = [
   'color',
   'd',
@@ -48,6 +52,13 @@ const valueOf = (arg: string | Word) => (typeof arg === 'string' ? arg : arg.val
 
 export const nodeLoadersArgs = { import: ['r', 'experimental-loader', 'require', 'loader'] };
 
+export const isEnvAssignment = /^\w+=/;
+
+export const toShellAssignment = (assignment: string) => {
+  const index = assignment.indexOf('=');
+  return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
+};
+
 const isGlobLikeMatch = /(^!|[*+\\(|{^$])/;
 export const isGlobLike = (value: string) => isGlobLikeMatch.test(value);
 
@@ -56,10 +67,12 @@ export const argsFrom = <T extends string | Word>(args: readonly T[], from: stri
   return index === -1 ? [] : args.slice(index);
 };
 
-export const spawningArgs = (parsed: ParsedArgs, args: string[]) => {
-  const index = parsed.positionalIndices?.[0];
+export const argsFromPositional = (parsed: ParsedArgs, args: string[], position: number) => {
+  const index = parsed.positionalIndices?.[position];
   return index === undefined ? (parsed['--'] ?? []) : args.slice(index);
 };
+
+export const spawningArgs = (parsed: ParsedArgs, args: string[]) => argsFromPositional(parsed, args, 0);
 
 export const argsAfter = <T extends string | Word>(args: readonly T[], token: string) => {
   const index = args.findIndex(arg => valueOf(arg) === token);

@@ -9,6 +9,7 @@ import type {
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
+import { unwrapExpression } from '../ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
@@ -78,14 +79,15 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
     return;
   }
 
+  const requireInit = unwrapExpression(init);
   if (
-    init.type === 'CallExpression' &&
-    init.callee.type === 'Identifier' &&
-    init.callee.name === 'require' &&
-    init.arguments.length === 1 &&
-    isStringLiteral(init.arguments[0])
+    requireInit.type === 'CallExpression' &&
+    requireInit.callee.type === 'Identifier' &&
+    requireInit.callee.name === 'require' &&
+    requireInit.arguments.length === 1 &&
+    isStringLiteral(requireInit.arguments[0])
   ) {
-    const specifier = getStringValue(init.arguments[0])!;
+    const specifier = getStringValue(requireInit.arguments[0])!;
     const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
     if (node.id.type === 'ObjectPattern') {
       for (const prop of node.id.properties) {
@@ -127,7 +129,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
         'default',
         node.id.name,
         undefined,
-        init.arguments[0].start,
+        requireInit.arguments[0].start,
         IMPORT_FLAGS.NONE,
         undefined,
         reqTags
@@ -138,7 +140,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolea
         undefined,
         undefined,
         undefined,
-        init.arguments[0].start,
+        requireInit.arguments[0].start,
         IMPORT_FLAGS.SIDE_EFFECTS,
         undefined,
         reqTags

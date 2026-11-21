@@ -21,20 +21,11 @@ const getCandidates = (prefix: string, identifier: string): string[] => {
   return [prefix + name, name];
 };
 
-const getDeclaredDependencies = (manifest: Manifest) =>
-  new Set([
-    ...Object.keys(manifest.dependencies ?? {}),
-    ...Object.keys(manifest.devDependencies ?? {}),
-    ...Object.keys(manifest.optionalDependencies ?? {}),
-    ...Object.keys(manifest.peerDependencies ?? {}),
-  ]);
-
 const pickCandidate = (prefix: string, identifier: string, manifest: Manifest) => {
   const candidates = getCandidates(prefix, identifier);
   if (candidates.length === 1 || isInternal(candidates[0])) return candidates[0];
 
-  const dependencies = getDeclaredDependencies(manifest);
-  return candidates.find(candidate => dependencies.has(candidate)) ?? candidates[0];
+  return candidates.find(candidate => manifest.allDependencies.has(candidate)) ?? candidates[0];
 };
 
 // Resolve plugins for https://github.com/wooorm/load-plugin

@@ -16,14 +16,9 @@ import {
   shellSpawningBinaries,
   spawningBinaries,
 } from './fallback.ts';
-import { isGlobLike, nodeLoadersArgs, toCommandBinary, toWordArgs } from './util.ts';
+import { isGlobLike, nodeLoadersArgs, toCommandBinary, toShellAssignment, toWordArgs } from './util.ts';
 
 export const isWrapper = (binary: string) => !!pluginArgsMap.get(binary)?.[1].fromArgs || isFallbackWrapper(binary);
-
-const toShellAssignment = (assignment: string) => {
-  const index = assignment.indexOf('=');
-  return `${assignment.slice(0, index)}='${assignment.slice(index + 1).replaceAll("'", "'\\''")}'`;
-};
 
 const toCrossEnvCommand = (args: string[]) => {
   const command = args.slice();
