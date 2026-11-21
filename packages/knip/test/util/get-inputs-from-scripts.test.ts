@@ -280,6 +280,7 @@ test('getInputsFromScripts (npx)', () => {
   t('npx tsx ./main.ts build', [toBinary('tsx', opt), ts]);
   t('npx tsx ./main.ts -- build', [toBinary('tsx', opt), ts]);
   t('npx ./tools/release-cli', [toModule('./tools/release-cli', { ...opt, dir: cwd })]);
+  t('npx --package=pnpm pnpm exec tsx ./main.ts', [toBinary('pnpm', opt), toDependency('pnpm', opt), toBinary('tsx'), ts]);
 });
 
 test('getInputsFromScripts (bun)', () => {

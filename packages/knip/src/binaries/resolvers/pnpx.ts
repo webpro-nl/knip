@@ -4,6 +4,7 @@ import type { BinaryResolver, BinaryResolverOptions } from '../../types/config.t
 import { getCatalogReference } from '../../util/catalog.ts';
 import { toCatalog, toDependency } from '../../util/input.ts';
 import { extractBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
+import { removeOuterCommand } from '../util.ts';
 
 const toDependencyInputs = (packageSpecifier: string) => {
   const dependency = toDependency(stripVersionFromSpecifier(packageSpecifier), { optional: true });
@@ -27,13 +28,8 @@ export const resolveDlx = (words: Word[], options: BinaryResolverOptions) => {
   const dependencyInputs = packageSpecifier ? toDependencyInputs(packageSpecifier) : [];
   const executable = packageSpecifier ? extractBinary(String(packageSpecifier)) : '';
   const forwarded = executable && !flags.dir ? options.fromArgs([executable, ...words.slice(commandIndex + 1)]) : [];
-  const isOuterCommand = forwarded[0]?.specifier === executable;
-  return [
-    ...dependencyInputs,
-    ...packages.flatMap(toDependencyInputs),
-    ...command,
-    ...(isOuterCommand ? forwarded.slice(1) : forwarded),
-  ];
+  removeOuterCommand(forwarded, executable);
+  return [...dependencyInputs, ...packages.flatMap(toDependencyInputs), ...command, ...forwarded];
 };
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
