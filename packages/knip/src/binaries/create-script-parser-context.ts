@@ -1,4 +1,5 @@
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import { ROOT_WORKSPACE_NAME } from '../constants.ts';
 import { createManifest, type Manifest } from '../util/package-json.ts';
 
 export type ScriptParserContext = {
@@ -7,7 +8,7 @@ export type ScriptParserContext = {
 };
 
 export const createScriptParserContext = (chief: ConfigurationChief): ScriptParserContext => {
-  const rawRootManifest = chief.getManifestForWorkspace('.');
+  const rawRootManifest = chief.getManifestForWorkspace(ROOT_WORKSPACE_NAME);
   const rootManifest = rawRootManifest ? createManifest(rawRootManifest) : undefined;
   const manifests = new Map<string, Manifest | undefined>();
   const getManifest = (dir: string): Manifest | undefined => {
