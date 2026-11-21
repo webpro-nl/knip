@@ -1,0 +1,5 @@
+{
+  "entry": ["src/index.ts"],
+  "project": ["src/**/*.ts"],
+  "vite": { "config": ["config/settings.json"] }
+}

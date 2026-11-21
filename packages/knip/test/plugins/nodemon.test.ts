@@ -17,3 +17,25 @@ test('Find dependencies with the nodemon plugin', async () => {
     total: 0,
   });
 });
+
+test('Find commands in nodemon config files', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/nodemon-config') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 2,
+    total: 2,
+  });
+});
+
+test('Find commands in nodemonConfig in package.json', async () => {
+  const options = await createOptions({ cwd: resolve('fixtures/plugins/nodemon-package-json') });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});

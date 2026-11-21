@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/workspaces-special-chars",
+  "private": true,
+  "workspaces": ["bindings/*"]
+}

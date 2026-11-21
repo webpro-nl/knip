@@ -1,95 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { buildDocs } from '../scripts/build-docs.js';
 
-const write = (dir, filePath, content) => {
-  mkdirSync(join(dir, filePath, '..'), { recursive: true });
-  writeFileSync(join(dir, filePath), content);
-};
-
-const dir = mkdtempSync(join(tmpdir(), 'knip-docs-'));
-write(
-  dir,
-  'page.md',
-  `---
-title: Page
----
-
-Intro with [external](https://knip.dev) and [site](/reference/cli).
-
-## One
-
-See [two][2], [\`--workspace [filter]\`][3] and [Self][].
-
-[![alt][4]][1]
-
-### One \`sub\`?
-
-To [other](./other.md#two) and [plugin](./writing-a-plugin/index.md).
-
-## One
-
-:::tip
-Tip content.
-:::
-
-:::note[Custom label]
-Note content.
-:::
-
-:::section
-Unwrapped.
-:::
-
-:a[Sponsored by:]{.intro href="/sponsors"} and :span[text]
-
-[1]: https://example.com
-[2]: ./other.mdx
-[3]: ./reference/cli.md#--workspace-filter
-[4]: /image.svg
-[self]: #one
-`
-);
-write(
-  dir,
-  'other.mdx',
-  `---
-title: Other
----
-
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-
-## Two
-
-<Tabs>
-  <TabItem label="npm">
-    \`\`\`shell
-    npm install
-    \`\`\`
-  </TabItem>
-</Tabs>
-
-<Card title="Card title">
-  Card content.
-</Card>
-
-<Projects />
-
-{/* comment */}
-`
-);
-write(dir, 'writing-a-plugin/index.md', '---\ntitle: Plugin\n---\n\n## Plugin\n');
-write(dir, 'reference/cli.md', '---\ntitle: CLI\n---\n\n## `--workspace [filter]`\n');
-write(dir, 'blog/post.md', '---\ntitle: Post\n---\n\n## Post\n');
-
-const docs = buildDocs(dir);
-rmSync(dir, { recursive: true, force: true });
+const docs = buildDocs(fileURLToPath(new URL('./fixtures/build-docs', import.meta.url)));
 
 /** @param {string} id @param {string} anchor */
 const section = (id, anchor) => {

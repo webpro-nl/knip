@@ -6,9 +6,7 @@ import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';
 import { load, save } from './util/package-json.ts';
 import { extname, join } from './util/path.ts';
-import { removeExport } from './util/remove-export.ts';
-
-const MODULE_MARKER = /^[ \t]*(import|export)\b/m;
+import { keepModuleMarker, removeExport } from './util/remove-export.ts';
 
 export const fix = async (issues: Issues, counters: Counters, options: MainOptions) => {
   const fixer = new IssueFixer(options);
@@ -86,14 +84,13 @@ class IssueFixer {
       for (const fix of fixes.sort((a, b) => a[0] - b[0] || b[1] - a[1])) {
         if (fix[0] >= (disjointFixes.at(-1)?.[1] ?? 0)) disjointFixes.push(fix);
       }
-      let sourceFileText = disjointFixes.reduceRight(
-        (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
-        originalSource
+      const sourceFileText = keepModuleMarker(
+        originalSource,
+        disjointFixes.reduceRight(
+          (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
+          originalSource
+        )
       );
-
-      if (MODULE_MARKER.test(originalSource) && !MODULE_MARKER.test(sourceFileText)) {
-        sourceFileText = `${sourceFileText.trimEnd()}\n\nexport {};\n`;
-      }
 
       await writeFile(absFilePath, sourceFileText);
 

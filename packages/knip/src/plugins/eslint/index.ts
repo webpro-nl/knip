@@ -69,7 +69,6 @@ export const docs = { note };
 const args = {
   config: true,
   alias: { format: ['f'] },
-  boolean: ['inspect-config'],
   resolveInputs: (parsed: ParsedArgs, { manifest }: { manifest: Manifest }) => {
     const inputs: Input[] = [];
     if (parsed['inspect-config']) inputs.push(toDependency('@eslint/config-inspector', { optional: true }));

@@ -1,27 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { relative } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createOptions, createSession, version } from 'knip/session';
 import { mcpServer } from '../src/server.js';
 import { buildResults } from '../src/tools.js';
 
-const write = (dir, filePath, content) => {
-  mkdirSync(join(dir, filePath, '..'), { recursive: true });
-  writeFileSync(join(dir, filePath), typeof content === 'string' ? content : JSON.stringify(content));
-};
-
-// Resolve symlinks (e.g. /var → /private/var on macOS) so paths in results match the fixture
-const cwd = realpathSync(mkdtempSync(join(tmpdir(), 'knip-mcp-')));
-write(cwd, 'package.json', { name: 'fixture', dependencies: { 'left-pad': '*' } });
-write(cwd, 'knip.json', { ignoreBinaries: ['pm2-.+'] });
-write(cwd, 'index.js', "import './used.js';");
-write(cwd, 'used.js', '');
-write(cwd, 'unused.js', '');
-write(cwd, 'node_modules/knip/package.json', { name: 'knip', version: '0.0.1' });
+const cwd = fileURLToPath(new URL('./fixtures/server', import.meta.url));
 
 const client = new Client({ name: 'test', version: '0.0.0' });
 const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -30,7 +17,6 @@ await client.connect(clientTransport);
 
 test.after(async () => {
   await client.close();
-  rmSync(cwd, { recursive: true, force: true });
 });
 
 /** @param {any} result */

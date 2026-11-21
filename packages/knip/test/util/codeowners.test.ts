@@ -100,3 +100,19 @@ test('codeowners file resolution', () => {
 
   assert(results.every(r => r.owners[0] === '@team'));
 });
+
+test('codeowners inline comments and surrounding whitespace', () => {
+  const content = [
+    '*.js    @js-owner #This is an inline comment.',
+    '/docs/  @docs-team # docs',
+    '/src/   @src-team  ',
+    '  /lib/ @lib-team',
+  ].join('\n');
+
+  const findOwners = parseCodeowners(content);
+
+  assert.deepEqual(findOwners('utils.js'), ['@js-owner']);
+  assert.deepEqual(findOwners('docs/api.md'), ['@docs-team']);
+  assert.deepEqual(findOwners('src/app.ts'), ['@src-team']);
+  assert.deepEqual(findOwners('lib/index.ts'), ['@lib-team']);
+});

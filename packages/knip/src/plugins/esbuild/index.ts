@@ -1,7 +1,7 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
 import { collectPropertyValues } from '../../typescript/ast-helpers.ts';
-import { toEntry, toEntryPath } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
@@ -21,8 +21,8 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) =>
   );
 
 const args: Args = {
-  args: args => args.filter(arg => !arg.startsWith('-')),
-  resolveInputs: parsed => parsed._.map(id => toEntryPath(id)),
+  boolean: true,
+  resolveInputs: parsed => parsed._.map(id => toEntry(id, { production: true })),
 };
 
 const plugin: Plugin = {

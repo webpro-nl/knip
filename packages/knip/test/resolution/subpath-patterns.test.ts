@@ -12,9 +12,11 @@ test('Allows subpath-patterns', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/internals/unused.ts' in issues.files);
+  assert(issues.exports['src/internals/used.ts']['helper']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    exports: 1,
     files: 1,
     processed: 5,
     total: 5,
@@ -26,9 +28,11 @@ test('Allows subpath-patterns (production)', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/internals/unused.ts' in issues.files);
+  assert(issues.exports['src/internals/used.ts']['helper']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    exports: 1,
     files: 1,
     processed: 5,
     total: 5,
@@ -40,9 +44,11 @@ test('Allows subpath-patterns (strict)', async () => {
   const { issues, counters } = await main(options);
 
   assert('src/internals/unused.ts' in issues.files);
+  assert(issues.exports['src/internals/used.ts']['helper']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    exports: 1,
     files: 1,
     processed: 5,
     total: 5,

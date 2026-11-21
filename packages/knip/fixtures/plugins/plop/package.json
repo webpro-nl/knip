@@ -2,7 +2,8 @@
   "name": "@plugins/plop",
   "type": "module",
   "scripts": {
-    "plop": "plop"
+    "plop": "plop",
+    "generate": "plop --plopfile 'custom generators/plopfile.mjs'"
   },
   "dependencies": {
     "plop": "*"

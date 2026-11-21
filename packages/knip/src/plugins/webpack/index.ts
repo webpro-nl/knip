@@ -53,22 +53,22 @@ const info = {
   issuerLayer: '',
 };
 
-const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
+const resolveRuleSetDependencies = (
+  rule: RuleSetRule | undefined | null | false | 0 | '...' | ''
+): (string | Input)[] => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
   if (typeof useItem === 'function') useItem = useItem(info);
   if (typeof useItem === 'string' && hasBabelOptions(rule)) {
-    const d = getDependenciesFromConfig((rule as { options: BabelConfigObj }).options).map(d => d.specifier);
-    return [useItem, ...d];
+    return [useItem, ...getDependenciesFromConfig((rule as { options: BabelConfigObj }).options)];
   }
   if (typeof useItem === 'string' && useItem && rule.options && rule.use == null)
     useItem = { loader: useItem, options: rule.options };
   return [useItem].flat().flatMap((item: RuleSetRule | RuleSetUseItem | undefined | null | false | 0) => {
     if (!item) return [];
     if (hasBabelOptions(item)) {
-      const d = getDependenciesFromConfig((item as { options: BabelConfigObj }).options).map(d => d.specifier);
-      return [...resolveUseItem(item), ...d];
+      return [...resolveUseItem(item), ...getDependenciesFromConfig((item as { options: BabelConfigObj }).options)];
     }
     if (typeof item !== 'string' && 'oneOf' in item) return item.oneOf?.flatMap(resolveRuleSetDependencies) ?? [];
     return resolveUseItem(item);
@@ -119,7 +119,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       const entries = [];
 
       for (const loader of opts.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
-        inputs.add(toModule(loader.replace(/\?.*/, '')));
+        inputs.add(typeof loader === 'string' ? toModule(loader.replace(/\?.*/, '')) : loader);
       }
 
       for (const plugin of opts?.plugins ?? []) {
@@ -128,7 +128,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           if (providePluginInstance.definitions) {
             for (const values of Object.values(providePluginInstance.definitions)) {
               const specifier = typeof values === 'string' ? values : values[0];
-              inputs.add(toModule(specifier));
+              inputs.add(toModule(specifier, { production: isProduction }));
             }
           }
         }
@@ -154,7 +154,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           const dir = opts.context ? opts.context : cwd;
           inputs.add(toEntryPath(entry, { production: isProduction, dir }));
         } else {
-          inputs.add(toModule(entry));
+          inputs.add(toModule(entry, { production: isProduction }));
         }
       }
 

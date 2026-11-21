@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -16,8 +16,7 @@ const encode = payload => {
 
 test('falls back to bundled knip when the project has no local knip', async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), 'knip-ls-'));
-  writeFileSync(path.join(cwd, 'package.json'), '{"name":"standalone","main":"index.js"}');
-  writeFileSync(path.join(cwd, 'index.js'), '');
+  cpSync(new URL('../../knip/fixtures/namespaces/namespace-enumerated', import.meta.url), cwd, { recursive: true });
 
   const server = spawn(process.execPath, [cli, '--stdio'], { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
   const logs = [];

@@ -93,7 +93,7 @@ export type FileNode = {
     readonly programFiles: Set<FilePath>;
     readonly entryFiles: Set<FilePath>;
     readonly imports: Imports;
-    readonly subpathImports: Set<string> | undefined;
+    readonly subpathImports: Map<string, string | undefined> | undefined;
   };
   exports: ExportMap;
   duplicates: Iterable<Array<IssueSymbol>>;

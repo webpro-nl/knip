@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/capacitor-allowlist",
+  "dependencies": {
+    "@capacitor/android": "*",
+    "@capacitor/ios": "*",
+    "@capacitor/app": "*",
+    "@capacitor/browser": "*",
+    "@capacitor/keyboard": "*"
+  }
+}

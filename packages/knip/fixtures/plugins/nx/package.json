@@ -5,9 +5,11 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "*",
+    "@nx/angular": "*",
     "@nx/next": "*",
     "@nx/linter": "*",
     "@nx/cypress": "*",
+    "@nrwl/angular": "*",
     "@nrwl/cypress": "*",
     "@nrwl/devkit": "*",
     "@nrwl/jest": "*",

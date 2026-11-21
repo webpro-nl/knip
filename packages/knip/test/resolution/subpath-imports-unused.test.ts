@@ -40,8 +40,8 @@ test('Report unused subpath imports and their target files', async () => {
     files: 5,
     subpaths: 3,
     unlisted: 1,
-    processed: 18,
-    total: 18,
+    processed: 20,
+    total: 20,
   });
 });
 
@@ -57,7 +57,7 @@ test('Report unused target files of subpath imports, not the subpaths (productio
     ...baseCounters,
     files: 5,
     unlisted: 1,
-    processed: 18,
-    total: 18,
+    processed: 20,
+    total: 20,
   });
 });

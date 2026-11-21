@@ -150,8 +150,8 @@ export const getSessionHandler = async (
       invalidateCache(graph);
 
       subpathReferences.reset();
-      const filePaths = await principal.getUsedResolvedFiles((specifier, filePath) =>
-        subpathReferences.add(specifier, filePath)
+      const filePaths = await principal.getUsedResolvedFiles((specifier, filePath, importedFilePath) =>
+        subpathReferences.add(specifier, filePath, importedFilePath)
       );
 
       const cachedUnusedFiles = collector.purge();
