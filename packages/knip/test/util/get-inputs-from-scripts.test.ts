@@ -731,6 +731,28 @@ test('getInputsFromScripts (env-cmd environments)', () => {
   t('env-cmd -e version -- run-s update:*', [toBinary('env-cmd'), toBinary('run-s')]);
 });
 
+test('getInputsFromScripts (sst)', () => {
+  t('sst deploy --stage production', [toBinary('sst')]);
+  t('sst shell', [toBinary('sst')]);
+  t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
+  t('sst shell "./scripts/my task.sh"', [toBinary('sst'), toEntry('./scripts/my task.sh')]);
+  t('sst shell --stage dev -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst shell --stage node node ./script.js', [toBinary('sst'), toBinary('node'), js]);
+  t('sst shell -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
+  t('sst --config infra/sst.config.ts shell tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst --stage dev shell -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst dev next dev', [toBinary('sst'), toBinary('next')]);
+  t('sst dev -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
+});
+
+test('getInputsFromScripts (sst bind and env)', () => {
+  t('sst bind vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst env vitest run', [toBinary('sst'), toBinary('vitest')]);
+  t('sst bind "tsx ./main.ts"', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst bind --script "node --import tsx" ./main.ts', [toBinary('sst'), toBinary('node'), ts, toModule('tsx')]);
+  t(`sst env 'node "./scripts/my task.js"' input`, [toBinary('sst'), toBinary('node'), toEntryPath('./scripts/my task.js', opt)]);
+});
+
 test('getInputsFromScripts (command flags)', () => {
   t('doppler run --command="node server.ts"', [toBinary('doppler'), toBinary('node'), toEntryPath('server.ts', opt)]);
   t("doppler run -c prod --command 'tsx watch src/index.ts'", [toBinary('doppler'), toBinary('tsx'), toEntryPath('src/index.ts', opt)]);

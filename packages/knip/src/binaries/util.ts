@@ -56,10 +56,12 @@ export const argsFrom = <T extends string | Word>(args: readonly T[], from: stri
   return index === -1 ? [] : args.slice(index);
 };
 
-export const spawningArgs = (parsed: ParsedArgs, args: string[]) => {
-  const index = parsed.positionalIndices?.[0];
+export const argsFromPositional = (parsed: ParsedArgs, args: string[], position: number) => {
+  const index = parsed.positionalIndices?.[position];
   return index === undefined ? (parsed['--'] ?? []) : args.slice(index);
 };
+
+export const spawningArgs = (parsed: ParsedArgs, args: string[]) => argsFromPositional(parsed, args, 0);
 
 export const argsAfter = <T extends string | Word>(args: readonly T[], token: string) => {
   const index = args.findIndex(arg => valueOf(arg) === token);
