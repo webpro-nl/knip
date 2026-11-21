@@ -9,11 +9,14 @@ const cwd = resolve('fixtures/plugins/sst2');
 
 test('Find dependencies with the sst plugin (2)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['billing.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    files: 1,
+    processed: 9,
+    total: 9,
   });
 });
