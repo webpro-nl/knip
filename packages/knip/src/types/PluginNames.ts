@@ -176,6 +176,7 @@ export type PluginName =
   | 'travis'
   | 'trigger-dev'
   | 'ts-node'
+  | 'ts-node-dev'
   | 'tsd'
   | 'tsdown'
   | 'tsrs'
@@ -394,6 +395,7 @@ export const pluginNames = [
   'travis',
   'trigger-dev',
   'ts-node',
+  'ts-node-dev',
   'tsd',
   'tsdown',
   'tsrs',

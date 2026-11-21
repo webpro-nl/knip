@@ -175,6 +175,7 @@ import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
 import { default as triggerDev } from './trigger-dev/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
+import { default as tsNodeDev } from './ts-node-dev/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
 import { default as tsrs } from './tsrs/index.ts';
@@ -393,6 +394,7 @@ export const Plugins = {
   travis,
   'trigger-dev': triggerDev,
   'ts-node': tsNode,
+  'ts-node-dev': tsNodeDev,
   tsd,
   tsdown,
   tsrs,

@@ -589,6 +589,14 @@ test('getInputsFromScripts ("positionals")', () => {
   t('npx --no jiti script.js', [toBinary('jiti'), toModule('script.js')]);
 });
 
+test('getInputsFromScripts (ts-node-dev)', () => {
+  t('ts-node-dev ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --respawn --transpile-only ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --respawn --watch src,config ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --inspect -- ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('tsnd -r pkg/register --project tsconfig.json ./main.ts --port 3000', [toBinary('tsnd'), ts, toModule('pkg/register')]);
+});
+
 test('getInputsFromScripts (c8)', () => {
   t('c8 program', [toBinary('c8'), toBinary('program')], forwardedArgs);
   t('c8 node ./script.js', [toBinary('c8'), toBinary('node'), js]);
