@@ -47,6 +47,7 @@ import { default as expoRouter } from './expo-router/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
 import { default as fast } from './fast/index.ts';
 import { default as filesystemRouting } from './filesystem-routing/index.ts';
+import { default as firebase } from './firebase/index.ts';
 import { default as flue } from './flue/index.ts';
 import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
@@ -264,6 +265,7 @@ export const Plugins = {
   'expressive-code': expressiveCode,
   fast,
   'filesystem-routing': filesystemRouting,
+  firebase,
   flue,
   fumadocs,
   gatsby,

@@ -825,6 +825,14 @@ test('getInputsFromScripts (plugins → fromArgs)', () => {
   t('nodemon --exec', [toBinary('nodemon')]);
 });
 
+test('getInputsFromScripts (firebase)', () => {
+  t('firebase emulators:exec --only firestore "node ./script.js"', [toBinary('firebase'), toBinary('node'), js]);
+  t('firebase emulators:exec --ui "node ./script.js" -P demo-test', [toBinary('firebase'), toBinary('node'), js]);
+  t('npx firebase-tools@15 emulators:exec --only auth "node tests/e2e.mjs"', [toDependency('firebase-tools', opt), toBinary('node'), toEntryPath('tests/e2e.mjs', opt)]);
+  t(`firebase emulators:exec 'node "./scripts/my task.js" && tsx ./main.ts'`, [toBinary('firebase'), toBinary('node'), toEntryPath('./scripts/my task.js', opt), toBinary('tsx'), ts]);
+  t('firebase deploy --only hosting', [toBinary('firebase')]);
+});
+
 test('getInputsFromScripts (find -exec)', () => {
   t("find blah -exec node -r {} ';'", [toBinary('find'), toBinary('node')]);
   t('find blah -exec node -r {} \\;', [toBinary('find'), toBinary('node')]);

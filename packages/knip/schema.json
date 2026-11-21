@@ -631,6 +631,10 @@
           "title": "filesystem-routing plugin configuration (https://knip.dev/reference/plugins/filesystem-routing)",
           "$ref": "#/definitions/plugin"
         },
+        "firebase": {
+          "title": "firebase plugin configuration (https://knip.dev/reference/plugins/firebase)",
+          "$ref": "#/definitions/plugin"
+        },
         "flue": {
           "title": "flue plugin configuration (https://knip.dev/reference/plugins/flue)",
           "$ref": "#/definitions/plugin"
