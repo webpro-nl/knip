@@ -40,10 +40,13 @@ test('Find dependencies with the Netlify plugin (production)', async () => {
     'package-4',
   ]);
 
+  assert.deepEqual(Object.keys(issues.files), ['myedgefunctions/tracker/old.ts']);
+
   assert.deepEqual(counters, {
     ...baseCounters,
+    files: 1,
     unlisted: 4,
-    processed: 0,
-    total: 1,
+    processed: 4,
+    total: 5,
   });
 });
