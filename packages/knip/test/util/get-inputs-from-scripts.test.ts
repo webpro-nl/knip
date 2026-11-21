@@ -244,7 +244,7 @@ test('getInputsFromScripts (cross-env-shell)', () => {
 test('getInputsFromScripts (nx)', () => {
   t('nx run myapp:build:production', [toBinary('nx')]);
   t('nx run-many -t build', [toBinary('nx')]);
-  t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toModule('./main.ts')]);
+  t('nx exec -- esbuild ./main.ts --outdir=build', [toBinary('nx'), toBinary('esbuild'), toEntry('./main.ts', { production: true })]);
 });
 
 test('getInputsFromScripts (npm)', () => {
@@ -599,6 +599,9 @@ test('getInputsFromScripts ("positionals")', () => {
   t('ts-node -D 7006 ./main.ts', [toBinary('ts-node'), ts]);
   t('ts-node-esm ./main.ts', [toBinary('ts-node-esm'), ts]);
   t('babel-node --inspect=0.0.0.0 ./main.ts', [toBinary('babel-node'), toModule('./main.ts')]);
+  t('esbuild --bundle ./main.ts ./worker.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true }), toEntry('./worker.ts', { production: true })]);
+  t('esbuild --minify --external:react ./main.ts --outdir=dist', [toBinary('esbuild'), toEntry('./main.ts', { production: true })]);
+  t('esbuild --bundle "app/javascript/*.*" --outdir=dist', [toBinary('esbuild'), toEntry('app/javascript/*.*', { production: true })]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toModule('script.js')]);
