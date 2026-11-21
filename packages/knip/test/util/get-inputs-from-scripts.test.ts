@@ -709,6 +709,16 @@ test('getInputsFromScripts (double-dash)', () => {
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
 });
 
+test('getInputsFromScripts (graphql-codegen)', () => {
+  const binary = toBinary('graphql-codegen');
+  const config = toConfig('graphql-codegen', 'codegen.ts');
+  const dotenv = toModule('dotenv/config');
+  const tsconfigPaths = toModule('tsconfig-paths/register');
+  t('graphql-codegen --config codegen.ts', [binary, config]);
+  t('graphql-codegen -r dotenv/config --config codegen.ts', [binary, dotenv, config]);
+  t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [binary, dotenv, tsconfigPaths]);
+});
+
 test('getInputsFromScripts (env-cmd environments)', () => {
   t('env-cmd -e dev rollup -c', [toBinary('env-cmd'), toBinary('rollup')]);
   t('env-cmd -e integration-tests node ./build-integration-test/integrationTests/index.js', [
