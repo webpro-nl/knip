@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/nodemon-config",
+  "scripts": {
+    "dev": "nodemon",
+    "dev:mock": "nodemon --config config/mock.json"
+  },
+  "devDependencies": {
+    "nodemon": "*",
+    "tsx": "*"
+  }
+}

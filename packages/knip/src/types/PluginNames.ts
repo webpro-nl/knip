@@ -49,6 +49,7 @@ export type PluginName =
   | 'expressive-code'
   | 'fast'
   | 'filesystem-routing'
+  | 'firebase'
   | 'flue'
   | 'fumadocs'
   | 'gatsby'
@@ -176,6 +177,7 @@ export type PluginName =
   | 'travis'
   | 'trigger-dev'
   | 'ts-node'
+  | 'ts-node-dev'
   | 'tsd'
   | 'tsdown'
   | 'tsrs'
@@ -267,6 +269,7 @@ export const pluginNames = [
   'expressive-code',
   'fast',
   'filesystem-routing',
+  'firebase',
   'flue',
   'fumadocs',
   'gatsby',
@@ -394,6 +397,7 @@ export const pluginNames = [
   'travis',
   'trigger-dev',
   'ts-node',
+  'ts-node-dev',
   'tsd',
   'tsdown',
   'tsrs',

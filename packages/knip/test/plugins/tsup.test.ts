@@ -13,7 +13,7 @@ test('Find dependencies with the tsup plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 12,
-    total: 12,
+    processed: 14,
+    total: 14,
   });
 });
