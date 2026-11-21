@@ -1,10 +1,31 @@
 import type { Args } from '../../types/args.ts';
-import type { Plugin } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
+import type { TsConfigJson } from '../../types/tsconfig-json.ts';
+import { type Input, toModule } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
+import { hasDependency } from '../../util/plugin.ts';
 
 // https://typestrong.org/ts-node/docs/options
+// https://github.com/TypeStrong/ts-node/blob/v10.9.2/src/configuration.ts#L235-L272
 
 const title = 'ts-node';
+
+const enablers = ['ts-node'];
+
+const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
+
+export const resolveTsNodeConfig = (options: NonNullable<TsConfigJson['ts-node']>) => {
+  const inputs: Input[] = [];
+
+  for (const id of options.require ?? []) inputs.push(toModule(id));
+
+  if (options.compiler) inputs.push(toModule(options.compiler));
+
+  const transpiler = Array.isArray(options.transpiler) ? options.transpiler[0] : options.transpiler;
+  if (transpiler) inputs.push(toModule(transpiler));
+
+  return inputs;
+};
 
 const args = {
   binaries: ['ts-node', 'ts-node-cwd', 'ts-node-esm', 'ts-node-script', 'ts-node-transpile-only'],
@@ -35,8 +56,15 @@ const args = {
   stopEarly: true,
 } satisfies Args;
 
+const note = 'The `"ts-node"` section of `tsconfig.json` is read by the TypeScript plugin.';
+
+/** @public */
+export const docs = { note };
+
 const plugin: Plugin = {
   title,
+  enablers,
+  isEnabled,
   args,
 };
 
