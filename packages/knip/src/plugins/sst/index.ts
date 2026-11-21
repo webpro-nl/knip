@@ -1,4 +1,4 @@
-import { argsFrom } from '../../binaries/util.ts';
+import { argsFromPositional } from '../../binaries/util.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin } from '../../types/config.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -23,7 +23,7 @@ const args: Args = {
   boolean: ['print-logs', 'script'],
   fromArgs: (parsed, args) => {
     if (!wrappers.has(parsed._[0])) return [];
-    const command = parsed._[1] ? argsFrom(args, parsed._[1]) : (parsed['--'] ?? []);
+    const command = argsFromPositional(parsed, args, 1);
     return parsed._[0] === 'bind' || parsed._[0] === 'env' ? command.join(' ') : command;
   },
 };

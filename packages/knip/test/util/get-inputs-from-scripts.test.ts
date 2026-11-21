@@ -737,6 +737,7 @@ test('getInputsFromScripts (sst)', () => {
   t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
   t('sst shell "./scripts/my task.sh"', [toBinary('sst'), toEntry('./scripts/my task.sh')]);
   t('sst shell --stage dev -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
+  t('sst shell --stage node node ./script.js', [toBinary('sst'), toBinary('node'), js]);
   t('sst shell -- tsx "./scripts/my task.ts"', [toBinary('sst'), toBinary('tsx'), toEntryPath('./scripts/my task.ts', opt)]);
   t('sst --config infra/sst.config.ts shell tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
   t('sst --stage dev shell -- tsx ./main.ts', [toBinary('sst'), toBinary('tsx'), ts]);
