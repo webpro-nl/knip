@@ -1,4 +1,4 @@
-import { spawningArgs } from '../../binaries/util.ts';
+import { isEnvAssignment, spawningArgs, toShellAssignment } from '../../binaries/util.ts';
 import type { Args } from '../../types/args.ts';
 import type { Plugin } from '../../types/config.ts';
 
@@ -7,7 +7,7 @@ import type { Plugin } from '../../types/config.ts';
 
 const title = 'env';
 
-const isAssignmentOrSubstitution = (arg: string) => /^(\w+=|\$\()/.test(arg);
+const isAssignmentOrSubstitution = (arg: string) => isEnvAssignment.test(arg) || arg.startsWith('$(');
 
 const options = {
   boolean: ['debug', 'ignore-environment'],
@@ -24,13 +24,7 @@ const args: Args = {
     const index = command.findIndex(arg => !isAssignmentOrSubstitution(arg));
     if (index === -1) return [];
     const assignments = command.slice(0, index).filter(arg => !arg.startsWith('$('));
-    return [
-      ...assignments.map(assignment => {
-        const separator = assignment.indexOf('=');
-        return `${assignment.slice(0, separator)}='${assignment.slice(separator + 1).replaceAll("'", "'\\''")}'`;
-      }),
-      ...command.slice(index),
-    ];
+    return [...assignments.map(toShellAssignment), ...command.slice(index)];
   },
 };
 
