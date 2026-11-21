@@ -9,6 +9,10 @@ export const toCommandBinary = (
   inputOptions: { dir?: string } = {}
 ) => toBinary(binary, optionalBinaries ? { ...inputOptions, optional: true } : inputOptions);
 
+export const removeOuterCommand = (inputs: Input[], executable: string) => {
+  if (inputs[0]?.specifier === executable) inputs.shift();
+};
+
 export const npmBooleanFlags = [
   'color',
   'd',

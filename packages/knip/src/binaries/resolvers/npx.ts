@@ -3,7 +3,7 @@ import type { BinaryResolver } from '../../types/config.ts';
 import { toBinary, toModule, toDependency } from '../../util/input.ts';
 import { extractBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
-import { argsFrom, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
+import { argsFrom, npmBooleanAliases, npmBooleanFlags, removeOuterCommand } from '../util.ts';
 
 const noInstallFlags = new Set(['--no', '--no-install', '--yes=false', '--no-yes']);
 
@@ -33,9 +33,7 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   const specifiers = dependency ? [dependency] : [];
 
   const forwarded = packageSpecifier ? fromArgs(argsFrom(words, packageSpecifier)) : [];
-  const [first] = forwarded;
-  const isOuterCommand = first && first.specifier === extractBinary(packageSpecifier);
-  if (isOuterCommand) forwarded.shift();
+  if (forwarded.length > 0) removeOuterCommand(forwarded, extractBinary(packageSpecifier));
 
   return [...specifiers, ...packages.map(id => toPackage(id, { optional: true })), ...command, ...forwarded];
 };
