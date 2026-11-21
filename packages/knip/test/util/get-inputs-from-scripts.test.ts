@@ -558,6 +558,13 @@ test('getInputsFromScripts (rollup)', () => {
   t('rollup -c rollup.custom.config.js', [toBinary('rollup'), toConfig('rollup', 'rollup.custom.config.js')]);
 });
 
+test('getInputsFromScripts (tsup)', () => {
+  const entry = toEntry('entry-8.ts', { production: true, allowIncludeExports: true });
+  t('tsup --clean entry-8.ts', [toBinary('tsup'), entry]);
+  t('tsup --keep-names entry-8.ts', [toBinary('tsup')]);
+  t('tsup --config custom.ts entry-8.ts', [toBinary('tsup'), toConfig('tsup', 'custom.ts'), entry]);
+});
+
 test('getInputsFromScripts ("positionals")', () => {
   t('execa --quiet ./script.js', [toBinary('execa'), toModule('./script.js')]);
   t('npx --yes execa --quiet ./script.js', [toBinary('execa', opt), toModule('./script.js')]);
@@ -581,6 +588,14 @@ test('getInputsFromScripts ("positionals")', () => {
   t('npx jiti script.js', [toBinary('jiti', opt), toModule('script.js')]);
   t('npx --yes jiti script.js', [toBinary('jiti', opt), toModule('script.js')]);
   t('npx --no jiti script.js', [toBinary('jiti'), toModule('script.js')]);
+});
+
+test('getInputsFromScripts (ts-node-dev)', () => {
+  t('ts-node-dev ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --respawn --transpile-only ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --respawn --watch src,config ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('ts-node-dev --inspect -- ./main.ts', [toBinary('ts-node-dev'), ts]);
+  t('tsnd -r pkg/register --project tsconfig.json ./main.ts --port 3000', [toBinary('tsnd'), ts, toModule('pkg/register')]);
 });
 
 test('getInputsFromScripts (c8)', () => {
@@ -693,6 +708,16 @@ test('getInputsFromScripts (double-dash)', () => {
   t('dotenvx run -- yarn exec -- tsx ./main.ts', [toBinary('dotenvx'), toBinary('tsx'), ts]);
   t('dotenvx run -- mocha -- ./main.ts', [toBinary('dotenvx'), toBinary('mocha'), toEntry('./main.ts')]);
   t('op run --env-file=.env -- node ./script.js -- --import unused-dep', [toBinary('op'), toBinary('node'), js]);
+});
+
+test('getInputsFromScripts (graphql-codegen)', () => {
+  const binary = toBinary('graphql-codegen');
+  const config = toConfig('graphql-codegen', 'codegen.ts');
+  const dotenv = toModule('dotenv/config');
+  const tsconfigPaths = toModule('tsconfig-paths/register');
+  t('graphql-codegen --config codegen.ts', [binary, config]);
+  t('graphql-codegen -r dotenv/config --config codegen.ts', [binary, dotenv, config]);
+  t('graphql-codegen --require dotenv/config --require tsconfig-paths/register', [binary, dotenv, tsconfigPaths]);
 });
 
 test('getInputsFromScripts (env-cmd environments)', () => {
@@ -817,6 +842,14 @@ test('getInputsFromScripts (plugins → fromArgs)', () => {
   t('glob --cmd "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
   t('glob -c "node ./script.js" "*.js"', [toBinary('glob'), toEntry('*.js'), toBinary('node'), js]);
   t('nodemon --exec', [toBinary('nodemon')]);
+});
+
+test('getInputsFromScripts (firebase)', () => {
+  t('firebase emulators:exec --only firestore "node ./script.js"', [toBinary('firebase'), toBinary('node'), js]);
+  t('firebase emulators:exec --ui "node ./script.js" -P demo-test', [toBinary('firebase'), toBinary('node'), js]);
+  t('npx firebase-tools@15 emulators:exec --only auth "node tests/e2e.mjs"', [toDependency('firebase-tools', opt), toBinary('node'), toEntryPath('tests/e2e.mjs', opt)]);
+  t(`firebase emulators:exec 'node "./scripts/my task.js" && tsx ./main.ts'`, [toBinary('firebase'), toBinary('node'), toEntryPath('./scripts/my task.js', opt), toBinary('tsx'), ts]);
+  t('firebase deploy --only hosting', [toBinary('firebase')]);
 });
 
 test('getInputsFromScripts (find -exec)', () => {
