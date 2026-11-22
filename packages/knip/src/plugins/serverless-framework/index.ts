@@ -38,8 +38,12 @@ const handlerToEntry = (handler: string, dir: string) => {
   return toEntryPath(file, { production: true, dir });
 };
 
-const pluginToInput = (plugin: string, dir: string) =>
-  isInternal(plugin) ? toEntryPath(toAbsolute(plugin, dir), { production: true }) : toDependency(plugin);
+const pluginToInput = (plugin: string, dir: string, localPath?: string) =>
+  isInternal(plugin)
+    ? toEntryPath(toAbsolute(plugin, dir), { production: true })
+    : localPath
+      ? toEntryPath(plugin, { production: true, dir: toAbsolute(localPath, dir) })
+      : toDependency(plugin);
 
 const getFunctionEntries = async (functions: unknown, dir: string, cwd: string) => {
   const entries = [];
@@ -63,9 +67,14 @@ const getInjectEntries = (esbuild: EsbuildConfig | undefined, dir: string) =>
 export const resolveConfig: ResolveConfig<PluginConfig> = async (config, options) => {
   const functions = await getFunctionEntries(config.functions, options.configFileDir, options.cwd);
   const resolvedPlugins = await resolveFileVariable(config.plugins, options.configFileDir);
-  const plugins = Array.isArray(resolvedPlugins)
-    ? resolvedPlugins.filter((plugin): plugin is string => typeof plugin === 'string')
-    : [];
+  const pluginConfig = isRecord(resolvedPlugins) ? resolvedPlugins : undefined;
+  const pluginModules = Array.isArray(resolvedPlugins)
+    ? resolvedPlugins
+    : pluginConfig && Array.isArray(pluginConfig.modules)
+      ? pluginConfig.modules
+      : [];
+  const localPath = pluginConfig && typeof pluginConfig.localPath === 'string' ? pluginConfig.localPath : undefined;
+  const plugins = pluginModules.filter((plugin): plugin is string => typeof plugin === 'string');
   const esbuild = config.custom?.esbuild || config.build?.esbuild ? [toDependency('esbuild', { optional: true })] : [];
   const injectEntries = [
     ...getInjectEntries(config.custom?.esbuild, options.configFileDir),
@@ -74,7 +83,7 @@ export const resolveConfig: ResolveConfig<PluginConfig> = async (config, options
 
   return [
     ...functions,
-    ...plugins.map(plugin => pluginToInput(plugin, options.configFileDir)),
+    ...plugins.map(plugin => pluginToInput(plugin, options.configFileDir, localPath)),
     ...esbuild,
     ...injectEntries,
   ];

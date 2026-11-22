@@ -1,0 +1,12 @@
+{
+  "name": "@plugins/serverless-framework-local-plugins",
+  "dependencies": {
+    "serverless": "*"
+  },
+  "devDependencies": {
+    "serverless-offline": "*"
+  },
+  "scripts": {
+    "deploy": "serverless deploy"
+  }
+}
