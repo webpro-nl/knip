@@ -39,10 +39,10 @@ const handlerToEntry = (handler: string, dir: string) => {
 };
 
 const pluginToInput = (plugin: string, dir: string, localPath?: string) =>
-  localPath
-    ? toEntryPath(join(toAbsolute(localPath, dir), plugin), { production: true })
-    : isInternal(plugin)
-      ? toEntryPath(toAbsolute(plugin, dir), { production: true })
+  isInternal(plugin)
+    ? toEntryPath(toAbsolute(plugin, dir), { production: true })
+    : localPath
+      ? toEntryPath(plugin, { production: true, dir: toAbsolute(localPath, dir) })
       : toDependency(plugin);
 
 const getFunctionEntries = async (functions: unknown, dir: string, cwd: string) => {

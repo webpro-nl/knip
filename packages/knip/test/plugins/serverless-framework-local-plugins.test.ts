@@ -5,14 +5,16 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-test('Resolve Serverless handlers with empty object-form plugin modules', async () => {
-  const options = await createOptions({ cwd: resolve('fixtures/plugins/serverless-framework-empty-plugin-modules') });
+const cwd = resolve('fixtures/plugins/serverless-framework-local-plugins');
+
+test('Find local and package plugins with the Serverless Framework plugin (localPath)', async () => {
+  const options = await createOptions({ cwd });
   const { counters, issues } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
   assert.deepEqual(issues.files, {});
   assert.deepEqual(issues.devDependencies, {});

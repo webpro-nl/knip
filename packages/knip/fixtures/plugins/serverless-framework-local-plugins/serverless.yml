@@ -1,8 +1,10 @@
-service: EmptyPluginModules
+service: LocalPlugins
 plugins:
   localPath: ./plugins
   modules:
     - register
+    - serverless-offline
+    - ./src/local-plugin
 functions:
   registeredHandler:
     handler: src/registered-handler.handler
