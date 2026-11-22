@@ -7,7 +7,7 @@ import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
 import { isFile } from './fs.ts';
 import { fromBinary, type Input, isConfig, isDeferResolveEntry, toDebugString } from './input.ts';
-import { getPackageNameFromFilePath, getPackageNameFromSpecifier } from './modules.ts';
+import { getPackageNameFromFilePath, getPackageNameFromSpecifier, isStartsLikePackageName } from './modules.ts';
 import { dirname, isAbsolute, isInNodeModules, isInternal, join } from './path.ts';
 import { _resolveModuleSync, _resolveSync, resolvePackageManifestPath } from './resolve.ts';
 
@@ -90,7 +90,7 @@ export const createInputHandler = (
       const packageName = resolvedFilePath
         ? getPackageNameFromFilePath(resolvedFilePath)
         : getPackageNameFromSpecifier(specifier);
-      if (packageName) {
+      if (packageName && isStartsLikePackageName(packageName)) {
         if (packageName !== recordedPackageName && !chief.findWorkspaceByPackageName(packageName, containingFilePath)) {
           addExternalRef(containingFilePath, packageName);
         }

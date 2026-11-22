@@ -97,3 +97,15 @@ test('Find dependencies with the SvelteKit plugin (svelte.config.js next to Svel
     total: 3,
   });
 });
+
+test('Find dependencies with the SvelteKit plugin (tsconfig extends generated $app/tsconfig)', async () => {
+  const cwd7 = resolve('fixtures/plugins/sveltekit3');
+  const options = await createOptions({ cwd: cwd7 });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
+  });
+});
