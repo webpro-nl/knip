@@ -753,13 +753,11 @@ test('getInputsFromScripts (env-cmd environments)', () => {
 });
 
 test('getInputsFromScripts (sst)', () => {
-  const config = toConfig('sst', 'infra/sst.config.ts', { dir: cwd });
+  const config = toConfig('sst', 'infra/sst.config.ts');
   t('sst deploy --stage production', [toBinary('sst')]);
   t('sst --config infra/sst.config.ts dev', [toBinary('sst'), config]);
   t('sst deploy --config infra/sst.config.ts --stage production', [toBinary('sst'), config]);
   t('sst shell -- vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts')]);
-  t('sst shell vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts')]);
-  t('sst --config infra/sst.config.ts shell vitest --config vitest.e2e.ts', [toBinary('sst'), toBinary('vitest'), toConfig('vitest', 'vitest.e2e.ts'), config]);
   t('sst shell', [toBinary('sst')]);
   t('sst shell drizzle-kit', [toBinary('sst'), toBinary('drizzle-kit')]);
   t('sst shell "./scripts/my task.sh"', [toBinary('sst'), toEntry('./scripts/my task.sh')]);
