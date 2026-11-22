@@ -16,6 +16,7 @@ export interface NuxtConfig {
     autoImport?: boolean;
     dirs?: string[];
   };
+  plugins?: Array<string | { src: string; mode?: string }>;
   extends?: NuxtLayer | NuxtLayer[];
   components?: Array<string | { path: string }> | { dirs?: Array<string | { path: string }> };
   css?: string[];

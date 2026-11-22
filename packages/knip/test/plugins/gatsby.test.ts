@@ -23,13 +23,28 @@ test('Find dependencies with the Gatsby plugin', async () => {
   assert(issues.unlisted['gatsby-node.js']['@babel/plugin-proposal-function-bind']);
   assert(issues.unlisted['gatsby-node.js']['babel-plugin-transform-imports']);
 
+  assert.deepEqual(issues.files, {});
+
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 1,
     devDependencies: 4,
     unlisted: 3,
     unresolved: 2,
-    processed: 2,
-    total: 2,
+    processed: 8,
+    total: 8,
+  });
+});
+
+test('Find dependencies with the Gatsby plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(issues.files, {});
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 6,
+    total: 6,
   });
 });

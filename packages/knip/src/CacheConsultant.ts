@@ -10,6 +10,7 @@ export class CacheConsultant<T> {
   getFileDescriptor: (filePath: string) => FileDescriptor<T> = () => dummyFileDescriptor;
   reconcile: () => void = () => {};
   removeEntry: (filePath: string) => void = () => {};
+  setFileData: (filePath: string, data: T) => void = () => {};
 
   constructor(name: string, options: MainOptions) {
     if (!options.isCache) return;
@@ -18,6 +19,7 @@ export class CacheConsultant<T> {
     this.getFileDescriptor = timerify(this.cache.getFileDescriptor.bind(this.cache));
     this.reconcile = timerify(this.cache.reconcile.bind(this.cache));
     this.removeEntry = timerify(this.cache.removeEntry.bind(this.cache));
+    this.setFileData = this.cache.setFileData.bind(this.cache);
   }
 
   getCachedFile(filePath: string): T | undefined {

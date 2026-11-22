@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsup",
     "build-3": "tsup --config tsup.config-3.ts",
-    "build-4": "tsup -c tsup.config-4.ts"
+    "build-4": "tsup -c tsup.config-4.ts",
+    "build-8": "tsup --clean entry-8.ts entry-9.ts --format esm,cjs --dts"
   },
   "tsup": {
     "entry": [

@@ -18,6 +18,7 @@ Mode
       --cache                  Enable caching
       --cache-location         Change cache location (default: node_modules/.cache/knip)
       --include-entry-exports  Include entry files when reporting unused exports
+      --include-subpath-exports  Report unused subpaths in package.json#exports
       --no-gitignore           Don't respect .gitignore
   -p, --production             Analyze only production source files (e.g. no test files, devDependencies)
   -s, --strict                 Consider only direct dependencies of workspace (not devDependencies, not other workspaces)
@@ -41,10 +42,11 @@ Fix
   -F, --format                 Format modified files after --fix using the local formatter
 
 Output
-      --preprocessor           Preprocess the results before providing it to the reporter(s), can be repeated
+      --preprocessor           Preprocess the results before providing them to the reporter(s), can be repeated
       --preprocessor-options   Pass extra options to the preprocessor (as JSON string, see --reporter-options example)
       --reporter               Select reporter (default: symbols), can be repeated (3)
       --reporter-options       Pass extra options to the reporter (as JSON string, see example)
+      --output-file            Write reporter output to a file instead of stdout ([reporter=]path), can be repeated
       --no-config-hints        Suppress configuration hints
       --no-tag-hints           Suppress tag hints
       --treat-config-hints-as-errors   Exit with non-zero code (1) if there are any configuration hints
@@ -59,13 +61,13 @@ Troubleshooting
       --memory-realtime        Log memory usage in realtime
       --performance            Measure count and running time of key functions and display stats table
       --performance-fn [name]  Measure only function [name]
-  -u, --duration               Print total running time (zero overhead, no instrumentation)
+  -u, --duration               Print run time and startup overhead (no instrumentation)
       --trace                  Show trace output
       --trace-dependency [name]  Show files that import the named dependency
       --trace-export [name]    Show trace output for named export(s)
       --trace-file [file]      Show trace output for exports in file
 
-(1) Issue types: files, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, catalogReferences, cycles
+(1) Issue types: files, subpaths, dependencies, unlisted, unresolved, exports, nsExports, types, nsTypes, enumMembers, namespaceMembers, duplicates, catalog, catalogReferences, cycles
 (2) Fixable issue types: dependencies, exports, types, files, catalog
 (3) Built-in reporters: symbols (default), compact, codeowners, cycles, json, codeclimate, markdown, disclosure, github-actions, sarif
 
@@ -78,6 +80,7 @@ $ knip --workspace @myorg/* --workspace '!@myorg/legacy'
 $ knip --workspace './apps/*' --workspace '@shared/utils'
 $ knip -c ./config/knip.json --reporter compact
 $ knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
+$ knip --reporter symbols --reporter json --output-file json=knip.json
 $ knip --tags=-lintignore
 
 Website: https://knip.dev`;
@@ -113,6 +116,7 @@ export default function parseCLIArgs() {
       help: { type: 'boolean', short: 'h' },
       include: { type: 'string', multiple: true },
       'include-entry-exports': { type: 'boolean' },
+      'include-subpath-exports': { type: 'boolean' },
       'max-issues': { type: 'string' },
       'max-show-issues': { type: 'string' },
       memory: { type: 'boolean' },
@@ -122,6 +126,7 @@ export default function parseCLIArgs() {
       'no-gitignore': { type: 'boolean' },
       'no-progress': { type: 'boolean', short: 'n' },
       'no-tag-hints': { type: 'boolean' },
+      'output-file': { type: 'string', multiple: true },
       performance: { type: 'boolean' },
       'performance-fn': { type: 'string' },
       production: { type: 'boolean', short: 'p' },

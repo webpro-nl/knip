@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
+import { toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
 import { get } from '../../util/object.ts';
 import { isInternal, join, normalize } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
@@ -34,6 +34,8 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const args = {
   config: true,
+  resolve: ['require'],
+  alias: { require: ['r'] },
 };
 
 const packageJsonPath: Plugin['packageJsonPath'] = manifest => get(manifest, 'codegen') ?? get(manifest, 'graphql');
@@ -57,7 +59,7 @@ const getPluginPackageName = (name: string) => {
 };
 
 // https://the-guild.dev/graphql/codegen/docs/presets/near-operation-file
-const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[]) => {
+const getOutputInput = (output: string, outputConfig: ConfiguredOutput | ConfiguredPlugin[], dir: string) => {
   if (isConfigurationOutput(outputConfig) && isNearOperationFilePreset(outputConfig.preset)) {
     const presetConfig: NearOperationFilePresetConfig = outputConfig.presetConfig ?? {};
     const { folder = '', extension = '.generated.ts', fileName = '*', filePerOperation = false } = presetConfig;
@@ -66,9 +68,13 @@ const getOutputPattern = (output: string, outputConfig: ConfiguredOutput | Confi
     const subfolder = normalize(folder)
       .split('/')
       .filter(segment => segment !== '' && segment !== '.' && segment !== '..');
-    return join(output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`);
+    return toEntry(join(dir, output, '**', ...subfolder, `${filePerOperation ? '*' : fileName}${extension}`), {
+      production: true,
+    });
   }
-  return output.endsWith('/') ? `${output}**` : output;
+  return output.endsWith('/')
+    ? toEntry(join(dir, `${output}**`), { production: true })
+    : toEntryPath(output, { production: true, dir });
 };
 
 const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | GraphqlProjectsConfigTypes> = (
@@ -85,9 +91,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
 
   const outputs = generateConfigs
     .flatMap(config => Object.entries(config.generates))
-    .map(([output, outputConfig]) =>
-      toProductionEntry(join(options.configFileDir, getOutputPattern(output, outputConfig)))
-    );
+    .map(([output, outputConfig]) => getOutputInput(output, outputConfig, options.configFileDir));
 
   const configurationOutput = generateSet.filter(isConfigurationOutput);
 
@@ -96,9 +100,11 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     .filter((preset): preset is PresetNames => typeof preset === 'string')
     .map(presetName =>
       // https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/src/presets.ts#L8-L11
-      presetName.startsWith('@graphql-codegen/')
-        ? presetName
-        : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
+      isInternal(presetName)
+        ? toModule(presetName, { dir: options.cwd })
+        : presetName.startsWith('@graphql-codegen/')
+          ? presetName
+          : `@graphql-codegen/${presetName}${presetName.endsWith('-preset') ? '' : '-preset'}`
     );
 
   const flatPlugins = generateSet
@@ -114,7 +120,7 @@ const resolveConfig: ResolveConfig<GraphqlCodegenTypes | GraphqlConfigTypes | Gr
     })
     .flatMap(plugin => {
       if (typeof plugin !== 'string') return [];
-      if (isInternal(plugin)) return [toEntry(plugin)];
+      if (isInternal(plugin)) return [toEntryPath(plugin, { dir: options.cwd })];
       return [toDependency(getPluginPackageName(plugin))];
     });
 

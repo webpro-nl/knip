@@ -9,7 +9,7 @@ const enablers = ['i18next-parser'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['i18next-parser.config.{js,mjs,json,ts,yaml,yml}'];
+const entry = ['i18next-parser.config.{js,mjs,json,ts,yaml,yml}'];
 
 const args = {
   binaries: ['i18next'],
@@ -20,7 +20,7 @@ const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
   args,
 };
 

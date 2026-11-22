@@ -1,15 +1,10 @@
-import { existsSync } from 'node:fs';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry, toProductionEntry } from '../../util/input.ts';
-import { isInternal, join } from '../../util/path.ts';
+import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
+import { type Input, toConfig, toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { createComponentStyleUrlsVisitor } from '../_component-style-urls/component-style-urls-visitor.ts';
 import * as karma from '../karma/helpers.ts';
-import type {
-  AngularCLIWorkspaceConfiguration,
-  KarmaTarget,
-  Project,
-  WebpackBrowserSchemaForBuildFacade,
-} from './types.ts';
+import { getBuilderEntries } from './helpers.ts';
+import type { AngularCLIWorkspaceConfiguration, KarmaTarget } from './types.ts';
 
 // https://angular.io/guide/workspace-config
 
@@ -29,7 +24,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
   for (const project of Object.values(config.projects)) {
     if (!project.architect) continue;
     for (const [targetName, target] of Object.entries(project.architect)) {
-      const { options: opts, configurations: configs } = target;
+      const { options: opts } = target;
       const [packageName] = typeof target.builder === 'string' ? target.builder.split(':') : [];
       if (packageName) inputs.add(toDependency(packageName));
       if (opts) {
@@ -37,46 +32,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           inputs.add(toConfig('typescript', opts.tsConfig));
         }
       }
-      const defaultEntriesByOption: EntriesByOption = opts ? entriesByOption(opts) : new Map();
-      const entriesByOptionByConfig: Map<string, EntriesByOption> = new Map(
-        configs ? Object.entries(configs).map(([name, opts]) => [name, entriesByOption(opts)]) : []
-      );
-      const productionEntriesByOption: EntriesByOption =
-        entriesByOptionByConfig.get(PRODUCTION_CONFIG_NAME) ?? new Map();
-      const isBuildTarget = targetName === BUILD_TARGET_NAME;
-      const maybeExternal = (option: string) => option === 'polyfills';
-      const toInput = (specifier: string, opts: { isProduction: boolean; maybeExternal: boolean }): Input => {
-        const normalizedPath = join(options.cwd, specifier);
-        // 👇 `isInternal` will report `false` for specifiers not starting with `.`
-        //    However, relative imports are usually specified in `angular.json` without `.` prefix
-        //    Hence checking also that file doesn't exist before considering it external
-        if (opts.maybeExternal && !isInternal(specifier) && !existsSync(normalizedPath)) {
-          return toDeferResolve(specifier);
-        }
-        return opts.isProduction ? toProductionEntry(normalizedPath) : toEntry(normalizedPath);
-      };
-      for (const [configName, entriesByOption] of entriesByOptionByConfig) {
-        for (const [option, entries] of entriesByOption) {
-          for (const entry of entries) {
-            inputs.add(
-              toInput(entry, {
-                isProduction: isBuildTarget && configName === PRODUCTION_CONFIG_NAME,
-                maybeExternal: maybeExternal(option),
-              })
-            );
-          }
-        }
-      }
-      for (const [option, entries] of defaultEntriesByOption) {
-        for (const entry of entries) {
-          inputs.add(
-            toInput(entry, {
-              isProduction: isBuildTarget && !productionEntriesByOption.get(option)?.length,
-              maybeExternal: maybeExternal(option),
-            })
-          );
-        }
-      }
+      for (const input of getBuilderEntries(targetName, target, options.cwd)) inputs.add(input);
       if (target.builder && isAngularBuilderRefWithName({ builderRef: target.builder, name: 'karma' }) && opts) {
         const karmaBuilderOptions = opts as KarmaTarget;
         // https://github.com/angular/angular-cli/blob/19.0.6/packages/angular_devkit/build_angular/src/builders/karma/schema.json#L143
@@ -102,7 +58,7 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
           karma.inputsFromFrameworks(['jasmine']).forEach(inputs.add, inputs);
         }
         if (karmaConfig && !karma.configFiles.includes(karmaConfig)) {
-          inputs.add(toConfig('karma', karmaConfig, { containingFilePath: options.configFilePath }));
+          inputs.add(toConfig('karma', karmaConfig));
         }
       }
     }
@@ -111,65 +67,16 @@ const resolveConfig: ResolveConfig<AngularCLIWorkspaceConfiguration> = async (co
   return Array.from(inputs);
 };
 
-const entriesByOption = (opts: TargetOptions): EntriesByOption =>
-  new Map(
-    Object.entries({
-      main: 'main' in opts && opts.main && typeof opts.main === 'string' ? [opts.main] : [],
-      scripts:
-        'scripts' in opts && opts.scripts && Array.isArray(opts.scripts)
-          ? (opts.scripts as ScriptsBuildOption).map(scriptStringOrObject =>
-              typeof scriptStringOrObject === 'string' ? scriptStringOrObject : scriptStringOrObject.input
-            )
-          : [],
-      styles:
-        'styles' in opts && opts.styles && Array.isArray(opts.styles)
-          ? (opts.styles as StylesBuildOption).map(styleStringOrObject =>
-              typeof styleStringOrObject === 'string' ? styleStringOrObject : styleStringOrObject.input
-            )
-          : [],
-      polyfills:
-        'polyfills' in opts && opts.polyfills
-          ? Array.isArray(opts.polyfills)
-            ? opts.polyfills
-            : [opts.polyfills]
-          : [],
-      fileReplacements:
-        'fileReplacements' in opts && opts.fileReplacements && Array.isArray(opts.fileReplacements)
-          ? (opts.fileReplacements as FileReplacementsBuildOption).map(fileReplacement =>
-              'with' in fileReplacement ? fileReplacement.with : fileReplacement.replaceWith
-            )
-          : [],
-      browser: 'browser' in opts && opts.browser && typeof opts.browser === 'string' ? [opts.browser] : [],
-      server: 'server' in opts && opts.server && typeof opts.server === 'string' ? [opts.server] : [],
-      ssrEntry:
-        'ssr' in opts &&
-        opts.ssr &&
-        typeof opts.ssr === 'object' &&
-        'entry' in opts.ssr &&
-        typeof opts.ssr.entry === 'string'
-          ? [opts.ssr.entry]
-          : [],
-    })
-  );
-
 const isAngularBuilderRefWithName = ({ builderRef, name }: { builderRef: string; name: string }) => {
   const [pkg, builderName] = builderRef.split(':');
   return (pkg === '@angular-devkit/build-angular' || pkg === '@angular/build') && builderName === name;
 };
 
-type TargetOptions = Exclude<Target['options'], undefined>;
-type Target = Architect[string];
-type Architect = Exclude<Project['architect'], undefined>;
+const isAngularSpecifier = (specifier: string): boolean => specifier === '@angular/core';
 
-type EntriesByOption = Map<string, readonly string[]>;
-
-//👇 Using Webpack-based browser schema to support old `replaceWith` file replacements
-type FileReplacementsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['fileReplacements'], undefined>;
-type ScriptsBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['scripts'], undefined>;
-type StylesBuildOption = Exclude<WebpackBrowserSchemaForBuildFacade['styles'], undefined>;
-
-const PRODUCTION_CONFIG_NAME = 'production';
-const BUILD_TARGET_NAME = 'build';
+const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
+  registerVisitor(createComponentStyleUrlsVisitor(ctx, isAngularSpecifier));
+};
 
 const plugin: Plugin = {
   title,
@@ -177,6 +84,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  registerVisitors,
 };
 
 export default plugin;

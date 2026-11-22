@@ -5,6 +5,7 @@ const withMDX = createMDX({
     remarkPlugins: ['remark-frontmatter', [`remark-mdx-frontmatter`, { name: 'metadata' }]],
     rehypePlugins: [['rehype-starry-night']],
     recmaPlugins: ['recma-export-filepath'],
+    providerImportSource: 'nextra/mdx-components',
   },
 });
 

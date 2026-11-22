@@ -24,13 +24,24 @@ test('Find dependencies with the Vitest plugin', async () => {
   assert(issues.unlisted['package.json']['vue-tsc']);
   assert(issues.unresolved['vitest.config.ts']['setup.js']);
   assert(issues.unresolved['vitest.config.ts']['snapshot-serializer.js']);
+  assert(issues.unlisted['vitest.config.ts']['installed-pkg']);
+  assert(!issues.files['test/basic.edge.ts']);
+  assert(!issues.files['coverage/config-provider.ts']);
+  assert(!issues.files['coverage/cli-provider.ts']);
+  assert(!issues.unlisted['vitest-custom-coverage.config.ts']);
+  assert(!issues.unlisted['package.json']['@vitest/coverage-custom']);
+  assert(!issues.unresolved['package.json']?.['./cli-provider.ts']);
+  assert(!issues.files['src/setupBare.ts']);
+  assert(issues.files['shared-state.ts']);
+  assert(issues.files['installed-pkg.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 11,
+    files: 2,
+    unlisted: 12,
     unresolved: 2,
-    processed: 12,
-    total: 12,
+    processed: 21,
+    total: 21,
   });
 });
 
@@ -38,14 +49,48 @@ test('Find dependencies with the Vitest plugin (production)', async () => {
   const options = await createOptions({ cwd, isProduction: true });
   const { issues, counters } = await main(options);
 
-  assert('src/setupTests.ts' in issues.files);
-  assert('src/htmlSnapshotSerializer.ts' in issues.files);
-  assert.equal(Object.keys(issues.files).length, 2);
+  assert('shared-state.ts' in issues.files);
+  assert('installed-pkg.ts' in issues.files);
+  assert(issues.dependencies['package.json']['linked-package']);
+  assert(issues.dependencies['package.json']['shared-state']);
+  assert(issues.dependencies['package.json']['upstream-esm']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
+    dependencies: 3,
     processed: 2,
-    total: 2,
+    total: 9,
+  });
+});
+
+test('Find dependencies with the Vitest plugin (strict)', async () => {
+  const options = await createOptions({ cwd, isStrict: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json']['shared-state']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    dependencies: 3,
+    processed: 2,
+    total: 9,
+  });
+});
+
+test('Find dependencies with the Vitest plugin (files only)', async () => {
+  const options = await createOptions({ cwd, includedIssueTypes: ['files'] });
+  const { issues, counters } = await main(options);
+
+  assert(!issues.files['src/setupBare.ts']);
+  assert(issues.files['shared-state.ts']);
+  assert(issues.files['installed-pkg.ts']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 21,
+    total: 21,
   });
 });

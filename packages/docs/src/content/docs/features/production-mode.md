@@ -22,6 +22,9 @@ To tell Knip what is production code, add an exclamation mark behind each
 }
 ```
 
+The default mode uses these patterns too, no need to list them again without
+`!`.
+
 Depending on file structure and enabled plugins, you might not need to modify
 your configuration at all.
 
@@ -38,6 +41,15 @@ Here's what's included in production mode:
   Remix)
 - Only the `start` script (of `package.json#scripts`)
 - Ignore exports with the [`@internal` tag][1]
+
+Files referenced only from development scripts or plugin configuration, such as
+a test setup file or a custom test reporter, are excluded from the analysis. A
+file that is also a production entry stays included. These references do not
+count as dependency usage, so a package in `dependencies` that only test or
+tooling configuration uses is reported as unused.
+
+Unused subpaths in `package.json` are not reported, since files excluded from
+the analysis, such as tests, may import them.
 
 :::note
 

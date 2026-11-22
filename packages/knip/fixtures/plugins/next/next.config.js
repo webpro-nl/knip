@@ -6,6 +6,8 @@ module.exports = phase => {
   const config = withTM({});
   return {
     pageExtensions: ['ts', 'tsx'],
+    images: { loader: 'custom', loaderFile: './image-loader.js' },
+    cacheHandler: './cache-handler.js',
     ...config,
   };
 };

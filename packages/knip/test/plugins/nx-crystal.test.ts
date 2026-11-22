@@ -21,7 +21,7 @@ test('Find dependencies with the Nx plugin (crystal)', async () => {
     binaries: 1,
     devDependencies: 2,
     unlisted: 1,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

@@ -9,13 +9,13 @@ const enablers = ['@vite-pwa/assets-generator'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['pwa-assets.config.{js,cjs,mjs,ts,cts,mts}'];
+const entry = ['pwa-assets.config.{js,cjs,mjs,ts,cts,mts}'];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

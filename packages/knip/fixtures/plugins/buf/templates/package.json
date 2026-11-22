@@ -1,0 +1,14 @@
+{
+  "name": "buf-plugin-fixture",
+  "private": true,
+  "scripts": {
+    "generate": "buf generate --template buf.gen.openapi.yaml",
+    "generate:nested": "buf generate --template=proto/buf.gen.yaml"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "*",
+    "@bufbuild/protoc-gen-es": "*",
+    "@bufbuild/protoplugin": "*",
+    "tsx": "*"
+  }
+}

@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { _glob } from '../../util/glob.ts';
+import { isFile } from '../../util/fs.ts';
 
 // https://docs.travis-ci.com/user/customizing-the-build/
 
@@ -7,7 +7,7 @@ const title = 'Travis CI';
 
 const enablers = 'This plugin is enabled when a `.travis.yml` file is found in the root folder.';
 
-const isEnabled: IsPluginEnabled = async ({ cwd }) => (await _glob({ cwd, patterns: ['.travis.yml'] })).length > 0;
+const isEnabled: IsPluginEnabled = ({ cwd }) => isFile(cwd, '.travis.yml');
 
 const isRootOnly = true;
 

@@ -11,13 +11,8 @@ import type { Fix } from '../../types/exports.ts';
 import type { ExportMember } from '../../types/module-graph.ts';
 import type { SymbolType } from '../../types/issues.ts';
 import { addNsValue, addValue } from '../../util/module-graph.ts';
-import {
-  extractEnumMembers,
-  extractNamespaceMembers,
-  getLineAndCol,
-  getStringValue,
-  isStringLiteral,
-} from '../ast-nodes.ts';
+import { unwrapExpression } from '../ast-helpers.ts';
+import { extractEnumMembers, extractNamespaceMembers, getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { EMPTY_TAGS } from './jsdoc.ts';
 import type { WalkState } from './walk.ts';
 
@@ -80,20 +75,33 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           for (const p of declarator.id.properties) {
             if (p.type === 'RestElement' && p.argument?.type === 'Identifier') {
               const name = p.argument.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.argument.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(
+                name,
+                SYMBOL_TYPE.UNKNOWN,
+                p.argument.start,
+                [],
+                undefined,
+                false,
+                s.getJSDocTags(exportStart)
+              );
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'Identifier') {
               const name = p.value.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.start, [], undefined, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             } else if (p.value?.type === 'AssignmentPattern' && p.value.left?.type === 'Identifier') {
               const name = p.value.left.name;
-              const fix: Fix = s.options.isFixExports ? [p.start, p.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
-              s.addExport(name, SYMBOL_TYPE.UNKNOWN, p.value.left.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(
+                name,
+                SYMBOL_TYPE.UNKNOWN,
+                p.value.left.start,
+                [],
+                undefined,
+                false,
+                s.getJSDocTags(exportStart)
+              );
               if (declarator.init) s.collectRefsInType(declarator.init, name, false);
               s.destructuredExports.add(name);
             }
@@ -101,18 +109,16 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
         } else if (declarator.id.type === 'ArrayPattern') {
           for (const el of declarator.id.elements) {
             if (el?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
-              s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], fix, false, s.getJSDocTags(exportStart));
+              s.addExport(el.name, SYMBOL_TYPE.UNKNOWN, el.start, [], undefined, false, s.getJSDocTags(exportStart));
               if (declarator.init) s.collectRefsInType(declarator.init, el.name, false);
               s.destructuredExports.add(el.name);
             } else if (el?.type === 'RestElement' && el.argument?.type === 'Identifier') {
-              const fix: Fix = s.options.isFixExports ? [el.start, el.end, FIX_FLAGS.NONE] : undefined;
               s.addExport(
                 el.argument.name,
                 SYMBOL_TYPE.UNKNOWN,
                 el.argument.start,
                 [],
-                fix,
+                undefined,
                 false,
                 s.getJSDocTags(exportStart)
               );
@@ -122,7 +128,7 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
           }
         } else if (declarator.id.type === 'Identifier') {
           const name = declarator.id.name;
-          const fix = s.getFix(exportStart, exportStart + 7);
+          const fix = decl.declarations.length === 1 ? s.getFix(exportStart, exportStart + 7) : undefined;
           const jsDocTags = s.getJSDocTags(exportStart);
 
           let isReExport = false;
@@ -178,21 +184,8 @@ export function handleExportNamed(node: ExportNamedDeclaration, s: WalkState) {
             s.collectRefsInType(declarator.init, name, hasExplicitFunctionReturnType(declarator.init));
           }
 
-          if (!jsDocTags.has(ALIAS_TAG) && declarator.init?.type === 'Identifier') {
-            const initName = declarator.init.name;
-            const existingExport = s.exports.get(initName);
-            if (existingExport && !existingExport.isReExport) {
-              if (!s.aliasedExports.has(initName)) {
-                s.aliasedExports.set(initName, [
-                  { symbol: initName, pos: existingExport.pos, line: existingExport.line, col: existingExport.col },
-                ]);
-              }
-              const aliased = s.aliasedExports.get(initName);
-              if (aliased) {
-                const { line: l, col: c } = getLineAndCol(s.lineStarts, declarator.id.start);
-                aliased.push({ symbol: name, pos: declarator.id.start, line: l, col: c });
-              }
-            }
+          if (!jsDocTags.has(ALIAS_TAG) && !isReExport && declarator.init?.type === 'Identifier') {
+            s.exportAliases.push({ local: declarator.init.name, symbol: name, pos: declarator.id.start });
           }
         }
       }
@@ -275,11 +268,13 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
   if (s.skipExports || s.isInNamespace(node)) return;
 
   const decl = node.declaration;
-  const hasDeclarationBody = decl.type === 'ClassDeclaration' || decl.type === 'FunctionDeclaration';
+  const isNamedDeclaration = (decl.type === 'ClassDeclaration' || decl.type === 'FunctionDeclaration') && decl.id;
+  const start =
+    decl.type === 'ClassDeclaration' ? Math.min(node.start, decl.decorators[0]?.start ?? node.start) : node.start;
   const fix: Fix = s.options.isFixExports
-    ? hasDeclarationBody
+    ? isNamedDeclaration
       ? [node.start, decl.start, FIX_FLAGS.NONE]
-      : [node.start, node.end + 1, FIX_FLAGS.NONE]
+      : [start, node.end + 1, FIX_FLAGS.NONE]
     : undefined;
 
   let type: SymbolType = SYMBOL_TYPE.UNKNOWN;
@@ -312,7 +307,9 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
       if (internalImport) {
-        if (_import.importedName !== 'default') {
+        if (_import.isNamespace) {
+          addValue(internalImport.reExportNs, 'default', s.filePath);
+        } else if (_import.importedName !== 'default') {
           addNsValue(internalImport.reExportAs, _import.importedName, 'default', s.filePath);
         } else {
           addValue(internalImport.reExport, 'default', s.filePath);
@@ -320,21 +317,8 @@ export function handleExportDefault(node: ExportDefaultDeclaration, s: WalkState
       }
     }
 
-    const jsDocTags = s.getJSDocTags(node.start);
-    if (!jsDocTags.has(ALIAS_TAG) && !s.specifierExportNames.has(decl.name)) {
-      const existingExport = s.exports.get(decl.name);
-      if (existingExport) {
-        if (!s.aliasedExports.has(decl.name)) {
-          s.aliasedExports.set(decl.name, [
-            { symbol: decl.name, pos: existingExport.pos, line: existingExport.line, col: existingExport.col },
-          ]);
-        }
-        const aliased = s.aliasedExports.get(decl.name);
-        if (aliased) {
-          const { line: defLine, col: defCol } = getLineAndCol(s.lineStarts, decl.start);
-          aliased.push({ symbol: 'default', pos: decl.start, line: defLine, col: defCol });
-        }
-      }
+    if (!_import && !s.getJSDocTags(node.start).has(ALIAS_TAG)) {
+      s.exportAliases.push({ local: decl.name, symbol: 'default', pos: decl.start });
     }
   }
 
@@ -372,22 +356,13 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
 
   if (left.type !== 'MemberExpression') return;
 
-  if (!left.computed && left.object.type === 'Identifier' && left.object.name === 'exports') {
-    if (s.skipExports) return;
-    const name = left.property.name;
-    if (name) {
-      const fix: Fix = s.options.isFixExports ? [node.start, node.end, FIX_FLAGS.NONE] : undefined;
-      s.addExport(name, SYMBOL_TYPE.UNKNOWN, left.property.start, [], fix, false, EMPTY_TAGS);
-    }
-    return;
-  }
-
   if (
-    left.object.type === 'MemberExpression' &&
-    !left.object.computed &&
-    left.object.object.type === 'Identifier' &&
-    left.object.object.name === 'module' &&
-    left.object.property.name === 'exports'
+    (left.object.type === 'Identifier' && left.object.name === 'exports') ||
+    (left.object.type === 'MemberExpression' &&
+      !left.object.computed &&
+      left.object.object.type === 'Identifier' &&
+      left.object.object.name === 'module' &&
+      left.object.property.name === 'exports')
   ) {
     let exportName: string | undefined;
     if (!left.computed && left.property.type === 'Identifier') {
@@ -399,21 +374,24 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
     if (exportName) {
       const right = expr.right;
       let isReExport = false;
+      const object = right.type === 'MemberExpression' ? unwrapExpression(right.object) : undefined;
       if (
         right.type === 'MemberExpression' &&
-        right.object.type === 'CallExpression' &&
-        right.object.callee.type === 'Identifier' &&
-        right.object.callee.name === 'require' &&
-        right.object.arguments.length === 1 &&
-        isStringLiteral(right.object.arguments[0])
+        object &&
+        object.type === 'CallExpression' &&
+        object.callee.type === 'Identifier' &&
+        object.callee.name === 'require' &&
+        object.arguments.length === 1 &&
+        isStringLiteral(object.arguments[0])
       ) {
-        const specifier = getStringValue(right.object.arguments[0])!;
+        const specifier = getStringValue(object.arguments[0])!;
         let memberName: string | undefined;
         if (!right.computed && right.property.type === 'Identifier') memberName = right.property.name;
         else if (right.computed && isStringLiteral(right.property)) memberName = getStringValue(right.property);
         if (memberName) {
           const alias = exportName !== memberName ? exportName : undefined;
-          s.addImport(specifier, memberName, alias, undefined, right.object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
+          s.addImport(specifier, memberName, alias, undefined, object.arguments[0].start, IMPORT_FLAGS.RE_EXPORT);
+          s.handledImportExpressions.add(object.start);
           isReExport = true;
         }
       }
@@ -440,7 +418,7 @@ export function handleExpressionStatement(node: ExpressionStatement, s: WalkStat
       if (allShorthand) {
         for (const prop of props) {
           if (prop.type === 'Property' && prop.key.type === 'Identifier') {
-            const fix: Fix = s.options.isFixExports ? [prop.start, prop.end, FIX_FLAGS.NONE] : undefined;
+            const fix: Fix = s.options.isFixExports ? [prop.start, prop.end, FIX_FLAGS.OBJECT_BINDING] : undefined;
             s.addExport(prop.key.name, SYMBOL_TYPE.UNKNOWN, prop.key.start, [], fix, false, EMPTY_TAGS);
           }
         }

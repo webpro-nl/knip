@@ -1,0 +1,6 @@
+catalog:
+  zod: ^4.4.3
+  lodash: ^4.0.0
+catalogs:
+  react:
+    react: ^19.0.0

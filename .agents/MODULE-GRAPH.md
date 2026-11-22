@@ -59,8 +59,10 @@ Defined in [`types/module-graph.ts`][types]; assembled in
 - `importedBy`: **reverse** index. The aggregated `ImportMaps` of every file
   that imports this one. What the analyze phase walks.
 - `exports`: `Map<identifier, Export>` for this file.
-- `imports.external` / `unresolved` / `externalRefs`: npm + unresolved specifiers.
-- `scripts`, `duplicates`, `internalImportCache` (watch-mode incremental rebuild).
+- `imports.external` / `unresolved` / `externalRefs`: npm + unresolved
+  specifiers.
+- `scripts`, `duplicates`, `internalImportCache` (watch-mode incremental
+  rebuild).
 
 `ImportMaps` is the per-edge usage record: `import` / `importAs` / `importNs` /
 `reExport` / `reExportNs` / `reExportAs` (id → source file(s)), plus `refs`
@@ -76,8 +78,8 @@ analyze depends on it being complete by the time build finishes.
 ## Invariants & gotchas
 
 - **One serial walk, one shared `ProjectPrincipal`.** The BFS seeds from entry +
-  program paths and grows its `visited`/`resolvedFiles` set _mid-loop_ as imports
-  resolve. A worker can't know its full input upfront (relevant to any
+  program paths and grows its `visited`/`resolvedFiles` set _mid-loop_ as
+  imports resolve. A worker can't know its full input upfront (relevant to any
   parallelism attempt; see [PERFORMANCE.md][perf]).
 - **Reachable ≠ analyzed.** Project files are fully analyzed (exports + refs).
   Files reached only as bare or non-project imports are parsed _just_ to extract
@@ -85,6 +87,24 @@ analyze depends on it being complete by the time build finishes.
   straight: `projectPaths` (globbed candidates) ⊇ `resolvedFiles` (reached +
   parsed) vs `analyzedFiles` (fully analyzed). Unused files = `projectPaths`
   minus reached.
+- **Entry paths can grow mid-walk.** Targets of a `package.json#imports` key,
+  and of an `exports` key when the workspace sets `includeSubpathExports`,
+  become entry files only once a specifier references the key.
+  `SubpathReferences` (`src/graph/SubpathReferences.ts`) resolves each specifier
+  it is handed to a workspace subpath, records the subpath and claims the key's
+  target files as entries (`claimEntryPath`). `onPathAdded` enqueues a claimed
+  target, and re-queues it when it was already reached as a non-project import
+  so it gets fully analyzed. Specifiers come from three places: inputs of
+  plugins and scripts (`addInput`, logged per owner), the imports of analyzed
+  files (fresh or cached), and files the walk reaches but doesn't analyze, whose
+  specifiers `walkAndAnalyze` hands to its `onSpecifier` callback. Nothing is
+  released one by one: a session calls `reset()` before each reachability walk
+  (`getUsedResolvedFiles`), which drops the references and the claimed entries
+  (`releaseEntryClaims`), replays the logged inputs and lets the walk rebuild
+  the rest from every reached file; a modified or deleted file only forgets its
+  logged inputs (`release`). A plain `addEntryPath` makes a claimed target a
+  permanent entry. `analyze.ts` reports the unreferenced keys from
+  `SubpathReferences` on every run, so sessions never retain `subpaths` issues.
 - **Cache short-circuits read+parse** for unchanged files (`CacheConsultant`).
   Warm runs jump straight to the cached `FileNode`; cold and warm timings differ
   a lot, so benchmark warm runs (see [PERFORMANCE.md][perf]).
@@ -94,27 +114,27 @@ analyze depends on it being complete by the time build finishes.
 
 ## Related docs
 
-- [EXPORTS.md][exports]: answering "is this export used?": chain refs, shadowing,
-  DTS correctness, `ignoreExportsUsedInFile`. Read it for anything touching
-  `is-referenced` or the export visitors.
+- [EXPORTS.md][exports]: answering "is this export used?": chain refs,
+  shadowing, DTS correctness, `ignoreExportsUsedInFile`. Read it for anything
+  touching `is-referenced` or the export visitors.
 - [PLUGINS.md][plugins]: how plugins contribute entry points and config.
 - [PERFORMANCE.md][perf]: cost map, why the walk is serial, what's load-bearing.
 
-[analyze]: ./packages/knip/src/graph/analyze.ts
-[bash]: ./packages/knip/src/binaries/bash-parser.ts
-[build]: ./packages/knip/src/graph/build.ts
-[cli]: ./packages/knip/src/cli.ts
-[deputy]: ./packages/knip/src/DependencyDeputy.ts
+[analyze]: ../packages/knip/src/graph/analyze.ts
+[bash]: ../packages/knip/src/binaries/bash-parser.ts
+[build]: ../packages/knip/src/graph/build.ts
+[cli]: ../packages/knip/src/cli.ts
+[deputy]: ../packages/knip/src/DependencyDeputy.ts
 [exports]: ./EXPORTS.md
-[gie]: ./packages/knip/src/typescript/get-imports-and-exports.ts
-[graphutil]: ./packages/knip/src/util/module-graph.ts
-[isref]: ./packages/knip/src/graph-explorer/operations/is-referenced.ts
-[ns]: ./packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
-[opts]: ./packages/knip/src/util/create-options.ts
+[gie]: ../packages/knip/src/typescript/get-imports-and-exports.ts
+[graphutil]: ../packages/knip/src/util/module-graph.ts
+[isref]: ../packages/knip/src/graph-explorer/operations/is-referenced.ts
+[ns]: ../packages/knip/src/graph-explorer/operations/has-strictly-ns-references.ts
+[opts]: ../packages/knip/src/util/create-options.ts
 [perf]: ./PERFORMANCE.md
 [plugins]: ./PLUGINS.md
-[principal]: ./packages/knip/src/ProjectPrincipal.ts
-[report]: ./packages/knip/src/reporters/symbols.ts
-[run]: ./packages/knip/src/run.ts
-[types]: ./packages/knip/src/types/module-graph.ts
-[worker]: ./packages/knip/src/WorkspaceWorker.ts
+[principal]: ../packages/knip/src/ProjectPrincipal.ts
+[report]: ../packages/knip/src/reporters/symbols.ts
+[run]: ../packages/knip/src/run.ts
+[types]: ../packages/knip/src/types/module-graph.ts
+[worker]: ../packages/knip/src/WorkspaceWorker.ts

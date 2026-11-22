@@ -17,6 +17,7 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.devDependencies['package.json']['@nrwl/web']);
   assert(issues.devDependencies['package.json']['@nrwl/workspace']);
   assert(issues.devDependencies['package.json']['rimraf']);
+  assert(issues.devDependencies['package.json']['karma']);
 
   assert(issues.unlisted['package.json']['nx']);
   assert(issues.unlisted['apps/b/project.json']['@js/cypress']);
@@ -24,6 +25,7 @@ test('Find dependencies with the Nx plugin', async () => {
   assert(issues.unlisted['libs/b/project.json']['@nx/vitest']);
   assert(issues.unlisted['libs/b/project.json']['@nx/webpack']);
   assert(issues.unlisted['libs/b/project.json']['webpack-cli']);
+  assert(issues.unlisted['libs/b/webpack.config.js']['@nx/webpack']);
 
   assert(issues.binaries['package.json']['nx']);
   assert(issues.binaries['libs/b/project.json']['webpack']);
@@ -34,10 +36,24 @@ test('Find dependencies with the Nx plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 6,
-    devDependencies: 6,
-    unlisted: 6,
-    files: 3,
-    processed: 4,
-    total: 4,
+    devDependencies: 7,
+    unlisted: 7,
+    processed: 18,
+    total: 18,
+  });
+});
+
+test('Find dependencies with the Nx plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert('libs/b/build.mts' in issues.files);
+  assert('libs/b/generate.mjs' in issues.files);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 2,
+    processed: 9,
+    total: 14,
   });
 });

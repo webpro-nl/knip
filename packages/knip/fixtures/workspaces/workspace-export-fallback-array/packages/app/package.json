@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/workspaces-export-fallback-array__app",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fixtures/workspaces-export-fallback-array__library": "*"
+  }
+}

@@ -3,7 +3,8 @@
     "eslint-plugin-unused-imports",
     "eslint-plugin-security",
     { "name": "jsdoc-js", "specifier": "eslint-plugin-jsdoc" },
-    "./local-plugin.mjs"
+    "./local-plugin.mjs",
+    "./[variant]/plugin.mjs"
   ],
   "overrides": [
     {

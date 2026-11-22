@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/nyc-config-mjs",
+  "type": "module",
+  "devDependencies": {
+    "nyc": "*"
+  }
+}

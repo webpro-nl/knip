@@ -15,7 +15,7 @@ Prints a summary of this page.
 
 Shortcut: `-V`
 
-Print the version number.
+Prints the version number.
 
 ### `--no-progress`
 
@@ -43,8 +43,9 @@ Shortcut: `-c`
 ### `--use-tsconfig-files`
 
 Per workspace, take project files from `tsconfig.json` (`files` + `include`,
-minus `exclude`, `node_modules` and `outDir`) instead of the `project` patterns.
-Workspaces without a `tsconfig.json` fall back to their `project` patterns.
+minus `exclude`, `node_modules` and `outDir`) and from the tsconfig files in its
+`references` instead of the `project` patterns. Workspaces without a
+`tsconfig.json` fall back to their `project` patterns.
 
 Implicitly enabled in the [editor extension, MCP server and language server][1]
 when there is no Knip configuration file.
@@ -67,20 +68,20 @@ Run Knip using the Bun runtime (instead of Node.js + jiti).
 knip-bun
 ```
 
-This is equal to `bunx --bun knip`
+This is equivalent to `bunx --bun knip`
 
 Requires [Bun][2] to be installed. Also see [known issues][3] for the type of
 issues this might help with.
 
-### NO\_COLOR
+### NO_COLOR
 
-The built-in reporters use the [NO\_COLOR][4] friendly [picocolors][5]:
+The built-in reporters use the [NO_COLOR][4] friendly [picocolors][5]:
 
 ```sh
 NO_COLOR=1 knip
 ```
 
-### KNIP\_DISABLE\_RAW\_TRANSFER
+### KNIP_DISABLE_RAW_TRANSFER
 
 Set `KNIP_DISABLE_RAW_TRANSFER=1` to disable oxc-parser raw transfer and use the
 normal parser path.
@@ -114,6 +115,17 @@ knip --include-entry-exports
 
 Also see [includeEntryExports][7].
 
+### `--include-subpath-exports`
+
+Report unused subpaths in the `exports` field of `package.json`, for packages
+that are only consumed within the repository:
+
+```sh
+knip --include-subpath-exports
+```
+
+Also see [includeSubpathExports][8].
+
 ### `--no-gitignore`
 
 Ignore `.gitignore` files.
@@ -130,16 +142,16 @@ Lint only production source files. This excludes:
   - Storybook stories
 - `devDependencies` from `package.json`
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][9].
 
 ### `--strict`
 
 Shortcut: `-s`
 
 Isolate workspaces and consider only direct dependencies. Implies [production
-mode][9].
+mode][10].
 
-Read more at [Production Mode][8].
+Read more at [Production Mode][9].
 
 ### `--watch`
 
@@ -148,8 +160,9 @@ Shortcut: `-w`
 Watch current directory, and update reported issues when a file is modified,
 added or deleted.
 
-Watch mode focuses on imports and exports in source files. During watch mode,
-changes in `package.json` or `node_modules` may not cause an updated report.
+Watch mode reloads configuration when a Knip config, plugin config (or a local
+module it imports), workspace manifest, `tsconfig.json` or `.gitignore` file
+changes. Changes inside `node_modules` require restarting Knip.
 
 ## Scope
 
@@ -161,7 +174,7 @@ workspaces.
 
 Shortcut: `-W`
 
-See [filter workspaces][10] for more details and examples.
+See [filter workspaces][11] for more details and examples.
 
 ### `--directory [dir]`
 
@@ -192,13 +205,14 @@ knip --include files,dependencies
 knip --include files --include dependencies
 ```
 
-`nsExports` and `nsTypes` are [off by default][11]; including only those _adds_
+`nsExports` and `nsTypes` are [off by default][12]; including only those _adds_
 them to the default report instead of narrowing it.
 
-Available [issue types][12] when filtering output using `--include` or
+Available [issue types][13] when filtering output using `--include` or
 `--exclude`:
 
 - `files`
+- `subpaths`
 - `dependencies`
 - `unlisted`
 - `binaries`
@@ -245,7 +259,7 @@ Shortcut to report only circular dependencies:
 --include cycles
 ```
 
-Also see the [cycles reporter][13].
+Also see the [cycles reporter][14].
 
 ### `--tags`
 
@@ -287,13 +301,13 @@ knip --tags @lintignore --tags @internal
 
 Shortcut: `-f`
 
-Read more at [auto-fix][14].
+Read more at [auto-fix][15].
 
 ### `--fix-type`
 
 Fix only issues of type, can be comma-separated or repeated.
 
-More info about fixable types at [issue types][12]
+More info about fixable types at [issue types][13]
 
 ### `--allow-remove-files`
 
@@ -309,7 +323,7 @@ Format modified files after `--fix` using the local formatter.
 
 ### `--preprocessor [preprocessor]`
 
-Preprocess the results before providing it to the [reporter(s)][15].
+Preprocess the results before providing them to the [reporter(s)][16].
 
 Can be repeated. Examples:
 
@@ -323,7 +337,7 @@ knip --preprocessor preprocessor-package
 
 Preprocessors can also be configured in the Knip configuration file.
 
-Also see [Reporters & Preprocessors][16].
+Also see [Reporters & Preprocessors][17].
 
 ### `--preprocessor-options [json]`
 
@@ -353,7 +367,7 @@ Can be repeated. Example:
 knip --reporter compact
 ```
 
-Also see [Reporters & Preprocessors][16].
+Also see [Reporters & Preprocessors][17].
 
 ### `--reporter-options [json]`
 
@@ -364,6 +378,22 @@ Example:
 ```sh
 knip --reporter codeowners --reporter-options '{"path":".github/CODEOWNERS"}'
 ```
+
+### `--output-file [reporter=]path`
+
+Write the output of a reporter to a file instead of `stdout`. Prefix the path
+with the reporter name to target one of multiple reporters. Can be repeated:
+
+```sh
+knip --reporter sarif --output-file knip.sarif
+knip --reporter symbols --reporter json --output-file json=knip.json
+```
+
+A relative path is resolved from the directory Knip runs in, like `--config` and
+`--trace-file`. With `--directory app --output-file knip.sarif` the file is
+written to `app/knip.sarif`.
+
+Also see [Writing to a file][18].
 
 ### `--no-config-hints`
 
@@ -408,7 +438,7 @@ The default exit codes:
 
 Shortcut: `-d`
 
-Show [debug output][17].
+Show [debug output][19].
 
 ### `--memory`
 
@@ -482,10 +512,10 @@ Total running time: 5s
 - `min`: the fastest invocation
 - `max`: the slowest invocation
 - `median`: the median invocation
-- `sum` the accumulated time of all invocations
+- `sum`: the accumulated time of all invocations
 
 This is not yet available in Bun, since it does not support
-`performance.timerify` ([GitHub issue][18]).
+`performance.timerify` ([GitHub issue][20]).
 
 ### `--duration`
 
@@ -515,20 +545,20 @@ Total running time: 12.9s
 
 Trace exports to see where they are imported.
 
-Also see [Trace][19].
+Also see [Trace][21].
 
 ### `--trace-dependency [name]`
 
 Trace package or binary name to see where it's referenced. Implies
-[--trace][20].
+[`--trace`][22].
 
 ### `--trace-export [name]`
 
-Trace export name to see where it's imported. Implies [--trace][20].
+Trace export name to see where it's imported. Implies [`--trace`][22].
 
 ### `--trace-file [path]`
 
-Trace file to see where its exports are imported. Implies [--trace][20].
+Trace file to see where its exports are imported. Implies [`--trace`][22].
 
 [1]: ./integrations.md
 [2]: https://bun.sh
@@ -537,16 +567,18 @@ Trace file to see where its exports are imported. Implies [--trace][20].
 [5]: https://www.npmx.dev/package/picocolors
 [6]: ./known-issues.md#stale-cache-results
 [7]: ./configuration.md#includeentryexports
-[8]: ../features/production-mode.md
-[9]: #--production
-[10]: ../features/monorepos-and-workspaces.md#filter-workspaces
-[11]: ../guides/namespace-imports.md
-[12]: ./issue-types.md
-[13]: ../features/reporters.md#cycles
-[14]: ../features/auto-fix.mdx
-[15]: #--reporter-reporter
-[16]: ../features/reporters.md
-[17]: ../guides/troubleshooting.md#debug
-[18]: https://github.com/oven-sh/bun/issues/9271
-[19]: ../guides/troubleshooting.md#trace
-[20]: #--trace
+[8]: ./configuration.md#includesubpathexports
+[9]: ../features/production-mode.md
+[10]: #--production
+[11]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[12]: ../guides/namespace-imports.md
+[13]: ./issue-types.md
+[14]: ../features/reporters.md#cycles
+[15]: ../features/auto-fix.mdx
+[16]: #--reporter-reporter
+[17]: ../features/reporters.md
+[18]: ../features/reporters.md#writing-to-a-file
+[19]: ../guides/troubleshooting.md#debug
+[20]: https://github.com/oven-sh/bun/issues/9271
+[21]: ../guides/troubleshooting.md#trace
+[22]: #--trace

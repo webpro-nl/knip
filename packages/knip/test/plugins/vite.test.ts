@@ -9,11 +9,14 @@ const cwd = resolve('fixtures/plugins/vite');
 
 test('Find dependencies with the Vite plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.equal('src/utils/format.ts' in issues.files, false);
+  assert.equal('server/app.ts' in issues.files, false);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    processed: 5,
+    total: 5,
   });
 });

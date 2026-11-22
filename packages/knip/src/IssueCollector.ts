@@ -1,10 +1,10 @@
 import picomatch from 'picomatch';
+import type { UnusedIgnorePattern } from './configuration-hints.ts';
 import { ROOT_WORKSPACE_NAME } from './constants.ts';
 import type { IgnoreIssues } from './types/config.ts';
 import type { ConfigurationHint, ConfigurationHints, Issue, IssueType, Rules, TagHint } from './types/issues.ts';
 import { partition } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
-import { prependDirToPattern } from './util/glob.ts';
 import { initCounters, initIssues } from './util/issue-initializers.ts';
 import { relative } from './util/path.ts';
 import type { WorkspaceFilePathFilter } from './util/workspace-file-filter.ts';
@@ -18,9 +18,9 @@ const createMatcher = (patterns: Set<string>) => {
   return picomatch(positive, { dot: true, ignore: negated.map(p => p.slice(1)) });
 };
 
-export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
+type IgnorePatternEntry = { pattern: string; id: string; workspaceName?: string; configKey?: string };
 
-type TrackedPattern = { hint: ConfigurationHint; isMatch: (path: string) => boolean };
+export type CollectorIssues = ReturnType<IssueCollector['getIssues']>;
 
 /**
  * - Collects issues and counts them
@@ -33,7 +33,8 @@ export class IssueCollector {
   private issues = initIssues();
   private counters = initCounters();
   private referencedFiles = new Set<string>();
-  private configurationHints: ConfigurationHints = new Map();
+  private configurationHintCandidates: ConfigurationHints = new Map();
+  private configurationHints: ConfigurationHint[] = [];
   private tagHints = new Set<TagHint>();
   private hasConfigLoadErrors = false;
   private ignorePatterns = new Set<string>();
@@ -42,8 +43,8 @@ export class IssueCollector {
   private isFileMatch: (filePath: string) => boolean;
   private issueMatchers: Map<IssueType, (filePath: string) => boolean> = new Map();
   private isTrackUnusedIgnorePatterns: boolean;
-  private unusedIgnorePatterns: Map<string, TrackedPattern> = new Map();
-  private unusedIgnoreFilesPatterns: Map<string, TrackedPattern> = new Map();
+  private unusedIgnorePatterns: Map<string, UnusedIgnorePattern> = new Map();
+  private unusedIgnoreFilesPatterns: Map<string, UnusedIgnorePattern> = new Map();
   private selectedWorkspaces: Set<string> | undefined;
 
   constructor(options: MainOptions) {
@@ -64,7 +65,7 @@ export class IssueCollector {
   }
 
   private collectIgnorePatterns(
-    entries: { pattern: string; id: string; workspaceName?: string }[],
+    entries: IgnorePatternEntry[],
     patterns: Set<string>,
     unused: typeof this.unusedIgnorePatterns,
     type: 'ignore' | 'ignoreFiles'
@@ -73,20 +74,29 @@ export class IssueCollector {
       patterns.add(entry.pattern);
       if (!this.isTrackUnusedIgnorePatterns) continue;
       if (entry.pattern.startsWith('!')) continue;
-      if (unused.has(entry.pattern)) continue;
-      unused.set(entry.pattern, {
-        hint: { type, identifier: entry.id, workspaceName: entry.workspaceName },
-        isMatch: picomatch(entry.pattern, { dot: true }),
-      });
+      const { id: identifier, workspaceName, configKey } = entry;
+      const hint: ConfigurationHint = configKey
+        ? { type, identifier, workspaceName, configKey }
+        : { type, identifier, workspaceName };
+      const tracked = unused.get(entry.pattern);
+      if (!tracked) {
+        unused.set(entry.pattern, { hints: [hint], isMatch: picomatch(entry.pattern, { dot: true }) });
+      } else if (
+        entry.workspaceName &&
+        entry.workspaceName !== ROOT_WORKSPACE_NAME &&
+        !tracked.hints.some(h => h.workspaceName === entry.workspaceName)
+      ) {
+        tracked.hints.push(hint);
+      }
     }
     return createMatcher(patterns);
   }
 
-  addIgnorePatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+  addIgnorePatterns(entries: IgnorePatternEntry[]) {
     this.isMatch = this.collectIgnorePatterns(entries, this.ignorePatterns, this.unusedIgnorePatterns, 'ignore');
   }
 
-  addIgnoreFilesPatterns(entries: { pattern: string; id: string; workspaceName?: string }[]) {
+  addIgnoreFilesPatterns(entries: IgnorePatternEntry[]) {
     this.isFileMatch = this.collectIgnorePatterns(
       entries,
       this.ignoreFilesPatterns,
@@ -108,12 +118,11 @@ export class IssueCollector {
     // Pre-compile matchers for each issue type
     const issueTypePatterns = new Map<IssueType, string[]>();
     for (const [pattern, issueTypes] of Object.entries(ignoreIssues)) {
-      const id = prependDirToPattern(this.cwd, pattern);
       for (const issueType of issueTypes) {
         if (!issueTypePatterns.has(issueType)) {
           issueTypePatterns.set(issueType, []);
         }
-        issueTypePatterns.get(issueType)?.push(id);
+        issueTypePatterns.get(issueType)?.push(pattern);
       }
     }
 
@@ -122,10 +131,10 @@ export class IssueCollector {
     }
   }
 
-  private shouldIgnoreIssue(filePath: string, issueType: IssueType): boolean {
+  private shouldIgnoreIssue(relativePath: string, issueType: IssueType): boolean {
     const matcher = this.issueMatchers.get(issueType);
     if (!matcher) return false;
-    return matcher(filePath);
+    return matcher(relativePath);
   }
 
   addFileCounts({ processed, unused }: { processed: number; unused: number }) {
@@ -133,21 +142,25 @@ export class IssueCollector {
     this.counters.total += processed + unused;
   }
 
+  addReferencedFile(filePath: string) {
+    this.referencedFiles.add(filePath);
+  }
+
   addFilesIssues(filePaths: string[]) {
     for (const filePath of filePaths) {
       if (!this.workspaceFilter(filePath)) continue;
       if (this.referencedFiles.has(filePath)) continue;
-      if (this.isMatch(filePath)) {
-        this.markUsedPatterns(filePath, this.unusedIgnorePatterns);
-        continue;
-      }
-      if (this.isFileMatch(filePath)) {
-        this.markUsedPatterns(filePath, this.unusedIgnoreFilesPatterns);
-        continue;
-      }
-      if (this.shouldIgnoreIssue(filePath, 'files')) continue;
-
       const symbol = relative(this.cwd, filePath);
+      if (this.isMatch(symbol)) {
+        this.markUsedPatterns(symbol, this.unusedIgnorePatterns);
+        continue;
+      }
+      if (this.isFileMatch(symbol)) {
+        this.markUsedPatterns(symbol, this.unusedIgnoreFilesPatterns);
+        continue;
+      }
+      if (this.shouldIgnoreIssue(symbol, 'files')) continue;
+
       this.issues.files[symbol] = {
         [symbol]: { type: 'files', filePath, symbol, workspace: '', severity: this.rules.files, fixes: [] },
       };
@@ -159,16 +172,16 @@ export class IssueCollector {
 
   addIssue(issue: Issue) {
     if (!this.workspaceFilter(issue.filePath)) return;
-    if (this.isMatch(issue.filePath)) {
-      this.markUsedPatterns(issue.filePath, this.unusedIgnorePatterns);
+    const key = relative(this.cwd, issue.filePath);
+    if (this.isMatch(key)) {
+      this.markUsedPatterns(key, this.unusedIgnorePatterns);
       return;
     }
-    if (this.shouldIgnoreIssue(issue.filePath, issue.type)) return;
+    if (this.shouldIgnoreIssue(key, issue.type)) return;
     if (this.rules[issue.type] === 'off') return;
-    const key = relative(this.cwd, issue.filePath);
     issue.severity = this.rules[issue.type];
     const issues = this.issues[issue.type];
-    issues[key] = issues[key] ?? {};
+    issues[key] = issues[key] ?? Object.create(null);
     const symbol = issue.parentSymbol ? `${issue.parentSymbol}.${issue.symbol}` : issue.symbol;
     if (!issues[key][symbol]) {
       issues[key][symbol] = issue;
@@ -182,9 +195,15 @@ export class IssueCollector {
       const workspaceName = issue.workspaceName ?? ROOT_WORKSPACE_NAME;
       if (workspaceName === ROOT_WORKSPACE_NAME || !this.selectedWorkspaces.has(workspaceName)) return;
     }
+    this.configurationHintCandidates.set(`${issue.workspaceName}::${issue.type}::${issue.identifier}`, issue);
+  }
 
-    const key = `${issue.workspaceName}::${issue.type}::${issue.identifier}`;
-    if (!this.configurationHints.has(key)) this.configurationHints.set(key, issue);
+  getConfigurationHintCandidates() {
+    return this.configurationHintCandidates.values();
+  }
+
+  setConfigurationHints(hints: ConfigurationHint[]) {
+    this.configurationHints = hints;
   }
 
   addTagHint(issue: TagHint) {
@@ -202,6 +221,7 @@ export class IssueCollector {
     }
     this.issues = initIssues();
     this.counters = initCounters();
+    this.tagHints.clear();
     return unusedFiles;
   }
 
@@ -210,17 +230,13 @@ export class IssueCollector {
       issues: this.issues,
       counters: this.counters,
       tagHints: this.tagHints,
-      configurationHints: Array.from(this.configurationHints.values()),
+      configurationHints: this.configurationHints,
       hasConfigLoadErrors: this.hasConfigLoadErrors,
     };
   }
 
-  getUnusedIgnorePatternHints(options: MainOptions) {
-    if (!options.isReportFiles) return [];
-    const hints: ConfigurationHint[] = [];
-    for (const p of this.unusedIgnorePatterns.values()) hints.push(p.hint);
-    for (const p of this.unusedIgnoreFilesPatterns.values()) hints.push(p.hint);
-    return hints;
+  getUnusedIgnorePatterns() {
+    return [...this.unusedIgnorePatterns.values(), ...this.unusedIgnoreFilesPatterns.values()];
   }
 
   // Retain issues from `handleInput` that would otherwise get lost between analysis runs (e.g. in watch mode)

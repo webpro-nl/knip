@@ -37,6 +37,7 @@ const config = {
         },
       },
     ],
+    ['module:decorator-transforms', { runtime: { import: 'decorator-transforms/runtime-esm' } }],
     // Simulates a required plugin, should not be added to the unspecified plugins array
     function myCustomPlugin() {},
   ],

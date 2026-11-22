@@ -11,18 +11,52 @@ import {
   DOC_TOOL_TOPIC_DESCRIPTION,
   ERROR_HINT,
   RUN_KNIP_TOOL_DESCRIPTION,
+  SERVER_INSTRUCTIONS,
   WORKFLOW,
 } from './texts.js';
-import { getDocs, getErrorMessage, getResults, readContent } from './tools.js';
+import { getDocs, getErrorMessage, getResults } from './tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 const DOCS = 'knip://docs';
 
+const RUN_OUTPUT_SCHEMA = {
+  reviewHint: z.string().optional(),
+  versionHint: z.string().optional(),
+  knipVersion: z.string(),
+  projectKnipVersion: z.string().optional(),
+  maybeUnconfigured: z.boolean(),
+  truncated: z.boolean(),
+  configurationHints: z.array(
+    z.looseObject({ type: z.string(), identifier: z.string(), message: z.string().optional() })
+  ),
+  docs: z.array(z.string()),
+  counters: z.record(z.string(), z.number()),
+  totalIssues: z.number(),
+  configFile: z.looseObject({
+    exists: z.boolean(),
+    filePath: z.string().optional(),
+    locations: z.array(z.string()).optional(),
+  }),
+  enabledPlugins: z.record(z.string(), z.array(z.string())),
+  files: z.array(z.string()),
+  issues: z.record(
+    z.string(),
+    z.array(
+      z.looseObject({
+        file: z.string(),
+        symbol: z.string(),
+        line: z.number().optional(),
+        parent: z.string().optional(),
+      })
+    )
+  ),
+};
+
 class MCP {
   constructor() {
-    this.server = new McpServer({ name: 'Knip', version: pkg.version });
+    this.server = new McpServer({ name: 'Knip', version: pkg.version }, { instructions: SERVER_INSTRUCTIONS });
     this.#registerPrompts();
     this.#registerResources();
     this.#registerTools();
@@ -63,7 +97,11 @@ class MCP {
         doc.name,
         uri,
         { description: doc.description, mimeType: 'text/markdown' },
-        async () => ({ contents: [{ uri, mimeType: 'text/markdown', text: readContent(doc.path) }] })
+        async () => {
+          const result = getDocs(id);
+          const text = 'content' in result ? result.content : result.error;
+          return { contents: [{ uri, mimeType: 'text/markdown', text }] };
+        }
       );
     }
 
@@ -72,10 +110,10 @@ class MCP {
       new ResourceTemplate(`${DOCS}/{+path}`, { list: undefined }),
       { description: 'Get Knip documentation page by path', mimeType: 'text/markdown' },
       async (uri, { path }) => {
-        const result = getDocs(path);
-        if ('content' in result) return { content: [{ type: 'text', text: result.content }] };
-        const errorText = `Documentation not found: ${path}`;
-        return { contents: [{ uri, mimeType: 'text/plain', text: errorText }] };
+        const result = getDocs(String(path));
+        if ('content' in result)
+          return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text: result.content }] };
+        return { contents: [{ uri: uri.href, mimeType: 'text/plain', text: result.error }] };
       }
     );
   }
@@ -89,12 +127,14 @@ class MCP {
           cwd: z.string().optional().describe('Working directory (default: workspace root)'),
           workspace: z.array(z.string()).optional().describe('Scope run to array of workspaces'),
         },
+        outputSchema: RUN_OUTPUT_SCHEMA,
       },
       async opts => {
         try {
           const cwd = opts.cwd || process.cwd();
           const results = await getResults(cwd, opts.workspace);
-          return { content: [{ type: 'text', text: JSON.stringify(results) }] };
+          // Serialized JSON in text content for clients that don't support structured content
+          return { content: [{ type: 'text', text: JSON.stringify(results) }], structuredContent: results };
         } catch (error) {
           const message = getErrorMessage(error);
           return {

@@ -1,0 +1,11 @@
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.local]
+command = "node"
+args = ["server.ts"]
+cwd = "tools/codex"
+
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"

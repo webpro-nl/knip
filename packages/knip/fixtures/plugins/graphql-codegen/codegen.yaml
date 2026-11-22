@@ -26,5 +26,9 @@ generates:
           content:
             "/* cSpell:disable */\nimport type { DeepPartial } from 'utility-types';\nimport { type Money as
             ContraMoney, type USD } from '@contra/money';"
+  'src/contra-api/__generated__/operations/':
+    preset: ./codegen/OperationsPreset.cjs
+    plugins:
+      - typescript-operations
 schema:
   - node_modules/@contra/graphql-schema/index.js

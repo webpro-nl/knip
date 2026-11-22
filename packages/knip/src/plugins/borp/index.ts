@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { Input } from '../../util/input.ts';
-import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { toModule, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { BorpConfig } from './types.ts';
@@ -23,7 +23,7 @@ const toReporterInput = (reporter: string) => {
   const separatorIndex = reporter.indexOf(':');
   const name = separatorIndex === -1 ? reporter : reporter.slice(0, separatorIndex);
   if (builtinReporters.has(name)) return;
-  return toDeferResolve(name);
+  return toModule(name);
 };
 
 const resolveConfig: ResolveConfig<BorpConfig> = async localConfig => {

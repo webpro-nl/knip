@@ -30,3 +30,17 @@ test('Find custom CSS with the starlight plugin', async () => {
     files: 1,
   });
 });
+
+test('Find Starlight components in a config object using satisfies', async () => {
+  const cwd = resolve('fixtures/plugins/starlight/satisfies');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['components/Unused.astro']);
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    files: 1,
+    processed: 3,
+    total: 3,
+  });
+});

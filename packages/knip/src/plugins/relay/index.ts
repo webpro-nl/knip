@@ -1,12 +1,12 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { RelayConfig } from './types.ts';
 
 // https://relay.dev/docs/next/guides/compiler/#configuration
-// https://github.com/facebook/relay/blob/main/compiler/crates/relay-compiler/relay-compiler-config-schema.json
+// https://github.com/facebook/relay/blob/v21.0.1/compiler/crates/relay-compiler/src/config.rs#L317-L325
 
 const title = 'Relay';
 
@@ -14,7 +14,7 @@ const enablers = ['vite-plugin-relay', '@swc/plugin-relay', 'babel-plugin-relay'
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config: string[] = ['relay.config.json', 'relay.config.js'];
+const config: string[] = ['package.json', 'relay.config.json', 'relay.config.js'];
 
 const resolveConfig: ResolveConfig<RelayConfig> = async config => {
   const projects = 'projects' in config ? Object.values(config.projects) : [config];
@@ -23,10 +23,10 @@ const resolveConfig: ResolveConfig<RelayConfig> = async config => {
     const artifactDirectory = project.artifactDirectory;
 
     if (artifactDirectory == null) {
-      return toProductionEntry('**/__generated__/*');
+      return toEntry('**/__generated__/*', { production: true });
     }
 
-    return toProductionEntry(join(artifactDirectory, '**'));
+    return toEntry(join(artifactDirectory, '**'), { production: true });
   });
 };
 

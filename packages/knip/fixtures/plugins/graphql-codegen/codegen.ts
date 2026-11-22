@@ -2,6 +2,9 @@ module.exports = {
   schema: 'schema.graphql',
   overwrite: true,
   generates: {
+    './src/[locale]/generated.ts': {
+      plugins: ['typescript'],
+    },
     './graphql.schema.json': {
       plugins: ['introspection', 'graphql-codegen-typescript-validation-schema'],
     },

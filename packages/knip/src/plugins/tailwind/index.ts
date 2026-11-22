@@ -1,6 +1,6 @@
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntryPath } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 
@@ -32,9 +32,10 @@ const registerCompilers: RegisterCompilers = ({ registerCompiler, hasDependency 
 // https://tailwindcss.com/docs/installation/tailwind-cli
 const args: Args = {
   binaries: ['tailwindcss'],
+  config: true,
   string: ['input'],
   alias: { input: ['i'] },
-  resolveInputs: parsed => (parsed.input ? [toProductionEntry(parsed.input)] : []),
+  resolveInputs: (parsed, { cwd }) => (parsed.input ? [toEntryPath(parsed.input, { production: true, dir: cwd })] : []),
 };
 
 const plugin: Plugin = {

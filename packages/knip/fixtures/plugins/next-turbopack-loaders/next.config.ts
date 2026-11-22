@@ -1,9 +1,30 @@
 import type { NextConfig } from 'next';
 
-const unrelated = { loader: 'unused-loader', loaders: ['unused-loader'] };
+const unrelated = {
+  loader: 'unused-loader',
+  loaders: ['unused-loader'],
+  resolveAlias: { unused: './unused.ts' },
+  images: { loaderFile: './unused.ts' },
+  cacheHandler: './unused.ts',
+  cacheHandlers: { unused: './unused.ts' },
+};
 
 export default {
+  images: {
+    loader: 'custom',
+    loaderFile: './app/[locale]/image-loader.ts',
+  },
+  cacheHandler: './cache/incremental.ts',
+  cacheHandlers: {
+    remote: './cache/remote.ts',
+  },
   turbopack: {
+    resolveAlias: {
+      canvas: './empty-module.ts',
+      telemetry: { browser: './browser.ts' },
+      adapters: ['./adapter.ts'],
+      pino: 'pino/browser',
+    },
     rules: {
       '*.css': { loaders: ['@tailwindcss/webpack'], as: '*.css' },
       '*.svg': { loaders: [{ loader: '@svgr/webpack', options: { icon: true } }], as: '*.js' },

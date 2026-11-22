@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/lingui2",
+  "scripts": {
+    "extract": "lingui extract --config config/catalogs.ts"
+  },
+  "devDependencies": {
+    "@lingui/cli": "*",
+    "@lingui/format-po": "*",
+    "@lingui/format-json": "*"
+  }
+}

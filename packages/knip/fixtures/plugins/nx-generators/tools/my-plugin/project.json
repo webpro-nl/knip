@@ -1,0 +1,11 @@
+{
+  "name": "my-plugin",
+  "targets": {
+    "bundle": {
+      "command": "node scripts/bundle.mjs",
+      "options": {
+        "cwd": "tools/my-plugin"
+      }
+    }
+  }
+}

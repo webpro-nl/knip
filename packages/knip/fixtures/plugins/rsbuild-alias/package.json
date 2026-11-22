@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/rsbuild-alias",
+  "devDependencies": {
+    "@rsbuild/core": "*"
+  }
+}

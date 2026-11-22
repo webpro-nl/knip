@@ -51,11 +51,17 @@ export const isReferenced = (
     }
 
     const node = graph.get(path);
-    const file = node?.importedBy;
-
-    if (!identifier || !node || !file) {
+    if (!identifier || !node) {
       return false;
     }
+
+    if (isEntryFile && node.skipExports) {
+      isReferenced = true;
+      return hasCompleteResult();
+    }
+
+    const file = node.importedBy;
+    if (!file) return false;
 
     const follow = (sources: Set<string>, nextId: string, nextViaStar = viaStar): boolean => {
       for (const byFilePath of sources) {

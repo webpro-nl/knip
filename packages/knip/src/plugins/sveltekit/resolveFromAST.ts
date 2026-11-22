@@ -9,17 +9,19 @@ import {
 } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { _syncGlob } from '../../util/glob.ts';
-import { toAlias, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { toAlias, toIgnore, toEntry } from '../../util/input.ts';
 import { config as viteConfig } from '../vite/index.ts';
 
 const production = [
   'src/routes/**/+{page,server,page.server,error,layout,layout.server}{,@*}.{js,ts,svelte}',
-  'src/hooks.{server,client}.{js,ts}',
+  'src/hooks{,.server,.client}.{js,ts}',
   'src/params/*.{js,ts}',
   'src/service-worker.{js,ts}',
   'src/service-worker/index.{js,ts}',
   'src/instrumentation.server.{js,ts}',
 ];
+
+const findKitOptions = (program: Program) => findCallArg(program, 'sveltekit') ?? findCallArg(program, 'withPwa');
 
 /**
  * SvelteKit ignores `svelte.config.js` when options are passed to `sveltekit()`, so prefer the Vite config.
@@ -28,13 +30,13 @@ const production = [
 const isConfigInViteConfig = (dir: string, readFile: (filePath: string) => string): boolean => {
   for (const filePath of _syncGlob({ cwd: dir, patterns: viteConfig })) {
     const text = readFile(filePath);
-    if (text && findCallArg(_parseFile(filePath, text).program, 'sveltekit')) return true;
+    if (text && findKitOptions(_parseFile(filePath, text).program)) return true;
   }
   return false;
 };
 
 const getLibFromViteConfig = (program: Program): string => {
-  const call = findCallArg(program, 'sveltekit');
+  const call = findKitOptions(program);
   const files = call ? findProperty(call, 'files') : undefined;
   return (files && getFirstPropertyValue(files, 'lib')) ?? 'src/lib';
 };
@@ -42,7 +44,7 @@ const getLibFromViteConfig = (program: Program): string => {
 const getLibFromSvelteConfig = (program: Program): string => collectFirstPropertyValue(program, 'lib') ?? 'src/lib';
 
 const toInputs = (lib: string) => [
-  ...production.map(pattern => toProductionEntry(pattern)),
+  ...production.map(pattern => toEntry(pattern, { production: true })),
   toAlias('$lib', [`./${lib}`]),
   toAlias('$lib/*', [`./${lib}/*`]),
   toIgnore('\\$app/.+', 'unresolved'),
@@ -52,7 +54,8 @@ const toInputs = (lib: string) => [
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {
   if (options.configFileName.startsWith('vite.config')) {
-    if (!hasImportSpecifier(program, '@sveltejs/kit/vite', 'sveltekit')) return [];
+    const isKit = hasImportSpecifier(program, '@sveltejs/kit/vite', 'sveltekit');
+    if (!isKit && !hasImportSpecifier(program, '@vite-pwa/sveltekit', 'withPwa')) return [];
     return toInputs(getLibFromViteConfig(program));
   }
   if (isConfigInViteConfig(options.configFileDir, options.readFile)) return [];

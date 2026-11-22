@@ -1,0 +1,4 @@
+version: v2
+plugins:
+  - local: [tsx, ./src/protoc-gen-hello.ts]
+    out: src/gen

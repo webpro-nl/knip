@@ -43,12 +43,27 @@ Typically, anywhere between 0.25% and 10% of total running time. To find out:
 knip --performance-fn hasRefsInFile
 ```
 
+## Bun
+
+On large projects, [`knip-bun`][4] is slower than `knip` on Node.js. Knip parses
+files with oxc-parser, which passes the AST to JavaScript using raw transfer.
+Raw transfer needs an `ArrayBuffer` larger than 4 GiB, which Bun can't allocate.
+So oxc-parser disables raw transfer under Bun and uses the slower path that
+[`KNIP_DISABLE_RAW_TRANSFER=1`][5] selects on Node.js.
+
+Measured with Node.js v26.13 and Bun v1.4.4 on macOS, Bun was about 20% slower
+on the Sentry repository (about 10,000 files) and on par on the Astro monorepo,
+while using 14-18% less memory. On Knip's own repository, Bun was faster because
+it starts faster.
+
 ## A last resort
 
 In case Knip is unbearably slow (or even crashes), you could resort to [lint
-individual workspaces][4].
+individual workspaces][6].
 
 [1]: ./configuring-project-files.md
 [2]: ../reference/cli.md#--performance
 [3]: ../reference/configuration.md#ignoreexportsusedinfile
-[4]: ../features/monorepos-and-workspaces.md#filter-workspaces
+[4]: ../reference/cli.md#knip-bun
+[5]: ../reference/cli.md#knip_disable_raw_transfer
+[6]: ../features/monorepos-and-workspaces.md#filter-workspaces

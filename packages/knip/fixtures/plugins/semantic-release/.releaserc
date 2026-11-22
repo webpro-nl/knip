@@ -1,3 +1,6 @@
+extends:
+  - '@shared/release-config'
+  - ./release.shared.cjs
 branches:
   - main
   - name: next

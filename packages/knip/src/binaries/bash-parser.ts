@@ -1,26 +1,13 @@
-import { type Command, parse, type Script, type Statement, type Word } from 'unbash';
-import type { FromArgs, GetInputsFromScriptsOptions } from '../types/config.ts';
+import { type Command, forEachChild, parse, type Script, type Statement, type SyntaxNode } from 'unbash';
+import type { FromArgs, GetInputsFromScriptsOptions, ScriptArg } from '../types/config.ts';
 import { debugLogObject } from '../util/debug.ts';
 import type { Input } from '../util/input.ts';
-import { extractBinary, isValidBinary } from '../util/modules.ts';
+import { extractBinary } from '../util/modules.ts';
 import { relative } from '../util/path.ts';
-import { substringBefore, truncate } from '../util/string.ts';
-import { walkCommands } from '../util/scripts.ts';
+import { truncate } from '../util/string.ts';
+import { isScriptExpansion } from '../util/scripts.ts';
 import { getDependenciesFromCommand } from './command.ts';
-import { toScript } from './util.ts';
-
-const collectExpansionScripts = (word: Word, out: Script[]) => {
-  if (!word.parts) return;
-  for (const part of word.parts) {
-    if ((part.type === 'CommandExpansion' || part.type === 'ProcessSubstitution') && part.script) {
-      out.push(part.script);
-    } else if (part.type === 'DoubleQuoted' || part.type === 'LocaleString') {
-      for (const child of part.parts) {
-        if (child.type === 'CommandExpansion' && child.script) out.push(child.script);
-      }
-    }
-  }
-};
+import { toForwardedScript } from './plugins.ts';
 
 export const getDependenciesFromScript = (script: string, options: GetInputsFromScriptsOptions): Input[] => {
   if (!script) return [];
@@ -28,44 +15,36 @@ export const getDependenciesFromScript = (script: string, options: GetInputsFrom
   // Helper for recursive calls; Word args re-serialize from their raw text, string args are script fragments
   const fromArgs: FromArgs = (args, opts): Input[] => {
     if (args.length === 0) return [];
-    const first = typeof args[0] === 'string' ? args[0] : args[0].value;
-    if (!isValidBinary(substringBefore(first, ' '))) return [];
-    return getDependenciesFromScript(toScript(args), {
+    return getDependenciesFromScript(toForwardedScript(args), {
       ...options,
       isForwardedArgs: false,
       ...opts,
     });
   };
 
-  const fromWords = (words: Word[], opts: GetInputsFromScriptsOptions): Input[] => {
-    const script = words
-      .filter(word => word.text !== '--')
-      .map(word => word.text)
-      .join(' ');
-    return getDependenciesFromScript(script, opts);
-  };
+  const fromWords = (args: ScriptArg[], opts: GetInputsFromScriptsOptions): Input[] =>
+    getDependenciesFromScript(toForwardedScript(args), opts);
 
   const definedFunctions = new Set<string>();
-  const collectFunctionNames = (statements: Statement[]): void => {
+  const collectFunctionNames = (statements: readonly Statement[]): void => {
     for (const stmt of statements) if (stmt.command.type === 'Function') definedFunctions.add(stmt.command.name.text);
   };
 
+  // Substitution scripts (in words, redirects, heredocs, arithmetic) are processed as scripts of their own
   const processScript = (s: Script): Input[] => {
     collectFunctionNames(s.commands);
-    const pending: Script[] = [];
-    const mainDeps: Input[] = [];
-    for (const statement of s.commands) {
-      for (const command of walkCommands(statement.command)) mainDeps.push(...processCommand(command, pending));
-    }
-    const expansionDeps = pending.flatMap(inner => processScript(inner));
-    return [...mainDeps, ...expansionDeps];
+    const inputs: Input[] = [];
+    const visit = (node: SyntaxNode) => {
+      if (node.type === 'Command') inputs.push(...processCommand(node));
+      if (isScriptExpansion(node)) {
+        if (node.script) inputs.push(...processScript(node.script));
+      } else forEachChild(node, visit);
+    };
+    visit(s);
+    return inputs;
   };
 
-  const processCommand = (node: Command, pending: Script[]): Input[] => {
-    if (node.name) collectExpansionScripts(node.name, pending);
-    for (const prefix of node.prefix) if (prefix.value) collectExpansionScripts(prefix.value, pending);
-    for (const suffix of node.suffix) collectExpansionScripts(suffix, pending);
-
+  const processCommand = (node: Command): Input[] => {
     if (definedFunctions.size && node.name && definedFunctions.has(extractBinary(node.name.value))) return [];
 
     return getDependenciesFromCommand(node, { ...options, fromArgs }, fromWords);

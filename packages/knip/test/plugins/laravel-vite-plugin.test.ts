@@ -7,14 +7,17 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/laravel-vite-plugin');
 
-test('Find entries with the laravel-vite-plugin plugin (config object)', async () => {
+test('Find literal entries with the laravel-vite-plugin plugin (config object)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['resources/js/v/entry.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    files: 1,
+    processed: 6,
+    total: 6,
   });
 });
 

@@ -8,8 +8,46 @@ Read the writing-a-plugin docs first:
 - [Inputs][2] — the `Input` type and helpers like `toEntry` and `toDependency`
 - [Argument Parsing][3] — `Plugin.args` for binaries and arguments in scripts
 
-Consider implementing `resolve*` functions only for custom plugin-specific needs
-(core takes care of module resolution, imports, exports, external dependencies).
+## Implementation
+
+- Consider implementing `resolve*` functions for custom plugin-specific needs.
+  Leave regular module resolution and tracking imports, exports and external
+  dependencies to the core routine.
+- Keep fixes local to the plugin and its tests. Discuss changes to core modules,
+  inputs, import flags, caches before implementing them.
+- Use the existing plugin lifecycle. Do not add core machinery solely to carry
+  one plugin's state.
+- Return specifiers as the tool reads them and name the tool's base with an
+  absolute `dir`. `toModule`, `toEntryPath` and `toConfig` resolve from it
+  (default: the config file's directory); `toDependency` and `toBinary` use it
+  to select the workspace; `toAlias` uses it as the base of its targets.
+  `toEntry` resolves patterns from it (default: the workspace directory) and
+  stays with the workspace that returned them; a negated entry pattern reaches
+  only the plugin's entry patterns with the same base (`dir`, else the workspace
+  directory). `toProject` is workspace-relative and ignores `dir`.
+- Use `toModule` for package-first resolution and `toEntryPath` for file-first
+  resolution that ignores missing local files. Both can credit dependencies. Set
+  `production: true` for production inputs.
+- Enable a plugin on the tool's package with `hasDependency`. File or manifest
+  checks in `isEnabled` add I/O per workspace; reserve them for tools without a
+  package, such as package managers, mise, Task or CI configs.
+- Plugins add no dependencies to Knip, including a tool's own config parser. Say
+  so early when a contribution needs one.
+- When another plugin already loads the config file, read this tool's section
+  from that loaded config instead of loading or parsing the file again (oxlint
+  reads Vite+ `lint` from the loaded Vite config).
+- For a drop-in replacement of a tool, re-export the original plugin's `config`
+  and `resolveConfig` (see `osls`, `tsrs`), so each tool keeps its own key.
+- Choose the input type from [Inputs][2] and match production relevance to the
+  nearest existing plugin. A value documented as a package name is a dependency,
+  not `toConfig`.
+- Emit `#` subpath imports like any other specifier: core resolves them through
+  `package.json#imports`, marks the key as used and credits a package target.
+- For a loaded shared config, such as an extended preset, set
+  `isFilterTransitiveDependencies` so the preset's own dependencies don't become
+  the project's (see prettier, metro, webpack).
+- Flag re-derived facts core owns, such as the set of declared dependencies from
+  `options.manifest` and `rootManifest`.
 
 ## Creating a new plugin
 
@@ -17,8 +55,12 @@ Consider implementing `resolve*` functions only for custom plugin-specific needs
 - Run `pnpm create-plugin --name [name]` from `packages/knip`. Use `--force` if
   files already exist from a partial run.
 - Clean up the generated template: remove unused arrays (`config`, `entry`,
-  `production`), `resolveConfig`, and `types.ts` if not needed.
+  `production`), `resolveConfig`, and `types.ts` if not needed. When a module in
+  `src/types/` already describes the tool, extend it instead of `types.ts`.
 - Consult similar plugins and the tool's website before implementation.
+- Below the imports, link the tool's docs in a comment (see template). It's the
+  single source of truth for upstream references; link the tool's source (pinned
+  to a tag or commit) for behavior the docs don't cover.
 - Run tests individually first: `bun test test/plugins/[name].test.ts`
 
 ## `entry` and `config`
@@ -28,25 +70,69 @@ Consider implementing `resolve*` functions only for custom plugin-specific needs
 - `config` — files the plugin parses to extract references (inputs, entries,
   plugins, etc.). `resolveConfig` / `resolveFromAST` run on these; they're
   auto-added as entries.
+- List every config file location the tool searches, taken from its discovery
+  code (e.g. cosmiconfig `searchPlaces`), and link that code in the top comment.
+- Without `resolveConfig` or `resolveFromAST`, use `entry`, not `config`. Core
+  only adds `config` files as entries anyway, after a wasted parse, and the docs
+  would claim the plugin reads them. `args.config` works without `config`. Only
+  files Knip can parse need an entry; JSON, YAML and extensionless rc files add
+  nothing.
+- Leave out patterns Knip already covers globally, such as `index.*`.
+- Match the tool's scan depth. For instance, where Nuxt reads `plugins/*` and
+  `plugins/*/index`, `plugins/**/*` turns an unimported helper below them into
+  an entry and hides it from the unused files report (#2312).
+- Keep brace alternatives within one path segment. An alternative containing `/`
+  (`{mise,.config/mise}/conf.d/*.toml`) disables directory pruning.
 
 ## `resolveConfig` and `resolveFromAST`
 
 Prefer `resolveFromAST` (fast, AST-only, no execution) over `resolveConfig`
-(loads and executes the config). Use `resolveConfig` only when the config is
-JSON or when execution is unavoidable (e.g. function configs).
+(loads and executes the config). Use `resolveConfig` when the config is JSON or
+when execution is unavoidable (e.g. function configs).
 
-`resolveConfig` should include `entry` and `production` items, either from the
-parsed config or the plugin defaults (so they can be overriden). Include the
-default `entry` and `production` in the plugin export for the docs generator.
+Keep `resolveFromAST` to static values. Avoid too many dynamic code patterns
+such as dynamic imports and spreads. When values depend on such patterns,
+consider `resolveConfig` to read them from the loaded config, and keep
+`resolveFromAST` for values the loaded config doesn't expose. Removing a single
+false positive does not always justify the additional complexity.
+
+Follow imported modules only where they provably form the config value; don't
+follow widely. Read a value from the exported config and its documented nesting,
+not from every object with a matching key. `toConfig` is for a tool's own config
+files, not for modules a config imports.
+
+Core adds the static `entry` and `production` patterns only while no config file
+other than `package.json` has been found or handed over for a plugin with
+`resolveConfig` or `resolveFromAST`. `resolveConfig` should include `entry` and
+`production` items, either from the parsed config or the plugin defaults (so
+they can be overriden). Include the default `entry` and `production` in the
+plugin export for the docs generator.
 
 See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 `collectPropertyValues`. See `ast-helpers.ts` for available utilities.
 
+## Path resolution
+
+- `dir` should be absolute (`options.cwd`, `options.configFileDir` or
+  `options.rootCwd`): workspace assignment prefix-matches absolute workspace
+  directories, so a relative `dir` falls back to the workspace of the file the
+  input came from, without a warning.
+- Do not join `options.cwd` onto a specifier that may be a package name. For
+  patterns from another base, `join(base, literal)` is fine for values you
+  control; use `toAbsolute(value, base)` when a config value may already be
+  absolute, because `join` would prefix it again, and keep a leading `!` in
+  front.
+- Root-relative values (Nx `{workspaceRoot}`, GitHub Actions
+  `working-directory`) use `options.rootCwd` as the base. Commands passed to
+  `getInputsFromScripts` are text: expand placeholders into path strings before
+  parsing them (see the `nx` plugin).
+
 ## Script parsing
 
-Don't walk and parse `manifest.scripts` manually. Use `Plugin.args` and find
-what core script parser handles. See [Argument Parsing][3] and other plugins
-like prisma, vitest, webpack.
+Read [SCRIPT-PARSING.md][4] before changing or reviewing `Plugin.args` or
+command discovery. It covers evidence from real scripts, parsing ownership,
+shell text versus argv, and verification. The [Argument Parsing reference][3]
+describes the available options.
 
 ## Compilers (`registerCompilers`)
 
@@ -55,7 +141,7 @@ registers their extension: it makes `**/*.<ext>` project files (unreferenced →
 unused) and extracts imports so refs are followed. Built-ins (`src/compilers/`:
 mdx/scss/less/ stylus) auto-enable on a known dependency; plugins gate on
 `hasDependency`. Regex extractors, not parsers. The same scope and tradeoffs
-apply when adding new compilers; read [COMPILERS.md][4] first.
+apply when adding new compilers; read [COMPILERS.md][5] first.
 
 ## Visitors (`registerVisitors`)
 
@@ -67,13 +153,19 @@ webpack/rspack `require.context`), `addScript` (execa, nano-spawn),
 Enabled-only, zero cost when off. Factories in `plugins/[name]/visitors/`,
 shared in `_custom-elements/`.
 
+Visitors collect syntax facts through `ctx`. Keep filesystem access, discovery,
+and module resolution outside AST traversal; discuss unavoidable exceptions
+first. To match calls of an imported API, use `findImportedCalls` from
+`ast-helpers.ts`; matching raw identifiers in source order turns unrelated calls
+into graph facts.
+
 ## Fixtures
 
-- Use non-default file names in config fields (e.g. `input: 'src/app.ts'`, not
-  `'index.ts'` or `'main.ts'`) so the test actually verifies the plugin resolves
-  them — default entry patterns would pick those up regardless.
+See [TESTS.md][6] for fixture conventions, including plugin fixtures.
 
 [1]: ../packages/docs/src/content/docs/writing-a-plugin/index.md
 [2]: ../packages/docs/src/content/docs/writing-a-plugin/inputs.md
 [3]: ../packages/docs/src/content/docs/writing-a-plugin/argument-parsing.md
-[4]: ./COMPILERS.md
+[4]: ./SCRIPT-PARSING.md
+[5]: ./COMPILERS.md
+[6]: ./TESTS.md#plugin-fixtures

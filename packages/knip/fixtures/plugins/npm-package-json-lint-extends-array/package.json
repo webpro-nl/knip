@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/npm-package-json-lint-extends-array",
+  "devDependencies": {
+    "npm-package-json-lint": "*",
+    "npm-package-json-lint-config-default": "*"
+  }
+}

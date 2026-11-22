@@ -31,3 +31,14 @@ jobs:
 
       - run: node from-working-dir
         working-directory: scripts
+
+  job4:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@4
+        with:
+          path: repo
+
+      - run: node from-nested-working-dir-with-path
+        working-directory: repo/scripts

@@ -1,7 +1,7 @@
 import type { PluginOptions } from '../../types/config.ts';
 import type { Manifest } from '../../util/package-json.ts';
 import { compact } from '../../util/array.ts';
-import { type ConfigInput, type Input, toConfig, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type ConfigInput, type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { extname, isAbsolute, isInternal } from '../../util/path.ts';
 import { substringBefore } from '../../util/string.ts';
@@ -27,7 +27,7 @@ export const getInputs = (
 
   dependencies.push('eslint-import-resolver-typescript');
 
-  return compact(dependencies).map(id => toDeferResolve(id, { optional: true }));
+  return compact(dependencies).map(id => toModule(id, { optional: true }));
 };
 
 const getInputsDeprecated = (
@@ -40,25 +40,26 @@ const getInputsDeprecated = (
   if (extendsSpecifiers.some(specifier => specifier?.startsWith('eslint-plugin-prettier')))
     extendsSpecifiers.push('eslint-config-prettier');
   const extendConfigs = [...extendsList.filter(isInternal), ...extendsSpecifiers].map(specifier =>
-    toConfig('eslint', specifier, { containingFilePath: options.configFilePath })
+    toConfig('eslint', specifier)
   );
   const plugins = config.plugins ? config.plugins.map(resolvePluginSpecifier) : [];
   const parsers = getParsers(config);
   const babelDependencies = config.parserOptions?.babelOptions
-    ? getDependenciesFromConfig(config.parserOptions.babelOptions)
+    ? getDependenciesFromConfig(config.parserOptions.babelOptions, false)
     : [];
   const settings = config.settings ? getDependenciesFromSettings(config.settings) : [];
   // const rules = getDependenciesFromRules(config.rules); // TODO enable in next major? Unexpected/breaking in certain cases w/ eslint v8
   const rules = getDependenciesFromRules({});
   const overrides = config.overrides ? [config.overrides].flat().flatMap(d => getInputsDeprecated(d, options)) : [];
-  const deferred = compact([...extendsSpecifiers, ...plugins, ...settings, ...rules]).map(id => toDeferResolve(id));
-  return [...extendConfigs, ...deferred, ...parsers, ...babelDependencies, ...overrides];
+  const dependencies = compact([...extendsSpecifiers, ...plugins, ...rules]).map(id => toDependency(id));
+  const resolvers = compact(settings).map(id => toModule(id));
+  return [...extendConfigs, ...dependencies, ...resolvers, ...parsers, ...babelDependencies, ...overrides];
 };
 
 const isParserObject = (value: Record<string, unknown>) =>
   typeof value.parseForESLint === 'function' || typeof value.parse === 'function';
 
-const toParser = (name: string) => toDeferResolve(name, name === 'espree' ? { optional: true } : {});
+export const toParser = (name: string) => toModule(name, name === 'espree' ? { optional: true } : {});
 
 const getParsers = ({ parser, parserOptions }: BaseConfig) => {
   const inputs: Input[] = [];
@@ -149,7 +150,7 @@ const getDependenciesFromSettings = (settings: ESLintConfigDeprecated['settings'
 };
 
 export const getInputsFromSettings = (settings?: Settings) =>
-  compact(getDependenciesFromSettings(settings)).map(id => toDeferResolve(id, { optional: true }));
+  compact(getDependenciesFromSettings(settings)).map(id => toModule(id, { optional: true }));
 
 const builtinFormatters = new Set(['html', 'json-with-metadata', 'json', 'stylish']);
 const builtinFormattersUntilV8 = new Set([
@@ -175,7 +176,7 @@ export const resolveFormatters = (formatters: string | string[], manifest: Manif
   for (const rawFormatter of [formatters].flat()) {
     const formatter = rawFormatter.replace(/\\/g, '/');
     if (!formatter.startsWith('@') && formatter.includes('/')) {
-      inputs.add(toDeferResolve(isInternal(formatter) ? formatter : `./${formatter}`));
+      inputs.add(toModule(isInternal(formatter) ? formatter : `./${formatter}`));
     } else {
       const isBuiltin = builtinFormatters.has(formatter) || (isBeforeV9 && builtinFormattersUntilV8.has(formatter));
       inputs.add(toDependency(normalizeFormatterName(formatter), isBuiltin ? { optional: true } : {}));

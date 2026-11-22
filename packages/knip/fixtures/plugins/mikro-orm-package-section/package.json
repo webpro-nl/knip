@@ -1,0 +1,13 @@
+{
+  "name": "@plugins/mikro-orm-package-section",
+  "private": true,
+  "devDependencies": {
+    "@mikro-orm/cli": "*"
+  },
+  "scripts": {
+    "migrate": "bun -b mikro-orm migration:up"
+  },
+  "mikro-orm": {
+    "useTsNode": true
+  }
+}

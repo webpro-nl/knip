@@ -10,6 +10,7 @@ interface ExplorerCache {
   exportedIdentifiers: Map<string, Map<string, boolean>>;
   exportTables: Map<string, ExportTableCache>;
   generation: number;
+  topologyGeneration: number;
 }
 
 const caches = new WeakMap<ModuleGraph, ExplorerCache>();
@@ -21,6 +22,7 @@ const createEmptyCache = (): ExplorerCache => ({
   exportedIdentifiers: new Map(),
   exportTables: new Map(),
   generation: 0,
+  topologyGeneration: 0,
 });
 
 const getCache = (graph: ModuleGraph): ExplorerCache => {
@@ -32,7 +34,9 @@ const getCache = (graph: ModuleGraph): ExplorerCache => {
   return cache;
 };
 
-export const invalidateCache = (graph: ModuleGraph): void => {
+export const getTopologyGeneration = (graph: ModuleGraph) => getCache(graph).topologyGeneration;
+
+export const invalidateCache = (graph: ModuleGraph, topologyUnchanged = false): void => {
   const cache = caches.get(graph);
   if (cache) {
     cache.definitions.clear();
@@ -41,6 +45,7 @@ export const invalidateCache = (graph: ModuleGraph): void => {
     cache.exportedIdentifiers.clear();
     cache.exportTables.clear();
     cache.generation++;
+    if (!topologyUnchanged) cache.topologyGeneration++;
   }
 };
 

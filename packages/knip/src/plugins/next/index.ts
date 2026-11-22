@@ -1,12 +1,20 @@
-import { type Expression, type SpreadElement, Visitor } from 'oxc-parser';
+import {
+  type AssignmentTarget,
+  type ExportDefaultDeclarationKind,
+  type Expression,
+  type Program,
+  type SpreadElement,
+  Visitor,
+} from 'oxc-parser';
 import type { Args } from '../../types/args.ts';
-import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config.ts';
-import { findProperty, getPropertyValues } from '../../typescript/ast-helpers.ts';
+import type { IsPluginEnabled, Plugin, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
+import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toConfig, toDeferResolve, toProductionEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { toConfig, toModule, toEntryPath, toEntry } from '../../util/input.ts';
+import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import type { NextConfigModule } from './types.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
 
@@ -54,9 +62,130 @@ const getEntryFilePatterns = (pageExtensions = defaultPageExtensions, cwd?: stri
 
 const production = getEntryFilePatterns();
 
+const getInputs = (
+  pageExtensions: string[],
+  loaders: Iterable<string>,
+  aliasTargets: Iterable<string>,
+  files: Iterable<string>,
+  configFileDir: string
+) => {
+  const extensions = pageExtensions.length > 0 ? pageExtensions : defaultPageExtensions;
+  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
+  const inputs = patterns.map(id => toEntry(join(configFileDir, id), { production: true }));
+  for (const loader of loaders) inputs.push(toModule(loader));
+  for (const target of aliasTargets) inputs.push(toModule(target, { dir: configFileDir, production: true }));
+  for (const file of files) inputs.push(toEntryPath(toAbsolute(file, configFileDir), { production: true }));
+  return inputs;
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+// Absolute paths come from `require.resolve()` in the config, which core credits to the module that resolved them
+const addSpecifier = (specifiers: Set<string>, value: unknown) => {
+  if (typeof value === 'string' && !isInNodeModules(value)) specifiers.add(value);
+};
+
+const collectLoaderValues = (value: unknown, loaders: Set<string>) => {
+  if (Array.isArray(value)) for (const item of value) collectLoaderValues(item, loaders);
+  else if (isObject(value)) {
+    addSpecifier(loaders, value.loader);
+    collectLoaderValues(value.loaders, loaders);
+  } else addSpecifier(loaders, value);
+};
+
+const collectAliasTargetValues = (value: unknown, targets: Set<string>) => {
+  if (Array.isArray(value)) for (const item of value) collectAliasTargetValues(item, targets);
+  else if (isObject(value)) collectAliasTargetValues(value.browser, targets);
+  else addSpecifier(targets, value);
+};
+
+const resolveConfig: ResolveConfig<NextConfigModule> = async (localConfig, { configFileDir }) => {
+  const config =
+    typeof localConfig === 'function'
+      ? await localConfig('phase-production-build', { defaultConfig: {} })
+      : localConfig;
+  const pageExtensions = Array.isArray(config?.pageExtensions)
+    ? config.pageExtensions.filter(extension => typeof extension === 'string')
+    : [];
+  const loaders = new Set<string>();
+  for (const rule of Object.values(config?.turbopack?.rules ?? {})) collectLoaderValues(rule, loaders);
+  const aliasTargets = new Set<string>();
+  for (const target of Object.values(config?.turbopack?.resolveAlias ?? {}))
+    collectAliasTargetValues(target, aliasTargets);
+  const files = new Set<string>();
+  addSpecifier(files, config?.images?.loaderFile);
+  addSpecifier(files, config?.cacheHandler);
+  for (const handler of Object.values(config?.cacheHandlers ?? {})) addSpecifier(files, handler);
+  return getInputs(pageExtensions, loaders, aliasTargets, files, configFileDir);
+};
+
+const isModuleExports = (node: AssignmentTarget) =>
+  node.type === 'MemberExpression' &&
+  node.object.type === 'Identifier' &&
+  node.object.name === 'module' &&
+  node.property.type === 'Identifier' &&
+  node.property.name === 'exports';
+
+const getConfigObject = (program: Program) => {
+  const declarations = new Map<string, Expression>();
+  let node: ExportDefaultDeclarationKind | SpreadElement | undefined;
+  for (const statement of program.body) {
+    if (statement.type === 'VariableDeclaration') {
+      for (const declaration of statement.declarations) {
+        if (declaration.id.type === 'Identifier' && declaration.init)
+          declarations.set(declaration.id.name, declaration.init);
+      }
+    } else if (statement.type === 'ExportDefaultDeclaration') {
+      node = statement.declaration;
+    } else if (
+      statement.type === 'ExpressionStatement' &&
+      statement.expression.type === 'AssignmentExpression' &&
+      isModuleExports(statement.expression.left)
+    ) {
+      node = statement.expression.right;
+    }
+  }
+  while (node) {
+    if (
+      node.type === 'TSSatisfiesExpression' ||
+      node.type === 'TSAsExpression' ||
+      node.type === 'ParenthesizedExpression'
+    )
+      node = node.expression;
+    else if (node.type === 'CallExpression') node = node.arguments[0];
+    else if (node.type === 'Identifier') {
+      const init = declarations.get(node.name);
+      declarations.delete(node.name);
+      node = init;
+    } else return resolveObjectArg(node);
+  }
+};
+
 const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const pageExtensions = new Set<string>();
   const loaders = new Set<string>();
+  const aliasTargets = new Set<string>();
+  const files = new Set<string>();
+  const config = getConfigObject(program);
+  addSpecifier(files, getStringValue(findProperty(findProperty(config, 'images'), 'loaderFile')));
+  addSpecifier(files, getStringValue(findProperty(config, 'cacheHandler')));
+  for (const handler of getPropertyValues(config, 'cacheHandlers')) addSpecifier(files, handler);
+  const collectAliasTargets = (node: Expression | SpreadElement | null) => {
+    const target = getStringValue(node);
+    if (target) aliasTargets.add(target);
+    else if (node?.type === 'ArrayExpression') {
+      for (const element of node.elements) collectAliasTargets(element);
+    } else if (node?.type === 'ObjectExpression') {
+      collectAliasTargets(findProperty(node, 'browser'));
+    }
+  };
+  const collectTurbopackAliases = (node: Expression | SpreadElement | null) => {
+    const aliases = findProperty(node, 'resolveAlias');
+    if (aliases?.type !== 'ObjectExpression') return;
+    for (const alias of aliases.properties) {
+      if (alias.type === 'Property') collectAliasTargets(alias.value);
+    }
+  };
   const collectLoaders = (node: Expression | SpreadElement | null) => {
     if (node?.type === 'ArrayExpression') {
       for (const element of node.elements) collectLoaders(element);
@@ -71,7 +200,14 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   const visitor = new Visitor({
     ObjectExpression(node) {
       for (const extension of getPropertyValues(node, 'pageExtensions')) pageExtensions.add(extension);
-      const rules = findProperty(findProperty(node, 'turbopack'), 'rules');
+      const turbopack = findProperty(node, 'turbopack');
+      if (turbopack?.type === 'ConditionalExpression') {
+        collectTurbopackAliases(turbopack.consequent);
+        collectTurbopackAliases(turbopack.alternate);
+      } else {
+        collectTurbopackAliases(turbopack);
+      }
+      const rules = findProperty(turbopack, 'rules');
       if (rules?.type !== 'ObjectExpression') return;
       for (const rule of rules.properties) {
         if (rule.type === 'Property') collectLoaders(rule.value);
@@ -80,11 +216,7 @@ const resolveFromAST: ResolveFromAST = (program, { configFileDir }) => {
   });
   visitor.visit(program);
 
-  const extensions = pageExtensions.size > 0 ? [...pageExtensions] : defaultPageExtensions;
-  const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
-  const inputs = patterns.map(id => toProductionEntry(join(configFileDir, id)));
-  for (const loader of loaders) inputs.push(toDeferResolve(loader));
-  return inputs;
+  return getInputs([...pageExtensions], loaders, aliasTargets, files, configFileDir);
 };
 
 const commands = new Set(['dev', 'build', 'start']);
@@ -98,12 +230,21 @@ const args: Args = {
   },
 };
 
+const note = `Knip loads \`next.config.*\` to read Turbopack loaders and alias targets, the custom image loader
+(\`images.loaderFile\`) and cache handlers (\`cacheHandler\`, \`cacheHandlers\`) from the composed configuration,
+including values a shared configuration factory adds. A configuration file that fails to load is analyzed statically.`;
+
+/** @public */
+export const docs = { note };
+
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
   config,
   production,
+  isLoadConfigOptional: true,
+  resolveConfig,
   resolveFromAST,
   args,
 };

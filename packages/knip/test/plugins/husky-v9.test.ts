@@ -18,8 +18,8 @@ test('Find dependencies with the husky plugin (v9)', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 3,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });
 
@@ -29,7 +29,8 @@ test('Find dependencies with the husky plugin (v9) (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    files: 1,
+    processed: 1,
+    total: 1,
   });
 });

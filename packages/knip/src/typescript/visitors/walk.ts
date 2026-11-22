@@ -6,13 +6,15 @@ import {
   type Program,
   type Span,
   type TSInterfaceDeclaration,
+  type TSImportTypeQualifier,
   type TSPropertySignature,
   type TSTypeName,
+  type TryStatement,
   type VariableDeclarator,
   type VisitorObject,
 } from 'oxc-parser';
 import type { PluginVisitorObject } from '../../types/config.ts';
-import { FIX_FLAGS, IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
+import { ALIAS_TAG, FIX_FLAGS, IMPORT_FLAGS, OPAQUE, SYMBOL_TYPE } from '../../constants.ts';
 import type { GetImportsAndExportsOptions } from '../../types/config.ts';
 import type { Fix } from '../../types/exports.ts';
 import type { IssueSymbol, SymbolType } from '../../types/issues.ts';
@@ -35,8 +37,25 @@ import {
   handleExportNamed,
   handleExpressionStatement,
 } from './exports.ts';
-import { handleImportExpression, handleVariableDeclarator } from './imports.ts';
+import {
+  getPromiseAllElements,
+  handleImportExpression,
+  handleImportThen,
+  handleVariableDeclarator,
+  markNamespaceRef,
+} from './imports.ts';
 import { handleJSXMemberExpression, handleMemberExpression } from './members.ts';
+import { isShadowedIn } from './shadow.ts';
+
+export type LocalImport = {
+  importedName: string;
+  filePath: string;
+  isNamespace: boolean;
+  isDynamicImport?: boolean;
+  scope?: [number, number];
+};
+
+export type LocalImportRef = { id: string; import: LocalImport };
 
 interface WalkContext {
   lineStarts: number[];
@@ -57,14 +76,11 @@ interface WalkContext {
     jsDocTags?: Set<string>
   ) => void;
   addNsMemberRefs: (internalImport: ImportMaps, namespace: string, member: string | string[]) => void;
-  addImportAlias: (aliasName: string, id: string, filePath: string) => void;
+  addImportAlias: (aliasName: string, id: string, _import: LocalImport) => void;
   internal: ImportMap;
-  localImportMap: Map<
-    string,
-    { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
-  >;
+  localImportMap: Map<string, LocalImport>;
   localDeclarationTypes: Map<string, SymbolType>;
-  importAliases: Map<string, Set<{ id: string; filePath: string }>>;
+  importAliases: Map<string, Set<LocalImportRef>>;
   referencedInExport: Map<string, Set<string>>;
   skipBareExprRefs: boolean;
   localRefs: Set<string> | undefined;
@@ -82,6 +98,7 @@ interface WalkContext {
   programFiles: Set<string>;
   entryFiles: Set<string>;
   handledImportExpressions: Set<number>;
+  caughtImportExpressions: Set<number>;
   visitor: Visitor;
   getJSDocTags: (nodeStart: number) => Set<string>;
 }
@@ -92,9 +109,11 @@ export interface WalkState extends WalkContext {
   isJS: boolean;
   isModuleFile: boolean;
   handledImportExpressions: Set<number>;
+  caughtTryBlockEnds: number[];
+  functionCaughtTryBlockEnds: number[][];
   bareExprRefs: Set<string>;
   accessedAliases: Set<string>;
-  nsContainers: Map<string, Map<string, string>>;
+  nsContainers: Map<string, Map<string, LocalImportRef>>;
   accessedNsContainers: Set<string>;
   chainedMemberExprs: WeakSet<object>;
   currentVarDeclStart: number;
@@ -105,7 +124,9 @@ export interface WalkState extends WalkContext {
   scopeStarts: number[];
   scopeEnds: number[];
   shadowScopes: Map<string, [number, number][]>;
+  scopedImports: { name: string; end: number; prev: LocalImport | undefined }[];
   localDeclarations: Map<string, FunctionNode | Class | VariableDeclarator>;
+  exportAliases: { local: string; symbol: string; pos: number }[];
   localInterfaces: Map<string, TSInterfaceDeclaration | null>;
   pendingCallRefs: Array<{
     name: string;
@@ -354,21 +375,34 @@ const _addRefInExport = (name: string, exportName: string) => {
 const _isInNamespace = (node: Span) =>
   state.nsRanges.length > 0 && state.nsRanges.some(([start, end]) => node.start >= start && node.end <= end);
 
-export const isShadowed = (name: string, pos: number): boolean => {
-  if (state.shadowScopes.size === 0) return false;
-  const ranges = state.shadowScopes.get(name);
-  if (!ranges) return false;
-  if (state.localImportMap.get(name)?.isDynamicImport) return false;
-  for (const range of ranges) {
-    if (pos >= range[0] && pos <= range[1]) return true;
-  }
-  return false;
-};
+export const isShadowed = (name: string, pos: number): boolean => isShadowedIn(state, name, pos);
 
 const _addLocalRef = (name: string, pos: number) => {
   if (isShadowed(name, pos)) return;
   if (state.localImportMap.has(name)) (state.importedRefs ??= new Set()).add(name);
   else state.localRefs!.add(name);
+};
+
+const _splitQualifiedName = (node: TSTypeName | TSImportTypeQualifier) => {
+  const members: string[] = [];
+  let root = node;
+  while (root.type === 'TSQualifiedName') {
+    if (root.right.type === 'Identifier') members.unshift(root.right.name);
+    root = root.left;
+  }
+  return { root, members };
+};
+
+const _addQualifiedRefs = (internalImport: ImportMaps, rootName: string, members: string[]) => {
+  if (members.length === 0) {
+    internalImport.refs.add(rootName);
+    return;
+  }
+  let path = '';
+  for (const member of members) {
+    path = path ? `${path}.${member}` : member;
+    state.addNsMemberRefs(internalImport, rootName, path);
+  }
 };
 
 const _addShadowRange = (name: string, range: [number, number]) => {
@@ -408,18 +442,50 @@ const _addParamShadows = (params: any, body: any) => {
   for (const param of items) _collectBindingNames(param, range);
 };
 
+const _restoreScopedImports = (end: number) => {
+  const stack = state.scopedImports;
+  while (stack.length > 0 && stack[stack.length - 1].end <= end) {
+    const { name, prev } = stack.pop()!;
+    if (prev) state.localImportMap.set(name, prev);
+    else state.localImportMap.delete(name);
+  }
+};
+
+const _enterScope = (node: Span) => {
+  state.scopeStarts[state.scopeDepth] = node.start;
+  state.scopeEnds[state.scopeDepth] = node.end;
+  state.scopeDepth++;
+};
+
+const _exitScope = (node: Span) => {
+  state.scopeDepth--;
+  _restoreScopedImports(node.end);
+};
+
 const coreVisitorObject: VisitorObject = {
   BlockStatement(node) {
-    state.scopeStarts[state.scopeDepth] = node.start;
-    state.scopeEnds[state.scopeDepth] = node.end;
-    state.scopeDepth++;
+    _enterScope(node);
   },
-  'BlockStatement:exit'() {
-    state.scopeDepth--;
+  'BlockStatement:exit'(node) {
+    _exitScope(node);
+    if (state.caughtTryBlockEnds[state.caughtTryBlockEnds.length - 1] === node.end) state.caughtTryBlockEnds.pop();
+  },
+  ForStatement(node) {
+    _enterScope(node);
+  },
+  'ForStatement:exit'(node) {
+    _exitScope(node);
+  },
+  SwitchStatement(node) {
+    _enterScope(node);
+  },
+  'SwitchStatement:exit'(node) {
+    _exitScope(node);
   },
   TSModuleDeclaration(node) {
     state.nsRanges.push([node.start, node.end]);
-    if (node.kind !== 'global' && state.isModuleFile && isStringLiteral(node.id)) {
+    if (node.kind === 'global' || !isStringLiteral(node.id)) return;
+    if (state.isModuleFile) {
       const specifier = getStringValue(node.id)!;
       for (const name of collectAugmentationRefs(node))
         state.addImport(
@@ -430,6 +496,24 @@ const coreVisitorObject: VisitorObject = {
           node.id.start,
           IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.AUGMENT
         );
+    } else if (node.body?.type === 'TSModuleBlock') {
+      for (const stmt of node.body.body) {
+        if (
+          (stmt.type === 'ImportDeclaration' ||
+            stmt.type === 'ExportAllDeclaration' ||
+            stmt.type === 'ExportNamedDeclaration') &&
+          stmt.source
+        ) {
+          state.addImport(
+            stmt.source.value,
+            undefined,
+            undefined,
+            undefined,
+            stmt.source.start,
+            IMPORT_FLAGS.TYPE_ONLY | IMPORT_FLAGS.OPAQUE
+          );
+        }
+      }
     }
   },
   TSInterfaceDeclaration(node) {
@@ -442,6 +526,7 @@ const coreVisitorObject: VisitorObject = {
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.CLASS);
       state.localDeclarations.set(node.id.name, node);
+      if (state.scopeDepth > 0) _addShadow(node.id.name);
     }
   },
   'ClassDeclaration:exit'() {
@@ -453,13 +538,17 @@ const coreVisitorObject: VisitorObject = {
   'ClassExpression:exit'() {
     state.classNameStack.pop();
   },
-  StaticBlock() {
+  StaticBlock(node) {
     state.staticBlockDepth++;
+    _enterScope(node);
   },
-  'StaticBlock:exit'() {
+  'StaticBlock:exit'(node) {
     state.staticBlockDepth--;
+    _exitScope(node);
   },
   FunctionDeclaration(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     if (node.id?.name) {
       state.localDeclarationTypes.set(node.id.name, SYMBOL_TYPE.FUNCTION);
       state.localDeclarations.set(node.id.name, node);
@@ -467,11 +556,25 @@ const coreVisitorObject: VisitorObject = {
     }
     _addParamShadows(node.params, node.body);
   },
+  'FunctionDeclaration:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   FunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
   },
+  'FunctionExpression:exit'() {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+  },
   ArrowFunctionExpression(node) {
+    state.functionCaughtTryBlockEnds.push(state.caughtTryBlockEnds);
+    state.caughtTryBlockEnds = [];
     _addParamShadows(node.params, node.body);
+  },
+  'ArrowFunctionExpression:exit'(node) {
+    state.caughtTryBlockEnds = state.functionCaughtTryBlockEnds.pop()!;
+    _restoreScopedImports(node.end);
   },
   CatchClause(node) {
     if (node.param?.type === 'Identifier' && node.body) {
@@ -480,12 +583,12 @@ const coreVisitorObject: VisitorObject = {
   },
   VariableDeclaration(node) {
     state.currentVarDeclStart = node.start;
+    for (const decl of node.declarations) handleVariableDeclarator(decl, node.kind === 'var', state);
     if (state.scopeDepth > 0) {
+      const i = state.scopeDepth - 1;
       for (const decl of node.declarations) {
-        if (decl.id.type === 'Identifier') {
-          state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
-          _addShadow(decl.id.name);
-        }
+        if (decl.id.type === 'Identifier') state.localDeclarationTypes.set(decl.id.name, SYMBOL_TYPE.VARIABLE);
+        _collectBindingNames(decl.id, [state.scopeStarts[i], state.scopeEnds[i]]);
       }
     } else {
       for (const decl of node.declarations) {
@@ -504,6 +607,12 @@ const coreVisitorObject: VisitorObject = {
   },
   ExportDefaultDeclaration(node) {
     handleExportDefault(node, state);
+    if (node.declaration.type === 'ObjectExpression') {
+      for (const prop of node.declaration.properties) {
+        const value = prop.type === 'Property' ? prop.value : prop.argument;
+        if (value.type === 'Identifier') markNamespaceRef(value.name, value.start, state, true);
+      }
+    }
   },
   TSExportAssignment(node) {
     handleExportAssignment(node, state);
@@ -512,14 +621,31 @@ const coreVisitorObject: VisitorObject = {
     handleExpressionStatement(node, state);
   },
   VariableDeclarator(node) {
-    handleVariableDeclarator(node, state);
     trackCustomElementRegistry(node, state);
   },
   ImportExpression(node) {
     handleImportExpression(node, state);
   },
+  TryStatement(node: TryStatement) {
+    if (node.handler) state.caughtTryBlockEnds.push(node.block.end);
+  },
+  AwaitExpression(node) {
+    if (state.caughtTryBlockEnds.length === 0) return;
+
+    const { argument } = node;
+    if (argument.type === 'ImportExpression') {
+      state.caughtImportExpressions.add(argument.start);
+    } else {
+      const elements = getPromiseAllElements(argument);
+      if (!elements) return;
+      for (const element of elements) {
+        if (element?.type === 'ImportExpression') state.caughtImportExpressions.add(element.start);
+      }
+    }
+  },
   CallExpression(node) {
     handleCallExpression(node, state);
+    handleImportThen(node, state);
   },
   NewExpression(node) {
     handleNewExpression(node, state);
@@ -531,9 +657,7 @@ const coreVisitorObject: VisitorObject = {
     handleJSXMemberExpression(node, state);
   },
   ForInStatement(node) {
-    if (node.left.type === 'VariableDeclaration' && node.body) {
-      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
-    }
+    _enterScope(node);
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -541,11 +665,12 @@ const coreVisitorObject: VisitorObject = {
         if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
       }
     }
+  },
+  'ForInStatement:exit'(node) {
+    _exitScope(node);
   },
   ForOfStatement(node) {
-    if (node.left.type === 'VariableDeclaration' && node.body) {
-      for (const decl of node.left.declarations) _collectBindingNames(decl.id, [node.body.start, node.body.end]);
-    }
+    _enterScope(node);
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
       if (_import?.isNamespace) {
@@ -554,33 +679,40 @@ const coreVisitorObject: VisitorObject = {
       }
     }
   },
-  TSQualifiedName(node) {
-    let left: TSTypeName = node;
-    const parts: string[] = [];
-    while (left.type === 'TSQualifiedName') {
-      if (left.right.type === 'Identifier') parts.unshift(left.right.name);
-      left = left.left;
+  'ForOfStatement:exit'(node) {
+    _exitScope(node);
+  },
+  ArrayExpression(node) {
+    for (const element of node.elements ?? []) {
+      if (element?.type !== 'Identifier') continue;
+      const _import = state.localImportMap.get(element.name);
+      if (_import?.isNamespace) {
+        const internalImport = state.internal.get(_import.filePath);
+        if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
+      }
     }
-    if (left.type === 'Identifier' && !isShadowed(left.name, left.start)) {
-      const rootName = left.name;
+  },
+  ReturnStatement(node) {
+    if (node.argument?.type === 'Identifier') markNamespaceRef(node.argument.name, node.argument.start, state, true);
+  },
+  AssignmentExpression(node) {
+    if (node.right?.type === 'Identifier') markNamespaceRef(node.right.name, node.right.start, state);
+  },
+  SpreadElement(node) {
+    if (node.argument?.type === 'Identifier') markNamespaceRef(node.argument.name, node.argument.start, state);
+  },
+  TSQualifiedName(node) {
+    const { root, members } = _splitQualifiedName(node);
+    if (root.type === 'Identifier' && !isShadowed(root.name, root.start)) {
+      const rootName = root.name;
       const _import = state.localImportMap.get(rootName);
       if (_import) {
         const internalImport = state.internal.get(_import.filePath);
-        if (internalImport) {
-          if (parts.length > 0) {
-            let path = '';
-            for (const part of parts) {
-              path = path ? `${path}.${part}` : part;
-              state.addNsMemberRefs(internalImport, rootName, path);
-            }
-          } else {
-            internalImport.refs.add(rootName);
-          }
-        }
-      } else if (parts.length > 0) {
+        if (internalImport) _addQualifiedRefs(internalImport, rootName, members);
+      } else if (members.length > 0) {
         let path = '';
-        for (const part of parts) {
-          path = path ? `${path}.${part}` : part;
+        for (const member of members) {
+          path = path ? `${path}.${member}` : member;
           state.memberRefsInFile.push(rootName, path);
         }
       }
@@ -614,7 +746,14 @@ const coreVisitorObject: VisitorObject = {
     const src = node.source;
     if (isStringLiteral(src)) {
       const specifier = getStringValue(src)!;
-      state.addImport(specifier, undefined, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      const qualifier = node.qualifier ? _splitQualifiedName(node.qualifier) : undefined;
+      const rootName = qualifier?.root.type === 'Identifier' ? qualifier.root.name : undefined;
+      state.addImport(specifier, rootName, undefined, undefined, src.start, IMPORT_FLAGS.TYPE_ONLY);
+      if (qualifier && rootName) {
+        const module = state.resolveModule(specifier, state.filePath);
+        const internalImport = module && state.internal.get(module.resolvedFileName);
+        if (internalImport) _addQualifiedRefs(internalImport, rootName, qualifier.members);
+      }
     }
   },
 
@@ -892,13 +1031,17 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
     scopeStarts: [],
     scopeEnds: [],
     shadowScopes: new Map(),
+    scopedImports: [],
     localDeclarations: new Map(),
+    exportAliases: [],
     localInterfaces: new Map(),
     pendingCallRefs: [],
     pendingMemberCallRefs: [],
     localToExports: new Map(),
     customElementRegistries: new Set(),
     classNameStack: [],
+    caughtTryBlockEnds: [],
+    functionCaughtTryBlockEnds: [],
     staticBlockDepth: 0,
     addExport: _addExport,
     getFix: _getFix,
@@ -909,6 +1052,28 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
   };
 
   ctx.visitor.visit(program);
+
+  for (const { local, symbol, pos } of state.exportAliases) {
+    let name = local;
+    let original = state.exports.get(local);
+    if (!original) {
+      const defaultExport = state.exports.get('default');
+      if (defaultExport && (defaultExport.binding === local || state.localToExports.get(local)?.has('default'))) {
+        name = 'default';
+        original = defaultExport;
+      }
+    }
+    if (!original || original.isReExport || original.jsDocTags.has(ALIAS_TAG) || name === symbol) continue;
+    if (symbol === 'default' && state.specifierExportNames.has(local)) continue;
+    let group = state.aliasedExports.get(name);
+    if (!group) {
+      group = [{ symbol: name, pos: original.pos, line: original.line, col: original.col }];
+      state.aliasedExports.set(name, group);
+    }
+    const { line, col } = getLineAndCol(state.lineStarts, pos);
+    group.push({ symbol, pos, line, col });
+  }
+  for (const group of state.aliasedExports.values()) group.sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
 
   while (state.pendingCallRefs.length > 0 || state.pendingMemberCallRefs.length > 0) {
     while (state.pendingCallRefs.length > 0) {
@@ -951,27 +1116,19 @@ function walkAST(program: Program, sourceText: string, filePath: string, hasModu
   for (const [aliasName, aliasSet] of state.importAliases) {
     if (!state.accessedAliases.has(aliasName)) {
       for (const alias of aliasSet) {
-        const _import = state.localImportMap.get(alias.id);
-        if (_import?.isNamespace) {
-          const internalImport = state.internal.get(_import.filePath);
-          if (internalImport) {
-            addValue(internalImport.import, OPAQUE, filePath);
-          }
+        if (alias.import.isNamespace) {
+          const internalImport = state.internal.get(alias.import.filePath);
+          if (internalImport) addValue(internalImport.import, OPAQUE, filePath);
         }
       }
     }
   }
 
   for (const [containerName, propMap] of state.nsContainers) {
-    for (const [propKey, nsName] of propMap) {
+    for (const [propKey, ref] of propMap) {
       if (!state.accessedNsContainers.has(`${containerName}.${propKey}`)) {
-        const _import = state.localImportMap.get(nsName);
-        if (_import) {
-          const internalImport = state.internal.get(_import.filePath);
-          if (internalImport) {
-            addValue(internalImport.import, OPAQUE, filePath);
-          }
-        }
+        const internalImport = state.internal.get(ref.import.filePath);
+        if (internalImport) addValue(internalImport.import, OPAQUE, filePath);
       }
     }
   }

@@ -1,0 +1,16 @@
+version: v2
+plugins:
+  - local: protoc-gen-es
+    out: src/gen
+  - local: [protoc-gen-connect-es]
+    out: src/gen
+  - local: ./node_modules/.bin/protoc-gen-connect-query
+    out: src/gen
+  - local: [pnpm, exec, protoc-gen-ts_proto]
+    out: src/gen
+  - local: [protoc-gen-ts]
+    out: src/gen
+  - local: [tsx, ./src/protoc-gen-hello.ts]
+    out: src/gen
+  - local: protoc-gen-go
+    out: gen/go

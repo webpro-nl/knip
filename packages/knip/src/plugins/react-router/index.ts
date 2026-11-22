@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { _glob } from '../../util/glob.ts';
-import { toEntry, toProductionDependency, toProductionEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry, toDependency } from '../../util/input.ts';
 import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency, load } from '../../util/plugin.ts';
 import vite from '../vite/index.ts';
@@ -16,7 +16,11 @@ const enablers = ['@react-router/dev'];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const viteConfig = typeof vite.config === 'function' ? [] : (vite.config ?? []);
-const config = ['react-router.config.{js,ts}', ...viteConfig];
+// `entryExts` in https://github.com/remix-run/react-router/blob/react-router@8.5.1/packages/react-router-dev/config/config.ts
+const entryExts = ['js', 'jsx', 'ts', 'tsx', 'mjs', 'mts'];
+const entryExtsGlob = `{${entryExts.join(',')}}`;
+
+const config = [`react-router.config.${entryExtsGlob}`, ...viteConfig];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
@@ -29,14 +33,8 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
 
   let routeConfig: RouteConfigEntry[] = [];
 
-  const routesPathTs = join(appDir, 'routes.ts');
-  const routesPathJs = join(appDir, 'routes.js');
-
-  if (existsSync(routesPathTs)) {
-    routeConfig = await load(routesPathTs);
-  } else if (existsSync(routesPathJs)) {
-    routeConfig = await load(routesPathJs);
-  }
+  const routesPath = entryExts.map(ext => join(appDir, `routes.${ext}`)).find(existsSync);
+  if (routesPath) routeConfig = await load(routesPath);
 
   const mapRoute = (route: RouteConfigEntry): string[] => {
     return [toAbsolute(route.file, appDir), ...(route.children ? route.children.flatMap(mapRoute) : [])];
@@ -45,30 +43,36 @@ const resolveConfig: ResolveConfig<PluginConfig> = async (localConfig, options) 
   const routes = routeConfig.flatMap(mapRoute);
 
   const resolved = [
-    // routes.{ts,js} is only used as input to the bundler build system
-    toEntry(join(appDir, 'routes.{js,ts}')),
+    // routes.* is only used as input to the bundler build system
+    toEntry(join(appDir, `routes.${entryExtsGlob}`)),
     // routes and entries are part of the actual build
-    toProductionEntry(join(appDir, 'root.{jsx,tsx}')),
-    toProductionEntry(join(appDir, 'entry.{client,server}.{js,jsx,ts,tsx}')),
-    ...routes.map(id => toProductionEntry(id)),
+    toEntry(join(appDir, `root.${entryExtsGlob}`), { production: true }),
+    toEntry(join(appDir, `entry.{client,server}.${entryExtsGlob}`), { production: true }),
+    ...routes.map(id => toEntryPath(id, { production: true })),
   ];
 
   const serverEntries = await _glob({
     cwd: appDir,
-    patterns: ['entry.server.{js,ts,jsx,tsx}'],
+    patterns: [`entry.server.${entryExtsGlob}`],
   });
 
   // If there are no server entries, then we need to add these as implicit
   // production dependencies, as @react-router/dev will add the
   // default entry.server.tsx automatically which depends on these.
-  // See: https://github.com/remix-run/react-router/blob/dev/packages/react-router-dev/config/defaults/entry.server.node.tsx
+  // See: https://github.com/remix-run/react-router/blob/react-router@8.5.1/packages/react-router-dev/config/defaults/entry.server.node.tsx
   if (serverEntries.length === 0) {
-    resolved.push(toProductionDependency('@react-router/node'));
-    resolved.push(toProductionDependency('isbot'));
+    resolved.push(toDependency('@react-router/node', { production: true }));
+    resolved.push(toDependency('isbot', { production: true }));
   }
 
   return resolved;
 };
+
+const note = `Route modules import their types from \`./+types/<route>\`, which \`react-router typegen\` generates.
+Run \`react-router typegen\` before Knip (e.g. in CI or a fresh checkout), or these imports are reported as unresolved.`;
+
+/** @public */
+export const docs = { note };
 
 const plugin: Plugin = {
   title,

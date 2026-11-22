@@ -1,6 +1,8 @@
 {
   "name": "@plugins/eslint3",
   "devDependencies": {
+    "@babel/eslint-parser": "*",
+    "@typescript-eslint/parser": "*",
     "eslint": "*",
     "eslint-plugin-no-secrets": "*",
     "eslint-plugin-prettier": "*"

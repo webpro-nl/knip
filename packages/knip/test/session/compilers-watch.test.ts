@@ -10,7 +10,6 @@ import { createOptions } from '../helpers/create-options.ts';
 test('Report failed watch compilations once and recover on the next edit', async t => {
   const cwd = await copyFixture('fixtures/session-compilers');
   const filePath = join(cwd, 'selection.foo');
-  const exitCode = process.exitCode;
   const errors: unknown[][] = [];
   const unhandled: unknown[] = [];
   const onUnhandledRejection = (error: unknown) => unhandled.push(error);
@@ -23,26 +22,23 @@ test('Report failed watch compilations once and recover on the next edit', async
     assert.ok(session);
 
     await writeFile(filePath, 'invalid\n');
-    session.listener('change', 'selection.foo');
-    await session.handleFileChanges([]);
+    await assert.rejects(session.handleFileChanges([{ type: 'modified', filePath: 'selection.foo' }]), error => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /Compiler for \.foo failed.*selection\.foo/);
+      assert.ok(error.cause instanceof Error);
+      assert.match(error.cause.message, /Invalid fruit/);
+      return true;
+    });
     await setImmediate();
-
-    const message = errors.flat().join('\n');
-    assert.equal(errors.length, 1);
-    assert.equal(message.match(/Compiler for \.foo/g)?.length, 1);
-    assert.match(message, /Compiler for \.foo failed.*selection\.foo/);
-    assert.match(message, /Reason: Invalid fruit/);
-    assert.equal(process.exitCode, 2);
+    assert.deepEqual(errors, []);
     assert.deepEqual(unhandled, []);
 
     await writeFile(filePath, 'banana\n');
-    session.listener('change', 'selection.foo');
-    await session.handleFileChanges([]);
+    await session.handleFileChanges([{ type: 'modified', filePath: 'selection.foo' }]);
 
     assert.deepEqual(Object.keys(session.getIssues().issues.exports['fruits.ts']), ['apple']);
-    assert.equal(errors.flat().join('\n'), message);
+    assert.deepEqual(errors, []);
   } finally {
-    process.exitCode = exitCode ?? 0;
     process.off('unhandledRejection', onUnhandledRejection);
     await rm(cwd, { recursive: true, force: true });
   }

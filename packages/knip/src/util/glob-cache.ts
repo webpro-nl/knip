@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
-import type { FSLike } from 'fdir';
+import type { FileSystemAdapter } from 'tinyglobby';
 import { createDiskCache } from './disk-cache.ts';
 
 interface GlobCacheEntry {
@@ -94,7 +94,7 @@ const trackReads = <T>(native: T, dirs: Set<string>): T => {
  * each traversed directory exactly once — so the recorded set is the complete set of directories whose
  * contents can affect the result, including ones that matched nothing.
  */
-export const createDirTracker = (): { dirs: Set<string>; fs: Partial<FSLike> } => {
+export const createDirTracker = (): { dirs: Set<string>; fs: FileSystemAdapter } => {
   const dirs = new Set<string>();
   return { dirs, fs: { readdir: trackReads(fs.readdir, dirs), readdirSync: trackReads(fs.readdirSync, dirs) } };
 };

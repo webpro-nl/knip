@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/evalite2",
+  "devDependencies": {
+    "evalite": "*"
+  }
+}

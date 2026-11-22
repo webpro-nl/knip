@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/sveltekit-vite-pwa-v1",
+  "type": "module",
+  "devDependencies": {
+    "@sveltejs/kit": "*",
+    "@vite-pwa/sveltekit": "*",
+    "svelte": "*",
+    "typescript": "*",
+    "vite": "*"
+  }
+}

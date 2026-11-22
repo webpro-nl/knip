@@ -7,9 +7,11 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/github-actions');
 
-test('Find dependencies with the GitHub Actions plugin', async () => {
+test('Find dependencies and literal action entries with the GitHub Actions plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['.github/actions/node-b/v/prepare.js']);
 
   assert(issues.unresolved['.github/workflows/test.yml']['esbuild-register']);
 
@@ -33,11 +35,32 @@ test('Find dependencies with the GitHub Actions plugin', async () => {
   // resolved relative to the action directory (not reported as unused).
   assert(!('.github/actions/composite/helper.mjs' in issues.files));
 
+  // A `working-directory` nested under the `actions/checkout` `path` is
+  // resolved relative to that path (not from the parent of the repository).
+  assert(!('scripts/from-nested-working-dir-with-path.js' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 8,
     unresolved: 2,
-    processed: 11,
-    total: 11,
+    files: 1,
+    processed: 14,
+    total: 14,
+  });
+});
+
+test('Find dependencies with the GitHub Actions plugin when cwd has a trailing slash', async () => {
+  const options = await createOptions({ cwd: `${cwd}/` });
+  const { issues, counters } = await main(options);
+
+  assert(issues.binaries['.github/workflows/test.yml']?.eslint);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 8,
+    unresolved: 2,
+    files: 1,
+    processed: 14,
+    total: 14,
   });
 });

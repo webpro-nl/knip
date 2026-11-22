@@ -1,6 +1,12 @@
 import type { Results } from '../../run.ts';
-import type { ConfigurationHint, ConfigurationHintType, ReporterOptions } from '../../types/issues.ts';
-import { relative, toRelative } from '../../util/path.ts';
+import { ROOT_WORKSPACE_NAME } from '../../constants.ts';
+import type {
+  ConfigurationHint,
+  ConfigurationHintType,
+  ReporterOptions,
+  UnusedIgnorePatternReason,
+} from '../../types/issues.ts';
+import { basename, relative, toRelative } from '../../util/path.ts';
 import { Table } from '../../util/table.ts';
 import { byPathDepth } from '../../util/workspace.ts';
 import { bright, dim, getColoredTitle, getDimmedTitle } from './util.ts';
@@ -11,19 +17,12 @@ interface PrintHintOptions {
   filePath: string;
   configFilePath?: string;
   workspaceName?: string;
+  configKey?: string;
+  reason?: UnusedIgnorePatternReason;
   size?: number;
 }
 
 type TableRow = ConfigurationHint & { message: string };
-
-const getWorkspaceName = (hint: ConfigurationHint) =>
-  hint.workspaceName &&
-  hint.workspaceName !== '.' &&
-  hint.type !== 'top-level-unconfigured' &&
-  hint.type !== 'workspace-unconfigured' &&
-  hint.type !== 'package-entry'
-    ? hint.workspaceName
-    : '';
 
 const getIdentifier = (hint: ConfigurationHint) => {
   if (hint.identifier === '.') return `. ${dim('(root)')}`;
@@ -32,38 +31,67 @@ const getIdentifier = (hint: ConfigurationHint) => {
 };
 
 const getTableForHints = (hints: TableRow[]) => {
-  const table = new Table({ truncate: { identifier: 'start', workspace: 'start', filePath: 'start' } });
+  const table = new Table({ truncate: { identifier: 'start', description: 'none' } });
   for (const hint of hints) {
     table.row();
     table.cell('identifier', getIdentifier(hint));
-    table.cell('workspace', getWorkspaceName(hint));
-    table.cell('filePath', hint.filePath);
     table.cell('description', dim(hint.message));
   }
   return table;
 };
 
-const type = (id: ConfigurationHintType) => bright(id.split('-').at(0));
+const type = (id: ConfigurationHintType) => id.split('-').at(0) as string;
 
-const unused = (options: PrintHintOptions) => `Remove from ${type(options.type)}`;
-const empty = (options: PrintHintOptions) => `Refine ${type(options.type)} pattern (no matches)`;
-const remove = (options: PrintHintOptions) => `Remove redundant ${type(options.type)} pattern`;
+const SEP = ' → ';
+
+const location = (options: PrintHintOptions, key?: string) => {
+  const segments: string[] = [];
+  if (options.filePath) {
+    segments.push(options.filePath);
+    if (basename(options.filePath) === 'package.json') segments.push('knip');
+  }
+  const workspace =
+    options.configKey ?? (options.workspaceName !== ROOT_WORKSPACE_NAME ? options.workspaceName : undefined);
+  if (workspace) segments.push(workspace === ROOT_WORKSPACE_NAME ? '(root)' : workspace);
+  if (key) segments.push(bright(key));
+  return segments.join(SEP);
+};
+
+const reasons: Record<UnusedIgnorePatternReason, string> = {
+  'no-issues': 'no issues',
+  gitignored: 'gitignored',
+  'no-matches': 'no matches',
+};
+
+const unused = (options: PrintHintOptions) => {
+  const reason = options.reason
+    ? options.type === 'ignoreFiles' && options.reason === 'no-issues'
+      ? 'files are used'
+      : reasons[options.reason]
+    : undefined;
+  return `Remove from ${location(options, type(options.type))}${reason ? ` (${reason})` : ''}`;
+};
+const empty = (options: PrintHintOptions) => `Refine ${location(options, type(options.type))} pattern (no matches)`;
+const remove = (options: PrintHintOptions) => `Remove redundant pattern from ${location(options, type(options.type))}`;
 const topLevel = (options: PrintHintOptions) =>
-  `Remove, or move unused top-level ${type(options.type)} to one of ${bright('"workspaces"')}`;
+  `Remove unused ${location(options, type(options.type))}, or move to ${bright('"workspaces"')}`;
 const add = (options: PrintHintOptions) =>
   options.configFilePath
-    ? `Add ${bright('entry')} and/or refine ${bright('project')} files (${options.size} unused files)`
+    ? `Add ${bright('entry')} and/or refine ${bright('project')} files in ${location(options)} (${options.size} unused files)`
     : `Create ${bright('knip.json')} configuration file, and add ${bright('entry')} and/or refine ${bright('project')} files (${options.size} unused files)`;
 const addWorkspace = (options: PrintHintOptions) =>
   options.configFilePath
-    ? `Add ${bright('entry')} and/or refine ${bright('project')} files in ${bright(`workspaces["${options.workspaceName}"]`)} (${options.size} unused files)`
+    ? `Add ${bright('entry')} and/or refine ${bright('project')} files in ${location({ ...options, workspaceName: undefined }, `workspaces["${options.workspaceName}"]`)} (${options.size} unused files)`
     : `Create ${bright('knip.json')} configuration file with ${bright(`workspaces["${options.workspaceName}"]`)} object (${options.size} unused files)`;
 
-const packageEntry = () => 'Package entry file not found';
+const packageEntry = (options: PrintHintOptions) =>
+  `Package entry file not found${options.filePath ? ` in ${options.filePath}` : ''}`;
 
-const extensionUnregistered = () => `Extension in ${bright('project')} not registered as a compiler`;
+const extensionUnregistered = (options: PrintHintOptions) =>
+  `Extension in ${location(options, 'project')} not registered as a compiler`;
 
-const extensionExcluded = () => `Compiled extension excluded by ${bright('project')} (imports not followed)`;
+const extensionExcluded = (options: PrintHintOptions) =>
+  `Compiled extension excluded by ${location(options, 'project')} (imports not followed)`;
 
 export const hintPrinters = new Map<ConfigurationHintType, { print: (options: PrintHintOptions) => string }>([
   ['ignore', { print: unused }],

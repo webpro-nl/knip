@@ -32,6 +32,8 @@ test('Should detect specifiers that look like package names', () => {
   assert.equal(isStartsLikePackageName('./relative'), false);
   assert.equal(isStartsLikePackageName('../parent'), false);
   assert.equal(isStartsLikePackageName('/absolute'), false);
+  assert.equal(isStartsLikePackageName('C:/absolute'), false);
+  assert.equal(isStartsLikePackageName('c:\\absolute'), false);
   assert.equal(isStartsLikePackageName('#subpath'), false);
   assert.equal(isStartsLikePackageName('$dollar'), false);
   assert.equal(isStartsLikePackageName('~/alias'), false);
@@ -45,7 +47,10 @@ test('Should extract package name from module specifier', () => {
   assert.equal(getPackageNameFromModuleSpecifier('@~private/pkg/deep'), '@~private/pkg');
   assert.equal(getPackageNameFromModuleSpecifier('react'), 'react');
   assert.equal(getPackageNameFromModuleSpecifier('react/jsx-runtime'), 'react');
+  assert.equal(getPackageNameFromModuleSpecifier('~utils'), '~utils');
+  assert.equal(getPackageNameFromModuleSpecifier('~utils/greet'), '~utils');
   assert.equal(getPackageNameFromModuleSpecifier('~/something'), undefined);
+  assert.equal(getPackageNameFromModuleSpecifier('~~/root'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('./relative'), undefined);
   assert.equal(getPackageNameFromModuleSpecifier('#subpath'), undefined);
 });
@@ -68,6 +73,7 @@ test('Should resolve package name from Yarn pnpm-linker store via package.json',
 
 test('Should sanitize import specifier', () => {
   assert.equal(sanitizeSpecifier('specifier'), 'specifier');
+  assert.equal(sanitizeSpecifier('cloudflare:workers'), 'cloudflare:workers');
   assert.equal(sanitizeSpecifier('/specifier'), '/specifier');
   assert.equal(sanitizeSpecifier('./specifier'), './specifier');
   assert.equal(sanitizeSpecifier('../specifier.ext'), '../specifier.ext');

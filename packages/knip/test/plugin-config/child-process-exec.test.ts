@@ -49,16 +49,50 @@ test('Reference binaries and entry files in node:child_process calls', async () 
   assert(binaries.melon);
   assert(!binaries.phantomserve);
 
+  // a plugin binary with a dynamic --config value is still referenced
+  assert(binaries.lingui);
+
+  // a literal after a dynamic arg is not referenced as a binary
+  assert(!binaries.phantomtarget);
+
+  // nor is a literal after an arg with unsafe characters
+  assert(!issues.unlisted['index.ts']?.phantomrange);
+
+  // a file after a spread, a dynamic flag value or an unsafe arg is still an entry file
+  assert(!('scripts/after-spread.js' in issues.files));
+  assert(!('scripts/after-value.js' in issues.files));
+  assert(!('scripts/after-unsafe.js' in issues.files));
+
   // dynamic command and a non-child_process `.exec` are not referenced
   assert(!binaries.kiwi);
   assert(!binaries.banana);
 
-  assert.equal(Object.keys(binaries).length, 22);
+  assert.equal(Object.keys(binaries).length, 23);
+
+  // a script path as the command is an entry file; a missing one is unresolved
+  assert(issues.unresolved['index.ts']['./scripts/missing.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 22,
-    processed: 3,
-    total: 3,
+    binaries: 23,
+    unresolved: 1,
+    processed: 9,
+    total: 9,
+  });
+});
+
+test('Reference binaries and entry files in node:child_process calls (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters, issues } = await main(options);
+
+  // the --require hook of a script in a production file is a production entry file
+  assert(!('scripts/hook.js' in issues.files));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    binaries: 23,
+    unresolved: 1,
+    processed: 9,
+    total: 9,
   });
 });

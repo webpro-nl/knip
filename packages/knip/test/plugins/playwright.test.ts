@@ -9,11 +9,20 @@ const cwd = resolve('fixtures/plugins/playwright');
 
 test('Find dependencies with the Playwright plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['setup/b/prepare.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 9,
-    total: 9,
+    files: 1,
+    processed: 11,
+    total: 11,
   });
+});
+
+test('Keep literal Playwright setup paths out of production', async () => {
+  const { issues } = await main(await createOptions({ cwd, isProduction: true }));
+  assert(issues.files['setup/b/prepare.ts']);
+  assert(!issues.files['setup/[browser]/prepare.ts']);
 });

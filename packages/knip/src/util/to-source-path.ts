@@ -8,10 +8,11 @@ import { _glob, prependDirToPattern } from './glob.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
 import { getPackageMapTarget } from './package-json.ts';
 import { isAbsolute, isInternal, join, toRelative } from './path.ts';
+import type { Exports } from '../types/package-json.ts';
 
 const defaultExtensions = `.{${Array.from(DEFAULT_EXTENSIONS, ext => ext.slice(1)).join(',')}}`;
 const hasTSExt = /(?<!\.d)\.(m|c)?tsx?$/;
-const matchExt = /(\.d)?\.(m|c)?(j|t)s$/;
+const matchExt = /(\.d)?\.(m|c)?(j|t)sx?$/;
 
 const sourceExtensions = [...DEFAULT_EXTENSIONS];
 
@@ -58,7 +59,7 @@ const rewritePattern = (sourceMaps: SourceMap[], absSpecifier: string, extension
 export type WorkspacePackageTargetHandler = (
   specifier: string,
   filePath: string
-) => { dir: string; target: unknown; patternMatch?: string } | undefined;
+) => { name: string; dir: string; target: Exports; subpath: string; patternMatch?: string } | undefined;
 
 export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): WorkspacePackageTargetHandler => {
   return (specifier, filePath) => {
@@ -70,7 +71,7 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
     } else {
       const packageName = getPackageNameFromModuleSpecifier(specifier);
       if (!packageName) return;
-      workspace = chief.workspacesByPkgName.get(packageName);
+      workspace = chief.findWorkspaceByPackageName(packageName, filePath);
       key = packageName === specifier ? '.' : `.${specifier.slice(packageName.length)}`;
     }
     if (!workspace) return;
@@ -78,14 +79,14 @@ export const getWorkspacePackageTargetHandler = (chief: ConfigurationChief): Wor
     const map = isImports ? manifest?.imports : manifest?.exports;
     if (!manifest || !map) return;
     const result = getPackageMapTarget(map, key);
-    if (result) return { dir: workspace.dir, ...result };
+    if (result) return { name: workspace.name, dir: workspace.dir, ...result };
   };
 };
 
 export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
   const toSourceMapCache = new Map<string, string | undefined>();
 
-  return (filePath: string) => {
+  return (filePath: string, extensions = sourceExtensions) => {
     if (!isInternal(filePath) || hasTSExt.test(filePath)) return;
     if (toSourceMapCache.has(filePath)) return toSourceMapCache.get(filePath);
     const workspace = chief.findWorkspaceByFilePath(filePath);
@@ -94,7 +95,7 @@ export const getModuleSourcePathHandler = (chief: ConfigurationChief) => {
       for (const { srcDir, outDir } of workspace.sourceMaps) {
         if (!(isUnderOutDir(filePath, outDir) || srcDir === outDir)) continue;
         const basePath = (srcDir + filePath.slice(outDir.length)).replace(matchExt, '');
-        const srcFilePath = findFileWithExtensions(basePath, sourceExtensions);
+        const srcFilePath = findFileWithExtensions(basePath, extensions);
         if (srcFilePath && srcFilePath !== filePath) {
           debugLog('*', `Source mapping ${toRelative(filePath, chief.cwd)} → ${toRelative(srcFilePath, chief.cwd)}`);
           result = srcFilePath;
@@ -112,10 +113,12 @@ export const getToSourcePathsHandler = (chief: ConfigurationChief) => {
     const patterns = new Set<string>();
 
     for (const specifier of specifiers) {
-      const absSpecifier = isAbsolute(specifier) ? specifier : prependDirToPattern(dir, specifier);
+      const negation = specifier.startsWith('!') ? '!' : '';
+      const id = specifier.slice(negation.length);
+      const absSpecifier = isAbsolute(id) ? id : prependDirToPattern(dir, id);
       const ws = chief.findWorkspaceByFilePath(absSpecifier);
       const mapped = ws?.sourceMaps && rewritePattern(ws.sourceMaps, absSpecifier, extensions);
-      patterns.add(mapped ?? absSpecifier);
+      patterns.add(negation + (mapped ?? id));
     }
 
     const filePaths = await _glob({ patterns: Array.from(patterns), cwd: chief.cwd, dir, label });

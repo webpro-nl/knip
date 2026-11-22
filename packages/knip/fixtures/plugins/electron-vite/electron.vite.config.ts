@@ -7,13 +7,13 @@ export default defineConfig({
   preload: {
     build: {
       rollupOptions: {
-        input: { chat: 'src/preload/chat.ts' },
+        input: { chat: 'src/preload/chat.ts', literal: 'src/preload/[variant]/bridge.ts' },
       },
     },
   },
   renderer: {
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         input: { index: 'src/renderer/main.ts' },
       },
     },

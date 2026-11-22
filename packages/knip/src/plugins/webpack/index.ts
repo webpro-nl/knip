@@ -2,18 +2,12 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { ResolveOptions, RuleSetRule, RuleSetUseItem } from 'webpack';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterVisitors, ResolveConfig } from '../../types/config.ts';
-import {
-  type Input,
-  toAlias,
-  toDeferResolve,
-  toDeferResolveEntry,
-  toDeferResolveProductionEntry,
-  toDependency,
-} from '../../util/input.ts';
-import { extname, isInternal, join, toAbsolute } from '../../util/path.ts';
+import { type Input, toAlias, toModule, toEntryPath, toDependency } from '../../util/input.ts';
+import { extname, isInternal, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
 import type { BabelConfigObj } from '../babel/types.ts';
+import type { SWCConfig } from '../swc/types.ts';
 import type { Argv, Env, ProvidePlugin, WebpackConfig } from './types.ts';
 import { createRequireContextVisitor } from './visitors/requireContext.ts';
 // https://webpack.js.org/configuration/
@@ -59,20 +53,22 @@ const info = {
   issuerLayer: '',
 };
 
-const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false | 0 | '...' | ''): string[] => {
+const resolveRuleSetDependencies = (
+  rule: RuleSetRule | undefined | null | false | 0 | '...' | ''
+): (string | Input)[] => {
   if (!rule || typeof rule === 'string') return [];
   if (typeof rule.use === 'string') return [rule.use];
   let useItem = rule.use ?? rule.loader ?? rule;
   if (typeof useItem === 'function') useItem = useItem(info);
   if (typeof useItem === 'string' && hasBabelOptions(rule)) {
-    const d = getDependenciesFromConfig((rule as { options: BabelConfigObj }).options).map(d => d.specifier);
-    return [useItem, ...d];
+    return [useItem, ...getDependenciesFromConfig((rule as { options: BabelConfigObj }).options)];
   }
+  if (typeof useItem === 'string' && useItem && rule.options && rule.use == null)
+    useItem = { loader: useItem, options: rule.options };
   return [useItem].flat().flatMap((item: RuleSetRule | RuleSetUseItem | undefined | null | false | 0) => {
     if (!item) return [];
     if (hasBabelOptions(item)) {
-      const d = getDependenciesFromConfig((item as { options: BabelConfigObj }).options).map(d => d.specifier);
-      return [...resolveUseItem(item), ...d];
+      return [...resolveUseItem(item), ...getDependenciesFromConfig((item as { options: BabelConfigObj }).options)];
     }
     if (typeof item !== 'string' && 'oneOf' in item) return item.oneOf?.flatMap(resolveRuleSetDependencies) ?? [];
     return resolveUseItem(item);
@@ -82,15 +78,19 @@ const resolveRuleSetDependencies = (rule: RuleSetRule | undefined | null | false
 const isSwcLoader = (loader: string) =>
   loader === 'builtin:swc-loader' || loader.endsWith('/swc-loader') || loader === 'swc-loader';
 
-const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
-  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
-  const plugins = (use.options as { jsc?: { experimental?: { plugins?: unknown[] } } }).jsc?.experimental?.plugins;
+export const getSwcPluginSpecifiers = (options: SWCConfig) => {
+  const plugins = options.jsc?.experimental?.plugins;
   if (!Array.isArray(plugins)) return [];
   return plugins.flatMap(plugin => {
     if (typeof plugin === 'string') return [plugin];
     if (Array.isArray(plugin) && typeof plugin[0] === 'string') return [plugin[0]];
     return [];
   });
+};
+
+const resolveSwcPluginDependencies = (use: RuleSetUseItem) => {
+  if (!hasLoaderOptions(use) || !isSwcLoader(use.loader)) return [];
+  return getSwcPluginSpecifiers(use.options);
 };
 
 const resolveUseItem = (use: RuleSetUseItem) => {
@@ -119,7 +119,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       const entries = [];
 
       for (const loader of opts.module?.rules?.flatMap(resolveRuleSetDependencies) ?? []) {
-        inputs.add(toDeferResolve(loader.replace(/\?.*/, '')));
+        inputs.add(typeof loader === 'string' ? toModule(loader.replace(/\?.*/, '')) : loader);
       }
 
       for (const plugin of opts?.plugins ?? []) {
@@ -128,7 +128,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           if (providePluginInstance.definitions) {
             for (const values of Object.values(providePluginInstance.definitions)) {
               const specifier = typeof values === 'string' ? values : values[0];
-              inputs.add(toDeferResolve(specifier));
+              inputs.add(toModule(specifier, { production: isProduction }));
             }
           }
         }
@@ -152,12 +152,9 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
       for (const entry of entries) {
         if (isInternal(entry) || entry.startsWith('#')) {
           const dir = opts.context ? opts.context : cwd;
-          const input = isProduction
-            ? toDeferResolveProductionEntry(entry, { dir })
-            : toDeferResolveEntry(entry, { dir });
-          inputs.add(input);
+          inputs.add(toEntryPath(entry, { production: isProduction, dir }));
         } else {
-          inputs.add(toDeferResolve(entry));
+          inputs.add(toModule(entry, { production: isProduction }));
         }
       }
 
@@ -171,7 +168,7 @@ export const findWebpackDependenciesFromConfig: ResolveConfig<WebpackConfig> = a
           } else {
             if (alias.length > 1) inputs.add(toAlias(alias, prefixes));
             for (const prefix of prefixes) {
-              inputs.add(toAlias(addStar(alias), [addStar(toAbsolute(prefix, options.configFileDir))]));
+              inputs.add(toAlias(addStar(alias), [addStar(prefix)], { dir: options.configFileDir }));
             }
           }
         }

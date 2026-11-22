@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/rsbuild-swc",
+  "devDependencies": {
+    "@rsbuild/core": "*",
+    "@swc/plugin-emotion": "*",
+    "@swc/plugin-styled-components": "*",
+    "swc-plugin-component-annotate": "*",
+    "@swc/plugin-styled-jsx": "*"
+  }
+}

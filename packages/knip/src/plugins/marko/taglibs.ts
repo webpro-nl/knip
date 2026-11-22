@@ -1,32 +1,12 @@
 import { readdirSync } from 'node:fs';
 import { isFile, loadJSON } from '../../util/fs.ts';
 import { basename, dirname, join } from '../../util/path.ts';
+import { resolvePackageFilePath } from '../../util/resolve.ts';
 
-const dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const getDependencies = async (cwd: string) => {
-  const manifest: unknown = await loadJSON(join(cwd, 'package.json'));
-  const dependencies = new Set<string>();
-  if (!isRecord(manifest)) return dependencies;
-  for (const field of dependencyFields) {
-    const values = manifest[field];
-    if (isRecord(values)) for (const packageName in values) dependencies.add(packageName);
-  }
-  return dependencies;
-};
-
-const findConfig = (cwd: string, packageName: string) => {
-  let dir = cwd;
-  while (true) {
-    const filePath = join(dir, 'node_modules', packageName, 'marko.json');
-    if (isFile(filePath)) return filePath;
-    const parent = dirname(dir);
-    if (parent === dir) return;
-    dir = parent;
-  }
-};
+const findConfig = (cwd: string, packageName: string) => resolvePackageFilePath(`${packageName}/marko.json`, cwd);
 
 const readDir = (dir: string) => {
   try {
@@ -67,10 +47,10 @@ const getTags = (dir: string) => {
   return tags;
 };
 
-export const getTaglibDependencies = async (cwd: string) => {
+export const getTaglibDependencies = async (cwd: string, dependencies: Set<string>) => {
   const tagDependencies = new Map<string, string[]>();
   const fallbackDependencies: string[] = [];
-  for (const packageName of await getDependencies(cwd)) {
+  for (const packageName of dependencies) {
     const configPath = findConfig(cwd, packageName);
     if (!configPath) continue;
     let config: unknown;

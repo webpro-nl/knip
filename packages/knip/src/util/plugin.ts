@@ -2,6 +2,7 @@ export { _load as load } from './loader.ts';
 
 import type { Plugin, PluginOptions, RawPluginConfiguration } from '../types/config.ts';
 import { arrayify } from './array.ts';
+import { loadFile } from './fs.ts';
 import { _load as load } from './loader.ts';
 import { get } from './object.ts';
 import { basename } from './path.ts';
@@ -22,22 +23,18 @@ export const hasDependency = (dependencies: Set<string>, values: (string | RegEx
 export const normalizePluginConfig = (pluginConfig: RawPluginConfiguration) => {
   if (typeof pluginConfig === 'boolean') return pluginConfig;
 
-  const isObject = typeof pluginConfig !== 'string' && !Array.isArray(pluginConfig);
+  if (typeof pluginConfig === 'string' || Array.isArray(pluginConfig)) {
+    return { config: pluginConfig ? arrayify(pluginConfig) : null, entry: null, project: [] };
+  }
 
-  const config = isObject
-    ? 'config' in pluginConfig
-      ? arrayify(pluginConfig.config)
-      : null
-    : pluginConfig
-      ? arrayify(pluginConfig)
-      : null;
+  const config = pluginConfig.config === undefined ? null : arrayify(pluginConfig.config);
 
-  const entry = isObject && 'entry' in pluginConfig ? arrayify(pluginConfig.entry) : null;
+  const entry = pluginConfig.entry === undefined ? null : arrayify(pluginConfig.entry);
 
   const project =
-    isObject && 'project' in pluginConfig
-      ? arrayify(pluginConfig.project)
-      : (entry ?? []).filter(pattern => !pattern.startsWith('!'));
+    pluginConfig.project === undefined
+      ? (entry ?? []).filter(pattern => !pattern.startsWith('!'))
+      : arrayify(pluginConfig.project);
 
   return { config, entry, project };
 };
@@ -51,9 +48,11 @@ export const loadConfigForPlugin = async (
   const { packageJsonPath } = plugin;
   const { manifest } = options;
 
-  return basename(configFilePath) === 'package.json'
-    ? typeof packageJsonPath === 'function'
+  if (basename(configFilePath) === 'package.json') {
+    return typeof packageJsonPath === 'function'
       ? packageJsonPath(manifest)
-      : get(manifest, packageJsonPath ?? pluginName)
-    : await load(configFilePath);
+      : get(manifest, packageJsonPath ?? pluginName);
+  }
+
+  return plugin.parseConfig ? await plugin.parseConfig(await loadFile(configFilePath)) : await load(configFilePath);
 };

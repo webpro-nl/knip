@@ -1,0 +1,8 @@
+{
+  "entry": [],
+  "project": [],
+  "ignoreDependencies": [
+    "vite-plus"
+  ],
+  "oxlint": false
+}

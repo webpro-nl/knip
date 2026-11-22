@@ -1,0 +1,7 @@
+{
+  "name": "jest-manual-mocks",
+  "devDependencies": {
+    "@jest/globals": "*",
+    "jest": "*"
+  }
+}

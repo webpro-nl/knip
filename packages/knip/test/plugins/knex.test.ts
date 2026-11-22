@@ -13,7 +13,18 @@ test('Find dependencies with the knex plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    processed: 8,
+    total: 8,
+  });
+});
+
+test('Find dependencies with the knex plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 1,
+    total: 1,
   });
 });

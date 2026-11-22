@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, PluginOptions, ResolveConfig } from '../../types/config.ts';
 import { hasFileWithExtension } from '../../util/fs.ts';
-import { type Input, isDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { type Input, isDeferResolveEntry, toEntryPath } from '../../util/input.ts';
 import { findByKeyDeep } from '../../util/object.ts';
 import { join, relative } from '../../util/path.ts';
 import type { Job, Runs } from './types.ts';
@@ -30,12 +30,13 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
 
 const ACTION_PATH_VAR = /\$\{\{\s*github\.action_path\s*\}\}|\$\{GITHUB_ACTION_PATH\}|\$GITHUB_ACTION_PATH/g;
 
-const resolveConfig: ResolveConfig = async (config, options) => {
+export const resolveConfig: ResolveConfig = async (config, options) => {
   const { rootCwd, getInputsFromScripts, isProduction, getManifest, configFileDir } = options;
 
   const inputs = new Set<Input>();
 
   const jobs = findByKeyDeep<Job>(config, 'steps');
+  const workflowWorkingDir = config?.defaults?.run?.['working-directory'];
 
   for (const steps of jobs) {
     if (!Array.isArray(steps.steps)) continue;
@@ -43,14 +44,15 @@ const resolveConfig: ResolveConfig = async (config, options) => {
       step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
     const path = action?.with?.path;
+    const jobWorkingDir = steps.defaults?.run?.['working-directory'] ?? workflowWorkingDir;
     for (const step of steps.steps) {
-      const workingDir = step['working-directory'];
-      const dir = join(rootCwd, path && workingDir ? relative(workingDir, path) : workingDir ? workingDir : '.');
+      const workingDir = step['working-directory'] ?? jobWorkingDir;
+      const dir = join(rootCwd, path && workingDir ? relative(path, workingDir) : workingDir ? workingDir : '.');
       if (step.run) {
         const manifest = getManifest(dir) ?? options.manifest;
         const actionPath = relative(dir, configFileDir);
         const run = step.run.replace(ACTION_PATH_VAR, actionPath ? `./${actionPath}` : '.');
-        for (const input of getInputsFromScripts([run], { optionalBinaries: true, manifest })) {
+        for (const input of getInputsFromScripts([run], { optionalBinaries: true, manifest, cwd: dir })) {
           if (isDeferResolveEntry(input) && path && !workingDir) {
             input.specifier = relative(join(dir, path), join(rootCwd, input.specifier));
           }
@@ -61,7 +63,7 @@ const resolveConfig: ResolveConfig = async (config, options) => {
     }
   }
 
-  return [...inputs, ...getActionDependencies(config, options).map(id => toEntry(id))];
+  return [...inputs, ...getActionDependencies(config, options).map(id => toEntryPath(id))];
 };
 
 const plugin: Plugin = {

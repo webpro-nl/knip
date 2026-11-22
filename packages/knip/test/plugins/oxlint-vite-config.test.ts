@@ -7,13 +7,13 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/oxlint-vite-config');
 
-test('Resolve oxlint jsPlugins from the vite-plus vite.config.ts lint block', async () => {
+test('Resolve oxlint jsPlugins from the vite-plus vite.config.ts lint block and its overrides', async () => {
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

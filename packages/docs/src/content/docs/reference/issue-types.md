@@ -9,6 +9,7 @@ Knip reports the following types of issues:
 | Title                                | Description                                                |       | Key                 |
 | :----------------------------------- | :--------------------------------------------------------- | ----- | :------------------ |
 | Unused files                         | Unable to find a reference to this file                    | 🔧    | `files`             |
+| Unused subpaths                      | Unable to find a reference to this package.json subpath    |       | `subpaths`          |
 | Unused dependencies                  | Unable to find a reference to this dependency              | 🔧    | `dependencies`      |
 | Unused devDependencies               | Unable to find a reference to this devDependency           | 🔧    | `dependencies`²     |
 | Referenced optional peerDependencies | Optional peer dependency is referenced                     |       | `dependencies`²     |

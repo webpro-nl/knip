@@ -1,21 +1,16 @@
-import { parseArgs } from 'node:util';
 import { Plugins } from './plugins/index.ts';
 import type { Args } from './types/args.ts';
 import type { Entries, PluginMap } from './types/config.ts';
 import type { PluginName } from './types/PluginNames.ts';
-import { timerify } from './util/Performance.ts';
+import { perfObserver, timerify } from './util/Performance.ts';
 
 const PMap: PluginMap = Plugins;
-
-const { values } = parseArgs({ strict: false, options: { performance: { type: 'boolean' } } });
-
-const isEnabled = !!values.performance;
 
 const timerifyMethods = ['resolve', 'resolveConfig', 'resolveFromAST'] as const;
 
 const PluginEntries = Object.entries(PMap) as Entries;
 
-if (isEnabled) {
+if (perfObserver.isTimerifyFunctions) {
   for (const [, plugin] of PluginEntries) {
     for (const method of timerifyMethods) {
       // @ts-expect-error function signatures don't match but doesn't matter

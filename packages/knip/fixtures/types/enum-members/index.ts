@@ -1,8 +1,10 @@
-import { MyEnum, TestEnum, Category } from './members';
+import { MyEnum, TestEnum, Category, Permission } from './members';
 
 const a: MyEnum.A_UsedExternal = 1;
 
 const b: TestEnum = { ['']: 'test' };
+
+const canEdit = (mask: number) => (mask & Permission.ReadWrite) === Permission.ReadWrite;
 
 export enum EntryEnum {
   UsedMemberInEntryEnum = 1,

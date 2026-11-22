@@ -5,8 +5,8 @@ import type { IsPluginEnabled, Plugin, ResolveFromAST } from '../../types/config
 import { findProperty, getFirstPropertyValue, getStringValues } from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { getGitRemoteUrls } from '../../util/git.ts';
-import { isEntry, type Input } from '../../util/input.ts';
-import { join, toAbsolute } from '../../util/path.ts';
+import type { Input } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://docs.railway.com/infrastructure-as-code
@@ -131,7 +131,6 @@ const resolveFromAST: ResolveFromAST = (program, options) => {
       ];
 
       for (const input of options.getInputsFromScripts(commands, { optionalBinaries: true, cwd, manifest })) {
-        if (isEntry(input)) input.specifier = toAbsolute(input.specifier, cwd);
         inputs.push({ ...input, dir: cwd });
       }
     },

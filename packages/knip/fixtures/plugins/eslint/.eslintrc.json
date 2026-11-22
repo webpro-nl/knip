@@ -10,7 +10,7 @@
   "plugins": ["@typescript-eslint"],
   "parserOptions": {
     "babelOptions": {
-      "plugins": ["@babel/plugin-syntax-import-assertions"]
+      "plugins": ["@babel/plugin-syntax-import-assertions", "@babel/plugin-transform-runtime"]
     }
   }
 }

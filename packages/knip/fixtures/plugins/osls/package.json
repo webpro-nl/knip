@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/osls",
+  "scripts": {
+    "deploy": "osls deploy",
+    "offline": "sls offline start"
+  },
+  "devDependencies": {
+    "osls": "*",
+    "serverless-offline": "*"
+  }
+}

@@ -42,7 +42,7 @@ test('Enable from the native manifest', async () => {
   });
 });
 
-test('Discover entries from the native plugin manifest', async () => {
+test('Discover literal entries from the native plugin manifest', async () => {
   const options = await createOptions({
     cwd: resolve('fixtures/plugins/openclaw-plugin-manifest-only'),
     isProduction: true,
@@ -52,12 +52,13 @@ test('Discover entries from the native plugin manifest', async () => {
 
   assert(!('provider-discovery.ts' in issues.files));
   assert('unrelated.ts' in issues.files);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['unrelated.ts', 'v/provider.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 1,
-    total: 2,
-    processed: 2,
+    files: 2,
+    total: 4,
+    processed: 4,
   });
 });
 

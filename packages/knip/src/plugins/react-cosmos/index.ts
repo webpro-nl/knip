@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { toModule, toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { ReactCosmosConfig } from './types.ts';
@@ -31,7 +31,7 @@ const resolveConfig: ResolveConfig<ReactCosmosConfig> = async localConfig => {
   ];
   return [...entries, ...decoratorEntry]
     .map(id => toEntry(id))
-    .concat((localConfig?.plugins ?? []).map(id => toDeferResolve(id)));
+    .concat((localConfig?.plugins ?? []).map(id => toModule(id)));
 };
 
 const plugin: Plugin = {

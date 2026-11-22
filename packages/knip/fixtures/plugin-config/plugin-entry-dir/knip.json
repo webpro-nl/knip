@@ -1,0 +1,13 @@
+{
+  "ignoreWorkspaces": ["packages/ignored", "packages/app/nested/ignored"],
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": ["**/*.ts!"]
+    },
+    "packages/*": {
+      "entry": [],
+      "project": ["**/*.ts!"]
+    }
+  }
+}

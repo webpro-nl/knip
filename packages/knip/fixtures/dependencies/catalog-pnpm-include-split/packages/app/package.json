@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/catalog-pnpm-include-split__app",
+  "main": "index.js",
+  "dependencies": {
+    "react": "catalog:react",
+    "vue": "catalog:legacy",
+    "zod": "catalog:"
+  }
+}

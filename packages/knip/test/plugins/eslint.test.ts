@@ -24,26 +24,40 @@ test('Find dependencies with the ESLint plugin (deprecated/1)', async () => {
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-config']);
   assert(issues.unlisted['.eslintrc.yml']['@sinonjs/eslint-plugin-no-prototype-methods']);
   assert(issues.unlisted['base.eslint.js']['@babel/eslint-parser']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.json']['eslint-config-airbnb']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.cjs']['eslint-plugin-import']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-config-next']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-cypress']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-comments']);
+  assert(issues.unlisted['.eslintrc.js']['eslint-plugin-eslint-plugin']);
+  assert(issues.unlisted['base.eslint.json']['eslint-plugin-import']);
 
-  assert(issues.unresolved['.eslintrc.cjs']['eslint-config-airbnb']);
-  assert(issues.unresolved['.eslintrc.cjs']['eslint-config-next']);
-  assert(issues.unresolved['.eslintrc.cjs']['eslint-plugin-import']);
   assert(issues.unresolved['.eslintrc.cjs']['eslint-import-resolver-webpack']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-config-airbnb']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-config-next']);
   assert(issues.unresolved['.eslintrc.js']['eslint-import-resolver-exports']);
   assert(issues.unresolved['.eslintrc.js']['eslint-import-resolver-typescript']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-cypress']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-comments']);
-  assert(issues.unresolved['.eslintrc.js']['eslint-plugin-eslint-plugin']);
-  assert(issues.unresolved['.eslintrc.json']['eslint-config-airbnb']);
-  assert(issues.unresolved['base.eslint.json']['eslint-plugin-import']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    unlisted: 13,
-    unresolved: 13,
+    unlisted: 23,
+    unresolved: 3,
     processed: 4,
     total: 4,
+  });
+});
+
+test('Find dependencies with the ESLint plugin (deprecated/1, production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.dependencies['package.json']['@babel/runtime']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    processed: 1,
+    total: 1,
   });
 });

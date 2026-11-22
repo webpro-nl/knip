@@ -7,6 +7,7 @@ export default defineConfig({
   projects: [
     'packages/*',
     '!packages/excluded',
+    '!packages/w',
     '<rootDir>/services/auth/rstest.config.ts',
     {
       name: 'dom',

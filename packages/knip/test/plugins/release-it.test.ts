@@ -21,7 +21,7 @@ test('Find dependencies with the Release It plugin', async () => {
     binaries: 1,
     devDependencies: 1,
     unlisted: 2,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

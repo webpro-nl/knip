@@ -69,3 +69,14 @@ test('Find dependencies with the Babel plugin (1)', async () => {
     total: 3,
   });
 });
+
+test('Find dependencies with the Babel plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    processed: 0,
+    total: 0,
+  });
+});

@@ -1,14 +1,15 @@
 {
   "name": "@fixtures/marko",
   "files": ["dist", "marko.json"],
+  "workspaces": ["packages/*"],
   "scripts": {
     "build": "mtc"
   },
   "dependencies": {
+    "@orchard/marko-migrate": "*",
     "@orchard/marko-tags": "*",
     "@orchard/unused-legacy-marko-tags": "*",
     "@orchard/unused-marko-tags": "*",
-    "combined-marko-tags": "*",
     "legacy-marko-tags": "*",
     "unused-library": "*"
   },
@@ -16,5 +17,13 @@
     "@marko/type-check": "*",
     "marko": "*",
     "sass": "*"
+  },
+  "peerDependencies": {
+    "combined-marko-tags": "*"
+  },
+  "peerDependenciesMeta": {
+    "combined-marko-tags": {
+      "optional": true
+    }
   }
 }

@@ -7,13 +7,16 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/tailwind4');
 
-test('Find dependencies with the Tailwind plugin (4)', async () => {
+test('Find dependencies and the literal --input path with the Tailwind plugin (4)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['src/t/theme.css']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 2,
+    total: 2,
   });
 });

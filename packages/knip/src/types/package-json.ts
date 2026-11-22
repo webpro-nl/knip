@@ -1,16 +1,8 @@
 import type { PluginMap, WorkspaceConfiguration } from './config.ts';
 
-type Primitive = null | undefined | string | number | boolean | symbol | bigint;
+export type Exports = null | string | string[] | { [key: string]: Exports };
 
-type LiteralUnion<LiteralType, BaseType extends Primitive> = LiteralType | (BaseType & Record<never, never>);
-
-type C = 'import' | 'require' | 'node' | 'node-addons' | 'deno' | 'browser' | 'electron' | 'react-native' | 'default';
-type ExportCondition = LiteralUnion<C, string>;
-type Exports = null | string | string[] | { [key in ExportCondition]: Exports } | { [key: string]: Exports };
-
-type Imports = {
-  [key: `#${string}`]: Exports;
-};
+type Imports = { [key: string]: Exports };
 
 type PackageJsonPath<T> = T extends { packageJsonPath: infer P } ? (P extends string ? P : never) : never;
 
@@ -36,7 +28,6 @@ export type PackageExtensions = Record<
   string,
   {
     peerDependencies?: Dependencies;
-    peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   }
 >;
 
@@ -46,6 +37,7 @@ export type PackageJson = {
   bin?: string | Record<string, string>;
   repository?: string | { type?: string; url?: string; directory?: string };
   version?: string;
+  keywords?: string[];
   private?: boolean;
   workspaces?: string[] | { packages?: string[]; catalog?: Catalog; catalogs?: Catalogs };
   exports?: Exports;
@@ -88,4 +80,5 @@ export type WorkspacePackage = {
   manifest: PackageJson;
   manifestPath: string;
   manifestStr: string;
+  aliases: Map<string, string>;
 };

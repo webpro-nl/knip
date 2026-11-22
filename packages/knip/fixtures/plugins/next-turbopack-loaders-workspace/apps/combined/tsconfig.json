@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@workspace/next-config": [
+        "../../packages/next-config/index.ts"
+      ]
+    }
+  }
+}

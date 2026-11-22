@@ -1,0 +1,7 @@
+{
+  "name": "@fixtures/public",
+  "exports": {
+    ".": "./index.js",
+    "./extra": "./extra.js"
+  }
+}

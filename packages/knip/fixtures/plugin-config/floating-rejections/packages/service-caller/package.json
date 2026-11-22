@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/floating-rejections-service-caller",
+  "devDependencies": {
+    "vite": "*"
+  }
+}

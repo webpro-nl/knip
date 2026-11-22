@@ -1,0 +1,1 @@
+{"name":"@fixtures/peer-dependencies-optional-caught-call","peerDependencies":{"optional-peer":"*"},"peerDependenciesMeta":{"optional-peer":{"optional":true}}}

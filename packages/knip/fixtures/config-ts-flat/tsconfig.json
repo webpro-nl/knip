@@ -1,5 +1,12 @@
 {
   "compilerOptions": {
-    "types": ["node"]
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "skipLibCheck": true
   }
 }

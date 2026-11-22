@@ -22,7 +22,8 @@ article.prose {
 }
 
 .sponsors .platinum,
-.sponsors .silver {
+.sponsors .gold,
+.sponsors .bronze {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -30,7 +31,7 @@ article.prose {
   gap: 2rem;
 }
 
-.sponsors .gold {
+.sponsors .silver {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -38,7 +39,7 @@ article.prose {
   gap: 2rem 4rem;
 }
 
-.sponsors .gold:has(> a:nth-child(even):last-child) {
+.sponsors .silver:has(> a:nth-child(even):last-child) {
   display: grid;
   grid-template-columns: repeat(2, auto);
   justify-content: center;
@@ -65,6 +66,10 @@ article.prose {
 
 .sponsors .w500 {
   width: 500px;
+}
+
+.sponsors .w400 {
+  width: 400px;
 }
 
 .sponsors .w280 {

@@ -36,10 +36,13 @@ const packageManifestResolver = new ResolverFactory({
 
 resolverInstances.push(packageManifestResolver);
 
-export const resolvePackageManifestPath = (packageName: string, baseDir: string) => {
-  const resolved = packageManifestResolver.sync(baseDir, `${packageName}/package.json`);
+export const resolvePackageFilePath = (specifier: string, baseDir: string) => {
+  const resolved = packageManifestResolver.sync(baseDir, specifier);
   if (resolved.path) return toPosix(resolved.path);
 };
+
+export const resolvePackageManifestPath = (packageName: string, baseDir: string) =>
+  resolvePackageFilePath(`${packageName}/package.json`, baseDir);
 
 const createSyncModuleResolver = (extensions: string[], tsConfigFile?: string) => {
   const baseOptions = {

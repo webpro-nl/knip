@@ -7,6 +7,7 @@
     "quasar": "*"
   },
   "devDependencies": {
-    "@quasar/app-vite": "*"
+    "@quasar/app-vite": "*",
+    "@quasar/quasar-app-extension-qmarkdown": "*"
   }
 }

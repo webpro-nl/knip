@@ -1,7 +1,11 @@
 {
   "name": "@plugins/jest4",
   "scripts": {},
+  "dependencies": {
+    "@babel/runtime": "*"
+  },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "*",
     "jest": "*",
     "babel-jest": "*",
     "@babel/preset-env": "*",

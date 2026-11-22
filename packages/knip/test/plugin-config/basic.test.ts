@@ -17,3 +17,14 @@ test('Use root plugin config', async () => {
     processed: 3,
   });
 });
+
+test('Treat undefined plugin config like an absent key', async () => {
+  const options = await createOptions({ cwd, args: { config: resolve('fixtures/plugin-config/undefined.ts') } });
+  const { counters } = await main(options);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    total: 4,
+    processed: 4,
+  });
+});

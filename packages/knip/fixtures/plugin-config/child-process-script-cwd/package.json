@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/child-process-script-cwd",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "bun run build:all",
+    "build:all": "bun scripts/build.mjs"
+  }
+}

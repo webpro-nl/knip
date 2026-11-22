@@ -7,15 +7,16 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/electron-vite');
 
-test('Find entry files with the electron-vite plugin', async () => {
+test('Find literal entry files with the electron-vite plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files), []);
+  assert.deepEqual(Object.keys(issues.files), ['src/preload/v/bridge.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 5,
-    total: 5,
+    files: 1,
+    processed: 7,
+    total: 7,
   });
 });

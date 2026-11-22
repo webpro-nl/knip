@@ -1,6 +1,7 @@
 {
   "name": "@plugins/next-mdx",
   "dependencies": {
-    "@next/mdx": "*"
+    "@next/mdx": "*",
+    "nextra": "*"
   }
 }

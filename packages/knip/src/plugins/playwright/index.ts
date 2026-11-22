@@ -1,7 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
-import { join, relative, toAbsolute } from '../../util/path.ts';
+import { type Input, toModule, toEntryPath, toEntry } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PlaywrightTestConfig } from './types.ts';
 
@@ -19,13 +19,12 @@ export const entry = ['**/*.@(spec|test).?(c|m)[jt]s?(x)'];
 
 const toEntryPatterns = (
   testMatch: string | RegExp | Array<string | RegExp>,
-  cwd: string,
   configDir: string,
   localConfig: PlaywrightTestConfig,
   rootConfig: PlaywrightTestConfig
 ) => {
   const testDir = localConfig.testDir ?? rootConfig.testDir;
-  const dir = relative(cwd, testDir ? join(configDir, testDir) : configDir);
+  const dir = testDir ? toAbsolute(testDir, configDir) : configDir;
   const patterns = [testMatch].flat().filter((p): p is string => typeof p === 'string');
   return patterns.map(pattern => toEntry(join(dir, pattern)));
 };
@@ -33,11 +32,23 @@ const toEntryPatterns = (
 const builtinReporters = ['dot', 'line', 'list', 'junit', 'html', 'blob', 'json', 'github', 'null'];
 
 export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir } = options;
+  const { configFileDir } = options;
 
   const inputs: Input[] = [];
-  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
-  for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntry(toAbsolute(id, configFileDir)));
+  for (const id of arrayify(localConfig.globalSetup)) inputs.push(toEntryPath(toAbsolute(id, configFileDir)));
+  for (const id of arrayify(localConfig.globalTeardown)) inputs.push(toEntryPath(toAbsolute(id, configFileDir)));
+
+  for (const server of [localConfig.webServer].flat()) {
+    if (!server?.command) continue;
+    const dir = server.cwd ? toAbsolute(server.cwd, configFileDir) : configFileDir;
+    for (const input of options.getInputsFromScripts(server.command, {
+      optionalBinaries: true,
+      cwd: dir,
+      manifest: options.getManifest(dir) ?? options.manifest,
+    })) {
+      inputs.push({ ...input, dir: input.dir ?? dir });
+    }
+  }
 
   const projects = localConfig.projects ? [localConfig, ...localConfig.projects] : [localConfig];
 
@@ -48,8 +59,8 @@ export const resolveConfig: ResolveConfig<PlaywrightTestConfig> = async (localCo
   });
 
   return projects
-    .flatMap(config => toEntryPatterns(config.testMatch ?? entry, cwd, configFileDir, config, localConfig))
-    .concat(reporters.map(id => toDeferResolve(id)))
+    .flatMap(config => toEntryPatterns(config.testMatch ?? entry, configFileDir, config, localConfig))
+    .concat(reporters.map(id => toModule(id)))
     .concat(inputs);
 };
 

@@ -8,6 +8,8 @@
     "test": "ng test"
   },
   "dependencies": {
+    "@angular/core": "*",
+    "@angular/localize": "*",
     "zone.js": "*"
   },
   "devDependencies": {

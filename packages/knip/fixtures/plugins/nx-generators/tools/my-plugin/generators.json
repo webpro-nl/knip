@@ -1,0 +1,7 @@
+{
+  "generators": {
+    "foo": { "factory": "./src/foo/generator" },
+    "implementation": { "implementation": "./src/foo/implementation#run", "factory": "./src/foo/factory" },
+    "external": "some-other-package:generator"
+  }
+}

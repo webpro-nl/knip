@@ -56,7 +56,9 @@ The set of `project` files determines the analysis scope. Use negated `project`
 patterns to exclude files from the analysis. See [configuring project files][1]
 for details.
 
-The values you set override the default values, they are not merged.
+The `entry` and `project` values you set replace the defaults, they are not
+merged. Entry files from `package.json` fields like `main`, `bin` and `exports`
+are always added as well.
 
 :::tip
 

@@ -1,3 +1,3 @@
 export interface MSWConfig {
-  workerDirectory?: string;
+  workerDirectory?: string | string[];
 }

@@ -17,5 +17,7 @@ test('Find dependencies with the markdownlint-cli2 plugin', async () => {
     ...baseCounters,
     binaries: 1,
     devDependencies: 1,
+    processed: 1,
+    total: 1,
   });
 });

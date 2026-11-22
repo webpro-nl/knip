@@ -29,9 +29,11 @@ module.exports = {
   projects: [
     {
       displayName: 'lint',
+      testEnvironment: 'uninstalled-environment',
       runner: 'jest-runner-eslint',
       testMatch: ['<rootDir>/**/*.js'],
     },
+    { displayName: 'node', testEnvironment: 'node' },
   ],
   testResultsProcessor: 'jest-phabricator',
   snapshotResolver: '<rootDir>/snapshotResolver.js',

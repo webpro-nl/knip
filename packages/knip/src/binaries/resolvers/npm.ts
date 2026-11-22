@@ -1,24 +1,37 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { isBinary, toBinary, toDependency } from '../../util/input.ts';
+import { isBinary, toBinary, toModule, toDependency } from '../../util/input.ts';
 import { extractBinary, isValidBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
-import { argsAfter, expandScript } from '../util.ts';
+import { argsAfter, expandScript, npmBooleanAliases, npmBooleanFlags } from '../util.ts';
+
+const runCommands = new Set(['run', 'run-script', 'rum', 'urn']);
+
+const lifecycleScripts = new Map([
+  ['start', 'start'],
+  ['stop', 'stop'],
+  ['restart', 'restart'],
+  ['test', 'test'],
+  ['t', 'test'],
+  ['tst', 'test'],
+]);
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const { fromArgs, manifest } = options;
   const parsed = parseArgs(words, {
     isStorePositions: true,
-    boolean: ['yes', 'no', 'parseable'],
+    boolean: [...npmBooleanFlags, 'parseable'],
     string: ['package', 'call'],
-    alias: { yes: 'y', parseable: 'p', call: 'c' },
+    alias: { ...npmBooleanAliases, parseable: 'p', call: 'c' },
     '--': true,
   });
   const [command, script] = parsed._;
   if (command === 'exec' || command === 'x') {
     const packages = parsed.package ? [parsed.package].flat() : [];
     const packageInputs = packages.map(specifier =>
-      toDependency(stripVersionFromSpecifier(specifier), { optional: true })
+      isInternal(specifier)
+        ? toModule(specifier, { optional: true, dir: options.cwd })
+        : toDependency(stripVersionFromSpecifier(specifier), { optional: true })
     );
     const separator = words.findIndex(word => word.value === '--');
     const args = parsed.positionalIndices!.slice(1).map(index => words[index]);
@@ -54,8 +67,9 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
 
   const _childArgs =
     parsed['--'] && parsed['--'].length > 0 ? fromArgs(argsAfter(words, '--'), { isForwardedArgs: true }) : [];
-  if (command === 'run' && manifest.scriptNames.has(script)) {
-    return expandScript(script, argsAfter(words, '--'), manifest.scripts, options) ?? _childArgs;
+  const name = runCommands.has(command) ? script : lifecycleScripts.get(command);
+  if (name && manifest.scriptNames.has(name)) {
+    return expandScript(name, argsAfter(words, '--'), manifest.scripts, options) ?? _childArgs;
   }
   return [];
 };

@@ -5,9 +5,11 @@ import { default as astroDb } from './astro-db/index.ts';
 import { default as astroMarkdoc } from './astro-markdoc/index.ts';
 import { default as astroOgCanvas } from './astro-og-canvas/index.ts';
 import { default as ava } from './ava/index.ts';
+import { default as awsCdk } from './aws-cdk/index.ts';
 import { default as babel } from './babel/index.ts';
 import { default as biome } from './biome/index.ts';
 import { default as borp } from './borp/index.ts';
+import { default as buf } from './buf/index.ts';
 import { default as bumpp } from './bumpp/index.ts';
 import { default as bun } from './bun/index.ts';
 import { default as c8 } from './c8/index.ts';
@@ -28,15 +30,26 @@ import { default as dependencyCruiser } from './dependency-cruiser/index.ts';
 import { default as docusaurus } from './docusaurus/index.ts';
 import { default as dotenv } from './dotenv/index.ts';
 import { default as drizzle } from './drizzle/index.ts';
+import { default as electronBuilder } from './electron-builder/index.ts';
+import { default as electronForge } from './electron-forge/index.ts';
 import { default as electronVite } from './electron-vite/index.ts';
 import { default as eleventy } from './eleventy/index.ts';
+import { default as ember } from './ember/index.ts';
+import { default as emberTemplateLint } from './ember-template-lint/index.ts';
+import { default as env } from './env/index.ts';
+import { default as envCmd } from './env-cmd/index.ts';
 import { default as esbuild } from './esbuild/index.ts';
 import { default as eslint } from './eslint/index.ts';
+import { default as evalite } from './evalite/index.ts';
 import { default as eve } from './eve/index.ts';
 import { default as execa } from './execa/index.ts';
 import { default as expo } from './expo/index.ts';
+import { default as expoRouter } from './expo-router/index.ts';
 import { default as expressiveCode } from './expressive-code/index.ts';
 import { default as fast } from './fast/index.ts';
+import { default as filesystemRouting } from './filesystem-routing/index.ts';
+import { default as firebase } from './firebase/index.ts';
+import { default as flue } from './flue/index.ts';
 import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
 import { default as githubAction } from './github-action/index.ts';
@@ -46,23 +59,30 @@ import { default as graphqlCodegen } from './graphql-codegen/index.ts';
 import { default as hardhat } from './hardhat/index.ts';
 import { default as husky } from './husky/index.ts';
 import { default as i18nextParser } from './i18next-parser/index.ts';
+import { default as jasmine } from './jasmine/index.ts';
 import { default as jest } from './jest/index.ts';
 import { default as karma } from './karma/index.ts';
 import { default as knex } from './knex/index.ts';
+import { default as kyselyCodegen } from './kysely-codegen/index.ts';
 import { default as ladle } from './ladle/index.ts';
 import { default as laravelVitePlugin } from './laravel-vite-plugin/index.ts';
 import { default as lefthook } from './lefthook/index.ts';
+import { default as lingui } from './lingui/index.ts';
 import { default as lintStaged } from './lint-staged/index.ts';
 import { default as linthtml } from './linthtml/index.ts';
 import { default as lit } from './lit/index.ts';
 import { default as lockfileLint } from './lockfile-lint/index.ts';
 import { default as lostPixel } from './lost-pixel/index.ts';
 import { default as lunaria } from './lunaria/index.ts';
+import { default as maestro } from './maestro/index.ts';
 import { default as markdownlint } from './markdownlint/index.ts';
 import { default as marko } from './marko/index.ts';
+import { default as mastra } from './mastra/index.ts';
+import { default as mcp } from './mcp/index.ts';
 import { default as mdx } from './mdx/index.ts';
 import { default as mdxlint } from './mdxlint/index.ts';
 import { default as metro } from './metro/index.ts';
+import { default as mikroOrm } from './mikro-orm/index.ts';
 import { default as mise } from './mise/index.ts';
 import { default as mocha } from './mocha/index.ts';
 import { default as moonrepo } from './moonrepo/index.ts';
@@ -87,6 +107,7 @@ import { default as oclif } from './oclif/index.ts';
 import { default as openapiTs } from './openapi-ts/index.ts';
 import { default as openclaw } from './openclaw/index.ts';
 import { default as orval } from './orval/index.ts';
+import { default as osls } from './osls/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
 import { default as pandaCss } from './panda-css/index.ts';
@@ -104,6 +125,7 @@ import { default as preCommit } from './pre-commit/index.ts';
 import { default as preconstruct } from './preconstruct/index.ts';
 import { default as prettier } from './prettier/index.ts';
 import { default as prisma } from './prisma/index.ts';
+import { default as purgecss } from './purgecss/index.ts';
 import { default as quasar } from './quasar/index.ts';
 import { default as qwik } from './qwik/index.ts';
 import { default as railway } from './railway/index.ts';
@@ -116,10 +138,12 @@ import { default as relay } from './relay/index.ts';
 import { default as releaseIt } from './release-it/index.ts';
 import { default as remark } from './remark/index.ts';
 import { default as remix } from './remix/index.ts';
+import { default as retryCli } from './retry-cli/index.ts';
 import { default as rolldown } from './rolldown/index.ts';
 import { default as rollup } from './rollup/index.ts';
 import { default as rsbuild } from './rsbuild/index.ts';
 import { default as rslib } from './rslib/index.ts';
+import { default as rslint } from './rslint/index.ts';
 import { default as rspack } from './rspack/index.ts';
 import { default as rstest } from './rstest/index.ts';
 import { default as sanity } from './sanity/index.ts';
@@ -128,8 +152,10 @@ import { default as sentry } from './sentry/index.ts';
 import { default as serverlessFramework } from './serverless-framework/index.ts';
 import { default as simpleGitHooks } from './simple-git-hooks/index.ts';
 import { default as sizeLimit } from './size-limit/index.ts';
+import { default as solidjsVitePlugin } from './solidjs-vite-plugin/index.ts';
 import { default as sst } from './sst/index.ts';
 import { default as starlight } from './starlight/index.ts';
+import { default as startServerAndTest } from './start-server-and-test/index.ts';
 import { default as stencil } from './stencil/index.ts';
 import { default as storybook } from './storybook/index.ts';
 import { default as stryker } from './stryker/index.ts';
@@ -148,9 +174,12 @@ import { default as tauri } from './tauri/index.ts';
 import { default as temporal } from './temporal/index.ts';
 import { default as textlint } from './textlint/index.ts';
 import { default as travis } from './travis/index.ts';
+import { default as triggerDev } from './trigger-dev/index.ts';
 import { default as tsNode } from './ts-node/index.ts';
+import { default as tsNodeDev } from './ts-node-dev/index.ts';
 import { default as tsd } from './tsd/index.ts';
 import { default as tsdown } from './tsdown/index.ts';
+import { default as tsrs } from './tsrs/index.ts';
 import { default as tsup } from './tsup/index.ts';
 import { default as tsx } from './tsx/index.ts';
 import { default as turbo } from './turbo/index.ts';
@@ -178,6 +207,7 @@ import { default as vitePwaAssetsGenerator } from './vite-pwa-assets-generator/i
 import { default as vitepress } from './vitepress/index.ts';
 import { default as vitest } from './vitest/index.ts';
 import { default as vue } from './vue/index.ts';
+import { default as webTestRunner } from './web-test-runner/index.ts';
 import { default as webdriverIo } from './webdriver-io/index.ts';
 import { default as webpack } from './webpack/index.ts';
 import { default as wireit } from './wireit/index.ts';
@@ -195,9 +225,11 @@ export const Plugins = {
   'astro-markdoc': astroMarkdoc,
   'astro-og-canvas': astroOgCanvas,
   ava,
+  'aws-cdk': awsCdk,
   babel,
   biome,
   borp,
+  buf,
   bumpp,
   bun,
   c8,
@@ -218,15 +250,26 @@ export const Plugins = {
   docusaurus,
   dotenv,
   drizzle,
+  'electron-builder': electronBuilder,
+  'electron-forge': electronForge,
   'electron-vite': electronVite,
   eleventy,
+  ember,
+  'ember-template-lint': emberTemplateLint,
+  env,
+  'env-cmd': envCmd,
   esbuild,
   eslint,
+  evalite,
   eve,
   execa,
   expo,
+  'expo-router': expoRouter,
   'expressive-code': expressiveCode,
   fast,
+  'filesystem-routing': filesystemRouting,
+  firebase,
+  flue,
   fumadocs,
   gatsby,
   'github-action': githubAction,
@@ -236,23 +279,30 @@ export const Plugins = {
   hardhat,
   husky,
   'i18next-parser': i18nextParser,
+  jasmine,
   jest,
   karma,
   knex,
+  'kysely-codegen': kyselyCodegen,
   ladle,
   'laravel-vite-plugin': laravelVitePlugin,
   lefthook,
+  lingui,
   'lint-staged': lintStaged,
   linthtml,
   lit,
   'lockfile-lint': lockfileLint,
   'lost-pixel': lostPixel,
   lunaria,
+  maestro,
   markdownlint,
   marko,
+  mastra,
+  mcp,
   mdx,
   mdxlint,
   metro,
+  'mikro-orm': mikroOrm,
   mise,
   mocha,
   moonrepo,
@@ -277,6 +327,7 @@ export const Plugins = {
   'openapi-ts': openapiTs,
   openclaw,
   orval,
+  osls,
   oxfmt,
   oxlint,
   'panda-css': pandaCss,
@@ -294,6 +345,7 @@ export const Plugins = {
   preconstruct,
   prettier,
   prisma,
+  purgecss,
   quasar,
   qwik,
   railway,
@@ -306,10 +358,12 @@ export const Plugins = {
   'release-it': releaseIt,
   remark,
   remix,
+  'retry-cli': retryCli,
   rolldown,
   rollup,
   rsbuild,
   rslib,
+  rslint,
   rspack,
   rstest,
   sanity,
@@ -318,8 +372,10 @@ export const Plugins = {
   'serverless-framework': serverlessFramework,
   'simple-git-hooks': simpleGitHooks,
   'size-limit': sizeLimit,
+  'solidjs-vite-plugin': solidjsVitePlugin,
   sst,
   starlight,
+  'start-server-and-test': startServerAndTest,
   stencil,
   storybook,
   stryker,
@@ -338,9 +394,12 @@ export const Plugins = {
   temporal,
   textlint,
   travis,
+  'trigger-dev': triggerDev,
   'ts-node': tsNode,
+  'ts-node-dev': tsNodeDev,
   tsd,
   tsdown,
+  tsrs,
   tsup,
   tsx,
   turbo,
@@ -368,6 +427,7 @@ export const Plugins = {
   vitepress,
   vitest,
   vue,
+  'web-test-runner': webTestRunner,
   'webdriver-io': webdriverIo,
   webpack,
   wireit,

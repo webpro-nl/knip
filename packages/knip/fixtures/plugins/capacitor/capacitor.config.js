@@ -1,0 +1,15 @@
+const config = {
+  appId: 'com.company.name',
+  appName: 'name',
+  includePlugins: [
+    '@capacitor-community/http',
+    '@capacitor/app',
+    '@capacitor/splash-screen',
+    '@capacitor/status-bar',
+    '@capacitor/storage',
+    'cordova-plugin-inappbrowser',
+  ],
+  plugins: {},
+};
+
+module.exports = config;

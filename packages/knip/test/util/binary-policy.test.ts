@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
 import type { GetInputsFromScriptsOptions } from '../../src/types/config.ts';
-import { toBinary, toConfig, toDeferResolve, toDeferResolveEntry } from '../../src/util/input.ts';
+import { toBinary, toConfig, toModule, toEntryPath } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -45,12 +45,12 @@ test('Wrappers preserve optional ambient executable references', () => {
 test('Optional executable references preserve explicit module, file and config references', () => {
   assert.deepEqual(inputs('node --import import-hook ./script.js'), [
     toBinary('node', optional),
-    toDeferResolveEntry('./script.js', optional),
-    toDeferResolve('import-hook'),
+    toEntryPath('./script.js', optional),
+    toModule('import-hook'),
   ]);
   assert.deepEqual(inputs('NODE_OPTIONS="--import import-hook" custom-build-cli'), [
     toBinary('custom-build-cli', optional),
-    toDeferResolve('import-hook'),
+    toModule('import-hook'),
   ]);
   assert.deepEqual(inputs('vitest --config ./vitest.custom.ts'), [
     toBinary('vitest', optional),

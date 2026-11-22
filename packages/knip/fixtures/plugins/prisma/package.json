@@ -12,7 +12,7 @@
   },
   "scripts": {
     "lint-staged": "lint-staged",
-    "generate": "prisma generate --schema prisma/schema-script.prisma --config config/prisma.custom-config.ts",
+    "generate": "prisma generate --schema 'prisma/[script]/schema-script.prisma' --config config/prisma.custom-config.ts",
     "generate-multi-schema": "prisma generate --schema prisma-multi-schema"
   },
   "prisma": {

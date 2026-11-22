@@ -1,0 +1,5 @@
+{
+  "wrangler": {
+    "config": ["worker/wrangler.jsonc"]
+  }
+}

@@ -17,9 +17,10 @@ export interface ParsedArgs {
 interface Opts {
   isStorePositions?: boolean;
   string?: string[];
-  boolean?: string[];
+  boolean?: string[] | true;
   alias?: Record<string, string | string[]>;
   '--'?: boolean;
+  stopEarly?: boolean;
 }
 
 const setNested = (target: ParsedArgs, key: string, value: ParsedValue) => {
@@ -44,7 +45,8 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
     else if (arg && typeof arg.value === 'string') argv.push(arg.value);
   }
   const strings = new Set(opts.string ?? []);
-  const booleans = new Set(opts.boolean ?? []);
+  const isBooleanDefault = opts.boolean === true;
+  const booleans = new Set(opts.boolean === true ? [] : (opts.boolean ?? []));
   const groups = new Map<string, string[]>();
   const canonicalOf = new Map<string, string>();
 
@@ -91,8 +93,14 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
     if (token.kind === 'option-terminator') {
       terminated = true;
     } else if (token.kind === 'positional') {
+      if (consumed.has(i)) continue;
+      if (opts.stopEarly) {
+        positionals.push(coerce(token.value), ...args.slice(token.index + 1));
+        for (let index = token.index; index < args.length; index++) positionalIndices?.push(index);
+        break;
+      }
       if (terminated && opts['--']) dd.push(token.value);
-      else if (!consumed.has(i)) {
+      else {
         positionals.push(coerce(token.value));
         positionalIndices?.push(token.index);
       }
@@ -106,7 +114,8 @@ const parseArgs = (input: readonly (string | Word)[], opts: Opts = {}): ParsedAr
         set(name, strings.has(name) ? token.value : coerce(token.value));
       } else {
         const next = tokens[i + 1];
-        if (next?.kind === 'positional' && !consumed.has(i + 1)) {
+        const takesValue = !isBooleanDefault || strings.has(name);
+        if (takesValue && next?.kind === 'positional' && !consumed.has(i + 1)) {
           consumed.add(i + 1);
           set(name, strings.has(name) ? next.value : coerce(next.value));
         } else {

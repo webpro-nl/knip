@@ -9,6 +9,7 @@ export interface NxProjectConfiguration {
         cwd?: string;
         eslintConfig?: string;
         jestConfig?: string;
+        karmaConfig?: string;
         tsConfig?: string;
         vitestConfig?: string;
         webpackConfig?: string;
@@ -16,6 +17,16 @@ export interface NxProjectConfiguration {
     };
   };
 }
+
+type NxCollectionEntry =
+  | string
+  | {
+      factory?: string;
+      implementation?: string;
+      batchImplementation?: string;
+    };
+
+export type NxCollection = Record<string, Record<string, NxCollectionEntry> | undefined>;
 
 export interface NxConfigRoot {
   plugins?: Array<

@@ -10,13 +10,13 @@ const enablers = ['syncpack'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', ...toCosmiconfig('syncpack')];
+const entry = ['package.json', ...toCosmiconfig('syncpack')];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

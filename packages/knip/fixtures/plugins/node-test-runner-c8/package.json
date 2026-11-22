@@ -1,7 +1,7 @@
 {
   "name": "@plugins/node-test-runner-c8",
   "scripts": {
-    "test": "c8 node --test"
+    "test": "c8 --reporter=lcov node --test"
   },
   "devDependencies": {
     "c8": "*"

@@ -1,0 +1,12 @@
+{
+  "entry": [],
+  "project": [],
+  "ignoreDependencies": [
+    "vite-plus"
+  ],
+  "vite": {
+    "config": [
+      "custom.config.ts"
+    ]
+  }
+}

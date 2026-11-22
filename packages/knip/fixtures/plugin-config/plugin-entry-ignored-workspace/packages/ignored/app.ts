@@ -1,0 +1,1 @@
+import 'ignored-workspace-dependency';

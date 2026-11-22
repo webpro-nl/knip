@@ -1,4 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import { relative } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toShellCommand } from '../../util/scripts.ts';
 import type { MoonConfiguration } from './types.ts';
@@ -17,8 +18,9 @@ const config = ['moon.yml', '.moon/tasks.yml', '.moon/tasks/*.yml'];
 
 const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) => {
   const tasks = config.tasks ? Object.values(config.tasks) : [];
+  // Scripts resolve from options.cwd, and relative roots keep a cwd with spaces or parentheses out of the command
   const expand = (value: string) =>
-    value.replace('$workspaceRoot', options.rootCwd).replace('$projectRoot', options.cwd);
+    value.replace('$workspaceRoot', relative(options.cwd, options.rootCwd)).replace('$projectRoot', '.');
   const inputs = tasks
     .map(task => task.command)
     .filter(command => command)

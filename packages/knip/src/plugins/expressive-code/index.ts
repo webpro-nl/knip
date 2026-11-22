@@ -13,11 +13,11 @@ const enablers = [
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['ec.config.{js,mjs,cjs,ts}'];
+const entry = ['ec.config.{js,mjs,cjs,ts}'];
 
 export default {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 } satisfies Plugin;

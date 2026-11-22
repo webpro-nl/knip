@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/subpath-exports-unused",
+  "workspaces": ["packages/*"]
+}

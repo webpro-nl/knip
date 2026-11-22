@@ -12,6 +12,8 @@ test('Find dependencies with the Jest plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
+  assert(!issues.devDependencies['package.json']?.['jest-environment-node']);
+
   assert(issues.unlisted['jest.config.shared.js']['@jest/types']);
   assert(issues.unlisted['jest.setup.js']['@testing-library/jest-dom']);
   assert(issues.unlisted['jest.config.js']['@jest/types']);
@@ -23,13 +25,14 @@ test('Find dependencies with the Jest plugin', async () => {
   assert(issues.unresolved['jest.config.js']['jest-phabricator']);
   assert(issues.unresolved['jest.config.js']['jest-runner-eslint']);
   assert(issues.unresolved['jest.config.js']['jest-silent-reporter']);
+  assert(issues.unresolved['jest.config.js']['uninstalled-environment']);
   assert(issues.unresolved['jest.config.js'][join(cwd, '__mocks__/fileMock.js')]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
     unlisted: 5,
-    unresolved: 7,
+    unresolved: 8,
     processed: 7,
     total: 7,
   });

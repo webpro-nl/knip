@@ -11,9 +11,15 @@ export const { a, b } = { a: 1, b: 1 };
 
 export const [c, d] = [3, 4];
 
+export const { n, o = n } = { n: 14 };
+
 export const [e, f] = [5, 6];
 
 export const [g, h, i] = [7, 8, 9];
+
+export const j = 10, k = 11;
+
+export const l = 12, m = 13;
 
 export default class MyClass {}
 

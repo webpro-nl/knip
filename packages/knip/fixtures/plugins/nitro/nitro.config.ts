@@ -5,4 +5,5 @@ export default defineNitroConfig({
   compatibilityDate: '2025-12-13',
   srcDir: 'server',
   imports: false,
+  modules: ['./modules/my-module.ts'],
 });

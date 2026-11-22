@@ -12,11 +12,29 @@ test('Find dependencies with the Capacitor plugin (Swift Package Manager)', asyn
   const { issues, counters } = await main(options);
 
   assert(issues.unlisted['capacitor.config.ts']['@capacitor/ios']);
+  assert.deepEqual(Object.keys(issues.dependencies['package.json']).sort(), ['@capacitor/browser', 'lodash']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
+    dependencies: 2,
     unlisted: 1,
     processed: 1,
     total: 1,
+  });
+});
+
+test('Find dependencies with the Capacitor plugin (Swift Package Manager) (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert(issues.unlisted['capacitor.config.ts']['@capacitor/ios']);
+  assert.deepEqual(Object.keys(issues.dependencies['package.json']).sort(), ['@capacitor/browser', 'lodash']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 2,
+    unlisted: 1,
+    processed: 0,
+    total: 0,
   });
 });

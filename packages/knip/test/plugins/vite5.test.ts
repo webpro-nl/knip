@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/vite5');
 
-test('Find entry from Vite index.html inline module script', async () => {
+test('Find literal entries from Vite index.html inline module scripts', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -15,11 +15,13 @@ test('Find entry from Vite index.html inline module script', async () => {
   assert('src/unused.ts' in issues.files);
   assert('src/commented-out.ts' in issues.files);
   assert('src/decoy.ts' in issues.files);
+  assert(issues.files['src/v/entry.ts']);
+  assert(!issues.files['src/[variant]/entry.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 3,
-    processed: 4,
-    total: 4,
+    files: 4,
+    processed: 6,
+    total: 6,
   });
 });

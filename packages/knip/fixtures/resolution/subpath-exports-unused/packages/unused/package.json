@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/unused",
+  "exports": "./lib.js"
+}

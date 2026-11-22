@@ -7,13 +7,16 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/turbo2');
 
-test('Find dependencies with the turbo plugin (config.cjs, root plopfile, --config)', async () => {
+test('Find dependencies and literal --config paths with the turbo plugin (config.cjs, root plopfile, --config)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['tools/g/generator.ts']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    files: 1,
+    processed: 5,
+    total: 5,
   });
 });

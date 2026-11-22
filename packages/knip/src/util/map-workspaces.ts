@@ -5,11 +5,21 @@ import { partition } from './array.ts';
 import { debugLog } from './debug.ts';
 import { ConfigurationError } from './errors.ts';
 import { logWarning } from './log.ts';
+import { isStartsLikePackageName } from './modules.ts';
 import { getPackageName } from './package-name.ts';
 import { join } from './path.ts';
 
 type Packages = Map<string, WorkspacePackage>;
 type WorkspacePkgNames = Set<string>;
+
+const dependencyTypes = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const;
+
+const getAliasedWorkspacePkgName = (range: string) => {
+  if (!range.startsWith('workspace:')) return;
+  const spec = range.slice(10);
+  const at = spec.lastIndexOf('@');
+  if (at > 0 && isStartsLikePackageName(spec)) return spec.slice(0, at);
+};
 
 export default async function mapWorkspaces(cwd: string, workspaces: string[]): Promise<[Packages, WorkspacePkgNames]> {
   const [negatedPatterns, patterns] = partition(workspaces, p => p.match(/^!/));
@@ -33,7 +43,7 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
       const manifestStr = (await readFile(manifestPath, 'utf8')).replace(/^﻿/, '');
       const manifest: PackageJson = JSON.parse(manifestStr);
       const pkgName = getPackageName(manifest, dir);
-      const pkg: WorkspacePackage = { dir, name, pkgName, manifestPath, manifestStr, manifest };
+      const pkg: WorkspacePackage = { dir, name, pkgName, manifestPath, manifestStr, manifest, aliases: new Map() };
       packages.set(name, pkg);
       if (pkgName) wsPkgNames.add(pkgName);
       else throw new ConfigurationError(`Missing package name in ${manifestPath}`);
@@ -43,6 +53,17 @@ export default async function mapWorkspaces(cwd: string, workspaces: string[]): 
       } else if (error instanceof SyntaxError) {
         logWarning(`Skipping workspace ${name}: invalid JSON in ${manifestPath} (${error.message})`);
       } else throw error;
+    }
+  }
+
+  for (const { manifest, aliases } of packages.values()) {
+    for (const type of dependencyTypes) {
+      const dependencies = manifest[type];
+      if (!dependencies) continue;
+      for (const alias in dependencies) {
+        const pkgName = getAliasedWorkspacePkgName(dependencies[alias]);
+        if (pkgName && pkgName !== alias && wsPkgNames.has(pkgName)) aliases.set(alias, pkgName);
+      }
     }
   }
 

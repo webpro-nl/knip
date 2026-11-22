@@ -1,5 +1,6 @@
 import type { CatalogCounselor } from '../CatalogCounselor.ts';
 import type { ConfigurationChief, Workspace } from '../ConfigurationChief.ts';
+import { getUnusedIgnorePatternHints, settleConfigurationHints } from '../configuration-hints.ts';
 import type { ConsoleStreamer } from '../ConsoleStreamer.ts';
 import type { DependencyDeputy } from '../DependencyDeputy.ts';
 import { createGraphExplorer } from '../graph-explorer/explorer.ts';
@@ -20,7 +21,8 @@ import { relative } from '../util/path.ts';
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { findMatch } from '../util/regex.ts';
 import { getShouldIgnoreHandler, getShouldIgnoreTagHandler, hasTag, isAlwaysIgnored } from '../util/tag.ts';
-import { INTERNAL_TAG } from '../constants.ts';
+import { IMPORT_FLAGS, INTERNAL_TAG } from '../constants.ts';
+import type { SubpathReferences } from './SubpathReferences.ts';
 
 interface AnalyzeOptions {
   analyzedFiles: Set<string>;
@@ -30,7 +32,9 @@ interface AnalyzeOptions {
   deputy: DependencyDeputy;
   entryPaths: Set<string>;
   graph: ModuleGraph;
+  isGitIgnored: (filePath: string) => boolean;
   streamer: ConsoleStreamer;
+  subpathReferences: SubpathReferences;
   unreferencedFiles: Set<string>;
   options: MainOptions;
 }
@@ -58,14 +62,16 @@ export const analyze = async ({
   deputy,
   entryPaths,
   graph,
+  isGitIgnored,
   streamer,
+  subpathReferences,
   unreferencedFiles,
   options,
 }: AnalyzeOptions) => {
   const shouldIgnore = getShouldIgnoreHandler(options.isProduction);
   const shouldIgnoreTags = getShouldIgnoreTagHandler(options.tags);
 
-  const explorer = createGraphExplorer(graph, entryPaths);
+  const explorer = createGraphExplorer(graph, entryPaths, options.isSession);
 
   const isReferencedInUsedExport = (
     exportedItem: Export,
@@ -152,7 +158,7 @@ export const analyze = async ({
     }
   };
 
-  const analyzeGraph = async () => {
+  const analyzeGraph = timerify(async () => {
     if (options.isReportValues || options.isReportTypes) {
       streamer.cast('Connecting the dots');
 
@@ -314,6 +320,7 @@ export const analyze = async ({
                 specifier: extImport.specifier,
                 isTypeOnly: extImport.isTypeOnly,
                 isResolved: extImport.filePath !== undefined,
+                isCaught: !!(extImport.modifiers & IMPORT_FLAGS.CAUGHT),
               });
             if (!isHandled && !(extImport.jsDocTags?.size && shouldIgnoreTags(extImport.jsDocTags)))
               collector.addIssue({
@@ -375,6 +382,8 @@ export const analyze = async ({
 
     collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
 
+    for (const issue of subpathReferences.getIssues()) collector.addIssue(issue);
+
     if (options.isReportDependencies) {
       const { dependencyIssues, devDependencyIssues, optionalPeerDependencyIssues } = deputy.settleDependencyIssues();
       for (const issue of dependencyIssues) collector.addIssue(issue);
@@ -400,12 +409,20 @@ export const analyze = async ({
       collector.addConfigurationHint({ type: 'ignoreWorkspaces', identifier });
     }
 
-    for (const hint of collector.getUnusedIgnorePatternHints(options)) {
-      collector.addConfigurationHint(hint);
+    if (options.isReportFiles) {
+      const patterns = collector.getUnusedIgnorePatterns();
+      const filePaths = [graph.keys(), unreferencedFiles];
+      const context = { cwd: options.cwd, filePaths, isGitIgnored };
+      for (const hint of getUnusedIgnorePatternHints(patterns, context)) collector.addConfigurationHint(hint);
     }
 
     for (const hint of chief.getConfigurationHints()) collector.addConfigurationHint(hint);
-  };
+
+    const hints = settleConfigurationHints(collector.getConfigurationHintCandidates(), {
+      countWorkspaces: configKey => chief.countWorkspacesForConfigKey(configKey),
+    });
+    collector.setConfigurationHints(hints);
+  }, 'analyzeGraph');
 
   await analyzeGraph();
 

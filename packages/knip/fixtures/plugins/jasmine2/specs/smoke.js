@@ -1,0 +1,3 @@
+describe("smoke", () => {
+  it("boots", () => {});
+});

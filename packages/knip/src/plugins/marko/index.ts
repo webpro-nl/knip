@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toProductionEntry } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
+import { type Input, toModule, toEntry } from '../../util/input.ts';
+import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { createCompiler } from './compiler.ts';
 import { getTaglibDependencies } from './taglibs.ts';
@@ -42,26 +42,25 @@ const tagDefFields = [
 ] satisfies (keyof MarkoTagDef)[];
 
 const resolveConfig: ResolveConfig<MarkoTagDef> = (localConfig, options) => {
-  const { configFileName, configFileDir, cwd } = options;
-  const inputs: Input[] = [];
+  const { configFileName, configFileDir } = options;
+  const inputs: Input[] = production.map(pattern => toEntry(pattern, { production: true }));
   if (!localConfig) return inputs;
 
   if (configFileName === 'marko.json') {
-    const dir = relative(cwd, configFileDir);
-    return tagProduction.map(pattern => toProductionEntry(join(dir, pattern)));
+    return tagProduction.map(pattern => toEntry(join(configFileDir, pattern), { production: true }));
   }
 
   for (const field of tagDefFields) {
     for (const id of [localConfig[field]].flat()) {
-      if (typeof id === 'string') inputs.push(toDeferResolve(join(configFileDir, id)));
+      if (typeof id === 'string') inputs.push(toModule(id));
     }
   }
   return inputs;
 };
 
-const registerCompilers: RegisterCompilers = async ({ cwd, registerCompiler, hasDependency }) => {
+const registerCompilers: RegisterCompilers = async ({ cwd, dependencies, registerCompiler, hasDependency }) => {
   if (hasDependency('marko')) {
-    const { tagDependencies, fallbackDependencies } = await getTaglibDependencies(cwd);
+    const { tagDependencies, fallbackDependencies } = await getTaglibDependencies(cwd, dependencies);
     registerCompiler({ extension: '.marko', compiler: createCompiler(tagDependencies, fallbackDependencies) });
   }
 };

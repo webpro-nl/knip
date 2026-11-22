@@ -1,4 +1,5 @@
 export default [
+  { file: 'routes/sitemap[.]xml.tsx', path: 'sitemap.xml' },
   { file: 'routes/home.tsx', index: true },
   {
     file: 'routes/layout.tsx',

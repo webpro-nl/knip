@@ -1,22 +1,18 @@
-import type { WatchListener } from 'node:fs';
 import type { ConfigurationChief } from '../ConfigurationChief.ts';
+import type { SubpathReferences } from '../graph/SubpathReferences.ts';
 import { invalidateCache } from '../graph-explorer/cache.ts';
 import type { IssueCollector } from '../IssueCollector.ts';
 import type { ProjectPrincipal } from '../ProjectPrincipal.ts';
-import type { Issues } from '../types/issues.ts';
+import type { ConfigurationFiles } from '../session/configuration.ts';
+import { getFileTopology, hasSameTopology, isIncrementalFile } from '../session/incremental.ts';
 import type { ModuleGraph } from '../types/module-graph.ts';
 import type { MainOptions } from './create-options.ts';
 import { debugLog } from './debug.ts';
-import { hasErrorCause } from './errors.ts';
-import { isFile } from './fs.ts';
-import { logError } from './log.ts';
 import { updateImportMap } from './module-graph.ts';
-import { toAbsolute, toPosix, toRelative } from './path.ts';
+import { toAbsolute, toRelative } from './path.ts';
 import { clearModuleResolutionCaches } from '../typescript/resolve-module-names.ts';
 import { clearGlobCache } from './glob-cache.ts';
 import { clearResolverCache } from './resolve.ts';
-
-export type OnFileChange = (options: { issues: Issues; duration?: number; mem?: number }) => void;
 
 export type WatchChange = {
   type: 'added' | 'deleted' | 'modified';
@@ -28,13 +24,14 @@ export type SessionHandler = Awaited<ReturnType<typeof getSessionHandler>>;
 type WatchOptions = {
   analyzedFiles: Set<string>;
   analyzeSourceFile: (filePath: string) => Promise<void>;
+  subpathReferences: SubpathReferences;
   chief: ConfigurationChief;
   collector: IssueCollector;
   analyze: () => Promise<void>;
   principal: ProjectPrincipal;
   graph: ModuleGraph;
+  configurationFiles?: ConfigurationFiles;
   isIgnored: (path: string) => boolean;
-  onFileChange?: OnFileChange;
   unreferencedFiles: Set<string>;
   entryPaths: Set<string>;
 };
@@ -50,13 +47,14 @@ export const getSessionHandler = async (
   {
     analyzedFiles,
     analyzeSourceFile,
+    subpathReferences,
     chief,
     collector,
     analyze,
     principal,
     graph,
+    configurationFiles,
     isIgnored,
-    onFileChange,
     unreferencedFiles,
     entryPaths,
   }: WatchOptions
@@ -64,10 +62,13 @@ export const getSessionHandler = async (
   const added = new Set<string>();
   const deleted = new Set<string>();
   const modified = new Set<string>();
+  if (configurationFiles) principal.collectConfigurationImports(configurationFiles);
 
   const processFileChanges = async (changes: WatchChange[]) => {
     const startTime = performance.now();
     let hasRelevantChanges = false;
+    const configurationChange = configurationFiles?.getChange(changes, options.cwd);
+    if (configurationChange) throw configurationChange;
 
     for (const change of changes) {
       const filePath = toAbsolute(change.filePath, options.cwd);
@@ -93,6 +94,7 @@ export const getSessionHandler = async (
           deleted.add(filePath);
           added.delete(filePath);
           analyzedFiles.delete(filePath);
+          subpathReferences.release(filePath);
           principal.removeProjectPath(filePath);
           debugLog(workspace.name, `Watcher: - ${relativePath}`);
           break;
@@ -102,6 +104,7 @@ export const getSessionHandler = async (
             continue;
           }
           modified.add(filePath);
+          subpathReferences.release(filePath);
           debugLog(workspace.name, `Watcher: ± ${relativePath}`);
           break;
         }
@@ -112,82 +115,109 @@ export const getSessionHandler = async (
 
     if (!hasRelevantChanges || (added.size === 0 && deleted.size === 0 && modified.size === 0)) return;
 
-    clearResolverCache();
-    clearModuleResolutionCaches();
-    clearGlobCache();
-    invalidateCache(graph);
-
-    const filePaths = await principal.getUsedResolvedFiles();
-
-    unreferencedFiles.clear();
-    const cachedUnusedFiles = collector.purge();
-
-    for (const filePath of added) cachedUnusedFiles.add(filePath);
-    for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
-
-    if (added.size > 0 || deleted.size > 0) {
-      graph.clear();
-      for (const filePath of filePaths) {
-        const workspace = chief.findWorkspaceByFilePath(filePath);
-        if (workspace) {
-          await analyzeSourceFile(filePath);
+    let incremental = added.size === 0 && deleted.size === 0;
+    if (incremental) {
+      for (const filePath of modified) {
+        const file = graph.get(filePath);
+        if (!file || !analyzedFiles.has(filePath) || !isIncrementalFile(file)) {
+          incremental = false;
+          break;
         }
       }
+    }
+    if (incremental) {
+      for (const filePath of modified) {
+        const file = graph.get(filePath);
+        if (!file) {
+          incremental = false;
+          break;
+        }
+        const before = getFileTopology(file);
+        await analyzeSourceFile(filePath);
+        if (!hasSameTopology(before, file)) {
+          incremental = false;
+          break;
+        }
+      }
+    }
+    if (incremental) {
+      invalidateCache(graph, true);
+      collector.purge();
     } else {
-      for (const [filePath, file] of graph) {
-        if (filePaths.has(filePath)) {
-          file.importedBy = undefined;
-        } else {
-          graph.delete(filePath);
-          analyzedFiles.delete(filePath);
-          const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
-        }
-      }
+      clearResolverCache();
+      clearModuleResolutionCaches();
+      clearGlobCache();
+      invalidateCache(graph);
 
-      for (const filePath of filePaths) {
-        if (!graph.has(filePath)) {
+      subpathReferences.reset();
+      const filePaths = await principal.getUsedResolvedFiles((specifier, filePath, importedFilePath) =>
+        subpathReferences.add(specifier, filePath, importedFilePath)
+      );
+
+      const cachedUnusedFiles = collector.purge();
+
+      for (const filePath of added) cachedUnusedFiles.add(filePath);
+      for (const filePath of deleted) cachedUnusedFiles.delete(filePath);
+
+      if (added.size > 0 || deleted.size > 0) {
+        graph.clear();
+        for (const filePath of filePaths) {
           const workspace = chief.findWorkspaceByFilePath(filePath);
           if (workspace) {
             await analyzeSourceFile(filePath);
           }
         }
-      }
+      } else {
+        for (const [filePath, file] of graph) {
+          if (filePaths.has(filePath)) {
+            file.importedBy = undefined;
+          } else {
+            graph.delete(filePath);
+            analyzedFiles.delete(filePath);
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace && principal.projectPaths.has(filePath)) cachedUnusedFiles.add(filePath);
+          }
+        }
 
-      for (const filePath of modified) {
-        if (!cachedUnusedFiles.has(filePath)) {
-          const workspace = chief.findWorkspaceByFilePath(filePath);
-          if (workspace) {
-            if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
+        for (const filePath of filePaths) {
+          if (!graph.has(filePath) || !analyzedFiles.has(filePath)) {
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace) {
               await analyzeSourceFile(filePath);
             }
           }
         }
+
+        for (const filePath of modified) {
+          if (!cachedUnusedFiles.has(filePath)) {
+            const workspace = chief.findWorkspaceByFilePath(filePath);
+            if (workspace) {
+              if (principal.projectPaths.has(filePath) || graph.has(filePath)) {
+                await analyzeSourceFile(filePath);
+              }
+            }
+          }
+        }
+
+        for (const filePath of filePaths) {
+          const file = graph.get(filePath);
+          if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
+        }
       }
 
-      for (const filePath of filePaths) {
-        const file = graph.get(filePath);
-        if (file?.internalImportCache) updateImportMap(file, file.internalImportCache, graph);
-      }
+      const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
+      unreferencedFiles.clear();
+      for (const filePath of unusedFiles) unreferencedFiles.add(filePath);
     }
 
-    await analyze();
-
-    const unusedFiles = [...cachedUnusedFiles].filter(filePath => !analyzedFiles.has(filePath));
-    collector.addFilesIssues(unusedFiles);
-    collector.addFileCounts({ processed: analyzedFiles.size, unused: unusedFiles.length });
-
     for (const issue of collector.getRetainedIssues()) collector.addIssue(issue);
+    await analyze();
 
     added.clear();
     deleted.clear();
     modified.clear();
 
-    const update = createUpdate({ startTime });
-
-    if (onFileChange) onFileChange(Object.assign({ issues: getIssues().issues }, update));
-
-    return update;
+    return createUpdate({ startTime });
   };
 
   const clearSourceText = () => principal.fileManager.sourceTextCache.clear();
@@ -198,29 +228,11 @@ export const getSessionHandler = async (
     return update;
   };
 
-  const listener: WatchListener<string | Buffer> = (eventType, filePath) => {
-    debugLog('*', `(raw) ${eventType} ${filePath}`);
-    if (typeof filePath === 'string') {
-      // On Windows, fs.watch provides paths with backslash separators.
-      // Normalize to POSIX separators so downstream posix path utilities work correctly.
-      const normalizedPath = toPosix(filePath);
-      const type = eventType === 'rename' ? (isFile(options.cwd, normalizedPath) ? 'added' : 'deleted') : 'modified';
-      handleFileChanges([{ type, filePath: normalizedPath }]).catch(error => {
-        const message = error instanceof Error ? error.message : String(error);
-        const reason = error instanceof Error && hasErrorCause(error) ? `\nReason: ${error.cause.message}` : '';
-        logError(message + reason);
-        process.exitCode = 2;
-      });
-    }
-  };
-
   const getIssues = () => collector.getIssues();
 
   const getEntryPaths = () => entryPaths;
 
   const getGraph = () => graph;
 
-  if (onFileChange) onFileChange({ issues: getIssues().issues });
-
-  return { listener, handleFileChanges, getEntryPaths, getGraph, getIssues };
+  return { handleFileChanges, getEntryPaths, getGraph, getIssues, configurationFiles };
 };

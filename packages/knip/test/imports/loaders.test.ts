@@ -14,10 +14,11 @@ test('Inline dynamic import loaders consume only the default export of modules t
   assert(issues.exports['pages/dashboard.ts'].unusedWidget);
   assert(issues.exports['pages/profile.ts'].unusedAvatar);
   assert(issues.exports['pages/settings.ts'].unusedToggle);
+  assert(issues.exports['pages/terms.ts'].clause);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 3,
+    exports: 4,
     processed: 7,
     total: 7,
   });

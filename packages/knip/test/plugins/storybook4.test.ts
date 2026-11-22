@@ -16,7 +16,7 @@ test('Follow imports in Storybook MDX docs', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/peer-dependencies-optional-try-catch-unresolved",
+  "peerDependencies": { "optional-peer": "*" },
+  "peerDependenciesMeta": { "optional-peer": { "optional": true } }
+}

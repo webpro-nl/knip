@@ -1,12 +1,18 @@
+import { join } from 'node:path';
+
 export default {
   title: 'Docusaurus',
   url: 'https://docusaurus.io',
-  scripts: ['/js/custom.js', { src: '/js/analytics.js', async: true }, 'https://example.com/external.js'],
+  scripts: ['/js/custom.js', { src: '/js/analytics.js', async: true }, 'https://example.com/external.js', '/js/[variant]/client.js'],
   stylesheets: ['/css/custom.css', { href: '/css/theme.css' }, 'https://example.com/external.css'],
   future: {
     experimental_faster: true,
   },
-  themes: ['@docusaurus/theme-mermaid', '@docusaurus/theme-search-algolia'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    '@docusaurus/theme-search-algolia',
+    ['@easyops-cn/docusaurus-search-local', { hashed: true }],
+  ],
   markdown: {
     mermaid: true,
   },
@@ -23,11 +29,15 @@ export default {
     '@docusaurus/plugin-content-pages',
     ['sitemap', { changefreq: 'weekly' }],
     'awesome',
+    'sass',
+    'docusaurus-lunr-search',
     '@my-company',
     '@my-company/awesome',
     '@my-company/cool/web',
     './plugins/local-plugin.js',
     ['./plugins/local-plugin-with-options.js', { foo: 'bar' }],
+    join(import.meta.dirname, 'plugins/absolute-plugin.js'),
+    [join(import.meta.dirname, 'plugins/absolute-plugin-with-options.js'), { foo: 'bar' }],
   ],
   presets: [
     [

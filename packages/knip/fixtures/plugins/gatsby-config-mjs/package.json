@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/gatsby-config-mjs",
+  "devDependencies": {
+    "gatsby": "*",
+    "gatsby-plugin-manifest": "*",
+    "babel-plugin-transform-imports": "*",
+    "babel-plugin-from-local-plugin": "*"
+  }
+}

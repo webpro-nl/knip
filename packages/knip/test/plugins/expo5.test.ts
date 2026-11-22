@@ -9,11 +9,16 @@ const cwd = resolve('fixtures/plugins/expo5');
 
 test('Find dependencies with the Expo plugin (5)', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert('src/app/unused.ts' in issues.files);
+  assert(issues.exports['src/app/App.tsx']['unusedHelper']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 2,
-    total: 2,
+    files: 1,
+    exports: 1,
+    processed: 4,
+    total: 4,
   });
 });

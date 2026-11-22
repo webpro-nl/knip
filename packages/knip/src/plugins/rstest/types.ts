@@ -1,3 +1,5 @@
+import type { ConfigParams } from '../rsbuild/types.ts';
+
 type TestEnvironment = 'node' | 'jsdom' | 'happy-dom';
 
 export type RstestProjectConfig = {
@@ -25,7 +27,5 @@ type RstestConfig = RstestProjectConfig & {
   // https://rstest.rs/config/test/coverage
   coverage?: { provider?: 'istanbul' | 'v8' };
 };
-
-type ConfigParams = { env: string; command: string; envMode: string };
 
 export type RstestConfigOrFn = RstestConfig | ((params: ConfigParams) => RstestConfig | Promise<RstestConfig>);

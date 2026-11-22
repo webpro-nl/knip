@@ -1,11 +1,18 @@
 import type { Program } from 'oxc-parser';
 import { blockCommentMatcher, lineCommentMatcher, scriptExtractor } from '../../compilers/compilers.ts';
-import { findImportedCalls, findProperty, getStringValues } from '../../typescript/ast-helpers.ts';
+import {
+  findImportedCalls,
+  findProperty,
+  getStringValues,
+  resolveObjectArg,
+  unwrapExpression,
+} from '../../typescript/ast-helpers.ts';
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isFile, loadFile } from '../../util/fs.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
-import { dirname, join, toAbsolute } from '../../util/path.ts';
+import { type Input, toEntryPath } from '../../util/input.ts';
+import { dirname, isInternal, join, toAbsolute } from '../../util/path.ts';
 import { getDependenciesFromConfig } from '../babel/index.ts';
+import { toProviderInput } from '../mdx/index.ts';
 
 const babelPluginSources = ['@rolldown/plugin-babel', '@vitejs/plugin-react', 'vite-plugin-babel'];
 
@@ -23,6 +30,15 @@ export const getBabelInputs = (program: Program): Input[] => {
       presets.push(...getStringValues(findProperty(config, 'presets')));
     }
     inputs.push(...getDependenciesFromConfig({ plugins, presets }));
+  }
+  return inputs;
+};
+
+export const getMdxInputs = (program: Program, dir: string): Input[] => {
+  const inputs: Input[] = [];
+  for (const call of findImportedCalls(program, '@mdx-js/rollup')) {
+    const provider = getStringValue(findProperty(call.arguments?.[0], 'providerImportSource'));
+    if (provider && !isInternal(provider)) inputs.push(toProviderInput(provider, dir));
   }
   return inputs;
 };
@@ -76,7 +92,9 @@ export const getHtmlScriptEntries = async (
   if (!isFile(htmlPath)) return [];
 
   const html = await loadFile(htmlPath);
-  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src => toProductionEntry(src));
+  return getScriptSources(html, dirname(htmlPath), rootDir, publicDir).map(src =>
+    toEntryPath(src, { production: true })
+  );
 };
 
 export const getIndexHtmlEntries = (rootDir: string, publicDir?: string): Promise<Input[]> =>
@@ -103,4 +121,15 @@ export const getVitePluginDirs = (program: Program, specifiers: string[], key: s
     if (collected.length > 0) dirs = collected;
   }
   return dirs;
+};
+
+export const getViteRoot = (program: Program, cwd: string): string => {
+  for (const node of program.body) {
+    if (node.type !== 'ExportDefaultDeclaration') continue;
+    const declaration = unwrapExpression(node.declaration);
+    const arg = declaration.type === 'CallExpression' ? declaration.arguments[0] : declaration;
+    const config = resolveObjectArg(arg && arg.type !== 'SpreadElement' ? unwrapExpression(arg) : undefined);
+    return toAbsolute(getStringValue(findProperty(config, 'root')) ?? '.', cwd);
+  }
+  return cwd;
 };

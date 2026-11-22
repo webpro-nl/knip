@@ -5,8 +5,11 @@
     "hello-world": "yarn run --top-level hello",
     "icons": ""
   },
+  "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "*"
+  },
   "devDependencies": {
-    "stylelint": "*",
-    "goodbye": "*"
+    "goodbye": "*",
+    "stylelint": "*"
   }
 }

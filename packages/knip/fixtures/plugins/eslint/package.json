@@ -1,7 +1,11 @@
 {
   "name": "@plugins/eslint",
+  "dependencies": {
+    "@babel/runtime": "*"
+  },
   "devDependencies": {
     "eslint": "8.57.0",
+    "@babel/plugin-transform-runtime": "*",
     "@nrwl/eslint-plugin-nx": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",

@@ -1,7 +1,7 @@
 import type { PluginOptions, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDependency, toProductionDependency } from '../../util/input.ts';
+import { type Input, toEntryPath, toDependency } from '../../util/input.ts';
 import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
-import { join } from '../../util/path.ts';
+import { isInternal, join } from '../../util/path.ts';
 import type { ExpoConfig } from './types.ts';
 
 const getDummyConfigContext = (options: PluginOptions) => ({
@@ -26,15 +26,18 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   const platforms = config.platforms ?? ['ios', 'android'];
 
-  const pluginPackages =
-    (config.plugins
-      ?.map(plugin => {
-        const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
-        return getPackageNameFromModuleSpecifier(pluginName);
-      })
-      .filter(Boolean) as string[]) ?? [];
+  const inputs = new Set<Input>();
 
-  const inputs = new Set<Input>(pluginPackages.map(id => toDependency(id)));
+  for (const plugin of config.plugins ?? []) {
+    const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+    if (typeof pluginName !== 'string') continue;
+    if (isInternal(pluginName)) {
+      inputs.add(toEntryPath(pluginName));
+    } else {
+      const packageName = getPackageNameFromModuleSpecifier(pluginName);
+      if (packageName) inputs.add(toDependency(packageName));
+    }
+  }
 
   const allowedPackages = ['expo-atlas', 'expo-dev-client'];
   const allowedProductionPackages = ['expo-insights'];
@@ -49,32 +52,32 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
 
   for (const pkg of allowedProductionPackages) {
     if (manifestDependencies.includes(pkg)) {
-      inputs.add(toProductionDependency(pkg));
+      inputs.add(toDependency(pkg, { production: true }));
     }
   }
 
   if (config.updates?.enabled !== false) {
-    inputs.add(toProductionDependency('expo-updates'));
+    inputs.add(toDependency('expo-updates', { production: true }));
   }
 
   if (config.notification) {
-    inputs.add(toProductionDependency('expo-notifications'));
+    inputs.add(toDependency('expo-notifications', { production: true }));
   }
 
   const isExpoRouter = manifest.main === 'expo-router/entry';
 
   // https://docs.expo.dev/router/installation/#setup-entry-point
   if (isExpoRouter) {
-    inputs.add(toProductionDependency('expo-router'));
+    inputs.add(toDependency('expo-router', { production: true }));
   }
 
   // https://docs.expo.dev/workflow/web/#install-web-dependencies
   if (platforms.includes('web')) {
-    inputs.add(toProductionDependency('react-native-web'));
-    inputs.add(toProductionDependency('react-dom'));
+    inputs.add(toDependency('react-native-web', { production: true }));
+    inputs.add(toDependency('react-dom', { production: true }));
 
     // https://github.com/expo/expo/tree/main/packages/@expo/metro-runtime
-    if (!isExpoRouter) {
+    if (!isExpoRouter && !options.enabledPlugins.includes('expo-router')) {
       inputs.add(toDependency('@expo/metro-runtime'));
     }
   }
@@ -83,11 +86,11 @@ export const getDependencies: ResolveConfig<ExpoConfig> = async (localConfig, op
     (platforms.includes('android') && (config.userInterfaceStyle || config.android?.userInterfaceStyle)) ||
     (platforms.includes('ios') && (config.backgroundColor || config.ios?.backgroundColor))
   ) {
-    inputs.add(toProductionDependency('expo-system-ui'));
+    inputs.add(toDependency('expo-system-ui', { production: true }));
   }
 
   if (platforms.includes('android') && config.androidNavigationBar) {
-    inputs.add(toProductionDependency('expo-navigation-bar'));
+    inputs.add(toDependency('expo-navigation-bar', { production: true }));
   }
 
   return [...inputs];

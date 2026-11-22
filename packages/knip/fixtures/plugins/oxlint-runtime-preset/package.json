@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/oxlint-runtime-preset",
+  "devDependencies": {
+    "vite-plus": "*",
+    "oxlint-config-shared": "*"
+  }
+}

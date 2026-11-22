@@ -1,6 +1,4 @@
 import { ISSUE_TYPES, KNIP_CONFIG_LOCATIONS } from '../constants.ts';
-import { knipConfigurationSchema } from '../schema/configuration.ts';
-import type { RawConfiguration } from '../types/config.ts';
 import type { IssueType } from '../types/issues.ts';
 import type { Options } from '../types/options.ts';
 import type { PackageJson } from '../types/package-json.ts';
@@ -18,10 +16,12 @@ import {
 } from './get-included-issue-types.ts';
 import { defaultRules } from './issue-initializers.ts';
 import { loadResolvedConfigFile } from './load-config.ts';
-import { _load } from './loader.ts';
+import { _load, unload } from './loader.ts';
 import { logWarning } from './log.ts';
 import { getKeysByValue } from './object.ts';
-import { isAbsolute, isInternal, join, normalize, toAbsolute, toPosix } from './path.ts';
+import { parseConfiguration } from './parse-configuration.ts';
+import { timerify } from './Performance.ts';
+import { isAbsolute, isInternal, join, resolveCwd, toAbsolute } from './path.ts';
 import { splitTags } from './tag.ts';
 
 interface CreateOptions extends Partial<Options> {
@@ -33,10 +33,9 @@ interface CreateOptions extends Partial<Options> {
  * - Loads & validates knip.json
  * - Creates options
  */
-export const createOptions = async (options: CreateOptions) => {
+export const createOptions = timerify(async (options: CreateOptions, isReload = false) => {
   const { args = {} } = options;
-  const pcwd = toPosix(process.cwd());
-  const cwd = normalize(toAbsolute(toPosix(options.cwd ?? args.directory ?? pcwd), pcwd));
+  const cwd = resolveCwd(options.cwd ?? args.directory ?? '.');
 
   const manifestPath = findFile(cwd, 'package.json');
   const manifest: PackageJson = manifestPath && (await loadJSON(manifestPath));
@@ -57,6 +56,8 @@ export const createOptions = async (options: CreateOptions) => {
   if (args.config && !configFilePath && !manifest.knip) {
     throw new ConfigurationError(`Unable to find ${args.config} or package.json#knip`);
   }
+
+  if (options.isSession && !isReload && configFilePath) unload([configFilePath]);
 
   const loadedConfig = Object.assign(
     {},
@@ -84,12 +85,22 @@ export const createOptions = async (options: CreateOptions) => {
     }
   }
 
-  const parsedConfig: RawConfiguration = knipConfigurationSchema.parse(loadedConfig);
+  const parsedConfig = parseConfiguration(loadedConfig);
 
   if (!configFilePath && manifest.knip) configFilePath = manifestPath;
 
   const pnpmWorkspacePath = findFile(cwd, 'pnpm-workspace.yaml');
   const pnpmWorkspace = pnpmWorkspacePath && (await _load(pnpmWorkspacePath));
+
+  const catalog = [await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace)];
+
+  for (const source in pnpmWorkspace?.include) {
+    if (!source.startsWith('.')) continue;
+    const filePath = join(cwd, source);
+    const included = await _load(filePath);
+    if (!included) continue;
+    catalog.push({ filePath, catalog: included.catalog, catalogs: included.catalogs, overrides: included.overrides });
+  }
 
   const workspaces =
     pnpmWorkspace?.packages ??
@@ -143,8 +154,9 @@ export const createOptions = async (options: CreateOptions) => {
     (parsedConfig.preprocessorOptions ? JSON.stringify(parsedConfig.preprocessorOptions) : '');
 
   return {
+    createdFrom: options,
     cacheLocation: args['cache-location'] ?? join(cwd, 'node_modules', '.cache', 'knip'),
-    catalog: await getCatalogContainer(cwd, manifest, manifestPath, pnpmWorkspacePath, pnpmWorkspace),
+    catalog,
     config: args.config,
     configFilePath,
     cwd,
@@ -167,6 +179,7 @@ export const createOptions = async (options: CreateOptions) => {
     isFixUnusedTypes: fixTypes.length === 0 || fixTypes.includes('types'),
     isFormat: args.format ?? options.isFormat ?? false,
     isIncludeEntryExports: args['include-entry-exports'] ?? options.isIncludeEntryExports ?? false,
+    isIncludeSubpathExports: args['include-subpath-exports'] ?? options.isIncludeSubpathExports ?? false,
     isProduction,
     isReportDependencies:
       includedIssueTypes.dependencies ||
@@ -189,7 +202,7 @@ export const createOptions = async (options: CreateOptions) => {
       includedIssueTypes.enumMembers ||
       includedIssueTypes.namespaceMembers,
     isReportValues: includedIssueTypes.exports || includedIssueTypes.nsExports,
-    isSession: options.isSession ?? false,
+    isSession: options.isSession ?? args.watch ?? options.isWatch ?? false,
     isShowProgress:
       !isDebug &&
       !isTrace &&
@@ -219,6 +232,6 @@ export const createOptions = async (options: CreateOptions) => {
     workspace,
     workspaces,
   };
-};
+}, 'createOptions');
 
 export type MainOptions = Awaited<ReturnType<typeof createOptions>>;

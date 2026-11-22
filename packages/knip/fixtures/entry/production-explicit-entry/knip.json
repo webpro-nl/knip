@@ -1,0 +1,5 @@
+{
+  "entry": ["main.ts!"],
+  "project": ["**/*.ts!"],
+  "ignoreDependencies": ["vite-plus"]
+}

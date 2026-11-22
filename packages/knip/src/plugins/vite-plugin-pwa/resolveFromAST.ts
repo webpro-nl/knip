@@ -6,11 +6,11 @@ import {
   getFirstPropertyValue,
   getPropertyValues,
 } from '../../typescript/ast-helpers.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
+import { type Input, toEntryPath } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 
-export const defaultSrcDir = 'public';
-export const defaultFilename = 'sw.js';
+const defaultSrcDir = 'public';
+const defaultFilename = 'sw.js';
 
 const isNuxtConfig = (configFileName: string) => configFileName.startsWith('nuxt.config.');
 
@@ -18,7 +18,7 @@ const getInjectManifestEntry = (options: any, configFileDir: string): Input | un
   if (!getPropertyValues(options, 'strategies').has('injectManifest')) return;
   const srcDir = getFirstPropertyValue(options, 'srcDir') ?? defaultSrcDir;
   const filename = getFirstPropertyValue(options, 'filename') ?? defaultFilename;
-  return toProductionEntry(join(configFileDir, srcDir, filename));
+  return toEntryPath(join(configFileDir, srcDir, filename), { production: true });
 };
 
 export const resolveFromAST: ResolveFromAST = (program, options) => {

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/babel-config-mts",
+  "devDependencies": {
+    "@babel/preset-env": "*",
+    "@babel/preset-react": "*"
+  }
+}

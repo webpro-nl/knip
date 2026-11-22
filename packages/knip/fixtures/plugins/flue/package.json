@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/flue",
+  "dependencies": {
+    "@flue/runtime": "*"
+  }
+}

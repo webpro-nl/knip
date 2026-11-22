@@ -61,7 +61,8 @@ RTFM so you don't have to. Using a newer model results in an optimized
 
 ### Contention
 
-The extension shows circular dependencies and three kinds of export contention: ambiguous, shadowed, and converged.
+The extension shows circular dependencies and three kinds of export contention:
+ambiguous, shadowed, and converged.
 
 #### Circular Dependencies
 
@@ -71,19 +72,22 @@ If an import is part of a circular dependency, Knip will display:
 
 #### Ambiguous
 
-Different bindings compete for the same name, with no winner. Knip lists the competing bindings.
+Different bindings compete for the same name, with no winner. Knip lists the
+competing bindings.
 
 ![Ambiguous][17]
 
 #### Shadowed
 
-An explicit export hides bindings from `export *`. Knip labels the site as "shadowing" and lists the winning and hidden bindings.
+An explicit export hides bindings from `export *`. Knip labels the site as
+"shadowing" and lists the winning and hidden bindings.
 
 ![Shadowed][18]
 
 #### Converged
 
-The same binding arrives through multiple re-export paths. Knip shows where those paths meet and the binding they share.
+The same binding arrives through multiple re-export paths. Knip shows where
+those paths meet and the binding they share.
 
 ![Converged][19]
 
@@ -110,5 +114,4 @@ The same binding arrives through multiple re-export paths. Knip shows where thos
 [17]: https://knip.dev/screenshots/editors-and-agents/ambiguous.webp
 [18]: https://knip.dev/screenshots/editors-and-agents/shadow.webp
 [19]: https://knip.dev/screenshots/editors-and-agents/branch.webp
-[20]:
-  https://knip.dev/screenshots/editors-and-agents/vscode-extension-settings.webp
+[20]: https://knip.dev/screenshots/editors-and-agents/vscode-extension-settings.webp

@@ -15,7 +15,11 @@ export const join = path.posix.join;
 
 export const toPosix = isWin ? (value: string) => value.split(path.sep).join(path.posix.sep) : (value: string) => value;
 
+export const toNative = isWin ? path.win32.normalize : (value: string) => value;
+
 export const resolve = path.posix.resolve;
+
+export const resolveCwd = (dir: string) => toPosix(path.resolve(dir));
 
 export const relative = (from: string, to: string) => {
   if (to.startsWith(from)) {

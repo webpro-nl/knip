@@ -19,14 +19,14 @@ export const fixInternalLinks = defineMdastPlugin({
   link(node, ctx) {
     if (node.url.startsWith('.')) {
       const next = rewrite(node.url);
-      ctx.setProperty(node, 'url', next);
+      ctx.setField(node, 'url', next);
       log(node.url, next);
     }
   },
   definition(node, ctx) {
     if (node.url.startsWith('.')) {
       const next = rewrite(node.url);
-      ctx.setProperty(node, 'url', next);
+      ctx.setField(node, 'url', next);
       log(node.url, next);
     }
   },

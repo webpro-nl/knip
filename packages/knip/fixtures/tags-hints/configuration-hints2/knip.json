@@ -1,11 +1,32 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/entry.js", "lib/index.js"],
-  "project": ["src/**"],
+  "entry": [
+    "src/entry.js",
+    "lib/index.js"
+  ],
+  "project": [
+    "src/**"
+  ],
   "workspaces": {
     ".": {
-      "entry": ["src/entry.js", "lib/index.js"],
-      "project": ["src/**", "lib/**"]
+      "entry": [
+        "src/entry.js",
+        "lib/index.js"
+      ],
+      "project": [
+        "src/**",
+        "lib/**"
+      ]
+    },
+    "packages/lib": {
+      "entry": [
+        "src/index.js",
+        "missing.js"
+      ],
+      "project": [
+        "src/*.js",
+        "generated/**"
+      ]
     }
   }
 }

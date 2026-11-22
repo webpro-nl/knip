@@ -1,10 +1,12 @@
 {
   "name": "@plugins/webdriver-io",
   "scripts": {
-    "test": "wdio"
+    "test": "wdio",
+    "test:e2e": "wdio run --headless ./config/wdio.e2e.ts"
   },
   "dependencies": {
     "@wdio/cli": "*",
+    "@wdio/jasmine-framework": "*",
     "@wdio/mocha-framework": "*",
     "@wdio/concise-reporter": "*",
     "@wdio/browser-runner": "*",
@@ -12,6 +14,10 @@
     "@wdio/dot-reporter": "*",
     "@wdio/junit-reporter": "*",
     "@wdio/allure-reporter": "*",
-    "@wdio/json-reporter": "*"
+    "@wdio/json-reporter": "*",
+    "@wdio/local-runner": "*",
+    "@wdio/appium-service": "*",
+    "wdio-obsidian-reporter": "*",
+    "wdio-obsidian-service": "*"
   }
 }

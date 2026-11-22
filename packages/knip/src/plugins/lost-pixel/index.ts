@@ -9,13 +9,13 @@ const enablers = ['lost-pixel'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['lostpixel.config.{js,ts}'];
+const entry = ['lostpixel.config.{js,ts}'];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

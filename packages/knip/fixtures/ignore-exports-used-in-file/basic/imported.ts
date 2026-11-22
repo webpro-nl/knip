@@ -33,3 +33,6 @@ export class Paladin {
 }
 
 (0, ranger)();
+
+export const marco = () => polo();
+export const polo = () => marco();

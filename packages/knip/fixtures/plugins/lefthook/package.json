@@ -1,5 +1,6 @@
 {
   "name": "@plugins/lefthook",
+  "workspaces": ["packages/*"],
   "scripts": {
     "postinstall": "lefthook install"
   },

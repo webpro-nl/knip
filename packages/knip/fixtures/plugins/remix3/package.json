@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/remix3",
+  "type": "module",
+  "dependencies": {
+    "@remix-run/headers": "*"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

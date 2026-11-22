@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/binary-scoped-name",
+  "scripts": {
+    "inspect": "config-inspector"
+  },
+  "devDependencies": {
+    "@eslint/config-inspector": "*"
+  }
+}

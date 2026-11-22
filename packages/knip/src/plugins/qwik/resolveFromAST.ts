@@ -1,7 +1,7 @@
 import type { Program } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
 import { findCallArg, getFirstPropertyValue, getPropertyValues } from '../../typescript/ast-helpers.ts';
-import { type Input, toEntry, toIgnore, toProductionEntry } from '../../util/input.ts';
+import { type Input, toEntry, toIgnore } from '../../util/input.ts';
 
 export const entry = ['src/entry.dev.tsx'];
 
@@ -32,13 +32,13 @@ export const resolveFromAST: ResolveFromAST = program => {
   const routeEntries: Input[] = [];
   for (const routesDir of routesDirs) {
     for (const pattern of routeProduction) {
-      routeEntries.push(toProductionEntry(setRoutesDir(pattern, routesDir)));
+      routeEntries.push(toEntry(setRoutesDir(pattern, routesDir), { production: true }));
     }
   }
 
   return [
     ...entry.map(setSrcDir).map(path => toEntry(path)),
-    ...production.map(setSrcDir).map(path => toProductionEntry(path)),
+    ...production.map(setSrcDir).map(path => toEntry(path, { production: true })),
     ...routeEntries,
     toIgnore('@qwik-city-plan', 'unlisted'),
     toIgnore('@qwik-city-sw-register', 'unlisted'),

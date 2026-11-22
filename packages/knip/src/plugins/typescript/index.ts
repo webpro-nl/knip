@@ -2,9 +2,11 @@ import type { ConfigArg } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import type { TsConfigJson } from '../../types/tsconfig-json.ts';
 import { compact } from '../../util/array.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toProductionDependency } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
+import { resolveTsNodeConfig } from '../ts-node/index.ts';
 import { contentMapperResolvers } from './content-mappers.ts';
 
 // https://www.typescriptlang.org/tsconfig
@@ -15,39 +17,47 @@ const enablers = ['typescript', '@typescript/native', '@typescript/native-previe
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['tsconfig.json'];
+export const config = ['tsconfig.json'];
 
-const resolveContentMappers = (localConfig: TsConfigJson) => {
+const resolveContentMappers = (localConfig: TsConfigJson, dir: string) => {
   const inputs: Input[] = [];
   for (const { package: name, options } of localConfig.contentMappers ?? []) {
     inputs.push(toDependency(name));
     const resolveOptions = contentMapperResolvers.get(name);
-    if (resolveOptions && options) inputs.push(...resolveOptions(options));
+    if (resolveOptions && options) inputs.push(...resolveOptions(options, dir));
   }
   return inputs;
 };
 
-const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
+export const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
   const { compilerOptions } = localConfig;
 
   const extend = localConfig.extends
-    ? [localConfig.extends]
-        .flat()
-        .map(specifier => toConfig('typescript', specifier, { containingFilePath: options.configFilePath }))
+    ? [localConfig.extends].flat().map(specifier => toConfig(options.pluginName, specifier))
     : [];
 
   const references =
-    localConfig.references
-      ?.filter(reference => reference.path.endsWith('.json'))
-      .map(reference => toConfig('typescript', reference.path, { containingFilePath: options.configFilePath })) ?? [];
+    localConfig.references?.map(({ path }) =>
+      toConfig(
+        options.pluginName,
+        path.endsWith('.json') ? path : toAbsolute(join(path, 'tsconfig.json'), options.configFileDir)
+      )
+    ) ?? [];
 
-  const contentMappers = resolveContentMappers(localConfig);
+  const contentMappers = resolveContentMappers(localConfig, options.configFileDir);
 
-  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...extend, ...references]);
+  const tsNode =
+    localConfig['ts-node'] && options.enabledPlugins.includes('ts-node')
+      ? resolveTsNodeConfig(localConfig['ts-node'])
+      : [];
 
-  const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(toProductionDependency);
+  if (!(compilerOptions && localConfig)) return compact([...contentMappers, ...tsNode, ...extend, ...references]);
 
-  const types = compilerOptions.types ?? [];
+  const jsx = (compilerOptions?.jsxImportSource ? [compilerOptions.jsxImportSource] : []).map(id =>
+    toDependency(id, { production: true, dir: options.cwd, alsoReferenceOwner: true })
+  );
+
+  const types = compilerOptions.types?.filter(id => id !== '*') ?? [];
   const plugins = Array.isArray(compilerOptions?.plugins)
     ? compilerOptions.plugins.map(plugin => (typeof plugin === 'object' && 'name' in plugin ? plugin.name : ''))
     : [];
@@ -55,19 +65,26 @@ const resolveConfig: ResolveConfig<TsConfigJson> = (localConfig, options) => {
 
   return compact([
     ...contentMappers,
+    ...tsNode,
     ...extend,
     ...references,
-    ...types.map(id => toDeferResolve(id, { isTypeOnly: true, dir: options.cwd })),
-    ...[...plugins, ...importHelpers].map(id => toDeferResolve(id)),
+    ...types.map(id => toModule(id, { isTypeOnly: true, dir: options.cwd, alsoReferenceOwner: true })),
+    ...plugins.map(id => toDependency(id, { dir: options.cwd, alsoReferenceOwner: true })),
+    ...importHelpers.map(id => toDependency(id, { production: true, dir: options.cwd, alsoReferenceOwner: true })),
     ...jsx,
   ]);
 };
 
-const args = {
+const toConfigPath = (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'));
+
+export const args = {
   binaries: ['tsc', 'tsgo'],
   string: ['project'],
-  alias: { project: ['p'] },
-  config: [['project', (p: string) => (p.endsWith('.json') ? p : join(p, 'tsconfig.json'))]] satisfies ConfigArg,
+  boolean: ['build', 'clean', 'dry', 'force', 'stopBuildOnErrors'],
+  alias: { project: ['p'], build: ['b'], verbose: ['v'], dry: ['d'], force: ['f'], watch: ['w'] },
+  config: [['project', toConfigPath]] satisfies ConfigArg,
+  resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) =>
+    parsed.build ? parsed._.map(String).map(p => toConfig('typescript', toConfigPath(p), { dir: cwd })) : [],
 };
 
 const note = `[What's up with that configurable tsconfig.json location?](/reference/faq#whats-up-with-that-configurable-tsconfigjson-location)`;

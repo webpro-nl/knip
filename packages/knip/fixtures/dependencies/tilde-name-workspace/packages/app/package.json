@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/tilde-name-workspace__app",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "~legacy": "*",
+    "~utils": "*"
+  }
+}

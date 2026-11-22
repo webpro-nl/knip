@@ -1,0 +1,7 @@
+{
+  "name": "@plugin-config/plugin-entry-dir",
+  "workspaces": [
+    "packages/*",
+    "packages/app/nested/*"
+  ]
+}

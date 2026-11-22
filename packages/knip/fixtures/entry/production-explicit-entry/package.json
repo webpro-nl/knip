@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/production-explicit-entry",
+  "scripts": {
+    "dev": "vite-node main.ts"
+  },
+  "devDependencies": {
+    "vite-plus": "*"
+  }
+}

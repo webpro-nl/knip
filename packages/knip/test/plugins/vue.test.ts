@@ -25,11 +25,47 @@ test('Detect imports from <style lang="scss|less|stylus"> in .vue SFCs', async (
   assert('styles/_unused.scss' in issues.files);
   assert('styles/unused.less' in issues.files);
   assert('styles/unused.styl' in issues.files);
+  assert(!('styles/panel.less' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 3,
-    processed: 7,
-    total: 7,
+    processed: 9,
+    total: 9,
+  });
+});
+
+test('Detect <script src> and <style src> in .vue SFCs', async () => {
+  const cwd = resolve('fixtures/plugins/vue-src');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(!('badge.ts' in issues.exports));
+  assert(issues.exports['Badge.vue']['default']);
+  assert(!('node.ts' in issues.files));
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    exports: 1,
+    processed: 8,
+    total: 8,
+  });
+});
+
+test('Find vue.config.cjs (vue)', async () => {
+  const cwd = resolve('fixtures/plugins/vue-cjs');
+  const options = await createOptions({ cwd });
+  const { issues, counters } = await main(options);
+
+  assert(!('vue.config.cjs' in issues.files));
+  assert(!('aliases.cjs' in issues.files));
+  assert(!issues.devDependencies['package.json']['raw-loader']);
+
+  assert.deepEqual(counters, {
+    ...baseCounters,
+    dependencies: 1,
+    devDependencies: 1,
+    processed: 2,
+    total: 2,
   });
 });

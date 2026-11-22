@@ -1,0 +1,1 @@
+npx semantic-release -e ./release.hook.cjs

@@ -1,0 +1,14 @@
+{
+  "extends": "./config/base.json",
+  "env": {
+    "test": {
+      "extends": "./config/test.json"
+    }
+  },
+  "overrides": [
+    {
+      "test": "./legacy",
+      "extends": "./config/legacy.json"
+    }
+  ]
+}

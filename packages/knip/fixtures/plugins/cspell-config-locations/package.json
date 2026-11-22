@@ -1,0 +1,8 @@
+{
+  "name": "@plugins/cspell-config-locations",
+  "devDependencies": {
+    "@cspell/dict-node": "*",
+    "@cspell/dict-typescript": "*",
+    "cspell": "*"
+  }
+}

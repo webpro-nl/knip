@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/jasmine4",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "devDependencies": {
+    "jasmine": "*",
+    "custom-esm-loader": "*"
+  }
+}

@@ -9,6 +9,7 @@
   "devDependencies": {
     "@heroui/react": "*",
     "@tailwindcss/forms": "*",
-    "@tailwindcss/typography": "*"
+    "@tailwindcss/typography": "*",
+    "tw-animate-css": "*"
   }
 }

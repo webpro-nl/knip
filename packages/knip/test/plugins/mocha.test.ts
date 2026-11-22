@@ -9,11 +9,12 @@ const cwd = resolve('fixtures/plugins/mocha');
 
 test('Find dependencies with the Mocha plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
 
+  assert(!issues.devDependencies['package.json']?.['mocha-multi-reporters']);
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 6,
-    total: 6,
+    processed: 7,
+    total: 7,
   });
 });

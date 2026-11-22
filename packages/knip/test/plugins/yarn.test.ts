@@ -12,19 +12,22 @@ test('Find dependencies with the yarn plugin', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });
 
-test('Find dependencies with the yarn plugin (Berry)', async () => {
+test('Find dependencies and literal entries with the yarn plugin (Berry)', async () => {
   const cwd = resolve('fixtures/plugins/yarn-berry');
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['p/local.cjs']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 4,
-    total: 4,
+    files: 1,
+    processed: 6,
+    total: 6,
   });
 });

@@ -1,0 +1,1 @@
+import '../window.ts';

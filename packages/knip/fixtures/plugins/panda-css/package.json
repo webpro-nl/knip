@@ -1,7 +1,11 @@
 {
   "name": "@plugins/panda-css",
+  "scripts": {
+    "codegen:lib": "panda codegen --config panda.lib.config.ts"
+  },
   "devDependencies": {
     "@pandacss/dev": "*",
+    "@shadow-panda/preset": "*",
     "postcss": "*"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "@plugins/purgecss2",
+  "scripts": {
+    "styles": "purgecss --config config/styles.mjs",
+    "print": "purgecss -c config/print.cjs"
+  },
+  "devDependencies": {
+    "purgecss": "*",
+    "purgecss-from-html": "*"
+  }
+}

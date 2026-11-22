@@ -1,4 +1,5 @@
 {
   "spec": ["specs/*.test.js"],
-  "file": ["hooks/db.setup", "teardown"]
+  "file": ["hooks/db.setup", "teardown"],
+  "reporter": "mocha-junit-reporter"
 }

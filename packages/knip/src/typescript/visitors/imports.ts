@@ -1,11 +1,60 @@
-import type { Expression, ImportExpression, VariableDeclarator } from 'oxc-parser';
+import type {
+  ArrayExpression,
+  BindingPattern,
+  CallExpression,
+  Expression,
+  ImportExpression,
+  VariableDeclarator,
+} from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
+import { unwrapExpression } from '../ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
+import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
-export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState) {
+export function markNamespaceRef(name: string, pos: number, s: WalkState, isStaticIncluded = false) {
+  const _import = s.localImportMap.get(name);
+  if (!_import?.isNamespace || !(_import.isDynamicImport || isStaticIncluded)) return;
+  if (isShadowedIn(s, name, pos)) return;
+  const internalImport = s.internal.get(_import.filePath);
+  if (!internalImport) return;
+  if (_import.isDynamicImport) addValue(internalImport.import, OPAQUE, s.filePath);
+  else internalImport.refs.add(name);
+}
+
+const getBlockScope = (s: WalkState): [number, number] | undefined => {
+  const i = s.scopeDepth - 1;
+  return i < 0 ? undefined : [s.scopeStarts[i], s.scopeEnds[i]];
+};
+
+const setDynamicNamespace = (
+  name: string,
+  filePath: string,
+  scope: [number, number] | undefined,
+  isVar: boolean,
+  s: WalkState
+) => {
+  if (scope && !isVar) s.scopedImports.push({ name, end: scope[1], prev: s.localImportMap.get(name) });
+  s.localImportMap.set(name, { importedName: IMPORT_STAR, filePath, isNamespace: true, isDynamicImport: true, scope });
+};
+
+export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
+  if (
+    expression.type === 'CallExpression' &&
+    expression.callee.type === 'MemberExpression' &&
+    !expression.callee.computed &&
+    expression.callee.object.type === 'Identifier' &&
+    expression.callee.object.name === 'Promise' &&
+    expression.callee.property.name === 'all' &&
+    expression.arguments[0]?.type === 'ArrayExpression'
+  ) {
+    return expression.arguments[0].elements;
+  }
+}
+
+export function handleVariableDeclarator(node: VariableDeclarator, isVar: boolean, s: WalkState) {
   const init = node.init;
   if (!init) return;
   let importExpr: ImportExpression | null = null;
@@ -16,68 +65,29 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   }
 
   if (importExpr && isStringLiteral(importExpr.source)) {
-    s.handledImportExpressions.add(importExpr.start);
-    const specifier = getStringValue(importExpr.source)!;
-
-    if (node.id.type === 'ObjectPattern') {
-      for (const prop of node.id.properties) {
-        if (prop.type === 'Property') {
-          const importedName =
-            prop.key?.type === 'Identifier'
-              ? prop.key.name
-              : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
-                ? prop.key.value
-                : undefined;
-          const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
-          const alias = localName !== importedName ? localName : undefined;
-          s.addImport(specifier, importedName, alias, undefined, prop.key?.start ?? prop.start, IMPORT_FLAGS.DYNAMIC);
-        } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
-          s.addImport(specifier, IMPORT_STAR, prop.argument.name, undefined, prop.start, IMPORT_FLAGS.DYNAMIC);
-        }
-      }
-    } else if (node.id.type === 'Identifier') {
-      if (init.type === 'AwaitExpression') {
-        s.addImport(specifier, 'default', node.id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC);
-        const resolved = s.resolveModule(specifier, s.filePath);
-        if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
-          s.localImportMap.set(node.id.name, {
-            importedName: IMPORT_STAR,
-            filePath: resolved.resolvedFileName,
-            isNamespace: true,
-            isDynamicImport: true,
-          });
-        }
-      } else {
-        s.addImport(
-          specifier,
-          undefined,
-          undefined,
-          undefined,
-          importExpr.source.start,
-          IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
-        );
-      }
-    } else {
-      s.addImport(
-        specifier,
-        undefined,
-        undefined,
-        undefined,
-        importExpr.source.start,
-        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
-      );
-    }
+    const caughtFlag =
+      init.type === 'AwaitExpression' && s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+    handleDynamicImportBinding(
+      node.id,
+      importExpr,
+      init.type === 'AwaitExpression',
+      caughtFlag,
+      getBlockScope(s),
+      isVar,
+      s
+    );
     return;
   }
 
+  const requireInit = unwrapExpression(init);
   if (
-    init.type === 'CallExpression' &&
-    init.callee.type === 'Identifier' &&
-    init.callee.name === 'require' &&
-    init.arguments.length === 1 &&
-    isStringLiteral(init.arguments[0])
+    requireInit.type === 'CallExpression' &&
+    requireInit.callee.type === 'Identifier' &&
+    requireInit.callee.name === 'require' &&
+    requireInit.arguments.length === 1 &&
+    isStringLiteral(requireInit.arguments[0])
   ) {
-    const specifier = getStringValue(init.arguments[0])!;
+    const specifier = getStringValue(requireInit.arguments[0])!;
     const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
     if (node.id.type === 'ObjectPattern') {
       for (const prop of node.id.properties) {
@@ -119,7 +129,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
         'default',
         node.id.name,
         undefined,
-        init.arguments[0].start,
+        requireInit.arguments[0].start,
         IMPORT_FLAGS.NONE,
         undefined,
         reqTags
@@ -130,7 +140,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
         undefined,
         undefined,
         undefined,
-        init.arguments[0].start,
+        requireInit.arguments[0].start,
         IMPORT_FLAGS.SIDE_EFFECTS,
         undefined,
         reqTags
@@ -139,54 +149,26 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     return;
   }
 
-  if (
-    init.type === 'AwaitExpression' &&
-    init.argument.type === 'CallExpression' &&
-    init.argument.callee.type === 'MemberExpression' &&
-    !init.argument.callee.computed &&
-    init.argument.callee.object.type === 'Identifier' &&
-    init.argument.callee.object.name === 'Promise' &&
-    init.argument.callee.property.name === 'all' &&
-    init.argument.arguments[0]?.type === 'ArrayExpression' &&
-    node.id.type === 'ArrayPattern'
-  ) {
-    const imports = init.argument.arguments[0].elements;
+  const imports = init.type === 'AwaitExpression' ? getPromiseAllElements(init.argument) : undefined;
+  if (imports && node.id.type === 'ArrayPattern') {
     const bindings = node.id.elements;
     for (let i = 0; i < imports.length; i++) {
       const imp = imports[i];
+      if (imp?.type === 'SpreadElement') break;
       const binding = bindings[i];
       if (imp?.type === 'ImportExpression' && isStringLiteral(imp.source)) {
-        s.handledImportExpressions.add(imp.start);
-        const specifier = getStringValue(imp.source)!;
-        if (binding?.type === 'ObjectPattern') {
-          for (const prop of binding.properties) {
-            if (prop.type === 'Property') {
-              const importedName =
-                prop.key?.type === 'Identifier'
-                  ? prop.key.name
-                  : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
-                    ? prop.key.value
-                    : undefined;
-              s.addImport(
-                specifier,
-                importedName,
-                undefined,
-                undefined,
-                prop.key?.start ?? prop.start,
-                IMPORT_FLAGS.NONE
-              );
-            }
-          }
-        } else if (binding?.type === 'Identifier') {
-          s.addImport(specifier, 'default', binding.name, undefined, imp.source.start, IMPORT_FLAGS.DYNAMIC);
+        const caughtFlag = s.caughtTryBlockEnds.length > 0 ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+        if (binding?.type === 'ObjectPattern' || binding?.type === 'Identifier') {
+          handleDynamicImportBinding(binding, imp, true, caughtFlag, getBlockScope(s), isVar, s);
         } else {
+          s.handledImportExpressions.add(imp.start);
           s.addImport(
-            specifier,
+            getStringValue(imp.source)!,
             undefined,
             undefined,
             undefined,
             imp.source.start,
-            IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.SIDE_EFFECTS
+            IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.SIDE_EFFECTS | caughtFlag
           );
         }
       }
@@ -198,11 +180,15 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
     const registerAlias = (expr: Expression) => {
       if (expr?.type === 'Identifier') {
         const _import = s.localImportMap.get(expr.name);
+        if (_import?.isDynamicImport && isShadowedIn(s, expr.name, expr.start)) return;
         if (_import) {
-          s.addImportAlias(aliasName, expr.name, _import.filePath);
+          s.addImportAlias(aliasName, expr.name, _import);
           if (_import.isNamespace) {
             const internalImport = s.internal.get(_import.filePath);
-            if (internalImport) internalImport.refs.add(expr.name);
+            if (internalImport) {
+              if (_import.isDynamicImport) addValue(internalImport.import, OPAQUE, s.filePath);
+              else internalImport.refs.add(expr.name);
+            }
           }
         }
       }
@@ -218,8 +204,8 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
       for (const prop of init.properties) {
         if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') {
           const _import = s.localImportMap.get(prop.argument.name);
-          if (_import) {
-            s.addImportAlias(aliasName, prop.argument.name, _import.filePath);
+          if (_import && !(_import.isDynamicImport && isShadowedIn(s, prop.argument.name, prop.argument.start))) {
+            s.addImportAlias(aliasName, prop.argument.name, _import);
             if (_import.isNamespace) {
               const internalImport = s.internal.get(_import.filePath);
               if (internalImport) internalImport.refs.add(prop.argument.name);
@@ -234,7 +220,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
         ) {
           const nsName = prop.value.name;
           const _import = s.localImportMap.get(nsName);
-          if (_import?.isNamespace) {
+          if (_import?.isNamespace && !(_import.isDynamicImport && isShadowedIn(s, nsName, prop.value.start))) {
             const internalImport = s.internal.get(_import.filePath);
             if (internalImport) internalImport.refs.add(nsName);
             let map = s.nsContainers.get(aliasName);
@@ -242,7 +228,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
               map = new Map();
               s.nsContainers.set(aliasName, map);
             }
-            map.set(prop.key.name, nsName);
+            map.set(prop.key.name, { id: nsName, import: _import });
           }
         }
       }
@@ -307,7 +293,7 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
               else internalImport.refs.add(defaultValue.name);
             }
             if (prop.value.left?.type === 'Identifier') {
-              s.addImportAlias(prop.value.left.name, defaultValue.name, _import.filePath);
+              s.addImportAlias(prop.value.left.name, defaultValue.name, _import);
             }
           }
         }
@@ -316,17 +302,105 @@ export function handleVariableDeclarator(node: VariableDeclarator, s: WalkState)
   }
 }
 
+function handleDynamicImportBinding(
+  id: BindingPattern,
+  importExpr: ImportExpression,
+  isAwaited: boolean,
+  caughtFlag: number,
+  scope: [number, number] | undefined,
+  isVar: boolean,
+  s: WalkState
+) {
+  s.handledImportExpressions.add(importExpr.start);
+  const specifier = getStringValue(importExpr.source)!;
+  if (id.type === 'ObjectPattern') {
+    for (const prop of id.properties) {
+      if (prop.type === 'Property') {
+        const importedName =
+          prop.key?.type === 'Identifier'
+            ? prop.key.name
+            : prop.key?.type === 'Literal' && typeof prop.key.value === 'string'
+              ? prop.key.value
+              : undefined;
+        const localName = prop.value?.type === 'Identifier' ? prop.value.name : importedName;
+        const alias = localName !== importedName ? localName : undefined;
+        s.addImport(
+          specifier,
+          importedName,
+          alias,
+          undefined,
+          prop.key?.start ?? prop.start,
+          IMPORT_FLAGS.DYNAMIC | caughtFlag
+        );
+      } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
+        s.addImport(
+          specifier,
+          IMPORT_STAR,
+          prop.argument.name,
+          undefined,
+          prop.start,
+          IMPORT_FLAGS.DYNAMIC | caughtFlag
+        );
+        const resolved = s.resolveModule(specifier, s.filePath);
+        if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+          setDynamicNamespace(prop.argument.name, resolved.resolvedFileName, scope, isVar, s);
+        }
+      }
+    }
+  } else if (id.type === 'Identifier') {
+    if (isAwaited) {
+      s.addImport(specifier, 'default', id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+      const resolved = s.resolveModule(specifier, s.filePath);
+      if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+        setDynamicNamespace(id.name, resolved.resolvedFileName, scope, isVar, s);
+      }
+    } else {
+      s.addImport(
+        specifier,
+        undefined,
+        undefined,
+        undefined,
+        importExpr.source.start,
+        IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
+      );
+    }
+  } else {
+    s.addImport(
+      specifier,
+      undefined,
+      undefined,
+      undefined,
+      importExpr.source.start,
+      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
+    );
+  }
+}
+
+export function handleImportThen(node: CallExpression, s: WalkState) {
+  const callee = node.callee;
+  if (callee.type !== 'MemberExpression' || callee.computed || callee.property.name !== 'then') return;
+  if (callee.object.type !== 'ImportExpression' || !isStringLiteral(callee.object.source)) return;
+  const fn = node.arguments[0];
+  if (fn?.type !== 'ArrowFunctionExpression' && fn?.type !== 'FunctionExpression') return;
+  const param = fn.params[0];
+  if (param?.type !== 'Identifier' && param?.type !== 'ObjectPattern') return;
+  const caughtFlag = s.caughtImportExpressions.has(callee.object.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+  const body = fn.body ?? fn;
+  handleDynamicImportBinding(param, callee.object, true, caughtFlag, [body.start, body.end], false, s);
+}
+
 export function handleImportExpression(node: ImportExpression, s: WalkState) {
   if (s.handledImportExpressions.has(node.start)) return;
   const specifier = getStringValue(node.source);
   if (specifier) {
+    const caughtFlag = s.caughtImportExpressions.has(node.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
     s.addImport(
       specifier,
       undefined,
       undefined,
       undefined,
       node.source.start,
-      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE
+      IMPORT_FLAGS.DYNAMIC | IMPORT_FLAGS.OPAQUE | caughtFlag
     );
   }
 }

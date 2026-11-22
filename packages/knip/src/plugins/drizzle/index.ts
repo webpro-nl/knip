@@ -1,5 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { DrizzleConfig } from './types.ts';
 
@@ -15,7 +16,12 @@ const config = ['drizzle.config.{ts,js,json}'];
 
 const resolveConfig: ResolveConfig<DrizzleConfig> = config => {
   if (!config.schema) return [];
-  return [config.schema].flat().map(id => toProductionEntry(id));
+  return [config.schema].flat().map(id => toEntry(id, { production: true }));
+};
+
+const args: Args = {
+  binaries: ['drizzle-kit'],
+  config: ['config'],
 };
 
 const plugin: Plugin = {
@@ -24,6 +30,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  args,
 };
 
 export default plugin;

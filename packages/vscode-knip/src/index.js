@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  NOTIFICATION_MODULE_GRAPH_BUILT,
   REQUEST_FILE_NODE,
   REQUEST_PACKAGE_JSON,
   REQUEST_RESTART,
@@ -199,6 +200,13 @@ export class Extension {
 
     const client = new LanguageClient(`knip-${folder.name}`, `Knip (${folder.name})`, serverOptions, clientOptions);
     this.#clients.set(key, client);
+
+    this.#context.subscriptions.push(
+      client.onNotification(NOTIFICATION_MODULE_GRAPH_BUILT, () => {
+        this.#packageJsonCache = undefined;
+        return this.#refresh();
+      })
+    );
 
     await client.start();
   }

@@ -1,0 +1,13 @@
+{
+  "contentMappers": [
+    {
+      "package": "mdx-content-mapper",
+      "extensions": [
+        ".mdx"
+      ],
+      "options": {
+        "providerImportSource": "nextra/mdx-components"
+      }
+    }
+  ]
+}

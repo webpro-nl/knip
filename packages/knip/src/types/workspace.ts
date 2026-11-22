@@ -1,7 +1,20 @@
 export type DependencySet = Set<string>;
 export type DependencyArray = Array<string>;
 
-type WorkspaceManifest = {
+export type WorkspaceIgnores = {
+  ignoreDependencies: (string | RegExp)[];
+  ignoreBinaries: (string | RegExp)[];
+  ignoreUnresolved: (string | RegExp)[];
+  unusedIgnoreDependencies: Set<string | RegExp>;
+  unusedIgnoreBinaries: Set<string | RegExp>;
+  unusedIgnoreUnresolved: Set<string | RegExp>;
+  ignoreConfigKeys: Record<
+    'ignoreDependencies' | 'ignoreBinaries' | 'ignoreUnresolved',
+    Map<string | RegExp, string | undefined>
+  >;
+};
+
+type WorkspaceManifest = WorkspaceIgnores & {
   workspaceDir: string;
   manifestPath: string;
   manifestStr: string;
@@ -10,15 +23,10 @@ type WorkspaceManifest = {
   peerDependencies: DependencySet;
   optionalPeerDependencies: DependencySet;
   requiredPeerDependencies: DependencyArray;
+  uninstalledOptionalDependencies: DependencySet;
   allDependencies: DependencySet;
   engines: Record<string, string>;
   isPrivate: boolean;
-  ignoreDependencies: (string | RegExp)[];
-  ignoreBinaries: (string | RegExp)[];
-  ignoreUnresolved: (string | RegExp)[];
-  unusedIgnoreDependencies: Set<string | RegExp>;
-  unusedIgnoreBinaries: Set<string | RegExp>;
-  unusedIgnoreUnresolved: Set<string | RegExp>;
 };
 
 export type WorkspaceManifests = Map<string, WorkspaceManifest>;

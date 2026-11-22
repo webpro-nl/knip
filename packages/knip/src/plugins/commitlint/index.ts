@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toConfig, toDependency } from '../../util/input.ts';
+import { type Input, toConfig, toModule, toDependency } from '../../util/input.ts';
 import { isInternal } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { toCosmiconfig } from '../../util/plugin-config.ts';
@@ -26,24 +26,31 @@ const toExtendsSpecifier = (id: string) => {
   return id.startsWith('commitlint-config-') ? id : `commitlint-config-${id}`;
 };
 
-const resolveConfig: ResolveConfig<CommitLintConfig> = async (config, options) => {
+const toPluginSpecifier = (id: string) => {
+  if (!id.startsWith('@')) return id.startsWith('commitlint-plugin-') ? id : `commitlint-plugin-${id}`;
+  const [scope, name] = id.split('/');
+  if (!name) return `${scope}/commitlint-plugin`;
+  if (name === 'commitlint-plugin' || name.startsWith('commitlint-plugin-')) return id;
+  return id.replace('/', '/commitlint-plugin-');
+};
+
+const resolveConfig: ResolveConfig<CommitLintConfig> = async config => {
   const inputs: Input[] = [];
   const extendsConfigs: string[] = [];
   for (const id of config.extends ? [config.extends].flat() : []) {
-    if (isInternal(id)) inputs.push(toConfig('commitlint', id, { containingFilePath: options.configFilePath }));
+    if (isInternal(id)) inputs.push(toConfig('commitlint', id));
     else extendsConfigs.push(toExtendsSpecifier(id));
   }
-  const plugins = config.plugins ? [config.plugins].flat().filter(s => typeof s === 'string') : [];
-  const formatter = config.formatter ? [config.formatter] : [];
+  const plugins: string[] = [];
+  for (const id of config.plugins ? [config.plugins].flat() : []) {
+    if (typeof id === 'string') plugins.push(toPluginSpecifier(id));
+  }
+  for (const id of [...extendsConfigs, ...plugins]) inputs.push(toDependency(id));
   const parserPreset = await config.parserPreset;
-  const parserPresetPaths: string[] = parserPreset
-    ? typeof parserPreset === 'string'
-      ? [parserPreset]
-      : parserPreset.path
-        ? [parserPreset.path ?? parserPreset]
-        : []
-    : [];
-  for (const id of [...extendsConfigs, ...plugins, ...formatter, ...parserPresetPaths]) inputs.push(toDependency(id));
+  const modules = config.formatter ? [config.formatter] : [];
+  if (typeof parserPreset === 'string') modules.push(parserPreset);
+  for (const id of modules) inputs.push(isInternal(id) ? toModule(id) : toDependency(id));
+  if (typeof parserPreset === 'object' && parserPreset.path) inputs.push(toDependency(parserPreset.path));
   return inputs;
 };
 

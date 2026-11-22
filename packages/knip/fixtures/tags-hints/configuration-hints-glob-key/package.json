@@ -1,0 +1,4 @@
+{
+  "name": "@fixtures/configuration-hints-glob-key",
+  "workspaces": ["packages/*"]
+}

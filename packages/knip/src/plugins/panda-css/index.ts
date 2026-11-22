@@ -1,5 +1,6 @@
+import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toDependency } from '../../util/input.ts';
+import { toModule, toDependency } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PandaCSSConfig } from './types.ts';
 
@@ -15,7 +16,12 @@ const config = ['panda.config.{ts,js,mjs,cjs,mts,cts}'];
 
 const resolveConfig: ResolveConfig<PandaCSSConfig> = config => {
   const presets = (config.presets ?? []).filter((preset): preset is string => typeof preset === 'string');
-  return [...presets.map(id => toDeferResolve(id)), toDependency('postcss')];
+  return [...presets.map(id => toModule(id)), toDependency('postcss')];
+};
+
+const args: Args = {
+  binaries: ['panda', 'pandacss'],
+  config: true,
 };
 
 const plugin: Plugin = {
@@ -24,6 +30,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  args,
 };
 
 export default plugin;

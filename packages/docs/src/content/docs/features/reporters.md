@@ -24,6 +24,26 @@ Example usage:
 knip --reporter compact
 ```
 
+### Writing to a file
+
+Reporters write to `stdout` by default. Use [`--output-file`][9] to write the
+output of a reporter to a file instead:
+
+```sh
+knip --reporter sarif --output-file knip.sarif
+```
+
+Combine multiple reporters and prefix each path with the reporter name, for
+example to keep the default report in the terminal while writing a JSON report
+for other tools:
+
+```sh
+knip --reporter symbols --reporter json --output-file json=knip.json
+```
+
+Reporters without an `--output-file` keep writing to `stdout`. Files are written
+without ANSI color codes. Parent directories are created if they don't exist.
+
 ### CodeClimate
 
 The built-in `codeclimate` reporter generates output in the Code Climate Report
@@ -56,7 +76,7 @@ $ knip --reporter codeclimate
 ### CODEOWNERS
 
 When a `.github/CODEOWNERS` file exists, each entry gains an `owners` array.
-Point the reporter at a different path through [`--reporter-options`][9]:
+Point the reporter at a different path through [`--reporter-options`][10]:
 
 ```sh
 knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
@@ -64,7 +84,7 @@ knip --reporter json --reporter-options '{"codeowners":"docs/CODEOWNERS"}'
 
 ### Cycles
 
-A verbose, multi-line tree view of [circular dependencies][10]. Each file path
+A verbose, multi-line tree view of [circular dependencies][11]. Each file path
 is suffixed with the location of the import that continues the cycle. Each edge
 shows the import kind and specifier, descends one file per level, and closes
 (`↩`) back to the file it started from.
@@ -89,14 +109,14 @@ subgraph, because that can produce a noisy and very large report. If the same
 file participates in multiple distinct reported paths, each path is shown
 separately.
 
-Use [`cycles.allow`][11] to accept known cycle paths.
+Use [`cycles.allow`][12] to accept known cycle paths.
 
 Dynamic imports are ignored by default because they are commonly used to avoid
-synchronous circular loads. Set [`cycles.dynamicImports`][11] to include them.
+synchronous circular loads. Set [`cycles.dynamicImports`][12] to include them.
 Repeated starting imports are grouped under one heading.
 
 For one line per cycle path, use `knip --cycles` with the default reporter. To
-report unused code as well, [combine the issue-type shorthands][12].
+report unused code as well, [combine the issue-type shorthands][13].
 
 Cycles are warnings by default. Set `"rules": { "cycles": "error" }` to make
 reported cycles cause a non-zero exit code.
@@ -206,9 +226,9 @@ every issue found in one file:
 | `owners`     | `{ name }[]` | Code owners, only when a `CODEOWNERS` file is found |
 | _issue type_ | array        | One key per enabled issue type (see below)          |
 
-Each entry carries a key for **every enabled [issue type][10]**, so the keys are
+Each entry carries a key for **every enabled [issue type][11]**, so the keys are
 the same across entries. An array is empty when that file has no issues of that
-type. Drop a type's key by disabling it with [filters or rules][12].
+type. Drop a type's key by disabling it with [filters or rules][13].
 
 Issue-type items are objects with position info:
 
@@ -220,18 +240,18 @@ Issue-type items are objects with position info:
 | `col`       | `number?` | 1-based column                                 |
 | `pos`       | `number?` | Character offset                               |
 
-See [Issue types][10] for the full set of issue-type keys.
+See [Issue types][11] for the full set of issue-type keys.
 
-For a typed object instead of JSON to parse, write a [custom reporter][13].
-Coding agents can also call Knip through the [MCP server][14], which returns
+For a typed object instead of JSON to parse, write a [custom reporter][14].
+Coding agents can also call Knip through the [MCP server][15], which returns
 structured results and configuration hints directly.
 
 ### SARIF
 
-The `sarif` reporter emits [SARIF 2.1.0][15] for code-scanning integrations:
+The `sarif` reporter emits [SARIF 2.1.0][16] for code-scanning integrations:
 
 ```sh
-knip --reporter sarif > knip.sarif
+knip --reporter sarif --output-file knip.sarif
 ```
 
 For example, upload the report to GitHub Code Scanning after installing project
@@ -244,7 +264,7 @@ permissions:
 
 steps:
   - uses: actions/checkout@v4
-  - run: pnpm exec knip --reporter sarif > knip.sarif
+  - run: pnpm exec knip --reporter sarif --output-file knip.sarif
   - if: always()
     uses: github/codeql-action/upload-sarif@v4
     with:
@@ -310,6 +330,7 @@ type ReporterOptions = {
   isProduction: boolean;
   isShowProgress: boolean;
   options: string;
+  write?: (output: string) => void;
 };
 ```
 
@@ -324,6 +345,22 @@ import type { Reporter } from 'knip';
 const reporter: Reporter = function (options) {
   console.log(options.issues);
   console.log(options.counters);
+};
+
+export default reporter;
+```
+
+Use `options.write` instead of `console.log` to support [`--output-file`][9]. It
+writes to `stdout` by default, and to the file when one is configured. Output
+from `console.log` is not redirected. Knip always passes `write` to reporters.
+It's optional in the type so existing code that builds a `ReporterOptions`
+object keeps compiling:
+
+```ts title="./my-reporter.ts"
+import type { Reporter } from 'knip';
+
+const reporter: Reporter = function (options) {
+  options.write?.(JSON.stringify(options.counters));
 };
 
 export default reporter;
@@ -395,10 +432,11 @@ Preprocessors can also be configured in the Knip configuration file:
 [6]: #json
 [7]: #markdown
 [8]: #sarif
-[9]: ../reference/cli.md#--reporter-options-json
-[10]: ../reference/issue-types.md
-[11]: ../reference/configuration.md#cycles
-[12]: ./rules-and-filters.md
-[13]: #custom-reporters
-[14]: ../reference/integrations.md
-[15]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
+[9]: ../reference/cli.md#--output-file-reporterpath
+[10]: ../reference/cli.md#--reporter-options-json
+[11]: ../reference/issue-types.md
+[12]: ../reference/configuration.md#cycles
+[13]: ./rules-and-filters.md
+[14]: #custom-reporters
+[15]: ../reference/integrations.md
+[16]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html

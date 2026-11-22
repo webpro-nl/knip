@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/mikro-orm",
+  "private": true,
+  "devDependencies": {
+    "@mikro-orm/cli": "*"
+  },
+  "scripts": {
+    "migrate": "bun -b mikro-orm migration:up"
+  }
+}

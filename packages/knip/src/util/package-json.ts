@@ -1,8 +1,10 @@
 // Borrowed from https://github.com/npm/package-json + https://github.com/npm/json-parse-even-better-errors
 import { readFile, writeFile } from 'node:fs/promises';
+import picomatch from 'picomatch';
 import { IS_DTS } from '../constants.ts';
-import type { PackageJson } from '../types/package-json.ts';
+import type { Exports, PackageJson } from '../types/package-json.ts';
 import { getPackageNameFromModuleSpecifier } from './modules.ts';
+import { join } from './path.ts';
 
 const INDENT = Symbol.for('indent');
 const NEWLINE = Symbol.for('newline');
@@ -30,15 +32,13 @@ const parseJson = (raw: string): ExtendedPackageJson => {
   return result;
 };
 
-const getEntriesFromExports = (obj: any): string[] => {
+export const getEntriesFromExports = (obj: any): string[] => {
   if (typeof obj === 'string') return [obj];
   let values: string[] = [];
   for (const prop in obj) {
     if (typeof obj[prop] === 'string') {
       values.push(obj[prop]);
-    } else if (obj[prop] === null) {
-      if (prop !== '.') values.push(`!${prop}`);
-    } else if (typeof obj[prop] === 'object') {
+    } else if (obj[prop] && typeof obj[prop] === 'object') {
       values = values.concat(getEntriesFromExports(obj[prop]));
     }
   }
@@ -58,7 +58,7 @@ export const toDeclarationSpecifier = (specifier: string) => {
   if (IS_DTS.test(specifier)) return specifier;
 };
 
-export const getPublishedTypeManifest = (manifest: PackageJson) => {
+export const getPublishedTypeManifest = (manifest: PackageJson): PackageJson => {
   const { publishConfig } = manifest;
   if (!publishConfig) return manifest;
 
@@ -122,20 +122,26 @@ export const getPublishedTypeEntrySpecifiers = (manifest: PackageJson) => {
   return { candidates, versioned };
 };
 
-export const getPackageMapTarget = (map: unknown, key: string) => {
-  if (!map || typeof map !== 'object' || Array.isArray(map)) return key === '.' ? { target: map } : undefined;
-
-  const entries = Object.entries(map);
-  let hasSubpaths = false;
-  for (const [subpath, target] of entries) {
-    if (!subpath.startsWith('.') && !subpath.startsWith('#')) continue;
-    hasSubpaths = true;
-    if (subpath === key) return { target };
+export const getPackageMapTarget = (map: Exports, key: string) => {
+  if (map === null || typeof map !== 'object' || Array.isArray(map)) {
+    return key === '.' ? { target: map, subpath: '.' } : undefined;
   }
-  if (!hasSubpaths) return key === '.' ? { target: map } : undefined;
 
-  let best: { target: unknown; patternMatch: string; prefixLength: number; subpathLength: number } | undefined;
-  for (const [subpath, target] of entries) {
+  let hasSubpaths = false;
+  for (const subpath in map) {
+    if (subpath.startsWith('.') || subpath.startsWith('#')) {
+      hasSubpaths = true;
+      break;
+    }
+  }
+  if (!hasSubpaths) return key === '.' ? { target: map, subpath: '.' } : undefined;
+  if (Object.hasOwn(map, key)) return { target: map[key], subpath: key };
+
+  let best:
+    | { target: Exports; subpath: string; patternMatch: string; prefixLength: number; subpathLength: number }
+    | undefined;
+  for (const subpath in map) {
+    const target = map[subpath];
     const starIndex = subpath.indexOf('*');
     if (starIndex < 0) continue;
     const prefix = subpath.slice(0, starIndex);
@@ -148,13 +154,50 @@ export const getPackageMapTarget = (map: unknown, key: string) => {
     ) {
       best = {
         target,
+        subpath,
         patternMatch: key.slice(prefix.length, key.length - suffix.length),
         prefixLength: prefix.length,
         subpathLength: subpath.length,
       };
     }
   }
-  if (best) return { target: best.target, patternMatch: best.patternMatch };
+  if (best) return { target: best.target, subpath: best.subpath, patternMatch: best.patternMatch };
+};
+
+const invalidSegments = /(^|\\|\/)((\.|%2e)(\.|%2e)?|node_modules)(\\|\/|$)/i;
+
+export const expandPackageTarget = (target: string | undefined, patternMatch: string | undefined) => {
+  if (!target?.startsWith('./') || invalidSegments.test(target.slice(2))) return;
+  if (!target.includes('*')) return target;
+  if (patternMatch === undefined || invalidSegments.test(patternMatch)) return;
+  return target.replaceAll('*', patternMatch);
+};
+
+export const toPackagePath = (dir: string, target: string) => {
+  const candidate = join(dir, target);
+  return candidate.startsWith(`${dir}/`) ? candidate : undefined;
+};
+
+export const getPackageTargetPaths = (
+  value: unknown,
+  dir: string,
+  patternMatch: string | undefined,
+  isIncludeTypes: boolean,
+  paths: string[] = []
+) => {
+  if (typeof value === 'string') {
+    const target = expandPackageTarget(value, patternMatch);
+    const candidate = target && toPackagePath(dir, target);
+    if (candidate) paths.push(candidate);
+  } else if (Array.isArray(value)) {
+    for (const item of value) getPackageTargetPaths(item, dir, patternMatch, isIncludeTypes, paths);
+  } else if (value && typeof value === 'object') {
+    for (const [condition, child] of Object.entries(value)) {
+      if (isIncludeTypes || condition !== 'types')
+        getPackageTargetPaths(child, dir, patternMatch, isIncludeTypes, paths);
+    }
+  }
+  return paths;
 };
 
 const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
@@ -167,7 +210,7 @@ const matchPublishedTypeTarget = (pattern: string, candidate: string) => {
   if (parts.join(patternMatch) === candidate) return { patternMatch };
 };
 
-const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
+export const getExportEntries = (exports: NonNullable<PackageJson['exports']>) => {
   if (!Array.isArray(exports) && typeof exports === 'object') {
     const entries = Object.entries(exports);
     if (entries.some(([key]) => key.startsWith('.'))) return entries.filter(([key]) => key.startsWith('.'));
@@ -205,8 +248,51 @@ export const save = async (filePath: string, content: ExtendedPackageJson) => {
   await writeFile(filePath, fileContent);
 };
 
-export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
-  const { main, module, browser, bin, exports, types, typings } = manifest;
+const expandWildcards = (specifier: string) =>
+  specifier
+    .replace(/\/\*$/, '/**') // /* → /**
+    .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
+    .replace(/\/\*\//, '/**/'); // /*/ → /**/
+
+const withoutDotSlash = (specifier: string) => specifier.replace(/^\.\//, '');
+
+const getHiddenPatternMatch = (nullSubpath: string, key: string) => {
+  const star = key.indexOf('*');
+  const prefix = key.slice(0, star);
+  const suffix = key.slice(star + 1);
+  const nullStar = nullSubpath.indexOf('*');
+  if (nullStar === -1) {
+    const isMatch = nullSubpath.startsWith(prefix) && nullSubpath.endsWith(suffix) && nullSubpath.length >= key.length;
+    return isMatch ? nullSubpath.slice(prefix.length, nullSubpath.length - suffix.length) : undefined;
+  }
+  const head = nullSubpath.slice(0, nullStar);
+  const tail = nullSubpath.slice(nullStar + 1);
+  const isMoreSpecific = head.startsWith(prefix) && (head.length > prefix.length || nullSubpath.length > key.length);
+  if (!isMoreSpecific) return;
+  if (tail.endsWith(suffix)) return `${head.slice(prefix.length)}*${tail.slice(0, tail.length - suffix.length)}`;
+  if (suffix.endsWith(tail)) return `${head.slice(prefix.length)}*`;
+};
+
+const getHiddenExportTargets = (exports: NonNullable<PackageJson['exports']>) => {
+  const entries = getExportEntries(exports);
+  const targets: string[] = [];
+  for (const [nullSubpath, value] of entries) {
+    if (value !== null || nullSubpath === '.') continue;
+    for (const [key, target] of entries) {
+      if (target === null || !key.includes('*')) continue;
+      const patternMatch = getHiddenPatternMatch(nullSubpath, key);
+      if (patternMatch === undefined) continue;
+      for (const item of getEntriesFromExports(target)) {
+        if (item.includes('*')) targets.push(item.replaceAll('*', patternMatch));
+      }
+    }
+  }
+  return targets;
+};
+
+export const getEntrySpecifiersFromManifest = (manifest: PackageJson, isIncludeSubpathExports = false) => {
+  const { main, module, browser, bin, types, typings } = manifest;
+  const exports = isIncludeSubpathExports ? undefined : manifest.exports;
 
   const entryPaths = new Set<string>();
 
@@ -221,20 +307,16 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
   if (exports) {
     for (const item of getEntriesFromExports(exports)) {
       if (item === './*' || item.trim() === '') continue;
-      const expanded = item
-        .replace(/\/\*$/, '/**') // /* → /**
-        .replace(/\/\*\./, '/**/*.') // /*. → /**/*.
-        .replace(/\/\*\//, '/**/'); // /*/ → /**/
-      entryPaths.add(expanded);
+      entryPaths.add(expandWildcards(item));
     }
   }
 
-  if (manifest.imports) {
-    for (const [key, value] of Object.entries(manifest.imports)) {
-      if (!key.startsWith('#')) continue;
-      for (const item of getEntriesFromExports(value)) {
-        if (item.startsWith('.') && !item.includes('*')) entryPaths.add(item);
-      }
+  if (exports) {
+    const entries = Array.from(entryPaths, withoutDotSlash);
+    for (const target of getHiddenExportTargets(exports)) {
+      const hidden = expandWildcards(target);
+      const isHidden = picomatch(withoutDotSlash(hidden), { dot: true });
+      if (!entries.some(entry => isHidden(entry))) entryPaths.add(`!${hidden}`);
     }
   }
 
@@ -243,19 +325,27 @@ export const getEntrySpecifiersFromManifest = (manifest: PackageJson) => {
 
 export type Manifest = PackageJson & {
   scriptNames: Set<string>;
+  allDependencies: Set<string>;
   getMajor: (name: string) => number | undefined;
 };
 
-export const createManifest = (raw: PackageJson): Manifest =>
-  Object.assign(raw, {
+export const createManifest = (raw: PackageJson): Manifest => {
+  const allDependencies = new Set<string>();
+  for (const name in raw.dependencies) allDependencies.add(name);
+  for (const name in raw.devDependencies) allDependencies.add(name);
+  for (const name in raw.peerDependencies) allDependencies.add(name);
+  for (const name in raw.optionalDependencies) allDependencies.add(name);
+  return Object.assign(raw, {
     ...raw,
     scriptNames: new Set(Object.keys(raw.scripts ?? {})),
+    allDependencies,
     getMajor(name: string) {
       const range = raw.dependencies?.[name] ?? raw.devDependencies?.[name];
       const match = range?.match(/\d+/)?.[0];
       return match ? Number.parseInt(match, 10) : undefined;
     },
   });
+};
 
 export const getManifestImportDependencies = (manifest: PackageJson) => {
   const dependencies = new Set<string>();

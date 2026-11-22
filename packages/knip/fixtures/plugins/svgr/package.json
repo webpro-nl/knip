@@ -2,7 +2,8 @@
   "name": "@plugins/svgr",
   "devDependencies": {
     "@svgr/cli": "*",
-    "@svgr/plugin-jsx": "*"
+    "@svgr/plugin-jsx": "*",
+    "@svgr/plugin-svgo": "*"
   },
   "scripts": {
     "build": "svgr"

@@ -12,6 +12,8 @@ test('Find dependencies with the Lefthook plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.binaries['lefthook.yml']['eslint']);
+  assert(!issues.binaries['lefthook.yml']['prettier']);
+  assert(!issues.devDependencies['packages/app/package.json']);
 
   assert.deepEqual(counters, {
     ...baseCounters,

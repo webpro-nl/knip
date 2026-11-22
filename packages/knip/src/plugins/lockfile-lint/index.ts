@@ -10,13 +10,13 @@ const enablers = ['lockfile-lint'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['package.json', ...toCosmiconfig('lockfile-lint', { additionalExtensions: ['toml'] })];
+const entry = ['package.json', ...toCosmiconfig('lockfile-lint', { additionalExtensions: ['toml'] })];
 
 const plugin: Plugin = {
   title,
   enablers,
   isEnabled,
-  config,
+  entry,
 };
 
 export default plugin;

@@ -32,10 +32,11 @@ test('Should track referenced named catalog entries', async () => {
   assert(issues.catalog['pnpm-workspace.yaml']['default.lodash']);
   assert(!issues.catalog['pnpm-workspace.yaml']['frontend.@nu/xt']);
   assert(issues.catalog['pnpm-workspace.yaml']['backend.fastify']);
+  assert(issues.catalog['pnpm-workspace.yaml']['tools.prettier']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    catalog: 2,
+    catalog: 3,
     processed: 1,
     total: 1,
   });

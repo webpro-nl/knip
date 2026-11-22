@@ -1,9 +1,13 @@
 import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
-import { OPAQUE } from '../../constants.ts';
+import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import type { ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
+import { unwrapExpression } from '../ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import { isShadowed, type WalkState } from './walk.ts';
+import { isShadowedIn } from './shadow.ts';
+import type { WalkState } from './walk.ts';
+
+const chainNames: string[] = [];
 
 function markWholeObjectRead(internalImport: ImportMaps, id: string) {
   (internalImport.enumerated ??= new Set()).add(id);
@@ -14,13 +18,47 @@ function isNumericKey(value: string | undefined) {
 }
 
 export function handleMemberExpression(node: MemberExpression, s: WalkState) {
-  if (node.object.type === 'MemberExpression' && node.object.object.type === 'MemberExpression') {
+  const object = unwrapExpression(node.object);
+  if (
+    object.type === 'CallExpression' &&
+    object.callee.type === 'Identifier' &&
+    object.callee.name === 'require' &&
+    object.arguments.length === 1 &&
+    isStringLiteral(object.arguments[0]) &&
+    !s.handledImportExpressions.has(object.start)
+  ) {
+    let memberName: string | undefined;
+    if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
+    else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+    if (memberName) {
+      const specifier = getStringValue(object.arguments[0])!;
+      const reqTags = s.currentVarDeclStart >= 0 ? s.getJSDocTags(s.currentVarDeclStart) : undefined;
+      s.addImport(
+        specifier,
+        memberName,
+        undefined,
+        undefined,
+        object.arguments[0].start,
+        IMPORT_FLAGS.NONE,
+        undefined,
+        reqTags
+      );
+    }
+    return;
+  }
+
+  if (
+    node.object.type === 'MemberExpression' &&
+    node.object.object.type === 'MemberExpression' &&
+    !node.computed &&
+    node.property.type === 'Identifier'
+  ) {
     s.chainedMemberExprs.add(node.object);
   }
 
   if (node.object.type === 'Identifier') {
     const localName = node.object.name;
-    const shadowed = isShadowed(localName, node.object.start);
+    const shadowed = isShadowedIn(s, localName, node.object.start);
     const _import = !shadowed ? s.localImportMap.get(localName) : undefined;
     if (_import) {
       const internalImport = s.internal.get(_import.filePath);
@@ -73,11 +111,10 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
         isWholeRead = true;
       }
       for (const alias of aliases) {
-        const internalImport = s.internal.get(alias.filePath);
+        const internalImport = s.internal.get(alias.import.filePath);
         if (!internalImport) continue;
         if (isWholeRead) {
-          const origin = s.localImportMap.get(alias.id);
-          markWholeObjectRead(internalImport, origin?.importedName ?? alias.id);
+          markWholeObjectRead(internalImport, alias.import.importedName);
         } else if (memberName) {
           s.addNsMemberRefs(internalImport, alias.id, memberName);
         }
@@ -93,7 +130,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.object.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
-    if (!isShadowed(rootName, node.object.object.start)) {
+    if (!isShadowedIn(s, rootName, node.object.object.start)) {
       const _import = s.localImportMap.get(rootName);
       if (_import?.isNamespace) {
         const internalImport = s.internal.get(_import.filePath);
@@ -117,7 +154,7 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
     node.property.type === 'Identifier'
   ) {
     const rootName = node.object.object.name;
-    if (!isShadowed(rootName, node.object.object.start)) {
+    if (!isShadowedIn(s, rootName, node.object.object.start)) {
       const _import = s.localImportMap.get(rootName);
       if (_import) {
         const internalImport = s.internal.get(_import.filePath);
@@ -145,33 +182,25 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
 
   if (
     node.object.type === 'MemberExpression' &&
-    !node.object.computed &&
     node.object.object.type === 'MemberExpression' &&
-    !node.object.object.computed &&
-    node.object.object.object.type === 'Identifier' &&
-    node.object.object.property.type === 'Identifier' &&
-    node.object.property.type === 'Identifier' &&
-    !node.computed &&
-    node.property.type === 'Identifier'
+    !s.chainedMemberExprs.has(node)
   ) {
-    const rootName = node.object.object.object.name;
-    if (!isShadowed(rootName, node.object.object.object.start)) {
-      const _import = s.localImportMap.get(rootName);
-      if (_import) {
-        const internalImport = s.internal.get(_import.filePath);
-        if (internalImport) {
-          const a = node.object.object.property.name;
-          const b = node.object.property.name;
-          const c = node.property.name;
-          s.addNsMemberRefs(internalImport, rootName, a);
-          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}`);
-          s.addNsMemberRefs(internalImport, rootName, `${a}.${b}.${c}`);
+    chainNames.length = 0;
+    let root: MemberExpression['object'] = node;
+    while (root.type === 'MemberExpression' && !root.computed && root.property.type === 'Identifier') {
+      chainNames.push(root.property.name);
+      root = root.object;
+    }
+    if (root.type === 'Identifier' && !isShadowedIn(s, root.name, root.start)) {
+      const _import = s.localImportMap.get(root.name);
+      const internalImport = _import && s.internal.get(_import.filePath);
+      if (internalImport || !_import) {
+        let path = '';
+        for (let i = chainNames.length - 1; i >= 0; i--) {
+          path = path ? `${path}.${chainNames[i]}` : chainNames[i];
+          if (internalImport) s.addNsMemberRefs(internalImport, root.name, path);
+          else s.memberRefsInFile.push(root.name, path);
         }
-      } else {
-        const a = node.object.object.property.name;
-        const b = node.object.property.name;
-        const c = node.property.name;
-        s.memberRefsInFile.push(rootName, a, rootName, `${a}.${b}`, rootName, `${a}.${b}.${c}`);
       }
     }
   }
@@ -184,19 +213,16 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
   ) {
     const containerName = node.object.object.name;
     const propKey = node.object.property.name;
-    const nsName = s.nsContainers.get(containerName)?.get(propKey);
-    if (nsName) {
-      const _import = s.localImportMap.get(nsName);
-      if (_import) {
-        const internalImport = s.internal.get(_import.filePath);
-        if (internalImport) {
-          let memberName: string | undefined;
-          if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
-          else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
-          if (memberName) {
-            s.addNsMemberRefs(internalImport, nsName, memberName);
-            s.accessedNsContainers.add(`${containerName}.${propKey}`);
-          }
+    const ref = s.nsContainers.get(containerName)?.get(propKey);
+    if (ref) {
+      const internalImport = s.internal.get(ref.import.filePath);
+      if (internalImport) {
+        let memberName: string | undefined;
+        if (!node.computed && node.property.type === 'Identifier') memberName = node.property.name;
+        else if (node.computed && isStringLiteral(node.property)) memberName = getStringValue(node.property);
+        if (memberName) {
+          s.addNsMemberRefs(internalImport, ref.id, memberName);
+          s.accessedNsContainers.add(`${containerName}.${propKey}`);
         }
       }
     }

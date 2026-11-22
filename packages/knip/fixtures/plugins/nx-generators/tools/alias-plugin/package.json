@@ -1,0 +1,7 @@
+{
+  "name": "alias-plugin",
+  "private": true,
+  "type": "module",
+  "schematics": "./schematics.json",
+  "builders": "./builders.json"
+}

@@ -1,0 +1,5 @@
+{
+  "entry": ["preload.ts"],
+  "project": ["preload.ts", "setup-*.ts"],
+  "jest": false
+}

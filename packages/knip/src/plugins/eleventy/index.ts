@@ -1,13 +1,15 @@
 import { DEFAULT_EXTENSIONS } from '../../constants.ts';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { toDeferResolve, toProductionEntry } from '../../util/input.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
+import { getPackageNameFromFilePath } from '../../util/modules.ts';
 import { isInNodeModules, join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { DummyEleventyConfig, defaultEleventyConfig } from './helpers.ts';
 import type { EleventyConfig, EleventyConfigOrFn } from './types.ts';
 
 // https://www.11ty.dev/docs/
+// https://github.com/11ty/eleventy/blob/v3.1.7/src/Data/TemplateData.js#L544-L560
 
 const title = 'Eleventy';
 
@@ -17,7 +19,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['.eleventy.js', 'eleventy.config.{js,cjs,mjs}'];
 
-const production = ['posts/**/*.11tydata.js', '_data/**/*.{js,cjs,mjs}'];
+const production = ['posts/**/*.11tydata.{js,cjs,mjs}', '_data/**/*.{js,cjs,mjs}'];
 
 const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, options) => {
   const { configFileDir } = options;
@@ -48,14 +50,14 @@ const resolveConfig: ResolveConfig<EleventyConfigOrFn> = async (localConfig, opt
   }
 
   return Array.from(copiedPackages)
-    .map(id => toDeferResolve(id))
+    .map(id => toDependency(getPackageNameFromFilePath(id)))
     .concat(
       [
         join(inputDir, dataDir, '**/*.{js,cjs,mjs}'),
         join(inputDir, `**/*.{${typeof templateFormats === 'string' ? templateFormats : templateFormats.join(',')}}`),
-        join(inputDir, '**/*.11tydata.js'),
+        join(inputDir, '**/*.11tydata.{js,cjs,mjs}'),
         ...copiedEntries,
-      ].map(id => toProductionEntry(id))
+      ].map(id => toEntry(id, { production: true }))
     );
 };
 

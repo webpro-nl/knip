@@ -14,7 +14,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rspack.config*.{js,ts,mjs,mts,cjs,cts}'];
 
-const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
+export const resolveConfig: ResolveConfig<WebpackConfig> = async (localConfig, options) => {
   const inputs = await findWebpackDependenciesFromConfig(localConfig, options);
 
   return inputs.filter(input => !input.specifier.startsWith('builtin:'));
@@ -24,6 +24,10 @@ const registerVisitors: RegisterVisitors = ({ ctx, registerVisitor }) => {
   registerVisitor(createRequireContextVisitor(ctx));
 };
 
+const args = {
+  config: true,
+};
+
 const plugin: Plugin = {
   title,
   enablers,
@@ -31,6 +35,7 @@ const plugin: Plugin = {
   config,
   resolveConfig,
   registerVisitors,
+  args,
 };
 
 export default plugin;

@@ -8,12 +8,17 @@
     "build-react": "tsc -p tsconfig.jsx-import-source-react.json",
     "build-jsx": "tsc -p tsconfig.jsx-preserve.json"
   },
+  "dependencies": {
+    "tslib": "*"
+  },
   "devDependencies": {
+    "@types/chai": "*",
     "ember-content-mapper": "*",
     "remark-gfm": "*",
     "@tsconfig/node16": "*",
     "@tsconfig/node20": "*",
     "@tsconfig/node22": "*",
+    "@tsconfig/strictest": "*",
     "typescript": "*"
   }
 }

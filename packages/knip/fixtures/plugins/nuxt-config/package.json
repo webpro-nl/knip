@@ -6,6 +6,8 @@
   "dependencies": {
     "nuxt": "*",
     "a-module": "*",
-    "a-nuxt-theme": "*"
+    "a-nuxt-theme": "*",
+    "animate.css": "*",
+    "@fontsource/roboto": "*"
   }
 }

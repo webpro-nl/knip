@@ -12,11 +12,13 @@ test('Find dependencies with the Cspell plugin', async () => {
   const { issues, counters } = await main(options);
 
   assert(issues.unlisted['.cspell.json']['@cspell/dict-cryptocurrencies']);
+  assert(!issues.devDependencies['package.json']['@cspell/dict-typescript']);
+  assert(issues.unlisted['package.json']['@cspell/dict-node']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 1,
-    unlisted: 1,
+    unlisted: 2,
     processed: 0,
     total: 0,
   });

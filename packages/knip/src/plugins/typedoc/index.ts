@@ -1,6 +1,7 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
 import { arrayify } from '../../util/array.ts';
-import { type Input, toDeferResolve, toEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntryPath } from '../../util/input.ts';
+import type { ParsedArgs } from '../../util/parse-args.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { TypeDocConfig } from './types.ts';
@@ -25,20 +26,25 @@ const config = [
   'tsconfig.json',
 ];
 
+const getThemes = (theme: TypeDocConfig['theme']) => arrayify(theme).filter(name => name !== 'default');
+
 const resolveConfig: ResolveConfig<TypeDocConfig | { typedocOptions: TypeDocConfig }> = (config, options) => {
   const cfg = 'typedocOptions' in config ? config.typedocOptions : config; // exception for `tsconfig.json`
   // TypeDoc accepts a single string for both options, spreading one yields an input per character
   const plugins = arrayify(cfg?.plugin);
-  const themes = arrayify(cfg?.theme);
-  const inputs: Input[] = [...plugins, ...themes].map(id => toDeferResolve(id));
+  const themes = getThemes(cfg?.theme);
+  const inputs: Input[] = [...plugins, ...themes].map(id => toModule(id));
   for (const file of [cfg?.customCss, cfg?.customJs]) {
-    if (file) inputs.push(toEntry(join(options.configFileDir, file)));
+    if (file) inputs.push(toEntryPath(join(options.configFileDir, file)));
   }
   return inputs;
 };
 
 const args = {
-  resolve: ['plugin', 'theme'],
+  config: ['options'],
+  resolve: ['plugin'],
+  string: ['theme'],
+  resolveInputs: (parsed: ParsedArgs) => getThemes(parsed.theme).map(id => toModule(id)),
 };
 
 const plugin: Plugin = {

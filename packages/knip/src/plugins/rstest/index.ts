@@ -3,8 +3,8 @@ import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.
 import { arrayify } from '../../util/array.ts';
 import { findFileWithExtensions } from '../../util/fs.ts';
 import { _dirGlob, _glob, negate } from '../../util/glob.ts';
-import { type Input, toAlias, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { dirname, join, relative, toAbsolute } from '../../util/path.ts';
+import { type Input, toAlias, toConfig, toModule, toEntryPath, toDependency, toEntry } from '../../util/input.ts';
+import { dirname, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency, load } from '../../util/plugin.ts';
 import type { RstestConfigOrFn, RstestProjectConfig } from './types.ts';
 import { createRstestMockVisitor } from './visitors/mock.ts';
@@ -50,7 +50,7 @@ const resolveConfig: ResolveConfig<RstestConfigOrFn> = async (localConfig, optio
   const inputs: Input[] = [];
 
   const addProject = async (project: RstestProjectConfig, projectRoot: string) => {
-    const toPattern = (pattern: string) => relative(cwd, toAbsolute(replaceRootDir(pattern, projectRoot), projectRoot));
+    const toPattern = (pattern: string) => toAbsolute(replaceRootDir(pattern, projectRoot), projectRoot);
 
     if (!options.config.entry) {
       const include: string[] = [];
@@ -63,14 +63,14 @@ const resolveConfig: ResolveConfig<RstestConfigOrFn> = async (localConfig, optio
         exclude.length === 0
           ? include
           : await _glob({ cwd, patterns: [...include, ...exclude.map(pattern => negate(toPattern(pattern)))] });
-      for (const entry of entries) inputs.push(toEntry(entry));
+      for (const entry of entries) inputs.push(exclude.length === 0 ? toEntry(entry) : toEntryPath(entry));
     }
 
     const env = project.testEnvironment;
     inputs.push(...getEnvironmentDependency(typeof env === 'string' ? env : env?.name));
 
     for (const specifier of [project.setupFiles ?? [], project.globalSetup ?? []].flat()) {
-      inputs.push(toDeferResolve(replaceRootDir(specifier, projectRoot), { dir: projectRoot }));
+      inputs.push(toModule(replaceRootDir(specifier, projectRoot), { dir: projectRoot }));
     }
 
     if (project.browser?.enabled) {
@@ -123,10 +123,10 @@ const resolveConfig: ResolveConfig<RstestConfigOrFn> = async (localConfig, optio
               .catch(() => undefined)
           : undefined;
       if (!project) {
-        inputs.push(toConfig('rstest', filePath, { containingFilePath: configFilePath }));
+        inputs.push(toConfig('rstest', filePath));
         continue;
       }
-      inputs.push(toEntry(filePath));
+      inputs.push(toEntryPath(filePath));
       if (project.projects) await addProjects(project.projects, dirname(filePath));
       else await addProject(project, toAbsolute(project.root ?? dirname(filePath), runnerRoot));
     }

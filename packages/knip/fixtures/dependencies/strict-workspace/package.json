@@ -1,0 +1,12 @@
+{
+  "name": "@fixtures/strict-workspace",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "start": "root-binary"
+  },
+  "dependencies": {
+    "root-binary-provider": "*",
+    "root-dependency": "*"
+  }
+}

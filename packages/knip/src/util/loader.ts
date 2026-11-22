@@ -1,8 +1,25 @@
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 import { LoaderError } from './errors.ts';
 import { loadFile, loadJSON, loadJSONC, loadTOML, loadYAML, parseJSONC, parseYAML } from './fs.ts';
-import { jiti } from './jiti.ts';
+import { getJiti } from './jiti.ts';
 import { timerify } from './Performance.ts';
-import { extname, isInternal } from './path.ts';
+import { extname, isInternal, toNative } from './path.ts';
+
+const versions = new Map<string, number>();
+
+const isReloadable = (ext: string) => ext === '.js' || ext === '.mjs' || ext === '.cjs';
+
+const reload = async (filePath: string, version: number) => {
+  const jiti = getJiti();
+  let imported;
+  try {
+    imported = jiti(filePath);
+  } catch {
+    imported = await import(`${pathToFileURL(filePath).href}?v=${version}`);
+  }
+  return imported.default ?? imported;
+};
 
 const load = async (filePath: string) => {
   try {
@@ -41,10 +58,25 @@ const load = async (filePath: string) => {
       return await loadTOML(filePath);
     }
 
-    return await jiti.import(filePath, { default: true });
+    const version = versions.get(filePath) ?? 0;
+    versions.set(filePath, version);
+    if (version && isReloadable(ext)) return await reload(filePath, version);
+
+    return await getJiti().import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
 };
 
 export const _load = timerify(load);
+
+const { cache } = createRequire(import.meta.url);
+
+export const unload = (filePaths: Iterable<string>) => {
+  for (const filePath of filePaths) {
+    delete cache[filePath];
+    delete cache[toNative(filePath)];
+    const version = versions.get(filePath);
+    if (version !== undefined) versions.set(filePath, version + 1);
+  }
+};

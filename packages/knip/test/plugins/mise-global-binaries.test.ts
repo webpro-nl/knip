@@ -16,12 +16,16 @@ test('Keep mise-managed and ambiguous global binaries separate from package depe
     'node',
     'find',
   ]);
-  assert.deepEqual(Object.keys(issues.binaries['mise.toml']), ['missing-local-cli', 'missing-concurrent-cli']);
+  assert.deepEqual(Object.keys(issues.binaries['mise.toml']), [
+    'missing-local-cli',
+    'missing-concurrent-cli',
+    'missing-bracket-cli',
+  ]);
 
   assert.deepEqual(counters, {
     ...baseCounters,
     devDependencies: 4,
-    binaries: 2,
+    binaries: 3,
     processed: 0,
     total: 0,
   });

@@ -1,4 +1,3 @@
-import { isBuiltin } from 'node:module';
 import type { ParseResult, Visitor } from 'oxc-parser';
 import { IMPORT_FLAGS, IMPORT_STAR, LOADER_DEFAULT, OPAQUE, PROTOCOL_VIRTUAL, SIDE_EFFECTS } from '../constants.ts';
 import type { GetImportsAndExportsOptions, IgnoreExportsUsedInFile, PluginVisitorContext } from '../types/config.ts';
@@ -8,6 +7,8 @@ import { addNsValue, addValue, createImports } from '../util/module-graph.ts';
 import {
   getPackageNameFromFilePath,
   getPackageNameFromModuleSpecifier,
+  getSubpathImport,
+  isBuiltin,
   isStartsLikePackageName,
   sanitizeSpecifier,
 } from '../util/modules.ts';
@@ -24,7 +25,7 @@ import {
   type ResolvedModule,
 } from './ast-nodes.ts';
 import { buildJSDocTagLookup } from './visitors/jsdoc.ts';
-import { _walkAST } from './visitors/walk.ts';
+import { _walkAST, type LocalImport, type LocalImportRef } from './visitors/walk.ts';
 
 interface AddInternalImportOptions {
   specifier: string;
@@ -60,24 +61,23 @@ const getImportsAndExports = (
   const programFiles = new Set<string>();
   const entryFiles = new Set<string>();
   const imports: Imports = new Set();
+  let subpathImports: Map<string, string | undefined> | undefined;
   const exports = new Map<string, Export>();
   const aliasedExports = new Map<string, IssueSymbol[]>();
   const specifierExportNames = new Set<string>();
   const scripts = new Set<string>();
   const importGlobs: ImportGlob[] = [];
   const handledImportExpressions = new Set<number>();
+  const caughtImportExpressions = new Set<number>();
 
-  const importAliases = new Map<string, Set<{ id: string; filePath: string }>>();
-  const addImportAlias = (aliasName: string, id: string, importFilePath: string) => {
+  const importAliases = new Map<string, Set<LocalImportRef>>();
+  const addImportAlias = (aliasName: string, id: string, _import: LocalImport) => {
     const aliases = importAliases.get(aliasName);
-    if (aliases) aliases.add({ id, filePath: importFilePath });
-    else importAliases.set(aliasName, new Set([{ id, filePath: importFilePath }]));
+    if (aliases) aliases.add({ id, import: _import });
+    else importAliases.set(aliasName, new Set([{ id, import: _import }]));
   };
 
-  const localImportMap = new Map<
-    string,
-    { importedName: string; filePath: string; isNamespace: boolean; isDynamicImport?: boolean }
-  >();
+  const localImportMap = new Map<string, LocalImport>();
   let builtinImports: Map<string, Import> | undefined;
   const localDeclarationTypes = new Map<string, SymbolType>();
   const referencedInExport = new Map<string, Set<string>>();
@@ -173,6 +173,12 @@ const getImportsAndExports = (
     }
 
     const module = preResolvedModule ?? resolveModule(specifier, filePath);
+
+    const subpathImport = getSubpathImport(specifier);
+    if (subpathImport) {
+      subpathImports ??= new Map();
+      if (!subpathImports.get(subpathImport)) subpathImports.set(subpathImport, module?.resolvedFileName);
+    }
 
     if (
       modifiers & IMPORT_FLAGS.AUGMENT &&
@@ -445,6 +451,7 @@ const getImportsAndExports = (
     programFiles,
     entryFiles,
     handledImportExpressions,
+    caughtImportExpressions,
     visitor,
     getJSDocTags,
   });
@@ -477,7 +484,16 @@ const getImportsAndExports = (
 
   return {
     skipExports,
-    imports: { internal, external, externalRefs: new Set(), programFiles, entryFiles, imports, unresolved },
+    imports: {
+      internal,
+      external,
+      externalRefs: new Set(),
+      programFiles,
+      entryFiles,
+      imports,
+      unresolved,
+      subpathImports,
+    },
     exports,
     duplicates: [...aliasedExports.values()],
     scripts,

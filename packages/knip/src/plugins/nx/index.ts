@@ -1,11 +1,15 @@
 import type { ParsedArgs } from '../../util/parse-args.ts';
-import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
+import type { IsPluginEnabled, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import type { PluginName } from '../../types/PluginNames.ts';
 import { compact } from '../../util/array.ts';
-import { toConfig, toDependency } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { isFile, loadJSON } from '../../util/fs.ts';
+import { type Input, toConfig, toModule, toEntryPath, toDependency } from '../../util/input.ts';
+import { get } from '../../util/object.ts';
+import { dirname, isInternal, join, relative, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
-import type { NxConfigRoot, NxProjectConfiguration } from './types.ts';
+import { getBuilderEntries } from '../angular/helpers.ts';
+import type { NxCollection, NxConfigRoot, NxProjectConfiguration } from './types.ts';
 
 const title = 'Nx';
 
@@ -14,6 +18,13 @@ const enablers = ['nx', /^@nrwl\//, /^@nx\//];
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
 const config = ['nx.json', 'project.json', '{apps,libs}/**/project.json', 'package.json'];
+
+const angularBuilderPackages = new Set([
+  '@angular-devkit/build-angular',
+  '@angular/build',
+  '@nrwl/angular',
+  '@nx/angular',
+]);
 
 const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfig => {
   const targetsDefault = localConfig.targetDefaults
@@ -37,7 +48,10 @@ const findNxDependenciesInNxJson: ResolveConfig<NxConfigRoot> = async localConfi
         .map(value => substringBefore(value, ':'))
     : [];
 
-  return compact([...targetsDefault, ...plugins, ...generators]).map(id => toDependency(id));
+  return [
+    ...compact([...targetsDefault, ...generators]).map(id => toDependency(id)),
+    ...compact(plugins).map(id => (isInternal(id) ? toModule(id) : toDependency(id))),
+  ];
 };
 
 const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = async (localConfig, options) => {
@@ -59,11 +73,8 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
   const expand = (value: string) =>
     value.replaceAll('{projectRoot}', options.configFileDir).replaceAll('{workspaceRoot}', options.rootCwd);
 
-  const resolveTargetCwd = (targetCwd: string | undefined) => {
-    if (!targetCwd) return options.cwd;
-    const expanded = expand(targetCwd);
-    return expanded === targetCwd ? join(options.cwd, targetCwd) : expanded;
-  };
+  const resolveTargetCwd = (targetCwd: string | undefined) =>
+    targetCwd ? toAbsolute(expand(targetCwd), options.rootCwd) : options.cwd;
 
   const inputs = targets
     .filter(target => target.executor === 'nx:run-commands' || target.command)
@@ -75,8 +86,19 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
         commands = target.options.commands.map(commandConfig =>
           typeof commandConfig === 'string' ? commandConfig : commandConfig.command
         );
-      return options.getInputsFromScripts(commands.map(expand), { cwd: resolveTargetCwd(target.options?.cwd) });
+      const cwd = resolveTargetCwd(target.options?.cwd);
+      // Relative roots keep a cwd with spaces or parentheses out of the command
+      const expandRelative = (command: string) =>
+        command
+          .replaceAll('{projectRoot}', relative(cwd, options.configFileDir))
+          .replaceAll('{workspaceRoot}', relative(cwd, options.rootCwd));
+      const scriptInputs = options.getInputsFromScripts(commands.map(expandRelative), { cwd });
+      for (const input of scriptInputs) input.dir ??= cwd;
+      return scriptInputs;
     });
+
+  const toTargetConfig = (pluginName: PluginName, specifier: string) =>
+    toConfig(pluginName, expand(specifier), { dir: options.rootCwd });
 
   const configInputs = targets.flatMap(target => {
     const opts = target.options;
@@ -85,31 +107,70 @@ const resolveConfig: ResolveConfig<NxProjectConfiguration | NxConfigRoot> = asyn
     const configs = [];
 
     if ('eslintConfig' in opts && typeof opts.eslintConfig === 'string') {
-      configs.push(toConfig('eslint', opts.eslintConfig));
+      configs.push(toTargetConfig('eslint', opts.eslintConfig));
     }
 
     if ('jestConfig' in opts && typeof opts.jestConfig === 'string') {
-      configs.push(toConfig('jest', opts.jestConfig));
+      configs.push(toTargetConfig('jest', opts.jestConfig));
+    }
+
+    if ('karmaConfig' in opts && typeof opts.karmaConfig === 'string') {
+      configs.push(toTargetConfig('karma', opts.karmaConfig));
     }
 
     if ('tsConfig' in opts && typeof opts.tsConfig === 'string') {
-      configs.push(toConfig('typescript', opts.tsConfig));
+      configs.push(toTargetConfig('typescript', opts.tsConfig));
     }
 
     if ('vitestConfig' in opts && typeof opts.vitestConfig === 'string') {
-      configs.push(toConfig('vitest', opts.vitestConfig));
+      configs.push(toTargetConfig('vitest', opts.vitestConfig));
     }
 
     if ('webpackConfig' in opts && typeof opts.webpackConfig === 'string') {
-      configs.push(toConfig('webpack', opts.webpackConfig));
+      configs.push(toTargetConfig('webpack', opts.webpackConfig));
     }
 
     return configs;
   });
 
-  return compact([...executors, ...inputs, ...configInputs]).map(id =>
+  const angularBuilderInputs: Input[] = [];
+  for (const [targetName, target] of Object.entries(config.targets ?? {})) {
+    if (target.executor && angularBuilderPackages.has(substringBefore(target.executor, ':'))) {
+      angularBuilderInputs.push(...getBuilderEntries(targetName, target, options.rootCwd, expand));
+    }
+  }
+
+  return compact([...executors, ...inputs, ...configInputs, ...angularBuilderInputs]).map(id =>
     typeof id === 'string' ? toDependency(id) : id
   );
+};
+
+const collections = [
+  ['generators', 'schematics'],
+  ['executors', 'builders'],
+] as const;
+
+const resolve: Resolve = async options => {
+  const inputs: Input[] = [];
+  for (const [key, alias] of collections) {
+    const file = get(options.manifest, key) ?? get(options.manifest, alias);
+    if (typeof file !== 'string') continue;
+    const filePath = join(options.cwd, file);
+    if (!isFile(filePath)) continue;
+
+    const collection: NxCollection = await loadJSON(filePath);
+    for (const entries of [collection[key], collection[alias]]) {
+      for (const entry of Object.values(entries ?? {})) {
+        if (!entry || typeof entry !== 'object') continue;
+        for (const id of [entry.implementation || entry.factory, entry.batchImplementation]) {
+          if (typeof id === 'string' && id.length > 0) {
+            inputs.push(toEntryPath(substringBefore(id, '#'), { dir: dirname(filePath) }));
+          }
+        }
+      }
+    }
+  }
+  return inputs;
 };
 
 const args = {
@@ -127,6 +188,7 @@ const plugin: Plugin = {
   isEnabled,
   config,
   resolveConfig,
+  resolve,
   args,
 };
 

@@ -1,0 +1,7 @@
+{
+  "default": {
+    "requireModule": ["ts-node/register"],
+    "require": ["src/steps/**/*.ts", "src/support/*.ts", "support"],
+    "import": ["features/support", "features/step_definitions"]
+  }
+}

@@ -1,5 +1,4 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import { formatly } from 'formatly';
 import type { Fixes } from './types/exports.ts';
 import type { Counters, Issue, Issues, IssueType } from './types/issues.ts';
 import { DEFAULT_CATALOG } from './util/catalog.ts';
@@ -7,9 +6,7 @@ import type { MainOptions } from './util/create-options.ts';
 import { debugLogArray, debugLogObject } from './util/debug.ts';
 import { load, save } from './util/package-json.ts';
 import { extname, join } from './util/path.ts';
-import { removeExport } from './util/remove-export.ts';
-
-const MODULE_MARKER = /^[ \t]*(import|export)\b/m;
+import { keepModuleMarker, removeExport } from './util/remove-export.ts';
 
 export const fix = async (issues: Issues, counters: Counters, options: MainOptions) => {
   const fixer = new IssueFixer(options);
@@ -24,8 +21,9 @@ export const fix = async (issues: Issues, counters: Counters, options: MainOptio
   }
 
   if (options.isFormat) {
+    const { formatly } = await import('formatly');
     const report = await formatly(Array.from(touchedFiles));
-    if (report.ran && report.result && (report.result.runner === 'virtual' || report.result.code === 0)) {
+    if (report.ran && report.result.runner !== 'dry-run' && report.result.code === 0) {
       debugLogArray('*', `Formatted files using ${report.formatter.name} (${report.formatter.runner})`, touchedFiles);
     } else {
       debugLogObject('*', 'Formatting files failed', report);
@@ -82,13 +80,17 @@ class IssueFixer {
       if (fixes.length === 0) continue;
       const absFilePath = join(this.options.cwd, filePath);
       const originalSource = await readFile(absFilePath, 'utf-8');
-      let sourceFileText = fixes
-        .sort((a, b) => b[0] - a[0])
-        .reduce((text, [start, end, flags]) => removeExport({ text, start, end, flags }), originalSource);
-
-      if (MODULE_MARKER.test(originalSource) && !MODULE_MARKER.test(sourceFileText)) {
-        sourceFileText = `${sourceFileText.trimEnd()}\n\nexport {};\n`;
+      const disjointFixes: Fixes = [];
+      for (const fix of fixes.sort((a, b) => a[0] - b[0] || b[1] - a[1])) {
+        if (fix[0] >= (disjointFixes.at(-1)?.[1] ?? 0)) disjointFixes.push(fix);
       }
+      const sourceFileText = keepModuleMarker(
+        originalSource,
+        disjointFixes.reduceRight(
+          (text, [start, end, flags]) => removeExport({ text, start, end, flags }),
+          originalSource
+        )
+      );
 
       await writeFile(absFilePath, sourceFileText);
 
@@ -96,7 +98,7 @@ class IssueFixer {
 
       for (const type of types) {
         const issueMap = issues[type]?.[filePath];
-        if (issueMap) for (const issue of Object.values(issueMap)) issue.isFixed = true;
+        if (issueMap) for (const issue of Object.values(issueMap)) if (issue.fixes.length > 0) issue.isFixed = true;
       }
     }
 
@@ -150,7 +152,7 @@ class IssueFixer {
 
         await writeFile(absFilePath, fileContent.split('\n').filter(keep).join('\n'));
 
-        for (const issue of issuesForFile) issue.isFixed = true;
+        for (const issue of issuesForFile) if (issue.fixes.length > 0) issue.isFixed = true;
 
         touchedFiles.add(filePath);
       } else {

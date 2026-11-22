@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getScriptCommands, toShellCommand } from '../../src/util/scripts.ts';
+import { getScriptCommands } from '../../src/binaries/plugins.ts';
+import { toShellCommand } from '../../src/util/scripts.ts';
 
 test('getScriptCommands splits chained commands', () => {
   assert.deepEqual(getScriptCommands('bun run build && bun test'), [
@@ -15,10 +16,87 @@ test('getScriptCommands keeps options with their command', () => {
   ]);
 });
 
+test('getScriptCommands excludes redirects from arguments', () => {
+  assert.deepEqual(getScriptCommands('>output.log node 2>errors.log ./script.js <input.txt'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env >output.log NODE_ENV=test node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+});
+
+test('getScriptCommands traverses shell command wrappers', () => {
+  assert.deepEqual(getScriptCommands('time -p ! { node ./script.js; } >output.log'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('time'), []);
+  assert.deepEqual(getScriptCommands('!'), []);
+});
+
+test('getScriptCommands traverses elif branches', () => {
+  assert.deepEqual(
+    getScriptCommands('if a; then b; elif c; then d; else e; fi').map(command => command.binary),
+    ['a', 'b', 'c', 'd', 'e']
+  );
+});
+
 test('getScriptCommands unwraps spawning binaries', () => {
   assert.deepEqual(getScriptCommands('cross-env NODE_ENV=test bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('cross-env-shell MESSAGE="two words" "node --test && bun test"'), [
+    { binary: 'node', args: ['--test'] },
+    { binary: 'bun', args: ['test'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell TZ=UTC node ./script.js "title=hello world"'), [
+    { binary: 'node', args: ['./script.js', 'title=hello', 'world'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cross-env-shell NODE_ENV=test node ./script.js -- --import unused-dep'), [
+    { binary: 'node', args: ['./script.js', '--', '--import', 'unused-dep'] },
+  ]);
+  assert.deepEqual(getScriptCommands('retry -n 3 -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('retry-cli -- node --test'), [{ binary: 'node', args: ['--test'] }]);
   assert.deepEqual(getScriptCommands('c8 node --test'), [{ binary: 'node', args: ['--test'] }]);
+});
+
+test('getScriptCommands unwraps the commands dependency discovery follows', () => {
+  assert.deepEqual(getScriptCommands('dotenvx run -- node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(
+    getScriptCommands('dotenvx run --quiet -- c8 node --test-reporter spec --test test/unit/**/*.test.js'),
+    [{ binary: 'node', args: ['--test-reporter', 'spec', '--test', 'test/unit/**/*.test.js'] }]
+  );
+  assert.deepEqual(getScriptCommands('op run --env-file=.env -- bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('doppler run --command="node index.js"'), [
+    { binary: 'node', args: ['index.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("infisical run --command 'tsx ./scripts/generate-api.ts'"), [
+    { binary: 'tsx', args: ['./scripts/generate-api.ts'] },
+  ]);
+  assert.deepEqual(getScriptCommands('concurrently "tsc -w" "node --watch -r dotenv/config ./build/src/start.js"'), [
+    { binary: 'tsc', args: ['-w'] },
+    { binary: 'node', args: ['--watch', '-r', 'dotenv/config', './build/src/start.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands("nodemon --exec 'npm test' --watch src --watch specs"), [
+    { binary: 'npm', args: ['test'] },
+  ]);
+  assert.deepEqual(
+    getScriptCommands(
+      'glob -c "node --import tsx --import global-jsdom/register --test --no-warnings" "./src/**/__tests__/**/*.[jt]s"'
+    ),
+    [{ binary: 'node', args: ['--import', 'tsx', '--import', 'global-jsdom/register', '--test', '--no-warnings'] }]
+  );
+});
+
+test('getScriptCommands skips options of spawning binaries', () => {
+  assert.deepEqual(getScriptCommands('c8 --reporter=lcov --reporter text node --test'), [
+    { binary: 'node', args: ['--test'] },
+  ]);
+  assert.deepEqual(getScriptCommands('c8 -r lcov --all bun test'), [{ binary: 'bun', args: ['test'] }]);
+  assert.deepEqual(getScriptCommands('c8 --100 node --test'), [{ binary: 'node', args: ['--test'] }]);
+  assert.deepEqual(getScriptCommands('retry --retries 3 node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('retry --randomize node ./script.js'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
 });
 
 test('getScriptCommands keeps quoted arguments of spawning binaries intact', () => {
@@ -31,8 +109,26 @@ test('getScriptCommands normalizes binary paths', () => {
   assert.deepEqual(getScriptCommands('./node_modules/.bin/bun test'), [{ binary: 'bun', args: ['test'] }]);
 });
 
-test('getScriptCommands returns an empty array for empty or unparseable scripts', () => {
+test('getScriptCommands returns an empty array for empty scripts and recovers from over-deep syntax', () => {
   assert.deepEqual(getScriptCommands(''), []);
+  const deep = `$((${'('.repeat(300)}1${')'.repeat(300)}))`;
+  assert.deepEqual(getScriptCommands(`echo ${deep}`), [{ binary: 'echo', args: [deep] }]);
+});
+
+test('getScriptCommands reaches commands in every compound body', () => {
+  assert.deepEqual(getScriptCommands('case $1 in start) node ./start.js;; *) node ./other.js;; esac'), [
+    { binary: 'node', args: ['./start.js'] },
+    { binary: 'node', args: ['./other.js'] },
+  ]);
+  assert.deepEqual(getScriptCommands('for (( i = 0; i < 3; i++ )); do node ./script.js; done'), [
+    { binary: 'node', args: ['./script.js'] },
+  ]);
+});
+
+test('getScriptCommands keeps substitution scripts out of the enclosing script', () => {
+  assert.deepEqual(getScriptCommands('echo $(node ./script.js) <(node ./other.js) >$(node ./target.js)'), [
+    { binary: 'echo', args: ['$(node ./script.js)', '<(node ./other.js)'] },
+  ]);
 });
 
 test('toShellCommand round-trips argv through the script parser', () => {
@@ -45,4 +141,13 @@ test('toShellCommand round-trips argv through the script parser', () => {
   t(['node', '$HOME/server.js']);
   t(['node', "it's/server.js"]);
   t(['node', 'lib/*.js']);
+});
+
+test('getScriptCommands passes the working directory to wrappers', () => {
+  assert.deepEqual(getScriptCommands('cdk --app "cloud assembly"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'cdk', args: ['--app', 'cloud assembly'] },
+  ]);
+  assert.deepEqual(getScriptCommands('cdk --app "node --test"', 'fixtures/plugins/aws-cdk'), [
+    { binary: 'node', args: ['--test'] },
+  ]);
 });

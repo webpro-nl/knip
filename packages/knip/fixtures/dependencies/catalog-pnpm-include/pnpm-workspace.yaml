@@ -1,0 +1,4 @@
+include:
+  ./catalogs.pnpm-workspace.yaml: [catalogs]
+packages:
+  - "packages/*"

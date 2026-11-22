@@ -1,4 +1,5 @@
 {
   "@weight": "number",
-  "transform": "./transform.ts"
+  "transform": "./transform.ts",
+  "migrate": "@orchard/marko-migrate"
 }

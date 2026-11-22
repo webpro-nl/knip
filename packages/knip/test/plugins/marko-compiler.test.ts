@@ -214,3 +214,60 @@ broken concise markup
     ['marko', 'legacy-taglib', '@ebay/ebayui-core', '@scope/tokens']
   );
 });
+
+test('Compile Marko style blocks with extensions next to custom elements named style-*', () => {
+  const source = `<style-panel>
+  <div>panel</div>
+</style-panel>
+<style.less>
+@import "./tokens.less";
+</style>
+<style.scss>
+@use "./theme";
+</style>
+<style.scss/styles>
+@use "./modules";
+</style>
+<div>Hello</div>
+`;
+  const compiler = createCompiler(new Map(), []);
+
+  const output = compiler(source, 'template.marko');
+
+  const result = parseSync('template.ts', output);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(
+    result.module.staticImports.map(item => item.moduleRequest.value),
+    [
+      'marko',
+      './tokens.less',
+      './theme.scss',
+      './_theme.scss',
+      './theme.sass',
+      './_theme.sass',
+      './modules.scss',
+      './_modules.scss',
+      './modules.sass',
+      './_modules.sass',
+    ]
+  );
+});
+
+test('Keep imports after Marko style blocks with id shorthand', () => {
+  const source = `<style#theme>
+.panel { color: red; }
+</style>
+import { label } from "./label.js";
+<div>\${label}</div>
+`;
+  const compiler = createCompiler(new Map(), []);
+
+  const output = compiler(source, 'template.marko');
+
+  const result = parseSync('template.ts', output);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(
+    result.module.staticImports.map(item => item.moduleRequest.value),
+    ['marko', './label.js']
+  );
+});

@@ -17,9 +17,10 @@ const config = ['package.json'];
 const entry = ['mockServiceWorker.js'];
 
 const resolveConfig: ResolveConfig<MSWConfig> = async localConfig => {
-  const workerDirectory = localConfig?.workerDirectory;
-  const dir = workerDirectory ? [workerDirectory].flat()[0] : '.';
-  return entry.map(pattern => toEntry(join(dir, pattern)));
+  const dirs = localConfig?.workerDirectory ? [localConfig.workerDirectory].flat() : ['.'];
+  const inputs = [];
+  for (const dir of dirs) for (const pattern of entry) inputs.push(toEntry(join(dir, pattern)));
+  return inputs;
 };
 
 const plugin: Plugin = {

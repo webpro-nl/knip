@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import type { AWS } from '@serverless/typescript';
 import { FUNCTION_TIMEOUTS_IN_SECONDS } from '~/libs/constants';
 
@@ -20,7 +21,13 @@ const config: AWS = {
       inject: ['./src/libs/production-globals.ts'],
     },
   },
-  plugins: ['serverless-esbuild', 'serverless-offline', 'serverless-offline-sns', 'serverless-offline-sqs'],
+  plugins: [
+    'serverless-esbuild',
+    'serverless-offline',
+    'serverless-offline-sns',
+    'serverless-offline-sqs',
+    join(import.meta.dirname, 'plugins/local-plugin.js'),
+  ],
   functions: {
     hello: {
       handler: 'src/functions/hello/handler.main',

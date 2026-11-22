@@ -1,0 +1,10 @@
+{
+  "name": "@fixtures/tsconfig-plugins-extends__web",
+  "dependencies": {
+    "@emotion/react": "*",
+    "next": "*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

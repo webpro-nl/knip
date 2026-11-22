@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { substringBefore } from '../../util/string.ts';
 import type { MarkdocConfig, MarkdocRenderSpecifier } from './types.ts';
@@ -39,7 +39,7 @@ const resolveConfig: ResolveConfig<MarkdocConfig> = async localConfig => {
     item && typeof item === 'object' && 'render' in item ? extractSpecifiers(item.render as MarkdocRenderSpecifier) : []
   );
 
-  return specifiers.map(id => toProductionEntry(id));
+  return specifiers.map(id => toEntry(id, { production: true }));
 };
 
 const plugin: Plugin = {

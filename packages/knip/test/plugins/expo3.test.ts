@@ -20,8 +20,6 @@ test('Find dependencies with the Expo plugin (3)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
     unlisted: 2,
     dependencies: 3,
   });

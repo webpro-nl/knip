@@ -87,7 +87,7 @@ configuration object.
 Here's the full source code of the `nyc` plugin:
 
 ```ts
-import { toDeferResolve } from '../../util/input.js';
+import { toModule } from '../../util/input.js';
 import { hasDependency } from '../../util/plugin.js';
 import type { NycConfig } from './types.js';
 import type {
@@ -106,14 +106,14 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) =>
 const config = [
   '.nycrc',
   '.nycrc.{json,yml,yaml}',
-  'nyc.config.js',
+  'nyc.config.{js,cjs,mjs}',
   'package.json',
 ];
 
 const resolveConfig: ResolveConfig<NycConfig> = config => {
   const extend = config?.extends ?? [];
   const requires = config?.require ?? [];
-  return [extend, requires].flat().map(id => toDeferResolve(id));
+  return [extend, requires].flat().map(id => toModule(id));
 };
 
 const plugin: Plugin = {
@@ -160,6 +160,9 @@ You should implement `resolveConfig` if any of these are true:
 - The `config` file contains one or more options that represent [entry
   points][3]
 - The `config` file references dependencies by strings (not import statements)
+
+If neither is true, use `entry` instead of `config` (see the first example).
+Knip would only add the `config` files as entry files anyway.
 
 :::
 
@@ -284,7 +287,9 @@ const getComponentPaths = (program: Program) => {
 
 const resolveFromAST: ResolveFromAST = (program: Program) => {
   const componentPaths = getComponentPaths(program);
-  return [...production, ...componentPaths].map(id => toProductionEntry(id));
+  return [...production, ...componentPaths].map(id =>
+    toEntry(id, { production: true })
+  );
 };
 
 const plugin: Plugin = {
@@ -311,10 +316,9 @@ const resolve: Resolve = async options => {
 
 ## Inputs
 
-You may have noticed functions like `toDeferResolve` and `toEntry`. They're a
-way for plugins to tell what they've found and how Knip should handle those. The
-more precision a plugin can provide here, the better results and performance
-will be.
+Functions like `toModule`, `toEntryPath` and `toEntry` tell Knip what a plugin
+found and how to handle it. Choose the helper that matches the tool's input to
+preserve resolution behavior and avoid unnecessary work.
 
 Find all the details over at [Writing A Plugin → Inputs][5].
 

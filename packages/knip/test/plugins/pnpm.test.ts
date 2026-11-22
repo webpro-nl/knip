@@ -24,7 +24,7 @@ test('Find dependencies with the pnpm plugin in pnpm-workspace.yaml', async () =
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

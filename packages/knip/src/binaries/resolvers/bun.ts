@@ -1,6 +1,6 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toBinary, toEntry } from '../../util/input.ts';
+import { toBinary, toEntryPath } from '../../util/input.ts';
 import { isAbsolute, join } from '../../util/path.ts';
 import { _resolveSync } from '../../util/resolve.ts';
 import { argsAfter, expandScript, toCommandBinary } from '../util.ts';
@@ -12,6 +12,7 @@ const commands = new Set([
   'auth',
   'build',
   'c',
+  'check',
   'ci',
   'cloud',
   'completions',
@@ -22,6 +23,7 @@ const commands = new Set([
   'discord',
   'exec',
   'feedback',
+  'fmt',
   'fuzzilli',
   'getcompletes',
   'help',
@@ -57,7 +59,12 @@ const commands = new Set([
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
   const binary = toCommandBinary(_binary, options);
-  const parsed = parseArgs(words, { string: ['cwd'] });
+  const parsed = parseArgs(words, {
+    string: ['cwd'],
+    boolean: ['bun', 'hot', 'if-present', 'silent', 'smol', 'watch'],
+    alias: { bun: 'b' },
+    isStorePositions: true,
+  });
   const [command, script] = parsed._;
 
   if (command === 'x') {
@@ -79,11 +86,11 @@ export const resolve: BinaryResolver = (_binary, words, options) => {
   if (!filePath) return [binary];
   const _cwd = parsed.cwd ? join(cwd, parsed.cwd) : cwd;
   const resolved = _resolveSync(isAbsolute(filePath) ? filePath : join(_cwd, filePath), _cwd);
-  if (resolved) return [binary, toEntry(resolved)];
+  if (resolved) return [binary, toEntryPath(resolved, { optional: true })];
 
   const dir = parsed.cwd ? join(cwd, parsed.cwd) : undefined;
   const opts = dir ? { cwd: dir } : {};
-  if (command !== 'run') return [binary, ...fromArgs(words, opts)];
+  if (command !== 'run') return [binary, ...fromArgs(dir ? words : words.slice(parsed.positionalIndices![0]), opts)];
 
   const input = toBinary(filePath, { optional: true });
   if (dir) input.dir = dir;

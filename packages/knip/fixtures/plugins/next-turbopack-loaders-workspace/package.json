@@ -1,0 +1,8 @@
+{
+  "name": "next-turbopack-loaders-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

@@ -6,9 +6,11 @@ export type PluginName =
   | 'astro-markdoc'
   | 'astro-og-canvas'
   | 'ava'
+  | 'aws-cdk'
   | 'babel'
   | 'biome'
   | 'borp'
+  | 'buf'
   | 'bumpp'
   | 'bun'
   | 'c8'
@@ -29,15 +31,26 @@ export type PluginName =
   | 'docusaurus'
   | 'dotenv'
   | 'drizzle'
+  | 'electron-builder'
+  | 'electron-forge'
   | 'electron-vite'
   | 'eleventy'
+  | 'ember'
+  | 'ember-template-lint'
+  | 'env'
+  | 'env-cmd'
   | 'esbuild'
   | 'eslint'
+  | 'evalite'
   | 'eve'
   | 'execa'
   | 'expo'
+  | 'expo-router'
   | 'expressive-code'
   | 'fast'
+  | 'filesystem-routing'
+  | 'firebase'
+  | 'flue'
   | 'fumadocs'
   | 'gatsby'
   | 'github-action'
@@ -47,23 +60,30 @@ export type PluginName =
   | 'hardhat'
   | 'husky'
   | 'i18next-parser'
+  | 'jasmine'
   | 'jest'
   | 'karma'
   | 'knex'
+  | 'kysely-codegen'
   | 'ladle'
   | 'laravel-vite-plugin'
   | 'lefthook'
+  | 'lingui'
   | 'lint-staged'
   | 'linthtml'
   | 'lit'
   | 'lockfile-lint'
   | 'lost-pixel'
   | 'lunaria'
+  | 'maestro'
   | 'markdownlint'
   | 'marko'
+  | 'mastra'
+  | 'mcp'
   | 'mdx'
   | 'mdxlint'
   | 'metro'
+  | 'mikro-orm'
   | 'mise'
   | 'mocha'
   | 'moonrepo'
@@ -88,6 +108,7 @@ export type PluginName =
   | 'openapi-ts'
   | 'openclaw'
   | 'orval'
+  | 'osls'
   | 'oxfmt'
   | 'oxlint'
   | 'panda-css'
@@ -105,6 +126,7 @@ export type PluginName =
   | 'preconstruct'
   | 'prettier'
   | 'prisma'
+  | 'purgecss'
   | 'quasar'
   | 'qwik'
   | 'railway'
@@ -117,10 +139,12 @@ export type PluginName =
   | 'release-it'
   | 'remark'
   | 'remix'
+  | 'retry-cli'
   | 'rolldown'
   | 'rollup'
   | 'rsbuild'
   | 'rslib'
+  | 'rslint'
   | 'rspack'
   | 'rstest'
   | 'sanity'
@@ -129,8 +153,10 @@ export type PluginName =
   | 'serverless-framework'
   | 'simple-git-hooks'
   | 'size-limit'
+  | 'solidjs-vite-plugin'
   | 'sst'
   | 'starlight'
+  | 'start-server-and-test'
   | 'stencil'
   | 'storybook'
   | 'stryker'
@@ -149,9 +175,12 @@ export type PluginName =
   | 'temporal'
   | 'textlint'
   | 'travis'
+  | 'trigger-dev'
   | 'ts-node'
+  | 'ts-node-dev'
   | 'tsd'
   | 'tsdown'
+  | 'tsrs'
   | 'tsup'
   | 'tsx'
   | 'turbo'
@@ -179,6 +208,7 @@ export type PluginName =
   | 'vitepress'
   | 'vitest'
   | 'vue'
+  | 'web-test-runner'
   | 'webdriver-io'
   | 'webpack'
   | 'wireit'
@@ -196,9 +226,11 @@ export const pluginNames = [
   'astro-markdoc',
   'astro-og-canvas',
   'ava',
+  'aws-cdk',
   'babel',
   'biome',
   'borp',
+  'buf',
   'bumpp',
   'bun',
   'c8',
@@ -219,15 +251,26 @@ export const pluginNames = [
   'docusaurus',
   'dotenv',
   'drizzle',
+  'electron-builder',
+  'electron-forge',
   'electron-vite',
   'eleventy',
+  'ember',
+  'ember-template-lint',
+  'env',
+  'env-cmd',
   'esbuild',
   'eslint',
+  'evalite',
   'eve',
   'execa',
   'expo',
+  'expo-router',
   'expressive-code',
   'fast',
+  'filesystem-routing',
+  'firebase',
+  'flue',
   'fumadocs',
   'gatsby',
   'github-action',
@@ -237,23 +280,30 @@ export const pluginNames = [
   'hardhat',
   'husky',
   'i18next-parser',
+  'jasmine',
   'jest',
   'karma',
   'knex',
+  'kysely-codegen',
   'ladle',
   'laravel-vite-plugin',
   'lefthook',
+  'lingui',
   'lint-staged',
   'linthtml',
   'lit',
   'lockfile-lint',
   'lost-pixel',
   'lunaria',
+  'maestro',
   'markdownlint',
   'marko',
+  'mastra',
+  'mcp',
   'mdx',
   'mdxlint',
   'metro',
+  'mikro-orm',
   'mise',
   'mocha',
   'moonrepo',
@@ -278,6 +328,7 @@ export const pluginNames = [
   'openapi-ts',
   'openclaw',
   'orval',
+  'osls',
   'oxfmt',
   'oxlint',
   'panda-css',
@@ -295,6 +346,7 @@ export const pluginNames = [
   'preconstruct',
   'prettier',
   'prisma',
+  'purgecss',
   'quasar',
   'qwik',
   'railway',
@@ -307,10 +359,12 @@ export const pluginNames = [
   'release-it',
   'remark',
   'remix',
+  'retry-cli',
   'rolldown',
   'rollup',
   'rsbuild',
   'rslib',
+  'rslint',
   'rspack',
   'rstest',
   'sanity',
@@ -319,8 +373,10 @@ export const pluginNames = [
   'serverless-framework',
   'simple-git-hooks',
   'size-limit',
+  'solidjs-vite-plugin',
   'sst',
   'starlight',
+  'start-server-and-test',
   'stencil',
   'storybook',
   'stryker',
@@ -339,9 +395,12 @@ export const pluginNames = [
   'temporal',
   'textlint',
   'travis',
+  'trigger-dev',
   'ts-node',
+  'ts-node-dev',
   'tsd',
   'tsdown',
+  'tsrs',
   'tsup',
   'tsx',
   'turbo',
@@ -369,6 +428,7 @@ export const pluginNames = [
   'vitepress',
   'vitest',
   'vue',
+  'web-test-runner',
   'webdriver-io',
   'webpack',
   'wireit',

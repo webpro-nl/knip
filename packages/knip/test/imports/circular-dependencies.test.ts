@@ -12,7 +12,16 @@ test('Does not report circular dependencies by default', async () => {
   const { issues, counters } = await main(options);
 
   assert.equal(Object.keys(issues.cycles).length, 0);
-  assert.deepEqual(counters, { ...baseCounters, processed: 11, total: 11 });
+  assert.deepEqual(counters, { ...baseCounters, exports: 1, processed: 20, total: 20 });
+});
+
+test('Does not report exports referenced only by each other (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues, counters } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.exports), ['stem.ts']);
+  assert.deepEqual(Object.keys(issues.exports['stem.ts']), ['stem']);
+  assert.deepEqual(counters, { ...baseCounters, exports: 1, processed: 19, total: 19 });
 });
 
 test('Reports circular dependencies when included', async () => {
@@ -48,12 +57,17 @@ test('Reports circular dependencies when included', async () => {
     'citrus.ts → lemon.ts → orange.ts',
   ]);
 
+  assert.deepEqual(Object.keys(issues.cycles['yin.ts']), ['yin.ts → yang.ts']);
+  assert.equal(issues.cycles['format.ts'], undefined);
+  assert.equal(issues.cycles['model.ts'], undefined);
+
   const dynamicIssue = Object.values(issues.cycles)
     .flatMap(issuesByFile => Object.values(issuesByFile))
     .find(issue => issue.symbol.includes('zucchini.ts') && issue.symbol.includes('zoodle.ts'));
   assert.equal(dynamicIssue, undefined);
+  assert.equal(issues.cycles['squash.ts'], undefined);
 
-  assert.deepEqual(counters, { ...baseCounters, cycles: 4, processed: 11, total: 11 });
+  assert.deepEqual(counters, { ...baseCounters, cycles: 5, processed: 20, total: 20 });
 });
 
 test('Allows circular dependencies by exact cycle path', async () => {
@@ -62,7 +76,7 @@ test('Allows circular dependencies by exact cycle path', async () => {
 
   assert.equal(issues.cycles['apricot.ts'], undefined);
   assert.equal(issues.cycles['ping.ts']['ping.ts → pong.ts'].symbol, 'ping.ts → pong.ts');
-  assert.deepEqual(counters, { ...baseCounters, cycles: 3, processed: 11, total: 11 });
+  assert.deepEqual(counters, { ...baseCounters, cycles: 4, processed: 20, total: 20 });
 });
 
 test('Includes dynamic import() cycles when cycles.dynamicImports is enabled', async () => {
@@ -75,7 +89,8 @@ test('Includes dynamic import() cycles when cycles.dynamicImports is enabled', a
 
   assert.ok(dynamicIssue);
   assert.ok(dynamicIssue.symbols?.some(s => s.kind === 'dynamicImport'));
-  assert.deepEqual(counters, { ...baseCounters, cycles: 5, processed: 11, total: 11 });
+  assert.deepEqual(Object.keys(issues.cycles['squash.ts']), ['squash.ts → noodle.ts']);
+  assert.deepEqual(counters, { ...baseCounters, cycles: 7, processed: 20, total: 20 });
 });
 
 test('Reports only circular dependencies with --cycles shorthand', async () => {

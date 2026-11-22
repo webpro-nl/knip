@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/relay-package-json",
+  "devDependencies": {
+    "babel-plugin-relay": "*"
+  },
+  "relay": {
+    "artifactDirectory": "artifacts"
+  }
+}

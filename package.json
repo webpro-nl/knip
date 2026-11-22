@@ -22,21 +22,22 @@
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
+    "remark": "remark '*.md' '.agents/*.md' '.github/*.md' 'packages/*/README.md' 'packages/docs/src/content/docs/**/*.md' --verbose -o && mdxlint 'packages/docs/src/content/docs/**/*.mdx' --verbose -o",
     "lint": "oxlint",
     "ci": "oxlint && oxfmt --check && installed-check --ignore-dev && ./scripts/check-line-endings.sh",
     "release": "./scripts/release.sh"
   },
   "devDependencies": {
-    "@e18e/eslint-plugin": "^0.8.0",
+    "@e18e/eslint-plugin": "^0.8.1",
     "@release-it/bumper": "^8.0.1",
     "installed-check": "^11.0.0",
     "mdxlint": "^1.0.0",
-    "mdxlint-preset-webpro": "^1.3.0",
-    "oxfmt": "^0.68.0",
-    "oxlint": "^1.83.0",
-    "release-it": "^21.1.0",
+    "mdxlint-preset-webpro": "^1.3.1",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
+    "release-it": "^21.1.2",
     "remark-cli": "12.0.1",
-    "remark-preset-webpro": "^2.2.0"
+    "remark-preset-webpro": "^2.2.2"
   },
   "prettier": {
     "arrowParens": "avoid",
@@ -51,7 +52,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@11.28.8+sha512.f6988a32046b9a3f78d7d7ee0747926bbe905ff9dff73bf19abb87bd7d1906a2ac90d93f73be32b5f9e14c2899569bcb0c9c5ec8a19e083f5d71bbab6dd9e0b8",
   "mdxlint": {
     "plugins": [
       "mdxlint-preset-webpro"

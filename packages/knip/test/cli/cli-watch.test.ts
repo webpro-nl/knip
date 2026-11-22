@@ -1,0 +1,66 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { renameSync, writeFileSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
+import test from 'node:test';
+import { setTimeout } from 'node:timers/promises';
+import { join } from '../../src/util/path.ts';
+import { copyFixture } from '../helpers/copy-fixture.ts';
+import { cliPath, runtime } from '../helpers/exec.ts';
+import { resolve } from '../helpers/resolve.ts';
+
+test('CLI watch reloads JSON and imported plugin configuration', async t => {
+  const cwd = await copyFixture('fixtures/session-incremental');
+
+  const child = spawn(runtime, [cliPath, '--watch', '--debug', '--directory', cwd, '--no-exit-code'], {
+    cwd: resolve('.'),
+    env: { ...process.env, NO_COLOR: '1', FORCE_COLOR: undefined },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let stdout = '';
+  let stderr = '';
+  let closed = false;
+  child.stdout.on('data', chunk => {
+    stdout += chunk.toString();
+  });
+  child.stderr.on('data', chunk => {
+    stderr += chunk.toString();
+  });
+  const exited = new Promise<void>(resolve => {
+    child.once('close', () => {
+      closed = true;
+      resolve();
+    });
+  });
+  t.after(async () => {
+    if (!closed) child.kill('SIGKILL');
+    await exited;
+    await rm(cwd, { recursive: true, force: true });
+  });
+
+  const getLastReport = () => {
+    const reports = stdout.split(/\d+ files \([^)]*\)/);
+    return reports.length > 1 ? reports[reports.length - 2] : '';
+  };
+  const waitForReport = async (predicate: (report: string) => boolean) => {
+    const deadline = Date.now() + 10000;
+    while (!predicate(getLastReport()) && Date.now() < deadline && !closed) await setTimeout(10);
+    assert.ok(predicate(getLastReport()), `Expected CLI watch update\nstdout:\n${stdout}\nstderr:\n${stderr}`);
+  };
+  const replaceFile = (fileName: string, contents: string) => {
+    const tmpPath = `${cwd}-${fileName}`;
+    writeFileSync(tmpPath, contents);
+    renameSync(tmpPath, join(cwd, fileName));
+  };
+
+  await waitForReport(report => report.includes('originalUnused') && report.includes('Unused files'));
+  writeFileSync(join(cwd, 'value.ts'), 'export const value = 1;\nexport const changedUnused = 2;\n');
+  await waitForReport(report => report.includes('changedUnused') && report.includes('missing-command'));
+
+  replaceFile('knip.json', '{"entry":["index.ts"],"project":["*.ts"],"ignore":["value.ts"]}');
+  await waitForReport(report => !report.includes('changedUnused') && report.includes('Unused files'));
+
+  replaceFile('settings.ts', "export const include = ['unused.ts'];\n");
+  await waitForReport(report => !report.includes('Unused files'));
+  assert.equal(stderr, '');
+});

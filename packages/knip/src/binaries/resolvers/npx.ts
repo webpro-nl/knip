@@ -1,37 +1,39 @@
 import parseArgs from '../../util/parse-args.ts';
 import type { BinaryResolver } from '../../types/config.ts';
-import { toBinary, toDependency } from '../../util/input.ts';
-import { stripVersionFromSpecifier } from '../../util/modules.ts';
+import { toBinary, toModule, toDependency } from '../../util/input.ts';
+import { extractBinary, stripVersionFromSpecifier } from '../../util/modules.ts';
 import { isInternal } from '../../util/path.ts';
-import { argsFrom } from '../util.ts';
+import { argsFrom, npmBooleanAliases, npmBooleanFlags, removeOuterCommand } from '../util.ts';
 
 const noInstallFlags = new Set(['--no', '--no-install', '--yes=false', '--no-yes']);
 
 export const resolve: BinaryResolver = (_binary, words, options) => {
-  const { fromArgs } = options;
-  const parsed = parseArgs(words, {
+  const { fromArgs, cwd } = options;
+  const toPackage = (id: string, opts?: { optional: boolean }) =>
+    isInternal(id) ? toModule(id, { ...opts, dir: cwd }) : toDependency(id, opts);
+  const args = {
     isStorePositions: true,
-    boolean: ['yes', 'no', 'quiet'],
-    alias: { yes: 'y', package: 'p', call: 'c' },
-  });
+    boolean: npmBooleanFlags,
+    alias: { ...npmBooleanAliases, package: 'p', call: 'c' },
+  };
+  const parsed = parseArgs(words, args);
+  const commandIndex = parsed.positionalIndices![0] ?? words.length;
+  const flags = parseArgs(words.slice(0, commandIndex), args);
 
   const packageSpecifier = parsed._[0];
   const specifier = packageSpecifier ? stripVersionFromSpecifier(packageSpecifier) : '';
 
-  const packages = parsed.package ? [parsed.package].flat().map(stripVersionFromSpecifier) : [];
-  const command = parsed.call ? fromArgs([parsed.call]) : [];
+  const packages = flags.package ? [flags.package].flat().map(stripVersionFromSpecifier) : [];
+  const command = flags.call ? fromArgs([flags.call]) : [];
 
   const isBinary = specifier && !packageSpecifier.includes('@') && !isInternal(specifier);
-  const commandIndex = parsed.positionalIndices![0] ?? words.length;
   const noInstall = words.slice(0, commandIndex).some(word => noInstallFlags.has(word.value));
   const opts = noInstall ? undefined : { optional: true };
-  const dependency = isBinary ? toBinary(specifier, opts) : toDependency(specifier, opts);
+  const dependency = isBinary ? toBinary(specifier, opts) : toPackage(specifier, opts);
   const specifiers = dependency ? [dependency] : [];
 
-  return [
-    ...specifiers,
-    ...packages.map(id => toDependency(id, { optional: true })),
-    ...command,
-    ...fromArgs(argsFrom(words, packageSpecifier)).slice(1),
-  ];
+  const forwarded = packageSpecifier ? fromArgs(argsFrom(words, packageSpecifier)) : [];
+  if (forwarded.length > 0) removeOuterCommand(forwarded, extractBinary(packageSpecifier));
+
+  return [...specifiers, ...packages.map(id => toPackage(id, { optional: true })), ...command, ...forwarded];
 };

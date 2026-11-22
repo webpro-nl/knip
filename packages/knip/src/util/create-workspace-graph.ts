@@ -20,7 +20,8 @@ export function createWorkspaceGraph(
     const dirs = new Set<string>();
     for (const type of types) {
       if (pkg.manifest[type]) {
-        for (const pkgName in pkg.manifest[type]) {
+        for (const dependency in pkg.manifest[type]) {
+          const pkgName = pkg.aliases.get(dependency) ?? dependency;
           if (wsPkgNames.has(pkgName)) {
             const wsPackage = packagesByPkgName.get(pkgName);
             if (wsPackage) dirs.add(wsPackage.dir);

@@ -1,7 +1,8 @@
 {
   "name": "@plugins/drizzle",
   "scripts": {
-    "migrate": "drizzle-kit push:pg"
+    "migrate": "drizzle-kit push:pg",
+    "generate:dev": "drizzle-kit generate --config=drizzle-dev.config.ts"
   },
   "devDependencies": {
     "drizzle-orm": "*",

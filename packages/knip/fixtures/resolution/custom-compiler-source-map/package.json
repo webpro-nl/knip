@@ -1,0 +1,5 @@
+{
+  "name": "@fixtures/custom-compiler-source-map",
+  "type": "module",
+  "main": "./dist/index.js"
+}

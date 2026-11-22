@@ -11,7 +11,8 @@
     "@release-it/conventional-changelog": {
       "infile": "CHANGELOG.md",
       "preset": "angular"
-    }
+    },
+    "./scripts/release-it-plugin.js": {}
   },
   "hooks": {
     "before:init": ["npm run lint", "npm test"],

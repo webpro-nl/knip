@@ -17,7 +17,7 @@ test('Find dependencies with the Panda CSS plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     unlisted: 2,
-    processed: 1,
-    total: 1,
+    processed: 2,
+    total: 2,
   });
 });

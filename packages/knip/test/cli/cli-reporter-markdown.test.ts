@@ -29,3 +29,15 @@ test('knip --reporter markdown', () => {
   const out = exec('knip --reporter markdown', { cwd }).stdout;
   assert.equal(out, markdown);
 });
+
+test('knip --reporter markdown (escape pipes in duplicate exports)', () => {
+  const markdown = `# Knip report
+
+## Duplicate exports (1)
+
+| Name                    | Location     | Severity |
+| :---------------------- | :----------- | :------- |
+| exportedResult\\|default | my-module.ts | error    |`;
+  const out = exec('knip --reporter markdown --include duplicates', { cwd: resolve('fixtures/exports/basic') }).stdout;
+  assert.equal(out, markdown);
+});

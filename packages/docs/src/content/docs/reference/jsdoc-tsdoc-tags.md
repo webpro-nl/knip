@@ -18,8 +18,11 @@ report an issue with Knip for false positives).
 
 :::
 
-JSDoc comments always start with `/**` (not `//`) and can be single or
-multi-line.
+Tags also work in regular block comments (`/* ... */`) and standalone line
+comments (`// ...`) before a declaration. These comments keep suppression tags
+out of JSDoc hover information.
+
+Tags in consecutive comments are combined. Trailing `//` comments are ignored.
 
 ## Tags
 
@@ -30,7 +33,7 @@ Example:
 /** @lintignore */
 export const myUnusedExport = 1;
 
-/** @lintignore */
+// @lintignore
 import Unresolved from './generated/lib.js';
 ```
 
@@ -70,7 +73,7 @@ export const unusedFunction = () => {};
 ```
 
 This tag can also be used to make exceptions in entry files when using
-[--include-entry-exports][3].
+[`--include-entry-exports`][3].
 
 [JSDoc: @public][4] and [TSDoc: @public][5]
 
@@ -117,7 +120,7 @@ duplicates from being reported.
 
 ## `@beta`
 
-Works identical to [`@public`][9]. Knip ignores other tags like `@alpha` and
+Works identically to [`@public`][9]. Knip ignores other tags like `@alpha` and
 `@experimental`.
 
 [TSDoc: @beta][10]

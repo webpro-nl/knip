@@ -10,4 +10,35 @@ export default defineConfig([
       'no-secrets': noSecrets,
     },
   },
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: '@babel/eslint-parser',
+      },
+    },
+  },
+  {
+    files: ['**/*.astro'],
+    languageOptions: {
+      parserOptions: {
+        parser: {
+          meta: { name: 'local-parser' },
+          name: 'local-parser',
+          parseForESLint() {},
+        },
+      },
+    },
+  },
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      parserOptions: {
+        parser: {
+          ts: '@typescript-eslint/parser',
+          js: 'espree',
+        },
+      },
+    },
+  },
 ]);

@@ -5,15 +5,14 @@ import baseCounters from '../helpers/baseCounters.ts';
 import { createOptions } from '../helpers/create-options.ts';
 import { resolve } from '../helpers/resolve.ts';
 
-const cwd = resolve('fixtures/plugins/svgr');
-
 test('Find dependencies with the svgr plugin', async () => {
+  const cwd = resolve('fixtures/plugins/svgr');
   const options = await createOptions({ cwd });
   const { counters } = await main(options);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 0,
-    total: 0,
+    processed: 1,
+    total: 1,
   });
 });

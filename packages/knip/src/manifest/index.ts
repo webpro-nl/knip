@@ -15,6 +15,7 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
   const installedBinaries: InstalledBinaries = new Map();
 
   const hasTypesIncluded = new Set<string>();
+  const uninstalledDependencies = new Set<string>();
 
   const addBinary = (key: string, value: string) => {
     const set = installedBinaries.get(key);
@@ -26,9 +27,8 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
     const manifest = loadPackageManifest({ dir, packageName });
     if (manifest) {
       // Read and store installed binaries
-      const defaultBinaryName = packageName.replace(/^@[^/]+\//, '');
-      const binaries = typeof manifest.bin === 'string' ? [defaultBinaryName] : Object.keys(manifest.bin ?? {});
-      for (const binaryName of binaries) addBinary(binaryName, packageName);
+      const binaries = typeof manifest.bin === 'string' ? [packageName] : Object.keys(manifest.bin ?? {});
+      for (const binaryName of binaries) addBinary(binaryName.replace(/^@[^/]+\//, ''), packageName);
 
       // Read and store peer dependencies
       const packagePeerDependencies = Object.keys(manifest.peerDependencies ?? {});
@@ -45,6 +45,8 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
       }
 
       if (!isDefinitelyTyped(packageName) && (manifest.types || manifest.typings)) hasTypesIncluded.add(packageName);
+    } else {
+      uninstalledDependencies.add(packageName);
     }
   }
 
@@ -52,6 +54,7 @@ const getMetaDataFromPackageJson = ({ dir, packageNames }: Options) => {
     hostDependencies,
     installedBinaries,
     hasTypesIncluded,
+    uninstalledDependencies,
   };
 };
 

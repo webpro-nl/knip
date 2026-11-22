@@ -9,8 +9,9 @@ const cwd = resolve('fixtures/plugins/next');
 
 test('Find dependencies with the Next.js plugin', async () => {
   const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
+  const { issues, counters, hasConfigLoadErrors } = await main(options);
 
+  assert.equal(hasConfigLoadErrors, false);
   assert('app/unused.ts' in issues.files);
   assert('pages/unused.jsx' in issues.files);
 
@@ -26,7 +27,7 @@ test('Find dependencies with the Next.js plugin', async () => {
     files: 2,
     devDependencies: 0,
     unlisted: 6,
-    processed: 13,
-    total: 13,
+    processed: 15,
+    total: 15,
   });
 });

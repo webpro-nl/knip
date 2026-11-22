@@ -1,3 +1,4 @@
 module.exports = {
-  plugins: ['commitlint-plugin-function-rules'],
+  plugins: ['function-rules', '@organization'],
+  parserPreset: './parser-preset',
 };

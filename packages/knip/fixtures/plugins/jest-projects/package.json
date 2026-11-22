@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/jest-projects",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "*",
+    "ts-jest": "*"
+  }
+}

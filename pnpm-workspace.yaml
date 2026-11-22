@@ -6,13 +6,18 @@ allowBuilds:
   sharp: false
 minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
-  - release-it
-  - '@release-it/bumper'
+  - '@astrojs/internal-helpers@0.13.1'
+  - '@astrojs/markdown-satteri@0.4.7'
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - undici-types@6.21.0
+overrides:
+  '@napi-rs/wasm-runtime@1.2.4>@emnapi/runtime': 1.11.3
 packageExtensions:
   '@astrojs/mdx@7.0.3':
     dependencies:
       satteri: 0.9.5
+# The VS Code remark extension needs remark resolvable from the workspace root
+publicHoistPattern:
+  - remark

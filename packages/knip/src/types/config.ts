@@ -1,13 +1,11 @@
 import type { Program, VisitorObject } from 'oxc-parser';
 import type { Word } from 'unbash';
-import type { z } from 'zod/mini';
 import type { Compiler, HasDependency, RawCompilers } from '../compilers/types.ts';
-import type { knipConfigurationSchema, workspaceConfigurationSchema } from '../schema/configuration.ts';
-import type { pluginSchema } from '../schema/plugins.ts';
 import type { ParsedCLIArgs } from '../util/cli-arguments.ts';
 import type { Input } from '../util/input.ts';
 import type { Manifest } from '../util/package-json.ts';
 import type { Args } from './args.ts';
+import type { RawConfiguration } from './configuration.ts';
 import type { IssueType, SymbolType } from './issues.ts';
 import type { Tags } from './options.ts';
 import type { PluginName } from './PluginNames.ts';
@@ -18,6 +16,7 @@ export interface GetInputsFromScriptsOptions extends BaseOptions {
   optionalBinaries?: boolean;
   containingFilePath: string;
   expandedScripts?: Set<string>;
+  manifestDir?: string;
 }
 
 export type GetInputsFromScripts<T = GetInputsFromScriptsOptions> = (
@@ -30,6 +29,13 @@ export type GetInputsFromScriptsPartial = (
   options?: Partial<GetInputsFromScriptsOptions>
 ) => Input[];
 
+export interface ScriptCommand {
+  binary: string;
+  args: string[];
+}
+
+export type GetScriptCommands = (script: string, cwd?: string) => ScriptCommand[];
+
 export type ScriptArg = string | Word;
 
 export type FromArgs = (args: ScriptArg[], options?: Partial<GetInputsFromScriptsOptions>) => Input[];
@@ -40,27 +46,23 @@ export interface BinaryResolverOptions extends GetInputsFromScriptsOptions {
 
 export type BinaryResolver = (binary: string, words: Word[], options: BinaryResolverOptions) => Input[];
 
-export type RawConfiguration = z.infer<typeof knipConfigurationSchema>;
+export type { RawConfiguration, RawPluginConfiguration, WorkspaceProjectConfig } from './configuration.ts';
 
 export type RawConfigurationOrFn =
   | RawConfiguration
   | ((options: ParsedCLIArgs) => RawConfiguration | Promise<RawConfiguration>);
 
-export type RawPluginConfiguration = z.infer<typeof pluginSchema>;
-
-export type WorkspaceProjectConfig = z.infer<typeof workspaceConfigurationSchema>;
-
 export type IgnorePatterns = (string | RegExp)[];
 
 type IgnorableExport = Exclude<SymbolType, 'unknown'>;
 
-export type IgnoreExportsUsedInFile = boolean | Partial<Record<IgnorableExport, boolean>>;
+export type IgnoreExportsUsedInFile = boolean | { [K in IgnorableExport]?: boolean | undefined };
 
 export type IgnoreIssues = Record<string, IssueType[]>;
 
 export type CyclesConfig = {
-  allow?: string[][];
-  dynamicImports?: boolean;
+  allow?: string[][] | undefined;
+  dynamicImports?: boolean | undefined;
 };
 
 export type GetImportsAndExportsOptions = {
@@ -84,6 +86,7 @@ export interface Configuration {
   ignoreUnresolved: IgnorePatterns;
   ignoreWorkspaces: string[];
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
   compilers: RawCompilers;
   rootPluginConfigs: Partial<PluginsConfiguration>;
 }
@@ -105,6 +108,7 @@ interface BaseWorkspaceConfiguration {
   ignoreGlobalBinaries: boolean;
   ignoreExportsUsedInFile: IgnoreExportsUsedInFile;
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
 }
 
 type PluginConfiguration = EnsuredPluginConfiguration | boolean;
@@ -126,11 +130,13 @@ type IsPluginEnabledOptions = {
   manifest: Manifest;
   dependencies: Set<string>;
   config: WorkspaceConfiguration;
+  getScriptCommands: GetScriptCommands;
 };
 
 export type IsPluginEnabled = (options: IsPluginEnabledOptions) => boolean | Promise<boolean>;
 
 export interface PluginOptions extends BaseOptions {
+  pluginName: PluginName;
   config: EnsuredPluginConfiguration;
   configFileDir: string;
   configFileName: string;
@@ -140,11 +146,14 @@ export interface PluginOptions extends BaseOptions {
   isProduction: boolean;
   enabledPlugins: string[];
   getInputsFromScripts: GetInputsFromScriptsPartial;
+  getScriptCommands: GetScriptCommands;
 }
 
 type PluginSetup = () => Promise<void> | void;
 
 export type IsLoadConfig = (options: PluginOptions, dependencies: Set<string>) => boolean;
+
+export type ParseConfig = (source: string) => unknown | Promise<unknown>;
 
 export type ResolveConfig<T = any> = (config: T, options: PluginOptions) => Promise<Input[]> | Input[];
 
@@ -180,6 +189,7 @@ export type ResolveFromAST = (
 
 type RegisterCompilersOptions = {
   cwd: string;
+  dependencies: Set<string>;
   hasDependency: HasDependency;
   registerCompiler: RegisterCompiler;
 };
@@ -228,6 +238,9 @@ export interface Plugin {
   project?: string[];
   setup?: PluginSetup;
   isLoadConfig?: IsLoadConfig;
+  /** Fall back to `resolveFromAST` when the config file fails to load, instead of reporting an error */
+  isLoadConfigOptional?: boolean;
+  parseConfig?: ParseConfig;
   resolveConfig?: ResolveConfig;
   resolve?: Resolve;
   /**

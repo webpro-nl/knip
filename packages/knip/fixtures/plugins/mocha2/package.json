@@ -4,6 +4,10 @@
     "file": "hooks/globals.js"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "mocha-junit-reporter": "*"
+  },
+  "scripts": {
+    "test:custom": "mocha --config config/.mocharc.json"
   }
 }

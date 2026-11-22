@@ -24,6 +24,14 @@ runSync('starfruit');
 spawn(path.join(__dirname, 'scripts', 'worker.js'));
 fork(path.join(__dirname, 'scripts', 'task.js'));
 
+// --require/--import hooks and the positional file are entry files
+execSync('node --require ./scripts/hook.js scripts/task.js');
+execSync('node scripts/jobs/*.js');
+
+// a script path as the command is an entry file; a missing one is unresolved
+execSync('./scripts/run.js');
+execSync('./scripts/missing.js');
+
 // options objects and callbacks must never be parsed as inputs
 execSync('lemon', { cwd: '/tmp', encoding: 'utf8' });
 exec('lime', (_error, stdout) => stdout);
@@ -41,6 +49,22 @@ execSync(`fig deploy --target=${target}`);
 exec(`melon ${target} --watch`);
 const bin = 'watermelon';
 execSync(`${bin} phantomserve`);
+
+// a plugin binary with a dynamic --config value must not drop the file's other inputs
+const config = 'lingui.config.ts';
+spawnSync('lingui', ['extract', '--config', config]);
+
+// a literal after a dynamic arg must not take its position
+const entry = path.join(import.meta.dirname, 'scripts', 'run.js');
+spawnSync('bun', [entry, 'phantomtarget']);
+
+// nor may a literal after an arg with unsafe characters
+spawn('bunx', ['--package', 'kiwano@^1', 'phantomrange']);
+
+// a file after a spread, a dynamic flag value or an unsafe arg is still an entry file
+spawn('node', [...process.execArgv, 'scripts/after-spread.js']);
+spawn('node', ['--env-file', target, 'scripts/after-value.js']);
+spawn('node', ['--title', 'my app', 'scripts/after-unsafe.js']);
 
 // not referenced: dynamic command, and a non-child_process `.exec`
 const dynamic = 'kiwi';

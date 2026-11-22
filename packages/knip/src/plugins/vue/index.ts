@@ -14,7 +14,7 @@ const enablers = ['vue'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['vue.config.{js,ts,mjs}'];
+const config = ['vue.config.{js,cjs,mjs,ts}'];
 
 const resolveConfig: ResolveConfig<VueConfig> = async (config, options) => {
   const { manifest } = options;

@@ -2,6 +2,7 @@
   "name": "@plugins/tailwind3",
   "type": "module",
   "dependencies": {
+    "@fontsource-variable/archivo": "*",
     "radix-themes-tw": "*"
   },
   "devDependencies": {

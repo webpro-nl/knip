@@ -1,8 +1,13 @@
 import { existsSync } from 'node:fs';
-import { isBuiltin } from 'node:module';
 import { DEFAULT_EXTENSIONS, DTS_EXTENSIONS, IS_DTS } from '../constants.ts';
 import { isFile } from '../util/fs.ts';
-import { getPackageNameFromFilePath, getPackageNameFromModuleSpecifier, sanitizeSpecifier } from '../util/modules.ts';
+import {
+  getPackageNameFromFilePath,
+  getPackageNameFromModuleSpecifier,
+  isBuiltin,
+  sanitizeSpecifier,
+} from '../util/modules.ts';
+import { expandPackageTarget, getPackageTargetPaths, toPackagePath } from '../util/package-json.ts';
 import { timerify } from '../util/Performance.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, join, toPosix } from '../util/path.ts';
 import { _createSyncModuleResolver, _resolveModuleSync, resolvePackageManifestPath } from '../util/resolve.ts';
@@ -11,56 +16,23 @@ import type { ResolveModule, ResolvedModule } from './ast-nodes.ts';
 
 function pickStringTarget(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+  if (!value || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const target = pickStringTarget(item);
+      if (target) return target;
+    }
+    return;
+  }
   const obj = value as Record<string, unknown>;
-  for (const key of ['default', 'node', 'import', 'require']) {
+  for (const key of Object.keys(obj)) {
+    if (key !== 'default' && key !== 'node' && key !== 'import' && key !== 'require') continue;
     const v = pickStringTarget(obj[key]);
     if (v) return v;
   }
   for (const v of Object.values(obj)) {
     const s = pickStringTarget(v);
     if (s) return s;
-  }
-}
-
-const invalidSegments = /(^|\\|\/)((\.|%2e)(\.|%2e)?|node_modules)(\\|\/|$)/i;
-
-const expandPackageTarget = (target: string | undefined, patternMatch: string | undefined) => {
-  if (!target?.startsWith('./') || invalidSegments.test(target.slice(2))) return;
-  if (!target.includes('*')) return target;
-  if (patternMatch === undefined || invalidSegments.test(patternMatch)) return;
-  return target.replaceAll('*', patternMatch);
-};
-
-const toPackagePath = (dir: string, target: string) => {
-  const candidate = join(dir, target);
-  return candidate.startsWith(`${dir}/`) ? candidate : undefined;
-};
-
-function pickExistingPackageTarget(
-  value: unknown,
-  dir: string,
-  patternMatch: string | undefined,
-  moduleExtensions: Set<string>
-): string | undefined {
-  if (typeof value === 'string') {
-    const target = expandPackageTarget(value, patternMatch);
-    if (!target || IS_DTS.test(target) || !moduleExtensions.has(extname(target))) return;
-    const candidate = toPackagePath(dir, target);
-    return candidate && isFile(candidate) ? candidate : undefined;
-  }
-  if (!value || typeof value !== 'object') return;
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const target = pickExistingPackageTarget(item, dir, patternMatch, moduleExtensions);
-      if (target) return target;
-    }
-    return;
-  }
-  for (const [condition, child] of Object.entries(value)) {
-    if (condition === 'types') continue;
-    const target = pickExistingPackageTarget(child, dir, patternMatch, moduleExtensions);
-    if (target) return target;
   }
 }
 
@@ -164,6 +136,7 @@ export function createCustomModuleResolver(
   const moduleExtensions = new Set([...DEFAULT_EXTENSIONS, ...customCompilerExtensions, '.json', '.jsonc']);
   const hasCustomExts = customCompilerExtensionsSet.size > 0;
   const extensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions, ...DTS_EXTENSIONS, '.json', '.jsonc'];
+  const sourceExtensions = [...DEFAULT_EXTENSIONS, ...customCompilerExtensions];
   const resolveSync =
     hasCustomExts || tsConfigFile ? _createSyncModuleResolver(extensions, tsConfigFile) : _resolveModuleSync;
   const pathMappings = compilePathMappings(compilerOptions.scopedPaths);
@@ -171,10 +144,13 @@ export function createCustomModuleResolver(
 
   function toSourcePath(resolvedFileName: string): string {
     if (!hasCustomExts || !customCompilerExtensionsSet.has(extname(resolvedFileName))) {
-      return toSourceFilePath(resolvedFileName) || resolvedFileName;
+      return toSourceFilePath(resolvedFileName, sourceExtensions) || resolvedFileName;
     }
     return resolvedFileName;
   }
+
+  const isModuleFile = (filePath: string) =>
+    !IS_DTS.test(filePath) && moduleExtensions.has(extname(filePath)) && isFile(filePath);
 
   function toResult(specifier: string, containingFile: string, resolvedFileName: string): ResolvedModule {
     const mapped = toSourcePath(resolvedFileName);
@@ -253,17 +229,18 @@ export function createCustomModuleResolver(
       const target = expandPackageTarget(pickStringTarget(workspaceTarget.target), workspaceTarget.patternMatch);
       if (target) {
         const targetPath = toPackagePath(workspaceTarget.dir, target);
-        const sourcePath = targetPath && toSourceFilePath(targetPath);
+        const sourcePath = targetPath && toSourceFilePath(targetPath, sourceExtensions);
         if (sourcePath) return toResult(specifier, containingFile, sourcePath);
       }
 
-      const existingTarget = pickExistingPackageTarget(
+      for (const targetPath of getPackageTargetPaths(
         workspaceTarget.target,
         workspaceTarget.dir,
         workspaceTarget.patternMatch,
-        moduleExtensions
-      );
-      if (existingTarget) return toResult(specifier, containingFile, existingTarget);
+        false
+      )) {
+        if (isModuleFile(targetPath)) return toResult(specifier, containingFile, targetPath);
+      }
     }
 
     const candidate = isAbsolute(specifier) ? specifier : join(dirname(containingFile), specifier);

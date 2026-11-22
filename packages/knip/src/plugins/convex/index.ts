@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntry } from '../../util/input.ts';
 import { join } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { ConvexConfig } from './types.ts';
@@ -18,7 +18,7 @@ const production = ['convex/**/*.@(js|ts)'];
 
 const resolveConfig: ResolveConfig<ConvexConfig> = localConfig => {
   const functionsDir = typeof localConfig.functions === 'string' ? localConfig.functions : 'convex';
-  return [toProductionEntry(join(functionsDir, '**/*.@(js|ts)'))];
+  return [toEntry(join(functionsDir, '**/*.@(js|ts)'), { production: true })];
 };
 
 const plugin: Plugin = {

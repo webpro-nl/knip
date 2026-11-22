@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { DT_SCOPE, PROTOCOL_VIRTUAL } from '../constants.ts';
+import { DT_SCOPE, PROTOCOL_CLOUDFLARE, PROTOCOL_VIRTUAL } from '../constants.ts';
 import { isAbsolute, isInNodeModules, join, toPosix } from './path.ts';
 
 export const getPackageNameFromModuleSpecifier = (specifier: string) => {
-  if (!isStartsLikePackageName(specifier)) return;
+  if (!isStartsLikePackageName(specifier) && !isTildePackageName(specifier)) return;
   let start = 0;
   if (specifier.charCodeAt(0) === 64) {
     const slash = specifier.indexOf('/', 1);
@@ -53,8 +53,12 @@ const isPackageNameStart = (ch: number) => (ch >= 65 && ch <= 90) || (ch >= 97 &
 const isPackageScopeStart = (ch: number) => isPackageNameStart(ch) || ch === 46 || ch === 95 || ch === 126;
 export const isStartsLikePackageName = (specifier: string) => {
   const ch = specifier.charCodeAt(0);
-  return ch === 64 ? isPackageScopeStart(specifier.charCodeAt(1)) : isPackageNameStart(ch);
+  return ch === 64
+    ? isPackageScopeStart(specifier.charCodeAt(1))
+    : isPackageNameStart(ch) && specifier.charCodeAt(1) !== 58;
 };
+const isTildePackageName = (specifier: string) =>
+  specifier.charCodeAt(0) === 126 && isPackageNameStart(specifier.charCodeAt(1));
 
 export const stripVersionFromSpecifier = (specifier: string) => specifier.replace(/(\S+)@.*/, '$1');
 
@@ -72,6 +76,80 @@ export const extractBinary = (command: string) =>
   );
 
 export const isValidBinary = (str: string) => !/[*:!()]/.test(str);
+
+// `module.builtinModules` without `node:` from Node.js 20 to 26 (core modules added since Node.js 18 are `node:`-only)
+const NODE_BUILTIN_MODULES = new Set([
+  '_http_agent',
+  '_http_client',
+  '_http_common',
+  '_http_incoming',
+  '_http_outgoing',
+  '_http_server',
+  '_stream_duplex',
+  '_stream_passthrough',
+  '_stream_readable',
+  '_stream_transform',
+  '_stream_wrap',
+  '_stream_writable',
+  '_tls_common',
+  '_tls_wrap',
+  'assert',
+  'assert/strict',
+  'async_hooks',
+  'buffer',
+  'child_process',
+  'cluster',
+  'console',
+  'constants',
+  'crypto',
+  'dgram',
+  'diagnostics_channel',
+  'dns',
+  'dns/promises',
+  'domain',
+  'events',
+  'fs',
+  'fs/promises',
+  'http',
+  'http2',
+  'https',
+  'inspector',
+  'inspector/promises',
+  'module',
+  'net',
+  'os',
+  'path',
+  'path/posix',
+  'path/win32',
+  'perf_hooks',
+  'process',
+  'punycode',
+  'querystring',
+  'readline',
+  'readline/promises',
+  'repl',
+  'stream',
+  'stream/consumers',
+  'stream/promises',
+  'stream/web',
+  'string_decoder',
+  'sys',
+  'timers',
+  'timers/promises',
+  'tls',
+  'trace_events',
+  'tty',
+  'url',
+  'util',
+  'util/types',
+  'v8',
+  'vm',
+  'wasi',
+  'worker_threads',
+  'zlib',
+]);
+
+export const isBuiltin = (specifier: string) => specifier.startsWith('node:') || NODE_BUILTIN_MODULES.has(specifier);
 
 export const isDefinitelyTyped = (packageName: string) => packageName.startsWith(`${DT_SCOPE}/`);
 
@@ -100,6 +178,7 @@ const CHAR_QUESTION = 63; // '?'
 export const sanitizeSpecifier = (specifier: string) => {
   if (
     specifier.startsWith('node:') ||
+    specifier.startsWith(PROTOCOL_CLOUDFLARE) ||
     isAbsolute(specifier) ||
     specifier.charCodeAt(0) === CHAR_COLON ||
     specifier.startsWith(PROTOCOL_VIRTUAL)
@@ -130,4 +209,10 @@ export const sanitizeSpecifier = (specifier: string) => {
     }
   }
   return colon !== -1 && colon < end ? specifier.slice(start, colon) : specifier.slice(start, end);
+};
+
+export const getSubpathImport = (specifier: string) => {
+  if (!specifier.includes('#')) return;
+  const sanitized = sanitizeSpecifier(specifier);
+  if (sanitized.charCodeAt(0) === CHAR_HASH) return sanitized;
 };

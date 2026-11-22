@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/peer-dependencies-optional-unguarded",
+  "peerDependencies": {
+    "optional-peer": "*"
+  },
+  "peerDependenciesMeta": {
+    "optional-peer": {
+      "optional": true
+    }
+  }
+}

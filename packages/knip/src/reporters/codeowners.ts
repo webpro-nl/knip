@@ -1,5 +1,5 @@
 import type { Entries } from '../types/entries.ts';
-import type { Issue, ReporterOptions } from '../types/issues.ts';
+import type { InternalReporterOptions, Issue } from '../types/issues.ts';
 import { createOwnershipEngine } from '../util/codeowners.ts';
 import { relative, resolve } from '../util/path.ts';
 import { getColoredTitle, getIssueLine, getIssueTypeTitle } from './util/util.ts';
@@ -10,14 +10,15 @@ type ExtraReporterOptions = {
   path?: string;
 };
 
-const logIssueRecord = (issues: OwnedIssue[], cwd: string) => {
+const getIssueRecordLines = (issues: OwnedIssue[], cwd: string) => {
   const sortedByFilePath = issues.sort((a, b) => (a.owner < b.owner ? -1 : 1));
-  for (const { filePath, symbols, owner, parentSymbol } of sortedByFilePath) {
-    console.log(getIssueLine({ owner, filePath, symbols, parentSymbol }, cwd));
-  }
+  return sortedByFilePath.map(({ filePath, symbols, owner, parentSymbol }) =>
+    getIssueLine({ owner, filePath, symbols, parentSymbol }, cwd)
+  );
 };
 
-export default ({ report, issues, isShowProgress, options, cwd }: ReporterOptions) => {
+export default ({ report, issues, isShowProgress, options, cwd, write }: InternalReporterOptions) => {
+  const lines: string[] = [];
   let opts: ExtraReporterOptions = {};
   try {
     opts = options ? JSON.parse(options) : opts;
@@ -47,9 +48,9 @@ export default ({ report, issues, isShowProgress, options, cwd }: ReporterOption
       });
 
       if (issuesForType.length > 0) {
-        if (totalIssues) console.log();
-        title && console.log(getColoredTitle(title, issuesForType.length));
-        logIssueRecord(issuesForType, cwd);
+        if (totalIssues) lines.push('');
+        title && lines.push(getColoredTitle(title, issuesForType.length));
+        lines.push(...getIssueRecordLines(issuesForType, cwd));
       }
 
       totalIssues = totalIssues + issuesForType.length;
@@ -57,6 +58,8 @@ export default ({ report, issues, isShowProgress, options, cwd }: ReporterOption
   }
 
   if (totalIssues === 0 && isShowProgress) {
-    console.log('✂️  Excellent, Knip found no issues.');
+    lines.push('✂️  Excellent, Knip found no issues.');
   }
+
+  write(lines.join('\n'));
 };

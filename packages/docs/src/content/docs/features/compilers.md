@@ -11,21 +11,29 @@ project. That's why Knip supports compilers.
 
 ## Built-in compilers
 
-Knip has built-in "compilers" for the following file extensions:
+Knip has built-in "compilers" for the following file extensions, enabled by the
+dependencies or plugins in parentheses:
 
-- `.astro`
-- `.css` (only enabled by `tailwindcss`)
-- `.mdx`
-- `.prisma`
-- `.sass` + `.scss`
-- `.less`
-- `.styl` + `.stylus`
-- `.svelte`
-- `.tsrx`
-- `.vue`
+<!-- compilers:start -->
+
+- `.astro` (Astro)
+- `.css` (Tailwind)
+- `.gjs` + `.gts` (Ember)
+- `.less` (`less`)
+- `.marko` (Marko)
+- `.md` (unplugin-vue-markdown)
+- `.mdx` (`@mdx-js/*`, `remark-mdx`, Astro, Fumadocs, Qwik, Storybook)
+- `.prisma` (Prisma)
+- `.sass` + `.scss` (`sass`, `sass-embedded`, `node-sass`, Stencil)
+- `.styl` + `.stylus` (`stylus`)
+- `.svelte` (Svelte)
+- `.tsrx` (`@tsrx/*`)
+- `.vue` (Nuxt, unplugin-auto-import, unplugin-vue-components, Vue)
+
+<!-- compilers:end -->
 
 Knip does not include real compilers for those files, but regular expressions to
-collect `import` statements. This is fast, requires no dependencies, and enough
+collect `import` statements. This is fast, requires no dependencies, and is enough
 for Knip to build the module graph. The tradeoff is that unused exports inside
 these files go unreported.
 
@@ -37,7 +45,7 @@ fidelity, override any built-in with the framework's own compiler (see the
 in [`.tsrx`][3] files.
 
 Compilers are enabled only when a related dependency is found. The `.tsrx`
-compiler when a `@tsrx/*` package is installed, for example. If that detection
+compiler is enabled when a `@tsrx/*` package is installed, for example. If that detection
 doesn't work for your project, set `true` to enable any compiler manually:
 
 ```ts title="knip.ts"
@@ -93,7 +101,7 @@ optional.
 
 #### CSS
 
-Here's an example, minimal compiler for CSS files:
+Here's an example of a minimal compiler for CSS files:
 
 ```ts title="knip.ts"
 export default {

@@ -13,6 +13,7 @@ test('Support CommonJS-style imports and exports (w/o tsconfig.json)', async () 
 
   assert(issues.exports['dir/exports.js']['unused']);
   assert(issues.exports['dir/mod1.js']['identifier2']);
+  assert(issues.exports['dir/members.js']['unusedMember']);
 
   assert(issues.unlisted['index.js']['side-effects']);
   assert(issues.unlisted['index.js']['aliased-binding']);
@@ -25,9 +26,9 @@ test('Support CommonJS-style imports and exports (w/o tsconfig.json)', async () 
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    exports: 2,
+    exports: 3,
     unlisted: 8,
-    processed: 8,
-    total: 8,
+    processed: 9,
+    total: 9,
   });
 });

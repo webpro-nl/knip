@@ -1,0 +1,6 @@
+{
+  "name": "@fixtures/cloudflare-builtins",
+  "dependencies": {
+    "cloudflare": "*"
+  }
+}

@@ -1,6 +1,6 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toProductionEntry } from '../../util/input.ts';
-import { isAbsolute, join } from '../../util/path.ts';
+import { type Input, toEntryPath, toEntry } from '../../util/input.ts';
+import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getHtmlScriptEntries } from '../vite/helpers.ts';
 import type { ElectronViteConfig } from './types.ts';
@@ -36,15 +36,18 @@ const resolveConfig: ResolveConfig<ElectronViteConfig> = async (localConfig, opt
     if (typeof section === 'function') section = await section(buildEnv);
 
     const ids: string[] = [];
-    for (const input of [section?.build?.rollupOptions?.input, section?.build?.lib?.entry]) {
+    const rolldownOptions = section?.build?.rolldownOptions ?? section?.build?.rollupOptions;
+    for (const input of [rolldownOptions?.input, section?.build?.lib?.entry]) {
       if (typeof input === 'string') ids.push(input);
       else if (input) ids.push(...Object.values(input as Record<string, string>));
     }
 
     const patterns = ids.length > 0 ? ids : [defaultEntry[name]];
     for (const id of patterns) {
-      const resolved = isAbsolute(id) ? id : join(configFileDir, id);
-      inputs.push(toProductionEntry(resolved));
+      const resolved = toAbsolute(id, configFileDir);
+      inputs.push(
+        ids.length > 0 ? toEntryPath(resolved, { production: true }) : toEntry(resolved, { production: true })
+      );
       if (name === 'renderer' && resolved.endsWith('.html')) {
         for (const input of await getHtmlScriptEntries(resolved)) inputs.push(input);
       }

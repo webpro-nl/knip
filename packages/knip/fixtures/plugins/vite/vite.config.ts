@@ -1,8 +1,17 @@
+import mdx from '@mdx-js/rollup';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
-export default defineConfig(() => ({
+export default defineConfig(({ isSsrBuild }) => ({
+  build: {
+    rollupOptions: { input: isSsrBuild ? './server/app.ts' : undefined },
+  },
   resolve: {
+    alias: [
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      { find: /^~icons\//, replacement: 'unplugin-icons/' },
+    ],
     dedupe: ['shared-state'],
   },
   optimizeDeps: {
@@ -12,6 +21,7 @@ export default defineConfig(() => ({
     external: ['native-renderer', 'transitive-runtime', /^@grpc\//],
   },
   plugins: [
+    mdx({ providerImportSource: 'nextra/mdx-components' }),
     react({
       babel: {
         plugins: ['@emotion/babel-plugin'],

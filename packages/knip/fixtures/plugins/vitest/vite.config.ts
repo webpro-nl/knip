@@ -16,6 +16,7 @@ export default defineConfig(async ({ mode, command }) => {
     return {
       test: {
         environment: 'edge-runtime',
+        projects: [{ test: { name: 'edge', include: ['test/**/*.edge.ts'] } }],
       },
     };
   }

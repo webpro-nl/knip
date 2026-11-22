@@ -13,7 +13,7 @@ troubleshoot issues.
 
 :::note[Rationale]
 
-The JavaScript/TypeScript ecosystem has a vast amount of frameworks and tools.
+The JavaScript/TypeScript ecosystem has a vast number of frameworks and tools.
 Additionally, file locations, configuration semantics, command-line arguments
 and so on vary wildly. Files and dependencies are referenced in many ways. Knip
 tries harder than you think to cover it all.
@@ -84,12 +84,12 @@ screenshot:
 It's like a reversed module graph. Instead of traversing imports it goes in the
 opposite direction and shows where exports are imported.
 
-The `--trace-dependency` accepts strings for exact matches, but if it looks like
-a regex that works too:
+The `--trace-dependency` option accepts strings for exact matches, but if it
+looks like a regex that works too:
 
 <img src="/screenshots/trace-dependency.png" alt="trace dependency" class="mw500" />
 
-Use [--workspace \[filter\]][8] to filter accordingly.
+Use [`--workspace [filter]`][8] to filter accordingly.
 
 #### Legend
 

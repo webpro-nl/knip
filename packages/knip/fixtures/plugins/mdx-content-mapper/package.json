@@ -5,10 +5,14 @@
     "#mdx-components": "./mdx-components.tsx"
   },
   "scripts": {
-    "build-next": "tsc -p tsconfig.next.json"
+    "build-next": "tsc -p tsconfig.next.json",
+    "build-provider": "tsc -p config/tsconfig.provider.json"
   },
   "devDependencies": {
     "mdx-content-mapper": "*",
     "typescript": "*"
+  },
+  "dependencies": {
+    "nextra": "*"
   }
 }

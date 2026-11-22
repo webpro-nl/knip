@@ -71,7 +71,7 @@ const hasWorkspaces = manifest => {
   if (hasAccess('pnpm-workspace.yaml')) {
     try {
       const content = fs.readFileSync('pnpm-workspace.yaml', 'utf-8');
-      return /(^|\n)packages:\n/.test(content);
+      return /^packages\s*:/m.test(content);
     } catch {
       return false;
     }

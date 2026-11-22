@@ -17,3 +17,9 @@ jobs:
       - name: Build site
         run: node_modules/.bin/site-build
         working-directory: packages/lib
+      - name: Start app with hook
+        run: node -r ./missing-hook.js
+        working-directory: packages/app
+      - name: Start app with instrumentation
+        run: tsx --import=@/instrumentation
+        working-directory: packages/app

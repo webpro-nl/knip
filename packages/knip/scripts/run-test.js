@@ -35,24 +35,35 @@ const nativeTS = major >= 24 || (major === 22 && minor >= 18);
 const require = createRequire(import.meta.url);
 const tsxBin = nativeTS ? null : resolve(dirname(require.resolve('tsx/package.json')), require('tsx/package.json').bin);
 
-const result = useBun
-  ? spawnSync(
-      'bun',
-      [
-        'test',
-        `--parallel=${concurrency}`,
-        '--no-isolate',
-        '--timeout',
-        '30000',
-        ...(values.shard ? [`--shard=${values.shard}`] : []),
-        ...files,
-      ],
-      { stdio: 'inherit' }
-    )
-  : spawnSync(
-      process.execPath,
-      [...(tsxBin ? [tsxBin] : []), '--test', ...(values.shard ? [`--test-shard=${values.shard}`] : []), ...files],
-      { stdio: 'inherit' }
-    );
+// Windows limits a command line to 32767 characters; one argument per test file outgrew that
+const batchSize = 300;
 
-process.exit(result.status ?? 1);
+const run = batch =>
+  useBun
+    ? spawnSync(
+        'bun',
+        [
+          'test',
+          `--parallel=${concurrency}`,
+          '--no-isolate',
+          '--timeout',
+          '30000',
+          ...(values.shard ? [`--shard=${values.shard}`] : []),
+          ...batch,
+        ],
+        { stdio: 'inherit' }
+      )
+    : spawnSync(
+        process.execPath,
+        [...(tsxBin ? [tsxBin] : []), '--test', ...(values.shard ? [`--test-shard=${values.shard}`] : []), ...batch],
+        { stdio: 'inherit' }
+      );
+
+let status = 0;
+for (let i = 0; i < files.length; i += batchSize) {
+  const result = run(files.slice(i, i + batchSize));
+  if (result.error) throw result.error;
+  if (result.status !== 0) status ||= result.status ?? 1;
+}
+
+process.exit(status);

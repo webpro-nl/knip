@@ -1,0 +1,8 @@
+{
+  "name": "@fixtures/npm-scripts-start-overlap-workspace",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "start": "yarn --cwd packages/app run workspace-cli",
+    "test": "yarn --cwd packages/tools run workspace-cli"
+  }
+}

@@ -2,8 +2,8 @@ import type { ParsedArgs } from '../../util/parse-args.ts';
 import type { Args } from '../../types/args.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig } from '../../types/config.ts';
 import { isDirectory } from '../../util/fs.ts';
-import { type Input, toEntry } from '../../util/input.ts';
-import { join } from '../../util/path.ts';
+import { type Input, toEntryPath, toEntry } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import compiler from './compiler.ts';
 import type { PrismaConfig } from './types.ts';
@@ -28,10 +28,10 @@ const config: string[] = [
 
 const resolveSchema = (path: string, cwd: string) => {
   if (!isDirectory(cwd, path)) {
-    return toEntry(path);
+    return toEntryPath(path, { dir: cwd });
   }
   // Multi-file schema directory
-  return toEntry(join(path, '**/*.prisma'));
+  return toEntry(join(toAbsolute(path, cwd), '**/*.prisma'));
 };
 
 const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
@@ -45,11 +45,12 @@ const resolveConfig: ResolveConfig<PrismaConfig> = async (config, options) => {
     // Prisma config file
     inputs.push(...options.getInputsFromScripts(config.migrations.seed));
   }
+  for (const input of inputs) input.dir ??= options.cwd;
 
   // Entry/Schema
   if (config.schema) {
     // package.json and Prisma config file
-    inputs.push(resolveSchema(config.schema, options.cwd));
+    inputs.push(resolveSchema(config.schema, options.configFileDir));
   }
 
   return inputs;

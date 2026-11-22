@@ -1,7 +1,10 @@
+import type { Configuration } from 'webpack';
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import type { RsbuildConfig } from './types.ts';
+import { resolveConfig as resolveRspackConfig } from '../rspack/index.ts';
+import { getSwcPluginSpecifiers } from '../webpack/index.ts';
+import type { AliasChain, RsbuildConfig, RsbuildConfigOrFn } from './types.ts';
 
 // https://rsbuild.rs/config/
 
@@ -13,8 +16,35 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
-const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
+// https://rsbuild.rs/guide/configuration/rsbuild#export-function
+const configParams = [
+  { env: 'development', command: 'dev', envMode: 'development' },
+  { env: 'production', command: 'build', envMode: 'production' },
+];
+
+const getConfigs = async (configOrFn: RsbuildConfigOrFn) => {
+  if (typeof configOrFn !== 'function') return [configOrFn];
+  const configs: RsbuildConfig[] = [];
+  for (const params of configParams) configs.push(await configOrFn(params));
+  return configs;
+};
+
+const getAliases = (chain: AliasChain) => {
+  const aliases: Record<string, string[]> = {};
+  for (const item of [chain].flat()) {
+    if (typeof item === 'function') continue;
+    for (const key in item) {
+      const targets: string[] = [];
+      for (const target of [item[key]].flat()) if (typeof target === 'string') targets.push(target);
+      if (targets.length > 0) aliases[key] = targets;
+    }
+  }
+  return aliases;
+};
+
+const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
   const entries = new Set<string>();
+  const inputs: Input[] = [];
 
   const checkSource = (source: RsbuildConfig['source']) => {
     if (source?.entry) {
@@ -35,15 +65,65 @@ const resolveConfig: ResolveConfig<RsbuildConfig> = async config => {
     }
   };
 
-  checkSource(config.source);
+  const checkConfig = async (localConfig: RsbuildConfig, config: RsbuildConfig) => {
+    checkSource(localConfig.source);
 
-  if (config.environments) {
-    for (const environment of Object.values(config.environments)) {
-      checkSource(environment.source);
+    const alias = localConfig.resolve?.alias;
+    if (alias) {
+      for (const input of await resolveRspackConfig({ resolve: { alias: getAliases(alias) } }, options)) {
+        inputs.push(input);
+      }
+    }
+
+    const swc = localConfig.tools?.swc;
+    if (swc && typeof swc === 'object') {
+      for (const specifier of getSwcPluginSpecifiers(swc)) inputs.push(toModule(specifier));
+    }
+
+    if (!localConfig.tools?.rspack) return;
+    const target = localConfig.output?.target ?? config.output?.target ?? 'web';
+    const mode = localConfig.mode ?? config.mode;
+    const passes = mode ? [mode === 'production'] : options.isProduction ? [true] : [false, true];
+
+    for (const rspack of [localConfig.tools.rspack].flat()) {
+      for (const isProduction of typeof rspack === 'function' ? passes : [options.isProduction]) {
+        const baseConfig = {
+          mode: mode ?? (isProduction ? 'production' : 'development'),
+          entry: {},
+          resolve: { alias: {} },
+          module: { rules: [] },
+          plugins: [],
+        } satisfies Configuration;
+        const utils = {
+          env: process.env.NODE_ENV ?? '',
+          isDev: baseConfig.mode === 'development',
+          isProd: baseConfig.mode === 'production',
+          target,
+          isServer: target === 'node',
+          isWebWorker: target === 'web-worker',
+        };
+        const resolvedConfig = typeof rspack === 'function' ? await rspack(baseConfig, utils) : rspack;
+        const resolvedInputs = await resolveRspackConfig(resolvedConfig ?? baseConfig, {
+          ...options,
+          isProduction: options.isProduction || isProduction,
+        });
+        for (const input of resolvedInputs) inputs.push(input);
+      }
+    }
+  };
+
+  for (const config of await getConfigs(configOrFn)) {
+    await checkConfig(config, config);
+
+    if (config.environments) {
+      for (const environment of Object.values(config.environments)) {
+        await checkConfig(environment, config);
+      }
     }
   }
 
-  return Array.from(entries).map(input => toProductionEntry(input));
+  for (const entry of entries) inputs.push(toEntry(entry, { production: true }));
+  return inputs;
 };
 
 const plugin: Plugin = {

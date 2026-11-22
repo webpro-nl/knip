@@ -1,0 +1,17 @@
+{
+  "name": "@fixtures/strict-workspace__app",
+  "private": true,
+  "scripts": {
+    "start": "root-binary"
+  },
+  "dependencies": {
+    "own-dependency": "*"
+  },
+  "devDependencies": {
+    "own-dev-dependency": "*",
+    "own-type-dev-dependency": "*"
+  },
+  "peerDependencies": {
+    "own-peer-dependency": "*"
+  }
+}

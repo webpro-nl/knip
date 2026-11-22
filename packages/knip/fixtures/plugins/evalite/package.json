@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/evalite",
+  "devDependencies": {
+    "dotenv": "*",
+    "evalite": "*"
+  }
+}

@@ -1,4 +1,4 @@
-import { type Input, toDeferResolve, toDependency } from '../../util/input.ts';
+import { type Input, toModule, toDependency } from '../../util/input.ts';
 import type { Manifest } from '../../util/package-json.ts';
 import { isInternal } from '../../util/path.ts';
 
@@ -21,20 +21,11 @@ const getCandidates = (prefix: string, identifier: string): string[] => {
   return [prefix + name, name];
 };
 
-const getDeclaredDependencies = (manifest: Manifest) =>
-  new Set([
-    ...Object.keys(manifest.dependencies ?? {}),
-    ...Object.keys(manifest.devDependencies ?? {}),
-    ...Object.keys(manifest.optionalDependencies ?? {}),
-    ...Object.keys(manifest.peerDependencies ?? {}),
-  ]);
-
 const pickCandidate = (prefix: string, identifier: string, manifest: Manifest) => {
   const candidates = getCandidates(prefix, identifier);
   if (candidates.length === 1 || isInternal(candidates[0])) return candidates[0];
 
-  const dependencies = getDeclaredDependencies(manifest);
-  return candidates.find(candidate => dependencies.has(candidate)) ?? candidates[0];
+  return candidates.find(candidate => manifest.allDependencies.has(candidate)) ?? candidates[0];
 };
 
 // Resolve plugins for https://github.com/wooorm/load-plugin
@@ -44,5 +35,5 @@ export const resolveLoadPluginStylePluginName = (prefix: string, identifier: str
 
   const candidate = pickCandidate(prefix, identifier, manifest);
 
-  return isInternal(candidate) ? toDeferResolve(candidate) : toDependency(candidate);
+  return isInternal(candidate) ? toModule(candidate) : toDependency(candidate);
 };

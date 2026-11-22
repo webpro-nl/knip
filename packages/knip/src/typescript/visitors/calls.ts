@@ -1,8 +1,10 @@
 import type { CallExpression, NewExpression, VariableDeclarator } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import { addValue } from '../../util/module-graph.ts';
+import { isStartsLikePackageName } from '../../util/modules.ts';
 import { getSafeScriptFromArgs, getScriptFromArg, getStringValue, isStringLiteral } from '../ast-nodes.ts';
-import { isShadowed, type WalkState } from './walk.ts';
+import { isShadowedIn } from './shadow.ts';
+import type { WalkState } from './walk.ts';
 
 /**
  * Credits the class registered by a native custom-element call `<registry>.define('tag', Class)`. The
@@ -21,7 +23,7 @@ function getRegisteredCustomElement(node: CallExpression, s: WalkState): string 
   if (object.type === 'Identifier') {
     isRegistry =
       (object.name === 'customElements' || s.customElementRegistries.has(object.name)) &&
-      !isShadowed(object.name, object.start);
+      !isShadowedIn(s, object.name, object.start);
   } else {
     isRegistry =
       object.type === 'MemberExpression' &&
@@ -32,7 +34,7 @@ function getRegisteredCustomElement(node: CallExpression, s: WalkState): string 
   if (!isRegistry) return undefined;
 
   const arg = node.arguments[1];
-  if (arg?.type === 'Identifier') return isShadowed(arg.name, arg.start) ? undefined : arg.name;
+  if (arg?.type === 'Identifier') return isShadowedIn(s, arg.name, arg.start) ? undefined : arg.name;
   if (arg?.type === 'ThisExpression' && s.staticBlockDepth > 0)
     return s.classNameStack[s.classNameStack.length - 1] || undefined;
   return undefined;
@@ -47,7 +49,7 @@ export function trackCustomElementRegistry(node: VariableDeclarator, s: WalkStat
   if (node.id.type !== 'Identifier' || !node.init) return;
   const init = node.init;
   if (
-    (init.type === 'Identifier' && init.name === 'customElements' && !isShadowed('customElements', init.start)) ||
+    (init.type === 'Identifier' && init.name === 'customElements' && !isShadowedIn(s, 'customElements', init.start)) ||
     (init.type === 'MemberExpression' &&
       !init.computed &&
       init.property.type === 'Identifier' &&
@@ -165,26 +167,28 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     return;
   }
 
-  if (
-    s.hasNodeModuleImport &&
-    ((node.callee.type === 'MemberExpression' &&
-      node.callee.object.type === 'Identifier' &&
-      node.callee.object.name === 'module' &&
-      !node.callee.computed &&
-      node.callee.property.name === 'register') ||
-      (node.callee.type === 'Identifier' && node.callee.name === 'register')) &&
-    node.arguments.length >= 1 &&
-    isStringLiteral(node.arguments[0])
-  ) {
+  if (s.hasNodeModuleImport && node.arguments.length >= 1 && isStringLiteral(node.arguments[0])) {
+    const { callee } = node;
+    const nodeModuleMethod =
+      callee.type === 'Identifier'
+        ? callee.name
+        : callee.type === 'MemberExpression' &&
+          !callee.computed &&
+          callee.object.type === 'Identifier' &&
+          callee.object.name === 'module' &&
+          callee.property.type === 'Identifier' &&
+          callee.property.name;
     const specifier = getStringValue(node.arguments[0])!;
     const arg1 = node.arguments[1];
     if (
-      specifier &&
-      (!specifier.startsWith('.') ||
-        (arg1?.type === 'MemberExpression' &&
-          !arg1.computed &&
-          arg1.object.type === 'MetaProperty' &&
-          arg1.property.name === 'url'))
+      (nodeModuleMethod === 'register' &&
+        specifier &&
+        (!specifier.startsWith('.') ||
+          (arg1?.type === 'MemberExpression' &&
+            !arg1.computed &&
+            arg1.object.type === 'MetaProperty' &&
+            arg1.property.name === 'url'))) ||
+      (nodeModuleMethod === 'findPackageJSON' && isStartsLikePackageName(specifier) && !URL.canParse(specifier))
     ) {
       s.addImport(specifier, undefined, undefined, undefined, node.arguments[0].start, IMPORT_FLAGS.ENTRY);
       return;
@@ -246,15 +250,17 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
     return;
   }
 
-  const markRefIfNs = (name: string) => {
+  const markRefIfNs = (name: string, pos: number) => {
     const _import = s.localImportMap.get(name);
     if (_import?.isNamespace) {
       const internalImport = s.internal.get(_import.filePath);
-      if (internalImport) internalImport.refs.add(name);
+      if (!internalImport) return;
+      if (!_import.isDynamicImport) internalImport.refs.add(name);
+      else if (!isShadowedIn(s, name, pos)) addValue(internalImport.import, OPAQUE, s.filePath);
     }
   };
   for (const arg of node.arguments) {
-    if (arg.type === 'Identifier') markRefIfNs(arg.name);
+    if (arg.type === 'Identifier') markRefIfNs(arg.name, arg.start);
     else if (arg.type === 'ArrowFunctionExpression' && arg.expression) {
       const body = arg.body.type === 'AwaitExpression' ? arg.body.argument : arg.body;
       if (body.type === 'ImportExpression' && isStringLiteral(body.source)) {
@@ -271,13 +277,14 @@ export function handleCallExpression(node: CallExpression, s: WalkState) {
       }
     } else if (arg.type === 'ArrayExpression') {
       for (const el of arg.elements ?? []) {
-        if (el?.type === 'Identifier') markRefIfNs(el.name);
+        if (el?.type === 'Identifier') markRefIfNs(el.name, el.start);
       }
     } else if (arg.type === 'ObjectExpression') {
       for (const prop of arg.properties ?? []) {
         if (prop.type === 'Property' && !prop.computed && prop.value?.type === 'Identifier')
-          markRefIfNs(prop.value.name);
-        if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier') markRefIfNs(prop.argument.name);
+          markRefIfNs(prop.value.name, prop.value.start);
+        if (prop.type === 'SpreadElement' && prop.argument?.type === 'Identifier')
+          markRefIfNs(prop.argument.name, prop.argument.start);
       }
     }
   }

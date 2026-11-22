@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toProductionEntry } from '../../util/input.ts';
+import { toEntryPath, toEntry } from '../../util/input.ts';
 import { toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { TanStackRouterConfig } from './types.ts';
@@ -23,7 +23,9 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 
 const config = ['tsr.config.json'];
 
-const production = ['src/routeTree.gen.{ts,js}', 'src/{router,start,client,server}.{js,jsx,ts,tsx}'];
+const routerEntries = ['src/{router,start,client,server}.{js,jsx,ts,tsx}'];
+
+const production = ['src/routeTree.gen.{ts,js}', ...routerEntries];
 
 const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, options) => {
   const { configFileDir } = options;
@@ -31,7 +33,10 @@ const resolveConfig: ResolveConfig<TanStackRouterConfig> = async (localConfig, o
   const generatedRouteTree = localConfig.generatedRouteTree ?? './src/routeTree.gen.ts';
   const routeTreePath = toAbsolute(generatedRouteTree, configFileDir);
 
-  return [toProductionEntry(routeTreePath)];
+  return [
+    toEntryPath(routeTreePath, { production: true }),
+    ...routerEntries.map(id => toEntry(id, { production: true })),
+  ];
 };
 
 const plugin: Plugin = {

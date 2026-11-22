@@ -1,0 +1,14 @@
+{
+  "name": "@fixtures/peer-dependencies-optional-caught-promise-all",
+  "peerDependencies": {
+    "pg": "*"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/pg": "*"
+  }
+}

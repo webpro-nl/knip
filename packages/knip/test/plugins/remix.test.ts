@@ -44,7 +44,7 @@ test('Find dependencies with the Remix plugin', async () => {
     unlisted: 12,
     binaries: 5,
     unresolved: 1,
-    processed: 8,
-    total: 8,
+    processed: 11,
+    total: 11,
   });
 });

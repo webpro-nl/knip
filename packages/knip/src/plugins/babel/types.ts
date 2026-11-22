@@ -4,6 +4,7 @@ type BabelConfigFn = (options: typeof api) => BabelConfigObj;
 
 export type BabelConfigObj = {
   configFile?: string;
+  extends?: string;
   plugins?: (string | [string, unknown])[];
   presets?: (string | [string, unknown])[];
   env?: Record<string, BabelConfigObj>;

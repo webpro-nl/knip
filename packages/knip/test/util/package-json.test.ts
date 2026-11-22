@@ -11,7 +11,7 @@ import {
 test('Return a root conditional exports map', () => {
   const target = { source: './src/index.ts', default: './dist/index.js' };
 
-  assert.deepEqual(getPackageMapTarget(target, '.'), { target });
+  assert.deepEqual(getPackageMapTarget(target, '.'), { target, subpath: '.' });
 });
 
 test('Prefer exact and more specific package subpath matches', () => {
@@ -22,9 +22,10 @@ test('Prefer exact and more specific package subpath matches', () => {
     './formats/json': exact,
   };
 
-  assert.deepEqual(getPackageMapTarget(map, './formats/json'), { target: exact });
+  assert.deepEqual(getPackageMapTarget(map, './formats/json'), { target: exact, subpath: './formats/json' });
   assert.deepEqual(getPackageMapTarget(map, './formats/special/json'), {
     target: map['./formats/special/*'],
+    subpath: './formats/special/*',
     patternMatch: 'json',
   });
   assert.equal(getPackageMapTarget(map, './missing'), undefined);

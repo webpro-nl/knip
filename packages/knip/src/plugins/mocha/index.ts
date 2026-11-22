@@ -1,11 +1,12 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { type Input, toDeferResolve, toDeferResolveEntry, toEntry } from '../../util/input.ts';
+import { type Input, toModule, toEntryPath, toEntry } from '../../util/input.ts';
 import type { ParsedArgs } from '../../util/parse-args.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { MochaConfig } from './types.ts';
 
 // https://mochajs.org/#configuring-mocha-nodejs
+// https://github.com/mochajs/mocha/blob/v12.0.3/lib/reporters/index.cjs
 
 const title = 'Mocha';
 
@@ -13,21 +14,67 @@ const enablers = ['mocha'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.mocharc.{js,cjs,json,jsonc,yml,yaml}', 'package.json'];
+const config = ['.mocharc.{js,cjs,mjs,json,jsonc,yml,yaml}', 'package.json'];
 
 const entry = ['**/test/*.{js,cjs,mjs}'];
 
 const defaultExtensions = ['js', 'cjs', 'mjs'];
 
-const resolveConfig: ResolveConfig<MochaConfig> = localConfig => {
+const builtInReporters = new Set([
+  'Base',
+  'base',
+  'Dot',
+  'dot',
+  'Doc',
+  'doc',
+  'TAP',
+  'tap',
+  'JSON',
+  'json',
+  'HTML',
+  'html',
+  'List',
+  'list',
+  'Min',
+  'min',
+  'Spec',
+  'spec',
+  'Nyan',
+  'nyan',
+  'XUnit',
+  'xunit',
+  'Markdown',
+  'markdown',
+  'Progress',
+  'progress',
+  'Landing',
+  'landing',
+  'JSONStream',
+  'json-stream',
+  'GithubActions',
+  'github-actions',
+]);
+
+const nodeOptionModule = /^(?:import|require|loader|experimental-loader)=(.+)$/;
+
+const isExternalReporter = (reporter: unknown): reporter is string =>
+  typeof reporter === 'string' && !builtInReporters.has(reporter);
+
+const resolveConfig: ResolveConfig<MochaConfig> = (localConfig, options) => {
   const entryPatterns = localConfig.spec ? [localConfig.spec].flat() : entry;
   const files = localConfig.file ? [localConfig.file].flat() : [];
   const require = localConfig.require ? [localConfig.require].flat() : [];
+  const nodeOptions = localConfig['node-option'] ? [localConfig['node-option']].flat() : undefined;
+  const preload = nodeOptions
+    ? nodeOptions.flatMap(option => option.match(nodeOptionModule)?.[1] ?? [])
+    : [localConfig.import ?? [], localConfig.loader ?? []].flat();
 
   const inputs: Input[] = [];
   inputs.push(...entryPatterns.map(id => toEntry(id)));
-  inputs.push(...files.map(id => toDeferResolveEntry(id)));
-  inputs.push(...require.map(id => toDeferResolve(id)));
+  inputs.push(...files.map(id => toEntryPath(id, { dir: options.cwd })));
+  inputs.push(...require.map(id => toModule(id, { dir: options.cwd })));
+  inputs.push(...preload.map(id => toModule(id, { dir: options.cwd })));
+  if (isExternalReporter(localConfig.reporter)) inputs.push(toModule(localConfig.reporter, { dir: options.cwd }));
   return inputs;
 };
 
@@ -70,7 +117,7 @@ const args = {
     ui: ['u'],
     watch: ['w'],
   },
-  string: ['config', 'extension', 'fgrep', 'file', 'grep', 'ignore', 'package', 'reporter', 'spec', 'ui'],
+  string: ['extension', 'file', 'ignore', 'reporter', 'spec'],
   config: ['config'],
   resolveInputs: (parsed: ParsedArgs, { cwd }: { cwd: string }) => {
     const extensions = [parsed.extension ?? []]
@@ -80,12 +127,14 @@ const args = {
     const list = extensions.length > 0 ? extensions : defaultExtensions;
     const suffix = list.length === 1 ? `*.${list[0]}` : `*.{${list.join(',')}}`;
     const inputs: Input[] = [];
-    for (const value of [...parsed._, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
+    const operands = [...parsed._, ...(parsed['--'] ?? []).filter(value => !value.startsWith('-'))];
+    for (const value of [...operands, ...[parsed.spec ?? []].flat(), ...[parsed.file ?? []].flat()].map(String)) {
       if (isDirectory(cwd, value))
         inputs.push(toEntry(`${value.replace(/\/$/, '')}/${parsed.recursive ? '**/' : ''}${suffix}`));
       else inputs.push(toEntry(value));
     }
     for (const value of [parsed.ignore ?? []].flat()) inputs.push(toEntry(`!${String(value)}`));
+    if (isExternalReporter(parsed.reporter)) inputs.push(toModule(parsed.reporter));
     return inputs;
   },
 };

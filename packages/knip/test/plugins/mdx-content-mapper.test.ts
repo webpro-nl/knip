@@ -13,8 +13,8 @@ test('Find dependencies with the MDX content mapper', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });
 
@@ -24,7 +24,7 @@ test('Find dependencies with the MDX content mapper (production)', async () => {
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 3,
-    total: 3,
+    processed: 5,
+    total: 5,
   });
 });

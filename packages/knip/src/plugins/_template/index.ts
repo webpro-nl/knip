@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve } from '../../util/input.ts';
+import { toModule } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { PluginConfig } from './types.ts';
 
@@ -19,7 +19,7 @@ const production: string[] = [];
 
 const resolveConfig: ResolveConfig<PluginConfig> = async config => {
   const inputs = config?.plugins ?? [];
-  return Array.from(inputs, id => toDeferResolve(id));
+  return Array.from(inputs, id => toModule(id));
 };
 
 const plugin: Plugin = {

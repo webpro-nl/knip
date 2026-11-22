@@ -13,6 +13,7 @@ export interface Options {
   isFix: boolean;
   isFormat: boolean;
   isIncludeEntryExports: boolean;
+  isIncludeSubpathExports: boolean;
 
   isProduction: boolean;
   isRemoveFiles: boolean;

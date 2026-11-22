@@ -1,12 +1,13 @@
 import MDX from '../../compilers/mdx.ts';
 import type { IsPluginEnabled, Plugin, RegisterCompilers, ResolveConfig, ResolveFromAST } from '../../types/config.ts';
-import { type Input, toConfig, toDeferResolve, toDependency, toEntry } from '../../util/input.ts';
-import { join, relative } from '../../util/path.ts';
+import { type Input, toConfig, toModule, toDependency, toEntry } from '../../util/input.ts';
+import { join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { getBabelInputs } from '../vite/helpers.ts';
 import type { StorybookConfig } from './types.ts';
 
 // https://storybook.js.org/docs/react/configure/overview
+// https://github.com/storybookjs/storybook/blob/v10.6.5/code/core/src/shared/constants/extensions.ts
 
 const title = 'Storybook';
 
@@ -14,26 +15,32 @@ const enablers = [/^@storybook\//, '@nrwl/storybook'];
 
 const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependencies, enablers);
 
-const config = ['.{storybook,rnstorybook}/{main,test-runner}.{js,ts,mts}'];
+const config = [
+  '.{storybook,rnstorybook}/main.{js,jsx,ts,tsx,mjs,mts,cjs,cts}',
+  '.{storybook,rnstorybook}/test-runner.{js,ts,mts}',
+];
 
 const stories = ['**/*.@(mdx|stories.@(mdx|js|jsx|mjs|ts|tsx))'];
 
-const restEntry = ['.{storybook,rnstorybook}/{manager,preview,index,vitest.setup}.{js,jsx,ts,tsx}'];
+const restEntry = [
+  '.{storybook,rnstorybook}/{manager,preview}.{js,jsx,ts,tsx,mjs,mts,cjs,cts}',
+  '.{storybook,rnstorybook}/{index,vitest.setup}.{js,jsx,ts,tsx}',
+];
 
 const entry = [...restEntry, ...stories];
 
-const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mts}'];
+const project = ['.{storybook,rnstorybook}/**/*.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'];
 
 const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, options) => {
-  const { cwd, configFileDir, configFilePath } = options;
+  const { cwd, configFileDir } = options;
   const strs = typeof localConfig?.stories === 'function' ? await localConfig.stories(stories) : localConfig?.stories;
-  const relativePatterns = strs?.map(pattern => {
-    if (typeof pattern === 'string') return relative(cwd, join(configFileDir, pattern));
-    return relative(cwd, join(configFileDir, pattern.directory, pattern.files ?? stories[0]));
+  const storyPatterns = strs?.map(pattern => {
+    if (typeof pattern === 'string') return toAbsolute(pattern, configFileDir);
+    return join(toAbsolute(pattern.directory, configFileDir), pattern.files ?? stories[0]);
   });
   const patterns = [
     ...(options.config.entry ?? restEntry),
-    ...(relativePatterns && relativePatterns.length > 0 ? relativePatterns : stories),
+    ...(storyPatterns && storyPatterns.length > 0 ? storyPatterns : stories),
   ];
 
   const addons = localConfig.addons?.map(addon => (typeof addon === 'string' ? addon : addon.name)) ?? [];
@@ -55,9 +62,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
     framework?.name === '@storybook/react-vite' &&
     framework?.options?.builder?.viteConfigPath;
 
-  const configs: Input[] = viteConfigPath
-    ? [toConfig('vite', viteConfigPath, { dir: cwd, containingFilePath: configFilePath })]
-    : [];
+  const configs: Input[] = viteConfigPath ? [toConfig('vite', viteConfigPath, { dir: cwd })] : [];
 
   const hasVitestAddon = addons.some(addon => addon === '@storybook/addon-vitest');
   const coverageDeps: Input[] = hasVitestAddon
@@ -69,7 +74,7 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
 
   return [
     ...patterns.map(id => toEntry(id)),
-    ...addons.map(id => toDeferResolve(id)),
+    ...addons.map(id => toModule(id)),
     ...builderPackages.map(id => toDependency(id)),
     ...frameworks.map(id => toDependency(id)),
     ...coverageDeps,

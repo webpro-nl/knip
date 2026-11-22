@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { _getInputsFromScripts } from '../../src/binaries/index.ts';
-import { toBinary, toDeferResolve, toDependency } from '../../src/util/input.ts';
+import { toBinary, toModule, toDependency } from '../../src/util/input.ts';
 import { createManifest } from '../../src/util/package-json.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
@@ -64,19 +64,19 @@ test('Parse ESLint CLI formatter arguments', () => {
   ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format ./formatters/custom.js .', options), [
     toBinary('eslint'),
-    toDeferResolve('./formatters/custom.js'),
+    toModule('./formatters/custom.js'),
   ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format formatters/custom.js .', options), [
     toBinary('eslint'),
-    toDeferResolve('./formatters/custom.js'),
+    toModule('./formatters/custom.js'),
   ]);
   assert.deepEqual(_getInputsFromScripts("eslint --format '.\\formatters\\custom.cjs' .", options), [
     toBinary('eslint'),
-    toDeferResolve('./formatters/custom.cjs'),
+    toModule('./formatters/custom.cjs'),
   ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format ".\\formatters\\custom.cjs" .', options), [
     toBinary('eslint'),
-    toDeferResolve('./formatters/custom.cjs'),
+    toModule('./formatters/custom.cjs'),
   ]);
   assert.deepEqual(_getInputsFromScripts('eslint --format compact .', options), [
     toBinary('eslint'),

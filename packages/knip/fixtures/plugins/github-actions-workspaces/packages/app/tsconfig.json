@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/instrumentation": [
+        "../../node_modules/@opentelemetry/auto-instrumentations-node/build/src/register.js"
+      ]
+    }
+  }
+}

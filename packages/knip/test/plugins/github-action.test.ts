@@ -7,13 +7,16 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/github-action');
 
-test('Find dependencies with the GitHub Action plugin', async () => {
+test('Find literal entry files with the GitHub Action plugin', async () => {
   const options = await createOptions({ cwd });
-  const { counters } = await main(options);
+  const { counters, issues } = await main(options);
+
+  assert.deepEqual(Object.keys(issues.files), ['v/prepare.js']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    processed: 1,
-    total: 1,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });

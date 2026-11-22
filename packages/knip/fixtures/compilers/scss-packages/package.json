@@ -1,6 +1,7 @@
 {
   "name": "@fixtures/compilers-scss-packages",
   "dependencies": {
+    "@fontsource-variable/archivo": "*",
     "@fontsource/lato": "*",
     "@fontsource/roboto": "*",
     "bootstrap": "*",

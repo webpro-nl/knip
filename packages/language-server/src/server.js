@@ -99,6 +99,11 @@ export class LanguageServer {
   /** @type {undefined | Session} */
   session;
 
+  revision = 0;
+
+  /** @type {undefined | number} */
+  failedRevision;
+
   /** @type {Rules}  */
   rules = {};
 
@@ -152,8 +157,9 @@ export class LanguageServer {
     });
 
     this.connection.onInitialized(async () => {
+      const revision = this.revision;
       const config = await this.getConfig();
-      if (config?.deferSession !== true) this.start();
+      if (revision === this.revision && config?.deferSession !== true) this.start();
     });
 
     this.connection.onRequest(REQUEST_START, () => this.start());
@@ -244,10 +250,13 @@ export class LanguageServer {
 
   async start() {
     if (this.session) return;
+    const revision = ++this.revision;
 
     try {
       const config = await this.getConfig();
+      if (revision !== this.revision) return;
       const knip = await this.#resolveKnipSession();
+      if (revision !== this.revision) return;
 
       const configFilePath = config?.configFilePath
         ? path.isAbsolute(config.configFilePath)
@@ -257,31 +266,39 @@ export class LanguageServer {
 
       this.connection.console.log('Creating options');
       const options = await knip.createOptions({ cwd: this.cwd, isSession: true, args: { config: configFilePath } });
+      if (revision !== this.revision) return;
       this.rules = options.rules;
 
       this.connection.console.log('Building module graph...');
       const start = Date.now();
       const session = await knip.createSession(options);
+      if (revision !== this.revision) return;
       this.connection.console.log(`Finished building module graph (${Date.now() - start}ms)`);
 
       this.session = session;
       this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
       this.connection.sendNotification(NOTIFICATION_MODULE_GRAPH_BUILT, { duration: Date.now() - start });
     } catch (_error) {
+      if (revision !== this.revision) return;
+      this.failedRevision = revision;
       this.connection.console.error(`Error: ${_error}`);
     }
   }
 
   stop() {
+    this.revision++;
     this.session = undefined;
     this.fileCache = undefined;
+    this.packageJsonCache = undefined;
+    this.cycleDiagnostics.clear();
+    this.issuesByUri.clear();
     for (const uri of this.published) this.connection.sendDiagnostics({ uri, diagnostics: [] });
     this.published.clear();
   }
 
-  restart() {
+  async restart() {
     this.stop();
-    this.start();
+    await this.start();
   }
 
   getResults() {
@@ -296,7 +313,8 @@ export class LanguageServer {
   async handleFileChanges(params) {
     this.fileCache = undefined;
     this.packageJsonCache = undefined;
-    if (!this.session) return;
+    const session = this.session;
+    if (!session && this.failedRevision !== this.revision) return;
 
     const cwd = this.cwd ?? process.cwd();
 
@@ -312,20 +330,26 @@ export class LanguageServer {
       changes.push({ type, filePath });
     }
 
-    if (changes.length === 0) return;
+    if (!session || changes.length === 0) return;
 
     try {
-      const result = await this.session.handleFileChanges(changes);
+      const result = await session.handleFileChanges(changes);
 
-      if (!result) return;
+      if (!result || this.session !== session) return;
+      this.fileCache = undefined;
+      this.packageJsonCache = undefined;
+      this.cycleDiagnostics.clear();
 
       this.connection.console.log(
         `Module graph updated (${Math.floor(result.duration)}ms • ${(result.mem / 1024 / 1024).toFixed(2)}M)`
       );
 
       const config = await this.getConfig();
-      this.publishDiagnostics(this.buildDiagnostics(this.session.getIssues().issues, config, this.rules));
+      if (this.session !== session) return;
+      this.publishDiagnostics(this.buildDiagnostics(session.getIssues().issues, config, this.rules));
+      this.connection.sendNotification(NOTIFICATION_MODULE_GRAPH_BUILT, { duration: result.duration });
     } catch (_error) {
+      if (this.session !== session) return;
       this.connection.console.error(`Error handling file changes: ${_error}`);
     }
   }

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "mcp-server-playwright"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"]
+    },
+    "cursor": {
+      "command": "node",
+      "args": ["${workspaceFolder}/scripts/cursor-server.ts"]
+    }
+  }
+}

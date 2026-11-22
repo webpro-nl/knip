@@ -1,0 +1,12 @@
+{
+  "workspaces": {
+    "packages/app": {},
+    "packages/lib": {
+      "includeSubpathExports": true
+    },
+    "packages/public": {},
+    "packages/unused": {
+      "includeSubpathExports": true
+    }
+  }
+}

@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { EOL } from 'node:os';
 import test from 'node:test';
+import picomatch from 'picomatch';
 import {
   convertGitignoreToPicomatchIgnorePatterns as convert,
+  expandIgnorePatterns as expand,
   parseAndConvertGitignorePatterns as parse,
   toExtendedIgnorePattern as ext,
 } from '../../src/util/parse-and-convert-gitignores.ts';
@@ -35,14 +37,25 @@ test('toExtendedIgnorePattern', () => {
   assert.equal(ext('**/a/b/c'), '**/a/b/c/**');
 });
 
+test('expandIgnorePatterns', () => {
+  const patterns = ['*', '**/dir', '**/.dot/*', 'dir/!(foo)'];
+  const expanded = ['*', '**/dir', '**/dir/**', '**/.dot/*', '**/.dot/*/**', 'dir/!(foo)', 'dir/!(foo)/**'];
+  assert.deepEqual(expand(patterns), expanded);
+  assert.deepEqual(expand(['**/.dot/*'], true), ['**/.dot/*']);
+  assert(picomatch(expand(['dir/!(foo)']))('dir/foobar.ts'));
+});
+
 test('parseAndConvertGitignorePatterns', async () => {
-  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c'];
+  const gitignorePatterns = ['.git', 'node_modules', 'a/b/c', '/a/b/c', 'data/*', '!data/keep.json', '*/**/gen/*.ts'];
   const globPatterns = parse(gitignorePatterns.join(EOL));
   assert.deepEqual(globPatterns, [
     { negated: false, pattern: '**/.git' },
     { negated: false, pattern: '**/node_modules' },
-    { negated: false, pattern: '**/a/b/c' },
     { negated: false, pattern: 'a/b/c' },
+    { negated: false, pattern: 'a/b/c' },
+    { negated: false, pattern: 'data/*' },
+    { negated: true, pattern: 'data/keep.json' },
+    { negated: false, pattern: '*/**/gen/*.ts' },
   ]);
 });
 
@@ -54,6 +67,17 @@ test('parseAndConvertGitignorePatterns (ancestor)', async () => {
     { negated: false, pattern: '**/node_modules' },
     { negated: false, pattern: '**/c' },
     { negated: false, pattern: 'c' },
+  ]);
+});
+
+test('parseAndConvertGitignorePatterns (ancestor with regex characters)', async () => {
+  assert.deepEqual(parse(['bindings/c++/gen', '/bindings/c++/out'].join(EOL), 'bindings/c++/'), [
+    { negated: false, pattern: '**/gen' },
+    { negated: false, pattern: 'out' },
+  ]);
+  assert.deepEqual(parse(['apps/(web)/gen', '!apps/(web)/gen/keep.ts'].join(EOL), 'apps/(web)/'), [
+    { negated: false, pattern: '**/gen' },
+    { negated: true, pattern: '**/gen/keep.ts' },
   ]);
 });
 

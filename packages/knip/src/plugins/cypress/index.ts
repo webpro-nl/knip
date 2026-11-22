@@ -1,5 +1,5 @@
 import type { IsPluginEnabled, Plugin, ResolveConfig } from '../../types/config.ts';
-import { toDeferResolve, toEntry } from '../../util/input.ts';
+import { toModule, toEntryPath, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import { resolveDependencies } from './helpers.ts';
 import type { CypressConfig } from './types.ts';
@@ -30,10 +30,17 @@ const resolveConfig: ResolveConfig<CypressConfig> = async (localConfig, options)
   const supportFiles = [localConfig.e2e?.supportFile || [], localConfig.component?.supportFile || []].flat();
   const inputs = await resolveDependencies(localConfig, options);
   return [
-    ...inputs.map(id => toDeferResolve(id)),
+    ...inputs.map(id => toModule(id)),
     ...(specPatterns.length > 0 ? specPatterns : TEST_FILE_PATTERNS).map(id => toEntry(id)),
-    ...(supportFiles.length > 0 ? supportFiles : SUPPORT_FILE_PATTERNS).map(id => toEntry(id)),
+    ...(supportFiles.length > 0
+      ? supportFiles.map(id => toEntryPath(id, { dir: options.cwd }))
+      : SUPPORT_FILE_PATTERNS.map(id => toEntry(id))),
   ];
+};
+
+const args = {
+  config: ['config-file'],
+  alias: { 'config-file': ['C'] },
 };
 
 const plugin: Plugin = {
@@ -43,6 +50,7 @@ const plugin: Plugin = {
   config,
   entry,
   resolveConfig,
+  args,
 };
 
 export default plugin;

@@ -32,7 +32,7 @@ edges already recorded:
 - a **dependency** is unused when no file imports it (and _unlisted_ when a file
   imports it but `package.json` doesn't list it)
 
-Analysis happens by quering the graph. Your results are only as accurate as the
+Analysis happens by querying the graph. Your results are only as accurate as the
 graph is complete. And the graph depends on your entry files.
 
 ## Entry files decide what Knip can see
@@ -63,6 +63,11 @@ reverse: add the entry, and the whole cascade collapses at once.
 So read the output from the root down: **unused files first, then exports, then
 dependencies.** A single unused file usually explains a long list of results
 below it. Fix causes at the root and the rest disappears.
+
+Some chains only show up one run at a time. An export counts as used when
+another file imports it, even if the importing code is unused. Remove that code,
+and the next run may report the export. Unused exports that import each other
+across files are never reported.
 
 ## A surprising result might be a gap, not a bug
 

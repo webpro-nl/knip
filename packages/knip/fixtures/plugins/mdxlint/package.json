@@ -4,6 +4,7 @@
     "mdx": "mdxlint"
   },
   "devDependencies": {
+    "@mapbox/remark-lint-link-text": "*",
     "mdxlint": "*",
     "remark-directive": "*",
     "remark-gfm": "*"

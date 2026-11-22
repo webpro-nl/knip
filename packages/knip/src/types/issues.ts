@@ -33,6 +33,7 @@ export type IssueRecords = Record<string, Record<string, Issue>>;
 
 export type Issues = {
   files: IssueRecords;
+  subpaths: IssueRecords;
   dependencies: IssueRecords;
   devDependencies: IssueRecords;
   optionalPeerDependencies: IssueRecords;
@@ -80,7 +81,10 @@ export type ReporterOptions = {
   selectedWorkspaces: string[] | undefined;
   configFilePath: string | undefined;
   maxShowIssues?: number;
+  write?: (output: string) => void;
 };
+
+export type InternalReporterOptions = ReporterOptions & { write: (output: string) => void };
 
 export type Reporter = (options: ReporterOptions) => void;
 
@@ -112,11 +116,15 @@ export type ConfigurationHintType =
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
+export type UnusedIgnorePatternReason = 'no-issues' | 'gitignored' | 'no-matches';
+
 export type ConfigurationHint = {
   type: ConfigurationHintType;
   identifier: string | RegExp;
   filePath?: string;
   workspaceName?: string;
+  configKey?: string;
+  reason?: UnusedIgnorePatternReason;
   size?: number;
 };
 
