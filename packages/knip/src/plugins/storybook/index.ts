@@ -57,10 +57,10 @@ const resolveConfig: ResolveConfig<StorybookConfig> = async (localConfig, option
   const frameworkName = typeof framework === 'string' ? framework : framework?.name;
   const frameworks = frameworkName ? [frameworkName] : [];
 
-  const viteConfigPath =
-    typeof framework === 'object' &&
-    framework?.name === '@storybook/react-vite' &&
-    framework?.options?.builder?.viteConfigPath;
+  const builderOptions =
+    (typeof framework === 'object' && framework?.options?.builder) ||
+    (typeof localConfig?.core?.builder === 'object' && localConfig.core.builder.options);
+  const viteConfigPath = builderOptions && builderOptions.viteConfigPath;
 
   const configs: Input[] = viteConfigPath ? [toConfig('vite', viteConfigPath, { dir: cwd })] : [];
 

@@ -16,7 +16,7 @@ test('Find dependencies with the Storybook plugin (vitest addon + coverage)', as
   assert.deepEqual(counters, {
     ...baseCounters,
     binaries: 0,
-    processed: 2,
-    total: 2,
+    processed: 3,
+    total: 3,
   });
 });
