@@ -1,8 +1,0 @@
-{
-  "name": "@plugins/storybook7",
-  "devDependencies": {
-    "@storybook/builder-vite": "*",
-    "@storybook/vue3-vite": "*",
-    "@vitejs/plugin-vue": "*"
-  }
-}
