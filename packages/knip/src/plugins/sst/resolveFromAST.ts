@@ -1,6 +1,6 @@
 import { Visitor } from 'oxc-parser';
 import type { ResolveFromAST } from '../../types/config.ts';
-import { collectPropertyValues, getImportMap } from '../../typescript/ast-helpers.ts';
+import { collectPropertyValues, findProperty, getImportMap } from '../../typescript/ast-helpers.ts';
 import { _parseFile } from '../../typescript/ast-nodes.ts';
 import { toEntryPath } from '../../util/input.ts';
 import { dirname } from '../../util/path.ts';
@@ -45,6 +45,17 @@ export const resolveFromAST: ResolveFromAST = (program, options) => {
         if (propName === 'route' && node.arguments?.length >= 2) {
           const handlerArg = node.arguments[1];
           if (handlerArg?.type === 'Literal' && typeof handlerArg.value === 'string') addHandler(handlerArg.value);
+        }
+        if (propName === 'subscribe') {
+          const [first, second] = node.arguments;
+          const subscriber =
+            second?.type === 'Literal'
+              ? second
+              : !second || (second.type === 'ObjectExpression' && !findProperty(second, 'handler'))
+                ? first
+                : undefined;
+          if (subscriber?.type === 'Literal' && typeof subscriber.value === 'string' && subscriber.value.includes('.'))
+            addHandler(subscriber.value);
         }
       },
     });
