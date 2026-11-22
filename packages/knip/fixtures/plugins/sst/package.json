@@ -1,5 +1,8 @@
 {
   "name": "@plugins/sst",
+  "scripts": {
+    "dev:infra": "sst --config infra/sst.config.ts dev"
+  },
   "dependencies": {
     "sst": "*"
   }

@@ -21,6 +21,7 @@ const wrappers = new Set(['bind', 'dev', 'env', 'shell']);
 
 const args: Args = {
   boolean: ['print-logs', 'script'],
+  config: ['config'],
   fromArgs: (parsed, args) => {
     if (!wrappers.has(parsed._[0])) return [];
     const command = argsFromPositional(parsed, args, 1);
