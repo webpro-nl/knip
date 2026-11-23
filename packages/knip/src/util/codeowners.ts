@@ -14,9 +14,12 @@ export function parseCodeowners(content: string) {
       // An inline comment (`*.js @owner # comment`) ends the list of owners
       const comment = tokens.findIndex(token => token.startsWith('#'));
       const owners = comment === -1 ? tokens : tokens.slice(0, comment);
-      const { pattern } = convertGitignoreToPicomatchIgnorePatterns(path);
+      // CODEOWNERS sits at the root, so a slash at the start or in the middle anchors a pattern there
+      const { pattern } = convertGitignoreToPicomatchIgnorePatterns(path, true);
+      // A bare `*` owns files at any depth, as in gitignore
+      const glob = path === '*' ? '**' : pattern;
       // CODEOWNERS `dir/*` is shallow: it owns direct files only, not nested subdirectories
-      return { owners, match: picomatch(expandIgnorePatterns([pattern], true)) };
+      return { owners, match: picomatch(expandIgnorePatterns([glob], true), { dot: true }) };
     });
 
   return (filePath: string) => {
