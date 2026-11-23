@@ -1,4 +1,4 @@
-import { type Input, toEntryPath, toModule } from '../../util/input.ts';
+import { type Input, toDependency, toEntryPath, toModule } from '../../util/input.ts';
 import { isObject } from '../../util/validation.ts';
 
 type EntriesByOption = Map<string, string[]>;
@@ -14,6 +14,12 @@ const BUILD_TARGET_NAME = 'build';
 const isPath = (value: unknown): value is string => typeof value === 'string' && value.length > 0;
 
 const getBundleInput = (value: unknown) => (isObject(value) ? value.input : value);
+
+const getAssetInput = (value: unknown) => {
+  if (!isObject(value) || typeof value.input !== 'string') return;
+  const input = value.input.replaceAll('\\', '/');
+  if (input.includes('node_modules/')) return input;
+};
 
 const getReplacementPath = (value: unknown) => (isObject(value) ? (value.with ?? value.replaceWith) : undefined);
 
@@ -31,6 +37,7 @@ const entriesByOption = (opts: Record<string, unknown>): EntriesByOption =>
     ['main', toPaths(opts.main)],
     ['scripts', toPaths(opts.scripts, getBundleInput)],
     ['styles', toPaths(opts.styles, getBundleInput)],
+    ['assets', toPaths(opts.assets, getAssetInput)],
     ['polyfills', toPaths(opts.polyfills)],
     ['fileReplacements', toPaths(opts.fileReplacements, getReplacementPath)],
     ['browser', toPaths(opts.browser)],
@@ -57,7 +64,9 @@ export const getBuilderEntries = (
   const toInput = (option: string, entry: string, isProduction: boolean): Input => {
     const specifier = toSpecifier(entry);
     const opts = { dir, production: isProduction };
-    return option === 'polyfills' ? toModule(specifier, opts) : toEntryPath(specifier, opts);
+    if (option === 'polyfills') return toModule(specifier, opts);
+    if (option === 'assets') return toDependency(specifier, opts);
+    return toEntryPath(specifier, opts);
   };
   const inputs: Input[] = [];
   for (const [configName, entriesByOption] of entriesByOptionByConfig) {

@@ -10,10 +10,13 @@
   "dependencies": {
     "@angular/core": "*",
     "@angular/localize": "*",
+    "@fruits/icons": "*",
+    "vegetables": "*",
     "zone.js": "*"
   },
   "devDependencies": {
     "@angular/cli": "*",
+    "@fruits/mocks": "*",
     "karma": "*",
     "karma-chrome-launcher": "*",
     "karma-coverage": "*",

@@ -23,7 +23,13 @@
             "polyfills": "src/polyfill.js",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              { "glob": "**/*", "input": "src/fonts", "output": "fonts" },
+              { "glob": "**/*.svg", "input": "node_modules/@fruits/icons/svg", "output": "icons" },
+              { "glob": "**/*.json", "input": "./node_modules/vegetables/dist", "output": "data" }
+            ],
             "styles": ["src/styles.scss"],
             "scripts": ["src/script.js", "src/[variant]/bootstrap.js"]
           },
@@ -78,7 +84,11 @@
             "polyfills": ["zone.js", "zone.js/testing", "@angular/localize/init"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              { "glob": "**/*", "input": "node_modules\\@fruits\\mocks\\dist", "output": "mocks" }
+            ],
             "styles": ["src/styles.scss"],
             "scripts": []
           }
