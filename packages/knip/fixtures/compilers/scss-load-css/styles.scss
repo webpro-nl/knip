@@ -1,0 +1,41 @@
+@use 'sass:meta';
+@use 'alias-loader';
+@use 'star-loader';
+
+$theme: 'dark';
+$theme-path: 'themes/dark';
+
+@mixin not-load-css($url) {
+  content: $url;
+}
+
+@layer base {
+  @include meta.load-css('layered');
+}
+
+@include meta.load-css('./relative');
+@include meta.load-css(
+  "double-quoted",
+  $with: ('color': red)
+);
+@include meta.load-css('pkg:bulma/sass/utilities');
+
+@include meta.load-css($theme-path);
+@include meta.load-css('themes/#{$theme}');
+@include meta.load-css('themes/' + $theme);
+
+.lookalike {
+  @include not-load-css('lookalike');
+}
+
+// @include meta.load-css('line-commented');
+
+/* @include meta.load-css('block-commented'); */
+
+.in-double-quotes::after {
+  content: "@include meta.load-css('in-double-quotes')";
+}
+
+.in-single-quotes::after {
+  content: '@include meta.load-css("in-single-quotes")';
+}

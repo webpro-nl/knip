@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/compilers-scss-load-css",
+  "dependencies": {
+    "bulma": "*"
+  },
+  "devDependencies": {
+    "sass": "*"
+  }
+}

@@ -6,8 +6,26 @@ import { hasUrlScheme } from '../util/url.ts';
 
 const dependencies = ['sass', 'sass-embedded', 'node-sass'];
 
-const dependencyMatcher =
-  /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)|'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)|\/\*[\s\S]*?(?:\*\/|$)|\/\/[^\r\n]*(?:[\r\n]|$)|@(?:use|import|forward)\s+['"](pkg:)?([^'"]+)['"]|url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/g;
+const doubleQuotedString = /"(?:\\(?:\r\n|[\s\S]|$)|[^"\\\r\n\f])*(?:"|[\r\n\f]|$)/;
+const singleQuotedString = /'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|$)/;
+const blockComment = /\/\*[\s\S]*?(?:\*\/|$)/;
+const lineComment = /\/\/[^\r\n]*(?:[\r\n]|$)/;
+const moduleRule = /@(?:use|import|forward)\s+/;
+const loadCssCall = /(?<=@include\s+(?:[\w-]+\.)?)load-css\(\s*/;
+const moduleUrl = /['"](pkg:)?([^'"]+)['"](?!\s*\+)/;
+const urlFunction = /url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/;
+
+const dependencyMatcher = new RegExp(
+  [
+    doubleQuotedString.source,
+    singleQuotedString.source,
+    blockComment.source,
+    lineComment.source,
+    `(?:${moduleRule.source}|${loadCssCall.source})${moduleUrl.source}`,
+    urlFunction.source,
+  ].join('|'),
+  'g'
+);
 
 const candidates = (specifier: string): string[] => {
   const { dir, name } = splitSpec(specifier);
@@ -36,7 +54,7 @@ export const compiler: CompilerSync = text => {
       continue;
     }
     let spec = match[2];
-    if (!spec || spec.startsWith('//') || hasUrlScheme(spec)) continue;
+    if (!spec || spec.startsWith('//') || hasUrlScheme(spec) || spec.includes('#{')) continue;
     let isBare = Boolean(match[1]) || isScopedPackage(spec);
     if (isTildePackage(spec)) {
       spec = spec.slice(1);
