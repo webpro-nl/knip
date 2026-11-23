@@ -228,48 +228,30 @@ export class WorkspaceWorker {
     return patterns;
   }
 
-  getPluginEntryFilePatterns(patterns: string[], base?: string) {
-    const negateWorkspaces = patterns.some(pattern => pattern.startsWith('**/')) ? this.negatedWorkspacePatterns : [];
-    // Patterns resolved from a base of their own start inside it, where a negated directory alone never prunes the crawl
+  getPluginEntryFilePatterns(patterns: string[], base?: string): string[][] {
     const prefix = `${this.name}/`;
     const toWorkspaceRelative = (name: string) => (name.startsWith(prefix) ? name.slice(prefix.length) : name);
-    const ignoredWorkspaces = base
-      ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
-      : this.ignoredWorkspacePatterns;
-    return [patterns, negateWorkspaces, ignoredWorkspaces.map(negate)].flat();
+    const ignoredWorkspaces =
+      base || patterns.some(pattern => pattern.startsWith('**/'))
+        ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
+        : this.ignoredWorkspacePatterns;
+    const ignoredPatterns = ignoredWorkspaces.map(negate);
+    if (this.negatedWorkspacePatterns.length === 0) return [[...patterns, ...ignoredPatterns]];
+
+    const batches: string[][] = [];
+    const [negations, positives] = partition(patterns, pattern => pattern.startsWith('!'));
+    const [recursive, scoped] = partition(positives, pattern => pattern.startsWith('**/'));
+    const negatedPatterns = expandIgnorePatterns(negations.map(pattern => pattern.slice(1))).map(negate);
+    if (recursive.length > 0) {
+      batches.push([...recursive, ...negatedPatterns, ...this.negatedWorkspacePatterns, ...ignoredPatterns]);
+    }
+    if (scoped.length > 0) batches.push([...scoped, ...negatedPatterns, ...ignoredPatterns]);
+    return batches;
   }
 
   private getNegatedDevelopmentEntryFiles() {
     const { entry } = this.config;
     return entry.filter(pattern => hasNoProductionSuffix(pattern) && !entry.includes(`${pattern}!`)).map(negate);
-  }
-
-  getPluginEntryGlobBatches(patterns: string[], base?: string): Array<{ patterns: string[]; label: string }> {
-    const batches: Array<{ patterns: string[]; label: string }> = [];
-    const [negations, positives] = partition(patterns, pattern => pattern.startsWith('!'));
-    const [recursive, scoped] = partition(positives, pattern => pattern.startsWith('**/'));
-
-    const prefix = `${this.name}/`;
-    const toWorkspaceRelative = (name: string) => (name.startsWith(prefix) ? name.slice(prefix.length) : name);
-    const ignoredWorkspaces = base
-      ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
-      : this.ignoredWorkspacePatterns;
-
-    if (recursive.length > 0) {
-      batches.push({
-        patterns: [recursive, negations, this.negatedWorkspacePatterns, ignoredWorkspaces.map(negate)].flat(),
-        label: 'recursive',
-      });
-    }
-
-    if (scoped.length > 0) {
-      batches.push({
-        patterns: [scoped, negations, ignoredWorkspaces.map(negate)].flat(),
-        label: 'scoped',
-      });
-    }
-
-    return batches;
   }
 
   getProductionEntryFilePatterns() {

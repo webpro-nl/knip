@@ -15,13 +15,20 @@ const app = join(cwd, 'packages/app');
 const run = async (
   t: TestContext,
   inputs: Input[],
-  { isProduction = false, isIncludeEntryExports = false, workspace = '.' } = {}
+  {
+    isProduction = false,
+    isIncludeEntryExports = false,
+    workspace = '.',
+    ignoreWorkspaces = ['packages/ignored', 'packages/app/nested/ignored'],
+  } = {}
 ) => {
   const runPlugins = t.mock.method(WorkspaceWorker.prototype, 'runPlugins', async function (this: WorkspaceWorker) {
     return this.name === workspace ? inputs : [];
   });
   try {
-    return await main(await createOptions({ cwd, isProduction, isIncludeEntryExports }));
+    const options = await createOptions({ cwd, isProduction, isIncludeEntryExports });
+    options.parsedConfig.ignoreWorkspaces = ignoreWorkspaces;
+    return await main(options);
   } finally {
     runPlugins.mock.restore();
   }
@@ -227,3 +234,50 @@ for (const [spelling, inputs] of Object.entries(nestedIgnoredSpellings)) {
     assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 4, total: 4 });
   });
 }
+
+for (const isProduction of [false, true]) {
+  for (const skipExportsAnalysis of [false, true]) {
+    test(`Preserve mixed plugin entries and explicit negations (production: ${isProduction}, skip exports: ${skipExportsAnalysis})`, async t => {
+      const patterns = ['**/*.ts', 'packages/app/keep.ts', '!**/skip.ts'];
+      const inputs = patterns.map(pattern => ({
+        ...(isProduction ? toProductionEntry(pattern) : toEntry(pattern)),
+        group: 'jest',
+        skipExportsAnalysis,
+      }));
+      const { issues, counters } = await run(t, inputs, { isProduction });
+
+      assert.deepEqual(Object.keys(issues.files).sort(), ['packages/app/skip.ts', 'skip.ts']);
+      assert.deepEqual(counters, { ...baseCounters, files: 2, processed: 4, total: 4 });
+    });
+  }
+}
+
+test('Keep a scoped entry out of an explicitly negated directory in a mixed group', async t => {
+  const inputs = ['**/*.ts', 'packages/app/keep.ts', '!packages/app'].map(pattern => ({
+    ...toEntry(pattern),
+    group: 'jest',
+  }));
+  const { issues, counters } = await run(t, inputs);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['packages/app/keep.ts', 'packages/app/skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 2, processed: 4, total: 4 });
+});
+
+test('Keep scoped entries into ignored workspaces out of a mixed group', async t => {
+  const inputs = ['**/*.ts', 'packages/ignored/keep.ts'].map(pattern => ({ ...toEntry(pattern), group: 'jest' }));
+  const { issues, counters } = await run(t, inputs);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['packages/app/keep.ts', 'packages/app/skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 2, processed: 4, total: 4 });
+});
+
+test('Allow scoped entries into a workspace re-enabled after a broad ignore', async t => {
+  const inputs = ['**/test/*.ts', 'packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
+    ...toEntry(pattern),
+    group: 'jest',
+  }));
+  const { issues, counters } = await run(t, inputs, { ignoreWorkspaces: ['packages/*', '!packages/app'] });
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+});

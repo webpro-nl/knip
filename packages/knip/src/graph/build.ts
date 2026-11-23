@@ -406,10 +406,10 @@ export const build = timerify(async function build({
           ...((!options.isProduction && entryPatterns.get(group)) || []),
           ...(productionPatterns.get(group) ?? []),
         ];
-        const batches = worker.getPluginEntryGlobBatches(raw, base);
-        for (const batch of batches) {
+        const batches = worker.getPluginEntryFilePatterns(raw, base);
+        for (const patterns of batches) {
           const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
-          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: batch.patterns, label });
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
           principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
         }
       }
@@ -419,10 +419,10 @@ export const build = timerify(async function build({
           ...((!options.isProduction && entryPatternsSkipExports.get(group)) || []),
           ...(productionPatternsSkipExports.get(group) ?? []),
         ];
-        const batches = worker.getPluginEntryGlobBatches(raw, base);
-        for (const batch of batches) {
+        const batches = worker.getPluginEntryFilePatterns(raw, base);
+        for (const patterns of batches) {
           const label = `entry paths from plugins (ignore exports)${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
-          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns: batch.patterns, label });
+          const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
           principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
         }
       }
