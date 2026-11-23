@@ -240,7 +240,7 @@ for (const isProduction of [false, true]) {
     test(`Preserve mixed plugin entries and explicit negations (production: ${isProduction}, skip exports: ${skipExportsAnalysis})`, async t => {
       const patterns = ['**/*.ts', 'packages/app/keep.ts', '!**/skip.ts'];
       const inputs = patterns.map(pattern => ({
-        ...(isProduction ? toProductionEntry(pattern) : toEntry(pattern)),
+        ...toEntry(pattern, { production: isProduction }),
         group: 'jest',
         skipExportsAnalysis,
       }));
@@ -291,7 +291,7 @@ for (const isProduction of [false, true]) {
   for (const skipExportsAnalysis of [false, true]) {
     test(`Keep re-enabled workspace entries without admitting ignored siblings (production: ${isProduction}, skip exports: ${skipExportsAnalysis})`, async t => {
       const inputs = ['**/*.ts', 'packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
-        ...(isProduction ? toProductionEntry(pattern) : toEntry(pattern)),
+        ...toEntry(pattern, { production: isProduction }),
         group: 'jest',
         skipExportsAnalysis,
       }));
@@ -344,7 +344,7 @@ test('Keep ignored siblings excluded when only scoped entries target a re-enable
 for (const isProduction of [false, true]) {
   test(`Honor production-only workspace overrides in plugin entries (production: ${isProduction})`, async t => {
     const inputs = ['**/test/*.ts', 'packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
-      ...toProductionEntry(pattern),
+      ...toEntry(pattern, { production: true }),
       group: 'jest',
     }));
     const { issues, counters } = await run(t, inputs, {
