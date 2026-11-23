@@ -109,17 +109,24 @@ export const build = timerify(async function build({
   const { rootManifest, getManifest } = scriptParserContext;
   const hasWorkspaceOverrides = chief.ignoredWorkspacePatterns.some(pattern => pattern.startsWith('!'));
   const availableWorkspaceNames = new Set(chief.availableWorkspaceNames);
-  const allWorkspaceNames = [...chief.workspacePackages.keys()];
-  const isPluginEntryPath = hasWorkspaceOverrides
-    ? createWorkspaceFilePathFilter(options.cwd, availableWorkspaceNames, allWorkspaceNames)
-    : undefined;
+  const allWorkspaceNames = new Set(chief.workspacePackages.keys());
   const ignoredPluginWorkspacePatterns = new Set<string>();
   if (hasWorkspaceOverrides) {
     for (const pattern of chief.ignoredWorkspacePatterns) {
       if (pattern.startsWith('!')) continue;
       const matchesWorkspace = picomatch(expandIgnorePatterns([pattern]), { dot: true });
-      if (!chief.availableWorkspaceNames.some(name => matchesWorkspace(name)))
+      if (!chief.availableWorkspaceNames.some(name => matchesWorkspace(name))) {
         ignoredPluginWorkspacePatterns.add(pattern);
+      } else {
+        const matchesName = picomatch(pattern);
+        for (const name of availableWorkspaceNames) {
+          let ancestor = name;
+          while (ancestor.includes('/')) {
+            ancestor = ancestor.slice(0, ancestor.lastIndexOf('/'));
+            if (matchesName(ancestor)) allWorkspaceNames.add(ancestor);
+          }
+        }
+      }
     }
     for (const name of allWorkspaceNames) {
       if (availableWorkspaceNames.has(name)) continue;
@@ -128,6 +135,9 @@ export const build = timerify(async function build({
       }
     }
   }
+  const isPluginEntryPath = hasWorkspaceOverrides
+    ? createWorkspaceFilePathFilter(options.cwd, availableWorkspaceNames, [...allWorkspaceNames])
+    : undefined;
   const filterPluginEntryPaths = (paths: string[]) => (isPluginEntryPath ? paths.filter(isPluginEntryPath) : paths);
 
   for (const workspace of workspaces) {

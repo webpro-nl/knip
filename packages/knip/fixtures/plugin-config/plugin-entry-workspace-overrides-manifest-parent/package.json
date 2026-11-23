@@ -1,0 +1,8 @@
+{
+  "name": "@workspace-overrides/manifest-parent",
+  "workspaces": [
+    "packages/*",
+    "packages/parent/nested/*",
+    "!packages/parent"
+  ]
+}
