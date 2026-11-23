@@ -83,12 +83,12 @@ To get started:
 Feel free to open a draft PR early to get feedback, and look at similar plugins
 for inspiration.
 
-[1]: ./CODE_OF_CONDUCT.md
+[1]: /.github/CODE_OF_CONDUCT.md
 [2]: https://knip.dev
 [3]: #open-an-issue
 [4]: #open-a-pull-request
 [5]: https://github.com/webpro-nl/knip/releases
-[6]: ../AI_POLICY.md
+[6]: /AI_POLICY.md
 [7]: /.github/DEVELOPMENT.md
 [8]: https://docs.github.com/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request
 [9]: https://knip.dev/#created-by-awesome-contributors
