@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import type { Jiti, JitiOptions } from 'jiti';
-import { join } from './path.ts';
+import { dirname, join, resolveCwd } from './path.ts';
 
 const empty = join(fileURLToPath(import.meta.url), '../empty.js');
 
@@ -16,12 +16,15 @@ const options: JitiOptions = {
   extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx', '.jsx'],
 };
 
-const cwd = process.cwd();
 const require = createRequire(import.meta.url);
-let jiti: Jiti | undefined;
+const cache = new Map<string, Jiti>();
 
-export const getJiti = () => {
+export const getJiti = (filePath: string) => {
+  const dir = dirname(resolveCwd(filePath));
+  let jiti = cache.get(dir);
   if (jiti) return jiti;
   const { createJiti }: typeof import('jiti') = require('jiti');
-  return (jiti = createJiti(cwd, options));
+  jiti = createJiti(join(dir, '_index.js'), options);
+  cache.set(dir, jiti);
+  return jiti;
 };

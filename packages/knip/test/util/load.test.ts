@@ -4,6 +4,8 @@ import { _load as load } from '../../src/util/loader.ts';
 import { join } from '../../src/util/path.ts';
 import { resolve } from '../helpers/resolve.ts';
 
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+
 test('Should load modules (CommonJS)', async () => {
   const cwd = resolve('fixtures/load-cjs');
   await assert.doesNotReject(load(join(cwd, 'index.js')));
@@ -17,6 +19,12 @@ test('Should load modules (ESM)', async () => {
 test('Should load modules (ESM/TS)', async () => {
   const cwd = resolve('fixtures/load-esm-ts');
   await assert.doesNotReject(load(join(cwd, 'index.ts')));
+});
+
+skipIfBun('Should resolve tsconfig paths relative to loaded TS file directory', async () => {
+  const cwd = resolve('fixtures/config-ts-nested-tsconfig/inner');
+  const config = await load(join(cwd, 'knip.config.ts'));
+  assert.deepEqual(config, { entry: ['index.ts', 'entry.ts'] });
 });
 
 test('Should load JSON5 files', async () => {

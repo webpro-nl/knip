@@ -11,7 +11,7 @@ const versions = new Map<string, number>();
 const isReloadable = (ext: string) => ext === '.js' || ext === '.mjs' || ext === '.cjs';
 
 const reload = async (filePath: string, version: number) => {
-  const jiti = getJiti();
+  const jiti = getJiti(filePath);
   let imported;
   try {
     imported = jiti(filePath);
@@ -62,7 +62,7 @@ const load = async (filePath: string) => {
     versions.set(filePath, version);
     if (version && isReloadable(ext)) return await reload(filePath, version);
 
-    return await getJiti().import(filePath, { default: true });
+    return await getJiti(filePath).import(filePath, { default: true });
   } catch (error) {
     throw new LoaderError(`Error loading ${filePath}`, { cause: error });
   }
