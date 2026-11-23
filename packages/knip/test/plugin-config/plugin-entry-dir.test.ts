@@ -286,3 +286,100 @@ test('Allow scoped entries into a workspace re-enabled after a broad ignore', as
   ]);
   assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 5, total: 5 });
 });
+
+for (const isProduction of [false, true]) {
+  for (const skipExportsAnalysis of [false, true]) {
+    test(`Keep re-enabled workspace entries without admitting ignored siblings (production: ${isProduction}, skip exports: ${skipExportsAnalysis})`, async t => {
+      const inputs = ['**/*.ts', 'packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
+        ...(isProduction ? toProductionEntry(pattern) : toEntry(pattern)),
+        group: 'jest',
+        skipExportsAnalysis,
+      }));
+      const { issues, counters } = await run(t, inputs, {
+        isProduction,
+        ignoreWorkspaces: ['packages/*', '!packages/app'],
+      });
+
+      assert.deepEqual(Object.keys(issues.files).sort(), [
+        'packages/app/nested/ignored/keep.ts',
+        'packages/app/skip.ts',
+      ]);
+      assert.deepEqual(counters, { ...baseCounters, files: 2, processed: 5, total: 5 });
+    });
+  }
+}
+
+test('Allow a scoped entry into a re-enabled nested workspace from its parent worker', async t => {
+  const inputs = ['**/test/*.ts', 'nested/ignored/keep.ts'].map(pattern => ({ ...toEntry(pattern), group: 'jest' }));
+  const { issues, counters } = await run(t, inputs, {
+    workspace: 'packages/app',
+    ignoreWorkspaces: ['packages/ignored', 'packages/app/nested/*', '!packages/app/nested/ignored'],
+  });
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'keep.ts',
+    'packages/app/keep.ts',
+    'packages/app/skip.ts',
+    'skip.ts',
+  ]);
+  assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 5, total: 5 });
+});
+
+test('Keep ignored siblings excluded when only scoped entries target a re-enabled workspace', async t => {
+  const inputs = ['packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
+    ...toEntry(pattern),
+    group: 'jest',
+  }));
+  const { issues, counters } = await run(t, inputs, { ignoreWorkspaces: ['packages/*', '!packages/app'] });
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'keep.ts',
+    'packages/app/nested/ignored/keep.ts',
+    'packages/app/skip.ts',
+    'skip.ts',
+  ]);
+  assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 5, total: 5 });
+});
+
+for (const isProduction of [false, true]) {
+  test(`Honor production-only workspace overrides in plugin entries (production: ${isProduction})`, async t => {
+    const inputs = ['**/test/*.ts', 'packages/app/keep.ts', 'packages/ignored/keep.ts'].map(pattern => ({
+      ...toProductionEntry(pattern),
+      group: 'jest',
+    }));
+    const { issues, counters } = await run(t, inputs, {
+      isProduction,
+      ignoreWorkspaces: ['packages/*!', '!packages/app!'],
+    });
+
+    assert.deepEqual(Object.keys(issues.files).sort(), [
+      'keep.ts',
+      'packages/app/nested/ignored/keep.ts',
+      'packages/app/skip.ts',
+      'skip.ts',
+    ]);
+    assert.deepEqual(counters, {
+      ...baseCounters,
+      files: 4,
+      processed: isProduction ? 5 : 6,
+      total: isProduction ? 5 : 6,
+    });
+  });
+}
+
+test('Honor workspace overrides for plugin entries resolved from explicit bases', async t => {
+  const inputs = [
+    { ...toEntry('keep.ts'), dir: app, group: 'jest' },
+    { ...toEntry('keep.ts'), dir: ignored, group: 'jest' },
+    { ...toEntry('**/test/*.ts'), group: 'jest' },
+  ];
+  const { issues, counters } = await run(t, inputs, { ignoreWorkspaces: ['packages/*', '!packages/app'] });
+
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'keep.ts',
+    'packages/app/nested/ignored/keep.ts',
+    'packages/app/skip.ts',
+    'skip.ts',
+  ]);
+  assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 5, total: 5 });
+});

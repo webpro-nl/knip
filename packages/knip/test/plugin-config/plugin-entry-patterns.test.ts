@@ -9,7 +9,8 @@ const cwd = resolve('fixtures/plugin-config/plugin-entry-dir');
 const createWorker = async (
   negatedWorkspacePatterns: string[] = [],
   ignoredWorkspacePatterns: string[] = [],
-  name = '.'
+  name = '.',
+  pluginEntryNegatedWorkspacePatterns?: string[]
 ) =>
   new WorkspaceWorker({
     name,
@@ -33,6 +34,7 @@ const createWorker = async (
     getManifest: () => undefined,
     readRawFile: () => '',
     negatedWorkspacePatterns,
+    pluginEntryNegatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors: [],
     configFilesMap: new Map(),
@@ -107,4 +109,13 @@ test('Preserve repeated explicit negations when splitting overlapping entries', 
     ['**/*.ts', '!tools/skip.ts', '!tools/skip.ts/**', '!tools/skip.ts', '!tools/skip.ts/**', '!packages/app/**'],
     ['tools/*.ts', '!tools/skip.ts', '!tools/skip.ts/**', '!tools/skip.ts', '!tools/skip.ts/**'],
   ]);
+});
+
+test('Keep plugin entries in one batch when only general workspace ignores need negation', async () => {
+  const negations = ['!packages/**', '!!packages/app/**'];
+  const worker = await createWorker(negations, [], '.', []);
+  const patterns = ['**/*.test.ts', 'packages/app/check.ts'];
+
+  assert.deepEqual(worker.getPluginEntryFilePatterns(patterns), [patterns]);
+  assert.deepEqual(worker.negatedWorkspacePatterns, negations);
 });

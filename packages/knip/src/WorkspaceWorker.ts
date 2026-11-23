@@ -55,6 +55,7 @@ type WorkspaceManagerOptions = {
   getManifest: (dir: string) => Manifest | undefined;
   readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[];
+  pluginEntryNegatedWorkspacePatterns?: string[];
   ignoredWorkspacePatterns: string[];
   enabledPluginsInAncestors: string[];
   configFilesMap: Map<string, Map<PluginName, Set<string>>>;
@@ -86,6 +87,7 @@ export class WorkspaceWorker {
   getManifest: (dir: string) => Manifest | undefined;
   readRawFile: (filePath: string) => string;
   negatedWorkspacePatterns: string[] = [];
+  pluginEntryNegatedWorkspacePatterns: string[];
   ignoredWorkspacePatterns: string[] = [];
 
   options: MainOptions;
@@ -109,6 +111,7 @@ export class WorkspaceWorker {
     allDependencies,
     rootManifest,
     negatedWorkspacePatterns,
+    pluginEntryNegatedWorkspacePatterns = negatedWorkspacePatterns,
     ignoredWorkspacePatterns,
     enabledPluginsInAncestors,
     handleInput,
@@ -129,6 +132,7 @@ export class WorkspaceWorker {
     this.dependencies = dependencies;
     this.allDependencies = allDependencies;
     this.negatedWorkspacePatterns = negatedWorkspacePatterns;
+    this.pluginEntryNegatedWorkspacePatterns = pluginEntryNegatedWorkspacePatterns;
     this.ignoredWorkspacePatterns = ignoredWorkspacePatterns;
     this.enabledPluginsInAncestors = enabledPluginsInAncestors;
     this.configFilesMap = configFilesMap;
@@ -236,14 +240,14 @@ export class WorkspaceWorker {
         ? expandIgnorePatterns(this.ignoredWorkspacePatterns.map(toWorkspaceRelative))
         : this.ignoredWorkspacePatterns;
     const ignoredPatterns = ignoredWorkspaces.map(negate);
-    if (this.negatedWorkspacePatterns.length === 0) return [[...patterns, ...ignoredPatterns]];
+    if (this.pluginEntryNegatedWorkspacePatterns.length === 0) return [[...patterns, ...ignoredPatterns]];
 
     const batches: string[][] = [];
     const [negations, positives] = partition(patterns, pattern => pattern.startsWith('!'));
     const [recursive, scoped] = partition(positives, pattern => pattern.startsWith('**/'));
     const negatedPatterns = expandIgnorePatterns(negations.map(pattern => pattern.slice(1))).map(negate);
     if (recursive.length > 0) {
-      batches.push([...recursive, ...negatedPatterns, ...this.negatedWorkspacePatterns, ...ignoredPatterns]);
+      batches.push([...recursive, ...negatedPatterns, ...this.pluginEntryNegatedWorkspacePatterns, ...ignoredPatterns]);
     }
     if (scoped.length > 0) batches.push([...scoped, ...negatedPatterns, ...ignoredPatterns]);
     return batches;

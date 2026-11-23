@@ -387,10 +387,10 @@ export class ConfigurationChief {
     };
   }
 
-  public getNegatedWorkspacePatterns(name: string) {
+  public getNegatedWorkspacePatterns(name: string, includeIgnored = true) {
     const descendentWorkspaces = this.getDescendentWorkspaces(name);
     const prefix = `${name}/`;
-    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
+    const ignoredWorkspaces = includeIgnored ? this.getIgnoredWorkspacesFor(name) : [];
     const endMatch = /\/\*{1,2}$|\/$|$/;
     return [...ignoredWorkspaces, ...descendentWorkspaces]
       .map(workspaceName => (workspaceName.startsWith(prefix) ? workspaceName.slice(prefix.length) : workspaceName))

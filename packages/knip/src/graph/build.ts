@@ -106,6 +106,16 @@ export const build = timerify(async function build({
     : undefined;
 
   const { rootManifest, getManifest } = scriptParserContext;
+  const [workspaceUnignores, workspaceIgnores] = partition(chief.ignoredWorkspacePatterns, pattern =>
+    pattern.startsWith('!')
+  );
+  const isIgnoredPluginEntry = workspaceUnignores.length
+    ? picomatch(expandIgnorePatterns(workspaceIgnores), {
+        ignore: expandIgnorePatterns(workspaceUnignores.map(pattern => pattern.slice(1))),
+      })
+    : undefined;
+  const filterPluginEntryPaths = (paths: string[]) =>
+    isIgnoredPluginEntry ? paths.filter(path => !isIgnoredPluginEntry(relative(options.cwd, path))) : paths;
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -187,7 +197,10 @@ export const build = timerify(async function build({
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
-      ignoredWorkspacePatterns: chief.getIgnoredWorkspacesFor(name),
+      pluginEntryNegatedWorkspacePatterns: isIgnoredPluginEntry
+        ? chief.getNegatedWorkspacePatterns(name, false)
+        : undefined,
+      ignoredWorkspacePatterns: isIgnoredPluginEntry ? [] : chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
       readRawFile: (filePath: string) => principal.fileManager.readRawFile(filePath) ?? '',
       configFilesMap,
@@ -410,7 +423,7 @@ export const build = timerify(async function build({
         for (const patterns of batches) {
           const label = `entry paths from plugins${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
           const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-          principal.addEntryPaths(productionPaths(pluginWorkspaceEntryPaths));
+          principal.addEntryPaths(productionPaths(filterPluginEntryPaths(pluginWorkspaceEntryPaths)));
         }
       }
 
@@ -423,7 +436,7 @@ export const build = timerify(async function build({
         for (const patterns of batches) {
           const label = `entry paths from plugins (ignore exports)${group !== DEFAULT_GROUP ? ` - ${group}` : ''}`;
           const pluginWorkspaceEntryPaths = await _glob({ ...sharedGlobOptions, patterns, label });
-          principal.addEntryPaths(pluginWorkspaceEntryPaths, { skipExportsAnalysis: true });
+          principal.addEntryPaths(filterPluginEntryPaths(pluginWorkspaceEntryPaths), { skipExportsAnalysis: true });
         }
       }
     }
