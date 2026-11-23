@@ -51,6 +51,7 @@ import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpe
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { expandIgnorePatterns } from '../util/parse-and-convert-gitignores.ts';
+import { createWorkspaceFilePathFilter } from '../util/workspace-file-filter.ts';
 import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
@@ -106,16 +107,28 @@ export const build = timerify(async function build({
     : undefined;
 
   const { rootManifest, getManifest } = scriptParserContext;
-  const [workspaceUnignores, workspaceIgnores] = partition(chief.ignoredWorkspacePatterns, pattern =>
-    pattern.startsWith('!')
-  );
-  const isIgnoredPluginEntry = workspaceUnignores.length
-    ? picomatch(expandIgnorePatterns(workspaceIgnores), {
-        ignore: expandIgnorePatterns(workspaceUnignores.map(pattern => pattern.slice(1))),
-      })
+  const hasWorkspaceOverrides = chief.ignoredWorkspacePatterns.some(pattern => pattern.startsWith('!'));
+  const availableWorkspaceNames = new Set(chief.availableWorkspaceNames);
+  const allWorkspaceNames = [...chief.workspacePackages.keys()];
+  const isPluginEntryPath = hasWorkspaceOverrides
+    ? createWorkspaceFilePathFilter(options.cwd, availableWorkspaceNames, allWorkspaceNames)
     : undefined;
-  const filterPluginEntryPaths = (paths: string[]) =>
-    isIgnoredPluginEntry ? paths.filter(path => !isIgnoredPluginEntry(relative(options.cwd, path))) : paths;
+  const ignoredPluginWorkspacePatterns = new Set<string>();
+  if (hasWorkspaceOverrides) {
+    for (const pattern of chief.ignoredWorkspacePatterns) {
+      if (pattern.startsWith('!')) continue;
+      const matchesWorkspace = picomatch(expandIgnorePatterns([pattern]), { dot: true });
+      if (!chief.availableWorkspaceNames.some(name => matchesWorkspace(name)))
+        ignoredPluginWorkspacePatterns.add(pattern);
+    }
+    for (const name of allWorkspaceNames) {
+      if (availableWorkspaceNames.has(name)) continue;
+      if (!chief.availableWorkspaceNames.some(available => available.startsWith(`${name}/`))) {
+        ignoredPluginWorkspacePatterns.add(name);
+      }
+    }
+  }
+  const filterPluginEntryPaths = (paths: string[]) => (isPluginEntryPath ? paths.filter(isPluginEntryPath) : paths);
 
   for (const workspace of workspaces) {
     const { name, dir, manifestPath, manifestStr } = workspace;
@@ -197,10 +210,14 @@ export const build = timerify(async function build({
       findWorkspaceByFilePath: chief.findWorkspaceByFilePath.bind(chief),
       getManifest,
       negatedWorkspacePatterns: chief.getNegatedWorkspacePatterns(name),
-      pluginEntryNegatedWorkspacePatterns: isIgnoredPluginEntry
+      pluginEntryNegatedWorkspacePatterns: hasWorkspaceOverrides
         ? chief.getNegatedWorkspacePatterns(name, false)
         : undefined,
-      ignoredWorkspacePatterns: isIgnoredPluginEntry ? [] : chief.getIgnoredWorkspacesFor(name),
+      ignoredWorkspacePatterns: hasWorkspaceOverrides
+        ? [...ignoredPluginWorkspacePatterns].filter(
+            pattern => name === ROOT_WORKSPACE_NAME || pattern.startsWith(`${name}/`)
+          )
+        : chief.getIgnoredWorkspacesFor(name),
       enabledPluginsInAncestors: ancestors.flatMap(ancestor => enabledPluginsStore.get(ancestor) ?? []),
       readRawFile: (filePath: string) => principal.fileManager.readRawFile(filePath) ?? '',
       configFilesMap,
