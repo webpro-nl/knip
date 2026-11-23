@@ -875,6 +875,10 @@
           "title": "osls plugin configuration (https://knip.dev/reference/plugins/osls)",
           "$ref": "#/definitions/plugin"
         },
+        "oxc-node": {
+          "title": "oxc-node plugin configuration (https://knip.dev/reference/plugins/oxc-node)",
+          "$ref": "#/definitions/plugin"
+        },
         "oxfmt": {
           "title": "oxfmt plugin configuration (https://knip.dev/reference/plugins/oxfmt)",
           "$ref": "#/definitions/plugin"

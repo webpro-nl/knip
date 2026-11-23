@@ -109,6 +109,7 @@ export type PluginName =
   | 'openclaw'
   | 'orval'
   | 'osls'
+  | 'oxc-node'
   | 'oxfmt'
   | 'oxlint'
   | 'panda-css'
@@ -330,6 +331,7 @@ export const pluginNames = [
   'openclaw',
   'orval',
   'osls',
+  'oxc-node',
   'oxfmt',
   'oxlint',
   'panda-css',

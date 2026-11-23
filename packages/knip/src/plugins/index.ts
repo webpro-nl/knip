@@ -108,6 +108,7 @@ import { default as openapiTs } from './openapi-ts/index.ts';
 import { default as openclaw } from './openclaw/index.ts';
 import { default as orval } from './orval/index.ts';
 import { default as osls } from './osls/index.ts';
+import { default as oxcNode } from './oxc-node/index.ts';
 import { default as oxfmt } from './oxfmt/index.ts';
 import { default as oxlint } from './oxlint/index.ts';
 import { default as pandaCss } from './panda-css/index.ts';
@@ -329,6 +330,7 @@ export const Plugins = {
   openclaw,
   orval,
   osls,
+  'oxc-node': oxcNode,
   oxfmt,
   oxlint,
   'panda-css': pandaCss,

@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/oxc-node",
+  "devDependencies": {
+    "@oxc-node/cli": "*"
+  },
+  "scripts": {
+    "test": "oxnode --test",
+    "dev": "oxnode watch src/a.ts"
+  }
+}
