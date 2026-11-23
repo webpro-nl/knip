@@ -278,6 +278,11 @@ test('Allow scoped entries into a workspace re-enabled after a broad ignore', as
   }));
   const { issues, counters } = await run(t, inputs, { ignoreWorkspaces: ['packages/*', '!packages/app'] });
 
-  assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
-  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+  assert.deepEqual(Object.keys(issues.files).sort(), [
+    'keep.ts',
+    'packages/app/nested/ignored/keep.ts',
+    'packages/app/skip.ts',
+    'skip.ts',
+  ]);
+  assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 5, total: 5 });
 });
