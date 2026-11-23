@@ -1,0 +1,5 @@
+@use './colors';
+
+body {
+  color: colors.$text;
+}
