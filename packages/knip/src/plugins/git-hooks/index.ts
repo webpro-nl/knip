@@ -1,6 +1,5 @@
-import type { IsLoadConfig, IsPluginEnabled, ParseConfig, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
-import { toDependency } from '../../util/input.ts';
-import { extname } from '../../util/path.ts';
+import type { IsPluginEnabled, ParseConfig, Plugin, Resolve, ResolveConfig } from '../../types/config.ts';
+import { toDependency, toEntry } from '../../util/input.ts';
 import { hasDependency } from '../../util/plugin.ts';
 
 // https://github.com/tarmolov/git-hooks-js
@@ -14,18 +13,18 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const isRootOnly = true;
 
 // Every executable file in .githooks/<hook-name>/ runs as a hook
-const config = ['.githooks/*/*'];
+const config = ['.githooks/*/{!(*.*),*.sh}'];
 
-// Other files with an extension (e.g. .js) are added as entry files, so only read shell scripts
-const isLoadConfig: IsLoadConfig = ({ configFileName }) => ['', '.sh'].includes(extname(configFileName));
+const entry = ['.githooks/*/*.?(c|m)[jt]s'];
 
 const parseConfig: ParseConfig = source => source;
 
 const resolveConfig: ResolveConfig = (script, options) => {
-  if (!script || options.isProduction) return [];
+  const entries = (options.config.entry ?? entry).map(id => toEntry(id));
+  if (!script || options.isProduction) return entries;
   // Git runs hooks from the repository root
   const inputs = options.getInputsFromScripts(String(script), { optionalBinaries: true });
-  return inputs.map(input => ({ ...input, dir: options.cwd }));
+  return [...entries, ...inputs.map(input => ({ ...input, dir: options.cwd }))];
 };
 
 // git-hooks installs itself through its own postinstall script, so nothing in the project references it
@@ -37,7 +36,7 @@ const plugin: Plugin = {
   isEnabled,
   isRootOnly,
   config,
-  isLoadConfig,
+  entry,
   parseConfig,
   resolveConfig,
   resolve,
