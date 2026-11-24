@@ -10,6 +10,7 @@
     "unused-loader": "*"
   },
   "dependencies": {
+    "lodash-es": "*",
     "pino": "*"
   }
 }
