@@ -1,0 +1,13 @@
+{
+  "name": "@fixtures/import-meta-glob-subpath-imports",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#src/*": "./src/*.ts",
+    "#lib/*": "./lib/*",
+    "#mod/*.ts": "./mod/*.ts"
+  },
+  "devDependencies": {
+    "vite": "*"
+  }
+}

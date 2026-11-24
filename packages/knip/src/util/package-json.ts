@@ -347,6 +347,30 @@ export const createManifest = (raw: PackageJson): Manifest => {
   });
 };
 
+/** Map an `import.meta.glob` pattern that starts with `#` through the closest `imports` field, as Node maps a specifier */
+export const resolveImportsGlobPattern = (scopedImports: Map<string, Exports>, pattern: string, dir: string) => {
+  const isNegated = pattern[0] === '!';
+  const specifier = isNegated ? pattern.slice(1) : pattern;
+  if (specifier[0] !== '#') return;
+  let scope: string | undefined;
+  for (const candidate of scopedImports.keys()) {
+    if ((dir === candidate || dir.startsWith(`${candidate}/`)) && (!scope || candidate.length > scope.length))
+      scope = candidate;
+  }
+  const imports = scope === undefined ? undefined : scopedImports.get(scope);
+  if (scope === undefined || !imports) return;
+  const match = getPackageMapTarget(imports, specifier);
+  if (!match) return;
+  const resolved: string[] = [];
+  for (const target of getEntriesFromExports(match.target)) {
+    // A key matched as written keeps the glob in its target; a pattern key fills the target's `*` with the capture
+    const mapped = expandPackageTarget(target, match.patternMatch ?? '*');
+    const filePath = mapped && toPackagePath(scope, mapped);
+    if (filePath) resolved.push(isNegated ? `!${filePath}` : filePath);
+  }
+  return resolved;
+};
+
 export const getManifestImportDependencies = (manifest: PackageJson) => {
   const dependencies = new Set<string>();
   if (!manifest.imports) return dependencies;

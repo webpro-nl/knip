@@ -12,6 +12,7 @@ import type {
 } from './types/config.ts';
 import type { ConfigurationFiles } from './session/configuration.ts';
 import type { FileNode } from './types/module-graph.ts';
+import type { Exports } from './types/package-json.ts';
 import type { Paths } from './types/project.ts';
 import { _getImportsAndExports } from './typescript/get-imports-and-exports.ts';
 import { createBunShellVisitor } from './typescript/visitors/script-visitors.ts';
@@ -24,6 +25,7 @@ import { compact } from './util/array.ts';
 import type { MainOptions } from './util/create-options.ts';
 import { debugLog } from './util/debug.ts';
 import { getSubpathImport } from './util/modules.ts';
+import { resolveImportsGlobPattern } from './util/package-json.ts';
 import { timerify } from './util/Performance.ts';
 import { extname, isInNodeModules, toAbsolute } from './util/path.ts';
 import type { ToSourceFilePath, WorkspacePackageTargetHandler } from './util/to-source-path.ts';
@@ -71,6 +73,7 @@ export class ProjectPrincipal {
   compilers: Compilers = new Map();
   private scopedCompilers = new Map<string, Map<string, Compiler>>();
   private paths = new Map<string, Record<string, string[]>>();
+  private manifestImports = new Map<string, Exports>();
   private rootDirs = new Map<string, string[]>();
   private tsConfigFile: string | undefined;
   private extensions = new Set(DEFAULT_EXTENSIONS);
@@ -136,6 +139,10 @@ export class ProjectPrincipal {
     this.paths.set(scope, scoped);
   }
 
+  addManifestImports(imports: Exports | undefined, scope: string) {
+    if (imports) this.manifestImports.set(scope, imports);
+  }
+
   addRootDirs(rootDirs: string[] | undefined, scope: string) {
     if (!rootDirs?.length) return;
     const scoped = this.rootDirs.get(scope) ?? [];
@@ -168,7 +175,12 @@ export class ProjectPrincipal {
       this.findWorkspacePackageTarget,
       this.tsConfigFile
     );
-    this.resolveGlobPattern = createGlobAliasResolver(scopedPaths);
+    const resolveAliasGlob = createGlobAliasResolver(scopedPaths);
+    const manifestImports = this.manifestImports;
+    this.resolveGlobPattern =
+      manifestImports.size === 0
+        ? resolveAliasGlob
+        : (pattern, dir) => resolveImportsGlobPattern(manifestImports, pattern, dir) ?? resolveAliasGlob(pattern, dir);
   }
 
   hasAcceptedExtension(filePath: string) {

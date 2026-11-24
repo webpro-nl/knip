@@ -288,6 +288,7 @@ export const build = timerify(async function build({
 
     principal.addPaths(config.paths, dir, dir);
     if (tsConfigPaths) principal.addPaths(tsConfigPaths, dir, dir);
+    principal.addManifestImports(manifest.imports, dir);
     principal.addRootDirs(compilerOptions.rootDirs, dir);
 
     const inputsFromPlugins = await worker.runPlugins();
@@ -619,6 +620,13 @@ export const build = timerify(async function build({
       }
 
       if (file.importGlobs.length > 0) {
+        for (const { patterns } of file.importGlobs) {
+          for (const pattern of patterns) {
+            const specifier = pattern[0] === '!' ? pattern.slice(1) : pattern;
+            if (specifier[0] !== '#') continue;
+            subpathReferences.addInput(toEntry(specifier, { containingFilePath: filePath }), filePath);
+          }
+        }
         const [analyzedImportGlobs, entryImportGlobs] = partition(file.importGlobs, glob => glob.analyzeExports);
         const analyzed = resolveImportGlobs(analyzedImportGlobs, filePath, principal.resolveGlobPattern, workspace.dir);
         for (const importedFilePath of analyzed) {
