@@ -14,11 +14,12 @@ test('Built-in compiler for SCSS', async () => {
   assert('unused.scss' in issues.files);
   assert('assets/unused.jpg' in issues.files);
   assert(!('assets/used.jpg' in issues.files));
+  assert(!('_layered.scss' in issues.files));
 
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 2,
-    processed: 19,
-    total: 19,
+    processed: 20,
+    total: 20,
   });
 });
