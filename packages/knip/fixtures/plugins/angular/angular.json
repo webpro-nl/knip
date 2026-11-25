@@ -23,7 +23,13 @@
             "polyfills": "src/polyfill.js",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              { "glob": "**/*", "input": "src/fonts", "output": "fonts" },
+              { "glob": "**/*", "input": "node_modules/@fortawesome/fontawesome-free/webfonts", "output": "webfonts" },
+              { "glob": "**/*", "input": "./node_modules/monaco-editor/min", "output": "monaco" }
+            ],
             "styles": ["src/styles.scss"],
             "scripts": ["src/script.js", "src/[variant]/bootstrap.js"]
           },
@@ -78,7 +84,11 @@
             "polyfills": ["zone.js", "zone.js/testing", "@angular/localize/init"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              { "glob": "*.svg", "input": "node_modules\\@mdi\\svg\\svg", "output": "mdi" }
+            ],
             "styles": ["src/styles.scss"],
             "scripts": []
           }

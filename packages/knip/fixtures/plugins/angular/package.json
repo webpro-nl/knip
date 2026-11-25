@@ -10,10 +10,13 @@
   "dependencies": {
     "@angular/core": "*",
     "@angular/localize": "*",
+    "@fortawesome/fontawesome-free": "*",
+    "monaco-editor": "*",
     "zone.js": "*"
   },
   "devDependencies": {
     "@angular/cli": "*",
+    "@mdi/svg": "*",
     "karma": "*",
     "karma-chrome-launcher": "*",
     "karma-coverage": "*",

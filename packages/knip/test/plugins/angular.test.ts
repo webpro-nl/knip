@@ -30,3 +30,11 @@ test('Find dependencies and literal script entries with the Angular plugin', asy
     total: 17,
   });
 });
+
+test('Find dependencies copied by assets with the Angular plugin (production)', async () => {
+  const options = await createOptions({ cwd, isProduction: true });
+  const { issues } = await main(options);
+
+  assert(!issues.dependencies['package.json']?.['@fortawesome/fontawesome-free']);
+  assert(!issues.dependencies['package.json']?.['monaco-editor']);
+});
