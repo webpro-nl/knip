@@ -31,7 +31,7 @@ const hasNodeTest = (
     script =>
       typeof script === 'string' &&
       getScriptCommands(script, cwd).some(
-        ({ binary, args }) => (binary === 'node' || binary === 'nub') && args.includes('--test')
+        ({ binary, args }) => (binary === 'node' || binary === 'nub' || binary === 'oxnode') && args.includes('--test')
       )
   );
   hasNodeTestCache.set(scripts, result);
