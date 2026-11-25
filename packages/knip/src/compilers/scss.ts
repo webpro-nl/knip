@@ -11,7 +11,7 @@ const singleQuotedString = /'(?:\\(?:\r\n|[\s\S]|$)|[^'\\\r\n\f])*(?:'|[\r\n\f]|
 const blockComment = /\/\*[\s\S]*?(?:\*\/|$)/;
 const lineComment = /\/\/[^\r\n]*(?:[\r\n]|$)/;
 const moduleRule = /@(?:use|import|forward)\s+/;
-const loadCssCall = /(?<=@include\s+(?:[\w-]+\.)?)load-css\(\s*/;
+const loadCssCall = /@include\s+(?:[\w-]+\.)?load-css\(\s*/;
 const moduleUrl = /['"](pkg:)?([^'"]+)['"](?!\s*\+)/;
 const urlFunction = /url\(\s*(?:["']([^"'\r\n]*)["']|([^'")\s]+))\s*\)/;
 
