@@ -21,6 +21,25 @@ test('Should use tsconfig files/include/exclude as project boundaries', async ()
   });
 });
 
+test(
+  'Should use tsconfig files with lowercase drive letter in cwd',
+  { skip: process.platform !== 'win32' },
+  async () => {
+    const lowerCwd = cwd.replace(/^[A-Z]:/, letter => letter.toLowerCase());
+    const options = await createOptions({ cwd: lowerCwd, isUseTscFiles: true });
+    const { issues, counters } = await main(options);
+
+    assert.equal(Object.keys(issues.files).length, 0);
+
+    assert.deepEqual(counters, {
+      ...baseCounters,
+      exports: 1,
+      processed: 4,
+      total: 4,
+    });
+  }
+);
+
 test('Should report unimported files as unused', async () => {
   const options = await createOptions({ cwd, isUseTscFiles: false });
   const { issues, counters } = await main(options);

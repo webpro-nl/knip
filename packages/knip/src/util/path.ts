@@ -19,7 +19,9 @@ export const toNative = isWin ? path.win32.normalize : (value: string) => value;
 
 export const resolve = path.posix.resolve;
 
-export const resolveCwd = (dir: string) => toPosix(path.resolve(dir));
+export const resolveCwd = isWin
+  ? (dir: string) => toPosix(path.resolve(dir)).replace(/^[a-z]:/, drive => drive.toUpperCase())
+  : (dir: string) => toPosix(path.resolve(dir));
 
 export const relative = (from: string, to: string) => {
   if (to.startsWith(from)) {
