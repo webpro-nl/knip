@@ -4,6 +4,8 @@ import { exec } from '../helpers/exec.ts';
 import { resolve } from '../helpers/resolve.ts';
 import { tsc } from '../helpers/tsc.ts';
 
+const skipIfBun = typeof Bun !== 'undefined' ? test.skip : test;
+
 test('Support loading js async function for configuration', async () => {
   const cwd = resolve('fixtures/config-js-async');
   assert.equal(exec('knip', { cwd }).stdout, '');
@@ -51,6 +53,22 @@ test('Configuration types accept explicit undefined with exactOptionalPropertyTy
 test('Support loading ts function for configuration', async () => {
   const cwd = resolve('fixtures/config-ts-function');
   assert.equal(exec('knip', { cwd }).stdout, '');
+});
+
+test('Resolve tsconfig from project root when loading ts configuration', async () => {
+  const cwd = resolve('fixtures/config-ts-nested-tsconfig/inner');
+  const { stdout, stderr, status } = exec('knip', { cwd });
+  assert.equal(status, 0);
+  assert.equal(stderr, '');
+  assert.equal(stdout, '');
+});
+
+skipIfBun('Resolve tsconfig from target directory with --directory', async () => {
+  const cwd = resolve('fixtures/config-ts-nested-tsconfig');
+  const { stdout, stderr, status } = exec('knip --directory inner', { cwd });
+  assert.equal(status, 0);
+  assert.equal(stderr, '');
+  assert.equal(stdout, '');
 });
 
 test('Report configuration that is not an object', async () => {
