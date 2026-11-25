@@ -227,10 +227,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Check out ${{ matrix.project.repo }}
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          persist-credentials: false
           repository: ${{ matrix.project.repo }}
           ref: ${{ matrix.project.ref }}
           path: ${{ matrix.project.name }}
