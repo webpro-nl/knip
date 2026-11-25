@@ -5,6 +5,7 @@
   },
   "scripts": {
     "test": "oxnode --test",
-    "dev": "oxnode watch src/a.ts"
+    "watch": "oxnode watch src/a.ts",
+    "watch2": "oxnode --watch src/b.ts"
   }
 }
