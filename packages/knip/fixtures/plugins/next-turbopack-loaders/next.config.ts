@@ -24,6 +24,9 @@ export default {
       telemetry: { browser: './browser.ts' },
       adapters: ['./adapter.ts'],
       pino: 'pino/browser',
+      'next-mdx-import-source-file': '@vercel/turbopack-next/mdx-import-source',
+      'private-next-root-dir/*': './*',
+      'lodash/*': 'lodash-es/*',
     },
     rules: {
       '*.css': { loaders: ['@tailwindcss/webpack'], as: '*.css' },

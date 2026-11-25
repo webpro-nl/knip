@@ -12,11 +12,13 @@ import { findProperty, getPropertyValues, resolveObjectArg } from '../../typescr
 import { getStringValue } from '../../typescript/ast-nodes.ts';
 import { isDirectory } from '../../util/fs.ts';
 import { toConfig, toModule, toEntryPath, toEntry } from '../../util/input.ts';
+import { getPackageNameFromModuleSpecifier } from '../../util/modules.ts';
 import { isInNodeModules, join, toAbsolute } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
 import type { NextConfigModule } from './types.ts';
 
 // https://nextjs.org/docs/getting-started/project-structure
+// https://github.com/vercel/next.js/blob/v16.2.6/crates/next-core/src/next_import_map.rs#L1048-L1063
 
 const title = 'Next.js';
 
@@ -73,7 +75,11 @@ const getInputs = (
   const patterns = [...getEntryFilePatterns(extensions, configFileDir), 'next-env.d.ts'];
   const inputs = patterns.map(id => toEntry(join(configFileDir, id), { production: true }));
   for (const loader of loaders) inputs.push(toModule(loader));
-  for (const target of aliasTargets) inputs.push(toModule(target, { dir: configFileDir, production: true }));
+  for (const target of aliasTargets) {
+    if (target.startsWith('@vercel/turbopack-next/')) continue;
+    if (target.includes('*') && !getPackageNameFromModuleSpecifier(target)) continue;
+    inputs.push(toModule(target, { dir: configFileDir, production: true }));
+  }
   for (const file of files) inputs.push(toEntryPath(toAbsolute(file, configFileDir), { production: true }));
   return inputs;
 };
