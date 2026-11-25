@@ -1,28 +1,36 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { main } from '../../src/index.ts';
-import baseCounters from '../helpers/baseCounters.ts';
-import { createOptions } from '../helpers/create-options.ts';
-import { resolve } from '../helpers/resolve.ts';
+import { compiler } from '../../src/compilers/scss.ts';
 
-const cwd = resolve('fixtures/compilers/scss-load-css');
+test('Compile static SCSS meta.load-css URLs', () => {
+  const scss = `@use 'sass:meta';
 
-test('Built-in compiler for SCSS meta.load-css with static URLs', async () => {
-  const options = await createOptions({ cwd });
-  const { issues, counters } = await main(options);
+@layer base {
+  @include meta.load-css('layered');
+}
+@include sass-meta.load-css("pkg:bulma/sass/utilities");
+@include load-css('pkg:@fontsource/lato/scss/mixins');
+@include meta.load-css(
+  'pkg:bootstrap/scss/reboot',
+  $with: ('enable-shadows': true)
+);
+@include meta.load-css($theme-path);
+@include meta.load-css('themes/#{$theme}');
+@include meta.load-css('themes/' + $theme);
+@include not-load-css('lookalike');
+// @include meta.load-css('line-commented');
+/* @include meta.load-css('block-commented'); */
+.double { content: "@include meta.load-css('double-quoted')"; }
+.single { content: '@include meta.load-css("single-quoted")'; }`;
 
-  assert('_line-commented.scss' in issues.files);
-  assert('_block-commented.scss' in issues.files);
-  assert('_in-double-quotes.scss' in issues.files);
-  assert('_in-single-quotes.scss' in issues.files);
-  assert('themes/_dark.scss' in issues.files);
-  assert('_themes.scss' in issues.files);
-  assert('_lookalike.scss' in issues.files);
-
-  assert.deepEqual(counters, {
-    ...baseCounters,
-    files: 7,
-    processed: 16,
-    total: 16,
-  });
+  assert.equal(
+    compiler(scss, 'styles.scss'),
+    `import _$0 from './layered.scss';
+import _$1 from './_layered.scss';
+import _$2 from './layered.sass';
+import _$3 from './_layered.sass';
+import _$4 from 'bulma/sass/utilities';
+import _$5 from '@fontsource/lato/scss/mixins';
+import _$6 from 'bootstrap/scss/reboot';`
+  );
 });
