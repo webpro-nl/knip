@@ -39,19 +39,17 @@ const resolveDependencies = async (
   rootDir: string,
   options: PluginOptions
 ): Promise<Input[]> => {
-  const { configFileDir } = options;
-
   if (config?.preset) {
     const { preset } = config;
     if (isInternal(preset)) {
-      const presetConfigPath = toAbsolute(preset, configFileDir);
+      const presetConfigPath = toAbsolute(preset, rootDir);
       const presetConfig = await resolveExtensibleConfig(presetConfigPath);
       config = Object.assign({}, presetConfig, config);
     }
   }
 
   const presets = (config.preset ? [config.preset] : []).map(preset =>
-    isInternal(preset) ? preset : join(preset, 'jest-preset')
+    isInternal(preset) ? toAbsolute(preset, rootDir) : join(preset, 'jest-preset')
   );
 
   const projects: Input[] = [];
