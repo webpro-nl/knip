@@ -145,8 +145,8 @@ jobs:
           - name: mocha
             repo: mochajs/mocha
             commands: |
-              npm ci
-              npm install -D $PKG_URL
+              npm ci --ignore-scripts
+              npm install --ignore-scripts -D $PKG_URL
               bash $SNAP mocha -- npm run lint:knip
 
           - name: InvokeAI
@@ -221,8 +221,8 @@ jobs:
             repo: microsoft/TypeScript
             ref: b465fdbfe175304d9b977da137b2c178ae1091d3 # Last passing commit before the TypeScript 7 migration
             commands: |
-              npm ci
-              npm install -D $PKG_URL
+              npm ci --ignore-scripts
+              npm install --ignore-scripts -D $PKG_URL
               bash $SNAP TypeScript -- npx knip
 
     steps:
