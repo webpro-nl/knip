@@ -116,3 +116,23 @@ test('codeowners inline comments and surrounding whitespace', () => {
   assert.deepEqual(findOwners('src/app.ts'), ['@src-team']);
   assert.deepEqual(findOwners('lib/index.ts'), ['@lib-team']);
 });
+
+test('codeowners global owner, dotfiles and anchored patterns', () => {
+  const content = `
+*            @global-owner
+*.js         @js-owner
+/.storybook/ @storybook-team
+apps/web/    @web-team
+  `.trim();
+
+  const findOwners = parseCodeowners(content);
+
+  assert.deepEqual(findOwners('README.md'), ['@global-owner']);
+  assert.deepEqual(findOwners('src/index.ts'), ['@global-owner']);
+  assert.deepEqual(findOwners('src/lib/deep/file.ts'), ['@global-owner']);
+  assert.deepEqual(findOwners('.github/workflows/ci.yml'), ['@global-owner']);
+  assert.deepEqual(findOwners('.eslintrc.js'), ['@js-owner']);
+  assert.deepEqual(findOwners('.storybook/main.ts'), ['@storybook-team']);
+  assert.deepEqual(findOwners('apps/web/index.ts'), ['@web-team']);
+  assert.deepEqual(findOwners('packages/apps/web/index.ts'), ['@global-owner']);
+});
