@@ -1,4 +1,4 @@
-import { Berries as Produce, Fruits } from './fruits';
+import { Berries as Produce, Citrus, Fruits } from './fruits';
 import { Direction } from './directions';
 
 Fruits.apple;
@@ -10,3 +10,5 @@ Object.entries(Fruits);
 Object.values(Produce);
 
 Object.getOwnPropertyNames(Direction);
+
+for (const citrus in Citrus) citrus;

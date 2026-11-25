@@ -660,9 +660,12 @@ const coreVisitorObject: VisitorObject = {
     _enterScope(node);
     if (node.right.type === 'Identifier' && !isShadowed(node.right.name, node.right.start)) {
       const _import = state.localImportMap.get(node.right.name);
-      if (_import?.isNamespace) {
+      if (_import) {
         const internalImport = state.internal.get(_import.filePath);
-        if (internalImport) addValue(internalImport.import, OPAQUE, state.filePath);
+        if (internalImport) {
+          if (_import.isNamespace) addValue(internalImport.import, OPAQUE, state.filePath);
+          else (internalImport.enumerated ??= new Set()).add(_import.importedName);
+        }
       }
     }
   },
