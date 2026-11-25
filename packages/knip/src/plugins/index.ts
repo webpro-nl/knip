@@ -52,6 +52,7 @@ import { default as firebase } from './firebase/index.ts';
 import { default as flue } from './flue/index.ts';
 import { default as fumadocs } from './fumadocs/index.ts';
 import { default as gatsby } from './gatsby/index.ts';
+import { default as gitHooks } from './git-hooks/index.ts';
 import { default as githubAction } from './github-action/index.ts';
 import { default as githubActions } from './github-actions/index.ts';
 import { default as glob } from './glob/index.ts';
@@ -273,6 +274,7 @@ export const Plugins = {
   flue,
   fumadocs,
   gatsby,
+  'git-hooks': gitHooks,
   'github-action': githubAction,
   'github-actions': githubActions,
   glob,

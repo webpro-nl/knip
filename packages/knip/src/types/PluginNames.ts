@@ -53,6 +53,7 @@ export type PluginName =
   | 'flue'
   | 'fumadocs'
   | 'gatsby'
+  | 'git-hooks'
   | 'github-action'
   | 'github-actions'
   | 'glob'
@@ -274,6 +275,7 @@ export const pluginNames = [
   'flue',
   'fumadocs',
   'gatsby',
+  'git-hooks',
   'github-action',
   'github-actions',
   'glob',
