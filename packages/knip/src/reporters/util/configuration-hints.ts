@@ -87,6 +87,9 @@ const addWorkspace = (options: PrintHintOptions) =>
 const packageEntry = (options: PrintHintOptions) =>
   `Package entry file not found${options.filePath ? ` in ${options.filePath}` : ''}`;
 
+const scriptEntry = (options: PrintHintOptions) =>
+  `Script file not found${options.filePath ? ` in ${options.filePath}` : ''}`;
+
 const extensionUnregistered = (options: PrintHintOptions) =>
   `Extension in ${location(options, 'project')} not registered as a compiler`;
 
@@ -112,6 +115,7 @@ export const hintPrinters = new Map<ConfigurationHintType, { print: (options: Pr
   ['entry-top-level', { print: topLevel }],
   ['project-top-level', { print: topLevel }],
   ['package-entry', { print: packageEntry }],
+  ['script-entry', { print: scriptEntry }],
 ]);
 
 const hintTypesOrder: ConfigurationHintType[][] = [
@@ -126,6 +130,7 @@ const hintTypesOrder: ConfigurationHintType[][] = [
   ['entry-empty', 'project-empty', 'entry-redundant', 'project-redundant'],
   ['project-extension-unregistered', 'project-extension-excluded'],
   ['package-entry'],
+  ['script-entry'],
 ];
 
 interface ProcessedHint extends ConfigurationHint {

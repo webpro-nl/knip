@@ -34,6 +34,7 @@ import {
   isAlias,
   isCatalog,
   isConfig,
+  isDeferResolveEntry,
   isEntry,
   isIgnore,
   isProductionEntry,
@@ -333,7 +334,27 @@ export const build = timerify(async function build({
       }
     };
 
+    const isMissingScriptFile = (input: Input) => {
+      const { specifier } = input;
+      if (!input.fromScript) return false;
+      if (!isEntry(input) && !isProductionEntry(input) && !isDeferResolveEntry(input)) return false;
+      if (specifier.startsWith('!') || isDynamicPattern(specifier) || IS_DTS.test(specifier)) return false;
+      if (!DEFAULT_EXTENSIONS.has(extname(specifier))) return false;
+      const abs = isAbsolute(specifier) ? specifier : join(input.dir ?? dir, specifier);
+      if (existsSync(abs) || isGitIgnored(abs)) return false;
+      const mapped = toSourceMappedSpecifiers(workspace, abs, extensionGlobStr);
+      return !mapped.some(pattern => _syncGlob({ patterns: [pattern], cwd: dir }).length > 0);
+    };
+
     for (const input of inputs) {
+      if (isMissingScriptFile(input)) {
+        collector.addConfigurationHint({
+          type: 'script-entry',
+          filePath: input.containingFilePath,
+          identifier: input.specifier,
+          workspaceName: name,
+        });
+      }
       if (input.group) groups.set(input.group, undefined);
       const specifier = input.specifier;
       if (isCatalog(input)) {

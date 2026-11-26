@@ -1,0 +1,11 @@
+{
+  "name": "@fixtures/script-entry",
+  "scripts": {
+    "bun-missing": "bun ./scripts/missing.ts",
+    "node-missing": "node scripts/missing.js",
+    "bun-exists": "bun ./scripts/exists.ts",
+    "build-output": "node ./dist/cli.js",
+    "extensionless": "node ./scripts/extensionless",
+    "glob": "node --test \"test/**/*.test.js\""
+  }
+}

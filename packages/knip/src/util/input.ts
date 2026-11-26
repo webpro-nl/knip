@@ -27,6 +27,7 @@ export interface Input {
   allowIncludeExports?: boolean;
   skipExportsAnalysis?: boolean;
   group?: string;
+  fromScript?: boolean;
 }
 
 export interface ConfigInput extends Input {

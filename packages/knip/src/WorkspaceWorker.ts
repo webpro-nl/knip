@@ -385,9 +385,14 @@ export class WorkspaceWorker {
       if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
       } else if (isProduction && isEntry(input) && !isDynamicPattern(input.specifier)) {
-        inputs.push({ ...input, type: 'deferResolveEntry', containingFilePath: inputContainingFilePath });
+        inputs.push({
+          ...input,
+          type: 'deferResolveEntry',
+          containingFilePath: inputContainingFilePath,
+          fromScript: true,
+        });
       } else {
-        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
+        inputs.push({ ...input, containingFilePath: inputContainingFilePath, fromScript: true });
       }
     }
 

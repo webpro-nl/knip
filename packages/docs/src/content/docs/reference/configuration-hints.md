@@ -184,6 +184,17 @@ Package entry file not found in packages/app/package.json
 
 **Solution**: Refine or remove the entry in `package.json`.
 
+## Missing script file
+
+A file referenced in a script in `package.json` does not exist. Only paths with
+a JavaScript or TypeScript extension that are not ignored by Git are reported.
+
+```
+Script file not found in packages/app/package.json
+```
+
+**Solution**: Fix or remove the script in `package.json`.
+
 [1]: ./cli.md#--treat-config-hints-as-errors
 [2]: ./configuration.md#treatconfighintsaserrors
 [3]: ../overview/configuration.md

@@ -113,6 +113,7 @@ export type ConfigurationHintType =
   | 'project-extension-unregistered'
   | 'project-extension-excluded'
   | 'package-entry'
+  | 'script-entry'
   | 'top-level-unconfigured'
   | 'workspace-unconfigured';
 
