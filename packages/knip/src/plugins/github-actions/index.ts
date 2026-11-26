@@ -28,11 +28,12 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
   return scripts.map(script => join(configFileDir, script));
 };
 
-// Steps in a `parallel` block run like the other steps of the job
+// Steps in a `parallel` block run like the other steps of the job (GitHub
+// rejects a `parallel` block nested in another, so one level is enough)
 const flattenSteps = (steps: Step[]): Step[] => {
   const flat: Step[] = [];
   for (const step of steps) {
-    if (Array.isArray(step?.parallel)) flat.push(...flattenSteps(step.parallel));
+    if (Array.isArray(step?.parallel)) flat.push(...step.parallel);
     else flat.push(step);
   }
   return flat;
