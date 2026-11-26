@@ -24,8 +24,8 @@ test('Find dependencies with the Netlify plugin', async () => {
     files: 1,
     devDependencies: 1,
     unlisted: 5,
-    processed: 5,
-    total: 5,
+    processed: 6,
+    total: 6,
   });
 });
 
@@ -46,7 +46,7 @@ test('Find dependencies with the Netlify plugin (production)', async () => {
     ...baseCounters,
     files: 1,
     unlisted: 4,
-    processed: 4,
-    total: 5,
+    processed: 5,
+    total: 6,
   });
 });

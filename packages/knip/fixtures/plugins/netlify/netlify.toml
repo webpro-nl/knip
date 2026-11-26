@@ -1,4 +1,5 @@
 [build]
+  command = "esbuild src/app.ts --bundle --outdir=dist"
   edge_functions = "myedgefunctions/"
 
 [[plugins]]
