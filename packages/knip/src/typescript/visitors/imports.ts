@@ -11,7 +11,7 @@ import { addValue } from '../../util/module-graph.ts';
 import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowedIn } from './shadow.ts';
-import type { WalkState } from './walk.ts';
+import type { LocalImport, WalkState } from './walk.ts';
 
 export function markDynamicNamespaceOpaque(name: string, pos: number, s: WalkState) {
   const _import = s.localImportMap.get(name);
@@ -26,6 +26,17 @@ const getBlockScope = (s: WalkState): [number, number] | undefined => {
   return i < 0 ? undefined : [s.scopeStarts[i], s.scopeEnds[i]];
 };
 
+const bindLocalImport = (
+  name: string,
+  entry: LocalImport,
+  scope: [number, number] | undefined,
+  isVar: boolean,
+  s: WalkState
+) => {
+  if (scope && !isVar) s.scopedImports.push({ name, end: scope[1], prev: s.localImportMap.get(name) });
+  s.localImportMap.set(name, entry);
+};
+
 const setDynamicNamespace = (
   name: string,
   filePath: string,
@@ -33,8 +44,13 @@ const setDynamicNamespace = (
   isVar: boolean,
   s: WalkState
 ) => {
-  if (scope && !isVar) s.scopedImports.push({ name, end: scope[1], prev: s.localImportMap.get(name) });
-  s.localImportMap.set(name, { importedName: IMPORT_STAR, filePath, isNamespace: true, isDynamicImport: true, scope });
+  bindLocalImport(
+    name,
+    { importedName: IMPORT_STAR, filePath, isNamespace: true, isDynamicImport: true, scope },
+    scope,
+    isVar,
+    s
+  );
 };
 
 export function getPromiseAllElements(expression: Expression): ArrayExpression['elements'] | undefined {
@@ -333,6 +349,11 @@ function handleDynamicImportBinding(
 ) {
   s.handledImportExpressions.add(importExpr.start);
   const specifier = getStringValue(importExpr.source)!;
+  const resolved = s.resolveModule(specifier, s.filePath);
+  const internalPath =
+    resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)
+      ? resolved.resolvedFileName
+      : undefined;
   if (id.type === 'ObjectPattern') {
     for (const prop of id.properties) {
       if (prop.type === 'Property') {
@@ -352,6 +373,15 @@ function handleDynamicImportBinding(
           prop.key?.start ?? prop.start,
           IMPORT_FLAGS.DYNAMIC | caughtFlag
         );
+        if (internalPath && importedName && prop.value?.type === 'Identifier') {
+          bindLocalImport(
+            prop.value.name,
+            { importedName, filePath: internalPath, isNamespace: false, scope },
+            scope,
+            isVar,
+            s
+          );
+        }
       } else if (prop.type === 'RestElement' && prop.argument?.type === 'Identifier') {
         s.addImport(
           specifier,
@@ -366,9 +396,8 @@ function handleDynamicImportBinding(
   } else if (id.type === 'Identifier') {
     if (isAwaited) {
       s.addImport(specifier, 'default', id.name, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
-      const resolved = s.resolveModule(specifier, s.filePath);
-      if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
-        setDynamicNamespace(id.name, resolved.resolvedFileName, scope, isVar, s);
+      if (internalPath) {
+        setDynamicNamespace(id.name, internalPath, scope, isVar, s);
       }
     } else {
       s.addImport(

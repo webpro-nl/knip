@@ -1,12 +1,28 @@
-import type { MemberExpression, JSXMemberExpression } from 'oxc-parser';
+import type { Expression, ImportExpression, JSXMemberExpression, MemberExpression } from 'oxc-parser';
 import { IMPORT_FLAGS, OPAQUE } from '../../constants.ts';
 import type { ImportMaps } from '../../types/module-graph.ts';
 import { addValue } from '../../util/module-graph.ts';
+import { isInNodeModules } from '../../util/path.ts';
 import { getStringValue, isStringLiteral } from '../ast-nodes.ts';
 import { isShadowedIn } from './shadow.ts';
 import type { WalkState } from './walk.ts';
 
 const chainNames: string[] = [];
+
+function unwrapExpression(expr: Expression): Expression {
+  let current = expr;
+  while (current.type === 'ParenthesizedExpression') current = current.expression;
+  return current;
+}
+
+function getImportExpression(expr: Expression): ImportExpression | undefined {
+  const node = unwrapExpression(expr);
+  if (node.type === 'ImportExpression') return node;
+  if (node.type === 'AwaitExpression') {
+    const arg = unwrapExpression(node.argument);
+    if (arg.type === 'ImportExpression') return arg;
+  }
+}
 
 function markWholeObjectRead(internalImport: ImportMaps, id: string) {
   (internalImport.enumerated ??= new Set()).add(id);
@@ -43,6 +59,30 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
       );
     }
     return;
+  }
+
+  if (
+    node.object.type === 'MemberExpression' &&
+    !node.object.computed &&
+    node.object.property.type === 'Identifier' &&
+    !node.computed &&
+    node.property.type === 'Identifier'
+  ) {
+    const importExpr = getImportExpression(node.object.object);
+    if (importExpr && isStringLiteral(importExpr.source)) {
+      const nsName = node.object.property.name;
+      const memberName = node.property.name;
+      s.handledImportExpressions.add(importExpr.start);
+      const specifier = getStringValue(importExpr.source)!;
+      const caughtFlag = s.caughtImportExpressions.has(importExpr.start) ? IMPORT_FLAGS.CAUGHT : IMPORT_FLAGS.NONE;
+      s.addImport(specifier, nsName, undefined, undefined, importExpr.source.start, IMPORT_FLAGS.DYNAMIC | caughtFlag);
+      const resolved = s.resolveModule(specifier, s.filePath);
+      if (resolved && !resolved.isExternalLibraryImport && !isInNodeModules(resolved.resolvedFileName)) {
+        const internalImport = s.internal.get(resolved.resolvedFileName);
+        if (internalImport) s.addNsMemberRefs(internalImport, nsName, memberName);
+      }
+      return;
+    }
   }
 
   if (
@@ -158,9 +198,13 @@ export function handleMemberExpression(node: MemberExpression, s: WalkState) {
         const internalImport = s.internal.get(_import.filePath);
         if (internalImport) {
           const mid = node.object.property.name;
-          s.addNsMemberRefs(internalImport, rootName, mid);
-          if (!s.chainedMemberExprs.has(node)) {
-            s.addNsMemberRefs(internalImport, rootName, `${mid}.${node.property.name}`);
+          if (_import.isDynamicImport) {
+            s.addNsMemberRefs(internalImport, mid, node.property.name);
+          } else {
+            s.addNsMemberRefs(internalImport, rootName, mid);
+            if (!s.chainedMemberExprs.has(node)) {
+              s.addNsMemberRefs(internalImport, rootName, `${mid}.${node.property.name}`);
+            }
           }
         }
         if (!_import.isNamespace) {
