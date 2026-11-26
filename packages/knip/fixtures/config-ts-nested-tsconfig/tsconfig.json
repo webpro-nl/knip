@@ -1,0 +1,3 @@
+{
+  "extends": "./nonexistent-tsconfig.json"
+}

@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import type { Jiti, JitiOptions } from 'jiti';
-import { join } from './path.ts';
+import { join, resolveCwd } from './path.ts';
 
 const empty = join(fileURLToPath(import.meta.url), '../empty.js');
 
@@ -16,12 +16,12 @@ const options: JitiOptions = {
   extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx', '.jsx'],
 };
 
-const cwd = process.cwd();
+const entry = resolveCwd('_index.js');
 const require = createRequire(import.meta.url);
 let jiti: Jiti | undefined;
 
 export const getJiti = () => {
   if (jiti) return jiti;
   const { createJiti }: typeof import('jiti') = require('jiti');
-  return (jiti = createJiti(cwd, options));
+  return (jiti = createJiti(entry, options));
 };

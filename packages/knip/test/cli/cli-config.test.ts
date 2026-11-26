@@ -53,6 +53,14 @@ test('Support loading ts function for configuration', async () => {
   assert.equal(exec('knip', { cwd }).stdout, '');
 });
 
+test('Resolve tsconfig from project root instead of parent directory when loading ts config', () => {
+  const cwd = resolve('fixtures/config-ts-nested-tsconfig/inner');
+  const { stdout, stderr, status } = exec('knip', { cwd });
+  assert.equal(status, 0);
+  assert.equal(stderr, '');
+  assert.equal(stdout, '');
+});
+
 test('Report configuration that is not an object', async () => {
   const cwd = resolve('fixtures/config-ts-nested-function');
   const { stderr, status } = exec('knip', { cwd });
