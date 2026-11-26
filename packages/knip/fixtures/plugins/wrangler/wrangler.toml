@@ -1,2 +1,5 @@
 name = 'test'
 main = '[variant]/worker.ts'
+
+[build]
+command = 'esbuild client/app.ts --bundle --outdir=public/dist'

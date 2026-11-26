@@ -1,4 +1,8 @@
 {
   "name": "api",
-  "main": "./worker.ts"
+  "main": "./worker.ts",
+  "build": {
+    "command": "node build.js",
+    "cwd": "scripts"
+  }
 }

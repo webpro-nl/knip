@@ -7,7 +7,7 @@ import { resolve } from '../helpers/resolve.ts';
 
 const cwd = resolve('fixtures/plugins/wrangler');
 
-test('Find literal entry files with the wrangler plugin', async () => {
+test('Find entry files and build command inputs with the wrangler plugin', async () => {
   const options = await createOptions({ cwd });
   const { issues, counters } = await main(options);
 
@@ -16,7 +16,7 @@ test('Find literal entry files with the wrangler plugin', async () => {
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 5,
-    total: 5,
+    processed: 7,
+    total: 7,
   });
 });
