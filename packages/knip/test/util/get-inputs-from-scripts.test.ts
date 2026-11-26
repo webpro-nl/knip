@@ -820,6 +820,9 @@ test('getInputsFromScripts (advanced bash syntax)', () => {
   t('program -- mvn exec:java -Dexec.args="-g -f"', [], forwardedArgs);
   t('node --maxWorkers="$(node -e \'process.stdout.write(os.cpus().length.toString())\')"', [toBinary('node'), toBinary('node')]);
   t(`pnpm exec "cat package.json | jq -r '\"\(.name)@\(.version)\"'" | sort`, [toBinary('cat'), toBinary('jq')]);
+  t('mocha --exit --reporter ${REPORTER:-spec}', [toBinary('mocha')]);
+  t('node --require "$PRELOAD" ./script.js', [toBinary('node'), js]);
+  t('node --import $(node ./main.ts) ./script.js', [toBinary('node'), js, toBinary('node'), ts]);
 });
 
 test('getInputsFromScripts (redirects and shell command wrappers)', () => {

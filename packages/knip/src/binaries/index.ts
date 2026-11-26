@@ -11,7 +11,7 @@ const getInputsFromScripts: GetInputsFromScripts = (npmScripts, options) => {
 
   for (const input of results) {
     if (!input.specifier) continue;
-    if (input.specifier.includes(SCRIPT_INTERPOLATION)) continue;
+    if (input.specifier.startsWith('$') || input.specifier.includes(SCRIPT_INTERPOLATION)) continue;
     if (isDependency(input) && input.specifier.startsWith('http')) continue;
     if (isBinary(input) && !/^\b/.test(fromBinary(input))) continue;
     inputs.add(input);
