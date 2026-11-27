@@ -87,6 +87,8 @@ console.log(`Pinning bindings: @oxc-parser@${oxcParserVersion}, @oxc-resolver@${
 
 cpSync(join(knipNm, 'jiti'), join(nm, 'jiti'), { recursive: true, dereference: true });
 cpSync(join(knipNm, 'oxc-parser'), join(nm, 'oxc-parser'), { recursive: true, dereference: true });
+cpSync(join(knipNm, 'smol-toml'), join(nm, 'smol-toml'), { recursive: true, dereference: true });
+cpSync(join(knipNm, 'yaml'), join(nm, 'yaml'), { recursive: true, dereference: true });
 
 execSync('pnpm run build', { cwd: join(root, '../mcp-server'), stdio: 'inherit' });
 cpSync(join(root, '../mcp-server/src/docs.json'), join(nm, '@knip/mcp/docs.json'));
