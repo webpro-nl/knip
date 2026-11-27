@@ -39,13 +39,17 @@ test('Find dependencies and literal action entries with the GitHub Actions plugi
   // resolved relative to that path (not from the parent of the repository).
   assert(!('scripts/from-nested-working-dir-with-path.js' in issues.files));
 
+  // Steps inside a `parallel` block are read like any other step.
+  assert(issues.binaries['.github/workflows/parallel.yml']['stylelint']);
+  assert(!('scripts/from-parallel-step.js' in issues.files));
+
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 8,
+    binaries: 9,
     unresolved: 2,
     files: 1,
-    processed: 14,
-    total: 14,
+    processed: 15,
+    total: 15,
   });
 });
 
@@ -57,10 +61,10 @@ test('Find dependencies with the GitHub Actions plugin when cwd has a trailing s
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    binaries: 8,
+    binaries: 9,
     unresolved: 2,
     files: 1,
-    processed: 14,
-    total: 14,
+    processed: 15,
+    total: 15,
   });
 });

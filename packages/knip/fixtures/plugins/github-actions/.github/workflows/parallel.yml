@@ -1,0 +1,10 @@
+name: Parallel
+on: push
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - parallel:
+          - run: npx --no-install stylelint "**/*.css"
+          - run: node scripts/from-parallel-step.js

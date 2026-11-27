@@ -1,4 +1,4 @@
-type Step = {
+export type Step = {
   run?: string;
   uses?: string;
   with?: {
@@ -6,6 +6,7 @@ type Step = {
     path: string;
   };
   'working-directory'?: string;
+  parallel?: Step[];
 };
 
 type Steps = Step[];

@@ -3,7 +3,7 @@ import { hasFileWithExtension } from '../../util/fs.ts';
 import { type Input, isDeferResolveEntry, toEntryPath } from '../../util/input.ts';
 import { findByKeyDeep } from '../../util/object.ts';
 import { join, relative } from '../../util/path.ts';
-import type { Job, Runs } from './types.ts';
+import type { Job, Runs, Step } from './types.ts';
 
 // https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 
@@ -28,6 +28,17 @@ export const getActionDependencies = (config: any, options: PluginOptions) => {
   return scripts.map(script => join(configFileDir, script));
 };
 
+// Steps in a `parallel` block run like the other steps of the job (GitHub
+// rejects a `parallel` block nested in another, so one level is enough)
+const flattenSteps = (steps: Step[]): Step[] => {
+  const flat: Step[] = [];
+  for (const step of steps) {
+    if (Array.isArray(step?.parallel)) flat.push(...step.parallel);
+    else flat.push(step);
+  }
+  return flat;
+};
+
 const ACTION_PATH_VAR = /\$\{\{\s*github\.action_path\s*\}\}|\$\{GITHUB_ACTION_PATH\}|\$GITHUB_ACTION_PATH/g;
 
 export const resolveConfig: ResolveConfig = async (config, options) => {
@@ -40,12 +51,13 @@ export const resolveConfig: ResolveConfig = async (config, options) => {
 
   for (const steps of jobs) {
     if (!Array.isArray(steps.steps)) continue;
-    const action = steps.steps.find(
+    const jobSteps = flattenSteps(steps.steps);
+    const action = jobSteps.find(
       step => step.uses?.startsWith('actions/checkout@') && typeof step.with?.path === 'string' && !step.with.repository
     );
     const path = action?.with?.path;
     const jobWorkingDir = steps.defaults?.run?.['working-directory'] ?? workflowWorkingDir;
-    for (const step of steps.steps) {
+    for (const step of jobSteps) {
       const workingDir = step['working-directory'] ?? jobWorkingDir;
       const dir = join(rootCwd, path && workingDir ? relative(path, workingDir) : workingDir ? workingDir : '.');
       if (step.run) {
