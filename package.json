@@ -19,6 +19,7 @@
   ],
   "type": "module",
   "scripts": {
+    "changed-packages": "git diff --name-only \"$(git describe --abbrev=0)\".. packages | cut -d/ -f1,2 | uniq",
     "docs": "pnpm run --dir packages/docs dev",
     "test": "pnpm run --dir packages/knip test",
     "fmt": "oxfmt",
