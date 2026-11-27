@@ -130,6 +130,35 @@ test('Keep a pattern with dir out of the workspace negations added for a `**/` s
   assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
 });
 
+// A root pattern inside another workspace is handed to that workspace: the root glob stays out of it, also beside a
+// `**/` sibling
+for (const [spelling, pattern] of Object.entries({ relative: 'packages/app/keep.ts', absolute: `${app}/keep.ts` })) {
+  for (const isProduction of [false, true]) {
+    test(`Hand a root entry pattern to the workspace that holds it (${spelling}, isProduction: ${isProduction})`, async t => {
+      const inputs = [pattern, '**/test/*.ts'].map(id => toEntry(id, { production: isProduction }));
+      const { issues, counters } = await run(t, inputs, { isProduction });
+
+      assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+      assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+    });
+  }
+}
+
+test('Keep a root entry pattern of a plugin group with its negations', async t => {
+  const inputs = ['packages/app/*.ts', '!packages/app/skip.ts'].map(id => ({ ...toEntry(id), group: 'mocha' }));
+  const { issues, counters } = await run(t, inputs);
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 4, total: 4 });
+});
+
+test('Exclude the files of a handed root development pattern in production mode', async t => {
+  const { issues, counters } = await run(t, [toEntry('packages/app/keep.ts')], { isProduction: true });
+
+  assert.deepEqual(Object.keys(issues.files).sort(), ['keep.ts', 'packages/app/skip.ts', 'skip.ts']);
+  assert.deepEqual(counters, { ...baseCounters, files: 3, processed: 3, total: 3 });
+});
+
 test('Resolve plugin entry patterns from the dir of a sibling workspace', async t => {
   const inputs = [
     { ...toEntry('*.ts'), dir: app },

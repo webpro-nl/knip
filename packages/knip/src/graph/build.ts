@@ -51,7 +51,7 @@ import { getPackageNameFromModuleSpecifier, isStartsLikePackageName, sanitizeSpe
 import { perfObserver, timerify } from '../util/Performance.ts';
 import { getEntrySpecifiersFromManifest, getManifestImportDependencies } from '../util/package-json.ts';
 import { expandIgnorePatterns } from '../util/parse-and-convert-gitignores.ts';
-import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative } from '../util/path.ts';
+import { dirname, extname, isAbsolute, isInNodeModules, isInternal, join, relative, toAbsolute } from '../util/path.ts';
 import { extensionAlias } from '../util/resolve.ts';
 import { augmentWorkspace, getToSourcePathsHandler, toSourceMappedSpecifiers } from '../util/to-source-path.ts';
 import { WorkspaceWorker } from '../WorkspaceWorker.ts';
@@ -133,7 +133,9 @@ export const build = timerify(async function build({
     principal.addEntryPath(options.configFilePath, { skipExportsAnalysis: true });
   }
 
-  const preprocessorInputs = new Map<string, Input[]>();
+  const workspaceInputs = new Map<string, Input[]>();
+  for (const { name } of workspaces) workspaceInputs.set(name, []);
+
   for (const specifier of options.preprocessorInputs) {
     const containingFilePath = options.configFilePath ?? join(options.cwd, 'package.json');
     const isLocal = isInternal(specifier);
@@ -143,10 +145,7 @@ export const build = timerify(async function build({
     // The negated production entry pattern only applies to its own workspace, so a local
     // preprocessor must be registered in the workspace holding it, not always in the root
     const owner = isLocal ? chief.findWorkspaceByFilePath(specifier)?.name : undefined;
-    const name = owner ?? ROOT_WORKSPACE_NAME;
-    const inputs = preprocessorInputs.get(name);
-    if (inputs) inputs.push(input);
-    else preprocessorInputs.set(name, [input]);
+    workspaceInputs.get(owner ?? ROOT_WORKSPACE_NAME)?.push(input);
   }
 
   for (const workspace of workspaces) {
@@ -218,7 +217,7 @@ export const build = timerify(async function build({
     const pluginSourceMaps = await worker.resolveSourceMaps();
     augmentWorkspace(workspace, dir, isFile ? compilerOptions : undefined, [...pluginSourceMaps, ...sourceMapPairs]);
 
-    const inputs = new Set(preprocessorInputs.get(name));
+    const inputs = new Set(workspaceInputs.get(name));
 
     if (definitionPaths.length > 0) {
       debugLogArray(name, 'Definition paths', definitionPaths);
@@ -330,6 +329,12 @@ export const build = timerify(async function build({
         addPattern(map, group, rebasePattern(input.specifier, base, dir));
       } else {
         addPattern(map, input.group ?? DEFAULT_GROUP, toWorkspaceRelative(input.specifier));
+        // The root runs first and also hands a pattern inside another workspace to it, where the root's own glob does
+        // not reach beside a `**/` sibling; a plugin's negations stay with the root
+        const specifier = toAbsolute(input.specifier, dir);
+        const owner = name === ROOT_WORKSPACE_NAME && !input.group && chief.findWorkspaceByFilePath(specifier);
+        if (owner && owner !== workspace)
+          workspaceInputs.get(owner.name)?.push({ ...input, specifier, dir: undefined });
       }
     };
 
