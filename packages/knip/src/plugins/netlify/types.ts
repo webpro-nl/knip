@@ -1,5 +1,6 @@
 export type NetlifyConfig = {
   build?: {
+    command?: string;
     edge_functions?: string;
   };
   plugins?: {

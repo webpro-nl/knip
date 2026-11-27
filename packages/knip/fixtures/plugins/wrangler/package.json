@@ -6,5 +6,8 @@
   },
   "dependencies": {
     "wrangler": "^3.37.0"
+  },
+  "devDependencies": {
+    "esbuild": "*"
   }
 }
