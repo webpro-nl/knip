@@ -18,6 +18,7 @@
     "@mdx-js/rollup": "*",
     "@emotion/babel-plugin": "*",
     "@vitejs/plugin-react": "*",
+    "sass": "*",
     "vite": "*"
   }
 }

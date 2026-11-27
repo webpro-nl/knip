@@ -52,23 +52,38 @@ const importSpecPattern = /\bimport\b(?:\s*\(\s*|(?:[\w$*,{}\s]*\bfrom\b)?\s*)([
 const isFilePath = (specifier: string) =>
   specifier.startsWith('/') || specifier.startsWith('./') || specifier.startsWith('../');
 
+const linkExtractor = /<link(?=[\s/>])((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
+
+const hrefAttrPattern = /(?:^|\s)href\s*=\s*["']([^"']+)["']/i;
+
+const cssRequestPattern = /\.(?:css|less|sass|scss|styl|stylus|pcss|postcss|sss)(?:$|[?#])/i;
+
+const isExternalUrl = (url: string) => !url || /^(?:[\w+.-]+:|\/\/)/.test(url);
+
+const getPublicFile = (src: string, publicDir?: string) => {
+  if (!publicDir || !src.startsWith('/')) return;
+  const publicPath = join(publicDir, src.split(/[?#]/, 1)[0]);
+  if (publicPath.startsWith(join(publicDir, '/')) && isFile(publicPath)) return publicPath;
+};
+
 const getScriptSources = (html: string, htmlDir: string, rootDir: string, publicDir?: string): string[] => {
   const sources: string[] = [];
   const resolveSource = (src: string) => (src.startsWith('/') ? join(rootDir, src) : toAbsolute(src, htmlDir));
+
+  for (const [, attrs] of html.matchAll(linkExtractor)) {
+    const href = attrs.match(hrefAttrPattern)?.[1].trim();
+    if (!href || isExternalUrl(href) || !cssRequestPattern.test(href)) continue;
+    sources.push(getPublicFile(href, publicDir) ?? resolveSource(href.split(/[?#]/, 1)[0]));
+  }
 
   for (const [, attrs, body] of html.matchAll(scriptExtractor)) {
     const srcMatch = attrs.match(srcAttrPattern);
     if (srcMatch) {
       const src = srcMatch[1].trim();
-      if (!src || /^(?:[\w+.-]+:|\/\/)/.test(src)) continue;
-      if (publicDir && src.startsWith('/')) {
-        const publicPath = join(publicDir, src.split(/[?#]/, 1)[0]);
-        if (publicPath.startsWith(join(publicDir, '/')) && isFile(publicPath)) {
-          sources.push(publicPath);
-          continue;
-        }
-      }
-      if (moduleTypePattern.test(attrs)) sources.push(resolveSource(src));
+      if (isExternalUrl(src)) continue;
+      const publicPath = getPublicFile(src, publicDir);
+      if (publicPath) sources.push(publicPath);
+      else if (moduleTypePattern.test(attrs)) sources.push(resolveSource(src));
       continue;
     }
 
