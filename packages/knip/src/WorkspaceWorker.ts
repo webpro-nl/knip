@@ -336,10 +336,17 @@ export class WorkspaceWorker {
     const productionInputsFromManifest = _getInputsFromScripts(Object.values(productionScripts), baseOptions);
     for (const input of productionInputsFromManifest) input.production = true;
 
+    // In production mode a development script that runs a single file names that file: it is resolved, not matched as
+    // a pattern, so it never removes a production entry
+    const toScriptInput = (input: Input): Input =>
+      isProduction && isEntry(input) && !isDynamicPattern(input.specifier)
+        ? { ...input, type: 'deferResolveEntry' }
+        : input;
+
     const createGetInputsFromScripts =
       (containingFilePath: string): GetInputsFromScriptsPartial =>
       (scripts, options) =>
-        _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath });
+        _getInputsFromScripts(scripts, { ...baseOptions, ...options, containingFilePath }).map(toScriptInput);
 
     const inputs: Input[] = [];
 
@@ -384,10 +391,8 @@ export class WorkspaceWorker {
       const inputContainingFilePath = input.containingFilePath ?? containingFilePath;
       if (isConfig(input)) {
         storeConfigFilePath(input.pluginName, { ...input, containingFilePath: inputContainingFilePath });
-      } else if (isProduction && isEntry(input) && !isDynamicPattern(input.specifier)) {
-        inputs.push({ ...input, type: 'deferResolveEntry', containingFilePath: inputContainingFilePath });
       } else {
-        inputs.push({ ...input, containingFilePath: inputContainingFilePath });
+        inputs.push({ ...toScriptInput(input), containingFilePath: inputContainingFilePath });
       }
     }
 
