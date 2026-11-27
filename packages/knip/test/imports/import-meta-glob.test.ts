@@ -15,8 +15,8 @@ test('Resolve import.meta.glob patterns as entry files', async () => {
     ...baseCounters,
     files: 1,
     exports: 2,
-    processed: 10,
-    total: 10,
+    processed: 11,
+    total: 11,
   });
   assert(!issues.files['raw/orphan.ts']);
   assert(issues.exports['raw/orphan.ts'].orphan);

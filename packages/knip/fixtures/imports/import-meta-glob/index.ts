@@ -10,3 +10,5 @@ import.meta.glob('./raw/*.ts', { query: '?raw' });
 import.meta.glob('./raw/*.ts', { query: 'raw' });
 import.meta.glob('./raw/*.ts', { query: { raw: '' } });
 import.meta.glob('./raw/*.ts', { as: 'raw' });
+
+import.meta.glob('#workers/timer.worker', { eager: true, import: 'default', query: '?worker' });

@@ -1,3 +1,4 @@
+import { IMPORT_FLAGS } from '../../../constants.ts';
 import type { PluginVisitorContext, PluginVisitorObject } from '../../../types/config.ts';
 import { findProperty } from '../../../typescript/ast-helpers.ts';
 import { getStringValue, isStringLiteral } from '../../../typescript/ast-nodes.ts';
@@ -19,7 +20,9 @@ export function createImportMetaGlobVisitor(ctx: PluginVisitorContext): PluginVi
       const arg = node.arguments[0];
       let patterns: string[] | undefined;
       if (isStringLiteral(arg)) {
-        patterns = [getStringValue(arg)!];
+        const pattern = getStringValue(arg)!;
+        if (pattern[0] === '#' && !pattern.includes('*')) return ctx.addImport(pattern, arg.start, IMPORT_FLAGS.ENTRY);
+        patterns = [pattern];
       } else if (arg.type === 'ArrayExpression') {
         patterns = [];
         for (const e of arg.elements) {
