@@ -1,0 +1,9 @@
+{
+  "name": "@plugins/jest-preset-root-dir",
+  "scripts": {
+    "test": "jest --config e2e/jest.config.js"
+  },
+  "devDependencies": {
+    "jest": "*"
+  }
+}
