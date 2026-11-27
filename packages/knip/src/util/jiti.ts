@@ -16,12 +16,12 @@ const options: JitiOptions = {
   extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.mts', '.cts', '.mtsx', '.ctsx', '.jsx'],
 };
 
-const entry = resolveCwd('_index.js');
+const fileInCwd = resolveCwd('_index.js');
 const require = createRequire(import.meta.url);
 let jiti: Jiti | undefined;
 
 export const getJiti = () => {
   if (jiti) return jiti;
   const { createJiti }: typeof import('jiti') = require('jiti');
-  return (jiti = createJiti(entry, options));
+  return (jiti = createJiti(fileInCwd, options));
 };
