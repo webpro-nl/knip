@@ -45,7 +45,7 @@ test('Find custom entry points with Config.setEntryPoint in the Remotion plugin'
   assert.deepEqual(counters, {
     ...baseCounters,
     files: 1,
-    processed: 5,
-    total: 5,
+    processed: 3,
+    total: 3,
   });
 });

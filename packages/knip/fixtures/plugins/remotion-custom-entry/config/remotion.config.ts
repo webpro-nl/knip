@@ -1,3 +1,3 @@
-import { Config as RemotionConfig } from '@remotion/cli/config';
+import { Config } from '@remotion/cli/config';
 
-RemotionConfig.setEntryPoint('./videos/main.tsx');
+Config.setEntryPoint('./videos/main.tsx');
