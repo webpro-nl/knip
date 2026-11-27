@@ -24,9 +24,22 @@ argument parsing, recursive discovery, and module resolution. Don't walk
 `manifest.scripts` manually or branch on a tool in shared code.
 
 Prefer declarative options and existing hooks and helpers. Add a scanner or
-second parse only for a real script they cannot handle. Pass commands from tool
-configs, with their cwd, to `options.getInputsFromScripts`. See the [argument
+second parse only for a real script they cannot handle. See the [argument
 types][2] and [shared plugin handling][3] for the contracts.
+
+Pass commands from tool configs to `options.getInputsFromScripts`. It parses
+them like `package.json` scripts and returns the binaries, files and
+dependencies they use.
+
+- `optionalBinaries: true` lets binaries credit listed packages without being
+  reported as unlisted. Use it for commands whose binary may come from the
+  `PATH` or a CI image (GitHub Actions, Travis, MCP). Leave it off when the tool
+  puts `node_modules/.bin` on the `PATH`, as package managers do for scripts.
+  Binaries run through `pnpm`, `yarn`, `npx --no-install` or a
+  `node_modules/.bin` path stay reportable.
+- `cwd` is the directory the command runs in (Playwright `webServer.cwd`, MCP
+  `cwd`). File arguments still resolve from the config file's directory, so set
+  `dir` on the returned inputs as well (see `mcp`, `tauri`).
 
 ## Keep shell text and argv distinct
 

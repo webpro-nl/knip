@@ -131,8 +131,8 @@ See `tsdown`, `rollup`, `rolldown` for simple `resolveFromAST` examples using
 
 Read [SCRIPT-PARSING.md][4] before changing or reviewing `Plugin.args` or
 command discovery. It covers evidence from real scripts, parsing ownership,
-shell text versus argv, and verification. The [Argument Parsing reference][3]
-describes the available options.
+`getInputsFromScripts` options, shell text versus argv, and verification. The
+[Argument Parsing reference][3] describes the available options.
 
 ## Compilers (`registerCompilers`)
 
