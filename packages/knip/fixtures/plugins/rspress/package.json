@@ -1,0 +1,17 @@
+{
+  "name": "@fixtures/plugins__rspress",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "eject": "rspress eject NavTitle"
+  },
+  "dependencies": {
+    "@rspress/core": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "devDependencies": {
+    "@rspress/plugin-llms": "*",
+    "sass": "*"
+  }
+}

@@ -1019,6 +1019,10 @@
           "title": "rspack plugin configuration (https://knip.dev/reference/plugins/rspack)",
           "$ref": "#/definitions/plugin"
         },
+        "rspress": {
+          "title": "rspress plugin configuration (https://knip.dev/reference/plugins/rspress)",
+          "$ref": "#/definitions/plugin"
+        },
         "rstest": {
           "title": "rstest plugin configuration (https://knip.dev/reference/plugins/rstest)",
           "$ref": "#/definitions/plugin"

@@ -42,7 +42,7 @@ const getAliases = (chain: AliasChain) => {
   return aliases;
 };
 
-const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
+export const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
   const entries = new Set<string>();
   const inputs: Input[] = [];
 

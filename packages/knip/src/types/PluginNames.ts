@@ -148,6 +148,7 @@ export type PluginName =
   | 'rslib'
   | 'rslint'
   | 'rspack'
+  | 'rspress'
   | 'rstest'
   | 'sanity'
   | 'semantic-release'
@@ -371,6 +372,7 @@ export const pluginNames = [
   'rslib',
   'rslint',
   'rspack',
+  'rspress',
   'rstest',
   'sanity',
   'semantic-release',
