@@ -102,13 +102,13 @@ jobs:
           - name: 10ten-ja-reader
             repo: birchill/10ten-ja-reader
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               bash $SNAP 10ten-ja-reader -- pnpm dlx $PKG_URL
 
           - name: argos
             repo: argos-ci/argos
             commands: | # build required: knexfile.js requires ./dist at config load time
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm build
               pnpm add -D -w $PKG_URL
               bash $SNAP argos -- pnpm run knip
@@ -116,26 +116,26 @@ jobs:
           - name: astro
             repo: withastro/astro
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w $PKG_URL
               bash $SNAP astro -- pnpm knip --fix
 
           - name: create-typescript-app
             repo: JoshuaKGoldberg/create-typescript-app
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D $PKG_URL
               bash $SNAP create-typescript-app -- pnpm lint:knip
 
           - name: DefinitelyTyped-tools
             repo: microsoft/DefinitelyTyped-tools
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               bash $SNAP DefinitelyTyped-tools -- pnpm dlx $PKG_URL
 
           - name: eslint
             repo: eslint/eslint
-            commands: |
+            commands: | # docs/.eleventy.js loads sharp, which requires its install script
               npm install
               npm install --prefix docs
               npm install -D $PKG_URL
@@ -155,7 +155,7 @@ jobs:
             sparse-checkout: invokeai/frontend/web
             commands: |
               cd invokeai/frontend/web
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D $PKG_URL
               bash $SNAP InvokeAI -- bunx --bun knip --tags=-knipignore
               bunx --bun knip --tags=-knipignore --production --fix --allow-remove-files --format --no-exit-code
@@ -164,7 +164,7 @@ jobs:
           - name: npmx.dev
             repo: npmx-dev/npmx.dev
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w $PKG_URL
               bash $SNAP npmx.dev -- pnpm knip
               bash $SNAP npmx.dev-prod -- pnpm knip --production --exclude dependencies --fix
@@ -172,11 +172,11 @@ jobs:
           - name: prettier
             repo: prettier/prettier
             commands: |
-              yarn install --immutable
-              yarn --cwd scripts/release install --immutable
-              yarn --cwd scripts/tools/bundle-test install --immutable
-              yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules install --immutable
-              yarn --cwd website install --immutable
+              yarn install
+              yarn --cwd scripts/release install
+              yarn --cwd scripts/tools/bundle-test install
+              yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules install
+              yarn --cwd website install
               yarn add -D knip@$PKG_URL
               bash $SNAP prettier -- yarn knip
 
@@ -184,7 +184,7 @@ jobs:
             repo: TanStack/query
             ref: 33aba0b5269ff05d634eb13e7fbdcb4e52e7f081 # Last passing commit before explicit exports left unused re-exports in preact-query tests
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w $PKG_URL
               bash $SNAP query -- pnpm test:knip --cache
               pnpm test:knip --cache --no-exit-code
@@ -192,28 +192,28 @@ jobs:
           - name: rolldown
             repo: rolldown/rolldown
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w knip@$PKG_URL
               bash $SNAP rolldown -- pnpm knip
 
           - name: sanity
             repo: sanity-io/sanity
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w $PKG_URL
               bash $SNAP sanity -- pnpm knip --exclude duplicates
 
           - name: sentry
             repo: getsentry/sentry
             commands: |
-              pnpm install --frozen-lockfile
+              pnpm install
               pnpm add -D -w $PKG_URL
               bash $SNAP sentry -- pnpm run knip --fix
               bash $SNAP sentry-prod -- pnpm run knip:prod
 
           - name: slonik
             repo: gajus/slonik
-            commands: |
+            commands: | # benchmark manifest and lockfile disagree, so a frozen install fails
               pnpm install --no-frozen-lockfile --ignore-scripts
               bash $SNAP slonik -- pnpm dlx $PKG_URL
 
