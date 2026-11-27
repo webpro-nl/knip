@@ -34,6 +34,7 @@ import {
   isAlias,
   isCatalog,
   isConfig,
+  isDeferResolveEntry,
   isEntry,
   isIgnore,
   isProductionEntry,
@@ -333,6 +334,16 @@ export const build = timerify(async function build({
       }
     };
 
+    const [unignoredWorkspaces, ignoredWorkspaces] = partition(chief.getIgnoredWorkspacesFor(name), pattern =>
+      pattern.startsWith('!')
+    );
+    const isIgnoredWorkspacePath =
+      ignoredWorkspaces.length === 0
+        ? () => false
+        : picomatch(expandIgnorePatterns(ignoredWorkspaces), {
+            ignore: expandIgnorePatterns(unignoredWorkspaces.map(pattern => pattern.slice(1))),
+          });
+
     for (const input of inputs) {
       if (input.group) groups.set(input.group, undefined);
       const specifier = input.specifier;
@@ -358,6 +369,7 @@ export const build = timerify(async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
+          if (isDeferResolveEntry(input) && isIgnoredWorkspacePath(relative(options.cwd, resolvedFilePath))) continue;
           if (options.isProduction && !input.production) {
             if (!input.optional) collector.addReferencedFile(resolvedFilePath);
           } else {

@@ -1,0 +1,7 @@
+{
+  "name": "@plugins/rstest-ignore-workspaces-ignored",
+  "devDependencies": {
+    "@formatjs/unplugin": "*",
+    "@rstest/core": "*"
+  }
+}
