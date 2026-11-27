@@ -47,17 +47,17 @@ test('Find dependencies and entries with the Rspress plugin (production)', async
   });
 });
 
-test('Find default entries and CLI root with the Rspress plugin', async () => {
+test('Find default entries with the Rspress plugin', async () => {
   const options = await createOptions({ cwd: defaultsCwd });
   const { issues, counters } = await main(options);
 
-  assert.deepEqual(Object.keys(issues.files).sort(), ['docs/_unused-snippet.mdx', 'site/_unused-site-partial.mdx']);
+  assert.deepEqual(Object.keys(issues.files).sort(), ['docs/_unused-snippet.mdx']);
 
   assert.deepEqual(counters, {
     ...baseCounters,
-    files: 2,
-    processed: 5,
-    total: 5,
+    files: 1,
+    processed: 3,
+    total: 3,
   });
 });
 

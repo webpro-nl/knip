@@ -1,7 +1,7 @@
 {
   "name": "@fixtures/plugins__rspress-defaults",
   "scripts": {
-    "build": "rspress build site"
+    "build": "rspress build"
   },
   "dependencies": {
     "rspress": "*"

@@ -4,7 +4,7 @@ import type { IsPluginEnabled, Plugin, RegisterCompilers, Resolve, ResolveConfig
 import { type Input, toAlias, toDependency, toEntry, toEntryPath, toIgnore, toModule } from '../../util/input.ts';
 import { join, toAbsolute, toPosix } from '../../util/path.ts';
 import { hasDependency } from '../../util/plugin.ts';
-import { resolveConfig as resolveRsbuildConfig } from '../rsbuild/index.ts';
+import { configParams, resolveConfig as resolveRsbuildConfig } from '../rsbuild/index.ts';
 import type { RspressConfig, RspressConfigOrFn } from './types.ts';
 
 // https://rspress.rs/api/config/config-basic
@@ -53,27 +53,9 @@ const production = [
   'theme/index.{js,jsx,ts,tsx,mjs}',
 ];
 
-const commands = new Set(['dev', 'build', 'preview', 'serve']);
-
 const args: Args = {
   config: true,
-  string: ['port', 'host', 'base'],
-  resolveInputs: (parsed, { cwd }) => {
-    const [first, second] = parsed._;
-    if (first === 'eject') return [];
-    const root = typeof first === 'string' && commands.has(first) ? second : first;
-    if (typeof root !== 'string' || !root) return [];
-    const rootDir = toAbsolute(toPosix(root), cwd);
-    const inputs: Input[] = [];
-    for (const pattern of getDocPatterns()) inputs.push(toEntry(pattern, { dir: rootDir, production: true }));
-    return inputs;
-  },
 };
-
-const configParams = [
-  { env: 'development', command: 'dev', envMode: 'development' },
-  { env: 'production', command: 'build', envMode: 'production' },
-];
 
 const getConfigs = async (configOrFn: RspressConfigOrFn) => {
   if (typeof configOrFn !== 'function') return [await configOrFn];
@@ -88,7 +70,7 @@ const getConfigs = async (configOrFn: RspressConfigOrFn) => {
 const resolve: Resolve = () => [
   toDependency('react', { optional: true, production: true }),
   toDependency('react-dom', { optional: true, production: true }),
-  toIgnore('@theme(-original)?(/.*)?', 'dependencies'),
+  toIgnore('^@theme(-original)?(/|$)', 'dependencies'),
 ];
 
 const resolveConfig: ResolveConfig<RspressConfigOrFn> = async (configOrFn, options) => {

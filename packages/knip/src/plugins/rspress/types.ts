@@ -1,4 +1,4 @@
-import type { RsbuildConfig } from '../rsbuild/types.ts';
+import type { ConfigParams, RsbuildConfig } from '../rsbuild/types.ts';
 
 export type RspressConfig = {
   root?: string;
@@ -25,4 +25,4 @@ export type RspressConfig = {
 export type RspressConfigOrFn =
   | RspressConfig
   | Promise<RspressConfig>
-  | ((params: { env: string; command: string; envMode: string }) => RspressConfig | Promise<RspressConfig>);
+  | ((params: ConfigParams) => RspressConfig | Promise<RspressConfig>);

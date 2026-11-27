@@ -17,7 +17,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
 // https://rsbuild.rs/guide/configuration/rsbuild#export-function
-const configParams = [
+export const configParams = [
   { env: 'development', command: 'dev', envMode: 'development' },
   { env: 'production', command: 'build', envMode: 'production' },
 ];
