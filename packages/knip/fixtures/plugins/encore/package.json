@@ -1,0 +1,6 @@
+{
+  "name": "@plugins/encore",
+  "dependencies": {
+    "encore.dev": "*"
+  }
+}
