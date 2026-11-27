@@ -141,6 +141,7 @@ export type PluginName =
   | 'release-it'
   | 'remark'
   | 'remix'
+  | 'remotion'
   | 'retry-cli'
   | 'rolldown'
   | 'rollup'
@@ -364,6 +365,7 @@ export const pluginNames = [
   'release-it',
   'remark',
   'remix',
+  'remotion',
   'retry-cli',
   'rolldown',
   'rollup',

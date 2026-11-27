@@ -1,0 +1,14 @@
+{
+  "name": "my-remotion-custom-entry",
+  "scripts": {
+    "dev": "remotion studio --config config/remotion.config.ts",
+    "deploy": "remotion cloudrun services deploy"
+  },
+  "dependencies": {
+    "remotion": "*"
+  },
+  "devDependencies": {
+    "@remotion/cli": "*",
+    "@remotion/cloudrun": "*"
+  }
+}
