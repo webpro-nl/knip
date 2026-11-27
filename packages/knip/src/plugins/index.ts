@@ -148,6 +148,7 @@ import { default as rsbuild } from './rsbuild/index.ts';
 import { default as rslib } from './rslib/index.ts';
 import { default as rslint } from './rslint/index.ts';
 import { default as rspack } from './rspack/index.ts';
+import { default as rspress } from './rspress/index.ts';
 import { default as rstest } from './rstest/index.ts';
 import { default as sanity } from './sanity/index.ts';
 import { default as semanticRelease } from './semantic-release/index.ts';
@@ -372,6 +373,7 @@ export const Plugins = {
   rslib,
   rslint,
   rspack,
+  rspress,
   rstest,
   sanity,
   'semantic-release': semanticRelease,

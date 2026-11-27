@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/plugins__rspress-function-config",
+  "scripts": {
+    "build": "rspress build --config config/docs.config.ts"
+  },
+  "dependencies": {
+    "@rspress/core": "*"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@fixtures/plugins__rspress-defaults",
+  "scripts": {
+    "build": "rspress build"
+  },
+  "dependencies": {
+    "rspress": "*"
+  }
+}

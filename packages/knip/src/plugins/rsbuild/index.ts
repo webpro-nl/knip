@@ -17,7 +17,7 @@ const isEnabled: IsPluginEnabled = ({ dependencies }) => hasDependency(dependenc
 const config = ['rsbuild*.config.{mjs,ts,js,cjs,mts,cts}'];
 
 // https://rsbuild.rs/guide/configuration/rsbuild#export-function
-const configParams = [
+export const configParams = [
   { env: 'development', command: 'dev', envMode: 'development' },
   { env: 'production', command: 'build', envMode: 'production' },
 ];
@@ -42,7 +42,7 @@ const getAliases = (chain: AliasChain) => {
   return aliases;
 };
 
-const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
+export const resolveConfig: ResolveConfig<RsbuildConfigOrFn> = async (configOrFn, options) => {
   const entries = new Set<string>();
   const inputs: Input[] = [];
 
