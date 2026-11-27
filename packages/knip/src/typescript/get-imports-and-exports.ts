@@ -394,13 +394,19 @@ const getImportsAndExports = (
           addImport(specifier, IMPORT_STAR, undefined, ns, entry.start, modifiers, pos, jsdocTags, reExportResolved);
         } else if (entry.importName.kind === 'Name') {
           const importedName = entry.importName.name!;
-          const builtinImport = builtinImports?.get(importedName);
-          // Forwarded default entries point at the import's local binding.
-          const sourceName =
-            builtinImport && builtinImport.pos === entry.importName.start ? builtinImport.identifier : importedName;
           const exportedName = entry.exportName.name;
-          const alias = exportedName && exportedName !== sourceName ? exportedName : undefined;
-          addImport(specifier, sourceName, alias, undefined, entry.start, modifiers, pos, undefined, reExportResolved);
+          const alias = exportedName && exportedName !== importedName ? exportedName : undefined;
+          addImport(
+            specifier,
+            importedName,
+            alias,
+            undefined,
+            entry.start,
+            modifiers,
+            pos,
+            undefined,
+            reExportResolved
+          );
         }
         continue;
       }
@@ -464,17 +470,6 @@ const getImportsAndExports = (
     if (builtinImport) {
       item.isReExport = true;
       item.isBindingReExport = true;
-      if (builtinImport.identifier === IMPORT_STAR) {
-        const isTypeOnly = builtinImport.isTypeOnly || item.type === 'type';
-        addImport(
-          builtinImport.specifier,
-          IMPORT_STAR,
-          id,
-          undefined,
-          item.pos,
-          IMPORT_FLAGS.RE_EXPORT | (isTypeOnly ? IMPORT_FLAGS.TYPE_ONLY : IMPORT_FLAGS.NONE)
-        );
-      }
     }
     item.referencedIn = referencedInExport.get(id);
     if (localRefs && shouldCountRefs(ignoreExportsUsedInFile, item.type) && localRefs.has(id)) {
