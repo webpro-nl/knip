@@ -112,6 +112,7 @@ const definitionFiles = [
   '.nuxt/components.d.ts',
   '.nuxt/types/nitro-routes.d.ts',
   '.nuxt/types/nitro-imports.d.ts',
+  '.nuxt/types/server-imports.d.ts',
 ];
 
 const registerCompilers: RegisterCompilers = async ({ cwd, hasDependency, registerCompiler }) => {
