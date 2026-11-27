@@ -1,0 +1,21 @@
+{
+  "name": "my-remotion-app",
+  "scripts": {
+    "studio": "remotion studio --port 3001",
+    "render": "remotion render src/promo/entry.ts PromoVideo out/promo.mp4 --codec h264 --overwrite",
+    "render:default": "remotion render MainVideo out/main.mp4",
+    "still": "remotion still src/still/entry.ts StillFrame out/still.png --frame 10",
+    "bundle": "remotion bundle --out-dir dist src/bundle/entry.ts",
+    "compositions": "remotion compositions src/compositions/entry.ts",
+    "deploy": "remotion lambda sites create src/lambda/entry.ts"
+  },
+  "dependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "remotion": "*"
+  },
+  "devDependencies": {
+    "@remotion/cli": "*",
+    "@remotion/lambda": "*"
+  }
+}
