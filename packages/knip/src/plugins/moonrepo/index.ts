@@ -21,12 +21,15 @@ const resolveConfig: ResolveConfig<MoonConfiguration> = async (config, options) 
   // Scripts resolve from options.cwd, and relative roots keep a cwd with spaces or parentheses out of the command
   const expand = (value: string) =>
     value.replace('$workspaceRoot', relative(options.cwd, options.rootCwd)).replace('$projectRoot', '.');
-  const inputs = tasks
-    .map(task => task.command)
-    .filter(command => command)
-    .map(command => (Array.isArray(command) ? toShellCommand(command.map(expand)) : expand(command)))
-    .flatMap(command => options.getInputsFromScripts(command));
-  return [...inputs];
+  const toCommand = (value: string | string[]) =>
+    Array.isArray(value) ? toShellCommand(value.map(expand)) : expand(value);
+  const scripts: string[] = [];
+  for (const task of tasks) {
+    if (task.script) scripts.push(expand(task.script));
+    else if (task.command)
+      scripts.push(task.args ? `${toCommand(task.command)} ${toCommand(task.args)}` : toCommand(task.command));
+  }
+  return options.getInputsFromScripts(scripts);
 };
 
 const plugin: Plugin = {

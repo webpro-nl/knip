@@ -11,3 +11,8 @@ tasks:
       - '$projectRoot/tools/build.ts'
       - '--'
       - '--verbose'
+  codegen:
+    command: 'vite-node'
+    args: 'tools/codegen.ts --watch'
+  lint.css:
+    script: 'stylelint "**/*.css" && tsx tools/sprite.ts'
