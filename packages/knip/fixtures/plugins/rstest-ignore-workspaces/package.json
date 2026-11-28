@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/rstest-ignore-workspaces",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@rstest/core": "*"
+  }
+}

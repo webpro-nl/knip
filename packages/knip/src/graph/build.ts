@@ -34,6 +34,7 @@ import {
   isAlias,
   isCatalog,
   isConfig,
+  isDeferResolveEntry,
   isEntry,
   isIgnore,
   isProductionEntry,
@@ -338,6 +339,8 @@ export const build = timerify(async function build({
       }
     };
 
+    const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name);
+
     for (const input of inputs) {
       if (input.group) groups.set(input.group, undefined);
       const specifier = input.specifier;
@@ -363,6 +366,7 @@ export const build = timerify(async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
+          if (isDeferResolveEntry(input) && isIgnoredWorkspace(resolvedFilePath)) continue;
           if (options.isProduction && !input.production) {
             if (!input.optional) collector.addReferencedFile(resolvedFilePath);
           } else {
@@ -445,7 +449,6 @@ export const build = timerify(async function build({
     );
 
     if (options.isUseTscFiles && isFile) {
-      const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
       debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
       for (const tscPath of tscSourcePaths) {
         const filePath = tryRealpath(tscPath);
