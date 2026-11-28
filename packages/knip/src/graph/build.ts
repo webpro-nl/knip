@@ -334,15 +334,7 @@ export const build = timerify(async function build({
       }
     };
 
-    const [unignoredWorkspaces, ignoredWorkspaces] = partition(chief.getIgnoredWorkspacesFor(name), pattern =>
-      pattern.startsWith('!')
-    );
-    const isIgnoredWorkspacePath =
-      ignoredWorkspaces.length === 0
-        ? () => false
-        : picomatch(expandIgnorePatterns(ignoredWorkspaces), {
-            ignore: expandIgnorePatterns(unignoredWorkspaces.map(pattern => pattern.slice(1))),
-          });
+    const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name);
 
     for (const input of inputs) {
       if (input.group) groups.set(input.group, undefined);
@@ -369,7 +361,7 @@ export const build = timerify(async function build({
         const ws = (input.containingFilePath && chief.findWorkspaceByFilePath(input.containingFilePath)) || workspace;
         const resolvedFilePath = handleInput(input, ws);
         if (resolvedFilePath) {
-          if (isDeferResolveEntry(input) && isIgnoredWorkspacePath(relative(options.cwd, resolvedFilePath))) continue;
+          if (isDeferResolveEntry(input) && isIgnoredWorkspace(resolvedFilePath)) continue;
           if (options.isProduction && !input.production) {
             if (!input.optional) collector.addReferencedFile(resolvedFilePath);
           } else {
@@ -452,7 +444,6 @@ export const build = timerify(async function build({
     );
 
     if (options.isUseTscFiles && isFile) {
-      const isIgnoredWorkspace = chief.createIgnoredWorkspaceMatcher(name, dir);
       debugLogArray(name, 'Using tsconfig files as project files', tscSourcePaths);
       for (const tscPath of tscSourcePaths) {
         const filePath = tryRealpath(tscPath);

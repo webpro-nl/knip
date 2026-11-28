@@ -206,3 +206,34 @@ for (const [spelling, inputs] of Object.entries(nestedIgnoredSpellings)) {
     assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 4, total: 4 });
   });
 }
+
+const rootManifest = join(cwd, 'package.json');
+const appManifest = join(app, 'package.json');
+const ignoredEntryPaths = {
+  'an ignored workspace': {
+    inputs: [toEntryPath(`${ignored}/keep.ts`, { containingFilePath: rootManifest })],
+    workspace: '.',
+  },
+  'a dot directory of an ignored workspace': {
+    inputs: [toEntryPath(`${ignored}/.cfg/keep.ts`, { containingFilePath: rootManifest })],
+    workspace: '.',
+  },
+  "an ignored workspace nested in the worker's workspace": {
+    inputs: [toEntryPath(`${nestedIgnored}/keep.ts`, { containingFilePath: appManifest })],
+    workspace: 'packages/app',
+  },
+};
+
+for (const [location, { inputs, workspace }] of Object.entries(ignoredEntryPaths)) {
+  test(`Keep a resolved plugin file in ${location} out of the entries`, async t => {
+    const { issues, counters } = await run(t, inputs, { workspace });
+
+    assert.deepEqual(Object.keys(issues.files).sort(), [
+      'keep.ts',
+      'packages/app/keep.ts',
+      'packages/app/skip.ts',
+      'skip.ts',
+    ]);
+    assert.deepEqual(counters, { ...baseCounters, files: 4, processed: 4, total: 4 });
+  });
+}

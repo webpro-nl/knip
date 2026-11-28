@@ -22,6 +22,7 @@ import { _dirGlob, prependDirToPattern, removeProductionSuffix } from './util/gl
 import { graphSequencer } from './util/graph-sequencer.ts';
 import { isPluginName } from './util/is-plugin-name.ts';
 import mapWorkspaces from './util/map-workspaces.ts';
+import { expandIgnorePatterns } from './util/parse-and-convert-gitignores.ts';
 import { join, relative } from './util/path.ts';
 import { normalizePluginConfig } from './util/plugin.ts';
 import { toRegexOrString } from './util/regex.ts';
@@ -378,13 +379,14 @@ export class ConfigurationChief {
     );
   }
 
-  public createIgnoredWorkspaceMatcher(name: string, dir: string) {
-    const ignoredWorkspaces = this.getIgnoredWorkspacesFor(name);
-    if (ignoredWorkspaces.length === 0) return () => false;
-    return (filePath: string) => {
-      const relativePath = filePath.startsWith(dir) ? filePath.slice(dir.length + 1) : filePath;
-      return picomatch.isMatch(relativePath, ignoredWorkspaces);
-    };
+  public createIgnoredWorkspaceMatcher(name: string) {
+    const [unignored, ignored] = partition(this.getIgnoredWorkspacesFor(name), pattern => pattern.startsWith('!'));
+    if (ignored.length === 0) return () => false;
+    const isMatch = picomatch(expandIgnorePatterns(ignored), {
+      dot: true,
+      ignore: expandIgnorePatterns(unignored.map(pattern => pattern.slice(1))),
+    });
+    return (filePath: string) => isMatch(relative(this.cwd, filePath));
   }
 
   public getNegatedWorkspacePatterns(name: string) {
