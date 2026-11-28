@@ -34,12 +34,34 @@ const positionals = new Set(['babel-node', 'execa', 'jiti', 'zx']);
 // Binaries where each positional arg is a separate script
 const positionalBinaries = new Set(['concurrently']);
 
+const booleanFlagBinaries = new Map([
+  [
+    'concurrently',
+    [
+      'g',
+      'group',
+      'i',
+      'handle-input',
+      'k',
+      'kill-others',
+      'kill-others-on-fail',
+      'P',
+      'passthrough-arguments',
+      'pad-prefix',
+      'r',
+      'raw',
+      'timings',
+    ],
+  ],
+  ['zx', ['experimental', 'i', 'install', 'repl']],
+]);
+
 export const isWrapper = (binary: string) =>
   spawningBinaries.includes(binary) || endOfCommandBinaries.includes(binary) || positionalBinaries.has(binary);
 
 const parse = (binary: string, words: Word[]) =>
   parseArgs(words, {
-    boolean: ['quiet', 'verbose'],
+    boolean: ['quiet', 'verbose', ...(booleanFlagBinaries.get(binary) ?? [])],
     string: commandFlagBinaries.get(binary) ?? [],
     '--': endOfCommandBinaries.includes(binary),
   });

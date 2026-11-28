@@ -608,6 +608,7 @@ test('getInputsFromScripts ("positionals")', () => {
   t('vite-node --script ./main.ts', [toBinary('vite-node'), ts]);
   t('vite-node ./main.ts build', [toBinary('vite-node'), ts]);
   t('zx --quiet script.js', [toBinary('zx'), toModule('script.js')]);
+  t('zx --install script.js', [toBinary('zx'), toModule('script.js')]);
   t('npx --yes zx --quiet script.js', [toBinary('zx', opt), toModule('script.js')]);
   t('jiti script.js', [toBinary('jiti'), toModule('script.js')]);
   t('npx jiti script.js', [toBinary('jiti', opt), toModule('script.js')]);
@@ -670,6 +671,8 @@ test('getInputsFromScripts (concurrently)', () => {
   t('sleep 2 && concurrently "npm:watch-*"', [toBinary('sleep'), toBinary('concurrently')]);
   t('concurrently -g -c red,green,yellow,blue,magenta pnpm:lint:*', [toBinary('concurrently')]);
   t('concurrently "npm:lint:*(!fix)" program --names "lint:" --prefixColors auto', [toBinary('concurrently'), toBinary('program')]);
+  t('concurrently -k "tsx watch s.ts" vite', [toBinary('concurrently'), toBinary('tsx'), toEntryPath('s.ts', opt), toBinary('vite')]);
+  t('concurrently --kill-others-on-fail --raw "tsx watch s.ts" vite', [toBinary('concurrently'), toBinary('tsx'), toEntryPath('s.ts', opt), toBinary('vite')]);
 });
 
 test('getInputsFromScripts (start-server-and-test)', () => {
