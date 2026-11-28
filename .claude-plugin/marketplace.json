@@ -1,0 +1,15 @@
+{
+  "name": "knip",
+  "description": "Agent plugins for Knip unused-file, dependency, and export linting, including the official Knip MCP server.",
+  "owner": {
+    "name": "Knip",
+    "url": "https://github.com/webpro-nl"
+  },
+  "plugins": [
+    {
+      "name": "knip",
+      "source": "./plugins/knip",
+      "description": "Knip CLI skill and @knip/mcp server for finding and fixing unused files, dependencies, and exports."
+    }
+  ]
+}
