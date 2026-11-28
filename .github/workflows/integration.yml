@@ -172,11 +172,11 @@ jobs:
           - name: prettier
             repo: prettier/prettier
             commands: |
-              yarn install
-              yarn --cwd scripts/release install
-              yarn --cwd scripts/tools/bundle-test install
-              yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules install
-              yarn --cwd website install
+              yarn
+              yarn --cwd scripts/release
+              yarn --cwd scripts/tools/bundle-test
+              yarn --cwd scripts/tools/eslint-plugin-prettier-internal-rules
+              yarn --cwd website
               yarn add -D knip@$PKG_URL
               bash $SNAP prettier -- yarn knip
 
