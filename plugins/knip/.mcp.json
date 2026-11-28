@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "knip": {
+      "command": "npx",
+      "args": ["-y", "@knip/mcp"]
+    }
+  }
+}

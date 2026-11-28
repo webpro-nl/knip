@@ -48,6 +48,11 @@ project.
 
 You may need to restart your agent session after installing the server.
 
+An agent-agnostic [plugin marketplace][28] registers the [`plugins/knip`][29]
+plugin. It ships a skill for running and configuring Knip, plus an `.mcp.json`
+that starts `@knip/mcp`. Codex and Claude Code manifests live in the plugin
+directory.
+
 ## Contributors
 
 Special thanks to [the wonderful people who have contributed to Knip][17]!
@@ -95,3 +100,5 @@ following projects:
 [25]: https://github.com/jaredwray/cacheable/blob/main/packages/file-entry-cache/LICENSE
 [26]: https://github.com/npm/json-parse-even-better-errors
 [27]: https://github.com/npm/json-parse-even-better-errors/blob/main/LICENSE.md
+[28]: https://github.com/webpro-nl/knip/blob/main/.agents/plugins/marketplace.json
+[29]: https://github.com/webpro-nl/knip/tree/main/plugins/knip

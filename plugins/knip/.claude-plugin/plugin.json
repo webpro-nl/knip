@@ -1,0 +1,25 @@
+{
+  "name": "knip",
+  "version": "0.1.0",
+  "description": "Find and fix unused files, dependencies, and exports in JavaScript and TypeScript projects; configure Knip through the official MCP server.",
+  "author": {
+    "name": "Knip",
+    "url": "https://knip.dev"
+  },
+  "homepage": "https://knip.dev",
+  "repository": "https://github.com/webpro-nl/knip",
+  "license": "ISC",
+  "keywords": [
+    "knip",
+    "unused-code",
+    "unused-exports",
+    "unused-dependencies",
+    "deadcode",
+    "typescript",
+    "javascript",
+    "linter",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

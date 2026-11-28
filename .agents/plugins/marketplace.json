@@ -1,0 +1,20 @@
+{
+  "name": "knip",
+  "interface": {
+    "displayName": "Knip"
+  },
+  "plugins": [
+    {
+      "name": "knip",
+      "source": {
+        "source": "local",
+        "path": "./plugins/knip"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
